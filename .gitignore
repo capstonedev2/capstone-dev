@@ -5,3 +5,4 @@ dist
 .env
 /src/generated/prisma
 .next-dev-*.log
+tsconfig.tsbuildinfo 
