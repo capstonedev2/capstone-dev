@@ -468,7 +468,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#f8fafc]">
+      <div className="fixed inset-0 z-[1000] flex h-[100dvh] w-screen items-center justify-center bg-[#f8fafc]">
         <div className="flex flex-col items-center gap-4">
           <i className="fas fa-circle-notch animate-spin text-4xl text-[#003a8f]" />
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Loading Schedule</p>
@@ -479,7 +479,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
 
   if (defenseAssignments.length === 0) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#f8fafc]">
+      <div className="fixed inset-0 z-[1000] flex h-[100dvh] w-screen items-center justify-center bg-[#f8fafc]">
         <div className="max-w-md text-center">
           <div className="mb-6 mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-100 border-8 border-white shadow-sm">
             <i className="fas fa-calendar-xmark text-4xl text-slate-400" />
