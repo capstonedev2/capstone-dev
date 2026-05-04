@@ -1,0 +1,7 @@
+node_modules
+.next
+.vercel
+dist
+.env
+/src/generated/prisma
+.next-dev-*.log
