@@ -926,74 +926,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       <div className="page-body student-dashboard-page">
         <section className="dashboard-hero">
           <article className="dashboard-hero-main">
-            {realGroup && realGroup.title === 'Pending Student Submission' && (
-              <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-6 shadow-sm mb-6">
-                <div className="flex gap-4 items-start">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 text-xl">
-                    <i className="fas fa-bullhorn"></i>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-amber-900">You have been added to a group!</h3>
-                    <p className="mt-1 text-sm text-amber-800">
-                      Your adviser has created the group <strong>{realGroup.code}</strong>. 
-                      {canSubmitTitle 
-                        ? ' Please enter your proposed project title for your adviser to review.'
-                        : ` Only the group leader (${realGroup.leader || 'Leader'}) can submit the title. You can request access if needed.`}
-                    </p>
-                    
-                    <div className="mt-4 flex gap-3 max-w-md">
-                      <input 
-                        type="text" 
-                        placeholder={canSubmitTitle ? "Enter project title..." : "Awaiting leader submission..."} 
-                        className="flex-1 rounded-xl border border-amber-200 px-4 py-2 text-sm shadow-sm focus:border-amber-400 focus:outline-none focus:ring-4 focus:ring-amber-100 disabled:opacity-60 disabled:bg-amber-100/50"
-                        value={titleDraft}
-                        onChange={(e) => setTitleDraft(e.target.value)}
-                        disabled={!canSubmitTitle}
-                      />
-                      {canSubmitTitle ? (
-                        <button 
-                          onClick={handleSubmitTitle}
-                          className="btn btn-primary rounded-xl px-5 py-2 text-sm"
-                          disabled={!titleDraft.trim()}
-                          style={!titleDraft.trim() ? { opacity: 0.65, cursor: 'not-allowed' } : undefined}
-                        >
-                          Save Title
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={() => setAccessRequested(true)}
-                          className={`btn ${accessRequested ? 'btn-outline' : 'btn-secondary'} rounded-xl px-5 py-2 text-sm whitespace-nowrap`}
-                          disabled={accessRequested}
-                        >
-                          {accessRequested ? 'Access Requested' : 'Request Access'}
-                        </button>
-                      )}
-                    </div>
-
-                    {isLeader && (
-                      <div className="mt-5 flex items-center gap-2">
-                        <label className="flex cursor-pointer items-center gap-3">
-                          <div className="relative">
-                            <input 
-                              type="checkbox" 
-                              className="sr-only" 
-                              checked={!!realGroup.allowMemberSubmission}
-                              onChange={handleToggleMemberAccess}
-                              disabled={isTogglingAccess}
-                            />
-                            <div className={`block h-5 w-9 rounded-full transition-colors ${realGroup.allowMemberSubmission ? 'bg-amber-500' : 'bg-amber-200'}`}></div>
-                            <div className={`dot absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition-transform ${realGroup.allowMemberSubmission ? 'translate-x-4' : ''}`}></div>
-                          </div>
-                          <span className="text-xs font-medium text-amber-800">
-                            Allow members to submit the title
-                          </span>
-                        </label>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="student-dashboard-overview-top">
               <span className="section-kicker">Project Workspace</span>
@@ -1004,25 +936,35 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
             </div>
 
             <div className="student-dashboard-title-block">
-              <h2 className="flex items-center gap-3">
-                {realGroup 
-                  ? realGroup.title === 'Pending Student Submission' 
-                    ? data.project.title 
-                    : realGroup.title === 'Awaiting Adviser Approval' 
-                      ? realGroup.projectTitle 
-                      : realGroup.title
-                  : data.project.title}
-                  
-                {realGroup?.title === 'Awaiting Adviser Approval' && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[0.65em] font-semibold text-amber-700 shadow-sm align-middle">
-                    <i className="fas fa-clock"></i> Awaiting Adviser Approval
-                  </span>
-                )}
-              </h2>
-              <p className="student-dashboard-intro">
-                {data.project.description ||
-                  'Track academic progress, active deliverables, faculty guidance, and the next capstone commitments from one focused workspace.'}
-              </p>
+              {realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval') ? (
+                <>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h2 style={{ opacity: 0.55, fontStyle: 'italic' }}>
+                      <i className="fas fa-lock" style={{ fontSize: '0.7em', marginRight: '0.5rem', opacity: 0.6 }}></i>
+                      Title not yet available
+                    </h2>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[0.65em] font-semibold text-amber-700 shadow-sm align-middle">
+                      <i className="fas fa-clock"></i>
+                      {realGroup.title === 'Pending Student Submission'
+                        ? 'Awaiting Title Submission'
+                        : 'Awaiting Adviser Approval'}
+                    </span>
+                  </div>
+                  <p className="student-dashboard-intro">
+                    Your project title will appear here once the concept proposal has been submitted and approved by your adviser.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2>
+                    {realGroup ? realGroup.title : data.project.title}
+                  </h2>
+                  <p className="student-dashboard-intro">
+                    {data.project.description ||
+                      'Track academic progress, active deliverables, faculty guidance, and the next capstone commitments from one focused workspace.'}
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="student-project-metrics">
