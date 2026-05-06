@@ -123,14 +123,17 @@ function isNeedsActionNotification(item: StudentNotification) {
 
 function NotificationCard({
   item,
-  onMarkRead
+  onMarkRead,
+  onAction
 }: {
-  item: StudentNotification;
+  item: StudentNotification & { entityType?: string; entityId?: string };
   onMarkRead: (id: string) => void;
+  onAction?: (id: string, action: 'accept' | 'reject') => void;
 }) {
   const action = getNotificationAction(item);
   const typeMeta = getNotificationTypeMeta(item.type);
   const priorityTone: BadgeTone = item.priority === 'high' ? 'danger' : 'neutral';
+  const isPermissionRequest = item.title === 'Upload Permission Request';
 
   return (
     <article className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/80 transition duration-150 hover:-translate-y-px hover:shadow-md">
@@ -146,6 +149,7 @@ function NotificationCard({
                 <Badge label={typeMeta.label} tone={typeMeta.tone} icon={typeMeta.icon} />
                 <Badge label={item.priority === 'high' ? 'Urgent' : 'Standard'} tone={priorityTone} />
                 <Badge label={item.read ? 'Completed' : 'Unread'} tone={item.read ? 'success' : 'warning'} />
+                {isPermissionRequest && !item.read ? <Badge label="Action Required" tone="danger" icon="fa-hand" /> : null}
               </div>
               <h4 className="mt-3 text-base font-bold leading-6 text-slate-950 sm:text-lg">{item.title}</h4>
               <p className="mt-1 text-sm leading-6 text-slate-600">{item.message}</p>
@@ -161,14 +165,35 @@ function NotificationCard({
           </div>
 
           <div className="flex flex-wrap gap-2 xl:justify-end">
-            <Link className={PRIMARY_ACTION_CLASS} href={action.href}>
-              <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" /> {action.label}
-            </Link>
-            {!item.read ? (
-              <button className={SECONDARY_ACTION_CLASS} type="button" onClick={() => onMarkRead(item.id)}>
-                <i className="fas fa-check" aria-hidden="true" /> Mark Read
-              </button>
-            ) : null}
+            {isPermissionRequest && !item.read && onAction ? (
+              <>
+                <button
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-emerald-600 bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition duration-150 hover:-translate-y-px hover:bg-emerald-700 hover:shadow-md"
+                  type="button"
+                  onClick={() => onAction(item.id, 'accept')}
+                >
+                  <i className="fas fa-check" aria-hidden="true" /> Accept
+                </button>
+                <button
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-600 shadow-sm transition duration-150 hover:-translate-y-px hover:border-rose-300 hover:bg-rose-50 hover:shadow-md"
+                  type="button"
+                  onClick={() => onAction(item.id, 'reject')}
+                >
+                  <i className="fas fa-xmark" aria-hidden="true" /> Reject
+                </button>
+              </>
+            ) : (
+              <>
+                <Link className={PRIMARY_ACTION_CLASS} href={action.href}>
+                  <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" /> {action.label}
+                </Link>
+                {!item.read ? (
+                  <button className={SECONDARY_ACTION_CLASS} type="button" onClick={() => onMarkRead(item.id)}>
+                    <i className="fas fa-check" aria-hidden="true" /> Mark Read
+                  </button>
+                ) : null}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -184,7 +209,8 @@ function NotificationSection({
   emptyCopy,
   tone,
   actions,
-  onMarkRead
+  onMarkRead,
+  onAction
 }: {
   kicker: string;
   title: string;
@@ -194,6 +220,7 @@ function NotificationSection({
   tone: BadgeTone;
   actions?: ReactNode;
   onMarkRead: (id: string) => void;
+  onAction?: (id: string, action: 'accept' | 'reject') => void;
 }) {
   return (
     <section className="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-200/80">
@@ -213,7 +240,7 @@ function NotificationSection({
       {items.length ? (
         <div className="mt-5 space-y-3">
           {items.map((item) => (
-            <NotificationCard key={item.id} item={item} onMarkRead={onMarkRead} />
+            <NotificationCard key={item.id} item={item as any} onMarkRead={onMarkRead} onAction={onAction} />
           ))}
         </div>
       ) : (
@@ -230,9 +257,47 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
   const [completedOpen, setCompletedOpen] = useState(false);
   const [notificationsData, setNotificationsData] = useState(() => sortByCreatedAtDesc(data.notifications || []));
 
+  const [realNotifications, setRealNotifications] = useState<any[]>([]);
+
   useEffect(() => {
-    setNotificationsData(sortByCreatedAtDesc(data.notifications || []));
-  }, [data.notifications]);
+    if (!data.profile.user_id) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
+        if (notifRes.ok) {
+          const notifs = await notifRes.json();
+          setRealNotifications(notifs);
+        }
+      } catch (e) {
+        console.error('Failed to poll notifications', e);
+      }
+    };
+
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(intervalId);
+  }, [data.profile.user_id]);
+
+  useEffect(() => {
+    const combined: any[] = [];
+    if (realNotifications.length > 0) {
+      realNotifications.forEach(notif => {
+        combined.push({
+          id: notif.id,
+          title: notif.title,
+          message: notif.message,
+          type: notif.type === 'info' ? 'general' : notif.type,
+          priority: notif.type === 'warning' || notif.type === 'danger' ? 'high' : 'normal',
+          read: notif.status === 'READ',
+          created_at: notif.createdAt,
+          dateLabel: new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          route: '/students/notifications',
+        } as any);
+      });
+    }
+    setNotificationsData(sortByCreatedAtDesc(combined));
+  }, [realNotifications]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -282,6 +347,22 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
   const markRead = (id: string) => {
     setNotificationsData((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
+  };
+
+  const handleAction = async (id: string, action: 'accept' | 'reject') => {
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId: id, action })
+      });
+      if (res.ok) {
+        // Optimistically update the UI to mark it read
+        markRead(id);
+      }
+    } catch (e) {
+      console.error('Failed to process notification action', e);
+    }
   };
 
   const markAllRead = () => {
@@ -535,6 +616,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
               tone="warning"
               actions={needsActionNotifications.length ? <Badge label="Respond first" tone="danger" icon="fa-bolt" /> : undefined}
               onMarkRead={markRead}
+              onAction={handleAction}
             />
 
             <NotificationSection
@@ -545,6 +627,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
               emptyCopy="No non-urgent update is present in the current filtered view."
               tone="info"
               onMarkRead={markRead}
+              onAction={handleAction}
             />
 
             <section className="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-200/80">
@@ -568,7 +651,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                 completedNotifications.length ? (
                   <div className="mt-5 space-y-3">
                     {completedNotifications.map((item) => (
-                      <NotificationCard key={item.id} item={item} onMarkRead={markRead} />
+                      <NotificationCard key={item.id} item={item as any} onMarkRead={markRead} onAction={handleAction} />
                     ))}
                   </div>
                 ) : (

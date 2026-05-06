@@ -366,17 +366,30 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
   const [accessRequested, setAccessRequested] = useState(false);
   const [isTogglingAccess, setIsTogglingAccess] = useState(false);
 
+  const [realNotifications, setRealNotifications] = useState<any[]>([]);
+
   useEffect(() => {
     async function fetchRealGroup() {
       try {
-        let realStudentName = '';
-
-        const authRes = await fetch('/api/auth/me', { cache: 'no-store' });
-        if (authRes.ok) {
-          const authData = await authRes.json();
-          const user = authData.data?.user;
-          if (user) {
-            realStudentName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim();
+        let realStudentName = data.profile.fullName;
+        
+        try {
+          const resAuth = await fetch('/api/auth/me');
+          if (resAuth.ok) {
+            const authData = await resAuth.json();
+            if (authData.user && authData.user.name) {
+              realStudentName = authData.user.name;
+            }
+          }
+        } catch (e) {
+          if (typeof window !== 'undefined') {
+            const raw = window.localStorage.getItem('capstoneAuthUser');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed && parsed.name) {
+                realStudentName = parsed.name;
+              }
+            }
           }
         }
         
@@ -409,13 +422,42 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
         } else {
           setDebugInfo((prev: any) => ({ ...prev, groupFetchError: res.statusText }));
         }
+
+        if (data.profile.user_id) {
+          const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
+          if (notifRes.ok) {
+            const notifs = await notifRes.json();
+            setRealNotifications(notifs);
+          }
+        }
+
       } catch (e: any) {
         setDebugInfo({ status: 'Error during fetch', error: e.message });
         console.error('Failed to fetch student real group', e);
       }
     }
     fetchRealGroup();
-  }, []);
+  }, [data.profile.user_id, data.profile.fullName]);
+
+  // Real-time polling for notifications
+  useEffect(() => {
+    if (!data.profile.user_id) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
+        if (notifRes.ok) {
+          const notifs = await notifRes.json();
+          setRealNotifications(notifs);
+        }
+      } catch (e) {
+        console.error('Failed to poll notifications', e);
+      }
+    };
+
+    const intervalId = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(intervalId);
+  }, [data.profile.user_id]);
 
   const handleSubmitTitle = async () => {
     if (!realGroup || !titleDraft.trim()) return;
@@ -503,14 +545,37 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
   );
   const recentFeedback = useMemo(() => sortByDateDesc(data.feedback).slice(0, 2), [data.feedback]);
   const latestFeedback = recentFeedback[0] ?? null;
-  const recentNotifications = useMemo(() => sortByDateDesc(data.notifications).slice(0, 2), [data.notifications]);
+  const mergedNotifications = useMemo(() => {
+    const combined: any[] = [];
+    if (realNotifications.length > 0) {
+      realNotifications.forEach(notif => {
+        combined.push({
+          id: notif.id,
+          title: notif.title,
+          message: notif.message,
+          priority: notif.type === 'warning' || notif.type === 'danger' ? 'high' : 'normal',
+          read: notif.status === 'READ',
+          dateLabel: new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          route: '/students/notifications',
+          timestamp: new Date(notif.createdAt).getTime()
+        } as any);
+      });
+    }
+    return combined.sort((a, b) => {
+      const timeA = a.timestamp || new Date(a.dateLabel + ' ' + new Date().getFullYear()).getTime();
+      const timeB = b.timestamp || new Date(b.dateLabel + ' ' + new Date().getFullYear()).getTime();
+      return timeB - timeA;
+    });
+  }, [realNotifications]);
+
+  const recentNotifications = useMemo(() => mergedNotifications.slice(0, 2), [mergedNotifications]);
 
   const approvedCount = data.documents.filter((item) => item.reviewStatus === 'Approved').length;
   const pendingCount = data.documents.filter((item) => item.reviewStatus === 'Pending Review').length;
   const revisionCount = data.documents.filter((item) => item.reviewStatus === 'Needs Revision').length;
   const unreadFeedbackCount = data.feedback.filter((item) => item.unread).length;
-  const unreadNotificationsCount = data.notifications.filter((item) => !item.read).length;
-  const highPriorityNotificationCount = data.notifications.filter(
+  const unreadNotificationsCount = mergedNotifications.filter((item) => !item.read).length;
+  const highPriorityNotificationCount = mergedNotifications.filter(
     (item) => !item.read && item.priority === 'high'
   ).length;
   const overdueCount = sortedSchedules.filter((item) => {

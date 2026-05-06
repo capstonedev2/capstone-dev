@@ -340,8 +340,8 @@ function Badge({
 }
 
 export function StudentTitleSubmission({ data }: { data: StudentDashboardData }) {
-  const currentMember = data.group.members.find((member) => member.isCurrent);
-  const isLeader = currentMember?.isLeader ?? data.profile.groupRole.toLowerCase().includes('leader');
+  const isLeader = Boolean(data.profile.groupRole && data.profile.groupRole.toLowerCase().includes('leader'));
+  const canUpload = isLeader || data.group?.allowMemberSubmission;
   const initialSubmissions = useMemo(
     () => buildInitialSubmissions(data.titleRegistration),
     [data.titleRegistration]
@@ -353,6 +353,37 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const [notice, setNotice] = useState<NoticeState>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const createdObjectUrlsRef = useRef(new Set<string>());
+
+  const handleRequestPermission = async () => {
+    const leader = data.group.members.find((m) => m.isLeader);
+    if (!leader?.user_id) {
+      setNotice({ tone: 'danger', message: 'Could not identify the group leader.' });
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: leader.user_id,
+          title: 'Upload Permission Request',
+          message: `${data.profile.fullName} is requesting permission to upload title proposal files.`,
+          type: 'info',
+          entityType: 'group',
+          entityId: data.group.id
+        })
+      });
+
+      if (res.ok) {
+        setNotice({ tone: 'success', message: `Upload permission request sent to ${data.group.leaderName}.` });
+      } else {
+        throw new Error('Failed to send request');
+      }
+    } catch (e) {
+      setNotice({ tone: 'danger', message: 'Failed to send upload request.' });
+    }
+  };
 
   useEffect(() => {
     setSubmissions(initialSubmissions);
@@ -572,6 +603,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   };
 
   const handleCreateSubmission = () => {
+    if (!canUpload) {
+      setNotice({
+        tone: 'warning',
+        message: 'Only the group leader is authorized to create a new title proposal.'
+      });
+      return;
+    }
+
     const nextProposalNumber =
       submissions.reduce((highest, submission) => Math.max(highest, submission.proposalNumber), 0) + 1;
     const draftSubmission = createDraftSubmission(data, nextProposalNumber, isLeader);
@@ -591,10 +630,25 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   };
 
   const handleBrowseAttachments = () => {
+    if (!canUpload) {
+      setNotice({
+        tone: 'warning',
+        message: 'Only authorized users can upload proposal files.'
+      });
+      return;
+    }
     fileInputRef.current?.click();
   };
 
   const handleAttachmentInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!canUpload) {
+      setNotice({
+        tone: 'warning',
+        message: 'Only authorized users can upload files.'
+      });
+      return;
+    }
+
     const files = Array.from(event.target.files ?? []);
 
     if (!files.length) {
@@ -675,7 +729,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const handleSubmitProposal = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!isLeader) {
+    if (!canUpload) {
       setNotice({
         tone: 'warning',
         message: `Only ${data.group.leaderName} can submit the official title proposal package.`
@@ -1072,8 +1126,37 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
                 <section className="register-title-form-group">
                   <div className="register-title-form-section-head">
-                    <strong>Proposal documents</strong>
-                    <p>Upload the title proposal file that already contains the title, background, statement of the problem, and objectives.</p>
+                    <div className="flex w-full items-center justify-between gap-4">
+                      <div>
+                        <strong>Proposal documents</strong>
+                        <p>Upload the title proposal file that already contains the title, background, statement of the problem, and objectives.</p>
+                      </div>
+                      {isLeader && data.group?.id && (
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-sm transition hover:bg-slate-50">
+                          <input 
+                            type="checkbox" 
+                            className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            defaultChecked={data.group?.allowMemberSubmission}
+                            onChange={async (e) => {
+                              const isChecked = e.target.checked;
+                              try {
+                                const res = await fetch('/api/groups', {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ id: data.group.id, allowMemberSubmission: isChecked })
+                                });
+                                if (res.ok) {
+                                  setNotice({ tone: 'success', message: isChecked ? 'Members are now allowed to upload files.' : 'Member uploads restricted.' });
+                                }
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            }}
+                          />
+                          <span className="text-sm font-medium text-slate-700">Allow Member Uploads</span>
+                        </label>
+                      )}
+                    </div>
                   </div>
 
                   <div className="title-submission-upload-shell">
@@ -1083,9 +1166,25 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                     </div>
 
                     <div className="register-title-panel-actions title-submission-file-actions">
-                      <button className="btn btn-secondary" type="button" onClick={handleBrowseAttachments} disabled={!isLeader}>
-                        <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload proposal file
-                      </button>
+                      {canUpload ? (
+                        <button className="btn btn-secondary" type="button" onClick={handleBrowseAttachments}>
+                          <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload proposal file
+                        </button>
+                      ) : (
+                        <div className="inline-flex items-center gap-3">
+                          <div className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 shadow-sm">
+                            <i className="fas fa-lock" aria-hidden="true" />
+                            <span>Only the group leader can upload files.</span>
+                          </div>
+                          <button 
+                            className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 hover:shadow-md" 
+                            type="button" 
+                            onClick={handleRequestPermission}
+                          >
+                            <i className="fas fa-paper-plane" aria-hidden="true" /> Request Permission
+                          </button>
+                        </div>
+                      )}
                       <button className="btn btn-primary" type="button" onClick={() => handleOpenAttachment(latestAttachment)} disabled={!latestAttachment}>
                         <i className="fas fa-eye" aria-hidden="true" /> Open latest file
                       </button>
@@ -1152,12 +1251,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
                 <div className="register-title-form-actions">
                   <div className="register-title-submit-cluster">
-                    <button className="btn btn-primary register-title-primary-action" type="submit" disabled={!isLeader}>
+                    <button className="btn btn-primary register-title-primary-action" type="submit" disabled={!canUpload}>
                       <i className="fas fa-paper-plane" aria-hidden="true" />
-                      {isLeader ? 'Submit Title Proposal for Review' : 'Leader Action Required'}
+                      {canUpload ? 'Submit Title Proposal for Review' : 'Leader Action Required'}
                     </button>
                     <span className="register-title-submit-note">
-                      {isLeader
+                      {canUpload
                         ? 'Submission only requires at least one uploaded title proposal document. The required sections must already be inside that file.'
                         : `This shared form is read-only for members. Coordinate with ${data.group.leaderName} for official title submission.`}
                     </span>

@@ -158,6 +158,7 @@ export type StudentDashboardData = {
     groupCode: string;
     leaderName: string;
     memberCount: number;
+    allowMemberSubmission?: boolean;
     members: Array<{
       id: string;
       user_id: string;
@@ -1833,6 +1834,7 @@ export async function getStudentDashboardData() {
 
       data.profile = {
         ...data.profile,
+        user_id: dbUser.id,
         fullName: userName,
         email: dbUser.email || data.profile.email,
         studentId: dbUser.studentId || data.profile.studentId,
@@ -1856,7 +1858,71 @@ export async function getStudentDashboardData() {
 
         if (groups.length > 0) {
           const group = groups[0];
-          data.profile.groupRole = group.leader === userName ? 'Group Leader' : 'Member';
+          
+          const normalize = (s: string) => s.replace(/\s+/g, '').toLowerCase();
+          const isActuallyLeader = normalize(group.leader) === normalize(userName);
+          
+          data.profile.groupRole = isActuallyLeader ? 'Group Leader' : 'Member';
+          
+          if (data.group) {
+            data.group.id = group.id;
+            data.group.allowMemberSubmission = group.allowMemberSubmission;
+            data.group.groupName = group.title || data.group.groupName;
+            data.group.leaderName = group.leader || data.group.leaderName;
+          }
+
+          // Fetch real GroupMember records with user details
+          try {
+            const groupMembers = await prisma.groupMember.findMany({
+              where: { groupId: group.id, isActive: true },
+              include: { user: true }
+            });
+
+            if (groupMembers.length > 0 && data.group) {
+              data.group.members = groupMembers.map(gm => ({
+                id: gm.id,
+                user_id: gm.userId,
+                project_id: group.projectId || '',
+                status: 'active',
+                created_at: gm.createdAt.toISOString(),
+                updated_at: gm.updatedAt.toISOString(),
+                fullName: gm.user.name || '',
+                studentId: gm.user.studentId || '',
+                email: gm.user.email || '',
+                isLeader: gm.role === 'LEADER',
+                isCurrent: gm.user.name === userName,
+              }));
+              data.group.memberCount = groupMembers.length;
+            } else if (group.students && group.students.length > 0 && data.group) {
+              // Fallback: build members from group.students name array
+              const studentUsers = await prisma.user.findMany({
+                where: { name: { in: group.students } }
+              });
+
+              const studentMap = new Map(studentUsers.map(u => [u.name, u]));
+
+              data.group.members = group.students.map((studentName: string, index: number) => {
+                const user = studentMap.get(studentName);
+                return {
+                  id: user?.id || `fallback-${index}`,
+                  user_id: user?.id || `fallback-${index}`,
+                  project_id: group.projectId || '',
+                  status: 'active',
+                  created_at: group.createdAt.toISOString(),
+                  updated_at: group.updatedAt.toISOString(),
+                  fullName: studentName,
+                  studentId: user?.studentId || '',
+                  email: user?.email || '',
+                  isLeader: studentName === group.leader,
+                  isCurrent: studentName === userName,
+                };
+              });
+              data.group.memberCount = group.students.length;
+            }
+          } catch (memberErr) {
+            console.error('Failed to fetch group members:', memberErr);
+          }
+
           data.project = {
             ...data.project,
             projectCode: group.code || data.project.projectCode,
@@ -1866,6 +1932,20 @@ export async function getStudentDashboardData() {
           };
         } else {
           data.profile.groupRole = 'Not assigned';
+          data.profile.adviser = 'Not assigned';
+          if (data.group) {
+            data.group.groupName = 'Not assigned';
+            data.group.groupCode = 'N/A';
+            data.group.leaderName = 'Not assigned';
+            data.group.memberCount = 0;
+            data.group.members = [];
+          }
+          if (data.project) {
+            data.project.groupName = 'Not assigned';
+            data.project.adviser = 'Not assigned';
+            data.project.title = 'No active project';
+            data.project.projectCode = 'N/A';
+          }
         }
       } catch {
         // Group check failed — keep mock groupRole

@@ -1501,17 +1501,17 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
   const adviserDepartment = data.profile.department?.replace(' Department', '') || 'IT';
   const { workspaceMode, switchWorkspace, pathname, basePath } = useWorkspaceMode();
   const [groups, setGroups] = useState<ManagedAdviserGroup[]>(
-    () => data.groups.filter((group) => getGroupDepartmentLabel(group) === adviserDepartment)
+    () => data.groups.filter((group) => group.user_id === data.profile.user_id)
   );
   
   useEffect(() => {
     async function fetchGroups() {
       try {
-        const response = await fetch(`/api/groups?department=${adviserDepartment}`);
+        const response = await fetch(`/api/groups?userId=${data.profile.user_id}`);
         if (response.ok) {
           const realGroups = await response.json();
           setGroups(current => {
-             const mockGroups = data.groups.filter(g => getGroupDepartmentLabel(g) === adviserDepartment);
+             const mockGroups = data.groups.filter(g => g.user_id === data.profile.user_id);
              // Format real groups to match ManagedAdviserGroup
              const formattedRealGroups = realGroups.map((g: any) => ({
                ...g,
@@ -1520,7 +1520,9 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
                created_at: g.createdAt,
                updated_at: g.updatedAt
              }));
-             return [...formattedRealGroups, ...mockGroups];
+             const realGroupIds = new Set(formattedRealGroups.map((g: any) => g.id));
+             const uniqueMockGroups = mockGroups.filter(g => !realGroupIds.has(g.id));
+             return [...formattedRealGroups, ...uniqueMockGroups];
           });
         }
       } catch (e) {

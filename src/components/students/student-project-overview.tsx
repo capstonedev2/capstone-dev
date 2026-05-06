@@ -490,10 +490,10 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               <div className="stack-list">
                 <article className="stack-card project-overview-panel-card">
                   <div className="stack-card-head">
-                    <strong>Panel Members</strong>
-                    <Badge label={`${project.panelMembers?.length || 0} assigned`} tone="warning" />
+                    <strong>Adviser</strong>
+                    <Badge label={project.adviser ? 'Assigned' : 'Pending'} tone={project.adviser ? 'success' : 'warning'} />
                   </div>
-                  <p>{project.panelMembers?.join(', ') || 'No panel members assigned.'}</p>
+                  <p>{project.adviser || 'No adviser assigned yet.'}</p>
                 </article>
               </div>
             </article>

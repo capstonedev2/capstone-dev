@@ -106,7 +106,7 @@ function buildLimitedStudentProfile(
 function getInitialWorkspaceAccess(data: StudentDashboardData): StudentWorkspaceAccess {
   const storedUser = readStoredJson<StoredAuthUser>(AUTH_USER_STORAGE_KEY);
 
-  if (!storedUser || storedUser.role !== 'student') {
+  if (!storedUser || storedUser.role?.toLowerCase() !== 'student') {
     return { isLimited: false, profile: null };
   }
 
@@ -1215,12 +1215,55 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       ? (dbProfile.projectCode || 'No active project')
       : (isLimitedWorkspace ? 'No active project' : data.project.projectCode)
   };
-  const shellNotifications = isLimitedWorkspace ? [] : data.notifications;
+  const [realNotifications, setRealNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!data.profile.user_id) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
+        if (notifRes.ok) {
+          const notifs = await notifRes.json();
+          setRealNotifications(notifs);
+        }
+      } catch (e) {
+        console.error('Failed to poll notifications in shell', e);
+      }
+    };
+
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(intervalId);
+  }, [data.profile.user_id]);
+
+  const shellNotifications = useMemo(() => {
+    if (isLimitedWorkspace) return [];
+    
+    const combined: any[] = [];
+    if (realNotifications.length > 0) {
+      realNotifications.forEach(notif => {
+        combined.push({
+          id: notif.id,
+          title: notif.title,
+          message: notif.message,
+          type: notif.type === 'info' ? 'general' : notif.type,
+          priority: notif.type === 'warning' || notif.type === 'danger' ? 'high' : 'normal',
+          read: notif.status === 'READ',
+          created_at: notif.createdAt,
+          dateLabel: new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          route: '/students/notifications',
+        } as any);
+      });
+    }
+    return sortNotifications(combined);
+  }, [isLimitedWorkspace, realNotifications]);
+
   const unreadNotificationsCount = shellNotifications.filter((item) => !item.read).length;
   const highPriorityNotificationsCount = shellNotifications.filter((item) => !item.read && item.priority === 'high').length;
   const unreadFeedbackCount = isLimitedWorkspace ? 0 : data.feedback.filter((item) => item.unread).length;
   const recentNotifications = useMemo(
-    () => sortNotifications(shellNotifications || []).slice(0, 4),
+    () => shellNotifications.slice(0, 4),
     [shellNotifications]
   );
   const navigationSections = useMemo(
@@ -1249,6 +1292,22 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
             ? <LimitedStudentLockedFeature featureLabel={getLimitedRouteLabel(pathname)} profile={limitedProfile} />
             : null
       : null;
+
+  const handleAction = async (id: string, action: 'accept' | 'reject') => {
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId: id, action })
+      });
+      if (res.ok) {
+        // Optimistically update
+        setRealNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'READ' } : item)));
+      }
+    } catch (e) {
+      console.error('Failed to process notification action', e);
+    }
+  };
 
   const toggleSidebar = () => {
     if (isMobile) {
@@ -1346,36 +1405,58 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   {recentNotifications.map((notification) => {
                     const action = getNotificationAction(notification);
                     const meta = getNotificationTypeMeta(notification.type);
+                    const isPermissionRequest = notification.title === 'Upload Permission Request';
 
                     return (
-                      <Link
+                      <div
                         key={notification.id}
                         className={`notification-menu-item${notification.read ? '' : ' is-unread'}`}
-                        href={action.href}
+                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                       >
-                        <span className={`notification-menu-item-icon is-${meta.tone}`}>
-                          <i aria-hidden="true" className={`fas ${meta.icon}`} />
-                        </span>
-                        <span className="notification-menu-item-copy">
-                          <span className="notification-menu-item-head">
-                            <strong>{notification.title}</strong>
-                            {!notification.read ? <span className="notification-menu-item-dot" aria-hidden="true" /> : null}
+                        <Link href={action.href} className="flex gap-4 w-full">
+                          <span className={`notification-menu-item-icon is-${meta.tone}`}>
+                            <i aria-hidden="true" className={`fas ${meta.icon}`} />
                           </span>
-                          <small>{notification.message}</small>
-                          <span className="notification-menu-item-footer">
-                            <span className="notification-menu-item-meta">
-                              <span>{notification.dateLabel}</span>
-                              <span className={`notification-menu-item-badge${notification.priority === 'high' ? ' is-danger' : ''}`}>
-                                {notification.priority === 'high' ? 'High priority' : meta.label}
+                          <span className="notification-menu-item-copy">
+                            <span className="notification-menu-item-head">
+                              <strong>{notification.title}</strong>
+                              {!notification.read ? <span className="notification-menu-item-dot" aria-hidden="true" /> : null}
+                            </span>
+                            <small>{notification.message}</small>
+                            <span className="notification-menu-item-footer">
+                              <span className="notification-menu-item-meta">
+                                <span>{notification.dateLabel}</span>
+                                <span className={`notification-menu-item-badge${notification.priority === 'high' ? ' is-danger' : ''}`}>
+                                  {notification.priority === 'high' ? 'High priority' : meta.label}
+                                </span>
                               </span>
-                            </span>
-                            <span className="notification-menu-item-cta">
-                              {action.label}
-                              <i aria-hidden="true" className="fas fa-arrow-right" />
+                              {!isPermissionRequest ? (
+                                <span className="notification-menu-item-cta">
+                                  {action.label}
+                                  <i aria-hidden="true" className="fas fa-arrow-right" />
+                                </span>
+                              ) : null}
                             </span>
                           </span>
-                        </span>
-                      </Link>
+                        </Link>
+
+                        {isPermissionRequest && !notification.read && (
+                          <div className="flex gap-2 pt-3 pl-[52px]">
+                            <button
+                              className="flex-1 rounded-md bg-emerald-600 px-2 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition"
+                              onClick={(e) => { e.preventDefault(); handleAction(notification.id, 'accept'); }}
+                            >
+                              <i className="fas fa-check mr-1" aria-hidden="true" /> Accept
+                            </button>
+                            <button
+                              className="flex-1 rounded-md border border-rose-200 bg-white px-2 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition"
+                              onClick={(e) => { e.preventDefault(); handleAction(notification.id, 'reject'); }}
+                            >
+                              <i className="fas fa-xmark mr-1" aria-hidden="true" /> Reject
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

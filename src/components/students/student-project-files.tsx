@@ -194,6 +194,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const currentUserRole = useMemo(() => resolveUserRole(data.profile.groupRole), [data.profile.groupRole]);
   const currentUserId = data.profile.user_id;
   const adviserName = data.project.adviser || data.profile.adviser || 'Assigned Adviser';
+  const isGroupLeader = Boolean(data.profile.groupRole && data.profile.groupRole.toLowerCase().includes('leader'));
 
   const [files, setFiles] = useState<ProjectFileRecord[]>(initialFiles);
   const [uploadDraft, setUploadDraft] = useState<ProjectFileUploadState>(() => createUploadDraft(data.profile.fullName));
@@ -209,6 +210,82 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const [pageError, setPageError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
   const [historyFile, setHistoryFile] = useState<ProjectFileRecord | null>(null);
+
+  // Background polling for specific member permission state via notifications
+  const [isUploadAllowed, setIsUploadAllowed] = useState(false);
+  const [permissionNotificationId, setPermissionNotificationId] = useState<string | null>(null);
+  const [recentlyAllowed, setRecentlyAllowed] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (isGroupLeader) return; // Leaders always have permission, no need to poll
+
+    const pollPersonalPermission = async () => {
+      try {
+        if (!currentUserId) return;
+        const res = await fetch(`/api/notifications?userId=${encodeURIComponent(currentUserId)}`, { cache: 'no-store' });
+        if (res.ok) {
+          const notifs = await res.json();
+          // Check if there are any 'Upload Permission Granted' notifications that are UNREAD
+          const permissionNotifs = notifs.filter(
+            (n: any) => n.status === 'UNREAD' && n.title === 'Upload Permission Granted' && n.entityType === 'permission' && n.entityId === data.group.id
+          );
+          
+          if (permissionNotifs.length > 0) {
+            if (!isUploadAllowed) {
+              setToast({ tone: 'success', message: 'Upload permission granted! You can now submit 1 file.' });
+              setIsUploadAllowed(true);
+            }
+            setPermissionNotificationId(permissionNotifs.map((n: any) => n.id).join(','));
+          } else {
+            setIsUploadAllowed(false);
+            setPermissionNotificationId(null);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to poll personal permissions', e);
+      }
+    };
+
+    // Initial check
+    pollPersonalPermission();
+    // Poll every 5 seconds
+    const intervalId = setInterval(pollPersonalPermission, 5000);
+    return () => clearInterval(intervalId);
+  }, [currentUserId, data.group.id, isGroupLeader, isUploadAllowed]);
+
+  const handleRequestPermission = async () => {
+    console.log('[REQUEST PERM] Members:', JSON.stringify(data.group.members, null, 2));
+    const leader = data.group.members.find((m) => m.isLeader);
+    console.log('[REQUEST PERM] Found leader:', leader);
+    if (!leader?.user_id) {
+      setToast({ tone: 'danger', message: 'Could not identify the group leader.' });
+      return;
+    }
+    console.log('[REQUEST PERM] Sending notification to leader user_id:', leader.user_id);
+
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: leader.user_id,
+          title: 'Upload Permission Request',
+          message: `${data.profile.fullName} is requesting permission to upload project files.`,
+          type: 'info',
+          entityType: 'group',
+          entityId: `${data.group.id}:${currentUserId}`
+        })
+      });
+
+      if (res.ok) {
+        setToast({ tone: 'success', message: 'Upload permission request sent to the group leader.' });
+      } else {
+        throw new Error('Failed to send request');
+      }
+    } catch (e) {
+      setToast({ tone: 'danger', message: 'Failed to send upload request.' });
+    }
+  };
 
   useEffect(() => {
     setFiles(initialFiles);
@@ -477,10 +554,29 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       history: [...(previousLatestFile?.history || []), nextHistoryEntry]
     };
 
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
       setFiles((current) => [nextRecord, ...current]);
       setCurrentPage(1);
       setIsUploading(false);
+      
+      // Consume ALL one-time use permission tokens if used
+      if (!isGroupLeader && permissionNotificationId) {
+        try {
+          const tokenIds = permissionNotificationId.split(',');
+          await Promise.all(tokenIds.map(id => 
+            fetch('/api/notifications', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ notificationId: id, action: 'consume' })
+            })
+          ));
+          setIsUploadAllowed(false);
+          setPermissionNotificationId(null);
+        } catch (e) {
+          console.error('Failed to consume permission tokens', e);
+        }
+      }
+
       setToast({
         tone: 'success',
         message: `${selectedFile.name} uploaded as ${getProjectFileVersionLabel(nextRecord)}.`
@@ -936,10 +1032,122 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   <h3>Submit a new file</h3>
                   <p>Complete each step so your adviser can quickly understand the file, its version, and what changed.</p>
                 </div>
-                <span className="ui-badge is-info"><i className="fas fa-file-code" aria-hidden="true" /> Next {nextVersionLabel}</span>
+                <div className="flex items-center gap-4">
+                  {isGroupLeader && data.group?.id && (
+                    <div className="relative group/permissions">
+                      <button type="button" className="flex items-center gap-2.5 rounded-xl border border-blue-200/60 bg-gradient-to-br from-indigo-50 to-blue-50 px-4 py-2 shadow-sm transition-all duration-300 hover:border-blue-300 hover:from-indigo-100 hover:to-blue-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/80 shadow-sm border border-blue-100/50">
+                          <i className="fas fa-user-lock text-blue-600 transition-transform duration-300 group-hover/permissions:scale-110" aria-hidden="true" />
+                        </div>
+                        <span className="text-sm font-bold text-blue-900">Manage Permissions</span>
+                        <i className="fas fa-chevron-down text-blue-500 text-[10px] ml-0.5 transition-transform duration-300 group-hover/permissions:rotate-180" aria-hidden="true" />
+                      </button>
+
+                      <div className="absolute right-0 top-full z-20 hidden w-64 flex-col pt-3 group-hover/permissions:flex animate-in fade-in slide-in-from-top-2 duration-200">
+                        {/* Little triangle pointer */}
+                        <div className="absolute right-6 top-1.5 h-3 w-3 rotate-45 border-l border-t border-slate-200/60 bg-white/95" />
+                        
+                        <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/95 p-2 shadow-2xl shadow-blue-900/10 ring-1 ring-slate-900/5 backdrop-blur-xl">
+                          <div className="px-3 pb-2 pt-1.5 border-b border-slate-100/50 mb-1">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Grant 1-Time Upload</h4>
+                          </div>
+
+                          {data.group.members.filter(m => !m.isLeader).length ? (
+                            data.group.members.filter(m => !m.isLeader).map(member => {
+                              const isAllowed = recentlyAllowed.has(member.user_id);
+                              
+                              return (
+                                <button
+                                  key={member.user_id}
+                                  type="button"
+                                  disabled={isAllowed}
+                                  className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition group/item ${
+                                    isAllowed 
+                                      ? 'bg-emerald-50 cursor-default' 
+                                      : 'hover:bg-slate-50 hover:text-blue-600'
+                                  }`}
+                                  onClick={async () => {
+                                    if (!member.user_id || isAllowed) return;
+                                    try {
+                                      const res = await fetch('/api/notifications', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          userId: member.user_id,
+                                          title: 'Upload Permission Granted',
+                                          message: 'Your leader has approved your request to upload files.',
+                                          type: 'success',
+                                          entityType: 'permission',
+                                          entityId: data.group.id
+                                        })
+                                      });
+                                      if (res.ok) {
+                                        setRecentlyAllowed(prev => new Set(prev).add(member.user_id));
+                                        setToast({ tone: 'success', message: `Upload unlocked for ${member.fullName}.` });
+                                      }
+                                    } catch (e) {
+                                      console.error(e);
+                                    }
+                                  }}
+                                >
+                                  <div className="flex items-center gap-3 min-w-0">
+                                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition ${
+                                      isAllowed 
+                                        ? 'bg-emerald-100 text-emerald-700' 
+                                        : 'bg-slate-100 text-slate-600 group-hover/item:bg-blue-100 group-hover/item:text-blue-700'
+                                    }`}>
+                                      {isAllowed ? <i className="fas fa-check" aria-hidden="true" /> : member.fullName.charAt(0).toUpperCase()}
+                                    </span>
+                                    <span className={`text-sm font-semibold transition truncate ${
+                                      isAllowed 
+                                        ? 'text-emerald-800' 
+                                        : 'text-slate-700 group-hover/item:text-blue-700'
+                                    }`}>
+                                      {member.fullName}
+                                    </span>
+                                  </div>
+                                  <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                                    isAllowed 
+                                      ? 'text-emerald-600' 
+                                      : 'text-slate-400 group-hover/item:text-blue-600'
+                                  }`}>
+                                    {isAllowed ? 'Allowed' : 'Allow'}
+                                  </span>
+                                </button>
+                              );
+                            })
+                          ) : (
+                            <div className="px-3 py-3 text-center text-xs text-slate-500">
+                              No members available.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <span className="ui-badge is-info"><i className="fas fa-file-code" aria-hidden="true" /> Next {nextVersionLabel}</span>
+                </div>
               </div>
 
-              <form className="portal-form project-files-upload-form" onSubmit={handleUploadSubmit}>
+              {!isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (
+                <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/50 p-8 text-center shadow-sm">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 shadow-sm">
+                    <i className="fas fa-lock text-2xl" aria-hidden="true" />
+                  </div>
+                  <h4 className="mt-4 text-xl font-bold tracking-tight text-amber-900">Upload Restricted</h4>
+                  <p className="mx-auto mt-2 max-w-md text-sm text-amber-700">
+                    Only the designated group leader is authorized to submit or upload files to the project workspace. If you need to upload a document, you must request permission from your group leader.
+                  </p>
+                  <button 
+                    type="button" 
+                    onClick={handleRequestPermission} 
+                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 hover:shadow-md"
+                  >
+                    <i className="fas fa-paper-plane" aria-hidden="true" /> Request Upload Permission
+                  </button>
+                </div>
+              ) : (
+                <form className="portal-form project-files-upload-form" onSubmit={handleUploadSubmit}>
                 <div className="project-files-upload-workflow">
                   <section className="project-files-step-card">
                     <div className="project-files-step-head">
@@ -1119,7 +1327,8 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     <p>Keep approved records available for long-term storage and final archive needs.</p>
                   </article>
                 </div>
-              </form>
+                </form>
+              )}
             </article>
           </section>
 
