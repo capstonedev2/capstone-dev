@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display, Poppins } from 'next/font/google';
 import { BrandingProvider } from '@/components/branding/branding-provider';
+import { SYSTEM_LOGO_SRC } from '@/lib/branding';
 import './globals.css';
 import '../styles/portal-shell-menus.css';
 
@@ -25,7 +26,10 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: 'ThesisTrack',
-  description: 'Inventory, progress monitoring, and technology transfer system.'
+  description: 'Inventory, progress monitoring, and technology transfer system.',
+  icons: {
+    icon: SYSTEM_LOGO_SRC
+  }
 };
 
 export default function RootLayout({

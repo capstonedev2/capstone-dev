@@ -11,6 +11,7 @@ import {
 } from 'react';
 import {
   DEFAULT_BRANDING,
+  SYSTEM_LOGO_SRC,
   getCssVariableMap,
   sanitizeBrandingSettings,
   type BrandingSettings
@@ -62,9 +63,7 @@ export function applyBrandingToDocument(brandingInput: BrandingSettings) {
     document.title = branding.systemName;
   }
 
-  if (branding.assets.favicon) {
-    ensureFaviconElement().href = branding.assets.favicon;
-  }
+  ensureFaviconElement().href = branding.assets.favicon || branding.assets.mainLogo || SYSTEM_LOGO_SRC;
 }
 
 export function publishBrandingUpdate(brandingInput: BrandingSettings) {

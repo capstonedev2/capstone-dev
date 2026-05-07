@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useBranding } from '@/components/branding/branding-provider';
+import { SYSTEM_LOGO_SRC } from '@/lib/branding';
 
 function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
@@ -27,7 +28,7 @@ export function PortalShellBrand({
   const displayTitle = isSystemName ? branding.systemName : title;
   const displaySubtitle = subtitle ?? (isSystemName ? branding.tagline : undefined);
   const logoSrc = isSystemName
-    ? branding.assets.mainLogo || branding.assets.lightLogo || branding.assets.darkLogo
+    ? branding.assets.mainLogo || branding.assets.lightLogo || branding.assets.darkLogo || SYSTEM_LOGO_SRC
     : '';
 
   return (

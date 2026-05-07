@@ -50,6 +50,8 @@ export type BrandingSettings = {
   updatedAt?: string;
 };
 
+export const SYSTEM_LOGO_SRC = '/System%20Logo/logo-transparent.png';
+
 export type ThemePreset = {
   id: string;
   name: string;
@@ -87,10 +89,10 @@ const DEFAULT_COLORS: BrandingColors = {
 };
 
 const DEFAULT_ASSETS: BrandingAssets = {
-  mainLogo: '',
-  lightLogo: '',
-  darkLogo: '',
-  favicon: '',
+  mainLogo: SYSTEM_LOGO_SRC,
+  lightLogo: SYSTEM_LOGO_SRC,
+  darkLogo: SYSTEM_LOGO_SRC,
+  favicon: SYSTEM_LOGO_SRC,
   loginBackground: ''
 };
 
