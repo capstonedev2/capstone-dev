@@ -88,26 +88,27 @@ function getAdviserActionMeta(action: AdviserActionStatus) {
 
 export function ProgressSummaryCards({ metrics }: { metrics: ProgressSummaryMetric[] }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+    <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
       {metrics.map((metric) => (
         <article
           key={metric.id}
-          className="flex min-h-[152px] flex-col justify-between rounded-[1.75rem] bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.08)]"
+          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)]"
         >
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-light)]">{metric.label}</p>
-              <p className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[var(--primary)]">
+              <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--text-light)]">{metric.label}</p>
+              <p className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
                 {metric.value}
               </p>
             </div>
             <span
-              className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base ${metric.iconClassName}`}
+              className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
             >
               <i className={`fas ${metric.icon}`} />
             </span>
           </div>
-          <p className="mt-5 text-sm leading-6 text-[var(--text-light)]">{metric.helperText}</p>
+          <p className="mt-4 text-[13px] leading-[1.6] text-[var(--text-light)]">{metric.helperText}</p>
         </article>
       ))}
     </div>

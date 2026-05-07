@@ -1,4 +1,9 @@
-import { hashPassword, hashResetToken, validatePassword } from '@/lib/auth';
+import { type NextRequest } from 'next/server';
+import {
+  PASSWORD_RESET_SESSION_COOKIE_NAME,
+  hashPassword,
+  hashResetToken
+} from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import {
   HttpError,
@@ -10,38 +15,34 @@ import {
 
 export const runtime = 'nodejs';
 
+const RESET_PASSWORD_MIN_LENGTH = 8;
+
 type ResetPasswordBody = {
-  token?: unknown;
   password?: unknown;
   confirmPassword?: unknown;
   confirm_password?: unknown;
 };
 
-export async function POST(request: Request) {
+function resetSessionError() {
+  return new HttpError('Reset session has expired. Request a new code.', 401);
+}
+
+export async function POST(request: NextRequest) {
   try {
     const body = await parseJsonBody<ResetPasswordBody>(request);
-    const token = normalizeText(body.token);
     const password = normalizeText(body.password);
-    const confirmPassword = normalizeText(body.confirmPassword ?? body.confirm_password ?? body.password);
+    const confirmPassword = normalizeText(body.confirmPassword ?? body.confirm_password);
     const fieldErrors: Record<string, string> = {};
-
-    if (!token) {
-      fieldErrors.token = 'Reset token is required.';
-    }
 
     if (!password) {
       fieldErrors.password = 'Please enter a new password.';
-    } else {
-      try {
-        validatePassword(password);
-      } catch (error) {
-        if (error instanceof HttpError) {
-          Object.assign(fieldErrors, error.fieldErrors);
-        }
-      }
+    } else if (password.length < RESET_PASSWORD_MIN_LENGTH) {
+      fieldErrors.password = `Use at least ${RESET_PASSWORD_MIN_LENGTH} characters.`;
     }
 
-    if (password !== confirmPassword) {
+    if (!confirmPassword) {
+      fieldErrors.confirmPassword = 'Please confirm your new password.';
+    } else if (password !== confirmPassword) {
       fieldErrors.confirmPassword = 'Passwords do not match.';
     }
 
@@ -49,32 +50,84 @@ export async function POST(request: Request) {
       throw new HttpError('Please correct the highlighted fields and try again.', 400, fieldErrors);
     }
 
-    const tokenHash = hashResetToken(token);
-    const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { tokenHash }
+    const sessionToken = request.cookies.get(PASSWORD_RESET_SESSION_COOKIE_NAME)?.value;
+
+    if (!sessionToken) {
+      throw resetSessionError();
+    }
+
+    const resetTokenHash = hashResetToken(sessionToken);
+    const resetCode = await prisma.passwordResetCode.findUnique({
+      where: {
+        resetTokenHash
+      },
+      select: {
+        id: true,
+        userId: true,
+        expiresAt: true,
+        usedAt: true,
+        verifiedAt: true
+      }
     });
 
-    if (!resetToken || resetToken.usedAt || resetToken.expiresAt.getTime() <= Date.now()) {
-      throw new HttpError('This reset link is invalid or has expired.', 400, {
-        token: 'Request a new password reset link.'
-      });
+    if (
+      !resetCode ||
+      resetCode.usedAt ||
+      !resetCode.verifiedAt ||
+      resetCode.expiresAt.getTime() <= Date.now()
+    ) {
+      throw resetSessionError();
     }
 
     const passwordHash = await hashPassword(password);
+    const usedAt = new Date();
 
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: resetToken.userId },
-        data: { passwordHash }
-      }),
-      prisma.passwordResetToken.deleteMany({
-        where: { userId: resetToken.userId }
-      })
-    ]);
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: {
+          id: resetCode.userId
+        },
+        data: {
+          passwordHash
+        }
+      });
 
-    return successResponse({
+      await tx.passwordResetCode.update({
+        where: {
+          id: resetCode.id
+        },
+        data: {
+          usedAt
+        }
+      });
+
+      await tx.passwordResetCode.updateMany({
+        where: {
+          userId: resetCode.userId,
+          usedAt: null,
+          id: {
+            not: resetCode.id
+          }
+        },
+        data: {
+          usedAt
+        }
+      });
+    });
+
+    const response = successResponse({
       message: 'Password updated successfully. You can now sign in with your new password.'
     });
+
+    response.cookies.set(PASSWORD_RESET_SESSION_COOKIE_NAME, '', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 0
+    });
+
+    return response;
   } catch (error) {
     return handleApiError(error);
   }

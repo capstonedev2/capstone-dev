@@ -1859,7 +1859,7 @@ export async function getStudentDashboardData() {
         if (groups.length > 0) {
           const group = groups[0];
           
-          const normalize = (s: string) => s.replace(/\s+/g, '').toLowerCase();
+          const normalize = (s: string | null | undefined) => (s || '').replace(/\s+/g, '').toLowerCase();
           const isActuallyLeader = normalize(group.leader) === normalize(userName);
           
           data.profile.groupRole = isActuallyLeader ? 'Group Leader' : 'Member';

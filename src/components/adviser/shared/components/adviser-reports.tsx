@@ -21,6 +21,7 @@ import {
   EvaluationSummaryCard,
   ProgressSummaryCard,
   ReportFilters,
+  ReportOverviewPanel,
   ReportSummaryCards,
   SupervisionSummaryCard
 } from '@/components/adviser/shared/data/report-workspace-sections';
@@ -42,11 +43,22 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
   const meta = WORKSPACE_META[workspaceMode];
 
   const reportModule = useMemo(() => buildAdviserReportsModule(data, { dateRange, status }), [data, dateRange, status]);
+  const hasActiveFilters = dateRange !== 'current-cycle' || reportType !== 'all' || status !== 'all';
 
   const showEvaluation = reportType === 'all' || reportType === 'evaluation';
   const showProgress = reportType === 'all' || reportType === 'progress';
   const showCompletedProjects = reportType === 'all' || reportType === 'completed-projects';
   const showSupervision = reportType === 'all' || reportType === 'supervision';
+  const visibleSectionCount = [showEvaluation, showProgress, showCompletedProjects, showSupervision].filter(Boolean).length;
+  const dateRangeLabel = REPORT_DATE_RANGE_OPTIONS.find((option) => option.value === dateRange)?.label ?? 'Current Cycle';
+  const reportTypeLabel = REPORT_TYPE_OPTIONS.find((option) => option.value === reportType)?.label ?? 'All Reports';
+  const statusLabel = REPORT_STATUS_OPTIONS.find((option) => option.value === status)?.label ?? 'All Status';
+
+  function clearFilters() {
+    setDateRange('current-cycle');
+    setReportType('all');
+    setStatus('all');
+  }
 
   function showToast(message: string, type: ToastState['type'] = 'info') {
     const id = Date.now();
@@ -113,6 +125,14 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
         />
 
         <div className="mx-auto max-w-[1600px] space-y-6">
+          <ReportOverviewPanel
+            dateRangeLabel={dateRangeLabel}
+            reportModule={reportModule}
+            reportTypeLabel={reportTypeLabel}
+            statusLabel={statusLabel}
+            visibleSectionCount={visibleSectionCount}
+          />
+
           <ReportSummaryCards metrics={reportModule.summaryMetrics} />
 
           <ReportFilters
@@ -120,6 +140,8 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
             reportType={reportType}
             status={status}
             dateOptions={REPORT_DATE_RANGE_OPTIONS}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
             reportTypeOptions={REPORT_TYPE_OPTIONS}
             statusOptions={REPORT_STATUS_OPTIONS}
             onDateRangeChange={setDateRange}

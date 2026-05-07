@@ -16,6 +16,11 @@ export const AUTH_COOKIE_NAME = 'thesistrack_session';
 const AUTH_TOKEN_EXPIRES_IN = '7d';
 const PASSWORD_RESET_TOKEN_BYTES = 32;
 const PASSWORD_RESET_TOKEN_TTL_MINUTES = 60;
+const PASSWORD_RESET_CODE_DIGITS = 6;
+export const PASSWORD_RESET_CODE_TTL_MINUTES = 10;
+export const PASSWORD_RESET_MAX_ATTEMPTS = 5;
+export const PASSWORD_RESET_SESSION_COOKIE_NAME = 'thesistrack_password_reset';
+export const PASSWORD_RESET_SESSION_TTL_SECONDS = PASSWORD_RESET_CODE_TTL_MINUTES * 60;
 
 export type AuthRole =
   | 'admin'
@@ -332,4 +337,23 @@ export function createPasswordResetToken() {
 
 export function hashResetToken(token: string) {
   return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+export function createPasswordResetCode() {
+  return crypto.randomInt(0, 10 ** PASSWORD_RESET_CODE_DIGITS).toString().padStart(
+    PASSWORD_RESET_CODE_DIGITS,
+    '0'
+  );
+}
+
+export async function hashPasswordResetCode(code: string) {
+  return bcrypt.hash(code, 12);
+}
+
+export async function verifyPasswordResetCode(code: string, codeHash: string) {
+  return bcrypt.compare(code, codeHash);
+}
+
+export function createPasswordResetSessionToken() {
+  return crypto.randomBytes(PASSWORD_RESET_TOKEN_BYTES).toString('hex');
 }

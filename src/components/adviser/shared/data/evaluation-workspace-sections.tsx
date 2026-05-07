@@ -200,26 +200,27 @@ function getStudentReviewState(studentEvaluation: EvaluationRecord['studentEvalu
 
 export function EvaluationSummaryCards({ metrics }: { metrics: EvaluationSummaryMetric[] }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+    <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
       {metrics.map((metric) => (
         <article
           key={metric.id}
-          className="flex min-h-[152px] flex-col justify-between rounded-[1.75rem] bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.08)]"
+          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)]"
         >
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-light)]">{metric.label}</p>
-              <p className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[var(--primary)]">
+              <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--text-light)]">{metric.label}</p>
+              <p className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
                 {metric.value}
               </p>
             </div>
             <span
-              className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base ${metric.iconClassName}`}
+              className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
             >
               <i className={`fas ${metric.icon}`} />
             </span>
           </div>
-          <p className="mt-5 text-sm leading-6 text-[var(--text-light)]">{metric.helperText}</p>
+          <p className="mt-4 text-[13px] leading-[1.6] text-[var(--text-light)]">{metric.helperText}</p>
         </article>
       ))}
     </div>
@@ -240,10 +241,12 @@ export function EvaluationFilters({
   const scopeLabel = getScopeChipLabel(workspaceMode);
 
   return (
-    <section className="rounded-[1.75rem] bg-white p-4 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+    <section className="relative overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
       <div className="grid gap-4 xl:grid-cols-[minmax(190px,1fr)_minmax(160px,1fr)_minmax(170px,1fr)_minmax(360px,1.6fr)]">
         <FilterField label="Scope">
-          <div className="inline-flex min-h-12 w-full items-center rounded-2xl bg-[rgba(0,58,143,0.06)] px-4 text-sm font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
+          <div className="inline-flex min-h-12 w-full items-center gap-2.5 rounded-2xl bg-gradient-to-r from-[rgba(0,58,143,0.07)] to-[rgba(0,58,143,0.03)] px-4 text-sm font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
+            <i className="fas fa-layer-group text-xs opacity-60" />
             {scopeLabel}
           </div>
         </FilterField>
@@ -301,21 +304,36 @@ export function EvaluationTable({
   const completedCount = records.filter((record) => record.status === 'completed').length;
 
   return (
-    <section className="rounded-[1.75rem] bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+    <section className="relative overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">{sectionTitle}</h2>
-          <p className="text-sm text-[var(--text-light)]">{description}</p>
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)]">
+            <i className="fas fa-clipboard-list" />
+          </span>
+          <div>
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">{sectionTitle}</h2>
+            <p className="mt-0.5 text-sm text-[var(--text-light)]">{description}</p>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+            <i className="fas fa-list-check text-[10px] opacity-50" />
             {records.length} record{records.length === 1 ? '' : 's'}
           </span>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 ring-1 ring-inset ring-emerald-200">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 ring-1 ring-inset ring-emerald-200">
+            <i className="fas fa-circle-check text-[10px]" />
             {completedCount} submitted
           </span>
         </div>
       </div>
+      {records.length > 0 ? (
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-emerald-500 transition-all duration-700"
+            style={{ width: `${Math.round((completedCount / records.length) * 100)}%` }}
+          />
+        </div>
+      ) : null}
 
       {records.length ? (
         <div className="mt-5 overflow-x-auto">
@@ -345,13 +363,13 @@ export function EvaluationTable({
           </table>
         </div>
       ) : (
-        <div className="mt-5 rounded-[1.5rem] bg-slate-50 px-6 py-10 text-center">
-          <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)]">
-            <i className="fas fa-clipboard-check text-lg" />
+        <div className="mt-5 rounded-[1.5rem] bg-gradient-to-br from-slate-50 to-blue-50/40 px-6 py-12 text-center">
+          <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-[rgba(0,58,143,0.08)] to-[rgba(0,58,143,0.03)] text-[var(--primary)] shadow-sm">
+            <i className="fas fa-clipboard-check text-xl" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold text-[var(--text-dark)]">No matching evaluation records</h3>
-          <p className="mt-2 text-sm text-[var(--text-light)]">
-            Adjust the filters or search terms to bring evaluation records back into view.
+          <h3 className="mt-5 text-lg font-bold text-[var(--text-dark)]">No matching evaluation records</h3>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[var(--text-light)]">
+            Adjust the filters or search terms above to bring evaluation records back into view.
           </p>
         </div>
       )}
@@ -373,34 +391,43 @@ export function EvaluationRow({
   const scheduleMeta = getScheduleMeta(record.defenseDate);
 
   return (
-    <tr className="group">
-      <td className={`rounded-l-[1.35rem] px-4 py-4 align-top ${statusMeta.rowClassName}`}>
+    <tr className="group transition-all duration-200 hover:shadow-[0_4px_20px_rgba(0,58,143,0.06)]">
+      <td className={`rounded-l-[1.35rem] px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
         <div className="max-w-[280px]">
-          <p className="text-base font-semibold leading-6 text-[var(--text-dark)]">{record.projectTitle}</p>
+          <p className="text-base font-semibold leading-6 text-[var(--text-dark)] transition-colors group-hover:text-[var(--primary)]">{record.projectTitle}</p>
           <p className="mt-1 text-sm text-[var(--text-light)]">
             Evaluator: <span className="font-medium text-[var(--text-dark)]">{record.evaluatorId}</span>
           </p>
         </div>
       </td>
-      <td className={`px-4 py-4 align-top ${statusMeta.rowClassName}`}>
-        <span className="text-sm font-semibold text-[var(--primary)]">{record.groupId}</span>
+      <td className={`px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
+        <span className="inline-flex items-center gap-1.5 rounded-lg bg-[rgba(0,58,143,0.05)] px-2.5 py-1 text-sm font-semibold text-[var(--primary)]">
+          <i className="fas fa-users-rectangle text-[10px] opacity-50" />
+          {record.groupId}
+        </span>
       </td>
-      <td className={`px-4 py-4 align-top ${statusMeta.rowClassName}`}>
+      <td className={`px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
         <span
           className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getDepartmentBadgeClass(record.department)}`}
         >
           {record.department}
         </span>
       </td>
-      <td className={`px-4 py-4 align-top ${statusMeta.rowClassName}`}>
+      <td className={`px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
         <div className="max-w-[210px]">
           <p className="text-sm font-medium text-[var(--text-dark)]">{getStudentPreview(record.students, 3)}</p>
-          <p className="mt-1 text-xs text-[var(--text-light)]">{record.students.length} students assigned</p>
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-[var(--text-light)]">
+            <i className="fas fa-user-group text-[9px] opacity-40" />
+            {record.students.length} students assigned
+          </p>
         </div>
       </td>
-      <td className={`px-4 py-4 align-top ${statusMeta.rowClassName}`}>
+      <td className={`px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
         <div className="min-w-[150px]">
-          <div className="text-sm font-medium text-[var(--text-dark)]">{formatEvaluationDateTime(record.defenseDate)}</div>
+          <div className="flex items-center gap-1.5 text-sm font-medium text-[var(--text-dark)]">
+            <i className="fas fa-calendar text-[10px] text-[var(--text-light)]" />
+            {formatEvaluationDateTime(record.defenseDate)}
+          </div>
           <span
             className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${scheduleMeta.className}`}
           >
@@ -408,12 +435,17 @@ export function EvaluationRow({
           </span>
         </div>
       </td>
-      <td className={`px-4 py-4 align-top ${statusMeta.rowClassName}`}>
-        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badgeClassName}`}>
+      <td className={`px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badgeClassName}`}>
+          {record.status === 'overdue' ? (
+            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" /></span>
+          ) : record.status === 'pending' ? (
+            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" /></span>
+          ) : null}
           {statusMeta.label}
         </span>
       </td>
-      <td className={`px-4 py-4 align-top ${statusMeta.rowClassName}`}>
+      <td className={`px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
         {record.status === 'completed' && record.score !== null && record.recommendation ? (
           <ScoreBadge
             detail={`${reviewedStudentCount}/${record.studentEvaluations.length} students reviewed`}
@@ -421,16 +453,20 @@ export function EvaluationRow({
             score={record.score}
           />
         ) : (
-          <span className="text-sm text-[var(--text-light)]">Not yet submitted</span>
+          <span className="flex items-center gap-1.5 text-sm text-[var(--text-light)]">
+            <i className="fas fa-clock text-[10px] opacity-40" />
+            Not yet submitted
+          </span>
         )}
       </td>
-      <td className={`rounded-r-[1.35rem] px-4 py-4 align-top ${statusMeta.rowClassName}`}>
+      <td className={`rounded-r-[1.35rem] px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
         <div className="flex justify-end">
           <button
-            className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition hover:-translate-y-0.5 ${statusMeta.buttonClassName}`}
+            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${statusMeta.buttonClassName}`}
             type="button"
             onClick={() => (record.status === 'completed' ? onViewScore(record) : onEvaluate(record))}
           >
+            <i className={`fas ${record.status === 'completed' ? 'fa-eye' : 'fa-pen-to-square'} text-xs`} />
             {statusMeta.actionLabel}
           </button>
         </div>
@@ -449,14 +485,25 @@ export function ScoreBadge({
   detail?: string;
 }) {
   const recommendationMeta = getRecommendationMeta(recommendation);
+  const circumference = 2 * Math.PI * 16;
+  const offset = circumference - (score / 100) * circumference;
+  const scoreColor = score >= 90 ? '#059669' : score >= 75 ? '#0369a1' : '#d97706';
 
   return (
-    <div className="flex min-w-[140px] flex-col gap-2">
-      <span className="text-base font-bold text-[var(--text-dark)]">{score}%</span>
-      <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${recommendationMeta.className}`}>
-        {recommendation}
-      </span>
-      {detail ? <span className="text-xs text-[var(--text-light)]">{detail}</span> : null}
+    <div className="flex items-center gap-3">
+      <div className="relative h-11 w-11 shrink-0">
+        <svg className="-rotate-90" viewBox="0 0 36 36" width="44" height="44">
+          <circle cx="18" cy="18" r="16" fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
+          <circle cx="18" cy="18" r="16" fill="none" stroke={scoreColor} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.7s ease' }} />
+        </svg>
+        <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-[var(--text-dark)]">{score}%</span>
+      </div>
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${recommendationMeta.className}`}>
+          {recommendation}
+        </span>
+        {detail ? <span className="text-[11px] leading-4 text-[var(--text-light)]">{detail}</span> : null}
+      </div>
     </div>
   );
 }

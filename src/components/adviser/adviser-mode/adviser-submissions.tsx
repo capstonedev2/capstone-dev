@@ -1,15 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
-import { NAV_ITEMS, WORKSPACE_META, isNavItemActive, getShortName } from '@/components/adviser/shared/config/dashboard-utils';
+import { NAV_ITEMS, WORKSPACE_META, isNavItemActive } from '@/components/adviser/shared/config/dashboard-utils';
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
 import {
   FiltersBar,
-  PriorityQueue,
-  ReviewChecklist,
+  SubmissionFocusPanel,
   SubmissionList,
   SummaryCards,
   type SubmissionSummaryMetric
@@ -33,22 +32,19 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
   const [milestoneFilter, setMilestoneFilter] = useState<SubmissionMilestone | 'all'>('all');
   const [searchValue, setSearchValue] = useState('');
 
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') return;
-    };
-
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, []);
-
   const adviserMeta = WORKSPACE_META[workspaceMode];
   const submissions = IT_ADVISER_SUBMISSIONS;
   const typeOptions = useMemo(() => getSubmissionTypeOptions(submissions), [submissions]);
   const milestoneOptions = useMemo(() => getSubmissionMilestoneOptions(submissions), [submissions]);
+  const hasActiveFilters =
+    typeFilter !== 'all' || statusFilter !== 'all' || milestoneFilter !== 'all' || searchValue.trim().length > 0;
+
+  const clearFilters = () => {
+    setTypeFilter('all');
+    setStatusFilter('all');
+    setMilestoneFilter('all');
+    setSearchValue('');
+  };
 
   const filteredSubmissions = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
@@ -71,8 +67,32 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
           .includes(normalizedSearch);
 
       return matchesType && matchesStatus && matchesMilestone && matchesSearch;
+    }).sort((left, right) => {
+      const statusPriority: Record<SubmissionStatus, number> = {
+        'needs-revision': 0,
+        'pending-review': 1,
+        'under-review': 2,
+        approved: 3
+      };
+
+      return statusPriority[left.status] - statusPriority[right.status] || new Date(left.deadline).getTime() - new Date(right.deadline).getTime();
     });
   }, [milestoneFilter, searchValue, statusFilter, submissions, typeFilter]);
+
+  const activeReviewCount = useMemo(
+    () => submissions.filter((submission) => submission.status !== 'approved').length,
+    [submissions]
+  );
+  const nextDueSubmission = useMemo(
+    () =>
+      [...submissions]
+        .filter((submission) => submission.status !== 'approved')
+        .sort((left, right) => new Date(left.deadline).getTime() - new Date(right.deadline).getTime())[0] ?? null,
+    [submissions]
+  );
+  const completionRate = Math.round(
+    (submissions.filter((submission) => submission.status === 'approved').length / Math.max(1, submissions.length)) * 100
+  );
 
   const summaryMetrics = useMemo<SubmissionSummaryMetric[]>(
     () => [
@@ -161,30 +181,38 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
         />
 
         <div className="mx-auto max-w-[1600px] space-y-6">
+          <SubmissionFocusPanel
+            activeReviewCount={activeReviewCount}
+            completionRate={completionRate}
+            nextDueSubmission={nextDueSubmission}
+          />
+
           <SummaryCards metrics={summaryMetrics} />
 
           <FiltersBar
+            hasActiveFilters={hasActiveFilters}
             milestoneFilter={milestoneFilter}
             milestoneOptions={milestoneOptions}
+            onClearFilters={clearFilters}
             onMilestoneChange={setMilestoneFilter}
             onSearchChange={setSearchValue}
             onStatusChange={setStatusFilter}
             onTypeChange={setTypeFilter}
+            resultCount={filteredSubmissions.length}
             searchValue={searchValue}
             statusFilter={statusFilter}
             statusOptions={SUBMISSION_STATUS_FILTER_OPTIONS}
+            totalCount={submissions.length}
             typeFilter={typeFilter}
             typeOptions={typeOptions}
           />
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,7fr)_minmax(320px,3fr)]">
-            <SubmissionList submissions={filteredSubmissions} />
-
-            <div className="space-y-6">
-              <PriorityQueue submissions={submissions} />
-              <ReviewChecklist />
-            </div>
-          </div>
+          <SubmissionList
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+            submissions={filteredSubmissions}
+            totalSubmissions={submissions.length}
+          />
         </div>
       </main>
     </div>

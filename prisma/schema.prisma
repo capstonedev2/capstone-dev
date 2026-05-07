@@ -102,6 +102,7 @@ model User {
   id                  String               @id @default(cuid())
   email               String               @unique
   passwordHash        String
+  googleSub           String?              @unique
   name                String
   firstName           String?
   lastName            String?
@@ -120,6 +121,7 @@ model User {
   isSuspended         Boolean              @default(false)
   suspendedAt         DateTime?
   passwordResetTokens PasswordResetToken[]
+  passwordResetCodes  PasswordResetCode[]
   uploadedFiles       UploadedFile[]
   groupMemberships    GroupMember[]
   ownedProjects       Project[]            @relation("ProjectOwner")
@@ -150,6 +152,24 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model PasswordResetCode {
+  id             String    @id @default(cuid())
+  codeHash       String
+  resetTokenHash String?   @unique
+  expiresAt      DateTime
+  usedAt         DateTime?
+  verifiedAt     DateTime?
+  attempts       Int       @default(0)
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_codes")
 }
 
 model UploadedFile {

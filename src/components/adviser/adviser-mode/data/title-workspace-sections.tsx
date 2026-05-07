@@ -124,26 +124,27 @@ function createAdviserTitleDocumentData(record: AdviserTitleRecord): TitleSubmis
 
 export function TitleSummaryCards({ metrics }: { metrics: TitleSummaryMetric[] }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+    <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
       {metrics.map((metric) => (
         <article
           key={metric.id}
-          className="flex min-h-[152px] flex-col justify-between rounded-[1.75rem] bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.08)]"
+          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)]"
         >
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-light)]">{metric.label}</p>
-              <p className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[var(--primary)]">
+              <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--text-light)]">{metric.label}</p>
+              <p className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
                 {metric.value}
               </p>
             </div>
             <span
-              className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base ${metric.iconClassName}`}
+              className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
             >
               <i className={`fas ${metric.icon}`} />
             </span>
           </div>
-          <p className="mt-5 text-sm leading-6 text-[var(--text-light)]">{metric.helperText}</p>
+          <p className="mt-4 text-[13px] leading-[1.6] text-[var(--text-light)]">{metric.helperText}</p>
         </article>
       ))}
     </div>
@@ -164,10 +165,11 @@ export function TitleFilters({
   onSortChange
 }: TitleFiltersProps) {
   return (
-    <section className="rounded-[1.75rem] bg-white p-4 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+    <section className="relative overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
       <div className="grid gap-3 xl:grid-cols-[minmax(170px,1fr)_minmax(150px,1fr)_minmax(190px,1fr)_minmax(170px,1fr)_minmax(320px,1.6fr)]">
-        <div className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[rgba(0,58,143,0.06)] px-4 text-sm font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
-          <i className="fas fa-lock text-xs" />
+        <div className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[rgba(0,58,143,0.07)] to-[rgba(0,58,143,0.03)] px-4 text-sm font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
+          <i className="fas fa-lock text-xs opacity-60" />
           IT Department
         </div>
 
@@ -224,16 +226,24 @@ export function TitleList({
 }: TitleListProps) {
   return (
     <section className="space-y-4">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">Title Review Queue</h2>
-          <p className="text-sm text-[var(--text-light)]">
-            Review proposed IT project titles, validate originality indicators, and record the next adviser decision.
-          </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)]">
+            <i className="fas fa-file-signature" />
+          </span>
+          <div>
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">Title Review Queue</h2>
+            <p className="mt-0.5 text-sm text-[var(--text-light)]">
+              Review proposed IT project titles, validate originality indicators, and record the next adviser decision.
+            </p>
+          </div>
         </div>
-        <p className="text-sm font-semibold text-[var(--text-light)]">
-          {titles.length} title record{titles.length === 1 ? '' : 's'}
-        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+            <i className="fas fa-list-check text-[10px] opacity-50" />
+            {titles.length} title record{titles.length === 1 ? '' : 's'}
+          </span>
+        </div>
       </div>
 
       {titles.length ? (
@@ -480,26 +490,34 @@ function TitleCard({
   const documentData = createAdviserTitleDocumentData(record);
 
   return (
-    <article className="group rounded-[1.75rem] bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.08)]">
+    <article className="group rounded-[1.75rem] bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.08)]">
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(280px,0.9fr)] xl:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex rounded-full bg-[rgba(0,58,143,0.08)] px-3 py-1 text-xs font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[rgba(0,58,143,0.07)] to-[rgba(0,58,143,0.03)] px-3 py-1 text-xs font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
+              <i className="fas fa-layer-group text-[10px] opacity-60" />
               IT
             </span>
-            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badgeClassName}`}>
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badgeClassName}`}>
+              {record.status === 'pending' ? (
+                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" /></span>
+              ) : null}
               {statusMeta.label}
             </span>
           </div>
 
           <h3
-            className="mt-4 overflow-hidden text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-4 overflow-hidden text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.title}
           >
             {record.title}
           </h3>
-          <p className="mt-2 text-sm font-semibold text-[var(--primary)]">{record.groupId}</p>
-          <p className="mt-1 text-sm text-[var(--text-light)]">
+          <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)]">
+            <i className="fas fa-users-rectangle text-xs opacity-70" />
+            {record.groupId}
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-[var(--text-light)]">
+            <i className="fas fa-user-group text-[10px] opacity-50" />
             {record.membersCount} members | {formatMemberPreview(record.memberPreview)}
           </p>
           <p
@@ -513,7 +531,7 @@ function TitleCard({
             {record.keywords.map((keyword) => (
               <span
                 key={keyword}
-                className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"
+                className="inline-flex rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200"
               >
                 {keyword}
               </span>
@@ -522,8 +540,9 @@ function TitleCard({
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[1.35rem] bg-[rgba(248,250,252,0.98)] p-4">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
+          <div className="rounded-[1.35rem] bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 ring-1 ring-inset ring-slate-100">
+            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
+              <i className="fas fa-circle-info text-[10px]" />
               Submission Info
             </p>
             <dl className="mt-3 space-y-3 text-sm">
@@ -545,9 +564,10 @@ function TitleCard({
           <SimilarityIndicator compact score={record.similarityScore} similarTitles={record.similarTitles} />
         </div>
 
-        <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-inset ring-slate-200/70">
+        <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-inset ring-slate-200/70 shadow-sm">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
+            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
+              <i className="fas fa-clipboard-check text-[10px]" />
               Adviser Note / Action Needed
             </p>
             <p
@@ -559,48 +579,52 @@ function TitleCard({
           </div>
 
           <div className="mt-5 grid gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white transition-all hover:bg-[var(--primary-dark)] hover:-translate-y-0.5 hover:shadow-md"
+                type="button"
+                onClick={() => onApprove(record)}
+              >
+                <i className="fas fa-check text-xs" /> Approve
+              </button>
+              <button
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] transition-all hover:bg-[rgba(0,58,143,0.04)] hover:-translate-y-0.5"
+                type="button"
+                onClick={() => onRequestRevision(record)}
+              >
+                <i className="fas fa-rotate-left text-xs" /> Revise
+              </button>
+            </div>
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--primary-dark)]"
-              type="button"
-              onClick={() => onApprove(record)}
-            >
-              Approve
-            </button>
-            <button
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] transition hover:bg-[rgba(0,58,143,0.04)]"
-              type="button"
-              onClick={() => onRequestRevision(record)}
-            >
-              Request Revision
-            </button>
-            <button
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition-all hover:bg-rose-100 hover:-translate-y-0.5"
               type="button"
               onClick={() => onReject(record)}
             >
-              Reject
+              <i className="fas fa-ban text-xs" /> Reject
             </button>
             <button
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:-translate-y-0.5"
               type="button"
               onClick={() => onViewDetails(record)}
             >
-              View Details
+              <i className="fas fa-expand text-xs" /> View Details
             </button>
-            <button
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] transition hover:bg-[rgba(0,58,143,0.04)]"
-              type="button"
-              onClick={() => openTitleSubmissionDocument(documentData)}
-            >
-              View Document
-            </button>
-            <button
-              className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-              type="button"
-              onClick={() => downloadTitleSubmissionDocument(documentData)}
-            >
-              Download Document
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-3 text-xs font-semibold text-[var(--primary)] transition-all hover:bg-[rgba(0,58,143,0.04)] hover:-translate-y-0.5"
+                type="button"
+                onClick={() => openTitleSubmissionDocument(documentData)}
+              >
+                <i className="fas fa-file-lines" /> Document
+              </button>
+              <button
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:-translate-y-0.5"
+                type="button"
+                onClick={() => downloadTitleSubmissionDocument(documentData)}
+              >
+                <i className="fas fa-download" /> Download
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -616,24 +640,25 @@ export function EmptyState({
   onViewApproved: () => void;
 }) {
   return (
-    <div className="rounded-[1.75rem] bg-white px-6 py-12 text-center shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-      <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-[1.35rem] bg-[rgba(0,58,143,0.06)] text-[var(--primary)]">
-        <i className="fas fa-file-signature text-xl" />
+    <div className="rounded-[1.75rem] bg-gradient-to-br from-slate-50 to-blue-50/40 px-6 py-16 text-center shadow-[0_18px_36px_rgba(15,23,42,0.05)] border border-slate-100/50">
+      <div className="mx-auto inline-flex h-20 w-20 items-center justify-center rounded-[1.35rem] bg-gradient-to-br from-[rgba(0,58,143,0.08)] to-[rgba(0,58,143,0.03)] text-[var(--primary)] shadow-sm">
+        <i className="fas fa-file-signature text-2xl" />
       </div>
-      <h3 className="mt-5 text-xl font-semibold text-[var(--text-dark)]">
+      <h3 className="mt-6 text-xl font-bold text-[var(--text-dark)]">
         {hasPendingTitles ? 'No matching titles' : 'No pending titles'}
       </h3>
-      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[var(--text-light)]">
+      <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-[var(--text-light)]">
         {hasPendingTitles
-          ? 'Adjust the filters or search terms to bring title records back into view.'
-          : 'All submitted IT project titles have already been reviewed.'}
+          ? 'Adjust the filters or search terms above to bring title records back into view.'
+          : 'All submitted IT project titles have already been reviewed and processed.'}
       </p>
       {!hasPendingTitles ? (
         <button
-          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] transition hover:bg-[rgba(0,58,143,0.04)]"
+          className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-6 text-sm font-semibold text-[var(--primary)] shadow-sm ring-1 ring-inset ring-[rgba(0,58,143,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-md hover:bg-slate-50"
           type="button"
           onClick={onViewApproved}
         >
+          <i className="fas fa-folder-open text-xs" />
           View Approved Titles
         </button>
       ) : null}
@@ -655,4 +680,3 @@ function DrawerMeta({
     </article>
   );
 }
-

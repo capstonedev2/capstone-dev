@@ -3,6 +3,8 @@ node_modules
 .vercel
 dist
 .env
+.env.local
+.env.*.local
 /src/generated/prisma
 .next-dev-*.log
 tsconfig.tsbuildinfo 

@@ -263,6 +263,7 @@ export async function registerWithApi(payload: {
   password: string;
   confirmPassword: string;
   role: ApiUserRole;
+  provider?: 'google';
 }) {
   return postAuthRequest('/api/auth/register', payload);
 }

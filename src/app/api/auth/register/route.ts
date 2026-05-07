@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { Prisma, UserRole } from '@/generated/prisma/client';
 import {
   buildDisplayName,
@@ -9,6 +10,10 @@ import {
   toPublicUser,
   validatePassword
 } from '@/lib/auth';
+import {
+  clearGoogleRegistrationCookie,
+  getGoogleRegistrationContext
+} from '@/lib/google-oauth';
 import { prisma } from '@/lib/prisma';
 import {
   HttpError,
@@ -38,6 +43,7 @@ type RegisterBody = {
   yearLevel?: unknown;
   year_level?: unknown;
   role?: unknown;
+  provider?: unknown;
 };
 
 export async function POST(request: Request) {
@@ -45,11 +51,21 @@ export async function POST(request: Request) {
     ensureAuthConfig();
 
     const body = await parseJsonBody<RegisterBody>(request);
+    const provider = normalizeText(body.provider).toLowerCase();
+    const isGoogleRegistration = provider === 'google';
+    const googleRegistrationContext = isGoogleRegistration
+      ? getGoogleRegistrationContext(request)
+      : null;
+
+    if (isGoogleRegistration && !googleRegistrationContext) {
+      throw new HttpError('Google registration session has expired. Start again from Google sign in.', 401);
+    }
+
     const email = normalizeEmail(body.email);
     const password = normalizeText(body.password);
     const confirmPassword = normalizeText(body.confirmPassword ?? body.confirm_password ?? body.password);
-    const firstName = normalizeText(body.firstName ?? body.first_name);
-    const lastName = normalizeText(body.lastName ?? body.last_name);
+    const firstName = normalizeText(body.firstName ?? body.first_name) || googleRegistrationContext?.firstName || '';
+    const lastName = normalizeText(body.lastName ?? body.last_name) || googleRegistrationContext?.lastName || '';
     const studentId = normalizeText(body.studentId ?? body.student_id);
     const department = normalizeText(body.department);
     const yearLevel = normalizeText(body.yearLevel ?? body.year_level);
@@ -60,6 +76,8 @@ export async function POST(request: Request) {
       fieldErrors.email = 'Please enter your email address.';
     } else if (!isValidEmail(email)) {
       fieldErrors.email = 'Enter a valid email address.';
+    } else if (googleRegistrationContext && email !== googleRegistrationContext.email) {
+      fieldErrors.email = 'Use the email from your verified Google account.';
     }
 
     if (!firstName) {
@@ -82,11 +100,11 @@ export async function POST(request: Request) {
       fieldErrors.yearLevel = 'Please select your year level.';
     }
 
-    if (!password) {
+    if (!isGoogleRegistration && !password) {
       fieldErrors.password = 'Please enter a password.';
     }
 
-    if (password) {
+    if (!isGoogleRegistration && password) {
       try {
         validatePassword(password);
       } catch (error) {
@@ -96,7 +114,7 @@ export async function POST(request: Request) {
       }
     }
 
-    if (password !== confirmPassword) {
+    if (!isGoogleRegistration && password !== confirmPassword) {
       fieldErrors.confirmPassword = 'Passwords do not match.';
     }
 
@@ -109,9 +127,31 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      throw new HttpError('An account with this email already exists.', 409, {
-        email: 'An account with this email already exists.'
+      throw new HttpError(
+        isGoogleRegistration
+          ? 'This Google account is already registered. Use Continue with Google to sign in.'
+          : 'An account with this email already exists.',
+        409,
+        {
+          email: isGoogleRegistration
+            ? 'Use Continue with Google to sign in.'
+            : 'An account with this email already exists.'
+        }
+      );
+    }
+
+    if (googleRegistrationContext) {
+      const existingGoogleUser = await prisma.user.findUnique({
+        where: {
+          googleSub: googleRegistrationContext.sub
+        }
       });
+
+      if (existingGoogleUser) {
+        throw new HttpError('This Google account is already linked to a ThesisTrack account.', 409, {
+          email: 'Use Continue with Google to sign in.'
+        });
+      }
     }
 
     if (studentId) {
@@ -126,7 +166,9 @@ export async function POST(request: Request) {
       }
     }
 
-    const passwordHash = await hashPassword(password);
+    const passwordHash = await hashPassword(
+      isGoogleRegistration ? crypto.randomBytes(32).toString('hex') : password
+    );
     const name = buildDisplayName({
       name: normalizeText(body.name),
       firstName,
@@ -138,6 +180,7 @@ export async function POST(request: Request) {
       data: {
         email,
         passwordHash,
+        googleSub: googleRegistrationContext?.sub || null,
         name,
         firstName: firstName || null,
         lastName: lastName || null,
@@ -152,6 +195,7 @@ export async function POST(request: Request) {
     const token = signAuthToken(user);
     const response = successResponse({ user: toPublicUser(user) }, 201);
     setAuthCookie(response, token);
+    clearGoogleRegistrationCookie(response);
 
     return response;
   } catch (error) {
@@ -170,6 +214,10 @@ export async function POST(request: Request) {
 
       if (target.includes('studentId')) {
         fieldErrors.studentId = 'A student account with this ID already exists.';
+      }
+
+      if (target.includes('googleSub')) {
+        fieldErrors.email = 'This Google account is already linked to a ThesisTrack account.';
       }
 
       return handleApiError(

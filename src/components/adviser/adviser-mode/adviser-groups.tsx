@@ -33,6 +33,8 @@ type GroupDraft = {
   students: string[];
   leader: string;
 };
+type StudentRosterRecord = { name?: string | null };
+type GroupRosterRecord = { students?: unknown };
 
 const GROUP_STATUS_META = ADVISER_GROUP_STATUS_META;
 
@@ -83,6 +85,34 @@ function getLifecycleGroup(group: ManagedAdviserGroup): LifecycleGroup {
 
 function isAttentionStatus(status: AdviserGroupLifecycleStatus) {
   return status === 'pending' || status === 'needs-revision' || status === 'at-risk';
+}
+
+function normalizeStudentRosterName(value: string) {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function getGroupStudentKeys(group: GroupRosterRecord) {
+  if (!Array.isArray(group.students)) {
+    return [];
+  }
+
+  return group.students
+    .filter((student): student is string => typeof student === 'string')
+    .map(normalizeStudentRosterName)
+    .filter(Boolean);
+}
+
+function mergeStudentKeys(currentKeys: string[], students: string[]) {
+  const nextKeys = new Set(currentKeys);
+
+  students.forEach((student) => {
+    const key = normalizeStudentRosterName(student);
+    if (key) {
+      nextKeys.add(key);
+    }
+  });
+
+  return Array.from(nextKeys);
 }
 
 function formatCompletedDate(value: string | null | undefined) {
@@ -829,10 +859,12 @@ function AddStudentToGroupModal({
 
   if (!open || !group) return null;
 
+  const groupStudentKeys = new Set(group.students.map(normalizeStudentRosterName));
+  const searchQuery = studentSearch.trim().toLowerCase();
   const filteredStudents = availableStudents.filter(
     (student) =>
-      !group.students.includes(student) &&
-      student.toLowerCase().includes(studentSearch.trim().toLowerCase())
+      !groupStudentKeys.has(normalizeStudentRosterName(student)) &&
+      student.toLowerCase().includes(searchQuery)
   );
 
   return (
@@ -985,10 +1017,12 @@ function CreateGroupModal({
     };
   }, [open, onClose]);
 
+  const draftStudentKeys = new Set(draft.students.map(normalizeStudentRosterName));
+  const searchQuery = studentSearch.trim().toLowerCase();
   const filteredStudents = availableStudents.filter(
     (student) =>
-      !draft.students.includes(student) &&
-      student.toLowerCase().includes(studentSearch.trim().toLowerCase())
+      !draftStudentKeys.has(normalizeStudentRosterName(student)) &&
+      student.toLowerCase().includes(searchQuery)
   );
 
   const addStudentToDraft = (student: string) => {
@@ -1542,17 +1576,34 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [groupDraft, setGroupDraft] = useState<GroupDraft>(createEmptyGroupDraft());
   const [availableDbStudents, setAvailableDbStudents] = useState<string[]>([]);
+  const [assignedStudentKeys, setAssignedStudentKeys] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchStudents() {
       try {
-        const response = await fetch(`/api/students?department=${adviserDepartment}`);
-        if (response.ok) {
-          const students = await response.json();
-          setAvailableDbStudents(students.map((s: any) => s.name));
+        const [studentsResponse, groupsResponse] = await Promise.all([
+          fetch(`/api/students?department=${encodeURIComponent(adviserDepartment)}`),
+          fetch(`/api/groups?department=${encodeURIComponent(adviserDepartment)}`)
+        ]);
+
+        if (studentsResponse.ok) {
+          const students: StudentRosterRecord[] = await studentsResponse.json();
+          setAvailableDbStudents(
+            students
+              .map((student) => student.name?.trim())
+              .filter((student): student is string => Boolean(student))
+          );
+        }
+
+        if (groupsResponse.ok) {
+          const departmentGroups: GroupRosterRecord[] = await groupsResponse.json();
+          setAssignedStudentKeys(Array.from(new Set(departmentGroups.flatMap(getGroupStudentKeys))));
+        } else {
+          setAssignedStudentKeys([]);
         }
       } catch (e) {
         console.error('Failed to fetch students', e);
+        setAssignedStudentKeys([]);
       }
     }
     
@@ -1618,11 +1669,21 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     () => activeGroups.find((group) => group.id === studentGroupId) ?? null,
     [activeGroups, studentGroupId]
   );
+  const localAssignedStudentKeys = useMemo(
+    () => Array.from(new Set(groups.flatMap(getGroupStudentKeys))),
+    [groups]
+  );
+  const assignedStudentKeySet = useMemo(
+    () => new Set([...assignedStudentKeys, ...localAssignedStudentKeys]),
+    [assignedStudentKeys, localAssignedStudentKeys]
+  );
   const availableStudents = useMemo(
     () => {
-      return [...availableDbStudents].sort((left, right) => left.localeCompare(right));
+      return availableDbStudents
+        .filter((student) => !assignedStudentKeySet.has(normalizeStudentRosterName(student)))
+        .sort((left, right) => left.localeCompare(right));
     },
-    [availableDbStudents]
+    [assignedStudentKeySet, availableDbStudents]
   );
   const totalStudents = lifecycleGroups.reduce((sum, group) => sum + group.members, 0);
   const needsAttention = activeGroups.filter((group) => isAttentionStatus(group.status)).length;
@@ -1661,33 +1722,49 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
       return;
     }
 
+    if (assignedStudentKeySet.has(normalizeStudentRosterName(student))) {
+      alert('This student already belongs to a group.');
+      return;
+    }
+
     const nextStudents = [...targetGroup.students, student];
 
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => {
-        if (group.id !== groupId) {
-          return group;
-        }
-
-        return {
-          ...group,
-          students: nextStudents,
-          members: group.members + 1
-        };
-      })
-    );
-    setAddStudentModalOpen(false);
-
     try {
-      await fetch('/api/groups', {
+      const response = await fetch('/api/groups', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ id: groupId, students: nextStudents })
       });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => null);
+        alert(error?.error || 'Failed to add student to group.');
+        return;
+      }
+
+      const updatedGroup = await response.json();
+      const updatedStudents = Array.isArray(updatedGroup.students) ? updatedGroup.students : nextStudents;
+
+      setGroups((currentGroups) =>
+        currentGroups.map((group) => {
+          if (group.id !== groupId) {
+            return group;
+          }
+
+          return {
+            ...group,
+            students: updatedStudents,
+            members: updatedGroup.members ?? updatedStudents.length
+          };
+        })
+      );
+      setAssignedStudentKeys((currentKeys) => mergeStudentKeys(currentKeys, updatedStudents));
+      setAddStudentModalOpen(false);
     } catch (e) {
       console.error('Failed to update group students on server', e);
+      alert('An error occurred while adding the student.');
     }
   };
 
@@ -1709,6 +1786,12 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     if (!code || groupDraft.students.length === 0 || !groupDraft.leader) return;
 
     const students = groupDraft.students;
+    const assignedStudents = students.filter((student) => assignedStudentKeySet.has(normalizeStudentRosterName(student)));
+    if (assignedStudents.length > 0) {
+      alert('One or more selected students already belong to a group.');
+      return;
+    }
+
     const statusMeta = GROUP_STATUS_META[DEFAULT_NEW_GROUP_STATUS];
     const title = "Pending Student Submission";
 
@@ -1757,11 +1840,13 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
         };
 
         setGroups((currentGroups) => [nextGroup, ...currentGroups]);
+        setAssignedStudentKeys((currentKeys) => mergeStudentKeys(currentKeys, students));
         setSelectedGroupId(nextGroup.id);
         setGroupDraft(createEmptyGroupDraft());
         setCreateGroupModalOpen(false);
       } else {
-        alert('Failed to create group. Please check if the group code is unique.');
+        const error = await response.json().catch(() => null);
+        alert(error?.error || 'Failed to create group. Please check if the group code is unique.');
       }
     } catch (e) {
       console.error('Error creating group:', e);

@@ -1,5 +1,9 @@
-import { createPasswordResetToken, publicUserSelect, toPublicUser } from '@/lib/auth';
-import { sendPasswordResetEmail } from '@/lib/mailer';
+import {
+  PASSWORD_RESET_CODE_TTL_MINUTES,
+  createPasswordResetCode,
+  hashPasswordResetCode
+} from '@/lib/auth';
+import { assertMailerConfig, sendPasswordResetCodeEmail } from '@/lib/mailer';
 import { prisma } from '@/lib/prisma';
 import {
   HttpError,
@@ -12,15 +16,11 @@ import {
 
 export const runtime = 'nodejs';
 
+const PASSWORD_RESET_MESSAGE = 'If an account exists for this email, a reset code has been sent.';
+
 type ForgotPasswordBody = {
   email?: unknown;
 };
-
-function buildResetUrl(request: Request, token: string) {
-  const url = new URL('/reset-password', request.url);
-  url.searchParams.set('token', token);
-  return url.toString();
-}
 
 export async function POST(request: Request) {
   try {
@@ -33,44 +33,57 @@ export async function POST(request: Request) {
       });
     }
 
+    assertMailerConfig();
+
     const user = await prisma.user.findUnique({
       where: { email },
-      select: publicUserSelect
+      select: {
+        id: true,
+        email: true
+      }
     });
 
     if (!user) {
       return successResponse({
-        message: 'If an account exists for that email, a password reset link has been sent.'
+        message: PASSWORD_RESET_MESSAGE
       });
     }
 
-    const resetToken = createPasswordResetToken();
+    const code = createPasswordResetCode();
+    const codeHash = await hashPasswordResetCode(code);
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + PASSWORD_RESET_CODE_TTL_MINUTES * 60 * 1000);
 
     await prisma.$transaction([
-      prisma.passwordResetToken.deleteMany({
+      prisma.passwordResetCode.updateMany({
         where: {
-          userId: user.id
+          userId: user.id,
+          usedAt: null
+        },
+        data: {
+          usedAt: now
         }
       }),
-      prisma.passwordResetToken.create({
+      prisma.passwordResetCode.create({
         data: {
           userId: user.id,
-          tokenHash: resetToken.tokenHash,
-          expiresAt: resetToken.expiresAt
+          codeHash,
+          expiresAt
         }
       })
     ]);
 
-    const publicUser = toPublicUser(user);
-
-    await sendPasswordResetEmail({
-      to: publicUser.email,
-      name: publicUser.name,
-      resetUrl: buildResetUrl(request, resetToken.token)
-    });
+    try {
+      await sendPasswordResetCodeEmail({
+        to: user.email,
+        code
+      });
+    } catch (error) {
+      console.error('Unable to send password reset code email.', error);
+    }
 
     return successResponse({
-      message: 'If an account exists for that email, a password reset link has been sent.'
+      message: PASSWORD_RESET_MESSAGE
     });
   } catch (error) {
     return handleApiError(error);

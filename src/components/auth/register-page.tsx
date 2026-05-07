@@ -33,6 +33,17 @@ const yearLevelOptions = [
 ] as const;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const googleRegistrationMessage =
+  'No ThesisTrack account was found for this Google account. Please register first. Complete your registration to continue using ThesisTrack with Google.';
+
+function splitDisplayName(value: string) {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+
+  return {
+    firstName: parts[0] || '',
+    lastName: parts.slice(1).join(' ')
+  };
+}
 
 type RegisterFieldErrors = Partial<
   Record<
@@ -61,23 +72,49 @@ export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleRegistration, setIsGoogleRegistration] = useState(false);
 
   useEffect(() => {
     try {
       const draft = JSON.parse(localStorage.getItem('capstoneStudentProfileDraft') || 'null');
 
-      if (!draft) {
-        return;
+      if (draft) {
+        setFirstName(String(draft.firstName || ''));
+        setLastName(String(draft.lastName || ''));
+        setStudentId(String(draft.studentId || ''));
+        setEmail(String(draft.email || ''));
+        setDepartment(String(draft.department || ''));
+        setYearLevel(String(draft.yearLevel || ''));
       }
 
-      setFirstName(String(draft.firstName || ''));
-      setLastName(String(draft.lastName || ''));
-      setStudentId(String(draft.studentId || ''));
-      setEmail(String(draft.email || ''));
-      setDepartment(String(draft.department || ''));
-      setYearLevel(String(draft.yearLevel || ''));
+      const params = new URLSearchParams(window.location.search);
+      const provider = params.get('provider');
+
+      if (provider === 'google') {
+        const googleName = params.get('name') || '';
+        const splitName = splitDisplayName(googleName);
+        const googleFirstName = params.get('firstName') || splitName.firstName;
+        const googleLastName = params.get('lastName') || splitName.lastName;
+        const googleEmail = params.get('email') || '';
+
+        setIsGoogleRegistration(true);
+        setStatusMessage(googleRegistrationMessage);
+
+        if (googleFirstName) {
+          setFirstName(googleFirstName);
+        }
+
+        if (googleLastName) {
+          setLastName(googleLastName);
+        }
+
+        if (googleEmail) {
+          setEmail(googleEmail);
+        }
+      }
     } catch {
       // Ignore storage parsing issues.
     }
@@ -138,15 +175,15 @@ export function RegisterPage() {
       nextErrors.yearLevel = 'Please select your year level.';
     }
 
-    if (!normalizedPassword) {
+    if (!isGoogleRegistration && !normalizedPassword) {
       nextErrors.password = 'Please enter a password.';
-    } else if (normalizedPassword.length < 6) {
+    } else if (!isGoogleRegistration && normalizedPassword.length < 6) {
       nextErrors.password = 'Password must be at least 6 characters.';
     }
 
-    if (!normalizedConfirmPassword) {
+    if (!isGoogleRegistration && !normalizedConfirmPassword) {
       nextErrors.confirmPassword = 'Please confirm your password.';
-    } else if (normalizedPassword !== normalizedConfirmPassword) {
+    } else if (!isGoogleRegistration && normalizedPassword !== normalizedConfirmPassword) {
       nextErrors.confirmPassword = 'Passwords do not match.';
     }
 
@@ -184,7 +221,8 @@ export function RegisterPage() {
       yearLevel: trimmedYearLevel,
       password,
       confirmPassword,
-      role: 'student'
+      role: 'student',
+      ...(isGoogleRegistration ? { provider: 'google' as const } : {})
     });
 
     if (!result.success) {
@@ -241,6 +279,12 @@ export function RegisterPage() {
                     Use your official academic details so the research office can prepare your ThesisTrack workspace.
                   </p>
                 </div>
+
+                {statusMessage ? (
+                  <div className={getMessageClass('success')} role="status" aria-live="polite">
+                    {statusMessage}
+                  </div>
+                ) : null}
 
                 <form className="space-y-5" aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
                   <div className={authUi.fieldset}>
@@ -353,6 +397,10 @@ export function RegisterPage() {
                             autoComplete="email"
                             value={email}
                             onChange={(event) => {
+                              if (isGoogleRegistration) {
+                                return;
+                              }
+
                               setEmail(event.target.value);
                               setError('');
                               clearFieldError('email');
@@ -360,11 +408,16 @@ export function RegisterPage() {
                             aria-describedby={fieldErrors.email ? 'register-email-error' : undefined}
                             aria-invalid={fieldErrors.email ? 'true' : 'false'}
                             disabled={isSubmitting}
+                            readOnly={isGoogleRegistration}
                             required
                           />
                           {fieldErrors.email ? (
                             <span className={authUi.fieldError} id="register-email-error">
                               {fieldErrors.email}
+                            </span>
+                          ) : isGoogleRegistration ? (
+                            <span className={authUi.helperText}>
+                              This email comes from your verified Google account.
                             </span>
                           ) : null}
                         </div>
@@ -442,107 +495,113 @@ export function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className={authUi.fieldset}>
-                    <div className={authUi.fieldsetTitle}>
-                      <i className="fas fa-lock" aria-hidden="true" />
-                      Account security
+                  {isGoogleRegistration ? (
+                    <div className={authUi.compactNote}>
+                      <span className={authUi.noteStrong}>Google sign-in enabled.</span> Your verified Google account will be linked after you complete the required student details.
                     </div>
-                    <div className={authUi.formRow}>
-                      <div className={authUi.formGroup}>
-                        <label className={authUi.label} htmlFor="password">
-                          Password
-                        </label>
-                        <div className={authUi.passwordField}>
-                          <input
-                            id="password"
-                            className={getPasswordInputClass(Boolean(fieldErrors.password))}
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="Enter password"
-                            autoComplete="new-password"
-                            value={password}
-                            onChange={(event) => {
-                              setPassword(event.target.value);
-                              setError('');
-                              clearFieldError('password');
-                            }}
-                            aria-describedby={fieldErrors.password ? 'register-password-error' : 'register-password-help'}
-                            aria-invalid={fieldErrors.password ? 'true' : 'false'}
-                            disabled={isSubmitting}
-                            required
-                          />
-                          <button
-                            type="button"
-                            className={authUi.passwordToggle}
-                            onClick={() => setShowPassword((current) => !current)}
-                            aria-controls="password"
-                            aria-pressed={showPassword}
-                            aria-label={showPassword ? 'Hide password' : 'Show password'}
-                            disabled={isSubmitting}
-                          >
-                            <i
-                              className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}
-                              aria-hidden="true"
-                            />
-                          </button>
-                        </div>
-                        {fieldErrors.password ? (
-                          <span className={authUi.fieldError} id="register-password-error">
-                            {fieldErrors.password}
-                          </span>
-                        ) : (
-                          <span className={authUi.helperText} id="register-password-help">
-                            Use at least 6 characters.
-                          </span>
-                        )}
+                  ) : (
+                    <div className={authUi.fieldset}>
+                      <div className={authUi.fieldsetTitle}>
+                        <i className="fas fa-lock" aria-hidden="true" />
+                        Account security
                       </div>
+                      <div className={authUi.formRow}>
+                        <div className={authUi.formGroup}>
+                          <label className={authUi.label} htmlFor="password">
+                            Password
+                          </label>
+                          <div className={authUi.passwordField}>
+                            <input
+                              id="password"
+                              className={getPasswordInputClass(Boolean(fieldErrors.password))}
+                              type={showPassword ? 'text' : 'password'}
+                              placeholder="Enter password"
+                              autoComplete="new-password"
+                              value={password}
+                              onChange={(event) => {
+                                setPassword(event.target.value);
+                                setError('');
+                                clearFieldError('password');
+                              }}
+                              aria-describedby={fieldErrors.password ? 'register-password-error' : 'register-password-help'}
+                              aria-invalid={fieldErrors.password ? 'true' : 'false'}
+                              disabled={isSubmitting}
+                              required
+                            />
+                            <button
+                              type="button"
+                              className={authUi.passwordToggle}
+                              onClick={() => setShowPassword((current) => !current)}
+                              aria-controls="password"
+                              aria-pressed={showPassword}
+                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              disabled={isSubmitting}
+                            >
+                              <i
+                                className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}
+                                aria-hidden="true"
+                              />
+                            </button>
+                          </div>
+                          {fieldErrors.password ? (
+                            <span className={authUi.fieldError} id="register-password-error">
+                              {fieldErrors.password}
+                            </span>
+                          ) : (
+                            <span className={authUi.helperText} id="register-password-help">
+                              Use at least 6 characters.
+                            </span>
+                          )}
+                        </div>
 
-                      <div className={authUi.formGroup}>
-                        <label className={authUi.label} htmlFor="confirmPassword">
-                          Confirm Password
-                        </label>
-                        <div className={authUi.passwordField}>
-                          <input
-                            id="confirmPassword"
-                            className={getPasswordInputClass(Boolean(fieldErrors.confirmPassword))}
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            placeholder="Confirm password"
-                            autoComplete="new-password"
-                            value={confirmPassword}
-                            onChange={(event) => {
-                              setConfirmPassword(event.target.value);
-                              setError('');
-                              clearFieldError('confirmPassword');
-                            }}
-                            aria-describedby={
-                              fieldErrors.confirmPassword ? 'register-confirm-password-error' : undefined
-                            }
-                            aria-invalid={fieldErrors.confirmPassword ? 'true' : 'false'}
-                            disabled={isSubmitting}
-                            required
-                          />
-                          <button
-                            type="button"
-                            className={authUi.passwordToggle}
-                            onClick={() => setShowConfirmPassword((current) => !current)}
-                            aria-controls="confirmPassword"
-                            aria-pressed={showConfirmPassword}
-                            aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                            disabled={isSubmitting}
-                          >
-                            <i
-                              className={`fa-solid ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}
-                              aria-hidden="true"
+                        <div className={authUi.formGroup}>
+                          <label className={authUi.label} htmlFor="confirmPassword">
+                            Confirm Password
+                          </label>
+                          <div className={authUi.passwordField}>
+                            <input
+                              id="confirmPassword"
+                              className={getPasswordInputClass(Boolean(fieldErrors.confirmPassword))}
+                              type={showConfirmPassword ? 'text' : 'password'}
+                              placeholder="Confirm password"
+                              autoComplete="new-password"
+                              value={confirmPassword}
+                              onChange={(event) => {
+                                setConfirmPassword(event.target.value);
+                                setError('');
+                                clearFieldError('confirmPassword');
+                              }}
+                              aria-describedby={
+                                fieldErrors.confirmPassword ? 'register-confirm-password-error' : undefined
+                              }
+                              aria-invalid={fieldErrors.confirmPassword ? 'true' : 'false'}
+                              disabled={isSubmitting}
+                              required
                             />
-                          </button>
+                            <button
+                              type="button"
+                              className={authUi.passwordToggle}
+                              onClick={() => setShowConfirmPassword((current) => !current)}
+                              aria-controls="confirmPassword"
+                              aria-pressed={showConfirmPassword}
+                              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                              disabled={isSubmitting}
+                            >
+                              <i
+                                className={`fa-solid ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}
+                                aria-hidden="true"
+                              />
+                            </button>
+                          </div>
+                          {fieldErrors.confirmPassword ? (
+                            <span className={authUi.fieldError} id="register-confirm-password-error">
+                              {fieldErrors.confirmPassword}
+                            </span>
+                          ) : null}
                         </div>
-                        {fieldErrors.confirmPassword ? (
-                          <span className={authUi.fieldError} id="register-confirm-password-error">
-                            {fieldErrors.confirmPassword}
-                          </span>
-                        ) : null}
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className={authUi.compactNote}>
                     <span className={authUi.noteStrong}>Student access only.</span> Faculty, staff, and office accounts are issued by the school.
@@ -561,7 +620,7 @@ export function RegisterPage() {
                         Creating account...
                       </>
                     ) : (
-                      'Register Student Account'
+                      isGoogleRegistration ? 'Complete Google Registration' : 'Register Student Account'
                     )}
                   </button>
                 </form>

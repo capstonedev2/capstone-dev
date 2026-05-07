@@ -1,6 +1,60 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+function normalizeStudentName(value: unknown) {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').toLowerCase() : '';
+}
+
+function parseStudentNames(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const students: string[] = [];
+
+  value.forEach((entry) => {
+    if (typeof entry !== 'string') {
+      return;
+    }
+
+    const student = entry.trim().replace(/\s+/g, ' ');
+    const key = normalizeStudentName(student);
+    if (!key || seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    students.push(student);
+  });
+
+  return students;
+}
+
+async function findAssignedStudents(students: string[], excludeGroupId?: string) {
+  const requestedStudentKeys = new Set(students.map(normalizeStudentName).filter(Boolean));
+  if (requestedStudentKeys.size === 0) {
+    return [];
+  }
+
+  const groups = await prisma.group.findMany({
+    where: excludeGroupId ? { id: { not: excludeGroupId } } : undefined,
+    select: { students: true }
+  });
+
+  const assignedStudentKeys = new Set<string>();
+  groups.forEach((group) => {
+    group.students.forEach((student) => {
+      const key = normalizeStudentName(student);
+      if (requestedStudentKeys.has(key)) {
+        assignedStudentKeys.add(key);
+      }
+    });
+  });
+
+  return students.filter((student) => assignedStudentKeys.has(normalizeStudentName(student)));
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -57,6 +111,19 @@ export async function POST(request: Request) {
       projectId
     } = body;
 
+    const parsedStudents = parseStudentNames(students);
+    if (parsedStudents.length === 0) {
+      return NextResponse.json({ error: 'Select at least one student before creating a group.' }, { status: 400 });
+    }
+
+    const assignedStudents = await findAssignedStudents(parsedStudents);
+    if (assignedStudents.length > 0) {
+      return NextResponse.json(
+        { error: 'One or more selected students already belong to a group.', students: assignedStudents },
+        { status: 409 }
+      );
+    }
+
     const newGroup = await prisma.group.create({
       data: {
         userId,
@@ -65,8 +132,8 @@ export async function POST(request: Request) {
         projectTitle,
         dept,
         department,
-        students,
-        members: students.length,
+        students: parsedStudents,
+        members: parsedStudents.length,
         leader,
         statusLabel,
         statusClass,
@@ -84,16 +151,32 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, students, title } = body;
+    const { id, students } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Missing group id' }, { status: 400 });
     }
 
-    const updateData: any = {};
-    if (students) {
-      updateData.students = students;
-      updateData.members = students.length;
+    const updateData: {
+      students?: string[];
+      members?: number;
+      title?: string;
+      projectTitle?: string;
+      allowMemberSubmission?: boolean;
+    } = {};
+    if (Object.prototype.hasOwnProperty.call(body, 'students')) {
+      const parsedStudents = parseStudentNames(students);
+      const assignedStudents = await findAssignedStudents(parsedStudents, id);
+
+      if (assignedStudents.length > 0) {
+        return NextResponse.json(
+          { error: 'One or more selected students already belong to a group.', students: assignedStudents },
+          { status: 409 }
+        );
+      }
+
+      updateData.students = parsedStudents;
+      updateData.members = parsedStudents.length;
     }
     if (body.title !== undefined) {
       updateData.title = body.title;

@@ -32,7 +32,6 @@ import {
 import {
   EvaluationFilters,
   EvaluationModal,
-  EvaluationQuickInfoPanel,
   EvaluationSummaryCards,
   EvaluationTable,
   type EvaluationSummaryMetric
@@ -506,8 +505,7 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
         <div className="mx-auto max-w-[1600px] space-y-6">
           <EvaluationSummaryCards metrics={summaryMetrics} />
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.8fr)]">
-            <div className="space-y-6">
+          <div className="space-y-6">
               <EvaluationFilters
                 dateFilter={dateFilter}
                 dateOptions={EVALUATION_DATE_FILTER_OPTIONS}
@@ -526,9 +524,6 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
                 records={filteredRecords}
                 workspaceMode={workspaceMode}
               />
-            </div>
-
-            <EvaluationQuickInfoPanel records={records} workspaceMode={workspaceMode} />
           </div>
         </div>
 
