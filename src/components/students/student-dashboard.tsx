@@ -864,6 +864,36 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
   const nextMilestoneToneUi = getShellToneUi(nextMilestoneTone);
   const notificationToneUi = getShellToneUi(notificationTone);
   const attentionToneUi = getShellToneUi(attentionTone);
+  const workspaceHeroActions = [
+    {
+      id: 'continue-phase',
+      href: currentWorkflowStep?.route ?? '/students/milestones',
+      label: currentWorkflowStep?.actionLabel ?? 'Continue Phase',
+      meta: currentPhaseTitle,
+      icon: currentPhaseToneUi.icon,
+      tone: 'primary'
+    },
+    {
+      id: 'manage-files',
+      href: '/students/project-files',
+      label: revisionCount ? 'Resolve Revisions' : 'Manage Files',
+      meta: revisionCount
+        ? `${revisionCount} needs revision`
+        : `${data.documents.length} tracked file${data.documents.length === 1 ? '' : 's'}`,
+      icon: revisionCount ? 'fa-rotate-right' : 'fa-file-arrow-up',
+      tone: revisionCount ? 'danger' : 'neutral'
+    },
+    {
+      id: 'review-feedback',
+      href: '/students/faculty-feedback',
+      label: unreadFeedbackCount ? 'Read Feedback' : 'Faculty Notes',
+      meta: unreadFeedbackCount
+        ? `${unreadFeedbackCount} unread`
+        : latestFeedback?.dateLabel ?? 'No new notes',
+      icon: 'fa-comments',
+      tone: unreadFeedbackCount ? 'warning' : 'neutral'
+    }
+  ];
   const workspaceActions = quickLinks.map((item) => {
     if (item.href === '/students/project-overview') {
       return {
@@ -990,7 +1020,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
       <div className="page-body student-dashboard-page">
         <section className="dashboard-hero">
-          <article className="dashboard-hero-main">
+          <article className="dashboard-hero-main student-dashboard-workspace-hero">
 
             <div className="student-dashboard-overview-top">
               <span className="section-kicker">Project Workspace</span>
@@ -1030,6 +1060,39 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   </p>
                 </>
               )}
+            </div>
+
+            <div className="student-workspace-hero-meta" aria-label="Project workspace essentials">
+              <span>
+                <i className="fas fa-hashtag" aria-hidden="true" />
+                {data.project.projectCode}
+              </span>
+              <span>
+                <i className="fas fa-user-tie" aria-hidden="true" />
+                {data.project.adviser}
+              </span>
+              <span>
+                <i className="fas fa-users" aria-hidden="true" />
+                {data.group.groupName}
+              </span>
+              <span>
+                <i className="fas fa-calendar-check" aria-hidden="true" />
+                {nextSchedule?.startDateLabel ?? 'No scheduled review'}
+              </span>
+            </div>
+
+            <div className="student-workspace-hero-actions" aria-label="Primary workspace actions">
+              {workspaceHeroActions.map((item) => (
+                <Link key={item.id} className={`student-workspace-hero-action is-${item.tone}`} href={item.href}>
+                  <span className="student-workspace-action-icon">
+                    <i className={`fas ${item.icon}`} aria-hidden="true" />
+                  </span>
+                  <span>
+                    <small>{item.meta}</small>
+                    <strong>{item.label}</strong>
+                  </span>
+                </Link>
+              ))}
             </div>
 
             <div className="student-project-metrics">
@@ -1110,7 +1173,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
         <section className="stats-grid student-dashboard-kpi-grid">
           {analyticsCards.map((item) => (
-            <article key={item.id} className="stat-card student-dashboard-stat">
+            <article key={item.id} className={`stat-card student-dashboard-stat is-${item.tone}`}>
               <div className="stat-card-head">
                 <span className="stat-card-icon">
                   <i className={`fas ${item.icon}`} aria-hidden="true" />
@@ -1126,7 +1189,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
         <section className="dashboard-layout">
           <div className="dashboard-main-column">
-            <article className="surface-card student-dashboard-card">
+            <article className="surface-card student-dashboard-card student-dashboard-action-center">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Action Center</span>
@@ -1141,7 +1204,10 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               {priorityTasks.length ? (
                 <div className="stack-list">
                   {priorityTasks.map((item) => (
-                    <article key={item.id} className="stack-card student-priority-card">
+                    <article key={item.id} className={`stack-card student-priority-card is-${item.tone}`}>
+                      <span className="student-priority-icon" aria-hidden="true">
+                        <i className={`fas ${item.icon ?? 'fa-circle-exclamation'}`} />
+                      </span>
                       <div className="stack-card-head">
                         <div>
                           <strong>{item.title}</strong>
@@ -1165,7 +1231,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="surface-card student-dashboard-card">
+            <article className="surface-card student-dashboard-card student-dashboard-milestone-card">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Milestone Pipeline</span>
@@ -1206,7 +1272,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               </div>
             </article>
 
-            <section className="surface-card student-dashboard-card student-upload-preview-card">
+            <section className="surface-card student-dashboard-card student-upload-preview-card student-dashboard-files-card">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Project Files</span>
@@ -1266,7 +1332,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
           </div>
 
           <div className="dashboard-side-column">
-            <article className="student-insight-panel">
+            <article className="student-insight-panel student-dashboard-side-panel student-dashboard-upcoming-panel">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Upcoming Activity</span>
@@ -1316,7 +1382,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="student-insight-panel">
+            <article className="student-insight-panel student-dashboard-side-panel student-dashboard-health-panel">
               <div>
                 <span className="section-kicker">Submission Health</span>
                 <h4>Approved, pending, and revision status</h4>
@@ -1366,7 +1432,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               </div>
             </article>
 
-            <article className="surface-card student-dashboard-card">
+            <article className="surface-card student-dashboard-card student-dashboard-feedback-panel">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Faculty Feedback</span>
@@ -1415,7 +1481,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="surface-card student-dashboard-card">
+            <article className="surface-card student-dashboard-card student-dashboard-notification-panel">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Notification Summary</span>
@@ -1472,7 +1538,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="student-insight-panel">
+            <article className="student-insight-panel student-dashboard-side-panel student-dashboard-readiness-panel">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Archive Readiness</span>
@@ -1496,7 +1562,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               </div>
             </article>
 
-            <article className="surface-card student-dashboard-card">
+            <article className="surface-card student-dashboard-card student-dashboard-team-panel">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Shared Group Workspace</span>

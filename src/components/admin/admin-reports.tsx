@@ -33,7 +33,6 @@ const YEAR_GROWTH = [
 ];
 
 const BRIEFING_PACKAGES = [
-  { title: 'User monitoring report', description: 'Role distribution, account status, and profile completeness for oversight review.', action: 'Export' },
   { title: 'Project inventory report', description: 'Filtered project records with department, adviser, status, year, and document counts.', action: 'Export' },
   { title: 'Progress monitoring report', description: 'Milestone progress, delayed records, at-risk projects, and pending approvals.', action: 'Export' },
   { title: 'Technology transfer report', description: 'Deployable projects, partner matches, utilization status, and impact notes.', action: 'Export' }
@@ -152,7 +151,6 @@ export function AdminReports() {
                 <div className="span-3 admin-toolbar-field">
                   <label>Report Type</label>
                   <select className="admin-toolbar-select" defaultValue="Project Inventory Report">
-                    <option>User Monitoring Report</option>
                     <option>Project Inventory Report</option>
                     <option>Progress Monitoring Report</option>
                     <option>Technology Transfer Report</option>
@@ -415,7 +413,6 @@ export function AdminReports() {
                 <div className="form-group">
                   <label>Report Type</label>
                   <select defaultValue="Project Inventory Report">
-                    <option>User Monitoring Report</option>
                     <option>Project Inventory Report</option>
                     <option>Progress Monitoring Report</option>
                     <option>Technology Transfer Report</option>

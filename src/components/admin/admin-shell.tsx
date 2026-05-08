@@ -10,16 +10,12 @@ import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
 const ADMIN_NAV_ITEMS = [
   { key: 'dashboard', href: '/admin/dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
-  { key: 'users', href: '/admin/users', label: 'User Monitoring', icon: 'fa-users-viewfinder' },
   { key: 'projects', href: '/admin/projects', label: 'Project Inventory', icon: 'fa-boxes' },
   { key: 'approvals', href: '/admin/approvals', label: 'Approvals & Monitoring', icon: 'fa-list-check' },
   { key: 'technology-transfer', href: '/admin/technology-transfer', label: 'Technology Transfer', icon: 'fa-handshake-angle' },
   { key: 'reports', href: '/admin/reports', label: 'Reports', icon: 'fa-chart-bar' },
   { key: 'repository', href: '/admin/repository', label: 'Documents Repository', icon: 'fa-folder' },
-  { key: 'announcements', href: '/admin/announcements', label: 'Announcements', icon: 'fa-bullhorn' },
-  { key: 'settings', href: '/admin/settings', label: 'Roles & Access', icon: 'fa-shield-halved' },
-  { key: 'profile', href: '/admin/profile', label: 'My Profile', icon: 'fa-id-badge' },
-  { key: 'notifications', href: '/admin/notifications', label: 'Notifications', icon: 'fa-bell' }
+  { key: 'announcements', href: '/admin/announcements', label: 'Announcements', icon: 'fa-bullhorn' }
 ] as const;
 
 export type AdminNavKey = (typeof ADMIN_NAV_ITEMS)[number]['key'];
@@ -124,8 +120,6 @@ export function AdminShell({
         { label: 'Research Head Office', icon: 'fa-id-badge' }
       ]}
       profileActions={[
-        { label: 'My Profile', icon: 'fa-id-badge', href: '/admin/profile' },
-        { label: 'Roles & Access', icon: 'fa-shield-halved', href: '/admin/settings' },
         { label: 'Sign Out', icon: 'fa-right-from-bracket', danger: true, onClick: handleLogout }
       ]}
     />

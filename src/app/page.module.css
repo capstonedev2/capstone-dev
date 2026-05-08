@@ -310,7 +310,7 @@
 
 .heroContent h1 {
   margin: 1rem 0 0;
-  color: var(--primary-blue);
+  color: var(--landing-hero-primary, var(--primary-blue));
   font-family: var(--font-serif), Georgia, serif;
   font-size: clamp(2.35rem, 5vw, 4rem);
   font-weight: 800;
@@ -324,7 +324,7 @@
 }
 
 .heroContent h1 .heroTitleAccent {
-  color: var(--accent-gold);
+  color: var(--landing-hero-accent, var(--accent-gold));
 }
 
 .heroContent p {

@@ -27,17 +27,6 @@ const INITIAL_NOTIFICATIONS = [
     unread: true
   },
   {
-    id: 'notif-3',
-    category: 'User Monitoring',
-    department: 'All',
-    icon: 'fa-user-check',
-    iconColor: 'var(--success)',
-    title: 'User Profile Review Needed',
-    message: '4 research user profiles are missing department or role-context details for monitoring.',
-    time: '2 hours ago',
-    unread: true
-  },
-  {
     id: 'notif-4',
     category: 'Approval Queue',
     department: 'All',
@@ -114,7 +103,6 @@ export function AdminNotifications() {
                 <option>Approval Queue</option>
                 <option>Department Alerts</option>
                 <option>Repository Updates</option>
-                <option>User Monitoring</option>
               </select>
             </div>
             <div className="span-3">

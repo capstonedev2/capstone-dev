@@ -1,54 +1,78 @@
 'use client';
 
 import Link from 'next/link';
+import { type CSSProperties } from 'react';
 import { useBranding } from '@/components/branding/branding-provider';
 import styles from '@/app/page.module.css';
 
 export function LandingManagedHero() {
   const { branding } = useBranding();
   const landing = branding.landing;
+  const hasHeroImage = landing.showHeroImage && landing.heroImage.trim();
+  const heroTitle = landing.heroTitle.trim();
+  const preferredAccentPhrase = 'Project Management System';
+  const preferredAccentIndex = heroTitle.toLowerCase().lastIndexOf(preferredAccentPhrase.toLowerCase());
+  const fallbackTitleWords = heroTitle.split(/\s+/).filter(Boolean);
+  const fallbackAccent = fallbackTitleWords.pop() || '';
+  const titleLead = preferredAccentIndex >= 0
+    ? heroTitle.slice(0, preferredAccentIndex).trimEnd()
+    : fallbackTitleWords.join(' ');
+  const titleAccent = preferredAccentIndex >= 0
+    ? heroTitle.slice(preferredAccentIndex).trimStart()
+    : fallbackAccent;
+  const ctaAlignmentClass = landing.textAlignment === 'center'
+    ? 'justify-center'
+    : landing.textAlignment === 'right'
+      ? 'justify-end'
+      : 'justify-start';
   const heroStyle = {
+    '--landing-hero-primary': branding.colors.primary,
+    '--landing-hero-accent': branding.colors.accent,
     textAlign: landing.textAlignment
+  } as CSSProperties;
+  const titleStyle = {
+    color: branding.colors.primary
+  } as CSSProperties;
+  const titleAccentStyle = {
+    color: branding.colors.accent
+  } as CSSProperties;
+  const paragraphStyle = {
+    marginLeft: landing.textAlignment === 'left' ? 0 : 'auto',
+    marginRight: landing.textAlignment === 'right' ? 0 : 'auto'
   } as const;
+  const primaryCtaStyle = {
+    backgroundColor: branding.colors.primary,
+    boxShadow: `0 14px 28px color-mix(in srgb, ${branding.colors.primary} 24%, transparent)`
+  } as CSSProperties;
+  const secondaryCtaStyle = {
+    borderColor: branding.colors.accent,
+    color: branding.colors.primary
+  } as CSSProperties;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.72fr)] lg:items-center">
+    <div className={hasHeroImage ? 'grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.72fr)] lg:items-center' : 'grid justify-items-center'}>
       <div className={styles.heroContent} data-reveal="fade-up" style={heroStyle}>
         <span className={styles.heroBadge}>
           <i className="fas fa-graduation-cap" aria-hidden="true" />
           {landing.subtitle}
         </span>
-        <h1>
-          {landing.heroTitle.split(/\s+/).reduce<string[]>((lines, word) => {
-            const current = lines[lines.length - 1] || '';
-            if (!current || current.length + word.length < 24) {
-              lines[lines.length - 1] = current ? `${current} ${word}` : word;
-            } else {
-              lines.push(word);
-            }
-            return lines;
-          }, ['']).map((line, index, lines) => (
-            <span
-              key={`${line}-${index}`}
-              className={`${styles.heroTitleLine} ${index === lines.length - 1 ? styles.heroTitleAccent : ''}`}
-            >
-              {line}
-            </span>
-          ))}
+        <h1 style={titleStyle}>
+          {titleLead ? <span>{`${titleLead} `}</span> : null}
+          <span className={styles.heroTitleAccent} style={titleAccentStyle}>{titleAccent}</span>
         </h1>
-        <p>{landing.description}</p>
+        <p style={paragraphStyle}>{landing.description}</p>
         {landing.showCtaButtons ? (
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href={landing.primaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#003A8F] px-6 text-sm font-black text-white shadow-[0_14px_28px_rgba(0,58,143,0.22)] transition hover:-translate-y-0.5">
+          <div className={`mt-7 flex flex-wrap gap-3 ${ctaAlignmentClass}`}>
+            <Link href={landing.primaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-black text-white transition hover:-translate-y-0.5" style={primaryCtaStyle}>
               {landing.primaryCtaText}
             </Link>
-            <Link href={landing.secondaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#F6BE00]/50 bg-white px-6 text-sm font-black text-[#5b4200] shadow-sm transition hover:-translate-y-0.5">
+            <Link href={landing.secondaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full border bg-white px-6 text-sm font-black shadow-sm transition hover:-translate-y-0.5" style={secondaryCtaStyle}>
               {landing.secondaryCtaText}
             </Link>
           </div>
         ) : null}
       </div>
-      {landing.showHeroImage && landing.heroImage ? (
+      {hasHeroImage ? (
         <div className="relative min-h-[260px] overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-[0_20px_60px_rgba(15,43,89,0.08)]" data-reveal="fade-left">
           <img alt="" className="h-full min-h-[260px] w-full object-cover" src={landing.heroImage} />
         </div>

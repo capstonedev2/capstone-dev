@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
+import { useBranding } from '@/components/branding/branding-provider';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
 const SYSTEM_ADMIN_NAV_ITEMS = [
@@ -37,6 +38,8 @@ export function SystemAdminShell({
   notificationCount = 2
 }: SystemAdminShellProps) {
   const router = useRouter();
+  const { branding } = useBranding();
+  const shellBranding = branding.shell;
   const [displayName, setDisplayName] = useState('System Administrator');
   const [displayEmail, setDisplayEmail] = useState('system.admin@university.edu.ph');
   const currentNavItem = SYSTEM_ADMIN_NAV_ITEMS.find((item) => item.key === activeNav);
@@ -96,14 +99,14 @@ export function SystemAdminShell({
                 <i className="fas fa-server"></i>
               </span>
               <div className="admin-sidebar-copy">
-                <span className="admin-sidebar-kicker">Technical Control</span>
-                <h2>System Admin</h2>
-                <p>Platform configuration, security, backups, and access control</p>
+                <span className="admin-sidebar-kicker">{shellBranding.sidebarKicker}</span>
+                <h2>{shellBranding.sidebarTitle}</h2>
+                <p>{shellBranding.sidebarDescription}</p>
               </div>
             </div>
             <div className="user-badge">
               <i className="fas fa-lock"></i>
-              <span>Super Admin</span>
+              <span>{shellBranding.sidebarBadge}</span>
             </div>
           </div>
           <nav className="sidebar-nav">
@@ -136,7 +139,8 @@ export function SystemAdminShell({
                 className="shell-top-brand"
                 href="/system-admin/dashboard"
                 icon="fa-server"
-                title="Thesis Track"
+                subtitle={shellBranding.navbarSubtitle}
+                title={shellBranding.navbarTitle}
               />
             </div>
             <div className="user-area">

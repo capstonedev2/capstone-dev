@@ -116,13 +116,6 @@ export function AdminDashboard() {
   const pendingApprovals = approvalQueueData[0].value;
   const kpiCards = [
     {
-      title: 'Total Users',
-      value: totalUsers.toLocaleString(),
-      subtitle: 'Student, adviser, and academic leadership accounts currently in scope.',
-      trend: '+4.8% this semester',
-      icon: 'fa-users'
-    },
-    {
       title: 'Active Projects',
       value: totalActiveProjects.toString(),
       subtitle: 'Institutional projects still moving through review, defense, or deployment.',
@@ -315,7 +308,6 @@ export function AdminDashboard() {
                   </div>
                 </div>
                 <div className="dashboard-quick-actions">
-                  <Link className="btn btn-outline" href="/admin/users"><i className="fas fa-users-viewfinder"></i> User Monitoring</Link>
                   <Link className="btn btn-outline" href="/admin/reports"><i className="fas fa-chart-bar"></i> Open Reports</Link>
                   <Link className="btn btn-outline" href="/admin/projects"><i className="fas fa-folder-open"></i> Project Inventory</Link>
                   <Link className="btn btn-outline" href="/admin/technology-transfer"><i className="fas fa-handshake-angle"></i> Technology Transfer</Link>

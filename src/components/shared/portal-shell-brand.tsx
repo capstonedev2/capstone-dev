@@ -24,7 +24,8 @@ export function PortalShellBrand({
   className
 }: PortalShellBrandProps) {
   const { branding } = useBranding();
-  const isSystemName = title.trim().toLowerCase() === 'thesis track';
+  const normalizedTitle = title.trim().toLowerCase();
+  const isSystemName = normalizedTitle === 'thesis track' || normalizedTitle === branding.systemName.trim().toLowerCase();
   const displayTitle = isSystemName ? branding.systemName : title;
   const displaySubtitle = subtitle ?? (isSystemName ? branding.tagline : undefined);
   const logoSrc = isSystemName

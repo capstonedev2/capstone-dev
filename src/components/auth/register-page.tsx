@@ -16,8 +16,9 @@ import {
   getSelectClass
 } from './auth-ui';
 import { LogoIcon } from '@/components/branding/logo-icon';
+import { useBranding } from '@/components/branding/branding-provider';
 
-const departmentOptions = [
+const fallbackDepartmentOptions = [
   { value: '', label: 'Select Department' },
   { value: 'BSIT', label: 'BSIT - Information Technology' },
   { value: 'BSMET', label: 'BSMET - Manufacturing Eng. Tech.' },
@@ -61,6 +62,18 @@ type RegisterFieldErrors = Partial<
 
 export function RegisterPage() {
   const router = useRouter();
+  const { branding } = useBranding();
+  const registerBranding = branding.auth.register;
+  const departmentOptions = [
+    { value: '', label: 'Select Department' },
+    ...branding.departments
+      .filter((departmentItem) => departmentItem.active)
+      .map((departmentItem) => ({
+        value: departmentItem.label.split(' - ')[0]?.trim() || departmentItem.id,
+        label: departmentItem.label || `${departmentItem.shortName} - ${departmentItem.name}`
+      }))
+  ];
+  const availableDepartmentOptions = departmentOptions.length > 1 ? departmentOptions : fallbackDepartmentOptions;
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [studentId, setStudentId] = useState('');
@@ -257,10 +270,16 @@ export function RegisterPage() {
             <div className={authUi.mobileBrand} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <LogoIcon style={{ height: '84px', width: 'auto', marginBottom: '0.85rem' }} />
               <h1 className={authUi.brandTitle}>
-                Thesis<span className={authUi.brandAccent}>Track</span>
+                {branding.systemName.trim().toLowerCase() === 'thesis track' ? (
+                  <>
+                    Thesis<span className={authUi.brandAccent}>Track</span>
+                  </>
+                ) : (
+                  branding.systemName
+                )}
               </h1>
               <p className={authUi.brandSubtitle}>
-                Create your student workspace for thesis submissions, repository access, and academic project tracking.
+                {branding.tagline}
               </p>
             </div>
 
@@ -270,13 +289,13 @@ export function RegisterPage() {
                 <div className={authUi.header}>
                   <span className={authUi.headerPill}>
                     <i className="fas fa-user-plus" aria-hidden="true" />
-                    Student Account Setup
+                    {registerBranding.pill}
                   </span>
                   <h2 className={authUi.headerTitle} id="register-title">
-                    Student Registration
+                    {registerBranding.title}
                   </h2>
                   <p className={authUi.headerTextLeft}>
-                    Use your official academic details so the research office can prepare your ThesisTrack workspace.
+                    {registerBranding.subtitle}
                   </p>
                 </div>
 
@@ -443,7 +462,7 @@ export function RegisterPage() {
                               disabled={isSubmitting}
                               required
                             >
-                              {departmentOptions.map((option) => (
+                              {availableDepartmentOptions.map((option) => (
                                 <option key={option.value || 'empty'} value={option.value}>
                                   {option.label}
                                 </option>
@@ -604,7 +623,7 @@ export function RegisterPage() {
                   )}
 
                   <div className={authUi.compactNote}>
-                    <span className={authUi.noteStrong}>Student access only.</span> Faculty, staff, and office accounts are issued by the school.
+                    <span className={authUi.noteStrong}>{registerBranding.academicNote}</span> {registerBranding.staffNote}
                   </div>
 
                   {error ? (
@@ -620,20 +639,20 @@ export function RegisterPage() {
                         Creating account...
                       </>
                     ) : (
-                      isGoogleRegistration ? 'Complete Google Registration' : 'Register Student Account'
+                      isGoogleRegistration ? 'Complete Google Registration' : registerBranding.submitLabel
                     )}
                   </button>
                 </form>
 
                 <div className={authUi.footer}>
                   <p className={authUi.footerText}>
-                    Already have an account?{' '}
+                    {registerBranding.alternatePrompt}{' '}
                     <Link
                       href="/login"
                       className={authUi.bookLink}
                     >
                       <i className="fas fa-arrow-left" aria-hidden="true" />
-                      Sign in here
+                      {registerBranding.alternateLinkLabel}
                     </Link>
                   </p>
                 </div>

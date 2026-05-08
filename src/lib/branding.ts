@@ -30,6 +30,101 @@ export type BrandingAssets = {
   loginBackground: string;
 };
 
+export type BrandingLandingFeature = {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  visible: boolean;
+};
+
+export type BrandingLandingStatistic = {
+  id: string;
+  value: string;
+  label: string;
+  visible: boolean;
+};
+
+export type BrandingLandingSettings = {
+  subtitle: string;
+  heroTitle: string;
+  description: string;
+  textAlignment: 'left' | 'center' | 'right';
+  showCtaButtons: boolean;
+  primaryCtaText: string;
+  primaryCtaLink: string;
+  secondaryCtaText: string;
+  secondaryCtaLink: string;
+  showHeroImage: boolean;
+  heroImage: string;
+  aboutTitle: string;
+  aboutDescription: string;
+  features: BrandingLandingFeature[];
+  statistics: BrandingLandingStatistic[];
+};
+
+export type BrandingAuthPageSettings = {
+  pill: string;
+  title: string;
+  subtitle: string;
+  submitLabel: string;
+  alternatePrompt: string;
+  alternateLinkLabel: string;
+};
+
+export type BrandingAuthSettings = {
+  login: BrandingAuthPageSettings & {
+    identifierLabel: string;
+    identifierPlaceholder: string;
+    passwordLabel: string;
+    passwordPlaceholder: string;
+    googleLabel: string;
+  };
+  register: BrandingAuthPageSettings & {
+    academicNote: string;
+    staffNote: string;
+  };
+};
+
+export type BrandingNavigationLink = {
+  id: string;
+  label: string;
+  href: string;
+  visible: boolean;
+};
+
+export type BrandingNavigationSettings = {
+  subtitle: string;
+  loginLabel: string;
+  registerLabel: string;
+  showLogin: boolean;
+  showRegister: boolean;
+  links: BrandingNavigationLink[];
+};
+
+export type BrandingShellSettings = {
+  navbarTitle: string;
+  navbarSubtitle: string;
+  sidebarKicker: string;
+  sidebarTitle: string;
+  sidebarDescription: string;
+  sidebarBadge: string;
+};
+
+export type BrandingDepartmentSettings = {
+  id: string;
+  shortName: string;
+  name: string;
+  label: string;
+  description: string;
+  mission: string;
+  vision: string;
+  icon: string;
+  color: string;
+  logo: string;
+  active: boolean;
+};
+
 export type BrandingDerivedColors = {
   hover: string;
   lightVariant: string;
@@ -47,6 +142,11 @@ export type BrandingSettings = {
   colors: BrandingColors;
   derivedColors: BrandingDerivedColors;
   assets: BrandingAssets;
+  landing: BrandingLandingSettings;
+  auth: BrandingAuthSettings;
+  navigation: BrandingNavigationSettings;
+  shell: BrandingShellSettings;
+  departments: BrandingDepartmentSettings[];
   updatedAt?: string;
 };
 
@@ -96,6 +196,174 @@ const DEFAULT_ASSETS: BrandingAssets = {
   loginBackground: ''
 };
 
+const DEFAULT_LANDING: BrandingLandingSettings = {
+  subtitle: 'Built for Higher Education',
+  heroTitle: 'Thesis and Capstone Project Management System',
+  description: 'Manage the full lifecycle of thesis and capstone outputs, from title registration and milestone tracking to repository access, deployment, adoption, and accreditation evidence.',
+  textAlignment: 'center',
+  showCtaButtons: true,
+  primaryCtaText: 'Open Portal',
+  primaryCtaLink: '/login',
+  secondaryCtaText: 'Learn More',
+  secondaryCtaLink: '/about',
+  showHeroImage: false,
+  heroImage: '',
+  aboutTitle: 'Connected capstone management in one workspace',
+  aboutDescription: 'ThesisTrack centralizes capstone registration, submissions, reviews, evaluations, and archived outputs into one academic workflow.',
+  features: [
+    {
+      id: 'secure',
+      icon: 'fa-shield-halved',
+      title: 'Secure and Reliable',
+      description: 'Protected access for academic users, records, and project files.',
+      visible: true
+    },
+    {
+      id: 'workflow',
+      icon: 'fa-diagram-project',
+      title: 'Integrated Workflow',
+      description: 'Connected processes from proposal to repository archive.',
+      visible: true
+    },
+    {
+      id: 'collaboration',
+      icon: 'fa-users',
+      title: 'Collaborative',
+      description: 'Shared coordination for students, faculty, and support offices.',
+      visible: true
+    },
+    {
+      id: 'accessible',
+      icon: 'fa-globe',
+      title: 'Accessible Anywhere',
+      description: 'Web-based access across role-specific workspaces.',
+      visible: true
+    }
+  ],
+  statistics: [
+    { id: 'programs', value: '5', label: 'Programs', visible: true },
+    { id: 'roles', value: '8+', label: 'User Roles', visible: true },
+    { id: 'repository', value: '1', label: 'Repository', visible: true }
+  ]
+};
+
+const DEFAULT_AUTH: BrandingAuthSettings = {
+  login: {
+    pill: 'Account Access',
+    title: 'Welcome back',
+    subtitle: 'Sign in to continue managing thesis submissions, reviews, and academic records.',
+    submitLabel: 'Sign in',
+    alternatePrompt: 'New student account?',
+    alternateLinkLabel: 'Register here',
+    identifierLabel: 'Student ID / Email',
+    identifierPlaceholder: 'e.g. 2021-00123 or user@university.edu.ph',
+    passwordLabel: 'Password',
+    passwordPlaceholder: 'Enter your password',
+    googleLabel: 'Continue with Google'
+  },
+  register: {
+    pill: 'Student Account Setup',
+    title: 'Student Registration',
+    subtitle: 'Use your official academic details so the research office can prepare your ThesisTrack workspace.',
+    submitLabel: 'Register Student Account',
+    alternatePrompt: 'Already have an account?',
+    alternateLinkLabel: 'Sign in here',
+    academicNote: 'Student access only.',
+    staffNote: 'Faculty, staff, and office accounts are issued by the school.'
+  }
+};
+
+const DEFAULT_NAVIGATION: BrandingNavigationSettings = {
+  subtitle: 'Higher Education Institutions',
+  loginLabel: 'Login',
+  registerLabel: 'Sign Up',
+  showLogin: true,
+  showRegister: true,
+  links: [
+    { id: 'home', href: '/#home', label: 'Home', visible: true },
+    { id: 'modules', href: '/#modules', label: 'Modules', visible: true },
+    { id: 'workflow', href: '/#workflow', label: 'Workflow', visible: true },
+    { id: 'about', href: '/about', label: 'About', visible: true }
+  ]
+};
+
+const DEFAULT_SHELL: BrandingShellSettings = {
+  navbarTitle: 'Thesis Track',
+  navbarSubtitle: 'Inventory, progress monitoring, and technology transfer system.',
+  sidebarKicker: 'Technical Control',
+  sidebarTitle: 'System Admin',
+  sidebarDescription: 'Platform configuration, security, backups, and access control',
+  sidebarBadge: 'Super Admin'
+};
+
+export const DEFAULT_DEPARTMENTS: BrandingDepartmentSettings[] = [
+  {
+    id: 'IT',
+    shortName: 'IT',
+    name: 'Bachelor of Science in Information Technology',
+    label: 'BSIT - Information Technology',
+    description: 'Computing solutions, systems development, network administration, databases, and applied innovation.',
+    mission: 'To produce globally competitive IT professionals equipped with technical skills, ethical values, and innovative mindsets.',
+    vision: 'A nationally recognized center of excellence in Information Technology education.',
+    icon: 'fas fa-laptop-code',
+    color: '#3B82F6',
+    logo: '/department-logo/IT.png',
+    active: true
+  },
+  {
+    id: 'MET',
+    shortName: 'MET',
+    name: 'Bachelor of Science in Manufacturing Engineering Technology',
+    label: 'BSMET - Manufacturing Eng. Tech.',
+    description: 'Manufacturing engineering, mechanical design, fabrication, and digital precision manufacturing.',
+    mission: 'To develop competent manufacturing engineering technologists with industry-ready skills.',
+    vision: 'A leading manufacturing engineering technology program recognized for practical innovation.',
+    icon: 'fas fa-industry',
+    color: '#EF4444',
+    logo: '/department-logo/met.png',
+    active: true
+  },
+  {
+    id: 'TCM',
+    shortName: 'TCM',
+    name: 'Bachelor of Science in Technology Communication Management',
+    label: 'BSTCM - Technology Communication Mgmt.',
+    description: 'Technology-driven communication systems, information systems, and organizational communication.',
+    mission: 'To develop competent technology communication managers for modern organizations.',
+    vision: 'A premier program bridging technology and communication for innovation and community development.',
+    icon: 'fas fa-broadcast-tower',
+    color: '#F59E0B',
+    logo: '/department-logo/tcm.png',
+    active: true
+  },
+  {
+    id: 'ESM',
+    shortName: 'ESM',
+    name: 'Bachelor of Science in Energy Systems and Management',
+    label: 'BSESM - Energy Systems & Mgmt.',
+    description: 'Electrical machinery, industrial automation, energy systems, and preventive maintenance.',
+    mission: 'To produce highly skilled energy systems professionals for sustainable energy management.',
+    vision: 'A recognized program leading innovation in electrical machinery and industrial automation.',
+    icon: 'fas fa-bolt',
+    color: '#8B5CF6',
+    logo: '/department-logo/esm.png',
+    active: true
+  },
+  {
+    id: 'NAME',
+    shortName: 'NAME',
+    name: 'Bachelor of Science in Naval Architecture and Marine Engineering',
+    label: 'BSNAME - Naval Architecture & Marine Eng.',
+    description: 'Ship design, marine systems, systems engineering, and vessel operation.',
+    mission: 'To educate and train naval architects and marine engineers with comprehensive systems knowledge.',
+    vision: 'A premier engineering program for marine design, construction, and maritime systems.',
+    icon: 'fas fa-ship',
+    color: '#06B6D4',
+    logo: '/department-logo/name.png',
+    active: true
+  }
+];
+
 const FALLBACK_DERIVED_COLORS: BrandingDerivedColors = {
   hover: '#002C6B',
   lightVariant: '#DBEAFE',
@@ -112,7 +380,12 @@ export const DEFAULT_BRANDING: BrandingSettings = {
   themePreset: 'academic-blue',
   colors: DEFAULT_COLORS,
   derivedColors: FALLBACK_DERIVED_COLORS,
-  assets: DEFAULT_ASSETS
+  assets: DEFAULT_ASSETS,
+  landing: DEFAULT_LANDING,
+  auth: DEFAULT_AUTH,
+  navigation: DEFAULT_NAVIGATION,
+  shell: DEFAULT_SHELL,
+  departments: DEFAULT_DEPARTMENTS
 };
 
 export const THEME_PRESETS: ThemePreset[] = [
@@ -273,6 +546,206 @@ function normalizeHue(value: number) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readStringValue(value: unknown, fallback: string) {
+  const normalized = String(value ?? fallback).trim();
+
+  return normalized || fallback;
+}
+
+function readBooleanValue(value: unknown, fallback: boolean) {
+  return typeof value === 'boolean' ? value : fallback;
+}
+
+function sanitizeDepartmentId(value: unknown, fallback: string) {
+  const normalized = String(value ?? fallback)
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-|-$/g, '');
+
+  return normalized || fallback;
+}
+
+function sanitizeTextAlignment(value: unknown, fallback: BrandingLandingSettings['textAlignment']) {
+  return value === 'left' || value === 'center' || value === 'right' ? value : fallback;
+}
+
+function sanitizeLandingFeatures(value: unknown, fallback: BrandingLandingFeature[]) {
+  const source = Array.isArray(value) && value.length ? value : fallback;
+
+  return source.map((item, index) => {
+    const fallbackItem = fallback[index] ?? fallback[0];
+    const record = isRecord(item) ? item : {};
+
+    return {
+      id: readStringValue(record.id, fallbackItem.id),
+      icon: readStringValue(record.icon, fallbackItem.icon),
+      title: readStringValue(record.title, fallbackItem.title),
+      description: readStringValue(record.description, fallbackItem.description),
+      visible: readBooleanValue(record.visible, fallbackItem.visible)
+    };
+  });
+}
+
+function sanitizeLandingStatistics(value: unknown, fallback: BrandingLandingStatistic[]) {
+  const source = Array.isArray(value) && value.length ? value : fallback;
+
+  return source.map((item, index) => {
+    const fallbackItem = fallback[index] ?? fallback[0];
+    const record = isRecord(item) ? item : {};
+
+    return {
+      id: readStringValue(record.id, fallbackItem.id),
+      value: readStringValue(record.value, fallbackItem.value),
+      label: readStringValue(record.label, fallbackItem.label),
+      visible: readBooleanValue(record.visible, fallbackItem.visible)
+    };
+  });
+}
+
+function sanitizeLandingSettings(value: unknown): BrandingLandingSettings {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    subtitle: readStringValue(record.subtitle, DEFAULT_LANDING.subtitle),
+    heroTitle: readStringValue(record.heroTitle, DEFAULT_LANDING.heroTitle),
+    description: readStringValue(record.description, DEFAULT_LANDING.description),
+    textAlignment: sanitizeTextAlignment(record.textAlignment, DEFAULT_LANDING.textAlignment),
+    showCtaButtons: readBooleanValue(record.showCtaButtons, DEFAULT_LANDING.showCtaButtons),
+    primaryCtaText: readStringValue(record.primaryCtaText, DEFAULT_LANDING.primaryCtaText),
+    primaryCtaLink: readStringValue(record.primaryCtaLink, DEFAULT_LANDING.primaryCtaLink),
+    secondaryCtaText: readStringValue(record.secondaryCtaText, DEFAULT_LANDING.secondaryCtaText),
+    secondaryCtaLink: readStringValue(record.secondaryCtaLink, DEFAULT_LANDING.secondaryCtaLink),
+    showHeroImage: readBooleanValue(record.showHeroImage, DEFAULT_LANDING.showHeroImage),
+    heroImage: readStringValue(record.heroImage, DEFAULT_LANDING.heroImage),
+    aboutTitle: readStringValue(record.aboutTitle, DEFAULT_LANDING.aboutTitle),
+    aboutDescription: readStringValue(record.aboutDescription, DEFAULT_LANDING.aboutDescription),
+    features: sanitizeLandingFeatures(record.features, DEFAULT_LANDING.features),
+    statistics: sanitizeLandingStatistics(record.statistics, DEFAULT_LANDING.statistics)
+  };
+}
+
+function sanitizeAuthPageSettings<T extends BrandingAuthPageSettings>(
+  value: unknown,
+  fallback: T
+) {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    ...fallback,
+    pill: readStringValue(record.pill, fallback.pill),
+    title: readStringValue(record.title, fallback.title),
+    subtitle: readStringValue(record.subtitle, fallback.subtitle),
+    submitLabel: readStringValue(record.submitLabel, fallback.submitLabel),
+    alternatePrompt: readStringValue(record.alternatePrompt, fallback.alternatePrompt),
+    alternateLinkLabel: readStringValue(record.alternateLinkLabel, fallback.alternateLinkLabel)
+  };
+}
+
+function sanitizeAuthSettings(value: unknown): BrandingAuthSettings {
+  const record = isRecord(value) ? value : {};
+  const loginRecord = isRecord(record.login) ? record.login : {};
+  const registerRecord = isRecord(record.register) ? record.register : {};
+  const loginBase = sanitizeAuthPageSettings(record.login, DEFAULT_AUTH.login);
+  const registerBase = sanitizeAuthPageSettings(record.register, DEFAULT_AUTH.register);
+
+  return {
+    login: {
+      ...loginBase,
+      identifierLabel: readStringValue(loginRecord.identifierLabel, DEFAULT_AUTH.login.identifierLabel),
+      identifierPlaceholder: readStringValue(loginRecord.identifierPlaceholder, DEFAULT_AUTH.login.identifierPlaceholder),
+      passwordLabel: readStringValue(loginRecord.passwordLabel, DEFAULT_AUTH.login.passwordLabel),
+      passwordPlaceholder: readStringValue(loginRecord.passwordPlaceholder, DEFAULT_AUTH.login.passwordPlaceholder),
+      googleLabel: readStringValue(loginRecord.googleLabel, DEFAULT_AUTH.login.googleLabel)
+    },
+    register: {
+      ...registerBase,
+      academicNote: readStringValue(registerRecord.academicNote, DEFAULT_AUTH.register.academicNote),
+      staffNote: readStringValue(registerRecord.staffNote, DEFAULT_AUTH.register.staffNote)
+    }
+  };
+}
+
+function sanitizeNavigationLinks(value: unknown, fallback: BrandingNavigationLink[]) {
+  const source = Array.isArray(value) && value.length ? value : fallback;
+
+  return source.map((item, index) => {
+    const fallbackItem = fallback[index] ?? fallback[0];
+    const record = isRecord(item) ? item : {};
+
+    return {
+      id: readStringValue(record.id, fallbackItem.id),
+      href: readStringValue(record.href, fallbackItem.href),
+      label: readStringValue(record.label, fallbackItem.label),
+      visible: readBooleanValue(record.visible, fallbackItem.visible)
+    };
+  });
+}
+
+function sanitizeNavigationSettings(value: unknown): BrandingNavigationSettings {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    subtitle: readStringValue(record.subtitle, DEFAULT_NAVIGATION.subtitle),
+    loginLabel: readStringValue(record.loginLabel, DEFAULT_NAVIGATION.loginLabel),
+    registerLabel: readStringValue(record.registerLabel, DEFAULT_NAVIGATION.registerLabel),
+    showLogin: readBooleanValue(record.showLogin, DEFAULT_NAVIGATION.showLogin),
+    showRegister: readBooleanValue(record.showRegister, DEFAULT_NAVIGATION.showRegister),
+    links: sanitizeNavigationLinks(record.links, DEFAULT_NAVIGATION.links)
+  };
+}
+
+function sanitizeShellSettings(value: unknown): BrandingShellSettings {
+  const record = isRecord(value) ? value : {};
+
+  return {
+    navbarTitle: readStringValue(record.navbarTitle, DEFAULT_SHELL.navbarTitle),
+    navbarSubtitle: readStringValue(record.navbarSubtitle, DEFAULT_SHELL.navbarSubtitle),
+    sidebarKicker: readStringValue(record.sidebarKicker, DEFAULT_SHELL.sidebarKicker),
+    sidebarTitle: readStringValue(record.sidebarTitle, DEFAULT_SHELL.sidebarTitle),
+    sidebarDescription: readStringValue(record.sidebarDescription, DEFAULT_SHELL.sidebarDescription),
+    sidebarBadge: readStringValue(record.sidebarBadge, DEFAULT_SHELL.sidebarBadge)
+  };
+}
+
+function sanitizeDepartmentSettings(value: unknown, fallback: BrandingDepartmentSettings[]) {
+  const source = Array.isArray(value) && value.length ? value : fallback;
+  const fallbackById = new Map(fallback.map((item) => [item.id.toUpperCase(), item]));
+  const usedIds = new Set<string>();
+
+  return source.map((item, index) => {
+    const record = isRecord(item) ? item : {};
+    const baseId = sanitizeDepartmentId(record.id, fallback[index]?.id ?? `DEPT-${index + 1}`);
+    let id = baseId;
+    let duplicateIndex = 2;
+
+    while (usedIds.has(id)) {
+      id = `${baseId}-${duplicateIndex}`;
+      duplicateIndex += 1;
+    }
+
+    usedIds.add(id);
+
+    const fallbackItem = fallbackById.get(id) ?? fallback[index] ?? fallback[0];
+    const color = normalizeHexColor(record.color, fallbackItem.color);
+
+    return {
+      id,
+      shortName: readStringValue(record.shortName, fallbackItem.shortName),
+      name: readStringValue(record.name, fallbackItem.name),
+      label: readStringValue(record.label, fallbackItem.label),
+      description: readStringValue(record.description, fallbackItem.description),
+      mission: readStringValue(record.mission, fallbackItem.mission),
+      vision: readStringValue(record.vision, fallbackItem.vision),
+      icon: readStringValue(record.icon, fallbackItem.icon),
+      color,
+      logo: readStringValue(record.logo, fallbackItem.logo),
+      active: readBooleanValue(record.active, fallbackItem.active)
+    };
+  });
 }
 
 export function normalizeHexColor(value: unknown, fallback = '#000000') {
@@ -549,6 +1022,11 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
     colors,
     derivedColors,
     assets,
+    landing: sanitizeLandingSettings(value.landing),
+    auth: sanitizeAuthSettings(value.auth),
+    navigation: sanitizeNavigationSettings(value.navigation),
+    shell: sanitizeShellSettings(value.shell),
+    departments: sanitizeDepartmentSettings(value.departments, DEFAULT_DEPARTMENTS),
     updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : undefined
   };
 }
@@ -558,7 +1036,22 @@ export function cloneBranding(value: BrandingSettings) {
     ...value,
     colors: { ...value.colors },
     derivedColors: { ...value.derivedColors },
-    assets: { ...value.assets }
+    assets: { ...value.assets },
+    landing: {
+      ...value.landing,
+      features: value.landing.features.map((feature) => ({ ...feature })),
+      statistics: value.landing.statistics.map((statistic) => ({ ...statistic }))
+    },
+    auth: {
+      login: { ...value.auth.login },
+      register: { ...value.auth.register }
+    },
+    navigation: {
+      ...value.navigation,
+      links: value.navigation.links.map((link) => ({ ...link }))
+    },
+    shell: { ...value.shell },
+    departments: value.departments.map((department) => ({ ...department }))
   };
 }
 

@@ -13336,3 +13336,450 @@ progress::-moz-progress-bar {
 .student-shell tbody tr:hover td {
     background: #F5F9FF;
 }
+
+.student-shell .student-dashboard-workspace-hero {
+    position: relative;
+    overflow: hidden;
+    gap: 1.05rem;
+    border-color: rgba(0, 58, 143, 0.14);
+    background:
+        linear-gradient(90deg, rgba(0, 58, 143, 0.08), transparent 32%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.student-shell .student-dashboard-workspace-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0.42rem;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+}
+
+.student-shell .student-dashboard-workspace-hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+.student-workspace-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.student-workspace-hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    min-height: 2.2rem;
+    padding: 0 0.78rem;
+    border: 1px solid rgba(0, 58, 143, 0.1);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    color: #334155;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.student-workspace-hero-meta i {
+    color: var(--primary);
+}
+
+.student-workspace-hero-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.student-workspace-hero-action {
+    display: grid;
+    grid-template-columns: 2.65rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 4.8rem;
+    padding: 0.82rem 0.9rem;
+    border: 1px solid rgba(226, 232, 240, 0.96);
+    border-radius: 1.05rem;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+    transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.student-workspace-hero-action:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 58, 143, 0.18);
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+}
+
+.student-workspace-hero-action.is-primary {
+    border-color: rgba(0, 58, 143, 0.22);
+    background: linear-gradient(135deg, var(--primary), var(--primary-bright));
+    color: #ffffff;
+}
+
+.student-workspace-hero-action.is-warning {
+    border-color: rgba(246, 190, 0, 0.28);
+    background: linear-gradient(180deg, rgba(255, 248, 225, 0.98), #ffffff);
+}
+
+.student-workspace-hero-action.is-danger {
+    border-color: rgba(185, 28, 28, 0.18);
+    background: linear-gradient(180deg, rgba(254, 242, 242, 0.98), #ffffff);
+}
+
+.student-workspace-action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 0.9rem;
+    background: rgba(0, 58, 143, 0.08);
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.student-workspace-hero-action.is-primary .student-workspace-action-icon {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.student-workspace-hero-action.is-warning .student-workspace-action-icon {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.student-workspace-hero-action.is-danger .student-workspace-action-icon {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.student-workspace-hero-action small,
+.student-workspace-hero-action strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.student-workspace-hero-action small {
+    color: currentColor;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.25;
+    opacity: 0.72;
+    white-space: nowrap;
+}
+
+.student-workspace-hero-action strong {
+    margin-top: 0.16rem;
+    font-size: 0.95rem;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+@media (max-width: 1100px) {
+    .student-workspace-hero-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .student-shell .student-dashboard-workspace-hero {
+        padding: 1.15rem;
+    }
+
+    .student-workspace-hero-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .student-workspace-hero-meta {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .student-workspace-hero-meta span {
+        justify-content: flex-start;
+        width: 100%;
+    }
+}
+
+.student-shell .student-dashboard-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.student-shell .student-dashboard-stat {
+    min-height: 10.2rem;
+    border-color: rgba(226, 232, 240, 0.96);
+    background:
+        radial-gradient(circle at 92% 0%, rgba(0, 58, 143, 0.08), transparent 42%),
+        linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.student-shell .student-dashboard-stat::before {
+    height: 0.32rem;
+}
+
+.student-shell .student-dashboard-stat.is-success::before {
+    background: linear-gradient(90deg, var(--success), #86efac);
+}
+
+.student-shell .student-dashboard-stat.is-warning::before {
+    background: linear-gradient(90deg, var(--secondary-deep), var(--secondary));
+}
+
+.student-shell .student-dashboard-stat.is-danger::before {
+    background: linear-gradient(90deg, var(--danger), #fca5a5);
+}
+
+.student-shell .student-dashboard-stat.is-info::before {
+    background: linear-gradient(90deg, var(--primary), #60a5fa);
+}
+
+.student-shell .student-dashboard-stat .stat-card-icon {
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(0, 58, 143, 0.08), 0 10px 20px rgba(15, 23, 42, 0.05);
+}
+
+.student-shell .student-dashboard-stat.is-success .stat-card-icon {
+    color: var(--success);
+}
+
+.student-shell .student-dashboard-stat.is-warning .stat-card-icon {
+    color: var(--warning);
+}
+
+.student-shell .student-dashboard-stat.is-danger .stat-card-icon {
+    color: var(--danger);
+}
+
+.student-shell .student-dashboard-stat > strong {
+    font-size: clamp(1.8rem, 3vw, 2.25rem);
+    line-height: 1;
+}
+
+.student-dashboard-action-center,
+.student-dashboard-milestone-card,
+.student-dashboard-files-card,
+.student-dashboard-feedback-panel,
+.student-dashboard-notification-panel,
+.student-dashboard-team-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.student-dashboard-action-center::before,
+.student-dashboard-milestone-card::before,
+.student-dashboard-files-card::before,
+.student-dashboard-feedback-panel::before,
+.student-dashboard-notification-panel::before,
+.student-dashboard-team-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 0.28rem;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+
+.student-dashboard-action-center > *,
+.student-dashboard-milestone-card > *,
+.student-dashboard-files-card > *,
+.student-dashboard-feedback-panel > *,
+.student-dashboard-notification-panel > *,
+.student-dashboard-team-panel > * {
+    position: relative;
+    z-index: 1;
+}
+
+.student-dashboard-action-center {
+    background:
+        radial-gradient(circle at 100% 0%, rgba(246, 190, 0, 0.1), transparent 28%),
+        linear-gradient(180deg, #ffffff, #fbfdff);
+}
+
+.student-priority-card {
+    display: grid;
+    grid-template-columns: 2.85rem minmax(0, 1fr);
+    gap: 0.75rem 0.85rem;
+    align-items: start;
+}
+
+.student-priority-card .student-priority-icon {
+    grid-row: 1 / span 3;
+}
+
+.student-priority-card .stack-card-head,
+.student-priority-card p,
+.student-priority-card .inline-link {
+    grid-column: 2;
+}
+
+.student-priority-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 0.9rem;
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.student-priority-card.is-danger {
+    border-color: rgba(185, 28, 28, 0.18);
+    background: linear-gradient(180deg, rgba(254, 242, 242, 0.95), #ffffff);
+}
+
+.student-priority-card.is-warning {
+    border-color: rgba(246, 190, 0, 0.28);
+    background: linear-gradient(180deg, rgba(255, 247, 230, 0.98), #ffffff);
+}
+
+.student-priority-card.is-success {
+    border-color: rgba(21, 128, 61, 0.18);
+    background: linear-gradient(180deg, rgba(240, 253, 244, 0.98), #ffffff);
+}
+
+.student-priority-card.is-danger .student-priority-icon {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.student-priority-card.is-warning .student-priority-icon {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.student-priority-card.is-success .student-priority-icon {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.student-dashboard-milestone-card .student-phase-tracker {
+    position: relative;
+    padding-left: 0.35rem;
+}
+
+.student-dashboard-milestone-card .student-phase-tracker::before {
+    content: "";
+    position: absolute;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    left: 1.72rem;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(0, 58, 143, 0.22), rgba(246, 190, 0, 0.32));
+}
+
+.student-dashboard-milestone-card .student-phase-tracker-item {
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.03);
+}
+
+.student-dashboard-files-card .dashboard-upload-item {
+    border-color: rgba(0, 58, 143, 0.1);
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.student-dashboard-files-card .table-file-icon {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.student-dashboard-files-card .student-dashboard-file-summary-item {
+    border-color: rgba(226, 232, 240, 0.96);
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.student-dashboard-side-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.student-dashboard-side-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 0.24rem;
+    background: var(--primary);
+}
+
+.student-dashboard-upcoming-panel::before {
+    background: linear-gradient(90deg, var(--primary), #60a5fa);
+}
+
+.student-dashboard-health-panel::before {
+    background: linear-gradient(90deg, var(--success), var(--secondary));
+}
+
+.student-dashboard-readiness-panel::before {
+    background: linear-gradient(90deg, var(--secondary), var(--primary));
+}
+
+.student-dashboard-side-panel > * {
+    position: relative;
+    z-index: 1;
+}
+
+.student-dashboard-schedule-card {
+    border-color: rgba(0, 58, 143, 0.1);
+}
+
+.student-dashboard-schedule-card .stack-card-head strong {
+    color: var(--primary-deep);
+}
+
+.student-dashboard-health-panel .student-deadline-item,
+.student-dashboard-notification-panel .student-summary-metric,
+.student-dashboard-team-panel .student-summary-metric {
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.student-dashboard-readiness-panel .student-dashboard-readiness-item {
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.student-dashboard-feedback-panel .student-feedback-card.is-highlighted,
+.student-dashboard-notification-panel .student-notification-card.is-highlighted {
+    border-color: rgba(246, 190, 0, 0.35);
+    background:
+        linear-gradient(90deg, rgba(246, 190, 0, 0.12), transparent 34%),
+        #ffffff;
+}
+
+.student-dashboard-team-panel .dashboard-roster-item {
+    border-color: rgba(0, 58, 143, 0.1);
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-dashboard-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .student-shell .student-dashboard-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .student-priority-card {
+        grid-template-columns: 1fr;
+    }
+
+    .student-priority-card .student-priority-icon,
+    .student-priority-card .stack-card-head,
+    .student-priority-card p,
+    .student-priority-card .inline-link {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .student-dashboard-milestone-card .student-phase-tracker {
+        padding-left: 0;
+    }
+
+    .student-dashboard-milestone-card .student-phase-tracker::before {
+        display: none;
+    }
+}

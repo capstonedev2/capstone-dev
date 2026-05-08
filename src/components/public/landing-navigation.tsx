@@ -6,18 +6,15 @@ import { useEffect, useState } from 'react';
 
 import { BrandName } from '@/components/branding/brand-copy';
 import { LogoIcon } from '@/components/branding/logo-icon';
+import { useBranding } from '@/components/branding/branding-provider';
 import styles from '@/app/page.module.css';
 
-const navigationLinks = [
-  { href: '/#home', label: 'Home' },
-  { href: '/#modules', label: 'Modules' },
-  { href: '/#workflow', label: 'Workflow' },
-  { href: '/about', label: 'About' }
-];
-
 export function LandingNavigation() {
+  const { branding } = useBranding();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const navigation = branding.navigation;
+  const visibleLinks = navigation.links.filter((link) => link.visible);
 
   useEffect(() => {
     setIsOpen(false);
@@ -56,7 +53,7 @@ export function LandingNavigation() {
               <h2>
                 <BrandName />
               </h2>
-              <p>Higher Education Institutions</p>
+              <p>{navigation.subtitle}</p>
             </div>
           </div>
         </Link>
@@ -80,7 +77,7 @@ export function LandingNavigation() {
           id="landing-navigation"
           className={`${styles.navLinks} ${isOpen ? styles.navLinksOpen : ''}`}
         >
-          {navigationLinks.map(link => (
+          {visibleLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
@@ -92,18 +89,22 @@ export function LandingNavigation() {
           ))}
 
           <div className={styles.navActions}>
-            <Link href="/login" className={`${styles.buttonPrimary} ${styles.navActionButton}`}>
-              <span className={styles.buttonText}>Login</span>
-              <span className={styles.buttonIcon} aria-hidden="true">
-                <i className="fas fa-right-to-bracket" />
-              </span>
-            </Link>
-            <Link href="/register" className={`${styles.buttonSecondary} ${styles.navActionButton}`}>
-              <span className={styles.buttonText}>Sign Up</span>
-              <span className={styles.buttonIcon} aria-hidden="true">
-                <i className="fas fa-user-plus" />
-              </span>
-            </Link>
+            {navigation.showLogin ? (
+              <Link href="/login" className={`${styles.buttonPrimary} ${styles.navActionButton}`}>
+                <span className={styles.buttonText}>{navigation.loginLabel}</span>
+                <span className={styles.buttonIcon} aria-hidden="true">
+                  <i className="fas fa-right-to-bracket" />
+                </span>
+              </Link>
+            ) : null}
+            {navigation.showRegister ? (
+              <Link href="/register" className={`${styles.buttonSecondary} ${styles.navActionButton}`}>
+                <span className={styles.buttonText}>{navigation.registerLabel}</span>
+                <span className={styles.buttonIcon} aria-hidden="true">
+                  <i className="fas fa-user-plus" />
+                </span>
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>

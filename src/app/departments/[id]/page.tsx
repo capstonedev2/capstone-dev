@@ -4,8 +4,13 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { LandingRevealController } from "@/components/public/landing-reveal-controller";
 import { LandingFooter } from "@/components/public/landing-footer";
 import { departmentsData } from "@/lib/landing/departments-data";
+import { mergeDepartmentBranding } from "@/lib/landing/managed-departments";
+import { BRANDING_SETTING_KEY, DEFAULT_BRANDING, sanitizeBrandingSettings } from "@/lib/branding";
+import { prisma } from "@/lib/prisma";
 import { DepartmentChart } from "@/components/public/department-chart";
 import styles from "@/app/page.module.css";
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return departmentsData.map((dept) => ({
@@ -13,10 +18,26 @@ export function generateStaticParams() {
   }));
 }
 
+async function getManagedDepartmentsData() {
+  try {
+    const setting = await prisma.systemSetting.findUnique({
+      where: {
+        key: BRANDING_SETTING_KEY
+      }
+    });
+    const branding = sanitizeBrandingSettings(setting?.value);
+
+    return mergeDepartmentBranding(departmentsData, branding.departments);
+  } catch {
+    return mergeDepartmentBranding(departmentsData, DEFAULT_BRANDING.departments);
+  }
+}
+
 export default async function DepartmentPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const requestedDepartmentId = params.id.toUpperCase();
-  const department = departmentsData.find((d) => d.id.toUpperCase() === requestedDepartmentId);
+  const managedDepartmentsData = await getManagedDepartmentsData();
+  const department = managedDepartmentsData.find((d) => d.id.toUpperCase() === requestedDepartmentId);
 
   if (!department) {
     notFound();
@@ -251,7 +272,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                       Explore Other Departments
                     </h3>
                     <div className="flex flex-wrap gap-4 relative z-10">
-                      {departmentsData.map(dept => {
+                      {managedDepartmentsData.map(dept => {
                         const isActive = department.id === dept.id;
                         return (
                           <Link

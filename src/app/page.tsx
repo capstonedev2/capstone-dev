@@ -1,6 +1,11 @@
 import Link from 'next/link';
 
 import { LandingFooter } from '@/components/public/landing-footer';
+import {
+  LandingManagedAboutSummary,
+  LandingManagedFeatureRow,
+  LandingManagedHero
+} from '@/components/public/landing-managed-content';
 import { LandingNavigation } from '@/components/public/landing-navigation';
 import { LandingRevealController } from '@/components/public/landing-reveal-controller';
 import { PublicLayout } from '@/components/layouts/public-layout';
@@ -85,29 +90,6 @@ const workflowSteps = [
   }
 ];
 
-const featureItems = [
-  {
-    icon: 'fas fa-shield-halved',
-    title: 'Secure & Reliable',
-    description: 'Enterprise-grade security to protect your data.'
-  },
-  {
-    icon: 'fas fa-diagram-project',
-    title: 'Integrated Workflow',
-    description: 'Streamlined processes from proposal to archive.'
-  },
-  {
-    icon: 'fas fa-users',
-    title: 'Collaborative',
-    description: 'Empower teams and strengthen coordination.'
-  },
-  {
-    icon: 'fas fa-globe',
-    title: 'Accessible Anywhere',
-    description: 'Web-based access for anytime, anywhere.'
-  }
-];
-
 const systemOutcomes = [
   {
     icon: 'fas fa-folder-tree',
@@ -124,12 +106,6 @@ const systemOutcomes = [
     title: 'Decision Visibility',
     description: 'Monitor submissions, reviews, and academic actions.'
   }
-];
-
-const systemMetrics = [
-  { value: '5', label: 'Programs' },
-  { value: '8+', label: 'User Roles' },
-  { value: '1', label: 'Repository' }
 ];
 
 const systemFlowItems = [
@@ -163,25 +139,7 @@ export default function Page() {
         <main className={styles.main}>
           <section id="home" className={styles.heroSection}>
             <div className={`${styles.container} ${styles.heroGrid}`}>
-              <div className={styles.heroContent} data-reveal="fade-up">
-                <span className={styles.heroBadge}>
-                  <i className="fas fa-graduation-cap" aria-hidden="true" />
-                  Built for Higher Education
-                </span>
-                <h1>
-                  <span className={styles.heroTitleLine}>Thesis and Capstone</span>
-                  <span className={styles.heroTitleLine}>Project</span>
-                  <span className={`${styles.heroTitleLine} ${styles.heroTitleAccent}`}>
-                    Management System
-                  </span>
-                </h1>
-                <p>
-                  Manage the full lifecycle of thesis and capstone outputs, from title
-                  registration and milestone tracking to repository access, deployment,
-                  adoption, and accreditation evidence.
-                </p>
-              </div>
-
+              <LandingManagedHero />
             </div>
 
             <div className={`${styles.container} ${styles.heroInfoCard}`} data-reveal="fade-up">
@@ -201,17 +159,7 @@ export default function Page() {
             </div>
 
             <div className={`${styles.container} ${styles.featureRow}`} aria-label="System highlights">
-              {featureItems.map(feature => (
-                <article key={feature.title} className={styles.featureItem} data-reveal="fade-up">
-                  <div className={styles.featureIcon} aria-hidden="true">
-                    <i className={feature.icon} />
-                  </div>
-                  <div>
-                    <h3>{feature.title}</h3>
-                    <p>{feature.description}</p>
-                  </div>
-                </article>
-              ))}
+              <LandingManagedFeatureRow />
             </div>
           </section>
 
@@ -362,30 +310,7 @@ export default function Page() {
                   <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-blue-50/30 pointer-events-none" />
                   
                   <div className="relative z-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-[0.7rem] font-black uppercase tracking-widest text-[#003a8f] bg-[#ebf5ff]/80 backdrop-blur-md border border-[#dbe9fb] rounded-full shadow-sm ring-1 ring-white">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#003a8f]"></span>
-                      </span>
-                      About the System
-                    </div>
-                    
-                    <h2 className="font-serif text-[clamp(2.2rem,4vw,3.2rem)] font-black text-[#003a8f] leading-[1.1] mb-6 tracking-tight">
-                      Connected <span className="text-[#f6be00]">capstone management</span> in one workspace
-                    </h2>
-                    
-                    <p className="text-[1.05rem] text-[#536982] leading-[1.75] mb-10 max-w-xl font-medium">
-                      ThesisTrack centralizes capstone registration, submissions, reviews, evaluations, and archived outputs into a brilliantly unified platform.
-                    </p>
-
-                    <div className="grid grid-cols-3 gap-5" aria-label="System scope">
-                      {systemMetrics.map(metric => (
-                        <div key={metric.label} className="bg-white/90 backdrop-blur-sm border border-[#e2eaf5] shadow-[0_8px_20px_rgba(15,43,89,0.03)] rounded-[1.2rem] p-5 text-center group-hover:border-[#c6d7ef] hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(15,43,89,0.08)] transition-all duration-300">
-                          <strong className="block text-[1.8rem] font-black text-[#003a8f] mb-1">{metric.value}</strong>
-                          <span className="text-[0.7rem] font-bold text-[#66758a] uppercase tracking-wider">{metric.label}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <LandingManagedAboutSummary />
                   </div>
                 </article>
 
