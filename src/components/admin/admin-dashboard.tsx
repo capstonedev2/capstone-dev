@@ -24,7 +24,6 @@ import {
   BASE_MONTHLY_TRENDS,
   CHART_COLORS,
   DEPARTMENTS,
-  RECENT_PROJECTS,
   TOOLTIP_STYLE,
   YEAR_LABELS
 } from '@/components/admin/admin-dashboard-data';
@@ -45,9 +44,6 @@ export function AdminDashboard() {
 
   const selectedDepartment = DEPARTMENTS.find((department) => department.id === deptFilter) ?? null;
   const filteredDepartments = selectedDepartment ? [selectedDepartment] : DEPARTMENTS;
-  const filteredRecentProjects = selectedDepartment
-    ? RECENT_PROJECTS.filter((project) => project.department === selectedDepartment.id)
-    : RECENT_PROJECTS;
   const adviserLoadData = (
     selectedDepartment
       ? ADVISER_LOADS.filter((adviser) => adviser.department === selectedDepartment.id)
@@ -58,6 +54,8 @@ export function AdminDashboard() {
     .slice(0, 6);
 
   const totalProjects = DEPARTMENTS.reduce((sum, department) => sum + department.totalProjects, 0);
+  const totalStudents = DEPARTMENTS.reduce((sum, department) => sum + department.students, 0);
+  const totalAdvisers = DEPARTMENTS.reduce((sum, department) => sum + department.advisers, 0);
   const totalUsers = DEPARTMENTS.reduce((sum, department) => sum + department.students + department.advisers, 0);
   const totalCompleted = DEPARTMENTS.reduce((sum, department) => sum + department.completed, 0);
   const totalActiveProjects = DEPARTMENTS.reduce((sum, department) => sum + department.inProgress, 0);
@@ -66,6 +64,23 @@ export function AdminDashboard() {
   const totalDelayed = DEPARTMENTS.reduce((sum, department) => sum + department.delayed, 0);
   const scopeLabel = selectedDepartment ? `${selectedDepartment.name} Department` : 'All Departments';
   const scopeShare = selectedDepartment ? selectedDepartment.totalProjects / totalProjects : 1;
+  const scopedTotalProjects = selectedDepartment ? selectedDepartment.totalProjects : totalProjects;
+  const scopedCompleted = selectedDepartment ? selectedDepartment.completed : totalCompleted;
+  const scopedActiveProjects = selectedDepartment ? selectedDepartment.inProgress : totalActiveProjects;
+  const scopedDeployed = selectedDepartment ? selectedDepartment.deployed : totalDeployed;
+  const scopedPendingReview = selectedDepartment ? selectedDepartment.pendingReview : totalPendingReview;
+  const scopedDelayed = selectedDepartment ? selectedDepartment.delayed : totalDelayed;
+  const scopedStudents = selectedDepartment ? selectedDepartment.students : totalStudents;
+  const scopedAdvisers = selectedDepartment ? selectedDepartment.advisers : totalAdvisers;
+  const scopedPeople = selectedDepartment ? selectedDepartment.students + selectedDepartment.advisers : totalUsers;
+  const completionRate = Math.round((scopedCompleted / Math.max(scopedTotalProjects, 1)) * 100);
+  const deploymentRate = Math.round((scopedDeployed / Math.max(scopedTotalProjects, 1)) * 100);
+  const reviewLoad = scopedPendingReview + scopedDelayed;
+  const reviewPressureRate = Math.round((reviewLoad / Math.max(scopedActiveProjects, 1)) * 100);
+  const leadingDepartment = DEPARTMENTS.slice().sort((left, right) => right.successRate - left.successRate)[0];
+  const flaggedDepartment = DEPARTMENTS.slice().sort(
+    (left, right) => right.pendingReview + right.delayed - (left.pendingReview + left.delayed)
+  )[0];
 
   const statusOverviewData = selectedDepartment
     ? [
@@ -114,19 +129,71 @@ export function AdminDashboard() {
 
   const totalTrackedStatus = statusOverviewData.reduce((sum, item) => sum + item.value, 0);
   const pendingApprovals = approvalQueueData[0].value;
+  const commandMetrics = [
+    {
+      label: 'Completion Rate',
+      value: `${completionRate}%`,
+      detail: `${scopedCompleted} of ${scopedTotalProjects} records completed`,
+      icon: 'fa-circle-check',
+      tone: 'is-success'
+    },
+    {
+      label: 'Review Pressure',
+      value: `${reviewPressureRate}%`,
+      detail: `${reviewLoad} records need movement`,
+      icon: 'fa-triangle-exclamation',
+      tone: reviewPressureRate >= 25 ? 'is-warning' : 'is-info'
+    },
+    {
+      label: 'Deployment Rate',
+      value: `${deploymentRate}%`,
+      detail: `${scopedDeployed} projects transfer-ready`,
+      icon: 'fa-handshake-angle',
+      tone: 'is-info'
+    }
+  ];
+  const priorityQueue = [
+    {
+      label: 'Pending Approvals',
+      value: scopedPendingReview,
+      detail: 'Research head endorsement',
+      icon: 'fa-clock',
+      tone: 'is-warning'
+    },
+    {
+      label: 'Delayed Records',
+      value: scopedDelayed,
+      detail: 'Needs escalation path',
+      icon: 'fa-triangle-exclamation',
+      tone: scopedDelayed > 0 ? 'is-critical' : 'is-success'
+    },
+    {
+      label: 'Transfer Ready',
+      value: scopedDeployed,
+      detail: 'Partner coordination pool',
+      icon: 'fa-rocket',
+      tone: 'is-info'
+    }
+  ];
+  const departmentHealthCards = DEPARTMENTS.map((department) => ({
+    ...department,
+    completionRate: Math.round((department.completed / department.totalProjects) * 100),
+    reviewLoad: department.pendingReview + department.delayed,
+    isFocused: deptFilter === 'all' || deptFilter === department.id
+  }));
   const kpiCards = [
     {
       title: 'Active Projects',
-      value: totalActiveProjects.toString(),
+      value: scopedActiveProjects.toString(),
       subtitle: 'Institutional projects still moving through review, defense, or deployment.',
-      trend: `${totalCompleted} completed records`,
+      trend: `${scopedCompleted} completed records`,
       icon: 'fa-diagram-project'
     },
     {
       title: 'Technology Transfer',
-      value: totalDeployed.toString(),
+      value: scopedDeployed.toString(),
       subtitle: 'Projects endorsed for pilot use, partner adoption, or deployment support.',
-      trend: '5 newly endorsed this term',
+      trend: `${deploymentRate}% deployment rate`,
       icon: 'fa-rocket'
     },
     {
@@ -135,6 +202,13 @@ export function AdminDashboard() {
       subtitle: 'Approval items requiring research head review or institutional clearance.',
       trend: '6 due within 48 hours',
       icon: 'fa-clock'
+    },
+    {
+      title: 'People Monitored',
+      value: scopedPeople.toString(),
+      subtitle: `${scopedStudents} students and ${scopedAdvisers} advisers currently represented in this scope.`,
+      trend: `${scopedAdvisers} advisers`,
+      icon: 'fa-users-line'
     }
   ];
 
@@ -146,6 +220,73 @@ export function AdminDashboard() {
         description="Monitor academic project performance, review pipeline health, and manage institutional reporting from one official oversight workspace."
       >
         <div className="admin-page-stack">
+          <section className="dashboard-command-panel" aria-label="Research head operational snapshot">
+            <div className="dashboard-command-main">
+              <span className="kicker">
+                <i className="fas fa-building-columns" aria-hidden="true"></i>
+                Oversight Snapshot
+              </span>
+              <h2>{scopeLabel}</h2>
+              <p>
+                {formatAcademicYear(yearFilter)} shows {scopedTotalProjects} project records, {reviewLoad} review flags,
+                and {scopedDeployed} deployment-ready outputs across the current research oversight scope.
+              </p>
+              <div className="dashboard-scope-pills" aria-label="Department scope">
+                <button
+                  aria-pressed={deptFilter === 'all'}
+                  className={`dashboard-scope-pill${deptFilter === 'all' ? ' is-active' : ''}`}
+                  type="button"
+                  onClick={() => {
+                    setDeptFilter('all');
+                    showToast('All departments scope applied.');
+                  }}
+                >
+                  All
+                </button>
+                {DEPARTMENTS.map((department) => (
+                  <button
+                    key={department.id}
+                    aria-pressed={deptFilter === department.id}
+                    className={`dashboard-scope-pill${deptFilter === department.id ? ' is-active' : ''}`}
+                    type="button"
+                    onClick={() => {
+                      setDeptFilter(department.id);
+                      showToast(`${department.name} scope applied.`);
+                    }}
+                  >
+                    {department.shortLabel}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="dashboard-command-aside">
+              <div className="dashboard-command-actions" aria-label="Primary dashboard actions">
+                <button className="btn btn-primary" type="button" onClick={() => setModalOpen(true)}>
+                  <i className="fas fa-chart-line" aria-hidden="true"></i>
+                  Generate Report
+                </button>
+                <Link className="btn btn-outline" href="/admin/approvals">
+                  <i className="fas fa-list-check" aria-hidden="true"></i>
+                  Review Queue
+                </Link>
+              </div>
+              <div className="dashboard-command-metrics" aria-label="Scope health metrics">
+                {commandMetrics.map((metric) => (
+                  <article key={metric.label} className={`dashboard-command-metric ${metric.tone}`}>
+                    <span className="dashboard-command-metric-icon">
+                      <i className={`fas ${metric.icon}`} aria-hidden="true"></i>
+                    </span>
+                    <div>
+                      <span>{metric.label}</span>
+                      <strong>{metric.value}</strong>
+                      <small>{metric.detail}</small>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
           <section className="dashboard-kpi-grid" aria-label="Research head summary metrics">
             {kpiCards.map((card) => (
               <article key={card.title} className="stat-card dashboard-kpi-card">
@@ -164,6 +305,49 @@ export function AdminDashboard() {
                 </div>
               </article>
             ))}
+          </section>
+
+          <section className="dashboard-department-strip" aria-label="Department health overview">
+            <div className="dashboard-strip-head">
+              <div>
+                <span className="kicker">
+                  <i className="fas fa-chart-simple" aria-hidden="true"></i>
+                  Department Pulse
+                </span>
+                <h3>Performance by department</h3>
+                <p>
+                  {leadingDepartment.shortLabel} leads success rate at {leadingDepartment.successRate}%; {flaggedDepartment.shortLabel} has the largest review load.
+                </p>
+              </div>
+              <span className="admin-inline-badge">{scopeLabel}</span>
+            </div>
+            <div className="dashboard-department-grid">
+              {departmentHealthCards.map((department) => (
+                <button
+                  key={department.id}
+                  aria-pressed={deptFilter === department.id}
+                  className={`dashboard-department-card${department.isFocused ? ' is-focused' : ''}`}
+                  type="button"
+                  onClick={() => {
+                    setDeptFilter(department.id);
+                    showToast(`${department.name} Department selected.`);
+                  }}
+                >
+                  <span className="dashboard-department-card-top">
+                    <strong>{department.shortLabel}</strong>
+                    <span>{department.completionRate}%</span>
+                  </span>
+                  <span className="dashboard-department-name">{department.name}</span>
+                  <span className="dashboard-department-track" aria-hidden="true">
+                    <i style={{ width: `${department.completionRate}%` }}></i>
+                  </span>
+                  <span className="dashboard-department-card-meta">
+                    <span>{department.totalProjects} projects</span>
+                    <span>{department.reviewLoad} flags</span>
+                  </span>
+                </button>
+              ))}
+            </div>
           </section>
 
           <section className="dashboard-analytics-grid dashboard-analytics-grid-top">
@@ -276,8 +460,8 @@ export function AdminDashboard() {
               <div className="dashboard-control-layout">
                 <div className="dashboard-filter-grid">
                   <div className="field-group">
-                    <label>Department</label>
-                    <select className="toolbar-select" value={deptFilter} onChange={(event) => { setDeptFilter(event.target.value); showToast('Department scope updated.'); }}>
+                    <label htmlFor="research-head-dashboard-department">Department</label>
+                    <select className="toolbar-select" id="research-head-dashboard-department" value={deptFilter} onChange={(event) => { setDeptFilter(event.target.value); showToast('Department scope updated.'); }}>
                       <option value="all">All Departments</option>
                       {DEPARTMENTS.map((department) => (
                         <option key={department.id} value={department.id}>{department.name}</option>
@@ -285,8 +469,8 @@ export function AdminDashboard() {
                     </select>
                   </div>
                   <div className="field-group">
-                    <label>Academic Year</label>
-                    <select className="toolbar-select" value={yearFilter} onChange={(event) => { setYearFilter(event.target.value as keyof typeof YEAR_LABELS); showToast('Academic year filter applied.'); }}>
+                    <label htmlFor="research-head-dashboard-year">Academic Year</label>
+                    <select className="toolbar-select" id="research-head-dashboard-year" value={yearFilter} onChange={(event) => { setYearFilter(event.target.value as keyof typeof YEAR_LABELS); showToast('Academic year filter applied.'); }}>
                       <option value="2024">Academic Year: 2023-2024</option>
                       <option value="2023">Academic Year: 2022-2023</option>
                       <option value="2022">Academic Year: 2021-2022</option>
@@ -318,6 +502,20 @@ export function AdminDashboard() {
             </AdminChartCard>
 
             <AdminChartCard badge={`${pendingApprovals} pending`} description="Compact view of queue outcomes currently passing through the approval workflow." title="Approval Queue Analytics">
+              <div className="dashboard-priority-grid" aria-label="Research head priority queue">
+                {priorityQueue.map((item) => (
+                  <article key={item.label} className={`dashboard-priority-card ${item.tone}`}>
+                    <span>
+                      <i className={`fas ${item.icon}`} aria-hidden="true"></i>
+                    </span>
+                    <div>
+                      <strong>{item.value}</strong>
+                      <small>{item.label}</small>
+                      <p>{item.detail}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
               <div className="dashboard-chart-frame dashboard-chart-frame-compact">
                 <ChartResponsiveContainer width="100%" height="100%">
                   <BarChart data={approvalQueueData}>
@@ -375,23 +573,6 @@ export function AdminDashboard() {
                 </table>
               </div>
             </section>
-
-            <div className="dashboard-side-stack">
-              <AdminChartCard badge={`${filteredRecentProjects.length} latest records`} description="Latest submissions and approval-ready records entering the institutional review flow." title="Recent Activity">
-                <div className="dashboard-activity-list">
-                  {filteredRecentProjects.map((project) => (
-                    <article key={project.id} className="dashboard-activity-item">
-                      <div>
-                        <div className="dashboard-activity-title-row"><strong>{project.title}</strong><span className={`status-badge ${project.statusClass}`}>{project.statusLabel}</span></div>
-                        <span className="dashboard-activity-meta">{project.department} | {project.adviser} | {project.date}</span>
-                        <p>{project.stage}</p>
-                      </div>
-                      <button className="btn btn-outline small" type="button" onClick={() => showToast(`Opening ${project.title}.`)}><i className="fas fa-arrow-up-right-from-square"></i> Open</button>
-                    </article>
-                  ))}
-                </div>
-              </AdminChartCard>
-            </div>
           </section>
         </div>
       </AdminShell>
@@ -404,9 +585,9 @@ export function AdminDashboard() {
               <button className="close-modal" type="button" onClick={() => setModalOpen(false)}>&times;</button>
             </div>
             <div className="modal-body">
-              <div className="form-group"><label>Department</label><select defaultValue={deptFilter}><option value="all">All Departments</option>{DEPARTMENTS.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}</select></div>
-              <div className="form-group"><label>Academic Year</label><select defaultValue={yearFilter}><option value="2024">Academic Year: 2023-2024</option><option value="2023">Academic Year: 2022-2023</option><option value="2022">Academic Year: 2021-2022</option></select></div>
-              <div className="form-group"><label>Output Format</label><select><option>PDF Document</option><option>Excel Workbook</option><option>Executive Briefing Pack</option></select></div>
+              <div className="form-group"><label htmlFor="research-head-report-department">Department</label><select defaultValue={deptFilter} id="research-head-report-department"><option value="all">All Departments</option>{DEPARTMENTS.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}</select></div>
+              <div className="form-group"><label htmlFor="research-head-report-year">Academic Year</label><select defaultValue={yearFilter} id="research-head-report-year"><option value="2024">Academic Year: 2023-2024</option><option value="2023">Academic Year: 2022-2023</option><option value="2022">Academic Year: 2021-2022</option></select></div>
+              <div className="form-group"><label htmlFor="research-head-report-format">Output Format</label><select id="research-head-report-format"><option>PDF Document</option><option>Excel Workbook</option><option>Executive Briefing Pack</option></select></div>
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" type="button" onClick={() => setModalOpen(false)}>Cancel</button>
@@ -417,7 +598,7 @@ export function AdminDashboard() {
       ) : null}
 
       {toast ? (
-        <div className="notification-toast">
+        <div className="notification-toast" role="status">
           <i className={`fas fa-${toast.type === 'success' ? 'check-circle' : 'info-circle'}`} style={{ color: toast.type === 'success' ? CHART_COLORS.green : CHART_COLORS.primary }}></i>
           <span>{toast.message}</span>
         </div>

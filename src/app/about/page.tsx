@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 
 import { LandingFooter } from '@/components/public/landing-footer';
 import { LandingNavigation } from '@/components/public/landing-navigation';
 import { LandingRevealController } from '@/components/public/landing-reveal-controller';
 import { PublicLayout } from '@/components/layouts/public-layout';
+import { getDepartmentBranding } from '@/config/department-branding';
 import { teamMembers } from '@/lib/landing/team-members';
 
 import styles from '../page.module.css';
@@ -128,11 +130,52 @@ const capabilityGroups = [
 ];
 
 const departments = [
-  { code: 'IT', name: 'Information Technology', logo: '/department-logo/IT.png' },
-  { code: 'MET', name: 'Manufacturing Engineering Technology', logo: '/department-logo/met.png' },
-  { code: 'TCM', name: 'Technology Communication Management', logo: '/department-logo/tcm.png' },
-  { code: 'ESM', name: 'Electromechanical Systems and Maintenance', logo: '/department-logo/esm.png' },
-  { code: 'NAME', name: 'Naval Architecture and Marine Engineering', logo: '/department-logo/name.png' }
+  {
+    code: 'IT',
+    focus: 'Software, networks, databases, and applied computing solutions.',
+    metric: '480+',
+    metricLabel: 'Active students',
+    icon: 'fas fa-laptop-code',
+    logo: '/department-logo/IT.png'
+  },
+  {
+    code: 'MET',
+    focus: 'Mechanical design, fabrication, and digital precision manufacturing.',
+    metric: '150+',
+    metricLabel: 'Lab units',
+    icon: 'fas fa-industry',
+    logo: '/department-logo/met.png'
+  },
+  {
+    code: 'TCM',
+    focus: 'Technology management, communication systems, and digital media operations.',
+    metric: '15',
+    metricLabel: 'Industry partners',
+    icon: 'fas fa-broadcast-tower',
+    logo: '/department-logo/tcm.png'
+  },
+  {
+    code: 'ESM',
+    focus: 'Electrical machinery, industrial automation, and energy systems support.',
+    metric: '200+',
+    metricLabel: 'Equipment units',
+    icon: 'fas fa-bolt',
+    logo: '/department-logo/esm.png'
+  },
+  {
+    code: 'NAME',
+    focus: 'Ship design, marine systems, modeling, and maritime engineering operations.',
+    metric: '5 years',
+    metricLabel: 'Program duration',
+    icon: 'fas fa-ship',
+    logo: '/department-logo/name.png'
+  }
+];
+
+const departmentHighlights = [
+  { value: '5', label: 'Academic programs' },
+  { value: '1', label: 'Shared capstone workflow' },
+  { value: 'Role-based', label: 'Department visibility' }
 ];
 
 const operatingRules = [
@@ -338,39 +381,81 @@ export default function AboutPage() {
             </div>
           </section>
 
-          <section className={styles.departmentSystemSection}>
+          <section className={styles.departmentSystemSection} id="about-departments">
             <div className={styles.container}>
               <div className={styles.departmentSystemGrid}>
-                <div className={styles.sectionIntro} data-reveal="fade-right">
-                  <span className={styles.sectionKicker}>Academic Coverage</span>
+                <div className={styles.departmentSystemIntro} data-reveal="fade-right">
+                  <span className={styles.sectionKicker}>About Departments</span>
                   <h2>
-                    Designed for <span>multi-program coordination</span>
+                    Built for <span>multi-program coordination</span>
                   </h2>
                   <p>
-                    Program-specific records stay organized while research leaders can still view
-                    institutional progress across departments.
+                    Each department keeps its own program identity, research focus, and capstone
+                    records while ThesisTrack gives research leaders one connected view of
+                    institutional progress.
                   </p>
+
+                  <div className={styles.departmentInsightGrid} aria-label="Department coverage summary">
+                    {departmentHighlights.map(highlight => (
+                      <div key={highlight.label} className={styles.departmentInsightCard}>
+                        <strong>{highlight.value}</strong>
+                        <span>{highlight.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Link href="/departments/IT" className={styles.departmentExploreLink}>
+                    <span>Start with BSIT Program</span>
+                    <i className="fas fa-arrow-right" aria-hidden="true" />
+                  </Link>
                 </div>
 
                 <div className={styles.departmentLogoGrid} data-reveal="fade-left">
-                  {departments.map(department => (
-                    <Link
-                      key={department.code}
-                      href={`/departments/${department.code}`}
-                      className={styles.departmentLogoCard}
-                    >
-                      <img
-                        src={department.logo}
-                        alt={`${department.name} logo`}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <div>
-                        <strong>{department.code}</strong>
-                        <span>{department.name}</span>
-                      </div>
-                    </Link>
-                  ))}
+                  {departments.map(department => {
+                    const branding = getDepartmentBranding(department.code);
+
+                    return (
+                      <Link
+                        key={department.code}
+                        href={`/departments/${department.code}`}
+                        className={styles.departmentLogoCard}
+                        style={{
+                          '--department-primary': branding.primaryColor,
+                          '--department-secondary': branding.secondaryColor,
+                          '--department-accent': branding.accentColor,
+                          '--department-highlight': branding.highlightColor,
+                          '--department-text': branding.textColor
+                        } as CSSProperties}
+                      >
+                        <div className={styles.departmentLogoMark}>
+                          <img
+                            src={department.logo}
+                            alt={`${branding.departmentName} logo`}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                        <div className={styles.departmentCardBody}>
+                          <div className={styles.departmentCardTopline}>
+                            <span>{branding.code}</span>
+                            <i className={department.icon} aria-hidden="true" />
+                          </div>
+                          <strong>{branding.departmentName}</strong>
+                          <p>{department.focus}</p>
+                          <div className={styles.departmentCardFooter}>
+                            <span>
+                              <b>{department.metric}</b>
+                              {department.metricLabel}
+                            </span>
+                            <em>
+                              View Department
+                              <i className="fas fa-arrow-right" aria-hidden="true" />
+                            </em>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>

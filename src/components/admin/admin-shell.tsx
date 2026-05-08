@@ -19,9 +19,10 @@ const ADMIN_NAV_ITEMS = [
 ] as const;
 
 export type AdminNavKey = (typeof ADMIN_NAV_ITEMS)[number]['key'];
+type AdminShellActiveNav = AdminNavKey | 'notifications' | 'settings';
 
 type AdminShellProps = {
-  activeNav: AdminNavKey;
+  activeNav: AdminShellActiveNav;
   title: string;
   description: string;
   children: ReactNode;

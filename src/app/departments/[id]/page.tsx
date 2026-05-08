@@ -1,13 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { LandingRevealController } from "@/components/public/landing-reveal-controller";
 import { LandingFooter } from "@/components/public/landing-footer";
+import { DepartmentSectionNavigation } from "@/components/public/department-section-navigation";
 import { departmentsData } from "@/lib/landing/departments-data";
 import { mergeDepartmentBranding } from "@/lib/landing/managed-departments";
 import { BRANDING_SETTING_KEY, DEFAULT_BRANDING, sanitizeBrandingSettings } from "@/lib/branding";
 import { prisma } from "@/lib/prisma";
 import { DepartmentChart } from "@/components/public/department-chart";
+import { getDepartmentBranding } from "@/config/department-branding";
 import styles from "@/app/page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -43,13 +46,29 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
     notFound();
   }
 
+  const branding = getDepartmentBranding(department.id);
+  const departmentStyle = {
+    "--department-color": branding.primaryColor,
+    "--department-primary": branding.primaryColor,
+    "--department-secondary": branding.secondaryColor,
+    "--department-accent": branding.accentColor,
+    "--department-highlight": branding.highlightColor,
+    "--department-text": branding.textColor
+  } as CSSProperties;
+  const heroStats = department.stats.slice(0, 4);
+  const featuredAreas = department.keyAreas.slice(0, 3);
+  const heroDescription =
+    department.description.length > 220
+      ? `${department.description.slice(0, 220).trim()}...`
+      : department.description;
+
   return (
     <PublicLayout>
-      <div className={`${styles.landingPage} bg-slate-50 selection:bg-brand/20 selection:text-brand`}>
+      <div className={styles.landingPage} style={departmentStyle}>
         <LandingRevealController />
         {/* Simplified Navbar */}
-        <nav className={`${styles.navbar} !bg-white/80 !backdrop-blur-xl`}>
-          <div className={`${styles.container} ${styles.navbarInner}`}>
+        <header className={`${styles.navbar} ${styles.departmentNavbar}`}>
+          <div className={`${styles.container} ${styles.navbarInner} ${styles.departmentNavbarInner}`}>
             <div className={styles.brand}>
               <Link href="/" className="group flex flex-col transition-transform duration-200 hover:scale-[1.02]">
                 <h2 className="text-2xl font-bold tracking-tight text-brand">
@@ -60,90 +79,96 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                 </p>
               </Link>
             </div>
-            <div className={styles.navLinks}>
-              <Link 
-                href="/#about" 
-                className="group flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:text-brand hover:ring-brand/50 transition-all duration-300"
-              >
-                <i className="fas fa-arrow-left transition-transform group-hover:-translate-x-1" /> 
-                Back to Home
-              </Link>
-            </div>
+            <DepartmentSectionNavigation />
           </div>
-        </nav>
+        </header>
 
-        <main className={`${styles.main} relative overflow-hidden`} style={{ minHeight: 'calc(100vh - 160px)' }}>
-          {/* Decorative Background Blobs */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-br from-brand/10 via-transparent to-amber-500/10 blur-[120px] rounded-[100%] pointer-events-none -z-10" />
-          <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-gradient-to-tl from-amber-400/10 via-transparent to-brand/5 blur-[100px] rounded-[100%] pointer-events-none -z-10" />
-
+        <main className={`${styles.main} ${styles.departmentDetailMain}`}>
           {/* ── HERO SECTION ── */}
-          <section className="relative pt-32 pb-16 sm:pt-40 sm:pb-20">
+          <section className={styles.departmentHeroSection}>
             <div className={styles.container}>
-              <div className="mb-12 text-center max-w-4xl mx-auto" data-reveal="fade-up">
-                {department.logo ? (
-                  <div className="mx-auto mb-8 relative w-32 h-32 sm:w-40 sm:h-40 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-2 bg-white/80 backdrop-blur-xl border border-white/60 transition-transform duration-500 hover:scale-105">
-                    <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white shadow-inner">
-                      <img src={department.logo} alt={`${department.id} Logo`} className="w-[85%] h-[85%] object-contain" />
+              <div className={styles.departmentHeroGrid}>
+                <div className={styles.departmentHeroCopy} data-reveal="fade-up">
+                  <span className={styles.departmentHeroBadge}>
+                    <i className={department.icon} aria-hidden="true" />
+                    {branding.code} Program
+                  </span>
+
+                  <h1>{branding.departmentName}</h1>
+                  <p>{heroDescription}</p>
+
+                  <div className={styles.departmentHeroActions}>
+                    <Link href="#program-overview" className={styles.departmentHeroPrimaryAction}>
+                      <span>Read Program Profile</span>
+                      <i className="fas fa-arrow-down" aria-hidden="true" />
+                    </Link>
+                    <Link href="#research-focus" className={styles.departmentHeroSecondaryAction}>
+                      <span>View Focus Areas</span>
+                      <i className="fas fa-layer-group" aria-hidden="true" />
+                    </Link>
+                  </div>
+                </div>
+
+                <aside className={styles.departmentProfilePanel} data-reveal="fade-left" aria-label={`${branding.code} profile summary`}>
+                  <div className={styles.departmentProfileHeader}>
+                    <div className={styles.departmentProfileLogo}>
+                      {department.logo ? (
+                        <img src={department.logo} alt={`${branding.departmentName} logo`} />
+                      ) : (
+                        <i className={department.icon} aria-hidden="true" />
+                      )}
+                    </div>
+                    <div>
+                      <span>Program Profile</span>
+                      <strong>{branding.code}</strong>
                     </div>
                   </div>
-                ) : (
-                  <div className="mx-auto mb-8 inline-flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-3xl bg-white/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/60 text-brand transition-transform duration-500 hover:scale-105">
-                    <i className={`${department.icon} text-4xl sm:text-5xl`} />
+
+                  <div className={styles.departmentProfileFocus}>
+                    {featuredAreas.map((area) => (
+                      <div key={area.title}>
+                        <i className={area.icon} aria-hidden="true" />
+                        <span>{area.title}</span>
+                      </div>
+                    ))}
                   </div>
-                )}
-                
-                <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-bold tracking-widest uppercase text-amber-600 bg-amber-50 rounded-full shadow-sm ring-1 ring-amber-500/20 backdrop-blur-md">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                  </span>
-                  {department.id} Department
-                </div>
-                
-                <h1 className="font-serif text-[clamp(2.2rem,4vw,3.5rem)] font-bold text-gray-900 leading-[1.15] mb-6 tracking-tight">
-                  <span className="bg-gradient-to-r from-brand via-blue-800 to-brand bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-                    {department.name}
-                  </span>
-                </h1>
+
+                  <div className={styles.departmentProfileRoute}>
+                    <span>Workflow coverage</span>
+                    <strong>Register, review, defend, archive</strong>
+                  </div>
+                </aside>
               </div>
 
               {/* ── STATS ROW ── */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-5xl mx-auto mb-16" data-reveal="fade-up" style={{ '--reveal-delay': '0.05s' } as any}>
-                {department.stats.map((stat, i) => (
-                  <div
-                    key={stat.label}
-                    className="group relative overflow-hidden bg-white/70 backdrop-blur-xl border border-white/60 rounded-2xl p-6 text-center shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,58,143,0.08)] transition-all duration-500 hover:-translate-y-1"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-blue-50/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                    <p className="relative text-3xl sm:text-4xl font-bold tracking-tight text-brand mb-1">{stat.value}</p>
-                    <p className="relative text-sm text-gray-500 font-medium">{stat.label}</p>
-                  </div>
+              <div className={styles.departmentStatsGrid} data-reveal="fade-up">
+                {heroStats.map((stat) => (
+                  <article key={stat.label} className={styles.departmentStatCard}>
+                    <strong>{stat.value}</strong>
+                    <span>{stat.label}</span>
+                  </article>
                 ))}
               </div>
 
               {/* ── ABOUT THE PROGRAM ── */}
-              <div className="max-w-5xl mx-auto mb-8 sm:mb-16" data-reveal="fade-up" style={{ '--reveal-delay': '0.08s' } as any}>
-                <div className="relative overflow-hidden bg-white/60 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] p-8 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,58,143,0.08)] transition-all duration-500">
-                  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-brand/5 to-amber-500/5 blur-3xl rounded-full pointer-events-none -translate-y-1/3 translate-x-1/3" />
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-500/5 to-purple-500/5 blur-3xl rounded-full pointer-events-none translate-y-1/3 -translate-x-1/3" />
-                  
-                  <div className="relative z-10 flex flex-col md:flex-row gap-8 md:gap-16 items-start">
-                    <div className="md:w-1/3 shrink-0">
-                      <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-brand mb-6 shadow-inner ring-1 ring-blue-100/50">
+              <div id="program-overview" className={`${styles.departmentOverviewWrap} ${styles.departmentAnchorSection}`} data-reveal="fade-up" style={{ '--reveal-delay': '0.08s' } as any}>
+                <article className={styles.departmentOverviewCard}>
+                  <div className={styles.departmentOverviewIntro}>
+                    <div className={styles.departmentOverviewHeading}>
+                      <div className={styles.departmentOverviewIcon}>
                         <i className="fas fa-book-open text-xl" />
                       </div>
-                      <h2 className="font-serif text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight leading-[1.15]">
+                      <h2>
                         About the <br className="hidden md:block" />Program
                       </h2>
                     </div>
-                    <div className="md:w-2/3">
-                      <p className="text-lg text-gray-700 leading-relaxed font-medium text-justify sm:text-left">
+                    <div className={styles.departmentOverviewCopy}>
+                      <p>
                         {department.description}
                       </p>
                     </div>
                   </div>
-                </div>
+                </article>
               </div>
             </div>
           </section>
@@ -180,7 +205,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
           </section>
 
           {/* ── KEY RESEARCH AREAS ── */}
-          <section className="pb-16 sm:pb-20">
+          <section id="research-focus" className={`${styles.departmentAnchorSection} pb-16 sm:pb-20`}>
             <div className={styles.container}>
               <div className="text-center mb-12 max-w-3xl mx-auto" data-reveal="fade-up" style={{ '--reveal-delay': '0.15s' } as any}>
                 <h2 className="text-sm font-bold uppercase tracking-widest text-brand mb-3">Areas of Excellence</h2>
@@ -197,9 +222,9 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                       <div
                         className="inline-flex h-11 w-11 items-center justify-center rounded-xl mb-5 shadow-inner ring-1"
                         style={{
-                          backgroundColor: `${department.color}10`,
-                          color: department.color,
-                          borderColor: `${department.color}20`,
+                          backgroundColor: `color-mix(in srgb, ${branding.highlightColor} 18%, white)`,
+                          color: branding.primaryColor,
+                          borderColor: `color-mix(in srgb, ${branding.secondaryColor} 18%, white)`,
                         }}
                       >
                         <i className={`${area.icon} text-lg`} />
@@ -214,7 +239,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
           </section>
 
           {/* ── CHART + SIDEBAR ── */}
-          <section className="pb-16 sm:pb-20">
+          <section id="department-resources" className={`${styles.departmentAnchorSection} pb-16 sm:pb-20`}>
             <div className={styles.container}>
               <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-12 items-start max-w-6xl mx-auto" data-reveal="fade-up" style={{ '--reveal-delay': '0.25s' } as any}>
                 
@@ -274,6 +299,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                     <div className="flex flex-wrap gap-4 relative z-10">
                       {managedDepartmentsData.map(dept => {
                         const isActive = department.id === dept.id;
+                        const navBranding = getDepartmentBranding(dept.id);
                         return (
                           <Link
                             key={dept.id}
@@ -290,7 +316,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                               <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-100%] animate-[shimmer_2s_infinite]" />
                             )}
                             <span className="relative z-10 flex items-center gap-2">
-                              {dept.id} 
+                              {navBranding.code} 
                               {!isActive && <i className="fas fa-arrow-right text-[0.7rem] opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />}
                             </span>
                           </Link>
@@ -318,10 +344,10 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                     <i className={`${department.icon} text-2xl`} />
                   </div>
                   <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
-                    Ready to Start Your {department.id} Capstone?
+                    Ready to Start Your {branding.code} Capstone?
                   </h2>
                   <p className="text-blue-100/90 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-                    ThesisTrack streamlines the entire research lifecycle for the <strong className="text-white">{department.name}</strong> department — from title proposal to final defense.
+                    ThesisTrack streamlines the entire research lifecycle for the <strong className="text-white">{branding.departmentName}</strong> department — from title proposal to final defense.
                   </p>
                   <div className="flex flex-wrap justify-center gap-4">
                     <Link

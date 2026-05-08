@@ -16,7 +16,6 @@ import {
   useBranding
 } from '@/components/branding/branding-provider';
 import {
-  BRANDING_COLOR_KEYS,
   DEFAULT_BRANDING,
   NAMED_COLORS,
   THEME_PRESETS,
@@ -188,12 +187,6 @@ function getSuggestedColors(value: string) {
   ];
 
   return Array.from(new Set(suggestions));
-}
-
-function getContrastTone(status: string) {
-  if (status === 'Good Contrast') return 'is-good';
-  if (status === 'Low Contrast') return 'is-low';
-  return 'is-poor';
 }
 
 function getAssetPreviewLabel(key: BrandingAssetKey) {
@@ -2187,50 +2180,6 @@ export function SystemAdminBranding() {
               </div>
               <div className="admin-section-body">
                 <LiveSystemPreview branding={draft} mode={previewMode} />
-              </div>
-            </section>
-
-            <section className="admin-section-card">
-              <div className="admin-section-head">
-                <div>
-                  <h3>Accessibility Check</h3>
-                  <p>Contrast warnings before applying a theme globally.</p>
-                </div>
-                <span className={`branding-accessibility-summary ${accessibilityWarnings.length ? 'is-warning' : 'is-good'}`}>
-                  {accessibilityWarnings.length ? `${accessibilityWarnings.length} warnings` : 'All good'}
-                </span>
-              </div>
-              <div className="admin-section-body">
-                <div className="branding-contrast-list">
-                  {contrastChecks.map((check) => (
-                    <div key={check.label} className="branding-contrast-item">
-                      <div>
-                        <strong>{check.label}</strong>
-                        <span>{check.detail}</span>
-                      </div>
-                      <span className={`branding-contrast-badge ${getContrastTone(check.status)}`}>
-                        {check.status}
-                        <small>{check.ratio.toFixed(2)}:1</small>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="admin-section-card">
-              <div className="admin-section-head">
-                <div>
-                  <h3>CSS Variables</h3>
-                  <p>Current global theme tokens.</p>
-                </div>
-              </div>
-              <div className="admin-section-body">
-                <pre className="branding-css-preview">
-{`:root {
-${BRANDING_COLOR_KEYS.map((key) => `  --color-${key.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)}: ${draft.colors[key]};`).join('\n')}
-}`}
-                </pre>
               </div>
             </section>
           </aside>
