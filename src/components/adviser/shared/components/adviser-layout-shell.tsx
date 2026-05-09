@@ -16,15 +16,45 @@ import {
   type WorkspaceMode
 } from '@/components/adviser/shared/config/dashboard-utils';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
+import type { AdviserNotificationRecord } from '@/components/adviser/shared/components/adviser-notifications';
+import type { PortalNotificationItem } from '@/components/shared/portal-shell-action-menus';
 
 const SIDEBAR_STORAGE_KEY = 'adviserShellSidebarCollapsed';
 
 type AdviserLayoutShellProps = {
   children: React.ReactNode;
   data: AdviserDashboardData;
+  notifications?: AdviserNotificationRecord[];
 };
 
-export function AdviserLayoutShell({ children, data }: AdviserLayoutShellProps) {
+function toNotificationPreviewItems(
+  notifications: AdviserNotificationRecord[] | undefined,
+  basePath: string
+): PortalNotificationItem[] | undefined {
+  if (!notifications) {
+    return undefined;
+  }
+
+  return notifications.slice(0, 5).map((item) => ({
+    id: item.id,
+    title: item.title,
+    message: item.text,
+    href: item.entityType === 'uploaded_file'
+      ? basePath.includes('/panel-mode')
+        ? `${basePath}/evaluation-queue`
+        : `${basePath}/submissions`
+      : item.href.startsWith('/adviser/')
+        ? item.href
+        : `${basePath}/notifications`,
+    icon: item.icon,
+    meta: item.meta,
+    tone: item.tone,
+    unread: item.status !== 'read',
+    actionLabel: 'Open'
+  }));
+}
+
+export function AdviserLayoutShell({ children, data, notifications }: AdviserLayoutShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -36,6 +66,7 @@ export function AdviserLayoutShell({ children, data }: AdviserLayoutShellProps) 
   const basePath = getWorkspaceBasePath(workspaceMode);
   const dashboardPath = getWorkspaceDashboardPath(workspaceMode);
   const meta = WORKSPACE_META[workspaceMode];
+  const notificationPreviewItems = toNotificationPreviewItems(notifications, basePath);
 
   function switchWorkspace(mode: WorkspaceMode) {
     if (mode === workspaceMode) return;
@@ -129,6 +160,7 @@ export function AdviserLayoutShell({ children, data }: AdviserLayoutShellProps) 
             basePath={basePath}
             fullName={data.profile.fullName}
             notificationCount={data.profile.notificationCount}
+            notificationItems={notificationPreviewItems}
             workspaceMode={workspaceMode}
             onSwitchWorkspace={switchWorkspace}
           />

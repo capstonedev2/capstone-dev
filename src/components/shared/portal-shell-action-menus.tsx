@@ -83,6 +83,7 @@ export function PortalShellActionMenus({
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
@@ -111,8 +112,21 @@ export function PortalShellActionMenus({
     };
   }, []);
 
-  const unreadPreviewCount = notificationItems.filter((item) => item.unread !== false).length;
+  const markNotificationRead = (notificationId: string) => {
+    setReadNotificationIds((current) => new Set(current).add(notificationId));
+    void fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationId, action: 'read' }),
+      keepalive: true
+    }).finally(() => {
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    });
+  };
+
+  const unreadPreviewCount = notificationItems.filter((item) => item.unread !== false && !readNotificationIds.has(item.id)).length;
   const urgentPreviewCount = notificationItems.filter((item) => item.tone === 'danger' || item.tone === 'warning').length;
+  const visibleNotificationCount = Math.max(0, notificationCount - readNotificationIds.size);
 
   return (
     <div className="portal-shell-action-menus">
@@ -133,9 +147,9 @@ export function PortalShellActionMenus({
           </span>
           <span className="portal-shell-notification-trigger-copy">
             <strong>{notificationButtonLabel}</strong>
-            <small>{notificationCount ? `${notificationCount} unread` : 'All caught up'}</small>
+            <small>{visibleNotificationCount ? `${visibleNotificationCount} unread` : 'All caught up'}</small>
           </span>
-          {notificationCount ? <span className="portal-shell-notification-trigger-count">{notificationCount}</span> : null}
+          {visibleNotificationCount ? <span className="portal-shell-notification-trigger-count">{visibleNotificationCount}</span> : null}
         </button>
 
         <div className={`portal-shell-notification-menu${notificationMenuOpen ? ' is-open' : ''}`}>
@@ -157,7 +171,7 @@ export function PortalShellActionMenus({
           <div className="portal-shell-notification-menu-summary">
             <span className="portal-shell-notification-summary-pill is-primary">
               <i aria-hidden="true" className="fas fa-envelope-open-text" />
-              {notificationCount || unreadPreviewCount ? `${notificationCount || unreadPreviewCount} unread` : '0 unread'}
+              {visibleNotificationCount || unreadPreviewCount ? `${visibleNotificationCount || unreadPreviewCount} unread` : '0 unread'}
             </span>
             <span className={`portal-shell-notification-summary-pill${urgentPreviewCount ? ' is-danger' : ''}`}>
               <i aria-hidden="true" className="fas fa-bolt" />
@@ -170,9 +184,14 @@ export function PortalShellActionMenus({
               {notificationItems.map((item) => (
                 <Link
                   key={item.id}
-                  className={`portal-shell-notification-menu-item${item.unread === false ? '' : ' is-unread'}`}
+                  className={`portal-shell-notification-menu-item${item.unread === false || readNotificationIds.has(item.id) ? '' : ' is-unread'}`}
                   href={item.href}
-                  onClick={() => setNotificationMenuOpen(false)}
+                  onClick={() => {
+                    if (item.unread !== false && !readNotificationIds.has(item.id)) {
+                      markNotificationRead(item.id);
+                    }
+                    setNotificationMenuOpen(false);
+                  }}
                 >
                   <span className={`portal-shell-notification-menu-item-icon is-${item.tone || 'neutral'}`}>
                     <i aria-hidden="true" className={`fas ${item.icon}`} />
@@ -180,7 +199,7 @@ export function PortalShellActionMenus({
                   <span className="portal-shell-notification-menu-item-copy">
                     <span className="portal-shell-notification-menu-item-head">
                       <strong>{item.title}</strong>
-                      {item.unread === false ? null : <span aria-hidden="true" className="portal-shell-notification-menu-item-dot" />}
+                      {item.unread === false || readNotificationIds.has(item.id) ? null : <span aria-hidden="true" className="portal-shell-notification-menu-item-dot" />}
                     </span>
                     <small>{item.message}</small>
                     <span className="portal-shell-notification-menu-item-footer">

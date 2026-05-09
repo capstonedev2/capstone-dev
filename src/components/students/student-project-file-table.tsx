@@ -60,12 +60,12 @@ export function FileTable({
   const itemStart = totalCount ? (currentPage - 1) * pageSize + 1 : 0;
   const itemEnd = totalCount ? Math.min(currentPage * pageSize, totalCount) : 0;
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
+  const activeFilterLabel = PROJECT_FILE_FILTER_OPTIONS.find((option) => option.key === categoryFilter)?.label || 'Filter';
 
   return (
     <div className="project-files-table-block">
       <div className="toolbar-grid project-files-toolbar">
         <div className="form-field project-files-search-field">
-          <label htmlFor="project-files-search">Search files</label>
           <div className="project-files-search-control">
             <i className="fas fa-magnifying-glass" aria-hidden="true" />
             <input
@@ -73,21 +73,28 @@ export function FileTable({
               type="search"
               value={searchTerm}
               onChange={(event) => onSearchTermChange(event.target.value)}
-              placeholder="Search by file name, uploader, notes, or version"
+              placeholder="Search files..."
             />
           </div>
         </div>
 
-        <div className="form-field">
+        <div className="form-field project-files-filter-control">
           <label htmlFor="project-files-filter">Filter</label>
-          <select id="project-files-filter" value={categoryFilter} onChange={(event) => onCategoryFilterChange(event.target.value)}>
+          <i className="fas fa-filter" aria-hidden="true" />
+          <select
+            id="project-files-filter"
+            value={categoryFilter}
+            onChange={(event) => onCategoryFilterChange(event.target.value)}
+            aria-label="Filter project files"
+          >
             {PROJECT_FILE_FILTER_OPTIONS.map((option) => (
               <option key={option.key} value={option.key}>{option.label}</option>
             ))}
           </select>
+          <span>{categoryFilter === 'all' ? 'Filter' : activeFilterLabel}</span>
         </div>
 
-        <div className="form-field">
+        <div className="form-field project-files-hidden-filter">
           <label htmlFor="project-files-sort">Sort By</label>
           <select
             id="project-files-sort"
@@ -100,7 +107,7 @@ export function FileTable({
           </select>
         </div>
 
-        <div className="form-field">
+        <div className="form-field project-files-hidden-filter">
           <label htmlFor="project-files-page-size">Rows Per Page</label>
           <select
             id="project-files-page-size"
@@ -119,7 +126,7 @@ export function FileTable({
           <strong>{totalCount}</strong>
           <span>Tracked file record{totalCount === 1 ? '' : 's'}</span>
         </div>
-        <small>Use search, filters, and page controls to focus on the records that need attention.</small>
+        <small>{totalCount ? 'Use search, filters, and page controls to focus on the records that need attention.' : 'Real uploaded documents will appear here after they are saved to private storage.'}</small>
       </div>
 
       {errorMessage ? (
@@ -150,6 +157,7 @@ export function FileTable({
                   <th>Category</th>
                   <th>Version</th>
                   <th>Status</th>
+                  <th>Adviser Status</th>
                   <th>Uploaded By</th>
                   <th>Date</th>
                   <th className="align-right">Actions</th>
@@ -175,8 +183,7 @@ export function FileTable({
 
           <div className="project-files-pagination">
             <div className="project-files-pagination-copy">
-              <strong>Showing {itemStart}-{itemEnd}</strong>
-              <span>of {totalCount} file record{totalCount === 1 ? '' : 's'}</span>
+              <span>Showing {itemStart} to {itemEnd} of {totalCount} file{totalCount === 1 ? '' : 's'}</span>
             </div>
 
             <div className="project-files-pagination-controls">
@@ -205,11 +212,11 @@ export function FileTable({
         </>
       ) : (
         <div className="empty-state project-files-empty-state">
-          <span className="empty-state-icon"><i className="fas fa-folder-open" aria-hidden="true" /></span>
-          <strong>No files uploaded yet</strong>
-          <p>Add the first file to begin tracking revisions, review status, and approved copies.</p>
+          <span className="empty-state-icon"><i className="fas fa-file-shield" aria-hidden="true" /></span>
+          <strong>No private project files yet</strong>
+          <p>Upload your first thesis or capstone document to begin secure tracking, adviser review, and version history.</p>
           <button className="btn btn-primary project-files-empty-action" type="button" onClick={onOpenUpload}>
-            <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload a File
+            <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload Document
           </button>
         </div>
       )}

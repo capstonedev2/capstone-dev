@@ -10,6 +10,8 @@
   --footer: var(--color-primary-dark, #061b3a);
   --shadow-soft: 0 16px 38px rgb(15 43 89 / 0.08);
   --shadow-card: 0 28px 70px rgb(15 43 89 / 0.12);
+  --motion-luxe: cubic-bezier(0.19, 1, 0.22, 1);
+  --motion-silk: cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 100vh;
   overflow-x: hidden;
   background: var(--background);
@@ -26,6 +28,58 @@
 
 .landingPage a {
   text-decoration: none;
+}
+
+@keyframes luxeSurfaceSweep {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+    opacity: 0;
+  }
+
+  18%,
+  58% {
+    opacity: 0.72;
+  }
+
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+@keyframes luxeTraceFlow {
+  0% {
+    background-position: 220% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes luxeIconBreath {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 18px 34px rgb(15 43 89 / 0.1), inset 0 0 0 0.55rem rgb(255 255 255 / 0.72);
+  }
+
+  50% {
+    transform: translateY(-3px) scale(1.025);
+    box-shadow: 0 26px 46px rgb(15 43 89 / 0.15), inset 0 0 0 0.55rem rgb(255 255 255 / 0.72);
+  }
+}
+
+@keyframes luxeHeroSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .container {
@@ -70,11 +124,12 @@
 
 .departmentPageNavControls {
   display: flex;
+  width: 100%;
   min-width: 0;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 1rem;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .departmentBackLink {
@@ -258,7 +313,20 @@
   font-size: 0.94rem;
   font-weight: 900;
   letter-spacing: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  transition: transform 0.55s var(--motion-luxe), box-shadow 0.55s var(--motion-luxe), background 0.4s ease, color 0.4s ease;
+}
+
+.buttonPrimary::before,
+.buttonSecondary::before,
+.buttonGhost::before {
+  content: '';
+  position: absolute;
+  inset: -45% auto -45% -35%;
+  z-index: -1;
+  width: 36%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.48), transparent);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .buttonPrimary {
@@ -285,7 +353,13 @@
 .buttonPrimary:hover,
 .buttonSecondary:hover,
 .buttonGhost:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.015);
+}
+
+.buttonPrimary:hover::before,
+.buttonSecondary:hover::before,
+.buttonGhost:hover::before {
+  animation: luxeSurfaceSweep 1.15s var(--motion-silk);
 }
 
 .buttonIcon {
@@ -379,6 +453,19 @@
   pointer-events: none;
 }
 
+.heroSection::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(105deg, transparent 0 38%, rgb(255 255 255 / 0.5) 48%, transparent 58% 100%);
+  mix-blend-mode: screen;
+  opacity: 0.42;
+  transform: translateX(-62%);
+  animation: luxeSurfaceSweep 8.5s var(--motion-silk) 0.6s infinite;
+  pointer-events: none;
+}
+
 .heroGrid {
   display: grid;
   position: relative;
@@ -392,6 +479,29 @@
 .heroContent {
   max-width: 58rem;
   margin-inline: auto;
+}
+
+.heroContent[data-visible='true'] .heroBadge,
+.heroContent[data-visible='true'] h1,
+.heroContent[data-visible='true'] p,
+.heroContent[data-visible='true'] a {
+  animation: luxeHeroSettle 1s var(--motion-luxe) both;
+}
+
+.heroContent[data-visible='true'] h1 {
+  animation-delay: 0.08s;
+}
+
+.heroContent[data-visible='true'] p {
+  animation-delay: 0.16s;
+}
+
+.heroContent[data-visible='true'] a:nth-of-type(1) {
+  animation-delay: 0.24s;
+}
+
+.heroContent[data-visible='true'] a:nth-of-type(2) {
+  animation-delay: 0.3s;
 }
 
 .heroBadge {
@@ -409,6 +519,7 @@
   letter-spacing: 0;
   text-transform: uppercase;
   box-shadow: 0 12px 26px rgb(15 43 89 / 0.06);
+  backdrop-filter: blur(18px);
 }
 
 .heroBadge i {
@@ -457,6 +568,30 @@
   background: rgb(255 255 255 / 0.96);
   padding: 1.35rem 1.55rem;
   box-shadow: 0 22px 52px rgb(15 43 89 / 0.11);
+  backdrop-filter: blur(18px);
+  transition: transform 0.65s var(--motion-luxe), box-shadow 0.65s var(--motion-luxe), border-color 0.65s var(--motion-luxe);
+}
+
+.heroInfoCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(120deg, transparent 0 35%, rgb(255 255 255 / 0.78) 48%, transparent 62% 100%);
+  opacity: 0;
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.heroInfoCard:hover {
+  border-color: color-mix(in srgb, var(--primary-blue) 22%, white);
+  box-shadow: 0 34px 78px rgb(15 43 89 / 0.16);
+  transform: translateY(-5px);
+}
+
+.heroInfoCard:hover::before {
+  animation: luxeSurfaceSweep 1.25s var(--motion-silk);
 }
 
 .heroInfoIcon {
@@ -498,12 +633,18 @@
 }
 
 .featureItem {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 0.55rem;
   min-height: 7.4rem;
   padding: 0.65rem 1.1rem;
   text-align: center;
+  transition: transform 0.55s var(--motion-luxe);
+}
+
+.featureItem:hover {
+  transform: translateY(-4px);
 }
 
 .featureItem + .featureItem {
@@ -519,6 +660,14 @@
   background: #eef6ff;
   color: var(--primary-blue);
   font-size: 1.05rem;
+  transition: transform 0.55s var(--motion-luxe), background 0.55s var(--motion-luxe), color 0.55s var(--motion-luxe), box-shadow 0.55s var(--motion-luxe);
+}
+
+.featureItem:hover .featureIcon {
+  background: var(--primary-blue);
+  color: #fff;
+  box-shadow: 0 16px 30px rgb(0 58 143 / 0.18);
+  transform: translateY(-2px) scale(1.08);
 }
 
 .featureItem h3 {
@@ -703,6 +852,8 @@
   border-radius: 1rem;
   background: rgb(255 255 255 / 0.94);
   padding: 1.7rem;
+  transform-style: preserve-3d;
+  transition: transform 0.7s var(--motion-luxe), box-shadow 0.7s var(--motion-luxe), border-color 0.7s var(--motion-luxe);
 }
 
 .institutionCard::before {
@@ -711,6 +862,27 @@
   inset: 0 0 auto;
   height: 0.35rem;
   background: linear-gradient(90deg, var(--primary-blue), var(--hover-blue), var(--accent-gold));
+}
+
+.institutionCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, transparent 0 36%, rgb(255 255 255 / 0.76) 48%, transparent 62% 100%);
+  opacity: 0;
+  transform: translateX(-125%);
+  pointer-events: none;
+}
+
+.institutionCard:hover {
+  border-color: color-mix(in srgb, var(--primary-blue) 20%, white);
+  box-shadow: 0 34px 78px rgb(15 43 89 / 0.13);
+  transform: translateY(-7px) rotateX(1.2deg);
+}
+
+.institutionCard:hover::after {
+  animation: luxeSurfaceSweep 1.3s var(--motion-silk);
 }
 
 .institutionVisionCard {
@@ -852,6 +1024,13 @@
   font-size: 0.9rem;
   font-weight: 800;
   line-height: 1.45;
+  transition: transform 0.45s var(--motion-luxe), border-color 0.45s var(--motion-luxe), box-shadow 0.45s var(--motion-luxe);
+}
+
+.institutionMissionList li:hover {
+  border-color: color-mix(in srgb, var(--primary-blue) 20%, white);
+  box-shadow: 0 14px 30px rgb(15 43 89 / 0.08);
+  transform: translateX(5px);
 }
 
 .institutionMissionList li > span {
@@ -934,6 +1113,7 @@
 }
 
 .moduleGrid {
+  perspective: 1200px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
@@ -953,7 +1133,8 @@
   background: rgb(255 255 255 / 0.94);
   padding: 1.25rem;
   text-align: left;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transform-style: preserve-3d;
+  transition: transform 0.72s var(--motion-luxe), box-shadow 0.72s var(--motion-luxe), border-color 0.72s var(--motion-luxe), background 0.72s var(--motion-luxe);
 }
 
 .moduleCard::before {
@@ -970,7 +1151,12 @@
   z-index: -1;
   inset: 0;
   background:
+    linear-gradient(115deg, transparent 0 36%, rgb(255 255 255 / 0.78) 49%, transparent 63% 100%),
     radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--module-accent) 12%, transparent), transparent 13rem);
+  background-position: -180% 0, center;
+  background-size: 240% 100%, auto;
+  opacity: 0.82;
+  transition: opacity 0.5s ease;
 }
 
 .moduleCard:nth-child(2) {
@@ -987,8 +1173,13 @@
 
 .moduleCard:hover {
   border-color: color-mix(in srgb, var(--module-accent) 34%, white);
-  box-shadow: 0 26px 58px rgb(15 43 89 / 0.13);
-  transform: translateY(-4px);
+  background: rgb(255 255 255 / 0.98);
+  box-shadow: 0 34px 74px rgb(15 43 89 / 0.16);
+  transform: translateY(-8px) rotateX(1.4deg);
+}
+
+.moduleCard:hover::after {
+  animation: luxeTraceFlow 1.45s var(--motion-silk);
 }
 
 .moduleCardHeader {
@@ -1008,6 +1199,14 @@
   color: var(--module-accent);
   font-size: 1.35rem;
   box-shadow: inset 0 0 0 0.45rem rgb(255 255 255 / 0.58);
+  transition: transform 0.65s var(--motion-luxe), box-shadow 0.65s var(--motion-luxe), background 0.65s var(--motion-luxe), color 0.65s var(--motion-luxe);
+}
+
+.moduleCard:hover .moduleIcon {
+  background: var(--module-accent);
+  color: #fff;
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--module-accent) 24%, transparent);
+  transform: translateZ(20px) scale(1.08);
 }
 
 .moduleBadge {
@@ -1084,6 +1283,13 @@
   font-family: 'Font Awesome 6 Free';
   font-size: 0.56rem;
   font-weight: 900;
+  transition: transform 0.38s var(--motion-luxe), background 0.38s var(--motion-luxe), color 0.38s var(--motion-luxe);
+}
+
+.moduleCard:hover .moduleCapabilityList li::before {
+  background: var(--module-accent);
+  color: #fff;
+  transform: scale(1.08);
 }
 
 .cardCheckList {
@@ -1131,6 +1337,7 @@
 
 .workflowTimeline {
   position: relative;
+  perspective: 1200px;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1rem;
@@ -1153,6 +1360,22 @@
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 0.7),
     0 12px 28px rgb(0 58 143 / 0.14);
+}
+
+.workflowTimeline::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 2.25rem;
+  right: 4rem;
+  left: 4rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent 0 22%, rgb(255 255 255 / 0.9) 38%, transparent 54% 100%);
+  background-size: 240% 100%;
+  animation: luxeTraceFlow 4.8s var(--motion-silk) infinite;
+  pointer-events: none;
 }
 
 .workflowStep {
@@ -1215,6 +1438,16 @@
     0 18px 34px rgb(15 43 89 / 0.1),
     inset 0 0 0 0.55rem rgb(255 255 255 / 0.72);
   font-size: 1.55rem;
+  transition: transform 0.65s var(--motion-luxe), box-shadow 0.65s var(--motion-luxe), background 0.65s var(--motion-luxe), color 0.65s var(--motion-luxe);
+  animation: luxeIconBreath 5.5s ease-in-out infinite;
+  animation-delay: var(--reveal-delay, 0s);
+}
+
+.workflowStep:hover .workflowIcon {
+  background: var(--stage-accent);
+  color: #fff;
+  transform: translateY(-5px) scale(1.08);
+  animation-play-state: paused;
 }
 
 .stepNumber {
@@ -1247,7 +1480,8 @@
   background: rgb(255 255 255 / 0.94);
   padding: 1.25rem;
   box-shadow: 0 20px 46px rgb(15 43 89 / 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transform-style: preserve-3d;
+  transition: transform 0.68s var(--motion-luxe), box-shadow 0.68s var(--motion-luxe), border-color 0.68s var(--motion-luxe), background 0.68s var(--motion-luxe);
 }
 
 .workflowStepBody::before {
@@ -1260,8 +1494,9 @@
 
 .workflowStep:hover .workflowStepBody {
   border-color: color-mix(in srgb, var(--stage-accent) 42%, white);
-  box-shadow: 0 28px 60px rgb(15 43 89 / 0.13);
-  transform: translateY(-4px);
+  background: rgb(255 255 255 / 0.98);
+  box-shadow: 0 34px 74px rgb(15 43 89 / 0.15);
+  transform: translateY(-7px) rotateX(1.2deg);
 }
 
 .workflowStep h3 {
@@ -2654,11 +2889,13 @@
 .departmentOverviewCard {
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--department-secondary) 16%, #d3e0f2);
+  border: 1px solid color-mix(in srgb, var(--department-secondary) 34%, #d3e0f2);
   border-radius: 0.9rem;
-  background: rgb(255 255 255 / 0.92);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--department-primary) 8%, white), rgb(255 255 255 / 0.94) 48%),
+    rgb(255 255 255 / 0.92);
   padding: 1.35rem;
-  box-shadow: 0 18px 44px rgb(15 43 89 / 0.08);
+  box-shadow: 0 18px 44px color-mix(in srgb, var(--department-primary) 15%, transparent);
 }
 
 .departmentOverviewCard::before {
@@ -2679,6 +2916,14 @@
 .departmentOverviewHeading {
   display: grid;
   gap: 0.8rem;
+  min-height: 100%;
+  align-content: center;
+  border-radius: 0.82rem;
+  background:
+    linear-gradient(135deg, var(--department-primary), var(--department-secondary));
+  padding: 1.35rem;
+  color: var(--department-text);
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--department-primary) 22%, transparent);
 }
 
 .departmentOverviewIcon {
@@ -2686,16 +2931,16 @@
   width: 3.15rem;
   height: 3.15rem;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--department-secondary) 15%, white);
+  border: 1px solid color-mix(in srgb, var(--department-highlight) 42%, white);
   border-radius: 0.72rem;
-  background: color-mix(in srgb, var(--department-highlight) 18%, white);
+  background: color-mix(in srgb, var(--department-highlight) 82%, white);
   color: var(--department-primary);
-  box-shadow: inset 0 0 0 0.34rem rgb(255 255 255 / 0.72);
+  box-shadow: inset 0 0 0 0.34rem rgb(255 255 255 / 0.3);
 }
 
 .departmentOverviewHeading h2 {
   margin: 0;
-  color: #102033;
+  color: inherit;
   font-family: var(--font-serif), Georgia, serif;
   font-size: 2.15rem;
   font-weight: 800;
@@ -2705,7 +2950,7 @@
 
 .departmentOverviewCopy p {
   margin: 0;
-  color: #40566f;
+  color: color-mix(in srgb, var(--department-primary) 48%, #40566f);
   font-size: 1rem;
   font-weight: 650;
   line-height: 1.74;
@@ -3351,17 +3596,25 @@
 
 .landingPage [data-reveal] {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.65s ease, transform 0.65s ease;
+  transform: translate3d(0, 34px, 0) scale(0.985);
+  transform-origin: 50% 70%;
+  transition:
+    opacity 0.95s var(--motion-silk),
+    transform 0.95s var(--motion-silk);
   transition-delay: var(--reveal-delay, 0s);
+  will-change: opacity, transform;
 }
 
 .landingPage [data-reveal='fade-left'] {
-  transform: translateX(34px);
+  transform: translate3d(44px, 0, 0) scale(0.985);
 }
 
 .landingPage [data-reveal='fade-right'] {
-  transform: translateX(-34px);
+  transform: translate3d(-44px, 0, 0) scale(0.985);
+}
+
+.landingPage [data-reveal='zoom-in'] {
+  transform: translate3d(0, 22px, 0) scale(0.94);
 }
 
 .landingPage [data-visible='true'] {
@@ -3393,6 +3646,19 @@
 
 .workflowTimeline > *:nth-child(6) {
   --reveal-delay: 0.3s;
+}
+
+.featureRow > *:nth-child(2),
+.visionMissionGrid > *:nth-child(2) {
+  --reveal-delay: 0.07s;
+}
+
+.featureRow > *:nth-child(3) {
+  --reveal-delay: 0.14s;
+}
+
+.featureRow > *:nth-child(4) {
+  --reveal-delay: 0.21s;
 }
 
 @media (prefers-reduced-motion: reduce) {

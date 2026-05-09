@@ -184,7 +184,7 @@ function NotificationCard({
               </>
             ) : (
               <>
-                <Link className={PRIMARY_ACTION_CLASS} href={action.href}>
+                <Link className={PRIMARY_ACTION_CLASS} href={action.href} onClick={() => !item.read && onMarkRead(item.id)}>
                   <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" /> {action.label}
                 </Link>
                 {!item.read ? (
@@ -347,6 +347,15 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
   const markRead = (id: string) => {
     setNotificationsData((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
+    setRealNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'READ', readAt: new Date().toISOString() } : item)));
+    void fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationId: id, action: 'read' }),
+      keepalive: true
+    }).finally(() => {
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    });
   };
 
   const handleAction = async (id: string, action: 'accept' | 'reject') => {
@@ -367,6 +376,17 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
   const markAllRead = () => {
     setNotificationsData((prev) => prev.map((item) => ({ ...item, read: true })));
+    const unreadIds = notificationsData.filter((item) => !item.read).map((item) => item.id);
+    setRealNotifications((prev) => prev.map((item) => (unreadIds.includes(item.id) ? { ...item, status: 'READ', readAt: new Date().toISOString() } : item)));
+    unreadIds.forEach((notificationId) => {
+      void fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId, action: 'read' }),
+        keepalive: true
+      });
+    });
+    window.dispatchEvent(new Event('thesistrack:notifications-updated'));
   };
 
   const resetFilters = () => {

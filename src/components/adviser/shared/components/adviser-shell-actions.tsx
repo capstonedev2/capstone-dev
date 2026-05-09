@@ -9,6 +9,7 @@ type AdviserShellActionsProps = {
   basePath: string;
   fullName: string;
   notificationCount: number;
+  notificationItems?: PortalNotificationItem[];
   workspaceMode: WorkspaceMode;
   onSwitchWorkspace: (mode: WorkspaceMode) => void;
 };
@@ -89,6 +90,7 @@ export function AdviserShellActions({
   basePath,
   fullName,
   notificationCount,
+  notificationItems,
   workspaceMode,
   onSwitchWorkspace
 }: AdviserShellActionsProps) {
@@ -101,7 +103,7 @@ export function AdviserShellActions({
       notificationCount={notificationCount}
       notificationTitle="Workspace Notifications"
       notificationDescription="Latest reviews, schedule changes, and supervision updates for the current adviser workspace."
-      notificationItems={buildNotificationItems(basePath, workspaceMode)}
+      notificationItems={notificationItems ?? buildNotificationItems(basePath, workspaceMode)}
       profileName={fullName}
       profileSubtitle={workspaceMeta.pillLabel}
       profileDetail={`${workspaceMeta.headerLabel} • ${getInitials(fullName) || 'AD'}`}

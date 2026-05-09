@@ -3362,6 +3362,487 @@ tr:hover {
     display: none;
 }
 
+.adviser-evaluations-page {
+    animation: adviserEvaluationPageIn 0.42s ease both;
+}
+
+.adviser-evaluation-files-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(191, 219, 254, 0.78);
+    border-radius: 1.75rem;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)),
+        radial-gradient(circle at 8% 0%, rgba(246, 190, 0, 0.16), transparent 30%),
+        radial-gradient(circle at 96% 14%, rgba(0, 58, 143, 0.12), transparent 34%);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    padding: 1.35rem;
+}
+
+.adviser-evaluation-files-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), #1d4ed8 42%, var(--secondary));
+}
+
+.adviser-evaluation-files-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+}
+
+.adviser-evaluation-files-icon {
+    display: inline-flex;
+    width: 3.35rem;
+    height: 3.35rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.15rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary), #0f4aa2);
+    box-shadow: 0 16px 34px rgba(0, 58, 143, 0.2);
+}
+
+.adviser-evaluation-files-title {
+    min-width: 0;
+}
+
+.adviser-evaluation-files-title h3 {
+    margin-top: 0.2rem;
+    color: var(--text-dark);
+    font-size: clamp(1.15rem, 1.8vw, 1.55rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.adviser-evaluation-files-title p {
+    max-width: 58rem;
+    margin-top: 0.35rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
+.adviser-evaluation-file-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(6.5rem, 1fr));
+    gap: 0.6rem;
+}
+
+.adviser-evaluation-file-stats span {
+    display: grid;
+    gap: 0.18rem;
+    min-height: 4.2rem;
+    align-content: center;
+    border: 1px solid rgba(226, 232, 240, 0.88);
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.78);
+    padding: 0.75rem 0.85rem;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+}
+
+.adviser-evaluation-file-stats i {
+    color: var(--primary);
+    font-size: 0.8rem;
+}
+
+.adviser-evaluation-file-stats strong {
+    color: var(--text-dark);
+    font-size: 1.25rem;
+    font-weight: 850;
+    line-height: 1;
+}
+
+.adviser-evaluation-file-stats small {
+    color: var(--text-light);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.adviser-evaluation-upload-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(22rem, 0.8fr);
+    gap: 1rem;
+    margin-top: 1.15rem;
+}
+
+.adviser-evaluation-upload-card {
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 1.35rem;
+    background: rgba(255, 255, 255, 0.86);
+    padding: 1rem;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+
+.adviser-evaluation-upload-card-head,
+.adviser-evaluation-selected-file,
+.adviser-evaluation-upload-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+}
+
+.adviser-evaluation-upload-card-head {
+    margin-bottom: 0.85rem;
+}
+
+.adviser-evaluation-upload-card-head span,
+.adviser-evaluation-upload-card-head em {
+    color: var(--text-light);
+    font-size: 0.7rem;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.adviser-evaluation-upload-card-head strong {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--primary);
+    font-size: 1.35rem;
+    font-weight: 850;
+    letter-spacing: -0.04em;
+}
+
+.adviser-evaluation-upload-card-head em {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    border-radius: 999px;
+    background: rgba(0, 58, 143, 0.07);
+    padding: 0 0.75rem;
+    color: var(--primary);
+}
+
+.adviser-evaluation-record-preview {
+    margin-top: 0.85rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, rgba(0, 58, 143, 0.06), rgba(246, 190, 0, 0.08));
+    padding: 0.85rem;
+}
+
+.adviser-evaluation-record-preview p {
+    color: var(--text-dark);
+    font-size: 0.92rem;
+    font-weight: 750;
+    line-height: 1.45;
+}
+
+.adviser-evaluation-record-preview span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.45rem;
+    color: var(--text-light);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.adviser-evaluation-upload-card.is-action {
+    display: grid;
+    align-content: space-between;
+    gap: 1rem;
+}
+
+.adviser-evaluation-selected-file {
+    justify-content: flex-start;
+    min-height: 5.2rem;
+    border: 1px dashed rgba(0, 58, 143, 0.26);
+    border-radius: 1.15rem;
+    background: rgba(248, 250, 252, 0.78);
+    padding: 0.9rem;
+}
+
+.adviser-evaluation-selected-file > span {
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    background: rgba(0, 58, 143, 0.08);
+    color: var(--primary);
+}
+
+.adviser-evaluation-selected-file strong {
+    display: block;
+    max-width: 24rem;
+    overflow: hidden;
+    color: var(--text-dark);
+    font-size: 0.92rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.adviser-evaluation-selected-file p {
+    margin-top: 0.22rem;
+    color: var(--text-light);
+    font-size: 0.78rem;
+}
+
+.adviser-evaluation-upload-actions {
+    flex-wrap: wrap;
+}
+
+.adviser-evaluation-upload-actions .table-btn,
+.adviser-evaluation-secure-upload {
+    min-height: 2.85rem;
+    border-radius: 1rem;
+    padding-inline: 1rem;
+}
+
+.adviser-evaluation-secure-upload:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+.adviser-evaluation-document-list {
+    margin-top: 1rem;
+}
+
+.adviser-student-documents-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(191, 219, 254, 0.78);
+    border-radius: 1.75rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
+    padding: 1.25rem;
+}
+
+.adviser-student-documents-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), #1d4ed8 42%, var(--secondary));
+}
+
+.adviser-student-documents-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.adviser-student-documents-head h2 {
+    margin-top: 0.2rem;
+    color: var(--text-dark);
+    font-size: 1.35rem;
+    font-weight: 850;
+    letter-spacing: -0.03em;
+}
+
+.adviser-student-documents-head p {
+    max-width: 48rem;
+    margin-top: 0.3rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.adviser-student-documents-count {
+    display: inline-flex;
+    min-height: 2.45rem;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: rgba(0, 58, 143, 0.07);
+    padding: 0 0.9rem;
+    color: var(--primary);
+    font-size: 0.82rem;
+    font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(0, 58, 143, 0.08);
+}
+
+.adviser-student-documents-panel .project-files-repository-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 0.85rem;
+}
+
+.adviser-student-documents-panel .project-files-repository-item {
+    display: grid;
+    gap: 0.9rem;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.04);
+}
+
+.adviser-student-documents-panel .project-files-repository-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+}
+
+.adviser-student-documents-panel .project-files-repository-lock {
+    width: 2.65rem;
+    height: 2.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    border-radius: 0.9rem;
+    background: rgba(0, 58, 143, 0.08);
+    color: var(--primary);
+}
+
+.adviser-student-documents-panel .project-files-repository-copy {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.adviser-student-documents-panel .project-files-repository-copy strong {
+    color: var(--text-dark);
+    line-height: 1.35;
+}
+
+.adviser-student-documents-panel .project-files-repository-subcopy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.adviser-student-documents-panel .project-files-repository-subcopy span {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    border-radius: 999px;
+    background: #f1f5f9;
+    padding: 0.18rem 0.6rem;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.adviser-student-documents-panel .project-files-repository-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.1rem;
+}
+
+.adviser-student-documents-panel .project-files-repository-actions .table-btn {
+    min-height: 2.35rem;
+    border-radius: 0.75rem;
+    padding-inline: 0.85rem;
+}
+
+.adviser-student-documents-panel .project-files-empty-state,
+.adviser-student-documents-panel .project-files-state {
+    border: 1px dashed rgba(148, 163, 184, 0.55);
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.65);
+    padding: 1.25rem;
+}
+
+.adviser-evaluations-page .project-files-repository-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 0.85rem;
+}
+
+.adviser-evaluations-page .project-files-repository-item {
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.88);
+    padding: 0.9rem;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.04);
+}
+
+.adviser-evaluations-page .project-files-repository-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+}
+
+.adviser-evaluations-page .project-files-empty-state {
+    border: 1px dashed rgba(148, 163, 184, 0.55);
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.58);
+    padding: 1.25rem;
+}
+
+@keyframes adviserEvaluationPageIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 1180px) {
+    .adviser-evaluation-files-hero,
+    .adviser-evaluation-upload-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .adviser-evaluation-files-icon {
+        display: none;
+    }
+
+    .adviser-evaluation-file-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .adviser-evaluation-files-panel {
+        border-radius: 1.25rem;
+        padding: 1rem;
+    }
+
+    .adviser-evaluation-file-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .adviser-evaluation-upload-card-head,
+    .adviser-evaluation-upload-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .adviser-evaluation-upload-actions .table-btn,
+    .adviser-evaluation-secure-upload {
+        width: 100%;
+    }
+
+    .adviser-evaluation-selected-file strong {
+        max-width: 14rem;
+    }
+
+    .adviser-student-documents-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .adviser-student-documents-count {
+        width: fit-content;
+    }
+}
+
 /* Also hide the old top-nav leading toggle and brand (now in global navbar) */
 .adviser-shell .top-nav .adviser-shell-toggle,
 .adviser-shell .top-nav .adviser-shell-brand {

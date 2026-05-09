@@ -1,8 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import { type ChangeEvent, type DragEvent, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import {
+  DOCUMENT_FILE_ACCEPT,
+  DOCUMENT_STORAGE_BUCKETS,
+  validateFileSize,
+  validateFileType
+} from '@/lib/storage/upload-config';
 import { FileItem } from '@/components/students/student-project-file-item';
 import { FileTable } from '@/components/students/student-project-file-table';
 import type {
@@ -18,12 +23,12 @@ import {
   PROJECT_FILE_TAG_OPTIONS,
   compareProjectFileVersions,
   formatFileSizeLabel,
+  formatProjectFileAdviserStatus,
   formatProjectFileDateTime,
   formatProjectFileStatus,
   getNextProjectFileVersion,
   getNextProjectFileVersionParts,
   getProjectFileCategoryLabel,
-  getProjectFileTagFromStatus,
   getProjectFileTone,
   getProjectFileTypeIcon,
   getProjectFileVersionLabel,
@@ -65,23 +70,12 @@ function createUploadDraft(uploadedBy: string): ProjectFileUploadState {
   };
 }
 
-function shiftTimestamp(value: string, dayOffset: number, hourOffset = 0) {
-  const timestamp = new Date(value);
-  timestamp.setDate(timestamp.getDate() + dayOffset);
-  timestamp.setHours(timestamp.getHours() + hourOffset);
-  return timestamp.toISOString();
-}
-
 function getInitialHistoryNote(category: string) {
   return `Initial ${getProjectFileCategoryLabel(category).toLowerCase()} file uploaded for adviser review.`;
 }
 
 function getRevisionHistoryNote(category: string) {
   return `Updated ${getProjectFileCategoryLabel(category).toLowerCase()} package submitted after revision comments.`;
-}
-
-function getApprovedHistoryNote(category: string) {
-  return `${getProjectFileCategoryLabel(category)} copy approved and archived as an official repository document.`;
 }
 
 function getDefaultPendingNote(category: string, tag: ProjectFileUploadState['tag']) {
@@ -96,93 +90,25 @@ function getDefaultPendingNote(category: string, tag: ProjectFileUploadState['ta
   return getInitialHistoryNote(category);
 }
 
-function buildProjectFileHistory(
-  document: StudentDashboardData['documents'][number],
-  adviserName: string
-): ProjectFileHistoryEntry[] {
-  const normalizedStatus = normalizeProjectFileStatus(document.reviewStatus);
-  const initialUploadedAt = normalizedStatus === 'pending' ? document.created_at : shiftTimestamp(document.created_at, -8, -1);
-  const initialEntry: ProjectFileHistoryEntry = {
-    id: `${document.id}-history-v1-0`,
-    versionMajor: 1,
-    versionMinor: 0,
-    status: 'pending',
-    uploadedBy: document.uploadedBy,
-    uploadedAt: initialUploadedAt,
-    versionNotes: getInitialHistoryNote(document.category)
-  };
-
-  if (normalizedStatus === 'pending') {
-    return [initialEntry];
-  }
-
-  const revisionUploadedAt = normalizedStatus === 'revision' ? document.created_at : shiftTimestamp(document.created_at, -3, -2);
-  const revisionReviewedAt = shiftTimestamp(revisionUploadedAt, 1, 4);
-  const revisionEntry: ProjectFileHistoryEntry = {
-    id: `${document.id}-history-v1-1`,
-    versionMajor: 1,
-    versionMinor: 1,
-    status: 'revision',
-    uploadedBy: document.uploadedBy,
-    uploadedAt: revisionUploadedAt,
-    versionNotes: getRevisionHistoryNote(document.category),
-    reviewedBy: adviserName,
-    reviewedAt: revisionReviewedAt
-  };
-
-  if (normalizedStatus === 'revision') {
-    return [initialEntry, revisionEntry];
-  }
-
-  const approvedEntry: ProjectFileHistoryEntry = {
-    id: `${document.id}-history-v1-2`,
-    versionMajor: 1,
-    versionMinor: 2,
-    status: 'approved',
-    uploadedBy: document.uploadedBy,
-    uploadedAt: document.created_at,
-    versionNotes: getApprovedHistoryNote(document.category),
-    reviewedBy: adviserName,
-    reviewedAt: document.updated_at
-  };
-
-  return [initialEntry, revisionEntry, approvedEntry];
+function getFileStatusFromSubmission(file: any) {
+  return normalizeProjectFileStatus(String(file.submissionStatus || 'pending'));
 }
 
-function buildProjectFileRecords(data: StudentDashboardData): ProjectFileRecord[] {
-  const adviserName = data.project.adviser || data.profile.adviser || 'Assigned Adviser';
-
-  return sortProjectFiles(
-    data.documents.map((document) => {
-      const history = buildProjectFileHistory(document, adviserName);
-      const latestEntry = history[history.length - 1];
-
-      return {
-        id: document.id,
-        projectId: document.project_id,
-        category: document.category,
-        fileName: document.fileName,
-        fileUrl: '#',
-        versionMajor: latestEntry.versionMajor,
-        versionMinor: latestEntry.versionMinor,
-        status: latestEntry.status,
-        tag: getProjectFileTagFromStatus(latestEntry.status),
-        versionNotes: latestEntry.versionNotes,
-        uploadedBy: latestEntry.uploadedBy,
-        uploadedAt: latestEntry.uploadedAt,
-        reviewedBy: latestEntry.reviewedBy,
-        reviewedAt: latestEntry.reviewedAt,
-        isFinal: latestEntry.status === 'approved',
-        isRepositoryCopy: latestEntry.status === 'approved',
-        fileType: document.fileType,
-        sizeLabel: document.sizeLabel,
-        uploadedById: document.user_id,
-        history
-      };
-    }),
-    'newest'
-  );
+async function getApiErrorMessage(response: Response) {
+  try {
+    const payload = await response.json();
+    return payload?.message || 'Request failed. Please try again.';
+  } catch {
+    return 'Request failed. Please try again.';
+  }
 }
+
+const PROJECT_FILE_UPLOAD_STEPS = [
+  { id: 1, title: 'Upload File', text: 'Select your document' },
+  { id: 2, title: 'Choose Category', text: 'Select document type' },
+  { id: 3, title: 'Version Notes', text: 'Add version details' },
+  { id: 4, title: 'Submit to Adviser', text: 'Send for review' }
+];
 
 export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -190,13 +116,12 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const trackerSectionRef = useRef<HTMLElement | null>(null);
   const repositorySectionRef = useRef<HTMLElement | null>(null);
   const createdObjectUrlsRef = useRef(new Set<string>());
-  const initialFiles = useMemo(() => buildProjectFileRecords(data), [data]);
   const currentUserRole = useMemo(() => resolveUserRole(data.profile.groupRole), [data.profile.groupRole]);
   const currentUserId = data.profile.user_id;
   const adviserName = data.project.adviser || data.profile.adviser || 'Assigned Adviser';
   const isGroupLeader = Boolean(data.profile.groupRole && data.profile.groupRole.toLowerCase().includes('leader'));
 
-  const [files, setFiles] = useState<ProjectFileRecord[]>(initialFiles);
+  const [files, setFiles] = useState<ProjectFileRecord[]>([]);
   const [uploadDraft, setUploadDraft] = useState<ProjectFileUploadState>(() => createUploadDraft(data.profile.fullName));
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -288,10 +213,6 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   };
 
   useEffect(() => {
-    setFiles(initialFiles);
-  }, [initialFiles]);
-
-  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setHistoryFile(null);
@@ -317,6 +238,80 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     const timer = window.setTimeout(() => setIsLoadingFiles(false), 500);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStoredDocuments = async () => {
+      try {
+        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}`, {
+          cache: 'no-store'
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        const storedFiles: ProjectFileRecord[] = (payload.files || []).map((file: any) => ({
+          id: file.id,
+          projectId: file.projectId || data.project.project_id,
+          category: file.documentCategory || 'proposal',
+          fileName: file.fileName,
+          fileUrl: `/api/document-files/${file.id}/download`,
+          versionMajor: 1,
+          versionMinor: 0,
+          status: getFileStatusFromSubmission(file),
+          tag: getFileStatusFromSubmission(file) === 'approved' ? 'Final' : getFileStatusFromSubmission(file) === 'pending' ? 'Draft' : 'Revision',
+          versionNotes: `Secure private document stored in ${file.bucketName}.`,
+          uploadedBy: file.uploadedByName || (file.uploadedBy === currentUserId ? data.profile.fullName : 'Project Member'),
+          uploadedAt: file.createdAt,
+          reviewedAt: file.reviewedAt || undefined,
+          reviewedBy: file.reviewedAt ? adviserName : undefined,
+          latestReviewComment: file.latestReviewComment || null,
+          isFinal: file.bucketName === DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY || getFileStatusFromSubmission(file) === 'approved',
+          isRepositoryCopy: file.bucketName === DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY || getFileStatusFromSubmission(file) === 'approved',
+          fileType: file.fileType,
+          sizeLabel: formatFileSizeLabel(file.fileSize || 0),
+          uploadedById: file.uploadedBy,
+          history: [
+            {
+              id: `${file.id}-history`,
+              versionMajor: 1,
+              versionMinor: 0,
+              status: getFileStatusFromSubmission(file),
+              uploadedBy: file.uploadedByName || (file.uploadedBy === currentUserId ? data.profile.fullName : 'Project Member'),
+              uploadedAt: file.createdAt,
+              versionNotes: file.submissionStatus === 'UNDER_REVIEW'
+                ? 'Accepted by adviser and still under review.'
+                : file.submissionStatus === 'APPROVED'
+                  ? 'Approved by adviser.'
+                  : file.submissionStatus === 'NEEDS_REVISION'
+                    ? 'Revision requested by adviser.'
+                    : `Secure private document stored in ${file.bucketName}.`,
+              reviewedBy: file.reviewedAt ? adviserName : undefined,
+              reviewedAt: file.reviewedAt || undefined
+            }
+          ]
+        }));
+
+        if (!cancelled) {
+          setFiles((current) => {
+            const localPendingFiles = current.filter((file) => file.fileUrl.startsWith('blob:'));
+            return sortProjectFiles([...storedFiles, ...localPendingFiles], 'newest');
+          });
+        }
+      } catch {
+        // Keep the workspace usable; real uploads will appear after the API is available.
+      }
+    };
+
+    loadStoredDocuments();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [adviserName, currentUserId, data.profile.fullName, data.project.project_id]);
 
   useEffect(() => {
     if (!toast) {
@@ -434,6 +429,23 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
   const handleSelectedFile = (file: File | null) => {
     setUploadError(null);
+
+    if (file) {
+      const typeError = validateFileType(file.name, file.type);
+      const sizeError = validateFileSize(file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+
+      if (typeError || sizeError) {
+        setUploadError(typeError || sizeError || 'Selected file is not valid.');
+        updateUploadDraft('file', null);
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+
+        return;
+      }
+    }
+
     updateUploadDraft('file', file);
     updateUploadDraft('uploadedAt', new Date().toISOString());
   };
@@ -494,7 +506,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
   };
 
-  const handleUploadSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleUploadSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setUploadError(null);
     setPageError(null);
@@ -505,6 +517,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
 
     const selectedFile = uploadDraft.file;
+    const typeError = validateFileType(selectedFile.name, selectedFile.type);
+    const sizeError = validateFileSize(selectedFile.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+
+    if (typeError || sizeError) {
+      setUploadError(typeError || sizeError || 'Selected file is not valid.');
+      return;
+    }
     const uploadedAt = new Date().toISOString();
     const nextVersion = getNextProjectFileVersionParts(files, uploadDraft.category);
     const previousLatestFile = [...files]
@@ -528,36 +547,50 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       uploadedAt,
       versionNotes
     };
-    const fileUrl = URL.createObjectURL(selectedFile);
-
-    createdObjectUrlsRef.current.add(fileUrl);
     setIsUploading(true);
 
-    const nextRecord: ProjectFileRecord = {
-      id: `local-file-${Date.now()}`,
-      projectId: data.project.project_id,
-      category: uploadDraft.category,
-      fileName: selectedFile.name,
-      fileUrl,
-      versionMajor: nextVersion.versionMajor,
-      versionMinor: nextVersion.versionMinor,
-      status: 'pending',
-      tag: uploadDraft.tag,
-      versionNotes,
-      uploadedBy: data.profile.fullName,
-      uploadedAt,
-      isFinal: false,
-      isRepositoryCopy: false,
-      fileType: selectedFile.type || selectedFile.name.split('.').pop() || 'File',
-      sizeLabel: formatFileSizeLabel(selectedFile.size),
-      uploadedById: currentUserId,
-      history: [...(previousLatestFile?.history || []), nextHistoryEntry]
-    };
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('bucketName', DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+      formData.append('projectId', data.project.project_id || data.project.id);
+      formData.append('documentCategory', uploadDraft.category);
 
-    window.setTimeout(async () => {
+      const response = await fetch('/api/document-files', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(await getApiErrorMessage(response));
+      }
+
+      const payload = await response.json();
+      const uploadedFile = payload.file;
+      const nextRecord: ProjectFileRecord = {
+        id: uploadedFile.id,
+        projectId: uploadedFile.projectId || data.project.project_id,
+        category: uploadedFile.documentCategory || uploadDraft.category,
+        fileName: uploadedFile.fileName || selectedFile.name,
+        fileUrl: `/api/document-files/${uploadedFile.id}/download`,
+        versionMajor: nextVersion.versionMajor,
+        versionMinor: nextVersion.versionMinor,
+        status: getFileStatusFromSubmission(uploadedFile),
+        tag: uploadDraft.tag,
+        versionNotes,
+        uploadedBy: data.profile.fullName,
+        uploadedAt: uploadedFile.createdAt || uploadedAt,
+        latestReviewComment: uploadedFile.latestReviewComment || null,
+        isFinal: false,
+        isRepositoryCopy: false,
+        fileType: uploadedFile.fileType || selectedFile.type || selectedFile.name.split('.').pop() || 'File',
+        sizeLabel: formatFileSizeLabel(uploadedFile.fileSize || selectedFile.size),
+        uploadedById: uploadedFile.uploadedBy || currentUserId,
+        history: [...(previousLatestFile?.history || []), nextHistoryEntry]
+      };
+
       setFiles((current) => [nextRecord, ...current]);
       setCurrentPage(1);
-      setIsUploading(false);
       
       // Consume ALL one-time use permission tokens if used
       if (!isGroupLeader && permissionNotificationId) {
@@ -579,22 +612,40 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
       setToast({
         tone: 'success',
-        message: `${selectedFile.name} uploaded as ${getProjectFileVersionLabel(nextRecord)}.`
+        message: `${selectedFile.name} uploaded securely as ${getProjectFileVersionLabel(nextRecord)}.`
       });
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
       resetUploadDraft();
-    }, 850);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to upload the document.';
+      setUploadError(message);
+      setToast({ tone: 'danger', message });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const handleViewFile = (file: ProjectFileRecord) => {
+  const handleViewFile = async (file: ProjectFileRecord) => {
     if (file.fileUrl.startsWith('blob:')) {
       window.open(file.fileUrl, '_blank', 'noopener,noreferrer');
       return;
     }
 
-    setToast({
-      tone: 'warning',
-      message: 'Preview becomes available once this file is saved to the shared project record.'
-    });
+    try {
+      const response = await fetch(`/api/document-files/${file.id}/signed-url`, { method: 'POST' });
+
+      if (!response.ok) {
+        throw new Error(await getApiErrorMessage(response));
+      }
+
+      const payload = await response.json();
+      window.open(payload.signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      setToast({
+        tone: 'warning',
+        message: error instanceof Error ? error.message : 'Preview is not available for this file.'
+      });
+    }
   };
 
   const handleDownloadFile = (file: ProjectFileRecord) => {
@@ -608,26 +659,40 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       return;
     }
 
-    setToast({
-      tone: 'warning',
-      message: 'Download becomes available once this file is saved to the shared project record.'
-    });
+    window.open(`/api/document-files/${file.id}/download`, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDeleteFile = (file: ProjectFileRecord) => {
+  const handleDeleteFile = async (file: ProjectFileRecord) => {
     setPageError(null);
-    setFiles((current) => current.filter((item) => item.id !== file.id));
-    setHistoryFile((current) => (current?.id === file.id ? null : current));
 
     if (file.fileUrl.startsWith('blob:')) {
+      setFiles((current) => current.filter((item) => item.id !== file.id));
+      setHistoryFile((current) => (current?.id === file.id ? null : current));
       URL.revokeObjectURL(file.fileUrl);
       createdObjectUrlsRef.current.delete(file.fileUrl);
+      setToast({
+        tone: 'success',
+        message: `${file.fileName} removed from the active project tracker.`
+      });
+      return;
     }
 
-    setToast({
-      tone: 'success',
-      message: `${file.fileName} removed from the active project tracker.`
-    });
+    try {
+      const response = await fetch(`/api/document-files/${file.id}`, { method: 'DELETE' });
+
+      if (!response.ok) {
+        throw new Error(await getApiErrorMessage(response));
+      }
+
+      setFiles((current) => current.filter((item) => item.id !== file.id));
+      setHistoryFile((current) => (current?.id === file.id ? null : current));
+      setToast({
+        tone: 'success',
+        message: `${file.fileName} deleted from private storage.`
+      });
+    } catch (error) {
+      setPageError(error instanceof Error ? error.message : 'Unable to delete the document.');
+    }
   };
 
   const handleApproveFile = (file: ProjectFileRecord) => {
@@ -679,84 +744,56 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   };
 
   const needsAttentionCount = pendingReviewCount + revisionCount;
+  const hasProjectFiles = trackedFilesCount > 0;
   const heroStats = [
     {
       id: 'tracked',
-      label: 'Tracked files',
+      label: 'Tracked Files',
       value: `${trackedFilesCount}`,
+      icon: 'fa-folder-open',
+      tone: 'primary',
       note: latestFile
         ? `${getProjectFileVersionLabel(latestFile)} uploaded ${formatProjectFileDateTime(latestFile.uploadedAt)}`
         : 'Start the workspace by uploading the first project document.'
     },
     {
       id: 'attention',
-      label: 'Needs attention',
+      label: 'Needs Attention',
       value: needsAttentionCount ? `${needsAttentionCount}` : 'Clear',
+      icon: 'fa-circle-exclamation',
+      tone: 'warning',
       note: needsAttentionCount
         ? `${revisionCount} revision request${revisionCount === 1 ? '' : 's'} and ${pendingReviewCount} pending review file${pendingReviewCount === 1 ? '' : 's'}`
         : 'No file is currently flagged for revision or waiting on review.'
     },
     {
       id: 'repository',
-      label: 'Approved copies',
+      label: 'Approved Copies',
       value: `${approvedRepositoryCount}`,
+      icon: 'fa-circle-check',
+      tone: 'success',
       note: latestApprovedFile
         ? `${latestApprovedFile.fileName} is the latest verified repository file.`
         : 'Approved files will appear here after adviser confirmation.'
     },
     {
       id: 'next-version',
-      label: 'Next version',
+      label: 'Next Version',
       value: nextVersionLabel,
+      icon: 'fa-file-circle-plus',
+      tone: 'info',
       note: `Prepared for ${getProjectFileCategoryLabel(uploadDraft.category)} uploads.`
     }
   ];
-  const uploadSnapshot = [
-    {
-      id: 'selected-file',
-      label: 'Selected file',
-      value: uploadDraft.file?.name ?? 'No file selected yet',
-      note: uploadDraft.file
-        ? `${formatFileSizeLabel(uploadDraft.file.size)} | ${uploadDraft.file.type || 'Unknown file type'}`
-        : 'Choose a file to generate the next tracked version.'
-    },
-    {
-      id: 'category',
-      label: 'Category',
-      value: getProjectFileCategoryLabel(uploadDraft.category),
-      note: 'Documents stay grouped by type for faster adviser review.'
-    },
-    {
-      id: 'submission-tag',
-      label: 'Submission tag',
-      value: uploadDraft.tag,
-      note: 'Use Draft, Revision, or Final to clarify the current intent.'
-    }
-  ];
-  const repositoryPulse = [
-    {
-      id: 'latest-approved',
-      label: 'Latest approved copy',
-      value: latestApprovedFile?.fileName ?? 'Awaiting first approval',
-      note: latestApprovedFile
-        ? `${latestApprovedFile.reviewedBy || adviserName} | ${formatProjectFileDateTime(latestApprovedFile.reviewedAt || latestApprovedFile.uploadedAt)}`
-        : 'A verified file will appear here once your adviser approves it.'
-    },
-    {
-      id: 'filter-view',
-      label: 'Tracker view',
-      value: activeFilterLabel,
-      note: hasActiveTableFilters
-        ? 'You are viewing a filtered set of file records.'
-        : 'The tracker currently shows the full project record.'
-    },
-    {
-      id: 'role',
-      label: 'Workspace role',
-      value: currentUserRole === 'student' ? 'Student contributor' : currentUserRole,
-      note: 'Students upload working copies, advisers approve, and admins preserve final records.'
-    }
-  ];
+  const latestReviewStatus = latestFile ? formatProjectFileAdviserStatus(latestFile.status) : 'Pending Review';
+  const latestReviewTone = latestFile ? getProjectFileTone(latestFile.status) : 'warning';
+  const latestReviewHelper = latestFile?.status === 'approved'
+    ? 'Approved by adviser'
+    : latestFile?.status === 'under_review'
+      ? 'Accepted by adviser and still reviewing'
+    : latestFile?.status === 'revision'
+      ? 'Revision requested by adviser'
+      : 'Waiting for adviser to review';
   const toastIcon = toast?.tone === 'success'
     ? 'fa-circle-check'
     : toast?.tone === 'danger'
@@ -777,162 +814,36 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                 </span>
               </div>
               <h1>Project Files</h1>
-              <p>Keep drafts, revisions, and approved project documents organized in one working record for your group.</p>
+              <p>Keep drafts, revisions, and approved project documents organized in one workspace.</p>
             </div>
+          </div>
+          <div className="project-files-header-actions">
+            <button className="btn btn-primary project-files-upload-button" type="button" onClick={openUploadSection}>
+              <i className="fas fa-cloud-arrow-up" aria-hidden="true" /> Upload New Version
+            </button>
+            <button className="btn btn-secondary" type="button" onClick={openRepositorySection}>
+              <i className="fas fa-box-archive" aria-hidden="true" /> Open Repository
+            </button>
           </div>
         </header>
 
         <div className="page-body project-files-page-body">
           <section className="dashboard-hero project-files-hero">
             <article className="dashboard-hero-main project-files-hero-main">
-              <div className="student-dashboard-overview-top">
-                <span className="section-kicker">File Workspace</span>
-                <div className="chip-row">
-                  <span className={`ui-badge is-${needsAttentionCount ? 'warning' : 'success'}`}>
-                    <i className={`fas ${needsAttentionCount ? 'fa-triangle-exclamation' : 'fa-circle-check'}`} aria-hidden="true" />
-                    {needsAttentionCount ? `${needsAttentionCount} need attention` : 'Tracker clear'}
-                  </span>
-                  <span className="project-files-version-badge">Next {nextVersionLabel}</span>
-                </div>
-              </div>
-
-              <div className="project-files-hero-copy">
-                <h2>Version control for every project document from draft to approved copy</h2>
-                <p>
-                  Keep manuscript chapters, system packages, presentations, and evidence in one
-                  structured workspace so your group and adviser always see the latest file story.
-                </p>
-              </div>
-
               <div className="dashboard-callout-grid project-files-hero-stats">
                 {heroStats.map((item) => (
-                  <article key={item.id} className="dashboard-callout project-files-hero-stat">
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                    <small>{item.note}</small>
+                  <article key={item.id} className={`dashboard-callout project-files-hero-stat is-${item.tone}`}>
+                    <span className="project-files-stat-icon"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                    <div>
+                      <span>{item.label}</span>
+                      <strong>{item.value}</strong>
+                      <small>{item.note}</small>
+                    </div>
                   </article>
                 ))}
               </div>
-
-              <div className="dashboard-action-grid project-files-hero-actions">
-                <button className="dashboard-action-card project-files-action-card" type="button" onClick={openUploadSection}>
-                  <span className="dashboard-action-icon">
-                    <i className="fas fa-file-arrow-up" aria-hidden="true" />
-                  </span>
-                  <div className="project-files-action-copy">
-                    <span className="project-files-action-meta">Next {nextVersionLabel}</span>
-                    <strong>Upload New File</strong>
-                    <small>Start a new tracked submission without leaving the project-files page.</small>
-                  </div>
-                </button>
-
-                <button className="dashboard-action-card project-files-action-card" type="button" onClick={() => {
-                  updateUploadDraft('category', 'presentation-files');
-                  openUploadSection();
-                }}>
-                  <span className="dashboard-action-icon" style={{ backgroundColor: 'rgba(246,190,0,0.2)', color: 'var(--primary-dark)' }}>
-                    <i className="fas fa-file-powerpoint" aria-hidden="true" />
-                  </span>
-                  <div className="project-files-action-copy">
-                    <span className="project-files-action-meta" style={{ color: 'var(--primary-dark)' }}>Live Defense</span>
-                    <strong>Upload Presentation</strong>
-                    <small>Upload your final slide deck for the panelists to view during defense.</small>
-                  </div>
-                </button>
-
-                <button className="dashboard-action-card project-files-action-card" type="button" onClick={openTrackerSection}>
-                  <span className="dashboard-action-icon">
-                    <i className="fas fa-layer-group" aria-hidden="true" />
-                  </span>
-                  <div className="project-files-action-copy">
-                    <span className="project-files-action-meta">{totalCount} visible</span>
-                    <strong>Open File Tracker</strong>
-                    <small>Jump to the filtered records table and review current file activity.</small>
-                  </div>
-                </button>
-
-                <button className="dashboard-action-card project-files-action-card" type="button" onClick={openRepositorySection}>
-                  <span className="dashboard-action-icon">
-                    <i className="fas fa-lock" aria-hidden="true" />
-                  </span>
-                  <div className="project-files-action-copy">
-                    <span className="project-files-action-meta">{approvedRepositoryCount} approved</span>
-                    <strong>Open Repository</strong>
-                    <small>Review final approved copies prepared for archive handoff and download.</small>
-                  </div>
-                </button>
-
-                <Link className="dashboard-action-card project-files-action-card" href="/students/faculty-feedback">
-                  <span className="dashboard-action-icon">
-                    <i className="fas fa-comments" aria-hidden="true" />
-                  </span>
-                  <div className="project-files-action-copy">
-                    <span className="project-files-action-meta">
-                      {revisionCount ? `${revisionCount} revision request${revisionCount === 1 ? '' : 's'}` : 'Feedback clear'}
-                    </span>
-                    <strong>Review Feedback</strong>
-                    <small>Cross-check adviser comments before uploading another working version.</small>
-                  </div>
-                </Link>
-              </div>
             </article>
 
-            <div className="dashboard-hero-side">
-              <article className="dashboard-brief-card project-files-brief-card">
-                <div className="card-heading">
-                  <div>
-                    <span className="section-kicker">Upload Snapshot</span>
-                    <h3>Current submission setup</h3>
-                  </div>
-                  <span className={`ui-badge is-${uploadDraft.file ? 'info' : 'neutral'}`}>
-                    <i className={`fas ${uploadDraft.file ? getProjectFileTypeIcon(uploadDraft.file.name, uploadDraft.file.type) : 'fa-cloud-arrow-up'}`} aria-hidden="true" />
-                    {uploadDraft.file ? 'Ready to tag' : 'Waiting for file'}
-                  </span>
-                </div>
-
-                <div className="detail-grid project-files-snapshot-grid">
-                  {uploadSnapshot.map((item) => (
-                    <article key={item.id} className="detail-item">
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                      <small>{item.note}</small>
-                    </article>
-                  ))}
-                </div>
-
-                <div className="workspace-note is-member">
-                  <strong>Use version notes to explain what changed before each adviser review.</strong>
-                  <p>
-                    {latestFile
-                      ? `Latest tracked file: ${latestFile.fileName} ${getProjectFileVersionLabel(latestFile)} uploaded on ${formatProjectFileDateTime(latestFile.uploadedAt)}.`
-                      : 'Upload your first file to start the project record and keep future revisions easier to review.'}
-                  </p>
-                </div>
-              </article>
-
-              <article className="dashboard-brief-card project-files-brief-card">
-                <div className="card-heading">
-                  <div>
-                    <span className="section-kicker">Repository Pulse</span>
-                    <h3>Review posture and archive state</h3>
-                  </div>
-                  <span className={`ui-badge is-${approvedRepositoryCount ? 'success' : 'warning'}`}>
-                    <i className="fas fa-box-archive" aria-hidden="true" />
-                    {approvedRepositoryCount ? 'Archive building' : 'Awaiting approvals'}
-                  </span>
-                </div>
-
-                <div className="detail-grid project-files-snapshot-grid">
-                  {repositoryPulse.map((item) => (
-                    <article key={item.id} className="detail-item">
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                      <small>{item.note}</small>
-                    </article>
-                  ))}
-                </div>
-              </article>
-            </div>
           </section>
 
           <section className="content-grid two-thirds project-files-main-grid">
@@ -940,10 +851,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">File Tracker</span>
-                  <h3>Recent file records</h3>
-                  <p>Find files quickly, focus on one category, and see which records still need action.</p>
+                  <h3>File Tracker</h3>
+                  <p>All your project documents and their versions.</p>
                 </div>
-                <span className="ui-badge is-warning"><i className="fas fa-layer-group" aria-hidden="true" /> {totalCount} visible</span>
               </div>
 
               <div className="project-files-tracker-insights">
@@ -963,6 +873,25 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   <p>{latestApprovedFile ? `Latest approved by ${latestApprovedFile.reviewedBy || adviserName} on ${formatProjectFileDateTime(latestApprovedFile.reviewedAt || latestApprovedFile.uploadedAt)}.` : 'Approved files will move into the repository section once verified.'}</p>
                 </article>
               </div>
+
+              {!hasProjectFiles ? (
+                <div className="project-files-onboarding-card">
+                  <div className="project-files-onboarding-icon">
+                    <i className="fas fa-file-shield" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <span className="section-kicker">Secure Document Workflow</span>
+                    <h4>No private project files yet</h4>
+                    <p>
+                      Your tracker is now connected to Supabase private storage. Upload a PDF, Word,
+                      PowerPoint, or Excel document to create the first record visible to authorized reviewers.
+                    </p>
+                  </div>
+                  <button className="btn btn-primary" type="button" onClick={openUploadSection}>
+                    <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload Document
+                  </button>
+                </div>
+              ) : null}
 
               <div className="project-files-filter-shell">
                 <div className="project-files-filter-pills" aria-label="Quick category filters">
@@ -1029,7 +958,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Upload Workflow</span>
-                  <h3>Submit a new file</h3>
+                  <h3>Upload New Version</h3>
                   <p>Complete each step so your adviser can quickly understand the file, its version, and what changed.</p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1129,6 +1058,18 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                 </div>
               </div>
 
+              <div className="project-files-upload-stepper" aria-label="Upload submission steps">
+                {PROJECT_FILE_UPLOAD_STEPS.map((step) => (
+                  <div key={step.id} className="project-files-upload-step">
+                    <span>{step.id}</span>
+                    <div>
+                      <strong>{step.title}</strong>
+                      <small>{step.text}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               {!isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (
                 <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/50 p-8 text-center shadow-sm">
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 shadow-sm">
@@ -1149,15 +1090,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
               ) : (
                 <form className="portal-form project-files-upload-form" onSubmit={handleUploadSubmit}>
                 <div className="project-files-upload-workflow">
-                  <section className="project-files-step-card">
-                    <div className="project-files-step-head">
-                      <span className="project-files-step-number">Step 1</span>
-                      <div>
-                        <strong>Upload file</strong>
-                        <small>Select a document or drag it into the drop area.</small>
-                      </div>
-                    </div>
-
+                  <section className="project-files-upload-drop-panel">
                     <div
                       className={`dropzone project-files-dropzone ${isDragOver ? 'is-dragover' : ''}`}
                       onDragOver={handleDragOver}
@@ -1166,8 +1099,8 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     >
                       <i className={`fas ${uploadDraft.file ? getProjectFileTypeIcon(uploadDraft.file.name, uploadDraft.file.type) : 'fa-cloud-arrow-up'}`} aria-hidden="true" />
                       <strong>{uploadDraft.file ? uploadDraft.file.name : 'Drop a project file here'}</strong>
-                      <span>{uploadDraft.file ? 'The selected file is ready for metadata tagging and version tracking.' : 'Supports proposal files, chapters, system packages, presentations, certificates, and supporting evidence.'}</span>
-                      <small>{uploadDraft.file ? `${formatFileSizeLabel(uploadDraft.file.size)} | ${uploadDraft.file.type || 'Unknown file type'}` : 'Drag and drop or browse from your device without leaving this page.'}</small>
+                      <span>{uploadDraft.file ? 'The selected file is ready for secure private storage and version tracking.' : 'Supports PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX.'}</span>
+                      <small>{uploadDraft.file ? `${formatFileSizeLabel(uploadDraft.file.size)} | ${uploadDraft.file.type || 'Unknown file type'}` : 'Using thesis-documents private bucket. Limit: thesis-documents 50MB, evaluation-files 40MB, final-repository 50MB.'}</small>
 
                       <div className="row-actions">
                         <button className="table-btn" type="button" onClick={handleBrowseFile}>
@@ -1185,21 +1118,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                       ref={fileInputRef}
                       className="project-files-hidden-input"
                       type="file"
-                      accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg,.webp"
+                      accept={DOCUMENT_FILE_ACCEPT}
                       onChange={handleFileInputChange}
                     />
                   </section>
 
-                  <section className="project-files-step-card">
-                    <div className="project-files-step-head">
-                      <span className="project-files-step-number">Step 2</span>
-                      <div>
-                        <strong>Choose category</strong>
-                        <small>Choose the document type so the submission stays easy to find later.</small>
-                      </div>
-                    </div>
-
-                    <div className="form-field">
+                  <section className="project-files-upload-fields">
+                    <div className="form-field project-files-category-field">
                       <label htmlFor="project-file-category">Category</label>
                       <select
                         id="project-file-category"
@@ -1212,80 +1137,30 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                         ))}
                       </select>
                     </div>
-                  </section>
 
-                  <section className="project-files-step-card">
-                    <div className="project-files-step-head">
-                      <span className="project-files-step-number">Step 3</span>
-                      <div>
-                        <strong>Add details</strong>
-                        <small>Summarize what changed so reviewers can focus on the right update.</small>
-                      </div>
+                    <div className="form-field project-files-tag-field">
+                      <label htmlFor="project-file-tag">Tag / Version</label>
+                      <select
+                        id="project-file-tag"
+                        value={uploadDraft.tag}
+                        onChange={(event) => updateUploadDraft('tag', event.target.value as ProjectFileUploadState['tag'])}
+                        disabled={isUploading}
+                      >
+                        {PROJECT_FILE_TAG_OPTIONS.map((tag) => (
+                          <option key={tag} value={tag}>{tag}</option>
+                        ))}
+                      </select>
                     </div>
 
-                    <div className="form-grid project-files-upload-grid">
-                      <div className="form-field">
-                        <label htmlFor="project-file-tag">Tag</label>
-                        <select
-                          id="project-file-tag"
-                          value={uploadDraft.tag}
-                          onChange={(event) => updateUploadDraft('tag', event.target.value as ProjectFileUploadState['tag'])}
-                          disabled={isUploading}
-                        >
-                          {PROJECT_FILE_TAG_OPTIONS.map((tag) => (
-                            <option key={tag} value={tag}>{tag}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="form-field full">
-                        <label htmlFor="project-file-version-notes">Version Notes</label>
-                        <textarea
-                          id="project-file-version-notes"
-                          value={uploadDraft.versionNotes}
-                          onChange={(event) => updateUploadDraft('versionNotes', event.target.value)}
-                          placeholder="Summarize what changed in this version, why it was uploaded, or what the adviser should review."
-                          disabled={isUploading}
-                        />
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="project-files-step-card project-files-submit-card">
-                    <div className="project-files-step-head">
-                      <span className="project-files-step-number">Step 4</span>
-                      <div>
-                        <strong>Submit to tracker</strong>
-                        <small>Confirm the version label and submit the file for review.</small>
-                      </div>
-                    </div>
-
-                    <div className="project-files-upload-preview">
-                      <div className="project-files-upload-preview-head">
-                        <div>
-                          <strong>Upload summary</strong>
-                          <small>Version will be automatically generated.</small>
-                        </div>
-                        <span className="project-files-version-badge">{nextVersionLabel}</span>
-                      </div>
-
-                      <div className="project-files-upload-preview-grid">
-                        <div>
-                          <span>Selected File</span>
-                          <strong>{uploadDraft.file?.name || 'No file selected yet'}</strong>
-                          <small>{uploadDraft.file ? formatFileSizeLabel(uploadDraft.file.size) : 'Choose a file to preview its metadata.'}</small>
-                        </div>
-                        <div>
-                          <span>Category</span>
-                          <strong>{getProjectFileCategoryLabel(uploadDraft.category)}</strong>
-                          <small>Saved under the right file type for easier review later.</small>
-                        </div>
-                        <div>
-                          <span>Submission Tag</span>
-                          <strong>{uploadDraft.tag}</strong>
-                          <small>Status will start as Pending Review after upload.</small>
-                        </div>
-                      </div>
+                    <div className="form-field project-files-notes-field">
+                      <label htmlFor="project-file-version-notes">Version Notes</label>
+                      <textarea
+                        id="project-file-version-notes"
+                        value={uploadDraft.versionNotes}
+                        onChange={(event) => updateUploadDraft('versionNotes', event.target.value)}
+                        placeholder="Summarize what changed in this version..."
+                        disabled={isUploading}
+                      />
                     </div>
 
                     {uploadError ? (
@@ -1304,31 +1179,60 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
                     <div className="row-actions project-files-upload-actions">
                       <button className="btn btn-secondary" type="button" onClick={resetUploadDraft} disabled={isUploading}>
-                        <i className="fas fa-rotate-left" aria-hidden="true" /> Reset Form
+                        <i className="fas fa-rotate-left" aria-hidden="true" /> Reset
                       </button>
                       <button className="btn btn-primary project-files-upload-button" type="submit" disabled={isUploading}>
-                        <i className="fas fa-file-arrow-up" aria-hidden="true" /> Submit File
+                        <i className="fas fa-paper-plane" aria-hidden="true" /> Submit to Adviser
                       </button>
                     </div>
                   </section>
                 </div>
-
-                <div className="project-files-role-panel">
-                  <article className="project-files-role-card">
-                    <strong>Student</strong>
-                    <p>Submit files, review version history, and replace working copies before approval.</p>
-                  </article>
-                  <article className="project-files-role-card">
-                    <strong>Adviser</strong>
-                    <p>Check updates, request revisions, and approve final copies for the repository.</p>
-                  </article>
-                  <article className="project-files-role-card">
-                    <strong>Admin</strong>
-                    <p>Keep approved records available for long-term storage and final archive needs.</p>
-                  </article>
-                </div>
                 </form>
               )}
+            </article>
+
+            <article className="surface-card project-files-panel-card project-files-review-status-card">
+              <div className="card-heading">
+                <div>
+                  <span className="section-kicker">Adviser Review Status</span>
+                  <h3>Adviser Review Status</h3>
+                  <p>Track the current review status of your latest submission.</p>
+                </div>
+              </div>
+
+              <div className={`project-files-review-status is-${latestReviewTone}`}>
+                <span className="project-files-review-status-icon">
+                  <i className={`fas ${latestFile?.status === 'approved' ? 'fa-circle-check' : latestFile?.status === 'revision' ? 'fa-rotate-left' : latestFile?.status === 'under_review' ? 'fa-magnifying-glass' : 'fa-clock'}`} aria-hidden="true" />
+                </span>
+                <div className="project-files-review-status-cell">
+                  <span>Latest Submission</span>
+                  <strong>{latestFile?.fileName || 'No submission yet'}</strong>
+                  <small>{latestFile ? `${getProjectFileVersionLabel(latestFile)} | ${formatProjectFileDateTime(latestFile.uploadedAt)}` : 'Upload a document to send it to your adviser.'}</small>
+                </div>
+                <div className="project-files-review-status-cell">
+                  <span>Status</span>
+                  <strong>{latestFile ? latestReviewStatus : 'Pending Review'}</strong>
+                  <small>{latestReviewHelper}</small>
+                </div>
+                <div className="project-files-review-status-cell">
+                  <span>Assigned Adviser</span>
+                  <strong>{adviserName}</strong>
+                  <small>Research Adviser</small>
+                </div>
+                <button className="table-btn" type="button" onClick={latestFile ? () => handleViewHistory(latestFile) : openUploadSection}>
+                  <i className="fas fa-circle-info" aria-hidden="true" /> View Details
+                </button>
+              </div>
+
+              {latestFile?.latestReviewComment ? (
+                <div className="mt-4 rounded-[1.25rem] border border-blue-100 bg-blue-50/70 p-4">
+                  <span className="section-kicker">Latest Adviser Notes</span>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{latestFile.latestReviewComment.body}</p>
+                  <small className="mt-3 block text-xs font-semibold text-slate-500">
+                    {latestFile.latestReviewComment.authorName || adviserName} · {formatProjectFileDateTime(String(latestFile.latestReviewComment.createdAt))}
+                  </small>
+                </div>
+              ) : null}
             </article>
           </section>
 

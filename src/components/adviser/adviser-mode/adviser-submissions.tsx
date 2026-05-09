@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { type DocumentFileSummary } from '@/components/documents/document-file-controls';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
 import { NAV_ITEMS, WORKSPACE_META, isNavItemActive } from '@/components/adviser/shared/config/dashboard-utils';
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
+import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import {
   FiltersBar,
   SubmissionFocusPanel,
@@ -14,11 +16,11 @@ import {
   type SubmissionSummaryMetric
 } from '@/components/adviser/adviser-mode/data/submission-workspace-sections';
 import {
-  IT_ADVISER_SUBMISSIONS,
   SUBMISSION_STATUS_FILTER_OPTIONS,
   getApprovedThisWeekCount,
   getSubmissionMilestoneOptions,
   getSubmissionTypeOptions,
+  type AdviserSubmissionRecord,
   type SubmissionMilestone,
   type SubmissionStatus,
   type SubmissionType
@@ -31,9 +33,90 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
   const [statusFilter, setStatusFilter] = useState<SubmissionStatus | 'all'>('all');
   const [milestoneFilter, setMilestoneFilter] = useState<SubmissionMilestone | 'all'>('all');
   const [searchValue, setSearchValue] = useState('');
+  const [studentDocuments, setStudentDocuments] = useState<DocumentFileSummary[]>([]);
+  const [studentDocumentError, setStudentDocumentError] = useState<string | null>(null);
+  const [isLoadingStudentDocuments, setIsLoadingStudentDocuments] = useState(true);
+  const [reviewSubmission, setReviewSubmission] = useState<AdviserSubmissionRecord | null>(null);
+  const [reviewNotes, setReviewNotes] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const adviserMeta = WORKSPACE_META[workspaceMode];
-  const submissions = IT_ADVISER_SUBMISSIONS;
+
+  const submissions = useMemo<AdviserSubmissionRecord[]>(() => {
+    const mapSubmissionStatus = (status?: string | null): SubmissionStatus => {
+      switch (String(status || '').toUpperCase()) {
+        case 'UNDER_REVIEW':
+          return 'under-review';
+        case 'APPROVED':
+          return 'approved';
+        case 'NEEDS_REVISION':
+          return 'needs-revision';
+        default:
+          return 'pending-review';
+      }
+    };
+
+    const categoryToType = (category: string): SubmissionType => {
+      const normalized = category.toLowerCase();
+
+      if (normalized.includes('final') || normalized.includes('repository')) {
+        return 'Final';
+      }
+
+      if (normalized.includes('chapter')) {
+        return 'Chapter';
+      }
+
+      return 'Proposal';
+    };
+
+    const categoryToMilestone = (category: string): SubmissionMilestone => {
+      const normalized = category.toLowerCase();
+
+      if (normalized.includes('chapter 3')) return 'Chapter 3 Review';
+      if (normalized.includes('chapter')) return 'Chapter 1 Review';
+      if (normalized.includes('final') || normalized.includes('repository')) return 'Final Manuscript Check';
+
+      return 'Proposal Screening';
+    };
+
+    return studentDocuments.map((file, index) => {
+      const submittedAt = new Date(file.createdAt);
+      const deadline = new Date(submittedAt);
+      deadline.setDate(deadline.getDate() + 7);
+
+      const type = categoryToType(file.documentCategory);
+      const milestone = categoryToMilestone(file.documentCategory);
+
+      return {
+        id: file.id,
+        groupId: file.groupCode || file.groupTitle || 'Assigned Project',
+        projectTitle: file.projectTitle || file.groupTitle || 'Student thesis project',
+        submissionTitle: file.fileName,
+        type,
+        milestone,
+        status: mapSubmissionStatus(file.submissionStatus),
+        version: `v${file.submissionVersion || index + 1}`,
+        submittedAt: submittedAt.toISOString(),
+        deadline: deadline.toISOString(),
+        submittedBy: file.uploadedByName || 'Project Member',
+        groupMembers: file.groupMembers || [],
+        latestReviewComment: file.latestReviewComment || null,
+        reviewedAt: file.reviewedAt ? new Date(file.reviewedAt).toISOString() : null,
+        reviewFocus: `${file.uploadedByName || 'A student'} from ${file.groupCode || file.groupTitle || 'your assigned group'} submitted this ${file.documentCategory || 'document'} for adviser review.`,
+        nextAction: file.submissionStatus === 'APPROVED'
+          ? 'This submission has been approved and the student has been notified.'
+          : file.submissionStatus === 'NEEDS_REVISION'
+            ? 'Revision notes were sent to the student. Wait for the next uploaded version.'
+            : file.submissionStatus === 'UNDER_REVIEW'
+              ? 'Continue reviewing, approve it, or send revision notes to the student.'
+              : 'Start the review, then send notes, approve, or request revision.',
+        fileUrl: `/api/document-files/${file.id}/download`,
+        department: 'IT'
+      };
+    });
+  }, [studentDocuments]);
+
   const typeOptions = useMemo(() => getSubmissionTypeOptions(submissions), [submissions]);
   const milestoneOptions = useMemo(() => getSubmissionMilestoneOptions(submissions), [submissions]);
   const hasActiveFilters =
@@ -45,6 +128,118 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
     setMilestoneFilter('all');
     setSearchValue('');
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStudentDocuments = async () => {
+      setIsLoadingStudentDocuments(true);
+      setStudentDocumentError(null);
+
+      try {
+        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}`, {
+          cache: 'no-store'
+        });
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(payload?.message || 'Unable to load student thesis documents.');
+        }
+
+        if (!cancelled) {
+          setStudentDocuments(payload?.files || []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setStudentDocumentError(error instanceof Error ? error.message : 'Unable to load student thesis documents.');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingStudentDocuments(false);
+        }
+      }
+    };
+
+    loadStudentDocuments();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function openSignedStudentDocument(file: DocumentFileSummary) {
+    try {
+      const response = await fetch(`/api/document-files/${file.id}/signed-url`, { method: 'POST' });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to open the document.');
+      }
+
+      window.open(payload.signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      setStudentDocumentError(error instanceof Error ? error.message : 'Unable to open the document.');
+    }
+  }
+
+  function downloadStudentDocument(file: DocumentFileSummary) {
+    window.open(`/api/document-files/${file.id}/download`, '_blank', 'noopener,noreferrer');
+  }
+
+  function openSubmissionDocument(submission: AdviserSubmissionRecord) {
+    const file = studentDocuments.find((documentFile) => documentFile.id === submission.id);
+
+    if (file) {
+      void openSignedStudentDocument(file);
+    }
+  }
+
+  function downloadSubmissionDocument(submission: AdviserSubmissionRecord) {
+    const file = studentDocuments.find((documentFile) => documentFile.id === submission.id);
+
+    if (file) {
+      downloadStudentDocument(file);
+    }
+  }
+
+  function openReviewPanel(submission: AdviserSubmissionRecord) {
+    setReviewSubmission(submission);
+    setReviewNotes(submission.latestReviewComment?.body || '');
+    setStudentDocumentError(null);
+  }
+
+  async function updateSubmissionReviewStatus(
+    submission: AdviserSubmissionRecord,
+    status: 'accepted' | 'still_reviewing' | 'approved' | 'needs_revision',
+    notes = ''
+  ) {
+    setStudentDocumentError(null);
+    setIsSubmittingReview(true);
+
+    try {
+      const response = await fetch(`/api/document-files/${submission.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, notes })
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to update the review status.');
+      }
+
+      setStudentDocuments((current) => current.map((file) => (
+        file.id === submission.id ? { ...file, ...payload.file } : file
+      )));
+      setReviewSubmission(null);
+      setReviewNotes('');
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    } catch (error) {
+      setStudentDocumentError(error instanceof Error ? error.message : 'Unable to update the review status.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  }
 
   const filteredSubmissions = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
@@ -100,15 +295,15 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
         id: 'pending-review',
         label: 'Pending Review',
         value: submissions.filter((submission) => submission.status === 'pending-review').length,
-        helperText: 'IT submissions waiting for a first-pass adviser decision.',
+        helperText: 'Student thesis files waiting for a first-pass adviser decision.',
         icon: 'fa-clock',
         iconClassName: 'bg-amber-50 text-amber-600'
       },
       {
         id: 'under-review',
-        label: 'Under Review',
+        label: 'Still Reviewing',
         value: submissions.filter((submission) => submission.status === 'under-review').length,
-        helperText: 'Active IT documents currently in your review flow.',
+        helperText: 'Documents currently in your adviser review flow.',
         icon: 'fa-magnifying-glass',
         iconClassName: 'bg-blue-50 text-blue-600'
       },
@@ -124,7 +319,7 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
         id: 'needs-revision',
         label: 'Needs Revision',
         value: submissions.filter((submission) => submission.status === 'needs-revision').length,
-        helperText: 'Groups that still need follow-up comments and another pass.',
+        helperText: 'Files returned to students for another pass.',
         icon: 'fa-rotate-left',
         iconClassName: 'bg-rose-50 text-rose-600'
       }
@@ -143,7 +338,7 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
               <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
               <strong>Workspace</strong>
             </div>
-            <p>Review submitted chapters, proposals, and final documents from your assigned IT groups.</p>
+            <p>Review submitted chapters, proposals, and final documents from your assigned student projects.</p>
           </div>
           <span className="user-badge">
             <i aria-hidden="true" className={`fas ${adviserMeta.badgeIcon}`} />
@@ -167,7 +362,7 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
 
       <main className="main-content">
         <AdviserPageHeader
-          description="Review submitted chapters, proposals, and final documents from your assigned IT groups."
+          description="Review submitted chapters, proposals, and final documents from your assigned student projects."
           title="Submissions"
           actions={
             <AdviserShellActions
@@ -188,6 +383,13 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
           />
 
           <SummaryCards metrics={summaryMetrics} />
+
+          {studentDocumentError ? (
+            <div className="project-files-state is-danger">
+              <i className="fas fa-circle-exclamation" aria-hidden="true" />
+              <span>{studentDocumentError}</span>
+            </div>
+          ) : null}
 
           <FiltersBar
             hasActiveFilters={hasActiveFilters}
@@ -210,11 +412,99 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
           <SubmissionList
             hasActiveFilters={hasActiveFilters}
             onClearFilters={clearFilters}
+            onDownloadSubmission={downloadSubmissionDocument}
+            onReviewSubmission={openReviewPanel}
+            onViewSubmission={openSubmissionDocument}
             submissions={filteredSubmissions}
             totalSubmissions={submissions.length}
           />
         </div>
       </main>
+
+      {reviewSubmission ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <section className="w-full max-w-2xl overflow-hidden rounded-[1.75rem] bg-white shadow-[0_32px_80px_rgba(15,23,42,0.28)]">
+            <div className="border-b border-slate-100 p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#003A8F]">Adviser Review</span>
+                  <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-slate-950">{reviewSubmission.submissionTitle}</h2>
+                  <p className="mt-1 text-sm text-slate-500">{reviewSubmission.groupId} · Submitted by {reviewSubmission.submittedBy || 'Project Member'}</p>
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
+                  onClick={() => setReviewSubmission(null)}
+                  aria-label="Close review panel"
+                >
+                  <i className="fas fa-xmark" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-5 p-6">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-bold text-[var(--primary)] shadow-sm transition hover:bg-[rgba(0,58,143,0.04)]"
+                  onClick={() => openSubmissionDocument(reviewSubmission)}
+                >
+                  <i className="fas fa-eye text-xs" aria-hidden="true" />
+                  View File
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-bold text-[var(--primary)] shadow-sm transition hover:bg-[rgba(0,58,143,0.04)]"
+                  onClick={() => downloadSubmissionDocument(reviewSubmission)}
+                >
+                  <i className="fas fa-download text-xs" aria-hidden="true" />
+                  Download
+                </button>
+              </div>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-bold text-slate-800">Review notes or suggested revisions</span>
+                <textarea
+                  className="min-h-36 w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)]"
+                  value={reviewNotes}
+                  onChange={(event) => setReviewNotes(event.target.value)}
+                  placeholder="Write adviser notes, suggestions, corrections, or approval remarks for the student..."
+                />
+              </label>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <button
+                  type="button"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#003A8F] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#002C6B] disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSubmittingReview}
+                  onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'still_reviewing', reviewNotes)}
+                >
+                  <i className="fas fa-magnifying-glass text-xs" aria-hidden="true" />
+                  Still Reviewing
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSubmittingReview || !reviewNotes.trim()}
+                  onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'needs_revision', reviewNotes)}
+                >
+                  <i className="fas fa-rotate-left text-xs" aria-hidden="true" />
+                  Request Revision
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSubmittingReview}
+                  onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'approved', reviewNotes)}
+                >
+                  <i className="fas fa-circle-check text-xs" aria-hidden="true" />
+                  Approve
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -173,28 +173,35 @@ model PasswordResetCode {
 }
 
 model UploadedFile {
-  id           String      @id @default(cuid())
-  secureUrl    String
-  publicId     String      @unique
-  fileName     String
-  fileType     String
-  resourceType String?
-  category     String      @default("Uncategorized")
-  size         Int?
-  userId       String
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId    String?
-  project      Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  submissionId String?
-  submission   Submission? @relation(fields: [submissionId], references: [id], onDelete: SetNull)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  secureUrl        String?     @map("secure_url")
+  publicId         String?     @unique @map("public_id")
+  fileName         String      @map("file_name")
+  filePath         String?     @map("file_path")
+  bucketName       String?     @map("bucket_name")
+  fileType         String      @map("file_type")
+  resourceType     String?     @map("resource_type")
+  documentCategory String      @default("Uncategorized") @map("document_category")
+  category         String      @default("Uncategorized")
+  visibility       String      @default("private")
+  size             Int?        @map("file_size")
+  userId           String      @map("uploaded_by")
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId        String?     @map("project_id")
+  project          Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  submissionId     String?     @map("submission_id")
+  submission       Submission? @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
 
   @@index([userId])
   @@index([projectId])
   @@index([submissionId])
   @@index([category])
+  @@index([documentCategory])
+  @@index([bucketName])
   @@index([createdAt])
+  @@map("uploaded_files")
 }
 
 model Group {

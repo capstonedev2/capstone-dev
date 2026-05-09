@@ -2,8 +2,14 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import {
+  DocumentFileList,
+  DocumentFileUploadButton,
+  type DocumentFileSummary
+} from '@/components/documents/document-file-controls';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
+import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import {
   NAV_ITEMS,
   WORKSPACE_META,
@@ -81,6 +87,11 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   const [draftRecord, setDraftRecord] = useState<EvaluationRecord | null>(null);
   const [readOnlyModal, setReadOnlyModal] = useState(false);
   const [toast, setToast] = useState<{ id: number; message: string; type: ToastType } | null>(null);
+  const [evaluationFile, setEvaluationFile] = useState<File | null>(null);
+  const [evaluationFileProjectId, setEvaluationFileProjectId] = useState('');
+  const [evaluationFiles, setEvaluationFiles] = useState<DocumentFileSummary[]>([]);
+  const [evaluationFileError, setEvaluationFileError] = useState<string | null>(null);
+  const [isEvaluationFileUploading, setIsEvaluationFileUploading] = useState(false);
 
 
   useEffect(() => {
@@ -111,6 +122,76 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   const meta = WORKSPACE_META[workspaceMode];
   const pageContent = PAGE_CONTENT[workspaceMode];
   const records = workspaceMode === 'adviser' ? adviserRecords : panelRecords;
+  const evaluationFileProjectOptions = useMemo(
+    () => records.map((record) => ({
+      id: record.id,
+      label: `${record.groupId} - ${record.projectTitle}`
+    })),
+    [records]
+  );
+  const selectedEvaluationRecord = useMemo(
+    () => records.find((record) => record.id === evaluationFileProjectId) || null,
+    [evaluationFileProjectId, records]
+  );
+  const evaluationFileStats = useMemo(() => {
+    const secureFiles = evaluationFiles.length;
+    const assignedGroups = new Set(records.map((record) => record.groupId)).size;
+    const pendingRecords = records.filter((record) => record.status !== 'completed').length;
+
+    return [
+      {
+        id: 'secure-documents',
+        label: 'Secure Files',
+        value: secureFiles,
+        icon: 'fa-shield-halved'
+      },
+      {
+        id: 'assigned-groups',
+        label: 'Assigned Groups',
+        value: assignedGroups,
+        icon: 'fa-users-rectangle'
+      },
+      {
+        id: 'pending-records',
+        label: 'Needs Review',
+        value: pendingRecords,
+        icon: 'fa-clock'
+      }
+    ];
+  }, [evaluationFiles.length, records]);
+
+  useEffect(() => {
+    setEvaluationFileProjectId((current) => current || evaluationFileProjectOptions[0]?.id || '');
+  }, [evaluationFileProjectOptions]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadEvaluationFiles = async () => {
+      try {
+        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.EVALUATION_FILES}`, {
+          cache: 'no-store'
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        if (!cancelled) {
+          setEvaluationFiles(payload.files || []);
+        }
+      } catch {
+        // Keep the evaluation workspace usable if document listing is temporarily unavailable.
+      }
+    };
+
+    loadEvaluationFiles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
@@ -454,6 +535,79 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
     );
   }
 
+  async function uploadEvaluationFile() {
+    setEvaluationFileError(null);
+
+    if (!evaluationFile) {
+      setEvaluationFileError('Select an evaluation document before uploading.');
+      return;
+    }
+
+    setIsEvaluationFileUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', evaluationFile);
+      formData.append('bucketName', DOCUMENT_STORAGE_BUCKETS.EVALUATION_FILES);
+      formData.append('projectId', evaluationFileProjectId);
+      formData.append('documentCategory', 'evaluation');
+
+      const response = await fetch('/api/document-files', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to upload evaluation file.');
+      }
+
+      const payload = await response.json();
+      setEvaluationFiles((current) => [payload.file, ...current]);
+      setEvaluationFile(null);
+      showToast('Evaluation file uploaded securely.', 'success');
+    } catch (error) {
+      setEvaluationFileError(error instanceof Error ? error.message : 'Unable to upload evaluation file.');
+    } finally {
+      setIsEvaluationFileUploading(false);
+    }
+  }
+
+  async function openSignedDocument(file: DocumentFileSummary) {
+    try {
+      const response = await fetch(`/api/document-files/${file.id}/signed-url`, { method: 'POST' });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to open the document.');
+      }
+
+      window.open(payload.signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Unable to open the document.', 'error');
+    }
+  }
+
+  function downloadDocument(file: DocumentFileSummary) {
+    window.open(`/api/document-files/${file.id}/download`, '_blank', 'noopener,noreferrer');
+  }
+
+  async function deleteEvaluationDocument(file: DocumentFileSummary) {
+    try {
+      const response = await fetch(`/api/document-files/${file.id}`, { method: 'DELETE' });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to delete the document.');
+      }
+
+      setEvaluationFiles((current) => current.filter((item) => item.id !== file.id));
+      showToast('Evaluation file deleted.', 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Unable to delete the document.', 'error');
+    }
+  }
+
   return (
     <div className="dashboard-wrapper">
       <aside className="sidebar">
@@ -502,8 +656,114 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
           }
         />
 
-        <div className="mx-auto max-w-[1600px] space-y-6">
+        <div className="adviser-evaluations-page mx-auto max-w-[1600px] space-y-6">
           <EvaluationSummaryCards metrics={summaryMetrics} />
+
+          <section className="adviser-evaluation-files-panel">
+            <div className="adviser-evaluation-files-hero">
+              <div className="adviser-evaluation-files-icon">
+                <i className="fas fa-file-shield" aria-hidden="true" />
+              </div>
+              <div className="adviser-evaluation-files-title">
+                <span className="section-kicker">Private Evaluation Files</span>
+                <h3>Upload rubrics, comments, and assessment documents</h3>
+                <p>Attach panel forms and scoring documents to the active evaluation record. Access stays private through signed document links.</p>
+              </div>
+              <div className="adviser-evaluation-file-stats" aria-label="Evaluation file summary">
+                {evaluationFileStats.map((item) => (
+                  <span key={item.id}>
+                    <i className={`fas ${item.icon}`} aria-hidden="true" />
+                    <strong>{item.value}</strong>
+                    <small>{item.label}</small>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="adviser-evaluation-upload-grid">
+              <div className="adviser-evaluation-upload-card">
+                <div className="adviser-evaluation-upload-card-head">
+                  <div>
+                    <span>Target Record</span>
+                    <strong>{selectedEvaluationRecord?.groupId || 'Select record'}</strong>
+                  </div>
+                  {selectedEvaluationRecord ? (
+                    <em>{selectedEvaluationRecord.department}</em>
+                  ) : null}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="evaluation-file-project">Evaluation record</label>
+                  <select
+                    id="evaluation-file-project"
+                    value={evaluationFileProjectId}
+                    onChange={(event) => setEvaluationFileProjectId(event.target.value)}
+                    disabled={isEvaluationFileUploading}
+                  >
+                    {evaluationFileProjectOptions.map((record) => (
+                      <option key={record.id} value={record.id}>{record.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedEvaluationRecord ? (
+                  <div className="adviser-evaluation-record-preview">
+                    <p>{selectedEvaluationRecord.projectTitle}</p>
+                    <span>
+                      <i className="fas fa-calendar-day" aria-hidden="true" />
+                      {new Date(selectedEvaluationRecord.defenseDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="adviser-evaluation-upload-card is-action">
+                <div className="adviser-evaluation-selected-file">
+                  <span>
+                    <i className={`fas ${evaluationFile ? 'fa-file-lines' : 'fa-file-circle-plus'}`} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <strong>{evaluationFile ? evaluationFile.name : 'No file selected'}</strong>
+                    <p>{evaluationFile ? 'Ready for secure upload' : 'PDF, Word, PowerPoint, and Excel files only'}</p>
+                  </div>
+                </div>
+
+                <div className="adviser-evaluation-upload-actions">
+                  <DocumentFileUploadButton
+                    bucketName={DOCUMENT_STORAGE_BUCKETS.EVALUATION_FILES}
+                    disabled={isEvaluationFileUploading}
+                    label={evaluationFile ? 'Replace File' : 'Choose File'}
+                    onFileSelected={setEvaluationFile}
+                    onError={setEvaluationFileError}
+                  />
+                  <button
+                    className="btn btn-primary adviser-evaluation-secure-upload"
+                    type="button"
+                    disabled={isEvaluationFileUploading || !evaluationFile}
+                    onClick={uploadEvaluationFile}
+                  >
+                    <i className={`fas ${isEvaluationFileUploading ? 'fa-spinner fa-spin' : 'fa-lock'}`} aria-hidden="true" />
+                    {isEvaluationFileUploading ? 'Uploading...' : 'Upload Securely'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="adviser-evaluation-document-list">
+              <DocumentFileList
+                files={evaluationFiles}
+                error={evaluationFileError}
+                emptyMessage="No evaluation files uploaded yet."
+                onView={openSignedDocument}
+                onDownload={downloadDocument}
+                onDelete={deleteEvaluationDocument}
+              />
+            </div>
+          </section>
 
           <div className="space-y-6">
               <EvaluationFilters

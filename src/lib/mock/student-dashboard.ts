@@ -1851,10 +1851,23 @@ export async function getStudentDashboardData() {
       // Check real group assignment from the database
       try {
         const { prisma } = await import('@/lib/prisma');
-        const groups = await prisma.group.findMany({
-          where: { students: { has: userName } },
-          orderBy: { createdAt: 'desc' }
+        const groupByMembership = await prisma.group.findFirst({
+          where: {
+            groupMembers: {
+              some: {
+                userId: dbUser.id,
+                isActive: true
+              }
+            }
+          },
+          orderBy: { updatedAt: 'desc' }
         });
+        const groups = groupByMembership
+          ? [groupByMembership]
+          : await prisma.group.findMany({
+              where: { students: { has: userName } },
+              orderBy: { createdAt: 'desc' }
+            });
 
         if (groups.length > 0) {
           const group = groups[0];
@@ -1923,13 +1936,24 @@ export async function getStudentDashboardData() {
             console.error('Failed to fetch group members:', memberErr);
           }
 
+          const approvedTitleProject = await prisma.project.findFirst({
+            where: {
+              groupId: group.id,
+              status: 'APPROVED'
+            },
+            orderBy: { updatedAt: 'desc' }
+          });
+
           data.project = {
             ...data.project,
             projectCode: group.code || data.project.projectCode,
-            title: group.projectTitle || data.project.title,
+            title: approvedTitleProject?.title || group.projectTitle || data.project.title,
+            description: approvedTitleProject?.abstract || data.project.description,
             groupName: group.title || data.project.groupName,
             adviser: data.profile.adviser || data.project.adviser,
           };
+          data.titleRegistration.proposedTitle = approvedTitleProject?.title || data.titleRegistration.proposedTitle;
+          data.titleRegistration.registrationStatus = approvedTitleProject ? 'Approved' : data.titleRegistration.registrationStatus;
         } else {
           data.profile.groupRole = 'Not assigned';
           data.profile.adviser = 'Not assigned';

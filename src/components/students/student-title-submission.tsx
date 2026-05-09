@@ -322,6 +322,97 @@ function createAttachmentFromFile(file: File, uploadedBy: string, downloadUrl?: 
   };
 }
 
+function mapTitleStatusLabel(status: string) {
+  switch (status) {
+    case 'approved':
+      return 'Approved';
+    case 'needs-revision':
+      return 'Needs Revision';
+    case 'rejected':
+      return 'Rejected';
+    default:
+      return 'Pending Review';
+  }
+}
+
+function mapApiTitleToSubmission(title: any, index: number, data: StudentDashboardData): StudentTitleSubmissionRecord {
+  const statusLabel = mapTitleStatusLabel(title.status);
+  const reviewedAt = title.reviewedAt || title.updatedAt || title.submittedAt;
+  const latestComment = title.latestReviewComment;
+
+  return {
+    id: title.id,
+    proposalNumber: index + 1,
+    proposalLabel: formatProposalLabel(index + 1),
+    isCurrent: index === 0,
+    user_id: data.profile.user_id,
+    project_id: title.id,
+    status: 'active',
+    created_at: title.submittedAt,
+    updated_at: title.updatedAt || title.submittedAt,
+    proposedTitle: title.title,
+    briefDescription: title.description,
+    background: title.description,
+    statementOfProblem: 'Included in the submitted title proposal package.',
+    objectives: ['Validate the proposed title with the assigned adviser.'],
+    category: `${title.department || data.profile.department || 'IT'} Capstone Title Proposal`,
+    keywords: title.keywords || [],
+    groupMembers: title.memberPreview || data.group.members.map((member) => member.fullName),
+    adviser: data.titleRegistration.adviser,
+    registrationStatus: statusLabel,
+    lastReviewedAt: reviewedAt,
+    statusNote: latestComment?.body || title.adviserAction || 'Submitted for adviser title validation.',
+    reviewSummary: {
+      latestAction: statusLabel,
+      nextStep:
+        title.status === 'approved'
+          ? 'Use this approved title in dashboard, project overview, documents, and future submissions.'
+          : title.status === 'needs-revision'
+            ? 'Revise the title based on adviser notes, then submit another proposal.'
+            : title.status === 'rejected'
+              ? 'Submit a different title proposal for adviser validation.'
+              : 'Wait for adviser validation or submit another title option.',
+      lastReviewedBy: latestComment?.authorName || data.titleRegistration.adviser,
+      accessRole: data.profile.groupRole || 'Student access',
+      accessNote: 'Any student in the assigned group can submit title proposals for adviser review.'
+    },
+    workflow: undefined,
+    revisionHistory: [
+      {
+        id: `${title.id}-history`,
+        status: statusLabel,
+        date: reviewedAt,
+        dateLabel: formatDateLabel(reviewedAt),
+        note: latestComment?.body || title.adviserAction || 'Title proposal was submitted for adviser review.',
+        reviewedBy: latestComment?.authorName || data.titleRegistration.adviser
+      }
+    ],
+    reviewerFeedback: latestComment
+      ? [
+          {
+            id: latestComment.id,
+            author: latestComment.authorName || data.titleRegistration.adviser,
+            role: 'Research Adviser',
+            status: statusLabel,
+            date: String(latestComment.createdAt),
+            dateLabel: formatDateLabel(String(latestComment.createdAt)),
+            note: latestComment.body,
+            route: '#title-submission-form',
+            actionLabel: 'Review title notes'
+          }
+        ]
+      : [],
+    validation: {
+      status: title.similarityScore ? 'Needs validation' : 'Pending validation',
+      checkedAt: title.updatedAt || title.submittedAt,
+      checkedAtLabel: 'Adviser validation',
+      note: 'Similarity checking can be recorded by the adviser during title review.',
+      matchedTitles: []
+    },
+    attachments: []
+  };
+}
+
 function Badge({
   label,
   tone = 'neutral',
@@ -341,7 +432,7 @@ function Badge({
 
 export function StudentTitleSubmission({ data }: { data: StudentDashboardData }) {
   const isLeader = Boolean(data.profile.groupRole && data.profile.groupRole.toLowerCase().includes('leader'));
-  const canUpload = isLeader || data.group?.allowMemberSubmission;
+  const canUpload = true;
   const initialSubmissions = useMemo(
     () => buildInitialSubmissions(data.titleRegistration),
     [data.titleRegistration]
@@ -351,6 +442,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? ''
   );
   const [notice, setNotice] = useState<NoticeState>(null);
+  const [isLoadingTitles, setIsLoadingTitles] = useState(true);
+  const [isSubmittingTitle, setIsSubmittingTitle] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const createdObjectUrlsRef = useRef(new Set<string>());
 
@@ -386,11 +479,51 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   };
 
   useEffect(() => {
-    setSubmissions(initialSubmissions);
-    setActiveSubmissionId(
-      initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? ''
-    );
-  }, [initialSubmissions]);
+    let cancelled = false;
+
+    const loadRealTitleSubmissions = async () => {
+      setIsLoadingTitles(true);
+
+      try {
+        const response = await fetch('/api/title-submissions', { cache: 'no-store' });
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(payload?.message || 'Unable to load title submissions.');
+        }
+
+        const realSubmissions = (payload?.titles || []).map((title: any, index: number) =>
+          mapApiTitleToSubmission(title, index, data)
+        );
+
+        if (!cancelled) {
+          const nextSubmissions: StudentTitleSubmissionRecord[] = realSubmissions.length ? realSubmissions : initialSubmissions;
+          setSubmissions(nextSubmissions);
+          setActiveSubmissionId(
+            nextSubmissions.find((item) => item.isCurrent)?.id ?? nextSubmissions[0]?.id ?? ''
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setSubmissions(initialSubmissions);
+          setActiveSubmissionId(
+            initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? ''
+          );
+          setNotice({ tone: 'warning', message: error instanceof Error ? error.message : 'Unable to load title submissions.' });
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingTitles(false);
+        }
+      }
+    };
+
+    loadRealTitleSubmissions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data, initialSubmissions]);
 
   useEffect(() => {
     if (!notice) {
@@ -606,7 +739,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     if (!canUpload) {
       setNotice({
         tone: 'warning',
-        message: 'Only the group leader is authorized to create a new title proposal.'
+        message: 'Only authorized group members can create a new title proposal.'
       });
       return;
     }
@@ -726,7 +859,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     link.remove();
   };
 
-  const handleSubmitProposal = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmitProposal = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!canUpload) {
@@ -747,50 +880,59 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
     const submittedAt = new Date().toISOString();
     const revisionLabel = activeSubmission.revisionHistory.length ? 'Resubmitted' : 'Submitted';
+    const submittedTitle = activeSubmission.proposedTitle.trim()
+      || deriveTitleFromFileName(activeSubmission.attachments[0]?.fileName || '')
+      || `${activeSubmission.proposalLabel} Title Proposal`;
 
-    setSubmissions((current) =>
-      current.map((submission) => {
-        if (submission.id !== activeSubmission.id) {
-          return {
-            ...submission,
-            isCurrent: false
-          };
-        }
+    setIsSubmittingTitle(true);
 
-        return {
-          ...submission,
-          isCurrent: true,
-          updated_at: submittedAt,
-          lastReviewedAt: submittedAt,
-          registrationStatus: 'Pending Review',
-          statusNote:
-            'The title proposal document was submitted for adviser review. The required title, background, statement of the problem, and objectives are expected inside the uploaded file package.',
-          reviewSummary: {
-            latestAction: 'Submitted for adviser review',
-            nextStep: 'Wait for adviser validation, title similarity checking, and revision instructions if needed.',
-            lastReviewedBy: activeSubmission.adviser,
-            accessRole: 'Group leader access',
-            accessNote: 'Only the current group leader can submit official title updates for adviser review.'
-          },
-          revisionHistory: [
-            {
-              id: `${submission.id}-submission-${Date.now()}`,
-              status: revisionLabel,
-              date: submittedAt,
-              dateLabel: formatDateLabel(submittedAt),
-              note: `${submission.proposalLabel} was submitted with ${submission.attachments.length} attached proposal file${submission.attachments.length === 1 ? '' : 's'} for adviser validation.`,
-              reviewedBy: 'Student Group'
-            },
-            ...submission.revisionHistory
-          ]
-        };
-      })
-    );
+    try {
+      const response = await fetch('/api/title-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: submittedTitle,
+          description: activeSubmission.briefDescription || activeSubmission.background || activeSubmission.statusNote,
+          keywords: activeSubmission.keywords
+        })
+      });
+      const payload = await response.json().catch(() => null);
 
-    setNotice({
-      tone: 'success',
-      message: `${activeSubmission.proposalLabel} was submitted using the uploaded proposal document.`
-    });
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to submit the title proposal.');
+      }
+
+      const realSubmission = mapApiTitleToSubmission(payload.title, 0, data);
+      realSubmission.attachments = activeSubmission.attachments;
+      realSubmission.revisionHistory = [
+        {
+          id: `${realSubmission.id}-submission-${Date.now()}`,
+          status: revisionLabel,
+          date: submittedAt,
+          dateLabel: formatDateLabel(submittedAt),
+          note: `${realSubmission.proposalLabel} was submitted with ${activeSubmission.attachments.length} attached proposal file${activeSubmission.attachments.length === 1 ? '' : 's'} for adviser validation.`,
+          reviewedBy: 'Student Group'
+        },
+        ...realSubmission.revisionHistory
+      ];
+
+      setSubmissions((current) => [
+        realSubmission,
+        ...current
+          .filter((submission) => submission.id !== activeSubmission.id)
+          .map((submission) => ({ ...submission, isCurrent: false }))
+      ]);
+      setActiveSubmissionId(realSubmission.id);
+      setNotice({
+        tone: 'success',
+        message: `${realSubmission.proposalLabel} was submitted to your adviser.`
+      });
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    } catch (error) {
+      setNotice({ tone: 'danger', message: error instanceof Error ? error.message : 'Unable to submit the title proposal.' });
+    } finally {
+      setIsSubmittingTitle(false);
+    }
   };
 
   return (
@@ -1232,7 +1374,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                                 className="btn btn-ghost"
                                 type="button"
                                 onClick={() => handleRemoveAttachment(attachment.id)}
-                                disabled={!isLeader}
+                                disabled={!canUpload}
                               >
                                 <i className="fas fa-trash-can" aria-hidden="true" /> Remove
                               </button>
@@ -1251,13 +1393,13 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
                 <div className="register-title-form-actions">
                   <div className="register-title-submit-cluster">
-                    <button className="btn btn-primary register-title-primary-action" type="submit" disabled={!canUpload}>
+                    <button className="btn btn-primary register-title-primary-action" type="submit" disabled={!canUpload || isSubmittingTitle || isLoadingTitles}>
                       <i className="fas fa-paper-plane" aria-hidden="true" />
-                      {canUpload ? 'Submit Title Proposal for Review' : 'Leader Action Required'}
+                      {isSubmittingTitle ? 'Submitting...' : canUpload ? 'Submit Title Proposal for Review' : 'Action Required'}
                     </button>
                     <span className="register-title-submit-note">
                       {canUpload
-                        ? 'Submission only requires at least one uploaded title proposal document. The required sections must already be inside that file.'
+                        ? 'Any group member can submit another title option. The required sections must already be inside the uploaded file.'
                         : `This shared form is read-only for members. Coordinate with ${data.group.leaderName} for official title submission.`}
                     </span>
                   </div>

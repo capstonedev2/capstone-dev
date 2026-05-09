@@ -1,6 +1,7 @@
 import type { PortalRole, ProjectFileRecord } from '@/components/students/student-project-files.shared';
 import {
   formatProjectFileDate,
+  formatProjectFileAdviserStatus,
   formatProjectFileStatus,
   getProjectFileCategoryLabel,
   getProjectFileTone,
@@ -90,8 +91,6 @@ export function FileItem({
           </span>
           <div className="project-files-row-title">
             <strong>{file.fileName}</strong>
-            <small>{file.uploadedBy} | {formatProjectFileDate(file.uploadedAt)} | {file.sizeLabel}</small>
-            <span className="project-files-row-note">{file.versionNotes}</span>
           </div>
         </div>
       </td>
@@ -105,27 +104,39 @@ export function FileItem({
         <span className={`ui-badge is-${statusTone}`}>{formatProjectFileStatus(file.status)}</span>
       </td>
       <td>
+        <span className={`ui-badge is-${statusTone}`}>{formatProjectFileAdviserStatus(file.status)}</span>
+      </td>
+      <td>
         <div className="project-files-user-cell">
           <strong>{file.uploadedBy}</strong>
-          <small>{file.uploadedById === currentUserId ? 'Your submission' : 'Group submission'}</small>
         </div>
       </td>
       <td>
         <div className="project-files-date-cell">
           <strong>{formatProjectFileDate(file.uploadedAt)}</strong>
-          <small>{file.reviewedAt ? `Reviewed ${formatProjectFileDate(file.reviewedAt)}` : 'Awaiting review'}</small>
+          <small>{new Date(file.uploadedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</small>
         </div>
       </td>
       <td className="align-right">
         <div className="row-actions project-files-row-actions">
-          <button className="table-btn" type="button" onClick={() => onView(file)}>View</button>
-          <button className="table-btn" type="button" onClick={() => onDownload(file)}>Download</button>
-          <button className="table-btn" type="button" onClick={() => onViewHistory(file)}>View History</button>
+          <button className="table-btn project-files-icon-action" type="button" onClick={() => onView(file)} aria-label={`View ${file.fileName}`} title="View">
+            <i className="fas fa-eye" aria-hidden="true" />
+          </button>
+          <button className="table-btn project-files-icon-action" type="button" onClick={() => onDownload(file)} aria-label={`Download ${file.fileName}`} title="Download">
+            <i className="fas fa-download" aria-hidden="true" />
+          </button>
+          <button className="table-btn project-files-icon-action" type="button" onClick={() => onViewHistory(file)} aria-label={`View history for ${file.fileName}`} title="History">
+            <i className="fas fa-clock-rotate-left" aria-hidden="true" />
+          </button>
           {showApprove ? (
-            <button className="table-btn" type="button" onClick={() => onApprove(file)}>Approve</button>
+            <button className="table-btn project-files-icon-action" type="button" onClick={() => onApprove(file)} aria-label={`Approve ${file.fileName}`} title="Approve">
+              <i className="fas fa-circle-check" aria-hidden="true" />
+            </button>
           ) : null}
           {showDelete ? (
-            <button className="table-btn is-danger" type="button" onClick={() => onDelete(file)}>Delete</button>
+            <button className="table-btn project-files-icon-action is-danger" type="button" onClick={() => onDelete(file)} aria-label={`Delete ${file.fileName}`} title="Delete">
+              <i className="fas fa-trash-can" aria-hidden="true" />
+            </button>
           ) : null}
         </div>
       </td>

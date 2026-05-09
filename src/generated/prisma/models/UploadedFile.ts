@@ -39,9 +39,13 @@ export type UploadedFileMinAggregateOutputType = {
   secureUrl: string | null
   publicId: string | null
   fileName: string | null
+  filePath: string | null
+  bucketName: string | null
   fileType: string | null
   resourceType: string | null
+  documentCategory: string | null
   category: string | null
+  visibility: string | null
   size: number | null
   userId: string | null
   projectId: string | null
@@ -55,9 +59,13 @@ export type UploadedFileMaxAggregateOutputType = {
   secureUrl: string | null
   publicId: string | null
   fileName: string | null
+  filePath: string | null
+  bucketName: string | null
   fileType: string | null
   resourceType: string | null
+  documentCategory: string | null
   category: string | null
+  visibility: string | null
   size: number | null
   userId: string | null
   projectId: string | null
@@ -71,9 +79,13 @@ export type UploadedFileCountAggregateOutputType = {
   secureUrl: number
   publicId: number
   fileName: number
+  filePath: number
+  bucketName: number
   fileType: number
   resourceType: number
+  documentCategory: number
   category: number
+  visibility: number
   size: number
   userId: number
   projectId: number
@@ -97,9 +109,13 @@ export type UploadedFileMinAggregateInputType = {
   secureUrl?: true
   publicId?: true
   fileName?: true
+  filePath?: true
+  bucketName?: true
   fileType?: true
   resourceType?: true
+  documentCategory?: true
   category?: true
+  visibility?: true
   size?: true
   userId?: true
   projectId?: true
@@ -113,9 +129,13 @@ export type UploadedFileMaxAggregateInputType = {
   secureUrl?: true
   publicId?: true
   fileName?: true
+  filePath?: true
+  bucketName?: true
   fileType?: true
   resourceType?: true
+  documentCategory?: true
   category?: true
+  visibility?: true
   size?: true
   userId?: true
   projectId?: true
@@ -129,9 +149,13 @@ export type UploadedFileCountAggregateInputType = {
   secureUrl?: true
   publicId?: true
   fileName?: true
+  filePath?: true
+  bucketName?: true
   fileType?: true
   resourceType?: true
+  documentCategory?: true
   category?: true
+  visibility?: true
   size?: true
   userId?: true
   projectId?: true
@@ -229,12 +253,16 @@ export type UploadedFileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 
 export type UploadedFileGroupByOutputType = {
   id: string
-  secureUrl: string
-  publicId: string
+  secureUrl: string | null
+  publicId: string | null
   fileName: string
+  filePath: string | null
+  bucketName: string | null
   fileType: string
   resourceType: string | null
+  documentCategory: string
   category: string
+  visibility: string
   size: number | null
   userId: string
   projectId: string | null
@@ -268,12 +296,16 @@ export type UploadedFileWhereInput = {
   OR?: Prisma.UploadedFileWhereInput[]
   NOT?: Prisma.UploadedFileWhereInput | Prisma.UploadedFileWhereInput[]
   id?: Prisma.StringFilter<"UploadedFile"> | string
-  secureUrl?: Prisma.StringFilter<"UploadedFile"> | string
-  publicId?: Prisma.StringFilter<"UploadedFile"> | string
+  secureUrl?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  publicId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   fileName?: Prisma.StringFilter<"UploadedFile"> | string
+  filePath?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  bucketName?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   fileType?: Prisma.StringFilter<"UploadedFile"> | string
   resourceType?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  documentCategory?: Prisma.StringFilter<"UploadedFile"> | string
   category?: Prisma.StringFilter<"UploadedFile"> | string
+  visibility?: Prisma.StringFilter<"UploadedFile"> | string
   size?: Prisma.IntNullableFilter<"UploadedFile"> | number | null
   userId?: Prisma.StringFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
@@ -287,12 +319,16 @@ export type UploadedFileWhereInput = {
 
 export type UploadedFileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  secureUrl?: Prisma.SortOrder
-  publicId?: Prisma.SortOrder
+  secureUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicId?: Prisma.SortOrderInput | Prisma.SortOrder
   fileName?: Prisma.SortOrder
+  filePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  bucketName?: Prisma.SortOrderInput | Prisma.SortOrder
   fileType?: Prisma.SortOrder
   resourceType?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentCategory?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -310,11 +346,15 @@ export type UploadedFileWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.UploadedFileWhereInput | Prisma.UploadedFileWhereInput[]
   OR?: Prisma.UploadedFileWhereInput[]
   NOT?: Prisma.UploadedFileWhereInput | Prisma.UploadedFileWhereInput[]
-  secureUrl?: Prisma.StringFilter<"UploadedFile"> | string
+  secureUrl?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   fileName?: Prisma.StringFilter<"UploadedFile"> | string
+  filePath?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  bucketName?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   fileType?: Prisma.StringFilter<"UploadedFile"> | string
   resourceType?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  documentCategory?: Prisma.StringFilter<"UploadedFile"> | string
   category?: Prisma.StringFilter<"UploadedFile"> | string
+  visibility?: Prisma.StringFilter<"UploadedFile"> | string
   size?: Prisma.IntNullableFilter<"UploadedFile"> | number | null
   userId?: Prisma.StringFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
@@ -328,12 +368,16 @@ export type UploadedFileWhereUniqueInput = Prisma.AtLeast<{
 
 export type UploadedFileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  secureUrl?: Prisma.SortOrder
-  publicId?: Prisma.SortOrder
+  secureUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicId?: Prisma.SortOrderInput | Prisma.SortOrder
   fileName?: Prisma.SortOrder
+  filePath?: Prisma.SortOrderInput | Prisma.SortOrder
+  bucketName?: Prisma.SortOrderInput | Prisma.SortOrder
   fileType?: Prisma.SortOrder
   resourceType?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentCategory?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -352,12 +396,16 @@ export type UploadedFileScalarWhereWithAggregatesInput = {
   OR?: Prisma.UploadedFileScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UploadedFileScalarWhereWithAggregatesInput | Prisma.UploadedFileScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
-  secureUrl?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
-  publicId?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
+  secureUrl?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
+  publicId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
   fileName?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
+  filePath?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
+  bucketName?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
   fileType?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
   resourceType?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
+  documentCategory?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
   category?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
+  visibility?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
   size?: Prisma.IntNullableWithAggregatesFilter<"UploadedFile"> | number | null
   userId?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
@@ -368,12 +416,16 @@ export type UploadedFileScalarWhereWithAggregatesInput = {
 
 export type UploadedFileCreateInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -384,12 +436,16 @@ export type UploadedFileCreateInput = {
 
 export type UploadedFileUncheckedCreateInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   userId: string
   projectId?: string | null
@@ -400,12 +456,16 @@ export type UploadedFileUncheckedCreateInput = {
 
 export type UploadedFileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -416,12 +476,16 @@ export type UploadedFileUpdateInput = {
 
 export type UploadedFileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -432,12 +496,16 @@ export type UploadedFileUncheckedUpdateInput = {
 
 export type UploadedFileCreateManyInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   userId: string
   projectId?: string | null
@@ -448,12 +516,16 @@ export type UploadedFileCreateManyInput = {
 
 export type UploadedFileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -461,12 +533,16 @@ export type UploadedFileUpdateManyMutationInput = {
 
 export type UploadedFileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -490,9 +566,13 @@ export type UploadedFileCountOrderByAggregateInput = {
   secureUrl?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
   fileName?: Prisma.SortOrder
+  filePath?: Prisma.SortOrder
+  bucketName?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
   resourceType?: Prisma.SortOrder
+  documentCategory?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   size?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
@@ -510,9 +590,13 @@ export type UploadedFileMaxOrderByAggregateInput = {
   secureUrl?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
   fileName?: Prisma.SortOrder
+  filePath?: Prisma.SortOrder
+  bucketName?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
   resourceType?: Prisma.SortOrder
+  documentCategory?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   size?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
@@ -526,9 +610,13 @@ export type UploadedFileMinOrderByAggregateInput = {
   secureUrl?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
   fileName?: Prisma.SortOrder
+  filePath?: Prisma.SortOrder
+  bucketName?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
   resourceType?: Prisma.SortOrder
+  documentCategory?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   size?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
@@ -677,12 +765,16 @@ export type UploadedFileUncheckedUpdateManyWithoutSubmissionNestedInput = {
 
 export type UploadedFileCreateWithoutUserInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -692,12 +784,16 @@ export type UploadedFileCreateWithoutUserInput = {
 
 export type UploadedFileUncheckedCreateWithoutUserInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   projectId?: string | null
   submissionId?: string | null
@@ -736,12 +832,16 @@ export type UploadedFileScalarWhereInput = {
   OR?: Prisma.UploadedFileScalarWhereInput[]
   NOT?: Prisma.UploadedFileScalarWhereInput | Prisma.UploadedFileScalarWhereInput[]
   id?: Prisma.StringFilter<"UploadedFile"> | string
-  secureUrl?: Prisma.StringFilter<"UploadedFile"> | string
-  publicId?: Prisma.StringFilter<"UploadedFile"> | string
+  secureUrl?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  publicId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   fileName?: Prisma.StringFilter<"UploadedFile"> | string
+  filePath?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  bucketName?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   fileType?: Prisma.StringFilter<"UploadedFile"> | string
   resourceType?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  documentCategory?: Prisma.StringFilter<"UploadedFile"> | string
   category?: Prisma.StringFilter<"UploadedFile"> | string
+  visibility?: Prisma.StringFilter<"UploadedFile"> | string
   size?: Prisma.IntNullableFilter<"UploadedFile"> | number | null
   userId?: Prisma.StringFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
@@ -752,12 +852,16 @@ export type UploadedFileScalarWhereInput = {
 
 export type UploadedFileCreateWithoutProjectInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -767,12 +871,16 @@ export type UploadedFileCreateWithoutProjectInput = {
 
 export type UploadedFileUncheckedCreateWithoutProjectInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   userId: string
   submissionId?: string | null
@@ -808,12 +916,16 @@ export type UploadedFileUpdateManyWithWhereWithoutProjectInput = {
 
 export type UploadedFileCreateWithoutSubmissionInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -823,12 +935,16 @@ export type UploadedFileCreateWithoutSubmissionInput = {
 
 export type UploadedFileUncheckedCreateWithoutSubmissionInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   userId: string
   projectId?: string | null
@@ -864,12 +980,16 @@ export type UploadedFileUpdateManyWithWhereWithoutSubmissionInput = {
 
 export type UploadedFileCreateManyUserInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   projectId?: string | null
   submissionId?: string | null
@@ -879,12 +999,16 @@ export type UploadedFileCreateManyUserInput = {
 
 export type UploadedFileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -894,12 +1018,16 @@ export type UploadedFileUpdateWithoutUserInput = {
 
 export type UploadedFileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -909,12 +1037,16 @@ export type UploadedFileUncheckedUpdateWithoutUserInput = {
 
 export type UploadedFileUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -924,12 +1056,16 @@ export type UploadedFileUncheckedUpdateManyWithoutUserInput = {
 
 export type UploadedFileCreateManyProjectInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   userId: string
   submissionId?: string | null
@@ -939,12 +1075,16 @@ export type UploadedFileCreateManyProjectInput = {
 
 export type UploadedFileUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -954,12 +1094,16 @@ export type UploadedFileUpdateWithoutProjectInput = {
 
 export type UploadedFileUncheckedUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -969,12 +1113,16 @@ export type UploadedFileUncheckedUpdateWithoutProjectInput = {
 
 export type UploadedFileUncheckedUpdateManyWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -984,12 +1132,16 @@ export type UploadedFileUncheckedUpdateManyWithoutProjectInput = {
 
 export type UploadedFileCreateManySubmissionInput = {
   id?: string
-  secureUrl: string
-  publicId: string
+  secureUrl?: string | null
+  publicId?: string | null
   fileName: string
+  filePath?: string | null
+  bucketName?: string | null
   fileType: string
   resourceType?: string | null
+  documentCategory?: string
   category?: string
+  visibility?: string
   size?: number | null
   userId: string
   projectId?: string | null
@@ -999,12 +1151,16 @@ export type UploadedFileCreateManySubmissionInput = {
 
 export type UploadedFileUpdateWithoutSubmissionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1014,12 +1170,16 @@ export type UploadedFileUpdateWithoutSubmissionInput = {
 
 export type UploadedFileUncheckedUpdateWithoutSubmissionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1029,12 +1189,16 @@ export type UploadedFileUncheckedUpdateWithoutSubmissionInput = {
 
 export type UploadedFileUncheckedUpdateManyWithoutSubmissionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  secureUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
   resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1049,9 +1213,13 @@ export type UploadedFileSelect<ExtArgs extends runtime.Types.Extensions.Internal
   secureUrl?: boolean
   publicId?: boolean
   fileName?: boolean
+  filePath?: boolean
+  bucketName?: boolean
   fileType?: boolean
   resourceType?: boolean
+  documentCategory?: boolean
   category?: boolean
+  visibility?: boolean
   size?: boolean
   userId?: boolean
   projectId?: boolean
@@ -1068,9 +1236,13 @@ export type UploadedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   secureUrl?: boolean
   publicId?: boolean
   fileName?: boolean
+  filePath?: boolean
+  bucketName?: boolean
   fileType?: boolean
   resourceType?: boolean
+  documentCategory?: boolean
   category?: boolean
+  visibility?: boolean
   size?: boolean
   userId?: boolean
   projectId?: boolean
@@ -1087,9 +1259,13 @@ export type UploadedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   secureUrl?: boolean
   publicId?: boolean
   fileName?: boolean
+  filePath?: boolean
+  bucketName?: boolean
   fileType?: boolean
   resourceType?: boolean
+  documentCategory?: boolean
   category?: boolean
+  visibility?: boolean
   size?: boolean
   userId?: boolean
   projectId?: boolean
@@ -1106,9 +1282,13 @@ export type UploadedFileSelectScalar = {
   secureUrl?: boolean
   publicId?: boolean
   fileName?: boolean
+  filePath?: boolean
+  bucketName?: boolean
   fileType?: boolean
   resourceType?: boolean
+  documentCategory?: boolean
   category?: boolean
+  visibility?: boolean
   size?: boolean
   userId?: boolean
   projectId?: boolean
@@ -1117,7 +1297,7 @@ export type UploadedFileSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UploadedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "secureUrl" | "publicId" | "fileName" | "fileType" | "resourceType" | "category" | "size" | "userId" | "projectId" | "submissionId" | "createdAt" | "updatedAt", ExtArgs["result"]["uploadedFile"]>
+export type UploadedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "secureUrl" | "publicId" | "fileName" | "filePath" | "bucketName" | "fileType" | "resourceType" | "documentCategory" | "category" | "visibility" | "size" | "userId" | "projectId" | "submissionId" | "createdAt" | "updatedAt", ExtArgs["result"]["uploadedFile"]>
 export type UploadedFileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
@@ -1143,12 +1323,16 @@ export type $UploadedFilePayload<ExtArgs extends runtime.Types.Extensions.Intern
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    secureUrl: string
-    publicId: string
+    secureUrl: string | null
+    publicId: string | null
     fileName: string
+    filePath: string | null
+    bucketName: string | null
     fileType: string
     resourceType: string | null
+    documentCategory: string
     category: string
+    visibility: string
     size: number | null
     userId: string
     projectId: string | null
@@ -1585,9 +1769,13 @@ export interface UploadedFileFieldRefs {
   readonly secureUrl: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly publicId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly fileName: Prisma.FieldRef<"UploadedFile", 'String'>
+  readonly filePath: Prisma.FieldRef<"UploadedFile", 'String'>
+  readonly bucketName: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly fileType: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly resourceType: Prisma.FieldRef<"UploadedFile", 'String'>
+  readonly documentCategory: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly category: Prisma.FieldRef<"UploadedFile", 'String'>
+  readonly visibility: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly size: Prisma.FieldRef<"UploadedFile", 'Int'>
   readonly userId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly projectId: Prisma.FieldRef<"UploadedFile", 'String'>

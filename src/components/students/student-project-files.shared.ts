@@ -1,6 +1,6 @@
 export type PortalRole = 'student' | 'adviser' | 'admin';
 
-export type ProjectFileStatus = 'approved' | 'pending' | 'revision';
+export type ProjectFileStatus = 'approved' | 'pending' | 'under_review' | 'revision';
 
 export type ProjectFileTag = 'Draft' | 'Final' | 'Revision';
 
@@ -38,6 +38,13 @@ export type ProjectFileRecord = {
   uploadedAt: string;
   reviewedBy?: string;
   reviewedAt?: string;
+  latestReviewComment?: {
+    id: string;
+    body: string;
+    decision: string;
+    createdAt: string | Date;
+    authorName?: string | null;
+  } | null;
   isFinal: boolean;
   isRepositoryCopy: boolean;
   fileType: string;
@@ -98,6 +105,10 @@ export function normalizeProjectFileStatus(value: string): ProjectFileStatus {
     return 'approved';
   }
 
+  if (normalized.includes('under_review') || normalized.includes('under review') || normalized.includes('still reviewing') || normalized.includes('accepted')) {
+    return 'under_review';
+  }
+
   if (normalized.includes('revision')) {
     return 'revision';
   }
@@ -109,6 +120,8 @@ export function formatProjectFileStatus(status: ProjectFileStatus) {
   switch (status) {
     case 'approved':
       return 'Approved';
+    case 'under_review':
+      return 'Still Reviewing';
     case 'revision':
       return 'Needs Revision';
     default:
@@ -116,10 +129,25 @@ export function formatProjectFileStatus(status: ProjectFileStatus) {
   }
 }
 
-export function getProjectFileTone(status: ProjectFileStatus): 'success' | 'warning' | 'danger' {
+export function formatProjectFileAdviserStatus(status: ProjectFileStatus) {
+  switch (status) {
+    case 'approved':
+      return 'Approved';
+    case 'under_review':
+      return 'Accepted by Adviser';
+    case 'revision':
+      return 'Revision Requested';
+    default:
+      return 'Sent to Adviser';
+  }
+}
+
+export function getProjectFileTone(status: ProjectFileStatus): 'success' | 'warning' | 'danger' | 'info' {
   switch (status) {
     case 'approved':
       return 'success';
+    case 'under_review':
+      return 'info';
     case 'revision':
       return 'danger';
     default:
@@ -131,6 +159,8 @@ export function getProjectFileTagFromStatus(status: ProjectFileStatus): ProjectF
   switch (status) {
     case 'approved':
       return 'Final';
+    case 'under_review':
+      return 'Revision';
     case 'revision':
       return 'Revision';
     default:
@@ -173,7 +203,8 @@ export function sortProjectFiles(files: ProjectFileRecord[], sortBy: ProjectFile
   const statusOrder: Record<ProjectFileStatus, number> = {
     revision: 0,
     pending: 1,
-    approved: 2
+    under_review: 2,
+    approved: 3
   };
 
   return [...files].sort((left, right) => {

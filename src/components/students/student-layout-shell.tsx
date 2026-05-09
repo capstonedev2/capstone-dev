@@ -1233,8 +1233,12 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     };
 
     fetchNotifications();
+    window.addEventListener('thesistrack:notifications-updated', fetchNotifications);
     const intervalId = setInterval(fetchNotifications, 5000);
-    return () => clearInterval(intervalId);
+    return () => {
+      window.removeEventListener('thesistrack:notifications-updated', fetchNotifications);
+      clearInterval(intervalId);
+    };
   }, [data.profile.user_id]);
 
   const shellNotifications = useMemo(() => {
@@ -1307,6 +1311,18 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     } catch (e) {
       console.error('Failed to process notification action', e);
     }
+  };
+
+  const markNotificationRead = (id: string) => {
+    setRealNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'READ', readAt: new Date().toISOString() } : item)));
+    void fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationId: id, action: 'read' }),
+      keepalive: true
+    }).finally(() => {
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    });
   };
 
   const toggleSidebar = () => {
@@ -1384,7 +1400,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   <strong>Notifications</strong>
                   <small>Latest feedback, schedule updates, deadlines, and approvals for your workspace.</small>
                 </div>
-                <Link className="notification-menu-view-all" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'}>
+                <Link className="notification-menu-view-all" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
                   {isLimitedWorkspace ? 'View setup' : 'Open center'}
                 </Link>
               </div>
@@ -1413,7 +1429,16 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                         className={`notification-menu-item${notification.read ? '' : ' is-unread'}`}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                       >
-                        <Link href={action.href} className="flex gap-4 w-full">
+                        <Link
+                          href={action.href}
+                          className="flex gap-4 w-full"
+                          onClick={() => {
+                            if (!notification.read) {
+                              markNotificationRead(notification.id);
+                            }
+                            setNotificationMenuOpen(false);
+                          }}
+                        >
                           <span className={`notification-menu-item-icon is-${meta.tone}`}>
                             <i aria-hidden="true" className={`fas ${meta.icon}`} />
                           </span>
@@ -1472,7 +1497,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
               )}
 
               <div className="notification-menu-footer">
-                <Link className="notification-menu-footer-link" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'}>
+                <Link className="notification-menu-footer-link" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
                   {isLimitedWorkspace ? 'Back to dashboard' : 'See all notifications'}
                   <i aria-hidden="true" className="fas fa-arrow-up-right-from-square" />
                 </Link>

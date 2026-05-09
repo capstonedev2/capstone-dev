@@ -1,7 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AdminShell } from '@/components/admin/admin-shell';
+import {
+  DocumentFileList,
+  DocumentFileUploadButton,
+  type DocumentFileSummary
+} from '@/components/documents/document-file-controls';
+import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 
 const FOLDERS = [
   { key: 'Proposals', count: 156, icon: 'fa-folder' },
@@ -23,6 +29,11 @@ export function AdminRepository() {
   const [departmentFilter, setDepartmentFilter] = useState('All Departments');
   const [documentTypeFilter, setDocumentTypeFilter] = useState('All Document Types');
   const [query, setQuery] = useState('');
+  const [repositoryFile, setRepositoryFile] = useState<File | null>(null);
+  const [repositoryProjectId, setRepositoryProjectId] = useState(DOCUMENTS[0]?.id || '');
+  const [repositoryFiles, setRepositoryFiles] = useState<DocumentFileSummary[]>([]);
+  const [repositoryFileError, setRepositoryFileError] = useState<string | null>(null);
+  const [isRepositoryUploading, setIsRepositoryUploading] = useState(false);
 
   const filteredDocuments = useMemo(
     () =>
@@ -37,6 +48,106 @@ export function AdminRepository() {
       }),
     [departmentFilter, documentTypeFilter, query]
   );
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadRepositoryFiles = async () => {
+      try {
+        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY}`, {
+          cache: 'no-store'
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        if (!isCancelled) {
+          setRepositoryFiles(payload.files || []);
+        }
+      } catch {
+        // Leave static repository records visible if secure document listing is unavailable.
+      }
+    };
+
+    loadRepositoryFiles();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  async function uploadRepositoryFile() {
+    setRepositoryFileError(null);
+
+    if (!repositoryFile) {
+      setRepositoryFileError('Select a final repository document before uploading.');
+      return;
+    }
+
+    setIsRepositoryUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', repositoryFile);
+      formData.append('bucketName', DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY);
+      formData.append('projectId', repositoryProjectId);
+      formData.append('documentCategory', 'final-repository');
+
+      const response = await fetch('/api/document-files', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to upload final repository file.');
+      }
+
+      const payload = await response.json();
+      setRepositoryFiles((current) => [payload.file, ...current]);
+      setRepositoryFile(null);
+    } catch (error) {
+      setRepositoryFileError(error instanceof Error ? error.message : 'Unable to upload final repository file.');
+    } finally {
+      setIsRepositoryUploading(false);
+    }
+  }
+
+  async function openSignedRepositoryFile(file: DocumentFileSummary) {
+    try {
+      const response = await fetch(`/api/document-files/${file.id}/signed-url`, { method: 'POST' });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to open the document.');
+      }
+
+      window.open(payload.signedUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      setRepositoryFileError(error instanceof Error ? error.message : 'Unable to open the document.');
+    }
+  }
+
+  function downloadRepositoryFile(file: DocumentFileSummary) {
+    window.open(`/api/document-files/${file.id}/download`, '_blank', 'noopener,noreferrer');
+  }
+
+  async function deleteRepositoryFile(file: DocumentFileSummary) {
+    try {
+      const response = await fetch(`/api/document-files/${file.id}`, { method: 'DELETE' });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to delete repository file.');
+      }
+
+      setRepositoryFiles((current) => current.filter((item) => item.id !== file.id));
+    } catch (error) {
+      setRepositoryFileError(error instanceof Error ? error.message : 'Unable to delete repository file.');
+    }
+  }
 
   return (
     <AdminShell
@@ -115,6 +226,56 @@ export function AdminRepository() {
                 <span className="admin-note">{folder.count} documents</span>
               </article>
             ))}
+          </section>
+
+          <section className="admin-section-card">
+            <div className="admin-section-body">
+              <div className="admin-section-heading">
+                <div>
+                  <h3>Final repository upload</h3>
+                  <p>Upload approved final thesis/capstone documents to the private Supabase final-repository bucket.</p>
+                </div>
+              </div>
+
+              <div className="admin-toolbar compact">
+                <div className="span-3 admin-toolbar-field">
+                  <label>Project record</label>
+                  <select
+                    className="admin-toolbar-select"
+                    value={repositoryProjectId}
+                    onChange={(event) => setRepositoryProjectId(event.target.value)}
+                    disabled={isRepositoryUploading}
+                  >
+                    {DOCUMENTS.map((document) => (
+                      <option key={document.id} value={document.id}>{document.project}</option>
+                    ))}
+                  </select>
+                  {repositoryFile ? <span className="admin-note">{repositoryFile.name}</span> : null}
+                </div>
+                <div className="span-3 admin-toolbar-actions">
+                  <DocumentFileUploadButton
+                    bucketName={DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY}
+                    disabled={isRepositoryUploading}
+                    label="Choose Final File"
+                    onFileSelected={setRepositoryFile}
+                    onError={setRepositoryFileError}
+                  />
+                  <button className="btn btn-primary" type="button" disabled={isRepositoryUploading} onClick={uploadRepositoryFile}>
+                    <i className="fas fa-lock"></i>
+                    Upload Securely
+                  </button>
+                </div>
+              </div>
+
+              <DocumentFileList
+                files={repositoryFiles}
+                error={repositoryFileError}
+                emptyMessage="No final repository files uploaded to Supabase yet."
+                onView={openSignedRepositoryFile}
+                onDownload={downloadRepositoryFile}
+                onDelete={deleteRepositoryFile}
+              />
+            </div>
           </section>
 
           <section className="table-container">

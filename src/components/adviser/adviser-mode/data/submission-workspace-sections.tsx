@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import type { AdviserSubmissionRecord, SubmissionMilestone, SubmissionStatus, SubmissionType } from '@/components/adviser/adviser-mode/data/submission-workspace-data';
 import {
-  REVIEW_REFERENCE_DATE,
   formatSubmissionDate,
   getDeadlineLabel,
   getDeadlineToneClass,
+  getReviewReferenceDate,
   getSubmissionStatusMeta
 } from '@/components/adviser/adviser-mode/data/submission-workspace-data';
 
@@ -109,7 +109,7 @@ function startOfUtcDay(value: string) {
 }
 
 function getDeadlineDelta(deadline: string) {
-  return Math.round((startOfUtcDay(deadline) - startOfUtcDay(REVIEW_REFERENCE_DATE)) / dayInMilliseconds);
+  return Math.round((startOfUtcDay(deadline) - startOfUtcDay(getReviewReferenceDate())) / dayInMilliseconds);
 }
 
 function getDeadlineVisual(deadline: string, status: SubmissionStatus) {
@@ -201,7 +201,7 @@ export function SubmissionFocusPanel({
               </span>
               <h2 className="mt-4 text-2xl font-extrabold tracking-[-0.04em] sm:text-3xl">Submission Queue</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-blue-100">
-                Prioritized view for active IT document reviews, version checks, and adviser decisions.
+                Prioritized view for active student document reviews, version checks, and adviser decisions.
               </p>
             </div>
 
@@ -286,7 +286,7 @@ export function FiltersBar({
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex min-h-10 items-center gap-2 rounded-2xl bg-[rgba(0,58,143,0.06)] px-4 text-sm font-bold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
             <i className="fas fa-lock text-xs" />
-            IT Department
+            Assigned Projects
           </span>
           {hasActiveFilters ? (
             <button
@@ -336,7 +336,7 @@ export function FiltersBar({
           </span>
           <input
             className="min-h-12 w-full rounded-2xl border border-[rgba(226,232,240,0.92)] bg-white pl-11 pr-4 text-sm text-[var(--text-dark)] shadow-sm outline-none transition placeholder:text-[var(--text-light)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)]"
-            placeholder="Search IT groups, projects, or documents"
+            placeholder="Search groups, projects, or documents"
             type="search"
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -364,20 +364,26 @@ export function SubmissionList({
   submissions,
   totalSubmissions,
   hasActiveFilters,
-  onClearFilters
+  onClearFilters,
+  onViewSubmission,
+  onDownloadSubmission,
+  onReviewSubmission
 }: {
   submissions: AdviserSubmissionRecord[];
   totalSubmissions: number;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
+  onViewSubmission?: (submission: AdviserSubmissionRecord) => void;
+  onDownloadSubmission?: (submission: AdviserSubmissionRecord) => void;
+  onReviewSubmission?: (submission: AdviserSubmissionRecord) => void;
 }) {
   return (
     <section className="space-y-4">
       <div className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-100 bg-white px-5 py-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)] sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">Assigned IT Submissions</h2>
+          <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">Assigned Document Reviews</h2>
           <p className="text-sm text-[var(--text-light)]">
-            Review queue sorted by revision risk, pending decisions, and nearest deadline.
+            Real student uploads from your assigned projects, sorted by pending decisions and nearest deadline.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-[rgba(0,58,143,0.06)] px-3 py-1 text-xs font-bold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
@@ -389,7 +395,13 @@ export function SubmissionList({
       {submissions.length ? (
         <div className="grid gap-4">
           {submissions.map((submission) => (
-            <SubmissionItem key={submission.id} submission={submission} />
+            <SubmissionItem
+              key={submission.id}
+              submission={submission}
+              onViewSubmission={onViewSubmission}
+              onDownloadSubmission={onDownloadSubmission}
+              onReviewSubmission={onReviewSubmission}
+            />
           ))}
         </div>
       ) : (
@@ -397,7 +409,7 @@ export function SubmissionList({
           <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)]">
             <i className="fas fa-folder-open text-lg" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold text-[var(--text-dark)]">No matching IT submissions</h3>
+          <h3 className="mt-4 text-lg font-semibold text-[var(--text-dark)]">No matching document reviews</h3>
           <p className="mt-2 text-sm text-[var(--text-light)]">
             Adjust the filters or search terms to bring the assigned documents back into view.
           </p>
@@ -417,7 +429,17 @@ export function SubmissionList({
   );
 }
 
-function SubmissionItem({ submission }: { submission: AdviserSubmissionRecord }) {
+function SubmissionItem({
+  submission,
+  onViewSubmission,
+  onDownloadSubmission,
+  onReviewSubmission
+}: {
+  submission: AdviserSubmissionRecord;
+  onViewSubmission?: (submission: AdviserSubmissionRecord) => void;
+  onDownloadSubmission?: (submission: AdviserSubmissionRecord) => void;
+  onReviewSubmission?: (submission: AdviserSubmissionRecord) => void;
+}) {
   const statusMeta = getSubmissionStatusMeta(submission.status);
   const statusVisual = submissionStatusVisuals[submission.status];
   const deadlineVisual = getDeadlineVisual(submission.deadline, submission.status);
@@ -460,6 +482,12 @@ function SubmissionItem({ submission }: { submission: AdviserSubmissionRecord })
                 <p className="mt-1 truncate text-sm font-medium text-slate-500" title={submission.projectTitle}>
                   {submission.projectTitle}
                 </p>
+                {submission.submittedBy ? (
+                  <p className="mt-2 text-xs font-semibold text-slate-500">
+                    <i className="fas fa-user-graduate mr-1.5 text-[#003A8F]" aria-hidden="true" />
+                    Submitted by {submission.submittedBy}
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -497,6 +525,38 @@ function SubmissionItem({ submission }: { submission: AdviserSubmissionRecord })
               </p>
             </div>
           </div>
+
+          {submission.groupMembers?.length ? (
+            <div className="mt-5 border-t border-slate-100 pt-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Group Members</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {submission.groupMembers.map((member) => (
+                  <span
+                    key={`${submission.id}-${member.name}`}
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset ${
+                      member.isLeader
+                        ? 'bg-[rgba(246,190,0,0.18)] text-[#003A8F] ring-[rgba(246,190,0,0.42)]'
+                        : 'bg-slate-100 text-slate-700 ring-slate-200'
+                    }`}
+                  >
+                    <i className={`fas ${member.isLeader ? 'fa-crown' : 'fa-user'} text-[10px]`} aria-hidden="true" />
+                    {member.name}
+                    {member.isLeader ? <span className="text-[10px] uppercase tracking-[0.08em] text-amber-700">Leader</span> : null}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {submission.latestReviewComment ? (
+            <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-700">Latest Adviser Notes</p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{submission.latestReviewComment.body}</p>
+              <p className="mt-3 text-xs font-semibold text-slate-500">
+                {submission.latestReviewComment.authorName || 'Adviser'} · {formatSubmissionDate(String(submission.latestReviewComment.createdAt))}
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <aside className="flex min-h-full flex-col justify-between gap-5 border-t border-slate-100 bg-slate-50 p-5 xl:border-l xl:border-t-0">
@@ -525,19 +585,21 @@ function SubmissionItem({ submission }: { submission: AdviserSubmissionRecord })
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-            <a
+            <button
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-3 text-sm font-bold text-[var(--primary)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[rgba(0,58,143,0.04)]"
-              href={submission.fileUrl}
+              type="button"
+              onClick={() => onDownloadSubmission?.(submission)}
             >
               <i className="fas fa-download text-xs" />
               Download
-            </a>
+            </button>
             <button
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--primary-dark)]"
               type="button"
+              onClick={() => onReviewSubmission?.(submission)}
             >
               <i className={`fas ${statusVisual.actionIcon} text-xs`} />
-              {statusMeta.actionLabel}
+              {submission.status === 'pending-review' ? 'Start Review' : statusMeta.actionLabel}
             </button>
           </div>
         </aside>

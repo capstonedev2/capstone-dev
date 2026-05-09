@@ -37,8 +37,8 @@ export function LandingRevealController() {
             });
           },
           {
-            threshold: 0.01, // Super low threshold
-            rootMargin: '100px 0px 100px 0px' // Very generous margin
+            threshold: 0.12,
+            rootMargin: '0px 0px -8% 0px'
           }
         );
 

@@ -15,7 +15,6 @@ import {
   type TitleSummaryMetric
 } from '@/components/adviser/adviser-mode/data/title-workspace-sections';
 import {
-  IT_ADVISER_TITLES,
   TITLE_SORT_OPTIONS,
   TITLE_STATUS_FILTER_OPTIONS,
   getAcademicYearOptions,
@@ -29,14 +28,9 @@ import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
 export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const { workspaceMode, switchWorkspace, pathname, basePath } = useWorkspaceMode();
-  const [titleRecords, setTitleRecords] = useState<AdviserTitleRecord[]>(() =>
-    IT_ADVISER_TITLES.map((record) => ({
-      ...record,
-      keywords: [...record.keywords],
-      similarTitles: record.similarTitles.map((item) => ({ ...item })),
-      memberPreview: [...record.memberPreview]
-    }))
-  );
+  const [titleRecords, setTitleRecords] = useState<AdviserTitleRecord[]>([]);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [isLoadingTitles, setIsLoadingTitles] = useState(true);
   const [statusFilter, setStatusFilter] = useState<TitleStatus | 'all'>('all');
   const [academicYearFilter, setAcademicYearFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
@@ -45,6 +39,42 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const [remarksDraft, setRemarksDraft] = useState('');
 
   const adviserMeta = WORKSPACE_META[workspaceMode];
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTitles = async () => {
+      setIsLoadingTitles(true);
+      setTitleError(null);
+
+      try {
+        const response = await fetch('/api/title-submissions', { cache: 'no-store' });
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(payload?.message || 'Unable to load title submissions.');
+        }
+
+        if (!cancelled) {
+          setTitleRecords(payload?.titles || []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setTitleError(error instanceof Error ? error.message : 'Unable to load title submissions.');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingTitles(false);
+        }
+      }
+    };
+
+    loadTitles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -159,28 +189,40 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
     [titleRecords]
   );
 
-  const applyDecision = (
+  const applyDecision = async (
     record: AdviserTitleRecord,
     nextStatus: TitleStatus,
     customRemarks?: string
   ) => {
     const nextRemarks = customRemarks?.trim() || getDefaultActionForStatus(nextStatus);
 
-    setTitleRecords((current) =>
-      current.map((item) =>
-        item.id === record.id
-          ? {
-              ...item,
-              status: nextStatus,
-              adviserAction: nextRemarks
-            }
-          : item
-      )
-    );
+    try {
+      const response = await fetch('/api/title-submissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: record.id,
+          decision: nextStatus === 'needs-revision' ? 'needs_revision' : nextStatus,
+          remarks: nextRemarks
+        })
+      });
+      const payload = await response.json().catch(() => null);
 
-    if (selectedTitleId === record.id) {
-      setSelectedTitleId(null);
-      setRemarksDraft('');
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to update the title decision.');
+      }
+
+      setTitleRecords((current) =>
+        current.map((item) => (item.id === record.id ? payload.title : item))
+      );
+
+      if (selectedTitleId === record.id) {
+        setSelectedTitleId(null);
+        setRemarksDraft('');
+      }
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    } catch (error) {
+      setTitleError(error instanceof Error ? error.message : 'Unable to update the title decision.');
     }
   };
 
@@ -249,7 +291,19 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
             statusOptions={TITLE_STATUS_FILTER_OPTIONS}
           />
 
-          {titleRecords.length ? (
+          {titleError ? (
+            <div className="project-files-state is-danger">
+              <i className="fas fa-circle-exclamation" aria-hidden="true" />
+              <span>{titleError}</span>
+            </div>
+          ) : null}
+
+          {isLoadingTitles ? (
+            <div className="project-files-state">
+              <span className="project-files-spinner" aria-hidden="true" />
+              <span>Loading title submissions...</span>
+            </div>
+          ) : titleRecords.length ? (
             <TitleList
               hasPendingTitles={hasPendingTitles}
               onApprove={(record) => applyDecision(record, 'approved')}

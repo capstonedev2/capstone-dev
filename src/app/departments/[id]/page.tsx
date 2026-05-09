@@ -61,6 +61,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
     department.description.length > 220
       ? `${department.description.slice(0, 220).trim()}...`
       : department.description;
+  const departmentName = department.name || branding.departmentName;
 
   return (
     <PublicLayout>
@@ -69,21 +70,11 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
         {/* Simplified Navbar */}
         <header className={`${styles.navbar} ${styles.departmentNavbar}`}>
           <div className={`${styles.container} ${styles.navbarInner} ${styles.departmentNavbarInner}`}>
-            <div className={styles.brand}>
-              <Link href="/" className="group flex flex-col transition-transform duration-200 hover:scale-[1.02]">
-                <h2 className="text-2xl font-bold tracking-tight text-brand">
-                  Thesis<span className="text-amber-500">Track</span>
-                </h2>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-widest mt-0.5">
-                  Higher Education
-                </p>
-              </Link>
-            </div>
             <DepartmentSectionNavigation />
           </div>
         </header>
 
-        <main className={`${styles.main} ${styles.departmentDetailMain}`}>
+        <main className={`${styles.main} ${styles.departmentDetailMain}`} style={departmentStyle}>
           {/* ── HERO SECTION ── */}
           <section className={styles.departmentHeroSection}>
             <div className={styles.container}>
@@ -94,7 +85,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                     {branding.code} Program
                   </span>
 
-                  <h1>{branding.departmentName}</h1>
+                  <h1>{departmentName}</h1>
                   <p>{heroDescription}</p>
 
                   <div className={styles.departmentHeroActions}>
@@ -113,7 +104,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                   <div className={styles.departmentProfileHeader}>
                     <div className={styles.departmentProfileLogo}>
                       {department.logo ? (
-                        <img src={department.logo} alt={`${branding.departmentName} logo`} />
+                        <img src={department.logo} alt={`${departmentName} logo`} />
                       ) : (
                         <i className={department.icon} aria-hidden="true" />
                       )}
@@ -347,7 +338,7 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
                     Ready to Start Your {branding.code} Capstone?
                   </h2>
                   <p className="text-blue-100/90 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-                    ThesisTrack streamlines the entire research lifecycle for the <strong className="text-white">{branding.departmentName}</strong> department — from title proposal to final defense.
+                    ThesisTrack streamlines the entire research lifecycle for the <strong className="text-white">{departmentName}</strong> department — from title proposal to final defense.
                   </p>
                   <div className="flex flex-wrap justify-center gap-4">
                     <Link

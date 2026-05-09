@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { BrandName } from '@/components/branding/brand-copy';
 import { LogoIcon } from '@/components/branding/logo-icon';
@@ -12,13 +12,72 @@ import styles from '@/app/page.module.css';
 export function LandingNavigation() {
   const { branding } = useBranding();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeHref, setActiveHref] = useState('/#home');
   const pathname = usePathname();
   const navigation = branding.navigation;
-  const visibleLinks = navigation.links.filter((link) => link.visible);
+  const visibleLinks = useMemo(
+    () => navigation.links.filter((link) => link.visible),
+    [navigation.links]
+  );
 
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (pathname !== '/') {
+      setActiveHref(pathname);
+      return;
+    }
+
+    const sectionLinks = visibleLinks
+      .map((link) => {
+        const hashIndex = link.href.indexOf('#');
+        const id = hashIndex >= 0 ? link.href.slice(hashIndex + 1) : '';
+        const section = id ? document.getElementById(id) : null;
+
+        return section ? { href: link.href, section } : null;
+      })
+      .filter((item): item is { href: string; section: HTMLElement } => Boolean(item));
+
+    if (!sectionLinks.length) {
+      setActiveHref('/#home');
+      return;
+    }
+
+    let frame = 0;
+
+    const updateActiveHref = () => {
+      if (frame) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const activationLine = window.scrollY + 140;
+        const activeSection = sectionLinks.reduce((current, item) => (
+          item.section.offsetTop <= activationLine ? item : current
+        ), sectionLinks[0]);
+
+        setActiveHref(activeSection.href);
+      });
+    };
+
+    updateActiveHref();
+    window.addEventListener('scroll', updateActiveHref, { passive: true });
+    window.addEventListener('resize', updateActiveHref);
+    window.addEventListener('hashchange', updateActiveHref);
+
+    return () => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+
+      window.removeEventListener('scroll', updateActiveHref);
+      window.removeEventListener('resize', updateActiveHref);
+      window.removeEventListener('hashchange', updateActiveHref);
+    };
+  }, [pathname, visibleLinks]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -38,9 +97,9 @@ export function LandingNavigation() {
 
   const getActiveClassName = (href: string) => {
     const isAboutLink = href === '/about' && pathname === '/about';
-    const isHomeLink = href === '/#home' && pathname === '/';
+    const isSectionLink = pathname === '/' && href === activeHref;
 
-    return `${styles.navLink} ${isAboutLink || isHomeLink ? styles.navLinkActive : ''}`;
+    return `${styles.navLink} ${isAboutLink || isSectionLink ? styles.navLinkActive : ''}`;
   };
 
   return (
