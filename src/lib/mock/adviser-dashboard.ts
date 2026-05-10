@@ -30,6 +30,9 @@ export type AdviserDashboardData = {
     title: string;
     text: string;
     time: string;
+    href?: string;
+    meta?: string;
+    tone?: 'primary' | 'info' | 'warning' | 'danger' | 'success' | 'neutral';
   }>;
   panelActivity: Array<{
     id: string;
@@ -42,6 +45,9 @@ export type AdviserDashboardData = {
     title: string;
     text: string;
     time: string;
+    href?: string;
+    meta?: string;
+    tone?: 'primary' | 'info' | 'warning' | 'danger' | 'success' | 'neutral';
   }>;
   groups: Array<{
     id: string;
@@ -148,7 +154,8 @@ const adviserDashboardData: AdviserDashboardData = {
       icon: 'fa-check-circle',
       title: 'Chapter 3 Approved - Group A1',
       text: 'Methodology chapter approved. Students can proceed to data collection.',
-      time: '2 hours ago'
+      time: '2 hours ago',
+      meta: 'Adviser Activity'
     },
     {
       id: 'activity-002',
@@ -160,7 +167,8 @@ const adviserDashboardData: AdviserDashboardData = {
       icon: 'fa-comment',
       title: 'Feedback Provided - Group B2',
       text: 'Proposal revision comments were sent with a follow-up due on Mar 30.',
-      time: 'Yesterday'
+      time: 'Yesterday',
+      meta: 'Adviser Activity'
     },
     {
       id: 'activity-003',
@@ -172,7 +180,8 @@ const adviserDashboardData: AdviserDashboardData = {
       icon: 'fa-calendar-check',
       title: 'Consultation Scheduled - Group C3',
       text: 'Meeting locked in for Mar 29, 2026 at 10:30 AM in Consult Room B.',
-      time: '2 days ago'
+      time: '2 days ago',
+      meta: 'Adviser Activity'
     },
     {
       id: 'activity-004',
@@ -184,7 +193,8 @@ const adviserDashboardData: AdviserDashboardData = {
       icon: 'fa-file-signature',
       title: 'Title Approved - Group D4',
       text: '"Capstone Submission Monitoring Platform" cleared initial review and is ready for the next phase.',
-      time: '3 days ago'
+      time: '3 days ago',
+      meta: 'Adviser Activity'
     }
   ],
   panelActivity: [
@@ -198,7 +208,8 @@ const adviserDashboardData: AdviserDashboardData = {
       icon: 'fa-users-viewfinder',
       title: 'Panel Assignment Confirmed',
       text: 'You were assigned to two upcoming IT proposal defenses this review cycle.',
-      time: 'Today'
+      time: 'Today',
+      meta: 'Panel Activity'
     },
     {
       id: 'panel-activity-002',
@@ -210,7 +221,8 @@ const adviserDashboardData: AdviserDashboardData = {
       icon: 'fa-clipboard-check',
       title: 'Evaluation Packet Ready',
       text: 'Blockchain for Supply Chain is ready for scoring before the Apr 3 defense.',
-      time: 'Yesterday'
+      time: 'Yesterday',
+      meta: 'Panel Activity'
     },
     {
       id: 'panel-activity-003',
@@ -222,7 +234,8 @@ const adviserDashboardData: AdviserDashboardData = {
       icon: 'fa-calendar-day',
       title: 'Defense Schedule Published',
       text: 'Campus Safety Tracker was added to the Apr 5 defense lineup.',
-      time: '2 days ago'
+      time: '2 days ago',
+      meta: 'Panel Activity'
     }
   ],
   groups: [

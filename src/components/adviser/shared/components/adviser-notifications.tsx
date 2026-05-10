@@ -133,14 +133,19 @@ export function AdviserNotifications({
                      <div className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse" />
                   )}
                   
-                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-inner ${
-                    item.tone === 'success' ? 'bg-emerald-50 text-emerald-600' :
-                    item.tone === 'danger' ? 'bg-rose-50 text-rose-600' :
-                    item.tone === 'warning' ? 'bg-amber-50 text-amber-600' :
-                    'bg-[rgba(0,58,143,0.06)] text-[var(--primary)]'
-                  }`}>
-                    <i className={`fas ${item.icon} text-lg`} />
-                  </div>
+               <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-inner ${
+                    'tone' in item && item.tone === 'success'
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'tone' in item && item.tone === 'danger'
+                      ? 'bg-rose-50 text-rose-600'
+                      : 'tone' in item && item.tone === 'warning'
+                      ? 'bg-amber-50 text-amber-600'
+                      : 'bg-[rgba(0,58,143,0.06)] text-[var(--primary)]'
+                  }`}
+                 >
+                  <i className={`fas ${item.icon} text-lg`} />
+               </div>
                   
                   <div className="flex-1 min-w-0">
                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2 pr-4 sm:pr-8">
@@ -162,7 +167,7 @@ export function AdviserNotifications({
                        {item.text}
                      </p>
                      
-                     {item.meta && (
+                     {'meta' in item && item.meta && (
                        <div className="mt-4 flex flex-wrap items-center gap-2">
                          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200/50">
                            <i className="fas fa-layer-group opacity-50" />
