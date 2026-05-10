@@ -393,7 +393,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                 <div>
                   <span className="section-kicker">Project Summary</span>
                   <div className="project-overview-summary-title">
-                    {project.title === 'Pending Student Submission' || project.title === 'Awaiting Adviser Approval' || project.title === 'Pending Concept Presentation' ? (
+                    {projectStatusTone !== 'success' ? (
                       <div className="flex items-center gap-3 flex-wrap mb-2">
                         <h2 style={{ opacity: 0.55, fontStyle: 'italic', fontSize: '1.5rem', lineHeight: '1.2' }}>
                           <i className="fas fa-lock" style={{ fontSize: '0.7em', marginRight: '0.5rem', opacity: 0.6 }}></i>
@@ -401,7 +401,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                         </h2>
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[0.65em] font-semibold text-amber-700 shadow-sm align-middle mt-1">
                           <i className="fas fa-clock"></i>
-                          {project.title}
+                          Pending Approval
                         </span>
                       </div>
                     ) : (
@@ -409,7 +409,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     )}
                     <Badge label={project.status} tone={projectStatusTone} />
                   </div>
-                  {project.title === 'Pending Student Submission' || project.title === 'Awaiting Adviser Approval' || project.title === 'Pending Concept Presentation' ? (
+                  {projectStatusTone !== 'success' ? (
                     <p className="project-overview-summary-copy">Your project title will appear here once the concept proposal has been officially approved.</p>
                   ) : (
                     <p className="project-overview-summary-copy">{project.description}</p>

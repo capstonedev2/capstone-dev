@@ -133,7 +133,7 @@ function toTitlePayload(project: any) {
     groupId: project.group?.code || project.groupId || 'Assigned Group',
     groupTitle: project.group?.title || null,
     title: project.title,
-    description: project.abstract || 'Title proposal submitted for adviser validation.',
+    description: project.abstract || '',
     department: project.departmentId || project.group?.department || 'IT',
     status: latestSubmission ? (projectStatusToTitleStatus[project.status as ProjectStatus] || 'pending') : 'draft',
     projectStatus: project.status,

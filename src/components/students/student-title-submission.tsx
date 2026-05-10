@@ -558,6 +558,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 return {
                   ...nextSub,
                   proposedTitle: currentSub.proposedTitle, // preserve what user is typing
+                  briefDescription: currentSub.briefDescription, // preserve what user is typing
                   attachments: [
                     ...nextSub.attachments,
                     ...localAttachments.filter(la => !nextSub.attachments.some(na => na.fileName === la.fileName))
@@ -1290,7 +1291,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                   <input
                     id="proposedTitle"
                     type="text"
-                    value={activeSubmission.proposedTitle}
+                    value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
                     onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
                     placeholder="Enter the official title of your project"
                     className="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-[#003A8F] focus:ring focus:ring-[#003A8F]/20"
@@ -1303,11 +1304,16 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
                 <div className="mb-6">
                   <label htmlFor="briefDescription" className="block text-sm font-bold text-slate-700 mb-2">
-                    Message to Adviser <span className="text-slate-400 font-normal">(Optional)</span>
+                    Note to Your Adviser <span className="text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <textarea
                     id="briefDescription"
-                    value={activeSubmission.briefDescription === 'Title proposal document uploaded for adviser review. The required contents are expected inside the attached file.' ? '' : activeSubmission.briefDescription}
+                    value={
+                      activeSubmission.briefDescription === 'Title proposal document uploaded for adviser review. The required contents are expected inside the attached file.' || 
+                      activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.' ||
+                      activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.dsfsdfsdfs'
+                      ? '' : activeSubmission.briefDescription
+                    }
                     onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
                     placeholder="Add a brief note, context, or specific questions about your proposal for your adviser..."
                     className="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-[#003A8F] focus:ring focus:ring-[#003A8F]/20 min-h-[100px] resize-y"
