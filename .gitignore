@@ -3,3 +3,5 @@ node_modules
 .vercel
 dist
 .next-dev-*.log
+.env
+.env.local
