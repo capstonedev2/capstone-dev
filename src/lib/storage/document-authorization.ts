@@ -14,7 +14,7 @@ type AuthUser = {
   email?: string | null;
 };
 
-type ProjectAccessRecord = Pick<Project, 'id' | 'ownerId' | 'adviserId' | 'departmentId' | 'groupId'> & {
+type ProjectAccessRecord = Pick<Project, 'id' | 'status' | 'ownerId' | 'adviserId' | 'departmentId' | 'groupId'> & {
   group: {
     department: string;
     groupMembers: Array<{ userId: string; isActive: boolean }>;
@@ -61,6 +61,7 @@ function isProjectParticipant(user: AuthUser, project: ProjectAccessRecord | nul
 
 const projectAccessSelect = {
   id: true,
+  status: true,
   ownerId: true,
   adviserId: true,
   departmentId: true,
@@ -409,6 +410,7 @@ export async function getAuthorizedDocumentFile(fileId: string, user: AuthUser) 
       project: {
         select: {
           id: true,
+          status: true,
           ownerId: true,
           adviserId: true,
           departmentId: true,

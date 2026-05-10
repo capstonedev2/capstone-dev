@@ -117,6 +117,7 @@ export async function PATCH(
         project: {
           select: {
             id: true,
+            status: true,
             title: true,
             ownerId: true,
             adviserId: true,

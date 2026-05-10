@@ -1,4 +1,4 @@
-export type TitleStatus = 'pending' | 'approved' | 'needs-revision' | 'rejected';
+export type TitleStatus = 'pending' | 'approved' | 'needs-revision' | 'rejected' | 'draft';
 export type TitleSortOption = 'newest' | 'oldest' | 'highest-similarity';
 
 export type SimilarTitleRecord = {
@@ -22,6 +22,12 @@ export type AdviserTitleRecord = {
   memberPreview: string[];
   adviserAction: string;
   academicYear: string;
+  uploadedFiles: Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: number;
+  }>;
 };
 
 export const TITLE_STATUS_FILTER_OPTIONS = [
@@ -29,7 +35,8 @@ export const TITLE_STATUS_FILTER_OPTIONS = [
   { value: 'pending', label: 'Pending' },
   { value: 'approved', label: 'Approved' },
   { value: 'needs-revision', label: 'Needs Revision' },
-  { value: 'rejected', label: 'Rejected' }
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'draft', label: 'Draft' }
 ] as const;
 
 export const TITLE_SORT_OPTIONS: Array<{ value: TitleSortOption; label: string }> = [
@@ -65,6 +72,11 @@ const titleStatusMeta: Record<
     label: 'Rejected',
     badgeClassName: 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200',
     icon: 'fa-ban'
+  },
+  draft: {
+    label: 'Draft',
+    badgeClassName: 'bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-200',
+    icon: 'fa-file'
   }
 };
 

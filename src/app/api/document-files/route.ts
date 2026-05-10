@@ -1,4 +1,4 @@
-import { SubmissionStatus, UserRole } from '@/generated/prisma/client';
+import { ProjectStatus, SubmissionStatus, UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import {
@@ -178,6 +178,7 @@ export async function GET(request: Request) {
         project: {
           select: {
             id: true,
+            status: true,
             title: true,
             ownerId: true,
             adviserId: true,
@@ -264,6 +265,13 @@ export async function POST(request: Request) {
       if (!project.adviserId) {
         throw new HttpError('Your thesis project does not have an assigned adviser yet.', 400, {
           adviserId: 'Ask your program adviser to assign an adviser before uploading documents.'
+        });
+      }
+
+      const approvedStatuses: ProjectStatus[] = [ProjectStatus.APPROVED, ProjectStatus.DEFENSE_SCHEDULED, ProjectStatus.COMPLETED];
+      if (!approvedStatuses.includes(project.status)) {
+        throw new HttpError('Your project title must be officially approved before you can upload documents.', 400, {
+          status: 'Get your title approved by your adviser first.'
         });
       }
     }

@@ -166,11 +166,12 @@ function createSubmissionFromRegistration(
 }
 
 function buildInitialSubmissions(
-  title: StudentDashboardData['titleRegistration']
+  data: StudentDashboardData,
+  isLeader: boolean
 ): StudentTitleSubmissionRecord[] {
-  const seed = title.submissions?.length ? title.submissions : [createSubmissionFromRegistration(title)];
+  const seed = data.titleRegistration.submissions?.length ? data.titleRegistration.submissions : [createSubmissionFromRegistration(data.titleRegistration)];
 
-  return [...seed].sort((left, right) => {
+  const sorted = [...seed].sort((left, right) => {
     if (left.isCurrent && !right.isCurrent) {
       return -1;
     }
@@ -181,6 +182,15 @@ function buildInitialSubmissions(
 
     return new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime();
   });
+
+  const active = sorted.find(s => s.isCurrent) || sorted[0];
+  if (active && ['rejected', 'needs-revision', 'needs revision'].includes(active.registrationStatus.toLowerCase())) {
+    const nextProposalNumber = sorted.reduce((highest, submission) => Math.max(highest, submission.proposalNumber), 0) + 1;
+    const autoDraft = createDraftSubmission(data, nextProposalNumber, isLeader);
+    return [autoDraft, ...sorted.map(s => ({ ...s, isCurrent: false }))];
+  }
+
+  return sorted;
 }
 
 function buildFallbackWorkflow(title: StudentTitleSubmissionRecord): StudentTitleWorkflowStep[] {
@@ -318,7 +328,8 @@ function createAttachmentFromFile(file: File, uploadedBy: string, downloadUrl?: 
     uploadedAtLabel: formatDateTimeLabel(uploadedAt),
     uploadedBy,
     status: 'Attached',
-    downloadUrl
+    downloadUrl,
+    file
   };
 }
 
@@ -330,6 +341,8 @@ function mapTitleStatusLabel(status: string) {
       return 'Needs Revision';
     case 'rejected':
       return 'Rejected';
+    case 'draft':
+      return 'Draft';
     default:
       return 'Pending Review';
   }
@@ -431,17 +444,52 @@ function Badge({
 }
 
 export function StudentTitleSubmission({ data }: { data: StudentDashboardData }) {
+  if (!data.group?.id) {
+    return (
+      <div className="student-title-registration-page">
+        <header className="top-nav">
+          <div className="top-nav-leading">
+            <div className="page-title">
+              <div className="page-title-context">
+                <span className="page-kicker">Student Workspace</span>
+                <span className="page-breadcrumb" aria-hidden="true">
+                  <i className="fas fa-angle-right" />
+                  <span>Title Submission</span>
+                </span>
+              </div>
+              <h1>Title Submission</h1>
+              <p>Submit and track your proposed thesis titles for adviser validation.</p>
+            </div>
+          </div>
+        </header>
+
+        <div className="page-body p-6">
+          <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
+              <i className="fas fa-users-slash text-3xl" aria-hidden="true" />
+            </div>
+            <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-800">Group Assignment Required</h3>
+            <p className="mx-auto mt-4 max-w-lg text-slate-500 leading-relaxed">
+              You must be assigned to a project group before you can access the Title Submission workspace and submit proposals. Please contact your coordinator to be added to a group.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isLeader = Boolean(data.profile.groupRole && data.profile.groupRole.toLowerCase().includes('leader'));
   const canUpload = true;
   const initialSubmissions = useMemo(
-    () => buildInitialSubmissions(data.titleRegistration),
-    [data.titleRegistration]
+    () => buildInitialSubmissions(data, isLeader),
+    [data, isLeader]
   );
   const [submissions, setSubmissions] = useState<StudentTitleSubmissionRecord[]>(initialSubmissions);
   const [activeSubmissionId, setActiveSubmissionId] = useState(
     initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? ''
   );
   const [notice, setNotice] = useState<NoticeState>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
   const [isSubmittingTitle, setIsSubmittingTitle] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -480,9 +528,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
   useEffect(() => {
     let cancelled = false;
+    let pollInterval: NodeJS.Timeout;
 
-    const loadRealTitleSubmissions = async () => {
-      setIsLoadingTitles(true);
+    const loadRealTitleSubmissions = async (isBackground = false) => {
+      if (!isBackground) setIsLoadingTitles(true);
 
       try {
         const response = await fetch('/api/title-submissions', { cache: 'no-store' });
@@ -498,30 +547,81 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
         if (!cancelled) {
           const nextSubmissions: StudentTitleSubmissionRecord[] = realSubmissions.length ? realSubmissions : initialSubmissions;
-          setSubmissions(nextSubmissions);
-          setActiveSubmissionId(
-            nextSubmissions.find((item) => item.isCurrent)?.id ?? nextSubmissions[0]?.id ?? ''
-          );
+          
+          setSubmissions((currentSubmissions) => {
+            const localSubmissions = currentSubmissions.filter((s) => s.id.startsWith('title-local-'));
+            
+            const mergedReal = nextSubmissions.map((nextSub) => {
+              const currentSub = currentSubmissions.find((s) => s.id === nextSub.id);
+              if (currentSub) {
+                const localAttachments = currentSub.attachments.filter((a) => a.id.includes('local-'));
+                return {
+                  ...nextSub,
+                  proposedTitle: currentSub.proposedTitle, // preserve what user is typing
+                  attachments: [
+                    ...nextSub.attachments,
+                    ...localAttachments.filter(la => !nextSub.attachments.some(na => na.fileName === la.fileName))
+                  ]
+                };
+              }
+              return nextSub;
+            });
+
+            // Auto-create a draft if ALL real submissions are terminal (rejected/approved) and no local draft exists
+            const allTerminal = mergedReal.length > 0 && mergedReal.every((s) =>
+              ['rejected', 'approved', 'needs revision'].includes(s.registrationStatus.toLowerCase())
+            );
+            if (allTerminal && localSubmissions.length === 0) {
+              const nextNum = mergedReal.reduce((h, s) => Math.max(h, s.proposalNumber), 0) + 1;
+              const autoDraft = createDraftSubmission(data, nextNum, isLeader);
+              return [autoDraft, ...mergedReal.map(s => ({ ...s, isCurrent: false }))];
+            }
+            
+            return [...localSubmissions, ...mergedReal];
+          });
+
+          if (!isBackground) {
+            setActiveSubmissionId((currentId) => {
+              if (currentId.startsWith('title-local-')) return currentId;
+              // If all real submissions are terminal, the merge created an auto-draft — switch to it
+              const allTerminal = nextSubmissions.length > 0 && nextSubmissions.every((s) =>
+                ['rejected', 'approved', 'needs revision'].includes(s.registrationStatus.toLowerCase())
+              );
+              if (allTerminal) {
+                // The auto-draft ID will be set by the next render since it's at index 0
+                return currentId; // keep current, the submissions state update will handle it
+              }
+              const stillExists = nextSubmissions.some(s => s.id === currentId);
+              return stillExists ? currentId : (nextSubmissions.find(item => item.isCurrent)?.id ?? nextSubmissions[0]?.id ?? '');
+            });
+          }
         }
       } catch (error) {
-        if (!cancelled) {
+        if (!cancelled && !isBackground) {
           setSubmissions(initialSubmissions);
-          setActiveSubmissionId(
-            initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? ''
-          );
+          setActiveSubmissionId((currentId) => {
+            if (currentId.startsWith('title-local-')) return currentId;
+            return initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? '';
+          });
           setNotice({ tone: 'warning', message: error instanceof Error ? error.message : 'Unable to load title submissions.' });
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelled && !isBackground) {
           setIsLoadingTitles(false);
         }
       }
     };
 
     loadRealTitleSubmissions();
+    
+    // Poll for real-time updates every 5 seconds
+    pollInterval = setInterval(() => {
+      loadRealTitleSubmissions(true);
+    }, 5000);
 
     return () => {
       cancelled = true;
+      clearInterval(pollInterval);
     };
   }, [data, initialSubmissions]);
 
@@ -544,6 +644,13 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
   const activeSubmission =
     submissions.find((submission) => submission.id === activeSubmissionId) ?? submissions[0] ?? null;
+
+  // Auto-sync activeSubmissionId to the auto-created draft when the current ID is stale
+  useEffect(() => {
+    if (activeSubmission && activeSubmission.id !== activeSubmissionId) {
+      setActiveSubmissionId(activeSubmission.id);
+    }
+  }, [activeSubmission, activeSubmissionId]);
 
   const revisionHistory = useMemo(
     () => (activeSubmission ? sortByDateDesc(activeSubmission.revisionHistory) : []),
@@ -572,9 +679,23 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const approvedCount = submissions.filter(
     (submission) => submission.registrationStatus.toLowerCase() === 'approved'
   ).length;
+  const rejectedCount = submissions.filter(
+    (submission) => submission.registrationStatus.toLowerCase() === 'rejected'
+  ).length;
   const latestUpdatedSubmission = [...submissions].sort(
     (left, right) => new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime()
   )[0];
+
+  // Find the most recent rejected/needs-revision submission for the status banner
+  const latestRejectedSubmission = submissions.find(
+    (s) => ['rejected', 'needs revision'].includes(s.registrationStatus.toLowerCase())
+  );
+  const latestApprovedSubmission = submissions.find(
+    (s) => s.registrationStatus.toLowerCase() === 'approved'
+  );
+  const isViewingDraft = activeSubmission?.registrationStatus === 'Draft';
+  const showRejectionBanner = !!latestRejectedSubmission && isViewingDraft;
+  const showApprovalBanner = !!latestApprovedSubmission && isViewingDraft && !latestRejectedSubmission;
 
   if (!activeSubmission) {
     return null;
@@ -644,6 +765,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         : 'Upload the title package so each proposal has a supporting file record.'
     }
   ];
+
+  const hasApprovedTitle = approvedCount > 0;
 
   const formSummaryItems = [
     {
@@ -773,7 +896,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     fileInputRef.current?.click();
   };
 
-  const handleAttachmentInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const processFiles = (filesList: FileList | File[]) => {
     if (!canUpload) {
       setNotice({
         tone: 'warning',
@@ -782,7 +905,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       return;
     }
 
-    const files = Array.from(event.target.files ?? []);
+    const files = Array.from(filesList);
 
     if (!files.length) {
       return;
@@ -798,9 +921,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       ...submission,
       proposedTitle:
         submission.proposedTitle.trim() || deriveTitleFromFileName(files[0]?.name || 'Untitled title proposal'),
-      briefDescription:
-        submission.briefDescription.trim() ||
-        'Title proposal document uploaded for adviser review. The required contents are expected inside the attached file.',
       attachments: [...attachments, ...submission.attachments],
       updated_at: new Date().toISOString()
     }));
@@ -809,8 +929,33 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       tone: 'success',
       message: `${files.length} proposal file${files.length === 1 ? '' : 's'} attached to ${activeSubmission.proposalLabel}.`
     });
+  };
 
+  const handleAttachmentInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      processFiles(event.target.files);
+    }
     event.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (canUpload) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (!canUpload) return;
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files);
+    }
   };
 
   const handleRemoveAttachment = (attachmentId: string) => {
@@ -887,14 +1032,20 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     setIsSubmittingTitle(true);
 
     try {
+      const formData = new FormData();
+      formData.append('title', submittedTitle);
+      formData.append('description', activeSubmission.briefDescription.trim() || 'Title proposal document uploaded for adviser review.');
+      formData.append('keywords', JSON.stringify(activeSubmission.keywords));
+
+      activeSubmission.attachments.forEach((fileObj) => {
+        if (fileObj.file) {
+          formData.append('files', fileObj.file);
+        }
+      });
+
       const response = await fetch('/api/title-submissions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: submittedTitle,
-          description: activeSubmission.briefDescription || activeSubmission.background || activeSubmission.statusNote,
-          keywords: activeSubmission.keywords
-        })
+        body: formData
       });
       const payload = await response.json().catch(() => null);
 
@@ -935,8 +1086,35 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     }
   };
 
+  const computeTimelineStep = (submission: StudentTitleSubmissionRecord) => {
+    const status = submission.registrationStatus.toLowerCase();
+    if (status === 'archived') return 5;
+    if (status === 'approved') return 4;
+    if (status === 'under review' || status === 'needs revision' || status === 'rejected') return 3;
+    if (['pending review', 'submitted', 'resubmitted'].includes(status)) return 2;
+    if (submission.attachments.length > 0) return 1;
+    return 0; // Draft
+  };
+
+  const currentStepIndex = computeTimelineStep(activeSubmission);
+
+  const TIMELINE_STEPS = [
+    { id: 0, label: 'Draft', icon: 'fa-pen-ruler' },
+    { id: 1, label: 'Uploaded', icon: 'fa-file-arrow-up' },
+    { id: 2, label: 'Submitted', icon: 'fa-paper-plane' },
+    { 
+      id: 3, 
+      label: activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'Rejected' : 
+             activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'Needs Revision' : 'Under Review', 
+      icon: activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' : 
+            activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' : 'fa-magnifying-glass' 
+    },
+    { id: 4, label: 'Approved', icon: 'fa-check-circle' },
+    { id: 5, label: 'Archived', icon: 'fa-box-archive' },
+  ];
+
   return (
-    <div className="register-title-page student-title-submission-page">
+    <div className="student-title-submission-page">
       <header className="top-nav">
         <div className="top-nav-leading">
           <div className="page-title">
@@ -948,696 +1126,432 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               </span>
             </div>
             <h1>Title Submission</h1>
-            <p>
-              Prepare multiple title proposals and submit them by uploading the document file instead of filling out the title sections in-page.
-            </p>
+            <p>Upload your title proposal document using the required concept paper format.</p>
           </div>
+          <div className="flex items-center gap-2 mt-4">
+             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1E40AF]/10 px-3 py-1 text-xs font-semibold text-[#1E40AF] ring-1 ring-inset ring-[#1E40AF]/20">
+               <i className="fas fa-layer-group" aria-hidden="true" /> {activeSubmission.proposalLabel}
+             </span>
+             <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} icon="fa-file-signature" />
+          </div>
+        </div>
+        <div className="top-nav-actions">
+          <button 
+            type="button" 
+            onClick={handleCreateSubmission}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-[#003A8F]"
+          >
+            <i className="fas fa-plus text-[#003A8F]" aria-hidden="true" /> Upload Another Title
+          </button>
         </div>
       </header>
 
-      <div className="page-body">
-        <section className="dashboard-hero title-submission-hero">
-          <article className="dashboard-hero-main title-submission-hero-main">
-            <div className="student-dashboard-overview-top">
-              <span className="section-kicker">Title Workspace</span>
-              <div className="chip-row">
-                <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} icon="fa-file-signature" />
-                <Badge label={activeSubmission.proposalLabel} tone="neutral" icon="fa-layer-group" />
-                <Badge label={accessRoleLabel} tone={getStatusTone(accessRoleLabel)} icon="fa-user-shield" />
-              </div>
-            </div>
-
-            <div className="title-submission-hero-copy">
-              <h2>Manage several title proposals with an upload-first submission flow</h2>
-              <p>
-                Each proposal now centers on the uploaded title document package, so the required title, background,
-                problem statement, and objectives stay inside the file instead of being typed again in the page.
-              </p>
-            </div>
-
-            <div className="dashboard-callout-grid title-submission-hero-stats">
-              {heroStats.map((item) => (
-                <article key={item.id} className="dashboard-callout title-submission-hero-stat">
-                  <span>{item.label}</span>
-                  <strong>{item.value}</strong>
-                  <small>{item.note}</small>
-                </article>
-              ))}
-            </div>
-
-            <div className="dashboard-action-grid title-submission-hero-actions">
-              <button className="dashboard-action-card title-submission-action-card" type="button" onClick={handleCreateSubmission}>
-                <span className="dashboard-action-icon">
-                  <i className="fas fa-plus" aria-hidden="true" />
-                </span>
-                <div className="title-submission-action-copy">
-                  <span className="title-submission-action-meta">New proposal</span>
-                  <strong>Create Another Title</strong>
-                  <small>Start a separate title proposal record without overwriting the current one.</small>
-                </div>
-              </button>
-
-              <button className="dashboard-action-card title-submission-action-card" type="button" onClick={handleBrowseAttachments}>
-                <span className="dashboard-action-icon">
-                  <i className="fas fa-file-arrow-up" aria-hidden="true" />
-                </span>
-                <div className="title-submission-action-copy">
-                  <span className="title-submission-action-meta">{activeSubmission.attachments.length} attached</span>
-                  <strong>Upload Proposal Files</strong>
-                  <small>Attach the title package document with the required sections for this proposal.</small>
-                </div>
-              </button>
-
-              <button className="dashboard-action-card title-submission-action-card" type="button" onClick={() => handleOpenAttachment(latestAttachment)}>
-                <span className="dashboard-action-icon">
-                  <i className="fas fa-file-lines" aria-hidden="true" />
-                </span>
-                <div className="title-submission-action-copy">
-                  <span className="title-submission-action-meta">{latestAttachment?.fileType ?? 'Waiting for file'}</span>
-                  <strong>Open Latest Upload</strong>
-                  <small>Preview the uploaded title proposal file instead of relying on a generated fill-up record.</small>
-                </div>
-              </button>
-
-              <Link className="dashboard-action-card title-submission-action-card" href="#title-revision-history">
-                <span className="dashboard-action-icon">
-                  <i className="fas fa-clock-rotate-left" aria-hidden="true" />
-                </span>
-                <div className="title-submission-action-copy">
-                  <span className="title-submission-action-meta">
-                    {revisionHistory.length} record{revisionHistory.length === 1 ? '' : 's'}
-                  </span>
-                  <strong>Open Review Log</strong>
-                  <small>Review submission history, adviser actions, and revision notes for the active proposal.</small>
-                </div>
-              </Link>
-            </div>
-
-            {notice ? (
-              <div className={`title-submission-notice is-${notice.tone}`}>
-                <i
-                  className={`fas ${
-                    notice.tone === 'success'
-                      ? 'fa-circle-check'
-                      : notice.tone === 'danger'
-                        ? 'fa-circle-exclamation'
-                        : notice.tone === 'warning'
-                          ? 'fa-triangle-exclamation'
-                          : 'fa-circle-info'
-                  }`}
-                  aria-hidden="true"
-                />
-                <span>{notice.message}</span>
-              </div>
-            ) : null}
-          </article>
-
-          <div className="dashboard-hero-side">
-            <article className="dashboard-brief-card title-submission-brief-card">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Active Proposal</span>
-                  <h3>{activeSubmission.proposalLabel}</h3>
-                </div>
-                <Badge
-                  label={currentWorkflowStep ? `Now in ${currentWorkflowStep.title}` : 'Workflow active'}
-                  tone={currentWorkflowStep ? getWorkflowStatusTone(currentWorkflowStep.status) : 'info'}
-                  icon="fa-diagram-project"
-                />
-              </div>
-
-              <div className="detail-grid title-submission-snapshot-grid">
-                {statusMetaItems.map((item) => (
-                  <article key={item.id} className="detail-item">
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                    <small>{item.note}</small>
-                  </article>
-                ))}
-              </div>
-
-              <div className={`workspace-note ${isLeader ? 'is-leader' : 'is-member'}`}>
-                <strong>{nextStep}</strong>
-                <p>{accessNote}</p>
-              </div>
-            </article>
-
-            <article className="dashboard-brief-card title-submission-brief-card">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Validation Snapshot</span>
-                  <h3>Similarity and file readiness</h3>
-                </div>
-                <Badge
-                  label={validation?.status ?? 'Pending validation'}
-                  tone={getStatusTone(validation?.status ?? 'Pending')}
-                  icon="fa-shield-halved"
-                />
-              </div>
-
-              <div className="detail-grid title-submission-snapshot-grid">
-                {validationSnapshotItems.map((item) => (
-                  <article key={item.id} className="detail-item">
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                    <small>{item.note}</small>
-                  </article>
-                ))}
-              </div>
-
-              <div className="workspace-note is-member">
-                <strong>The uploaded proposal document is now the main submission record.</strong>
-                <p>Put the title, background, statement of the problem, and objectives inside that file before sending it for adviser review.</p>
-              </div>
-            </article>
+      <div className="page-body p-6 lg:p-8">
+        
+        {notice && (
+          <div className={`mb-6 rounded-xl border p-4 flex items-center gap-3 ${
+            notice.tone === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
+            notice.tone === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+            notice.tone === 'danger' ? 'bg-red-50 border-red-200 text-red-800' :
+            'bg-blue-50 border-blue-200 text-blue-800'
+          }`}>
+            <i className={`fas ${
+                notice.tone === 'success' ? 'fa-circle-check' :
+                notice.tone === 'warning' ? 'fa-triangle-exclamation' :
+                notice.tone === 'danger' ? 'fa-circle-exclamation' :
+                'fa-circle-info'
+              } text-lg`} aria-hidden="true" />
+            <span className="text-sm font-medium">{notice.message}</span>
           </div>
-        </section>
+        )}
 
-        <section className="content-grid two-thirds">
-          <div className="stack-section">
-            <article className="surface-card title-submission-queue-card">
-              <div className="card-heading title-submission-queue-head">
-                <div>
-                  <span className="section-kicker">Proposal Queue</span>
-                  <h3>Switch between title proposals</h3>
-                  <p>Each title proposal keeps a separate file list, required sections, and review history.</p>
-                </div>
-                <button className="btn btn-primary" type="button" onClick={handleCreateSubmission}>
-                  <i className="fas fa-plus" aria-hidden="true" /> New title proposal
-                </button>
+        {/* Compact Summary Cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                <i className="fas fa-paper-plane text-xl" aria-hidden="true" />
               </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Total Submitted</p>
+                <p className="text-2xl font-bold text-slate-900">{submissions.filter(s => s.registrationStatus !== 'Draft').length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                <i className="fas fa-clock text-xl" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Pending Review</p>
+                <p className="text-2xl font-bold text-slate-900">{pendingReviewCount}</p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <i className="fas fa-check-circle text-xl" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Approved</p>
+                <p className="text-2xl font-bold text-slate-900">{approvedCount}</p>
+              </div>
+            </div>
+          </div>
+          <div className={`rounded-2xl border p-5 shadow-sm transition-shadow hover:shadow-md ${rejectedCount > 0 ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200 bg-white'}`}>
+            <div className="flex items-center gap-4">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${rejectedCount > 0 ? 'bg-rose-100 text-rose-600' : 'bg-slate-50 text-slate-400'}`}>
+                <i className="fas fa-ban text-xl" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Rejected</p>
+                <p className={`text-2xl font-bold ${rejectedCount > 0 ? 'text-rose-600' : 'text-slate-900'}`}>{rejectedCount}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-              <div className="title-submission-queue-list">
-                {submissions.map((submission) => {
-                  const isActive = submission.id === activeSubmission.id;
+        {/* Rejection Status Banner */}
+        {showRejectionBanner && latestRejectedSubmission && (
+          <div className="mb-6 rounded-[1.25rem] border border-rose-200 bg-gradient-to-r from-rose-50 to-red-50 p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 shadow-inner">
+                <i className="fas fa-circle-exclamation text-xl" aria-hidden="true" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-rose-800 flex items-center gap-2">
+                  <span>Previous Title Rejected</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/10">
+                    <i className="fas fa-ban text-[10px]" /> Rejected
+                  </span>
+                </h3>
+                <p className="mt-1.5 text-sm text-rose-700/80 font-medium">
+                  <strong>&ldquo;{latestRejectedSubmission.proposedTitle}&rdquo;</strong> was rejected by your adviser.
+                </p>
+                {latestRejectedSubmission.statusNote && (
+                  <div className="mt-3 rounded-xl bg-white/70 border border-rose-100 p-4">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      <i className="fas fa-comment-dots mr-1" /> Adviser Remarks
+                    </p>
+                    <p className="text-sm text-slate-700 leading-relaxed">{latestRejectedSubmission.statusNote}</p>
+                  </div>
+                )}
+                <p className="mt-3 text-sm text-rose-600 font-semibold">
+                  <i className="fas fa-arrow-down mr-1" /> Use the form below to upload a new title proposal directly.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Approval Banner — prompt to upload another if viewing draft */}
+        {showApprovalBanner && latestApprovedSubmission && (
+          <div className="mb-6 rounded-[1.25rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 shadow-inner">
+                <i className="fas fa-circle-check text-xl" aria-hidden="true" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-emerald-800 flex items-center gap-2">
+                  <span>Title Approved</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10">
+                    <i className="fas fa-check text-[10px]" /> Approved
+                  </span>
+                </h3>
+                <p className="mt-1.5 text-sm text-emerald-700/80 font-medium">
+                  <strong>&ldquo;{latestApprovedSubmission.proposedTitle}&rdquo;</strong> has been approved by your adviser.
+                </p>
+                <p className="mt-3 text-sm text-emerald-600 font-semibold">
+                  <i className="fas fa-arrow-down mr-1" /> You may submit another title proposal below if needed.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column: Upload Section & Timeline */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            
+            {/* Upload Card */}
+            <div className="rounded-[1.25rem] border border-slate-200 bg-white overflow-hidden shadow-sm flex flex-col h-full">
+              <div className="border-b border-slate-100 bg-slate-50/80 px-6 py-5">
+                <h3 className="text-lg font-bold text-slate-800">Upload Proposal File</h3>
+                <p className="text-sm text-slate-500 mt-0.5">Upload your concept paper to start the review process.</p>
+              </div>
+              
+              <div className="p-6 flex-grow flex flex-col">
+                <div className="mb-6">
+                  <label htmlFor="proposedTitle" className="block text-sm font-bold text-slate-700 mb-2">
+                    Proposed Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="proposedTitle"
+                    type="text"
+                    value={activeSubmission.proposedTitle}
+                    onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
+                    placeholder="Enter the official title of your project"
+                    className="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-[#003A8F] focus:ring focus:ring-[#003A8F]/20"
+                    disabled={!canUpload}
+                  />
+                  <p className="text-xs text-slate-500 mt-2">
+                    If left blank, the title will be automatically extracted from your uploaded filename.
+                  </p>
+                </div>
+
+                <div className="mb-6">
+                  <label htmlFor="briefDescription" className="block text-sm font-bold text-slate-700 mb-2">
+                    Message to Adviser <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <textarea
+                    id="briefDescription"
+                    value={activeSubmission.briefDescription === 'Title proposal document uploaded for adviser review. The required contents are expected inside the attached file.' ? '' : activeSubmission.briefDescription}
+                    onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
+                    placeholder="Add a brief note, context, or specific questions about your proposal for your adviser..."
+                    className="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-[#003A8F] focus:ring focus:ring-[#003A8F]/20 min-h-[100px] resize-y"
+                    disabled={!canUpload}
+                  />
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  hidden
+                  multiple
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleAttachmentInputChange}
+                />
+                
+                {/* Drag and Drop Area */}
+                <button 
+                  type="button"
+                  onClick={handleBrowseAttachments}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  disabled={!canUpload}
+                  className={`group relative flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed py-12 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                    isDragging 
+                      ? 'border-[#003A8F] bg-[#003A8F]/5 scale-[1.02]' 
+                      : 'border-slate-300 bg-slate-50 hover:border-[#003A8F] hover:bg-[#003A8F]/5 disabled:hover:border-slate-300 disabled:hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm mb-5 transition-transform group-hover:scale-110 group-hover:text-[#003A8F]">
+                    <i className="fas fa-cloud-arrow-up text-2xl text-[#1E40AF]" aria-hidden="true"></i>
+                  </div>
+                  <h4 className="text-base font-bold text-slate-700 group-hover:text-[#003A8F]">Drag and drop your file here</h4>
+                  <p className="mt-1.5 text-sm text-slate-500">or click to browse from your computer</p>
+                  
+                  <div className="mt-5 flex gap-4 text-xs font-semibold text-slate-400">
+                    <span className="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-200 shadow-sm"><i className="fas fa-file-pdf text-red-500"></i> PDF</span>
+                    <span className="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-200 shadow-sm"><i className="fas fa-file-word text-blue-500"></i> DOCX</span>
+                    <span className="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-200 shadow-sm"><i className="fas fa-weight-hanging text-slate-500"></i> 10MB Max</span>
+                  </div>
+                  
+                  <div className="mt-6 rounded-xl bg-[#003A8F] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1E40AF] hover:shadow-md pointer-events-none">
+                    Select File
+                  </div>
+                </button>
+
+                {/* Uploaded Files Display */}
+                <div className="mt-6">
+                  {activeSubmission.attachments.length > 0 ? (
+                    <div className="space-y-3">
+                      {activeSubmission.attachments.map(att => (
+                        <div key={att.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50/30 p-4 transition-colors hover:bg-emerald-50/50">
+                          <div className="flex items-start sm:items-center gap-4">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 shadow-sm">
+                              <i className={`fas fa-file-${att.fileType.toLowerCase() === 'pdf' ? 'pdf' : 'word'} text-xl`} aria-hidden="true"></i>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-slate-800 truncate" title={att.fileName}>{att.fileName}</p>
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mt-1 font-medium">
+                                <span className="flex items-center gap-1"><i className="fas fa-calendar-alt text-slate-400"></i> {att.uploadedAtLabel}</span>
+                                <span className="flex items-center gap-1"><i className="fas fa-hdd text-slate-400"></i> {att.sizeLabel}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <button onClick={() => handleOpenAttachment(att)} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Open File">
+                              <i className="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                            <button onClick={() => handleDownloadAttachment(att)} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Download File">
+                              <i className="fas fa-download" aria-hidden="true"></i>
+                            </button>
+                            <button onClick={() => handleRemoveAttachment(att.id)} disabled={!canUpload} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" title="Remove">
+                              <i className="fas fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-800 shadow-sm">
+                      <i className="fas fa-circle-info text-xl" aria-hidden="true"></i>
+                      <p className="text-sm font-semibold">No proposal file uploaded yet.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Submit Action */}
+                <div className="mt-auto pt-6 flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-500 hidden sm:inline-block">
+                    {activeSubmission.attachments.length === 0 ? 'Upload a file to enable submission.' : !activeSubmission.proposedTitle.trim() ? 'Please enter a proposed title.' : 'Ready for adviser review.'}
+                  </span>
+                  <form onSubmit={handleSubmitProposal} className="w-full sm:w-auto">
+                    <button 
+                      type="submit"
+                      disabled={!canUpload || isSubmittingTitle || activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim()}
+                      className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#003A8F] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#1E40AF] disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
+                    >
+                      <i className="fas fa-paper-plane" aria-hidden="true"></i>
+                      {isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            {/* Workflow Timeline */}
+            <div className="rounded-[1.25rem] border border-slate-200 bg-white p-6 shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-lg font-bold text-slate-800">Workflow Progress</h3>
+                {!isViewingDraft && (
+                  <button 
+                    onClick={handleCreateSubmission}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
+                  >
+                    <i className="fas fa-rotate-left" aria-hidden="true" /> Upload Another Title
+                  </button>
+                )}
+              </div>
+              <div className="relative flex justify-between px-2 sm:px-6">
+                {/* Connecting Line Base */}
+                <div className="absolute top-5 left-8 right-8 h-1 bg-slate-100 rounded-full -z-10 hidden sm:block"></div>
+                {/* Connecting Line Fill */}
+                <div 
+                  className="absolute top-5 left-8 h-1 bg-emerald-500 rounded-full -z-10 transition-all duration-700 ease-in-out hidden sm:block" 
+                  style={{ width: `calc(${(currentStepIndex / 5) * 100}% - 4rem)` }}
+                ></div>
+                
+                {TIMELINE_STEPS.map((step, idx) => {
+                  const isCompleted = idx < currentStepIndex;
+                  const isCurrent = idx === currentStepIndex;
+                  
+                  let iconBg = 'bg-white text-slate-400 border-slate-200 shadow-sm';
+                  if (isCompleted) iconBg = 'bg-emerald-500 text-white border-emerald-500 shadow-sm';
+                  else if (isCurrent) {
+                    if (activeSubmission.registrationStatus.toLowerCase() === 'rejected') {
+                      iconBg = 'bg-rose-500 text-white border-rose-500 ring-4 ring-rose-500/20 shadow-md scale-110';
+                    } else if (activeSubmission.registrationStatus.toLowerCase() === 'needs revision') {
+                      iconBg = 'bg-blue-500 text-white border-blue-500 ring-4 ring-blue-500/20 shadow-md scale-110';
+                    } else {
+                      iconBg = 'bg-[#003A8F] text-white border-[#003A8F] ring-4 ring-[#1E40AF]/20 shadow-md scale-110';
+                    }
+                  }
+
+                  let textColor = 'text-slate-400';
+                  if (isCompleted) textColor = 'text-slate-700';
+                  else if (isCurrent) {
+                    if (activeSubmission.registrationStatus.toLowerCase() === 'rejected') textColor = 'text-rose-600';
+                    else if (activeSubmission.registrationStatus.toLowerCase() === 'needs revision') textColor = 'text-blue-600';
+                    else textColor = 'text-[#003A8F]';
+                  }
 
                   return (
-                    <button
-                      key={submission.id}
-                      className={`title-submission-queue-item ${isActive ? 'is-active' : ''}`}
-                      type="button"
-                      onClick={() => handleSelectSubmission(submission.id)}
-                    >
-                      <div className="title-submission-queue-item-head">
-                        <div>
-                          <span>{submission.proposalLabel}</span>
-                          <strong>{submission.proposedTitle || submission.attachments[0]?.fileName || 'Untitled title proposal'}</strong>
-                        </div>
-                        <Badge label={submission.registrationStatus} tone={getStatusTone(submission.registrationStatus)} />
+                    <div key={step.id} className="flex flex-col items-center relative z-10 w-16">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${iconBg} transition-all duration-300`}>
+                        <i className={`fas ${step.icon} text-sm`} aria-hidden="true"></i>
                       </div>
-                      <p>
-                        {submission.attachments.length
-                          ? `Latest file: ${submission.attachments[0]?.fileName}. This uploaded document is treated as the title proposal package for review.`
-                          : 'Upload the title proposal document for this record before submitting it for adviser review.'}
-                      </p>
-                      <div className="title-submission-queue-meta">
-                        <small>{submission.attachments.length} file{submission.attachments.length === 1 ? '' : 's'}</small>
-                        <small>{submission.registrationStatus}</small>
-                        <small>Updated {formatDateLabel(submission.updated_at)}</small>
-                      </div>
-                    </button>
+                      <span className={`mt-3 text-[10px] sm:text-xs font-bold text-center leading-tight transition-colors ${textColor}`}>
+                        {step.label}
+                      </span>
+                    </div>
                   );
                 })}
               </div>
-            </article>
+            </div>
 
-            <article className="surface-card register-title-workflow-card">
-              <div className="register-title-workflow-head">
-                <div>
-                  <span className="section-kicker">Workflow</span>
-                  <h3>Review steps for the active proposal</h3>
-                </div>
-                <Badge
-                  label={currentWorkflowStep ? `${currentWorkflowStep.title} active` : 'Workflow active'}
-                  tone={currentWorkflowStep ? getWorkflowStatusTone(currentWorkflowStep.status) : 'info'}
-                />
-              </div>
-
-              <p>Each title proposal follows its own draft, submission, review, approval, and archive trail.</p>
-
-              <div className="register-title-stepper">
-                {workflow.map((step, index) => (
-                  <article key={step.id} className={`register-title-step is-${step.status}`}>
-                    <div className="register-title-step-head">
-                      <span className="register-title-step-index">{index + 1}</span>
-                      <Badge label={getWorkflowStatusLabel(step.status)} tone={getWorkflowStatusTone(step.status)} />
-                    </div>
-                    <strong>{step.title}</strong>
-                    <small>{step.dateLabel ?? 'Awaiting update'}</small>
-                    <p>{step.note}</p>
-                  </article>
-                ))}
-              </div>
-            </article>
-
-            <article className="surface-card register-title-form-card" id="title-submission-form">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Upload Workflow</span>
-                  <h3>Upload the title proposal document</h3>
-                  <p>
-                    The title submission page now expects the proposal content to live in the uploaded document file instead of a fill-up form.
-                  </p>
-                </div>
-              </div>
-
-              <div className="register-title-form-summary">
-                {formSummaryItems.map((item) => (
-                  <article key={item.id} className="register-title-form-summary-item">
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                    <small>{item.note}</small>
-                  </article>
-                ))}
-              </div>
-
-              <form className="register-title-form" onSubmit={handleSubmitProposal}>
-                <section className="register-title-form-group">
-                  <div className="register-title-form-section-head">
-                    <strong>Document checklist</strong>
-                    <p>Include these sections inside the uploaded proposal document before you submit it.</p>
-                  </div>
-
-                  <div className="title-submission-requirement-grid">
-                    {[
-                      'Title',
-                      'Background',
-                      'Statement of the Problem',
-                      'Objectives'
-                    ].map((item) => (
-                      <article key={item} className="title-submission-requirement-card">
-                        <span>{item}</span>
-                        <strong>{item} must be inside the uploaded file</strong>
-                        <small>The adviser will review this section from the attached proposal document.</small>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="register-title-form-group register-title-form-group-members">
-                  <div className="register-title-form-section-head register-title-form-section-head--compact">
-                    <strong>Review ownership</strong>
-                    <p>These fields identify the adviser and group roster connected to this proposal package.</p>
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="title-submission-adviser">Adviser</label>
-                    <input
-                      id="title-submission-adviser"
-                      name="adviser"
-                      value={activeSubmission.adviser}
-                      disabled
-                    />
-                    <span className="register-title-field-hint">This reviewer receives the official title proposal package.</span>
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="title-submission-members">Group members</label>
-                    <textarea
-                      id="title-submission-members"
-                      name="groupMembers"
-                      rows={5}
-                      value={activeSubmission.groupMembers.join('\n')}
-                      disabled
-                    />
-                    <span className="register-title-field-hint">
-                      Membership is read-only and follows the currently registered student group.
-                    </span>
-                  </div>
-                </section>
-
-                <section className="register-title-form-group">
-                  <div className="register-title-form-section-head">
-                    <div className="flex w-full items-center justify-between gap-4">
-                      <div>
-                        <strong>Proposal documents</strong>
-                        <p>Upload the title proposal file that already contains the title, background, statement of the problem, and objectives.</p>
-                      </div>
-                      {isLeader && data.group?.id && (
-                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-sm transition hover:bg-slate-50">
-                          <input 
-                            type="checkbox" 
-                            className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                            defaultChecked={data.group?.allowMemberSubmission}
-                            onChange={async (e) => {
-                              const isChecked = e.target.checked;
-                              try {
-                                const res = await fetch('/api/groups', {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ id: data.group.id, allowMemberSubmission: isChecked })
-                                });
-                                if (res.ok) {
-                                  setNotice({ tone: 'success', message: isChecked ? 'Members are now allowed to upload files.' : 'Member uploads restricted.' });
-                                }
-                              } catch (err) {
-                                console.error(err);
-                              }
-                            }}
-                          />
-                          <span className="text-sm font-medium text-slate-700">Allow Member Uploads</span>
-                        </label>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="title-submission-upload-shell">
-                    <div className="register-title-panel-copy">
-                      <strong>Attach the title proposal file for this record.</strong>
-                      <p>The uploaded document itself is treated as the submission package. No separate in-page fill-up is required.</p>
-                    </div>
-
-                    <div className="register-title-panel-actions title-submission-file-actions">
-                      {canUpload ? (
-                        <button className="btn btn-secondary" type="button" onClick={handleBrowseAttachments}>
-                          <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload proposal file
-                        </button>
-                      ) : (
-                        <div className="inline-flex items-center gap-3">
-                          <div className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 shadow-sm">
-                            <i className="fas fa-lock" aria-hidden="true" />
-                            <span>Only the group leader can upload files.</span>
-                          </div>
-                          <button 
-                            className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 hover:shadow-md" 
-                            type="button" 
-                            onClick={handleRequestPermission}
-                          >
-                            <i className="fas fa-paper-plane" aria-hidden="true" /> Request Permission
-                          </button>
-                        </div>
-                      )}
-                      <button className="btn btn-primary" type="button" onClick={() => handleOpenAttachment(latestAttachment)} disabled={!latestAttachment}>
-                        <i className="fas fa-eye" aria-hidden="true" /> Open latest file
-                      </button>
-                      <button className="btn btn-ghost" type="button" onClick={() => handleDownloadAttachment(latestAttachment)} disabled={!latestAttachment}>
-                        <i className="fas fa-download" aria-hidden="true" /> Download latest file
-                      </button>
-                    </div>
-
-                    <input
-                      ref={fileInputRef}
-                      hidden
-                      multiple
-                      type="file"
-                      accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.png,.jpg,.jpeg"
-                      onChange={handleAttachmentInputChange}
-                    />
-
-                    {activeSubmission.attachments.length ? (
-                      <div className="title-submission-upload-list">
-                        {activeSubmission.attachments.map((attachment) => (
-                          <article key={attachment.id} className="title-submission-upload-item">
-                            <div className="title-submission-upload-item-head">
-                              <div>
-                                <strong>{attachment.fileName}</strong>
-                                <small>{attachment.fileType} | {attachment.sizeLabel}</small>
-                              </div>
-                              <Badge label={attachment.status} tone={getStatusTone(attachment.status)} icon="fa-paperclip" />
-                            </div>
-                            <div className="title-submission-upload-meta">
-                              <span>Uploaded {attachment.uploadedAtLabel}</span>
-                              <span>{attachment.uploadedBy}</span>
-                            </div>
-                            <div className="title-submission-upload-actions">
-                              {attachment.downloadUrl ? (
-                                <>
-                                  <button className="btn btn-secondary" type="button" onClick={() => handleOpenAttachment(attachment)}>
-                                    <i className="fas fa-eye" aria-hidden="true" /> Open
-                                  </button>
-                                  <button className="btn btn-ghost" type="button" onClick={() => handleDownloadAttachment(attachment)}>
-                                    <i className="fas fa-download" aria-hidden="true" /> Download
-                                  </button>
-                                </>
-                              ) : null}
-                              <button
-                                className="btn btn-ghost"
-                                type="button"
-                                onClick={() => handleRemoveAttachment(attachment.id)}
-                                disabled={!canUpload}
-                              >
-                                <i className="fas fa-trash-can" aria-hidden="true" /> Remove
-                              </button>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="register-title-empty-card">
-                        <strong>No proposal file attached yet</strong>
-                        <p>Upload the title proposal package before sending this record to the adviser review queue.</p>
-                      </div>
-                    )}
-                  </div>
-                </section>
-
-                <div className="register-title-form-actions">
-                  <div className="register-title-submit-cluster">
-                    <button className="btn btn-primary register-title-primary-action" type="submit" disabled={!canUpload || isSubmittingTitle || isLoadingTitles}>
-                      <i className="fas fa-paper-plane" aria-hidden="true" />
-                      {isSubmittingTitle ? 'Submitting...' : canUpload ? 'Submit Title Proposal for Review' : 'Action Required'}
-                    </button>
-                    <span className="register-title-submit-note">
-                      {canUpload
-                        ? 'Any group member can submit another title option. The required sections must already be inside the uploaded file.'
-                        : `This shared form is read-only for members. Coordinate with ${data.group.leaderName} for official title submission.`}
-                    </span>
-                  </div>
-
-                  <div className="form-helper">
-                    <strong>Last workflow update: {lastReviewedLabel}</strong>
-                    <p>
-                      {latestAction}. {activeSubmission.statusNote}
-                    </p>
-                  </div>
-                </div>
-              </form>
-            </article>
-
-            <article className="surface-card register-title-history-card" id="title-revision-history">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Revision History</span>
-                  <h3>Review log for {activeSubmission.proposalLabel}</h3>
-                  <p>Each proposal keeps a separate review trail so title alternatives do not overwrite one another.</p>
-                </div>
-              </div>
-
-              <div className="register-title-timeline">
-                {revisionHistory.length ? (
-                  revisionHistory.map((entry, index) => (
-                    <article key={entry.id} className={`register-title-timeline-item ${index === 0 ? 'is-latest' : ''}`}>
-                      <div className="stack-card-head">
-                        <div>
-                          <strong>{entry.status}</strong>
-                          <small>{entry.reviewedBy}</small>
-                        </div>
-                        <small>{entry.dateLabel}</small>
-                      </div>
-                      <Badge label={entry.status} tone={getStatusTone(entry.status)} />
-                      <p>{entry.note}</p>
-                    </article>
-                  ))
-                ) : (
-                  <div className="register-title-empty-card">
-                    <strong>No revision records yet</strong>
-                    <p>This proposal has not been submitted for adviser review yet.</p>
-                  </div>
-                )}
-              </div>
-            </article>
           </div>
 
-          <aside className="stack-section register-title-page-side">
-            <article className="surface-card register-title-side-card">
-              <div className="register-title-workflow-head">
-                <div>
-                  <span className="section-kicker">Approval Status</span>
-                  <h3>Current title review state</h3>
-                </div>
-                <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} icon="fa-file-signature" />
+          {/* Right Column: Requirements Checklist & Meta */}
+          <div className="space-y-6">
+            
+            {/* Requirements Checklist Card */}
+            <div className="rounded-[1.25rem] border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-[#003A8F] to-[#1E40AF] p-6 text-white">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <i className="fas fa-list-check" aria-hidden="true"></i> Document Requirements
+                </h3>
+                <p className="text-sm text-blue-100 mt-2 font-medium opacity-90 leading-relaxed">
+                  Ensure your concept paper includes these sections before uploading.
+                </p>
               </div>
-
-              <div className="register-title-panel-copy">
-                <strong>{latestAction}</strong>
-                <p>{activeSubmission.statusNote}</p>
-              </div>
-
-              <div className="register-title-side-meta">
-                {statusMetaItems.map((item) => (
-                  <div key={item.id}>
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                    <small>{item.note}</small>
-                  </div>
-                ))}
-              </div>
-
-              <div className="register-title-panel-actions">
-                <Link className="btn btn-secondary" href="/students/project-overview">
-                  <i className="fas fa-folder-open" aria-hidden="true" /> Project overview
-                </Link>
-                <Link className="btn btn-ghost" href="/students/faculty-feedback">
-                  <i className="fas fa-comments" aria-hidden="true" /> Faculty feedback
-                </Link>
-              </div>
-            </article>
-
-            <article className="surface-card register-title-side-card">
-              <div className="register-title-feedback-head">
-                <div>
-                  <span className="section-kicker">Feedback</span>
-                  <h3>Latest notes for the active proposal</h3>
-                </div>
-                <Badge
-                  label={
-                    reviewerFeedback.length
-                      ? `${reviewerFeedback.length} note${reviewerFeedback.length === 1 ? '' : 's'}`
-                      : 'No notes yet'
-                  }
-                  tone={reviewerFeedback.length ? 'warning' : 'neutral'}
-                  icon="fa-comments"
-                />
-              </div>
-
-              {reviewerFeedback.length ? (
-                <div className="register-title-feedback-list">
-                  {reviewerFeedback.map((entry) => (
-                    <article key={entry.id} className="register-title-feedback-item">
-                      <div className="register-title-feedback-head">
-                        <div>
-                          <strong>{entry.author}</strong>
-                          <small>
-                            {entry.role} | {entry.dateLabel}
-                          </small>
-                        </div>
-                        <Badge label={entry.status} tone={getStatusTone(entry.status)} />
-                      </div>
-                      <p>{entry.note}</p>
-                      {entry.route && entry.actionLabel ? (
-                        <Link className="inline-link" href={entry.route}>
-                          {entry.actionLabel}
-                        </Link>
-                      ) : null}
-                    </article>
+              <div className="p-6 bg-slate-50/50">
+                <ul className="space-y-3.5">
+                  {[
+                    'Title',
+                    'Background of the study',
+                    'Statement of the problem',
+                    'Objectives of the study',
+                    'Comparison of related studies',
+                    'Proposed solution',
+                    'Process of Addressing the Problems',
+                    'References'
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-3.5 text-sm font-semibold text-slate-700">
+                      <i className="fas fa-check text-emerald-500 mt-0.5 text-base" aria-hidden="true"></i>
+                      {item}
+                    </li>
                   ))}
-                </div>
-              ) : (
-                <div className="register-title-empty-card">
-                  <strong>No reviewer notes yet</strong>
-                  <p>Feedback from adviser review will appear here after this proposal is submitted.</p>
-                </div>
-              )}
-            </article>
-
-            <article className="surface-card register-title-side-card">
-              <div className="register-title-validation-head">
-                <div>
-                  <span className="section-kicker">Validation</span>
-                  <h3>Similarity and title check</h3>
-                </div>
-                <Badge
-                  label={validation?.status ?? 'Pending validation'}
-                  tone={getStatusTone(validation?.status ?? 'Pending')}
-                  icon="fa-shield-halved"
-                />
-              </div>
-
-              <div className="register-title-validation-card">
-                <div className="register-title-panel-copy">
-                  <strong>{validation?.note ?? 'Similarity checking results will appear here once connected.'}</strong>
-                  <p>
-                    {validation?.checkedAtLabel
-                      ? `Last validation checkpoint: ${validation.checkedAtLabel}.`
-                      : 'No validation timestamp has been recorded yet.'}
+                </ul>
+                
+                <div className="mt-6 rounded-xl border border-[#F6BE00]/40 bg-[#F6BE00]/10 p-4 flex items-start gap-3 shadow-sm">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F6BE00]/20 text-[#D97706]">
+                    <i className="fas fa-triangle-exclamation text-xs" aria-hidden="true"></i>
+                  </div>
+                  <p className="text-xs font-bold text-slate-800 leading-relaxed">
+                    Your uploaded file must follow the required concept paper format. Missing sections may delay the adviser review.
                   </p>
                 </div>
+              </div>
+            </div>
 
-                {(validation?.matchedTitles ?? []).length ? (
-                  <div className="register-title-validation-list">
-                    {validation?.matchedTitles.map((item) => (
-                      <article key={item.id} className="register-title-validation-match">
-                        <strong>{item.title}</strong>
-                        <small>{item.matchLabel}</small>
-                      </article>
+            {/* Submission Info */}
+            <div className="rounded-[1.25rem] border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-5">Submission Details</h3>
+              <div className="space-y-5">
+                <div>
+                  <span className="block text-xs font-semibold text-slate-400 mb-1">Adviser</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <i className="fas fa-user-tie text-blue-600" aria-hidden="true"></i>
+                    {activeSubmission.adviser}
+                  </div>
+                </div>
+                <div>
+                  <span className="block text-xs font-semibold text-slate-400 mb-1">Group Members</span>
+                  <div className="flex flex-col gap-1.5 mt-2">
+                    {activeSubmission.groupMembers.map((member, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm font-medium text-slate-700 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                         <i className="fas fa-user text-slate-400 text-xs" aria-hidden="true"></i> {member}
+                      </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="register-title-empty-card">
-                    <strong>No related title matches</strong>
-                    <p>Matched titles will appear here once the validation service returns comparison results.</p>
-                  </div>
-                )}
-              </div>
-            </article>
-
-            <article className="surface-card register-title-side-card title-submission-guide-card">
-              <div className="register-title-workflow-head">
-                <div>
-                  <span className="section-kicker">Package Guide</span>
-                  <h3>What the uploaded file should contain</h3>
                 </div>
-                <Badge label="Upload-first" tone="info" icon="fa-file-arrow-up" />
-              </div>
-
-              <div className="title-submission-side-highlight">
-                <span className="title-submission-guide-icon">
-                  <i className="fas fa-file-circle-check" aria-hidden="true" />
-                </span>
                 <div>
-                  <strong>{latestAttachment ? latestAttachment.fileName : 'No active proposal file yet'}</strong>
-                  <p>
-                    {latestAttachment
-                      ? `${latestAttachment.fileType} | ${latestAttachment.sizeLabel} | uploaded ${latestAttachment.uploadedAtLabel}`
-                      : 'Upload a DOCX or PDF title proposal package before sending this record to adviser review.'}
+                  <span className="block text-xs font-semibold text-slate-400 mb-1">Latest Action</span>
+                  <p className="text-sm font-medium text-slate-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50 mt-1">
+                    {latestAction}. {activeSubmission.statusNote}
                   </p>
                 </div>
               </div>
+            </div>
 
-              <div className="title-submission-package-grid">
-                {[
-                  ['Title', 'The proposed study title should be clear and specific.'],
-                  ['Background', 'Explain the context, gap, and reason for the study.'],
-                  ['Statement of the Problem', 'State the problem the project intends to address.'],
-                  ['Objectives', 'List the general and specific goals of the proposal.']
-                ].map(([label, copy]) => (
-                  <article key={label} className="title-submission-package-item">
-                    <span>{label}</span>
-                    <strong>Required inside file</strong>
-                    <small>{copy}</small>
-                  </article>
-                ))}
-              </div>
+          </div>
+        </div>
 
-              <div className="title-submission-format-card">
-                <span>Accepted files</span>
-                <div className="title-submission-format-pills">
-                  {['PDF', 'DOC', 'DOCX', 'PPT', 'PPTX', 'ZIP'].map((format) => (
-                    <strong key={format}>{format}</strong>
-                  ))}
-                </div>
-                <p>Use PDF or DOCX for the cleanest adviser review. ZIP is useful only when the proposal package includes supporting files.</p>
-              </div>
-
-              <div className="title-submission-review-path">
-                {[
-                  ['1', 'Upload proposal file', 'Attach the document that already contains the required sections.'],
-                  ['2', 'Submit for review', 'The record moves to the adviser queue after at least one file is attached.'],
-                  ['3', 'Wait for validation', 'Adviser checks title clarity, similarity, and scope alignment.'],
-                  ['4', 'Revise if needed', 'Upload a corrected proposal file if adviser feedback requires changes.']
-                ].map(([step, label, copy]) => (
-                  <article key={step} className="title-submission-review-step">
-                    <span>{step}</span>
-                    <div>
-                      <strong>{label}</strong>
-                      <small>{copy}</small>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </article>
-          </aside>
-        </section>
       </div>
     </div>
   );

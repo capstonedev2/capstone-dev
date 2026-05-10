@@ -1390,7 +1390,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                 <strong>Notifications</strong>
                 <small>{unreadNotificationsCount ? `${unreadNotificationsCount} unread` : 'All caught up'}</small>
               </span>
-              {unreadNotificationsCount ? <span className="notification-trigger-count">{unreadNotificationsCount}</span> : null}
+              {unreadNotificationsCount ? <span className="notification-trigger-count" style={{ backgroundColor: '#ef4444', color: 'white' }}>{unreadNotificationsCount}</span> : null}
             </button>
 
             <div className={`notification-menu ${notificationMenuOpen ? 'is-open' : ''}`}>
@@ -1400,9 +1400,25 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   <strong>Notifications</strong>
                   <small>Latest feedback, schedule updates, deadlines, and approvals for your workspace.</small>
                 </div>
-                <Link className="notification-menu-view-all" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
-                  {isLimitedWorkspace ? 'View setup' : 'Open center'}
-                </Link>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {unreadNotificationsCount > 0 && (
+                    <button 
+                      className="notification-menu-view-all" 
+                      style={{ background: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', cursor: 'pointer', padding: '4px 8px' }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const unreadIds = shellNotifications.filter(n => !n.read).map(n => n.id);
+                        unreadIds.forEach(id => markNotificationRead(id));
+                      }}
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                  <Link className="notification-menu-view-all" style={{ padding: '4px 8px' }} href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
+                    {isLimitedWorkspace ? 'View setup' : 'Open center'}
+                  </Link>
+                </div>
               </div>
 
               <div className="notification-menu-summary">

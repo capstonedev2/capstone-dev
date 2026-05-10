@@ -233,6 +233,40 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
       )));
       setReviewSubmission(null);
       setReviewNotes('');
+      
+      if (status === 'approved' || status === 'needs_revision') {
+        try {
+          const studentIds = (submission.groupMembers?.length ?? 0) > 0 
+            ? submission.groupMembers!.map((m: any) => m.user_id || m.id) 
+            : ['user-student-001']; // fallback for mock
+            
+          const notifTitle = status === 'approved' ? 'Title Approved' : 'Revision Requested';
+          const notifTone = status === 'approved' ? 'success' : 'danger';
+          const notifBaseMessage = status === 'approved' 
+            ? `Congrats! Your title "${submission.submissionTitle}" has been approved by the panel.`
+            : `Your title "${submission.submissionTitle}" requires revisions based on panel feedback.`;
+            
+          const notifMessage = notes.trim() ? `${notifBaseMessage} Evaluation Notes: "${notes}"` : notifBaseMessage;
+
+          await Promise.all(studentIds.map((sId: string) => 
+            fetch('/api/notifications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: sId,
+                title: notifTitle,
+                message: notifMessage,
+                type: notifTone,
+                entityType: 'title',
+                entityId: submission.id
+              })
+            })
+          ));
+        } catch (e) {
+          console.error('Failed to send evaluation notification', e);
+        }
+      }
+      
       window.dispatchEvent(new Event('thesistrack:notifications-updated'));
     } catch (error) {
       setStudentDocumentError(error instanceof Error ? error.message : 'Unable to update the review status.');
@@ -465,42 +499,51 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
               <label className="block">
                 <span className="mb-2 block text-sm font-bold text-slate-800">Review notes or suggested revisions</span>
                 <textarea
-                  className="min-h-36 w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)]"
+                  className="min-h-36 w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
                   value={reviewNotes}
                   onChange={(event) => setReviewNotes(event.target.value)}
                   placeholder="Write adviser notes, suggestions, corrections, or approval remarks for the student..."
+                  disabled={reviewSubmission.status === 'approved'}
                 />
               </label>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                <button
-                  type="button"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#003A8F] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#002C6B] disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={isSubmittingReview}
-                  onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'still_reviewing', reviewNotes)}
-                >
-                  <i className="fas fa-magnifying-glass text-xs" aria-hidden="true" />
-                  Still Reviewing
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={isSubmittingReview || !reviewNotes.trim()}
-                  onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'needs_revision', reviewNotes)}
-                >
-                  <i className="fas fa-rotate-left text-xs" aria-hidden="true" />
-                  Request Revision
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={isSubmittingReview}
-                  onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'approved', reviewNotes)}
-                >
-                  <i className="fas fa-circle-check text-xs" aria-hidden="true" />
-                  Approve
-                </button>
-              </div>
+              {reviewSubmission.status === 'approved' ? (
+                <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-800">
+                  <i className="fas fa-circle-check text-emerald-600" aria-hidden="true" />
+                  <strong>Approved</strong>
+                  <span className="opacity-80">— This submission has already been approved and cannot be modified.</span>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#003A8F] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#002C6B] disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isSubmittingReview}
+                    onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'still_reviewing', reviewNotes)}
+                  >
+                    <i className="fas fa-magnifying-glass text-xs" aria-hidden="true" />
+                    Still Reviewing
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-rose-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isSubmittingReview || !reviewNotes.trim()}
+                    onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'needs_revision', reviewNotes)}
+                  >
+                    <i className="fas fa-rotate-left text-xs" aria-hidden="true" />
+                    Request Revision
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isSubmittingReview}
+                    onClick={() => updateSubmissionReviewStatus(reviewSubmission, 'approved', reviewNotes)}
+                  >
+                    <i className="fas fa-circle-check text-xs" aria-hidden="true" />
+                    Approve
+                  </button>
+                </div>
+              )}
             </div>
           </section>
         </div>

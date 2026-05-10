@@ -29,7 +29,10 @@ export async function GET(
     assertDocumentBucket(bucketName);
     const signedUrl = await createSignedUrl(bucketName, file.filePath!, 60);
 
-    return NextResponse.redirect(signedUrl);
+    const urlObj = new URL(signedUrl);
+    urlObj.searchParams.set('download', file.fileName);
+
+    return NextResponse.redirect(urlObj.toString());
   } catch (error) {
     return handleApiError(error);
   }

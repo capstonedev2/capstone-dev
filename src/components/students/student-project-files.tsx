@@ -141,6 +141,14 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const [permissionNotificationId, setPermissionNotificationId] = useState<string | null>(null);
   const [recentlyAllowed, setRecentlyAllowed] = useState<Set<string>>(new Set());
 
+  const hasApprovedTitle = useMemo(() => {
+    const isMainApproved = data.titleRegistration.registrationStatus.toLowerCase() === 'approved';
+    const hasSubmissionApproved = (data.titleRegistration.submissions || []).some(
+      (sub) => sub.registrationStatus.toLowerCase() === 'approved'
+    );
+    return isMainApproved || hasSubmissionApproved;
+  }, [data.titleRegistration]);
+
   useEffect(() => {
     if (isGroupLeader) return; // Leaders always have permission, no need to poll
 
@@ -799,6 +807,74 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     : toast?.tone === 'danger'
       ? 'fa-circle-exclamation'
       : 'fa-circle-info';
+
+  if (!data.group?.id) {
+    return (
+      <div className="student-project-files-page">
+        <header className="top-nav">
+          <div className="top-nav-leading">
+            <div className="page-title">
+              <div className="page-title-context">
+                <span className="page-kicker">Student Workspace</span>
+                <span className="page-breadcrumb" aria-hidden="true">
+                  <i className="fas fa-angle-right" />
+                  <span>Project Files</span>
+                </span>
+              </div>
+              <h1>Project Files</h1>
+              <p>Keep drafts, revisions, and approved project documents organized in one workspace.</p>
+            </div>
+          </div>
+        </header>
+
+        <div className="page-body project-files-page-body p-6">
+          <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
+              <i className="fas fa-users-slash text-3xl" aria-hidden="true" />
+            </div>
+            <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-800">Group Assignment Required</h3>
+            <p className="mx-auto mt-4 max-w-lg text-slate-500 leading-relaxed">
+              You must be assigned to a project group before you can access the project files repository and begin uploading chapters or documents. Please contact your coordinator.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasApprovedTitle) {
+    return (
+      <div className="student-project-files-page">
+        <header className="top-nav">
+          <div className="top-nav-leading">
+            <div className="page-title">
+              <div className="page-title-context">
+                <span className="page-kicker">Student Workspace</span>
+                <span className="page-breadcrumb" aria-hidden="true">
+                  <i className="fas fa-angle-right" />
+                  <span>Project Files</span>
+                </span>
+              </div>
+              <h1>Project Files</h1>
+              <p>Keep drafts, revisions, and approved project documents organized in one workspace.</p>
+            </div>
+          </div>
+        </header>
+
+        <div className="page-body project-files-page-body p-6">
+          <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
+              <i className="fas fa-file-signature text-3xl" aria-hidden="true" />
+            </div>
+            <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-800">Title Approval Required</h3>
+            <p className="mx-auto mt-4 max-w-lg text-slate-500 leading-relaxed">
+              You must get your project title officially approved by your adviser in the Title Submission workspace before you can access the project files repository and begin uploading chapters or documents.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -261,7 +261,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
 
       <main className="main-content">
         <AdviserPageHeader
-          title="Titles"
+          title="Title Approvals"
           description="Review, validate, and manage proposed capstone project titles from your assigned IT groups."
           actions={
             <AdviserShellActions

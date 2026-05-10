@@ -1031,7 +1031,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
             </div>
 
             <div className="student-dashboard-title-block">
-              {realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval') ? (
+              {realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation') ? (
                 <>
                   <div className="flex items-center gap-3 flex-wrap">
                     <h2 style={{ opacity: 0.55, fontStyle: 'italic' }}>
@@ -1042,7 +1042,9 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                       <i className="fas fa-clock"></i>
                       {realGroup.title === 'Pending Student Submission'
                         ? 'Awaiting Title Submission'
-                        : 'Awaiting Adviser Approval'}
+                        : realGroup.title === 'Pending Concept Presentation'
+                          ? 'Pending Concept Presentation'
+                          : 'Awaiting Adviser Approval'}
                     </span>
                   </div>
                   <p className="student-dashboard-intro">

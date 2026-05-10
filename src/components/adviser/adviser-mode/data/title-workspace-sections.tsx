@@ -283,21 +283,21 @@ export function TitleDetailsDrawer({
   const documentData = createAdviserTitleDocumentData(record);
 
   return (
-    <div className="fixed inset-0 z-[1300] flex justify-end bg-slate-950/30" onClick={onClose}>
+    <div className="fixed inset-0 z-[1300] flex justify-end bg-slate-900/40 backdrop-blur-sm" onClick={onClose}>
       <aside
         aria-label="Title details"
         aria-modal="true"
-        className="h-full w-full max-w-[540px] overflow-y-auto bg-white px-5 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:px-6"
+        className="h-full w-full max-w-[540px] overflow-y-auto bg-slate-50/95 backdrop-blur-3xl px-5 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:px-6 ring-1 ring-white/20"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-light)]">Title Details</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]/80">Title Details</p>
             <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">{record.title}</h2>
           </div>
           <button
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/60 border border-white/80 text-slate-600 shadow-sm backdrop-blur transition hover:bg-white"
             type="button"
             onClick={onClose}
           >
@@ -324,34 +324,62 @@ export function TitleDetailsDrawer({
           <DrawerMeta label="Current Status" value={statusMeta.label} />
         </div>
 
-        <section className="mt-6 rounded-[1.35rem] bg-[rgba(0,58,143,0.06)] p-4 ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--primary)]">
-            Title Submission Document
+        <section className="mt-6 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)] mb-3">
+            Attached Documents
           </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--text-dark)]">
-            Open the generated title submission document for adviser review or download a local copy.
-          </p>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--primary-dark)]"
-              type="button"
-              onClick={() => openTitleSubmissionDocument(documentData)}
-            >
-              <i className="fas fa-file-lines" aria-hidden="true" />
-              View Document
-            </button>
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] transition hover:bg-[rgba(0,58,143,0.04)]"
-              type="button"
-              onClick={() => downloadTitleSubmissionDocument(documentData)}
-            >
-              <i className="fas fa-download" aria-hidden="true" />
-              Download
-            </button>
-          </div>
+          {record.uploadedFiles && record.uploadedFiles.length > 0 ? (
+            <div className="grid gap-3">
+              {record.uploadedFiles.map((file) => (
+                <div key={file.id} className="flex items-center justify-between rounded-2xl border border-slate-200/60 bg-white p-3 shadow-sm hover:border-[var(--primary)] hover:shadow-md transition group">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/5 text-[var(--primary)] transition group-hover:bg-[var(--primary)]/10">
+                      <i className="fas fa-file-pdf" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-800">{file.name}</p>
+                      <p className="text-xs font-medium text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  </div>
+                  <a 
+                    href={file.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--primary-dark)] ml-2"
+                  >
+                    View File
+                  </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[1.25rem] bg-[rgba(0,58,143,0.04)] p-4 ring-1 ring-inset ring-[rgba(0,58,143,0.08)]">
+              <p className="text-sm leading-6 text-[var(--text-dark)] font-medium">
+                No physical files were uploaded. Open the generated summary document for review.
+              </p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <button
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-dark)] hover:shadow"
+                  type="button"
+                  onClick={() => openTitleSubmissionDocument(documentData)}
+                >
+                  <i className="fas fa-file-lines" aria-hidden="true" />
+                  View Generated Doc
+                </button>
+                <button
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] shadow-sm transition hover:bg-[rgba(0,58,143,0.04)]"
+                  type="button"
+                  onClick={() => downloadTitleSubmissionDocument(documentData)}
+                >
+                  <i className="fas fa-download" aria-hidden="true" />
+                  Download
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
-        <section className="mt-6 rounded-[1.35rem] bg-slate-50/90 p-4">
+        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Group Information</p>
           <p className="mt-3 text-sm font-semibold text-[var(--text-dark)]">
             {formatMemberPreview(record.memberPreview, 3)}
@@ -361,12 +389,12 @@ export function TitleDetailsDrawer({
           </p>
         </section>
 
-        <section className="mt-6 rounded-[1.35rem] bg-slate-50/90 p-4">
+        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Project Description</p>
           <p className="mt-3 text-sm leading-7 text-[var(--text-dark)]">{record.description}</p>
         </section>
 
-        <section className="mt-6 rounded-[1.35rem] bg-slate-50/90 p-4">
+        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Keywords</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {record.keywords.map((keyword) => (
@@ -380,11 +408,11 @@ export function TitleDetailsDrawer({
           </div>
         </section>
 
-        <section className="mt-6">
+        <section className="mt-5">
           <SimilarityIndicator score={record.similarityScore} similarTitles={record.similarTitles} />
         </section>
 
-        <section className="mt-6 rounded-[1.35rem] bg-slate-50/90 p-4">
+        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Adviser Remarks</p>
           <textarea
             className="mt-3 min-h-32 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-[var(--text-dark)] outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)]"
@@ -487,11 +515,13 @@ function TitleCard({
   onViewDetails: (record: AdviserTitleRecord) => void;
 }) {
   const statusMeta = getTitleStatusMeta(record.status);
-  const documentData = createAdviserTitleDocumentData(record);
+  const fileCount = record.uploadedFiles?.length ?? 0;
 
   return (
-    <article className="group rounded-[1.75rem] bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.08)]">
+    <article className="group relative rounded-[1.75rem] bg-white/80 backdrop-blur-sm p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] ring-1 ring-slate-100/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)] hover:ring-[var(--primary)]/20">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 rounded-t-[1.75rem] bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00] opacity-60 transition-opacity group-hover:opacity-100" />
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(280px,0.9fr)] xl:items-start">
+        {/* Left: Title & Group Info */}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[rgba(0,58,143,0.07)] to-[rgba(0,58,143,0.03)] px-3 py-1 text-xs font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
@@ -504,6 +534,12 @@ function TitleCard({
               ) : null}
               {statusMeta.label}
             </span>
+            {fileCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200/60">
+                <i className="fas fa-paperclip text-[10px]" />
+                {fileCount} file{fileCount > 1 ? 's' : ''}
+              </span>
+            )}
           </div>
 
           <h3
@@ -539,6 +575,7 @@ function TitleCard({
           </div>
         </div>
 
+        {/* Center: Submission Info & Similarity */}
         <div className="space-y-4">
           <div className="rounded-[1.35rem] bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 ring-1 ring-inset ring-slate-100">
             <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
@@ -558,20 +595,27 @@ function TitleCard({
                 <dt className="text-[var(--text-light)]">Academic Year</dt>
                 <dd className="font-semibold text-[var(--text-dark)]">{record.academicYear}</dd>
               </div>
+              {fileCount > 0 && (
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-[var(--text-light)]">Documents</dt>
+                  <dd className="font-semibold text-emerald-700">{fileCount} attached</dd>
+                </div>
+              )}
             </dl>
           </div>
 
           <SimilarityIndicator compact score={record.similarityScore} similarTitles={record.similarTitles} />
         </div>
 
-        <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-inset ring-slate-200/70 shadow-sm">
+        {/* Right: Actions Panel */}
+        <div className="rounded-[1.5rem] bg-gradient-to-b from-white to-slate-50/80 p-4 ring-1 ring-inset ring-slate-200/70 shadow-sm">
           <div>
             <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
               <i className="fas fa-clipboard-check text-[10px]" />
-              Adviser Note / Action Needed
+              Adviser Action
             </p>
             <p
-              className="mt-3 overflow-hidden text-sm leading-7 text-[var(--text-dark)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]"
+              className="mt-3 overflow-hidden text-sm leading-7 text-[var(--text-dark)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
               title={record.adviserAction}
             >
               {record.adviserAction}
@@ -581,14 +625,14 @@ function TitleCard({
           <div className="mt-5 grid gap-2">
             <div className="grid grid-cols-2 gap-2">
               <button
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white transition-all hover:bg-[var(--primary-dark)] hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[var(--primary-dark)] hover:-translate-y-0.5 hover:shadow-md"
                 type="button"
                 onClick={() => onApprove(record)}
               >
                 <i className="fas fa-check text-xs" /> Approve
               </button>
               <button
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] transition-all hover:bg-[rgba(0,58,143,0.04)] hover:-translate-y-0.5"
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] shadow-sm transition-all hover:bg-[rgba(0,58,143,0.04)] hover:-translate-y-0.5"
                 type="button"
                 onClick={() => onRequestRevision(record)}
               >
@@ -596,35 +640,19 @@ function TitleCard({
               </button>
             </div>
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition-all hover:bg-rose-100 hover:-translate-y-0.5"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 shadow-sm transition-all hover:bg-rose-100 hover:-translate-y-0.5"
               type="button"
               onClick={() => onReject(record)}
             >
               <i className="fas fa-ban text-xs" /> Reject
             </button>
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:-translate-y-0.5"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-700 px-4 text-sm font-semibold text-white shadow-sm transition-all hover:from-slate-700 hover:to-slate-600 hover:-translate-y-0.5 hover:shadow-md"
               type="button"
               onClick={() => onViewDetails(record)}
             >
-              <i className="fas fa-expand text-xs" /> View Details
+              <i className="fas fa-expand text-xs" /> View Full Details
             </button>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-3 text-xs font-semibold text-[var(--primary)] transition-all hover:bg-[rgba(0,58,143,0.04)] hover:-translate-y-0.5"
-                type="button"
-                onClick={() => openTitleSubmissionDocument(documentData)}
-              >
-                <i className="fas fa-file-lines" /> Document
-              </button>
-              <button
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-100 hover:-translate-y-0.5"
-                type="button"
-                onClick={() => downloadTitleSubmissionDocument(documentData)}
-              >
-                <i className="fas fa-download" /> Download
-              </button>
-            </div>
           </div>
         </div>
       </div>

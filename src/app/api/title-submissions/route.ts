@@ -2,6 +2,8 @@ import { ProjectStatus, ReviewDecision, SubmissionStatus, UserRole } from '@/gen
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, normalizeText, successResponse } from '@/lib/utils';
+import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
+import { uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
 
 export const runtime = 'nodejs';
 
@@ -133,7 +135,7 @@ function toTitlePayload(project: any) {
     title: project.title,
     description: project.abstract || 'Title proposal submitted for adviser validation.',
     department: project.departmentId || project.group?.department || 'IT',
-    status: projectStatusToTitleStatus[project.status as ProjectStatus] || 'pending',
+    status: latestSubmission ? (projectStatusToTitleStatus[project.status as ProjectStatus] || 'pending') : 'draft',
     projectStatus: project.status,
     submittedAt: latestSubmission?.submittedAt || project.createdAt,
     updatedAt: project.updatedAt,
@@ -155,7 +157,13 @@ function toTitlePayload(project: any) {
         }
       : null,
     academicYear: project.academicYear?.label || 'Current Academic Year',
-    submissionId: latestSubmission?.id || null
+    submissionId: latestSubmission?.id || null,
+    uploadedFiles: latestSubmission?.files?.map((file: any) => ({
+      id: file.id,
+      name: file.fileName,
+      url: `/api/document-files/${file.id}/download`,
+      size: file.size
+    })) || []
   };
 }
 
@@ -195,6 +203,7 @@ const projectInclude = {
     orderBy: { submittedAt: 'desc' },
     take: 1,
     include: {
+      files: true,
       comments: {
         orderBy: { createdAt: 'desc' },
         take: 1,
@@ -249,7 +258,12 @@ export async function GET(request: Request) {
       take: 100
     });
 
-    return successResponse({ titles: projects.map(toTitlePayload) });
+    const titles = projects.map(toTitlePayload);
+    const filteredTitles = user.role === UserRole.STUDENT 
+      ? titles 
+      : titles.filter(t => t.status !== 'draft');
+
+    return successResponse({ titles: filteredTitles });
   } catch (error) {
     return handleApiError(error);
   }
@@ -258,12 +272,40 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
-    const body = await request.json().catch(() => ({}));
-    const title = normalizeText(body?.title);
-    const description = normalizeText(body?.description);
-    const keywords = Array.isArray(body?.keywords)
-      ? body.keywords.map((keyword: unknown) => normalizeText(keyword)).filter(Boolean)
-      : [];
+    const contentType = request.headers.get('content-type') || '';
+    
+    let title = '';
+    let description = '';
+    let keywords: string[] = [];
+    let uploadedFiles: File[] = [];
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      title = normalizeText(formData.get('title') as string);
+      description = normalizeText(formData.get('description') as string);
+      
+      const keywordsData = formData.get('keywords');
+      if (keywordsData) {
+        try {
+          keywords = JSON.parse(keywordsData as string);
+        } catch {
+          keywords = [];
+        }
+      }
+
+      for (const [key, value] of formData.entries()) {
+        if (key === 'files' && value instanceof File) {
+          uploadedFiles.push(value);
+        }
+      }
+    } else {
+      const body = await request.json().catch(() => ({}));
+      title = normalizeText(body?.title);
+      description = normalizeText(body?.description);
+      keywords = Array.isArray(body?.keywords)
+        ? body.keywords.map((keyword: unknown) => normalizeText(keyword)).filter(Boolean)
+        : [];
+    }
 
     if (!title) {
       return Response.json(
@@ -298,6 +340,21 @@ export async function POST(request: Request) {
     }
 
     const project = await prisma.$transaction(async (tx) => {
+      const deptName = group.department || group.dept || null;
+      let resolvedDeptId: string | null = null;
+      if (deptName) {
+        const dept = await tx.department.findFirst({
+          where: {
+            OR: [
+              { id: deptName },
+              { name: { equals: deptName, mode: 'insensitive' } }
+            ]
+          },
+          select: { id: true }
+        });
+        resolvedDeptId = dept?.id ?? null;
+      }
+
       const createdProject = await tx.project.create({
         data: {
           title,
@@ -307,11 +364,11 @@ export async function POST(request: Request) {
           groupId: group.id,
           ownerId: user.id,
           adviserId: group.userId,
-          departmentId: group.department || group.dept || null
+          departmentId: resolvedDeptId
         }
       });
 
-      await tx.submission.create({
+      const submission = await tx.submission.create({
         data: {
           projectId: createdProject.id,
           submittedById: user.id,
@@ -321,6 +378,39 @@ export async function POST(request: Request) {
           version: 1
         }
       });
+
+      // Handle file uploads if any
+      for (const file of uploadedFiles) {
+        const bucketName = DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS;
+        const filePath = generateUniqueFilePath({
+          bucketName,
+          projectId: createdProject.id,
+          userId: user.id,
+          fileName: file.name
+        });
+
+        await uploadFile({
+          bucketName,
+          filePath,
+          file
+        });
+
+        await tx.uploadedFile.create({
+          data: {
+            fileName: file.name,
+            filePath,
+            bucketName,
+            fileType: file.type || 'application/octet-stream',
+            documentCategory: 'Title Proposal',
+            category: 'Title Proposal',
+            visibility: 'private',
+            size: file.size,
+            userId: user.id,
+            projectId: createdProject.id,
+            submissionId: submission.id
+          }
+        });
+      }
 
       await tx.notification.create({
         data: {
