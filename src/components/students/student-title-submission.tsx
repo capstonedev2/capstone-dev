@@ -8,7 +8,7 @@ import type {
   StudentTitleAttachment,
   StudentTitleSubmissionRecord,
   StudentTitleWorkflowStep
-} from '@/lib/mock/student-dashboard';
+} from '@/lib/services/student-workspace';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
 type NoticeTone = 'success' | 'warning' | 'danger' | 'info';

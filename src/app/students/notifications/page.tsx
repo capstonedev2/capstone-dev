@@ -1,6 +1,6 @@
 import '@/styles/student-workspace.css';
 import { StudentNotifications } from '@/components/students/student-notifications';
-import { getStudentDashboardData } from '@/lib/mock/student-dashboard';
+import { getStudentDashboardData } from '@/lib/services/student-workspace';
 
 export const metadata = {
   title: 'ThesisTrack | Notifications'

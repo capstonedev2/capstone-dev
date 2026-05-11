@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { getProjectFileCategoryLabel } from '@/components/students/student-project-files.shared';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';

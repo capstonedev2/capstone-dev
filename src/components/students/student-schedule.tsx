@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import {
   buildStudentScheduleModel,
   formatMonthDayLabel,

@@ -1,6 +1,6 @@
 import '@/styles/student-workspace.css';
 import { StudentFacultyFeedback } from '@/components/students/student-faculty-feedback';
-import { getStudentDashboardData } from '@/lib/mock/student-dashboard';
+import { getStudentDashboardData } from '@/lib/services/student-workspace';
 
 export const metadata = {
   title: 'ThesisTrack | Faculty Feedback'

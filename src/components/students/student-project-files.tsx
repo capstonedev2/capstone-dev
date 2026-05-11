@@ -1,7 +1,7 @@
 'use client';
 
 import { type ChangeEvent, type DragEvent, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import {
   DOCUMENT_FILE_ACCEPT,
   DOCUMENT_STORAGE_BUCKETS,
@@ -23,7 +23,6 @@ import {
   PROJECT_FILE_TAG_OPTIONS,
   compareProjectFileVersions,
   formatFileSizeLabel,
-  formatProjectFileAdviserStatus,
   formatProjectFileDateTime,
   formatProjectFileStatus,
   getNextProjectFileVersion,
@@ -140,6 +139,16 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const [isUploadAllowed, setIsUploadAllowed] = useState(false);
   const [permissionNotificationId, setPermissionNotificationId] = useState<string | null>(null);
   const [recentlyAllowed, setRecentlyAllowed] = useState<Set<string>>(new Set());
+  const [permissionExpiresAt, setPermissionExpiresAt] = useState<number | null>(null);
+  const [permissionCountdown, setPermissionCountdown] = useState('');
+  const [leaderGrantDuration, setLeaderGrantDuration] = useState(3);
+
+  const PERMISSION_DURATION_OPTIONS = [
+    { value: 1, label: '1 minute' },
+    { value: 3, label: '3 minutes' },
+    { value: 5, label: '5 minutes' },
+    { value: 10, label: '10 minutes' },
+  ];
 
   const hasApprovedTitle = useMemo(() => {
     const isMainApproved = data.titleRegistration.registrationStatus.toLowerCase() === 'approved';
@@ -148,6 +157,33 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     );
     return isMainApproved || hasSubmissionApproved;
   }, [data.titleRegistration]);
+
+  // Countdown timer for member permission expiry
+  useEffect(() => {
+    if (!permissionExpiresAt || !isUploadAllowed) {
+      setPermissionCountdown('');
+      return;
+    }
+
+    const tick = () => {
+      const remaining = permissionExpiresAt - Date.now();
+      if (remaining <= 0) {
+        setIsUploadAllowed(false);
+        setPermissionExpiresAt(null);
+        setPermissionNotificationId(null);
+        setPermissionCountdown('');
+        setToast({ tone: 'warning', message: 'Upload permission expired. Request access again from your leader.' });
+        return;
+      }
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      setPermissionCountdown(`${mins}:${secs.toString().padStart(2, '0')}`);
+    };
+
+    tick();
+    const timerId = setInterval(tick, 1000);
+    return () => clearInterval(timerId);
+  }, [permissionExpiresAt, isUploadAllowed]);
 
   useEffect(() => {
     if (isGroupLeader) return; // Leaders always have permission, no need to poll
@@ -164,13 +200,40 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
           );
           
           if (permissionNotifs.length > 0) {
+            const latestPerm = permissionNotifs[0];
+            // Parse duration from the notification message (format: "...Duration: X minutes.")
+            const durationMatch = latestPerm.message?.match(/Duration:\s*(\d+)\s*minute/);
+            const durationMinutes = durationMatch ? parseInt(durationMatch[1], 10) : 3;
+            const grantedAt = new Date(latestPerm.createdAt).getTime();
+            const expiresAt = grantedAt + durationMinutes * 60 * 1000;
+
+            if (Date.now() >= expiresAt) {
+              // Permission has expired — consume the notification
+              try {
+                await Promise.all(permissionNotifs.map((n: any) =>
+                  fetch('/api/notifications', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notificationId: n.id, action: 'consume' })
+                  })
+                ));
+              } catch { /* ignore */ }
+              setIsUploadAllowed(false);
+              setPermissionExpiresAt(null);
+              setPermissionNotificationId(null);
+              return;
+            }
+
             if (!isUploadAllowed) {
-              setToast({ tone: 'success', message: 'Upload permission granted! You can now submit 1 file.' });
+              setToast({ tone: 'success', message: `Upload permission granted! You have ${durationMinutes} minute${durationMinutes === 1 ? '' : 's'} to upload.` });
               setIsUploadAllowed(true);
+              setPermissionExpiresAt(expiresAt);
             }
             setPermissionNotificationId(permissionNotifs.map((n: any) => n.id).join(','));
           } else {
-            setIsUploadAllowed(false);
+            if (isUploadAllowed && !permissionExpiresAt) {
+              setIsUploadAllowed(false);
+            }
             setPermissionNotificationId(null);
           }
         }
@@ -184,7 +247,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     // Poll every 5 seconds
     const intervalId = setInterval(pollPersonalPermission, 5000);
     return () => clearInterval(intervalId);
-  }, [currentUserId, data.group.id, isGroupLeader, isUploadAllowed]);
+  }, [currentUserId, data.group.id, isGroupLeader, isUploadAllowed, permissionExpiresAt]);
 
   const handleRequestPermission = async () => {
     console.log('[REQUEST PERM] Members:', JSON.stringify(data.group.members, null, 2));
@@ -793,15 +856,6 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       note: `Prepared for ${getProjectFileCategoryLabel(uploadDraft.category)} uploads.`
     }
   ];
-  const latestReviewStatus = latestFile ? formatProjectFileAdviserStatus(latestFile.status) : 'Pending Review';
-  const latestReviewTone = latestFile ? getProjectFileTone(latestFile.status) : 'warning';
-  const latestReviewHelper = latestFile?.status === 'approved'
-    ? 'Approved by adviser'
-    : latestFile?.status === 'under_review'
-      ? 'Accepted by adviser and still reviewing'
-    : latestFile?.status === 'revision'
-      ? 'Revision requested by adviser'
-      : 'Waiting for adviser to review';
   const toastIcon = toast?.tone === 'success'
     ? 'fa-circle-check'
     : toast?.tone === 'danger'
@@ -1054,7 +1108,27 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                         
                         <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/95 p-2 shadow-2xl shadow-blue-900/10 ring-1 ring-slate-900/5 backdrop-blur-xl">
                           <div className="px-3 pb-2 pt-1.5 border-b border-slate-100/50 mb-1">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Grant 1-Time Upload</h4>
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Grant Timed Upload</h4>
+                          </div>
+
+                          <div className="px-3 py-2 border-b border-slate-100/50 mb-1">
+                            <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">Time Limit</label>
+                            <div className="flex gap-1">
+                              {PERMISSION_DURATION_OPTIONS.map(opt => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setLeaderGrantDuration(opt.value); }}
+                                  className={`flex-1 rounded-lg px-2 py-1.5 text-[10px] font-bold transition-all ${
+                                    leaderGrantDuration === opt.value
+                                      ? 'bg-blue-600 text-white shadow-sm'
+                                      : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600'
+                                  }`}
+                                >
+                                  {opt.value}m
+                                </button>
+                              ))}
+                            </div>
                           </div>
 
                           {data.group.members.filter(m => !m.isLeader).length ? (
@@ -1080,7 +1154,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                         body: JSON.stringify({
                                           userId: member.user_id,
                                           title: 'Upload Permission Granted',
-                                          message: 'Your leader has approved your request to upload files.',
+                                          message: `Your leader has approved your request to upload files. Duration: ${leaderGrantDuration} minute${leaderGrantDuration === 1 ? '' : 's'}.`,
                                           type: 'success',
                                           entityType: 'permission',
                                           entityId: data.group.id
@@ -1088,7 +1162,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                       });
                                       if (res.ok) {
                                         setRecentlyAllowed(prev => new Set(prev).add(member.user_id));
-                                        setToast({ tone: 'success', message: `Upload unlocked for ${member.fullName}.` });
+                                        setToast({ tone: 'success', message: `Upload unlocked for ${member.fullName} for ${leaderGrantDuration} min.` });
                                       }
                                     } catch (e) {
                                       console.error(e);
@@ -1116,7 +1190,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                       ? 'text-emerald-600' 
                                       : 'text-slate-400 group-hover/item:text-blue-600'
                                   }`}>
-                                    {isAllowed ? 'Allowed' : 'Allow'}
+                                    {isAllowed ? `${leaderGrantDuration}m ✓` : 'Allow'}
                                   </span>
                                 </button>
                               );
@@ -1146,24 +1220,59 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                 ))}
               </div>
 
-              {!isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (
-                <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/50 p-8 text-center shadow-sm">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 shadow-sm">
-                    <i className="fas fa-lock text-2xl" aria-hidden="true" />
+              {!hasApprovedTitle ? (
+                <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/50 p-8 text-center shadow-sm">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
+                    <i className="fas fa-file-shield text-2xl" aria-hidden="true" />
                   </div>
-                  <h4 className="mt-4 text-xl font-bold tracking-tight text-amber-900">Upload Restricted</h4>
-                  <p className="mx-auto mt-2 max-w-md text-sm text-amber-700">
-                    Only the designated group leader is authorized to submit or upload files to the project workspace. If you need to upload a document, you must request permission from your group leader.
+                  <h4 className="mt-4 text-xl font-bold tracking-tight text-slate-800">Upload Locked</h4>
+                  <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+                    Project file uploads are disabled until your capstone project title has been officially submitted and approved by your adviser.
                   </p>
-                  <button 
-                    type="button" 
-                    onClick={handleRequestPermission} 
-                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 hover:shadow-md"
-                  >
-                    <i className="fas fa-paper-plane" aria-hidden="true" /> Request Upload Permission
-                  </button>
+                </div>
+              ) : !isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (
+                <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/50 p-8 shadow-sm">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 shadow-sm">
+                      <i className="fas fa-lock text-2xl" aria-hidden="true" />
+                    </div>
+                    <h4 className="mt-4 text-xl font-bold tracking-tight text-amber-900">Upload Restricted</h4>
+                    <p className="mt-2 max-w-md text-sm text-amber-700">
+                      Only the designated group leader is authorized to submit or upload files to the project workspace. If you need to upload a document, you must request permission from your group leader.
+                    </p>
+                    <button 
+                      type="button" 
+                      onClick={handleRequestPermission} 
+                      className="mt-6 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 hover:shadow-md"
+                    >
+                      <i className="fas fa-paper-plane" aria-hidden="true" /> Request Upload Permission
+                    </button>
+                  </div>
                 </div>
               ) : (
+                <>
+                {!isGroupLeader && permissionCountdown && (
+                  <div className="rounded-[1.25rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm mb-4">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-sm animate-pulse">
+                          <i className="fas fa-stopwatch text-lg" aria-hidden="true" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-emerald-900">Upload Window Active</p>
+                          <p className="text-xs text-emerald-700">Upload your file before time runs out. Permission will auto-expire.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 rounded-xl bg-white/80 border border-emerald-200 px-4 py-2 shadow-sm">
+                          <i className="fas fa-clock text-emerald-600 text-sm" aria-hidden="true" />
+                          <span className="text-lg font-black tabular-nums text-emerald-800 tracking-tight">{permissionCountdown}</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">remaining</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <form className="portal-form project-files-upload-form" onSubmit={handleUploadSubmit}>
                 <div className="project-files-upload-workflow">
                   <section className="project-files-upload-drop-panel">
@@ -1264,51 +1373,8 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   </section>
                 </div>
                 </form>
+                </>
               )}
-            </article>
-
-            <article className="surface-card project-files-panel-card project-files-review-status-card">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Adviser Review Status</span>
-                  <h3>Adviser Review Status</h3>
-                  <p>Track the current review status of your latest submission.</p>
-                </div>
-              </div>
-
-              <div className={`project-files-review-status is-${latestReviewTone}`}>
-                <span className="project-files-review-status-icon">
-                  <i className={`fas ${latestFile?.status === 'approved' ? 'fa-circle-check' : latestFile?.status === 'revision' ? 'fa-rotate-left' : latestFile?.status === 'under_review' ? 'fa-magnifying-glass' : 'fa-clock'}`} aria-hidden="true" />
-                </span>
-                <div className="project-files-review-status-cell">
-                  <span>Latest Submission</span>
-                  <strong>{latestFile?.fileName || 'No submission yet'}</strong>
-                  <small>{latestFile ? `${getProjectFileVersionLabel(latestFile)} | ${formatProjectFileDateTime(latestFile.uploadedAt)}` : 'Upload a document to send it to your adviser.'}</small>
-                </div>
-                <div className="project-files-review-status-cell">
-                  <span>Status</span>
-                  <strong>{latestFile ? latestReviewStatus : 'Pending Review'}</strong>
-                  <small>{latestReviewHelper}</small>
-                </div>
-                <div className="project-files-review-status-cell">
-                  <span>Assigned Adviser</span>
-                  <strong>{adviserName}</strong>
-                  <small>Research Adviser</small>
-                </div>
-                <button className="table-btn" type="button" onClick={latestFile ? () => handleViewHistory(latestFile) : openUploadSection}>
-                  <i className="fas fa-circle-info" aria-hidden="true" /> View Details
-                </button>
-              </div>
-
-              {latestFile?.latestReviewComment ? (
-                <div className="mt-4 rounded-[1.25rem] border border-blue-100 bg-blue-50/70 p-4">
-                  <span className="section-kicker">Latest Adviser Notes</span>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">{latestFile.latestReviewComment.body}</p>
-                  <small className="mt-3 block text-xs font-semibold text-slate-500">
-                    {latestFile.latestReviewComment.authorName || adviserName} · {formatProjectFileDateTime(String(latestFile.latestReviewComment.createdAt))}
-                  </small>
-                </div>
-              ) : null}
             </article>
           </section>
 

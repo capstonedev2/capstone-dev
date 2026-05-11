@@ -1,6 +1,6 @@
 import '@/styles/student-workspace.css';
 import { StudentHistory } from '@/components/students/student-history';
-import { getStudentDashboardData } from '@/lib/mock/student-dashboard';
+import { getStudentDashboardData } from '@/lib/services/student-workspace';
 
 export const metadata = {
   title: 'ThesisTrack | Student History'

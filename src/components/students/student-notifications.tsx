@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type NotificationType = StudentDashboardData['notifications'][number]['type'];

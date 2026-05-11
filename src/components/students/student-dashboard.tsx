@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { useMemo, useState, useEffect } from 'react';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 const CATEGORY_LABELS: Record<string, string> = {
   Proposal: 'Proposal',
@@ -1031,18 +1031,18 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
             </div>
 
             <div className="student-dashboard-title-block">
-              {realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation') ? (
+              {projectStatusTone !== 'success' || (realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation')) ? (
                 <>
                   <div className="flex items-center gap-3 flex-wrap">
                     <h2 style={{ opacity: 0.55, fontStyle: 'italic' }}>
                       <i className="fas fa-lock" style={{ fontSize: '0.7em', marginRight: '0.5rem', opacity: 0.6 }}></i>
-                      Title not yet available
+                      Project title pending approval
                     </h2>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[0.65em] font-semibold text-amber-700 shadow-sm align-middle">
                       <i className="fas fa-clock"></i>
-                      {realGroup.title === 'Pending Student Submission'
+                      {realGroup?.title === 'Pending Student Submission'
                         ? 'Awaiting Title Submission'
-                        : realGroup.title === 'Pending Concept Presentation'
+                        : realGroup?.title === 'Pending Concept Presentation'
                           ? 'Pending Concept Presentation'
                           : 'Awaiting Adviser Approval'}
                     </span>
@@ -1054,7 +1054,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               ) : (
                 <>
                   <h2>
-                    {realGroup ? realGroup.title : data.project.title}
+                    {realGroup ? realGroup.projectTitle || realGroup.title : data.project.title}
                   </h2>
                   <p className="student-dashboard-intro">
                     {data.project.description ||

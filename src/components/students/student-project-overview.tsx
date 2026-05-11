@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type ChangeEvent, type CSSProperties, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { logout } from '@/lib/mock/auth';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { STUDENT_NAV_ITEMS } from '@/components/students/student-navigation';
 
 function getInitials(value: string) {
@@ -392,27 +392,27 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               <div className="project-overview-summary-heading">
                 <div>
                   <span className="section-kicker">Project Summary</span>
-                  <div className="project-overview-summary-title">
+                  <div className="project-overview-summary-title flex items-center flex-wrap gap-3 mb-2">
                     {projectStatusTone !== 'success' ? (
-                      <div className="flex items-center gap-3 flex-wrap mb-2">
-                        <h2 style={{ opacity: 0.55, fontStyle: 'italic', fontSize: '1.5rem', lineHeight: '1.2' }}>
-                          <i className="fas fa-lock" style={{ fontSize: '0.7em', marginRight: '0.5rem', opacity: 0.6 }}></i>
-                          Title not yet available
+                      <>
+                        <h2 className="text-xl font-medium text-slate-500 italic flex items-center">
+                          <i className="fas fa-lock text-sm mr-2 opacity-60"></i>
+                          Project title pending approval
                         </h2>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[0.65em] font-semibold text-amber-700 shadow-sm align-middle mt-1">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 shadow-sm">
                           <i className="fas fa-clock"></i>
                           Pending Approval
                         </span>
-                      </div>
+                      </>
                     ) : (
-                      <h2>{project.title}</h2>
+                      <h2 className="text-2xl font-bold text-[#003A8F]">{project.title}</h2>
                     )}
                     <Badge label={project.status} tone={projectStatusTone} />
                   </div>
                   {projectStatusTone !== 'success' ? (
-                    <p className="project-overview-summary-copy">Your project title will appear here once the concept proposal has been officially approved.</p>
+                    <p className="project-overview-summary-copy text-sm text-slate-500 max-w-2xl">Your project title will appear here once the concept proposal has been officially approved.</p>
                   ) : (
-                    <p className="project-overview-summary-copy">{project.description}</p>
+                    <p className="project-overview-summary-copy text-sm text-slate-600 max-w-2xl">{project.description}</p>
                   )}
                 </div>
               </div>
@@ -436,21 +436,30 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                 </Link>
               </div>
             </div>
-            <div className="hero-card-side project-overview-summary-side">
-              <div className="project-overview-progress-panel">
-                <span className="section-kicker">Progress</span>
-                <div className="progress-orb" style={progressOrbStyle}>
+            <div className="hero-card-side project-overview-summary-side flex flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-col items-center justify-center text-center gap-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 w-full text-left">Progress</span>
+                <div className="progress-orb my-2" style={progressOrbStyle}>
                   <strong>{project.progressPercentage}%</strong>
                   <span>Progress</span>
                 </div>
-                <div className="project-overview-progress-meta">
-                  <span>Current milestone</span>
-                  <strong>{project.currentMilestone}</strong>
-                </div>
+                {project.progressPercentage === 0 && (
+                  <p className="text-xs text-slate-500 max-w-[200px] leading-relaxed">No milestone progress yet. Start by opening milestones.</p>
+                )}
               </div>
-              <div className="hero-facts project-overview-summary-facts">
-                <div><span>Upcoming deadline</span><strong>{project.upcomingDeadline}</strong></div>
-                <div><span>Repository status</span><strong>{project.repositoryStatus}</strong></div>
+              <div className="grid grid-cols-1 gap-3.5 pt-4 border-t border-slate-100 w-full">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-500">Current milestone</span>
+                  <strong className="text-slate-800 text-right">{project.currentMilestone || 'Not started'}</strong>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-500">Upcoming deadline</span>
+                  <strong className="text-slate-800 text-right">{project.upcomingDeadline || 'Not set'}</strong>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-500">Repository status</span>
+                  <strong className="text-slate-800 text-right">{project.repositoryStatus || 'Pending'}</strong>
+                </div>
               </div>
             </div>
           </section>
@@ -463,13 +472,16 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                   <h3>Academic and implementation information</h3>
                 </div>
               </div>
-              <div className="detail-grid project-overview-detail-grid">
-                {details.map((item) => (
-                  <div key={item.label} className="detail-item project-overview-detail-item">
-                    <span>{item.label}</span>
-                    <strong>{item.value || 'Not available'}</strong>
-                  </div>
-                ))}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-2">
+                {details.map((item) => {
+                  const isPending = !item.value || item.value === 'Not assigned' || item.value === 'Pending' || item.value === 'None';
+                  return (
+                    <div key={item.label} className="flex flex-col gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-4 shadow-sm transition-colors hover:border-slate-200">
+                      <span className="text-xs font-medium uppercase tracking-wider text-slate-500">{item.label}</span>
+                      <strong className={`text-sm ${isPending ? 'text-slate-400 font-medium italic' : 'text-slate-800 font-semibold'}`}>{isPending ? 'Not available' : item.value}</strong>
+                    </div>
+                  );
+                })}
               </div>
             </article>
 
@@ -505,12 +517,15 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               </div>
 
               <div className="stack-list">
-                <article className="stack-card project-overview-panel-card">
-                  <div className="stack-card-head">
-                    <strong>Adviser</strong>
-                    <Badge label={project.adviser ? 'Assigned' : 'Pending'} tone={project.adviser ? 'success' : 'warning'} />
+                <article className="stack-card project-overview-panel-card rounded-xl border border-slate-100 bg-white shadow-sm p-5">
+                  <div className="stack-card-head flex items-center justify-between mb-2">
+                    <strong className="text-sm font-semibold text-slate-800">Adviser</strong>
+                    <Badge 
+                      label={project.adviser && project.adviser !== 'Not assigned' ? 'Assigned' : 'Pending Assignment'} 
+                      tone={project.adviser && project.adviser !== 'Not assigned' ? 'success' : 'warning'} 
+                    />
                   </div>
-                  <p>{project.adviser || 'No adviser assigned yet.'}</p>
+                  <p className="text-sm text-slate-600">{project.adviser && project.adviser !== 'Not assigned' ? project.adviser : 'No adviser assigned yet.'}</p>
                 </article>
               </div>
             </article>
@@ -683,13 +698,13 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-10 text-center">
-                    <strong className="block text-base text-slate-800">No academic activities yet.</strong>
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      Start building the activity record by logging the first presentation, exhibit, or workshop.
-                    </p>
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-6 text-left">
+                    <div>
+                      <strong className="block text-sm font-semibold text-slate-800">No academic activities yet</strong>
+                      <p className="mt-1 text-sm text-slate-500">Log your first presentation, exhibit, or workshop.</p>
+                    </div>
                     <button
-                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-brand-dark"
+                      className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#003A8F] px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[#1E40AF]"
                       type="button"
                       onClick={openAcademicActivityModal}
                     >
@@ -746,13 +761,13 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-10 text-center">
-                    <strong className="block text-base text-slate-800">Upload your first evidence.</strong>
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      Certificates and photo evidence will appear here once activities are logged with supporting files.
-                    </p>
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-6 text-left">
+                    <div>
+                      <strong className="block text-sm font-semibold text-slate-800">Upload your first evidence</strong>
+                      <p className="mt-1 text-sm text-slate-500">Certificates and photo evidence will appear here.</p>
+                    </div>
                     <button
-                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-brand-dark"
+                      className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#003A8F] px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[#1E40AF]"
                       type="button"
                       onClick={openAcademicActivityModal}
                     >
@@ -819,218 +834,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               ) : null}
             </div>
 
-          <section className="hidden" aria-hidden="true">
-            <article className="surface-card flex h-full flex-col gap-5 rounded-2xl border border-slate-200 !bg-white !p-6 shadow-soft transition duration-200 hover:border-slate-300 hover:shadow-card">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Events</span>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold text-slate-950">Presentation records</h3>
-                    <p className="text-sm leading-6 text-slate-600">
-                      Logged symposiums, defenses, and research showcases connected to the project record.
-                    </p>
-                  </div>
-                </div>
-                <span className="inline-flex h-12 min-w-12 items-center justify-center rounded-full border border-blue-100 bg-blue-50 px-3 text-base font-bold text-brand">
-                  {presentations.length}
-                </span>
-              </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <MetaStat label="Total events" value={presentations.length} />
-                <MetaStat label="Highest scope" value={highestScope} />
-              </div>
-
-              {recentEvents.length ? (
-                <div className="space-y-3">
-                  {recentEvents.map((activity) => (
-                    <article
-                      key={activity.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50/75 p-4 transition duration-200 hover:border-blue-200 hover:bg-white"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <h4 className="text-sm font-semibold text-slate-950">{activity.eventName}</h4>
-                          <p className="text-sm leading-6 text-slate-600">
-                            {activity.description || 'No event description provided yet.'}
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <InfoPill label={activity.eventType} tone="info" icon="fa-presentation-screen" />
-                          <InfoPill label={activity.scope} tone={getScopeTone(activity.scope)} icon="fa-globe" />
-                          {activity.activityStatus ? (
-                            <InfoPill
-                              label={activity.activityStatus}
-                              tone={getStatusTone(activity.activityStatus)}
-                              icon="fa-circle-check"
-                            />
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <MetaStat label="Date" value={activity.dateLabel} />
-                        <MetaStat label="Location" value={activity.venue || 'To be announced'} />
-                        <MetaStat label="Scope" value={activity.scope} />
-                        <MetaStat label="Event type" value={activity.eventType} />
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-sm text-slate-600">
-                  <strong className="block text-base text-slate-900">No academic activities recorded yet.</strong>
-                  <p className="mt-2 leading-6">
-                    Completed presentations and exhibits will appear here once the group adds the first academic activity.
-                  </p>
-                  <button
-                    className="mt-4 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-brand transition duration-200 hover:border-blue-300 hover:bg-blue-100"
-                    type="button"
-                    onClick={openAcademicActivityModal}
-                  >
-                    <i className="fas fa-plus" aria-hidden="true" />
-                    Add Academic Activity
-                  </button>
-                </div>
-              )}
-            </article>
-
-            <article className="surface-card flex h-full flex-col gap-5 rounded-2xl border border-slate-200 !bg-white !p-6 shadow-soft transition duration-200 hover:border-slate-300 hover:shadow-card">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Certificates / Evidence
-                  </span>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold text-slate-950">Supporting proof</h3>
-                    <p className="text-sm leading-6 text-slate-600">
-                      Certificate attachments and photo evidence tied to recorded project activities.
-                    </p>
-                  </div>
-                </div>
-                <span className="inline-flex h-12 min-w-12 items-center justify-center rounded-full border border-blue-100 bg-blue-50 px-3 text-base font-bold text-brand">
-                  {certificateCount + presentationPhotoCount}
-                </span>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <MetaStat label="Certificates" value={certificateCount} />
-                <MetaStat label="Photos recorded" value={presentationPhotoCount} />
-              </div>
-
-              {evidenceRecords.length ? (
-                <div className="space-y-3">
-                  {evidenceRecords.map((activity) => (
-                    <article
-                      key={`${activity.id}-evidence`}
-                      className="rounded-2xl border border-slate-200 bg-slate-50/75 p-4 transition duration-200 hover:border-blue-200 hover:bg-white"
-                    >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="flex min-w-0 gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-brand">
-                            <i
-                              className={`fas ${activity.certificateFile ? 'fa-file-lines' : 'fa-images'}`}
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <div className="min-w-0 space-y-1">
-                            <h4 className="truncate text-sm font-semibold text-slate-950">
-                              {getEvidenceFileLabel(activity)}
-                            </h4>
-                            <p className="text-sm font-medium text-slate-700">{activity.eventName}</p>
-                            <p className="text-sm leading-6 text-slate-600">{getEvidenceNote(activity)}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2 sm:justify-end">
-                          <InfoPill
-                            label={activity.certificateFile ? 'Certificate' : 'Photo evidence'}
-                            tone={activity.certificateFile ? 'success' : 'info'}
-                            icon={activity.certificateFile ? 'fa-file-circle-check' : 'fa-camera'}
-                          />
-                          <InfoPill label={getEvidenceFileType(activity)} tone="neutral" icon="fa-folder-open" />
-                          {activity.activityStatus ? (
-                            <InfoPill
-                              label={activity.activityStatus}
-                              tone={getStatusTone(activity.activityStatus)}
-                              icon="fa-circle-check"
-                            />
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <MetaStat label="Photo count" value={activity.photoCount} />
-                        <MetaStat label="Date" value={activity.dateLabel} />
-                        <MetaStat label="Associated event" value={activity.eventName} />
-                        <MetaStat
-                          label="Status"
-                          value={activity.activityStatus || (activity.certificateFile ? 'Approved evidence' : 'Evidence recorded')}
-                        />
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-sm text-slate-600">
-                  <strong className="block text-base text-slate-900">No certificates uploaded yet</strong>
-                  <p className="mt-2 leading-6">
-                    Upload certificates or event photos so the record stays complete for adviser and panel review.
-                  </p>
-                  <button
-                    className="mt-4 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-brand transition duration-200 hover:border-blue-300 hover:bg-blue-100"
-                    type="button"
-                    onClick={openAcademicActivityModal}
-                  >
-                    <i className="fas fa-plus" aria-hidden="true" />
-                    Add Academic Activity
-                  </button>
-                </div>
-              )}
-            </article>
-
-            <article className="surface-card project-overview-evidence-card">
-              <div className="project-overview-evidence-head">
-                <div>
-                  <span className="section-kicker">Recognitions</span>
-                  <h3>Awards and distinctions</h3>
-                </div>
-                <span className="project-overview-evidence-count">{recognizedEvents}</span>
-              </div>
-              <p>Recognitions help summarize the project’s academic visibility without expanding the page into a separate dashboard.</p>
-              <div className="project-overview-evidence-metrics">
-                <div>
-                  <span>Recognitions</span>
-                  <strong>{recognizedEvents}</strong>
-                </div>
-                <div>
-                  <span>Latest scope</span>
-                  <strong>{latestRecognition ? latestRecognition.scope : 'No awards yet'}</strong>
-                </div>
-              </div>
-              {latestRecognition ? (
-                <div className="project-overview-evidence-latest">
-                  <small>Latest recognition</small>
-                  <strong>{latestRecognition.achievement}</strong>
-                  <p>{latestRecognition.dateLabel}</p>
-                  <span className="project-overview-evidence-meta">{getRecognitionMeta(latestRecognition)}</span>
-                  <div className="chip-row">
-                    <Badge label="Achievement" tone="accent" />
-                    <Badge label={latestRecognition.scope} tone={getScopeTone(latestRecognition.scope)} />
-                    {latestRecognition.activityStatus ? <Badge label={latestRecognition.activityStatus} tone={getStatusTone(latestRecognition.activityStatus)} /> : null}
-                  </div>
-                </div>
-              ) : (
-                <div className="project-overview-evidence-empty">
-                  <strong>No recognitions recorded yet</strong>
-                  <p>Recognition entries will appear after the group logs an awarded or featured presentation event.</p>
-                  <button className="project-overview-evidence-link page-strip-action" type="button" onClick={openAcademicActivityModal}>
-                    Add Academic Activity
-                  </button>
-                </div>
-              )}
-            </article>
-          </section>
           </section>
         </div>
 

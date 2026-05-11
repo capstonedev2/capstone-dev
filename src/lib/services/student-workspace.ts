@@ -364,7 +364,7 @@ export type StudentDashboardData = {
 };
 
 
-function getEmptyDashboardData(): StudentDashboardData {
+function getDefaultWorkspaceData(): StudentDashboardData {
   const now = new Date().toISOString();
   return {
     profile: {
@@ -402,7 +402,7 @@ function getEmptyDashboardData(): StudentDashboardData {
 }
 
 export async function getStudentDashboardData() {
-  const data = getEmptyDashboardData();
+  const data = getDefaultWorkspaceData();
 
   try {
     const { getAuthenticatedUser } = await import('@/lib/auth');
@@ -515,10 +515,27 @@ export async function getStudentDashboardData() {
           const approvedTitleProject = await prisma.project.findFirst({
             where: {
               groupId: group.id,
-              status: 'APPROVED'
+              status: 'APPROVED',
+              submissions: {
+                some: {}
+              }
             },
             orderBy: { updatedAt: 'desc' }
           });
+
+          let adviserName = 'Not assigned';
+          if (group.userId) {
+            try {
+              const adviserUser = await prisma.user.findUnique({
+                where: { id: group.userId }
+              });
+              if (adviserUser && adviserUser.name) {
+                adviserName = adviserUser.name;
+              }
+            } catch (e) {
+              console.error('Failed to fetch adviser name:', e);
+            }
+          }
 
           data.project = {
             ...data.project,
@@ -526,7 +543,9 @@ export async function getStudentDashboardData() {
             title: approvedTitleProject?.title || group.projectTitle || data.project.title,
             description: approvedTitleProject?.abstract || data.project.description,
             groupName: group.title || data.project.groupName,
-            adviser: data.profile.adviser || data.project.adviser,
+            adviser: adviserName !== 'Not assigned' ? adviserName : (data.profile.adviser || data.project.adviser),
+            program: group.dept || data.project.program,
+            department: group.department || data.project.department,
           };
           data.titleRegistration.proposedTitle = approvedTitleProject?.title || data.titleRegistration.proposedTitle;
           data.titleRegistration.registrationStatus = approvedTitleProject ? 'Approved' : 'Pending';

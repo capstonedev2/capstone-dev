@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { logout } from '@/lib/mock/auth';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { STUDENT_NAV_ITEMS, STUDENT_NAV_SECTIONS } from '@/components/students/student-navigation';
 import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 

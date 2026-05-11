@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { type ChangeEvent, type FormEvent, useEffect, useMemo, useState } from 'react';
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 const PROFILE_STORAGE_PREFIX = 'studentProfileDraft';
 const MAX_PROFILE_IMAGE_SIZE = 2 * 1024 * 1024;
