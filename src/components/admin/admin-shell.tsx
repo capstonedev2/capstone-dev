@@ -14,6 +14,7 @@ const ADMIN_NAV_ITEMS = [
   { key: 'approvals', href: '/admin/approvals', label: 'Approvals & Monitoring', icon: 'fa-list-check' },
   { key: 'technology-transfer', href: '/admin/technology-transfer', label: 'Technology Transfer', icon: 'fa-handshake-angle' },
   { key: 'reports', href: '/admin/reports', label: 'Reports', icon: 'fa-chart-bar' },
+  { key: 'final-repository-approval', href: '/admin/final-repository-approval', label: 'Final Repository Approval', icon: 'fa-clipboard-check' },
   { key: 'repository', href: '/admin/repository', label: 'Documents Repository', icon: 'fa-folder' },
   { key: 'announcements', href: '/admin/announcements', label: 'Announcements', icon: 'fa-bullhorn' }
 ] as const;

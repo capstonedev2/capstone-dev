@@ -26,7 +26,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: 'ThesisTrack',
-  description: 'Inventory, progress monitoring, and technology transfer system.',
+  description: 'Higher Education Institutions',
   icons: {
     icon: SYSTEM_LOGO_SRC
   }

@@ -289,7 +289,7 @@ const DEFAULT_NAVIGATION: BrandingNavigationSettings = {
 
 const DEFAULT_SHELL: BrandingShellSettings = {
   navbarTitle: 'Thesis Track',
-  navbarSubtitle: 'Inventory, progress monitoring, and technology transfer system.',
+  navbarSubtitle: 'Higher Education Institutions',
   sidebarKicker: 'Technical Control',
   sidebarTitle: 'System Admin',
   sidebarDescription: 'Platform configuration, security, backups, and access control',
@@ -376,7 +376,7 @@ export const DEFAULT_BRANDING: BrandingSettings = {
   version: BRANDING_VERSION,
   systemName: 'Thesis Track',
   systemShortName: 'TT',
-  tagline: 'Inventory, progress monitoring, and technology transfer system.',
+  tagline: 'Higher Education Institutions',
   themePreset: 'academic-blue',
   colors: DEFAULT_COLORS,
   derivedColors: FALLBACK_DERIVED_COLORS,
@@ -703,7 +703,7 @@ function sanitizeShellSettings(value: unknown): BrandingShellSettings {
 
   return {
     navbarTitle: readStringValue(record.navbarTitle, DEFAULT_SHELL.navbarTitle),
-    navbarSubtitle: readStringValue(record.navbarSubtitle, DEFAULT_SHELL.navbarSubtitle),
+    navbarSubtitle: DEFAULT_SHELL.navbarSubtitle,
     sidebarKicker: readStringValue(record.sidebarKicker, DEFAULT_SHELL.sidebarKicker),
     sidebarTitle: readStringValue(record.sidebarTitle, DEFAULT_SHELL.sidebarTitle),
     sidebarDescription: readStringValue(record.sidebarDescription, DEFAULT_SHELL.sidebarDescription),
@@ -1017,7 +1017,7 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
     version: BRANDING_VERSION,
     systemName: String(value.systemName ?? DEFAULT_BRANDING.systemName).trim() || DEFAULT_BRANDING.systemName,
     systemShortName: String(value.systemShortName ?? DEFAULT_BRANDING.systemShortName).trim() || DEFAULT_BRANDING.systemShortName,
-    tagline: String(value.tagline ?? DEFAULT_BRANDING.tagline).trim() || DEFAULT_BRANDING.tagline,
+    tagline: DEFAULT_BRANDING.tagline,
     themePreset: String(value.themePreset ?? DEFAULT_BRANDING.themePreset).trim() || DEFAULT_BRANDING.themePreset,
     colors,
     derivedColors,

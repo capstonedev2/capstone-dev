@@ -335,7 +335,7 @@ export function SystemAdminDashboard() {
               <div className="admin-list">
                 {[
                   ['System Admin', 'RBAC, user provisioning, settings, logs, backups, maintenance, branding'],
-                  ['Research Head', 'User monitoring, projects, approvals, reports, technology transfer oversight'],
+                  ['Research Head', 'User monitoring, projects, approvals, reports'],
                   ['Program Head', 'Adviser account creation and department-level academic monitoring']
                 ].map(([role, scope]) => (
                   <div key={role} className="admin-list-item">
@@ -1029,7 +1029,7 @@ export function SystemAdminUsers() {
 export function SystemAdminRoles() {
   const rows = [
     ['System Administrator', 'Full system control, RBAC, settings, branding, logs, backups, maintenance', 'No research monitoring workflow ownership'],
-    ['Research Head', 'View users, projects, analytics, approvals, reports, technology transfer', 'No technical settings, no Program Head or Adviser creation'],
+    ['Research Head', 'View users, projects, analytics, approvals, reports', 'No technical settings, no Program Head or Adviser creation'],
     ['Program Head', 'Create adviser accounts, monitor students and adviser performance in department', 'No system settings or cross-role management'],
     ['Student', 'Self-register, submit projects, upload files, track progress', 'No admin access'],
     ['Adviser / Panel', 'Academic review, guidance, evaluations, defense workflow', 'No system-level access'],
@@ -1138,7 +1138,7 @@ export function SystemAdminBranding() {
                   <i className="fas fa-graduation-cap"></i>
                 </span>
                 <h2>Thesis Track</h2>
-                <p>Inventory, progress monitoring, and technology transfer system.</p>
+                <p>Higher Education Institutions</p>
                 <div className="admin-action-row">
                   <span className="admin-inline-badge">#003A8F</span>
                   <span className="admin-inline-badge">#F6BE00</span>

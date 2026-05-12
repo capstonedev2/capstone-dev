@@ -34,22 +34,15 @@ const YEAR_GROWTH = [
 
 const BRIEFING_PACKAGES = [
   { title: 'Project inventory report', description: 'Filtered project records with department, adviser, status, year, and document counts.', action: 'Export' },
-  { title: 'Progress monitoring report', description: 'Milestone progress, delayed records, at-risk projects, and pending approvals.', action: 'Export' },
-  { title: 'Technology transfer report', description: 'Deployable projects, partner matches, utilization status, and impact notes.', action: 'Export' }
+  { title: 'Progress monitoring report', description: 'Milestone progress, delayed records, at-risk projects, and pending approvals.', action: 'Export' }
 ];
 
 const ADVISER_TABLE = [
-  { adviser: 'Dr. Ricardo Cruz', department: 'IT', supervised: 12, completionRate: '92%', avgScore: '89%', outputs: 5 },
-  { adviser: 'Prof. Maria Ramos', department: 'MET', supervised: 8, completionRate: '85%', avgScore: '86%', outputs: 3 },
-  { adviser: 'Dr. Anna Reyes', department: 'TCM', supervised: 6, completionRate: '88%', avgScore: '87%', outputs: 2 },
-  { adviser: 'Prof. Jose Lopez', department: 'ESM', supervised: 9, completionRate: '82%', avgScore: '84%', outputs: 4 },
-  { adviser: 'Dr. Elena Aquino', department: 'NAME', supervised: 7, completionRate: '86%', avgScore: '85%', outputs: 3 }
-];
-
-const TRANSFER_SHOWCASE = [
-  { department: 'IT', status: 'Deployed', title: 'AI Inventory System', note: 'Operational pilot deployed with TechCorp Inc. for inventory visibility and audit automation.', adoptionDate: 'January 2024', impact: '5/5' },
-  { department: 'MET', status: 'Testing', title: 'Smart Energy Monitor', note: 'Validation phase underway with GreenEnergy PH ahead of a broader sustainability trial.', adoptionDate: 'February 2024', impact: '4/5' },
-  { department: 'NAME', status: 'Operational', title: 'Marine Pollution Detector', note: 'OceanTech Inc. has integrated the detector into a live environmental monitoring workflow.', adoptionDate: 'December 2023', impact: '5/5' }
+  { adviser: 'Dr. Ricardo Cruz', department: 'IT', supervised: 12, completionRate: '92%', avgScore: '89%' },
+  { adviser: 'Prof. Maria Ramos', department: 'MET', supervised: 8, completionRate: '85%', avgScore: '86%' },
+  { adviser: 'Dr. Anna Reyes', department: 'TCM', supervised: 6, completionRate: '88%', avgScore: '87%' },
+  { adviser: 'Prof. Jose Lopez', department: 'ESM', supervised: 9, completionRate: '82%', avgScore: '84%' },
+  { adviser: 'Dr. Elena Aquino', department: 'NAME', supervised: 7, completionRate: '86%', avgScore: '85%' }
 ];
 
 export function AdminReports() {
@@ -77,7 +70,7 @@ export function AdminReports() {
                       Executive reporting center for school-wide capstone performance.
                     </h2>
                     <p className="admin-note" style={{ marginTop: '0.85rem', fontSize: '0.92rem' }}>
-                      Monitor completion movement, adviser productivity, and technology transfer readiness without
+                      Monitor completion movement and adviser productivity without
                       jumping across separate views.
                     </p>
                   </div>
@@ -153,7 +146,6 @@ export function AdminReports() {
                   <select className="admin-toolbar-select" defaultValue="Project Inventory Report">
                     <option>Project Inventory Report</option>
                     <option>Progress Monitoring Report</option>
-                    <option>Technology Transfer Report</option>
                   </select>
                 </div>
                 <div className="span-3 admin-toolbar-actions">
@@ -195,12 +187,7 @@ export function AdminReports() {
               <span className="admin-note">Active advisers supporting 987 students across five departments.</span>
               <span className="status-badge status-review">7 near capacity</span>
             </article>
-            <article className="admin-kpi-card">
-              <span className="admin-kpi-label">Transfer-Ready Outputs</span>
-              <strong className="admin-kpi-value">23</strong>
-              <span className="admin-note">Deployable projects with external partner interest or pilot activity.</span>
-              <span className="status-badge status-success">7 new this term</span>
-            </article>
+
           </section>
 
           <div className="admin-split-grid">
@@ -312,7 +299,7 @@ export function AdminReports() {
                     Export Center
                   </span>
                   <h3>Ready-made Research Head reports</h3>
-                  <p>Choose user, project, progress, or technology transfer outputs for council meetings and audits.</p>
+                  <p>Choose user, project, or progress outputs for council meetings and audits.</p>
                 </div>
                 <div className="status-badge status-review">4 presets</div>
               </div>
@@ -343,7 +330,7 @@ export function AdminReports() {
                   Adviser Productivity
                 </span>
                 <h3>Top performing advisers</h3>
-                <p>Ranked by completion strength, student outcomes, and transfer participation.</p>
+                <p>Ranked by completion strength and student outcomes.</p>
               </div>
               <div className="status-badge status-review">Updated weekly</div>
             </div>
@@ -356,7 +343,6 @@ export function AdminReports() {
                     <th>Projects Supervised</th>
                     <th>Completion Rate</th>
                     <th>Avg. Student Score</th>
-                    <th>Transfer Outputs</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -367,7 +353,6 @@ export function AdminReports() {
                       <td>{row.supervised}</td>
                       <td>{row.completionRate}</td>
                       <td>{row.avgScore}</td>
-                      <td>{row.outputs}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -375,24 +360,7 @@ export function AdminReports() {
             </div>
           </section>
 
-          <section className="admin-grid-3">
-            {TRANSFER_SHOWCASE.map((item) => (
-              <article key={item.title} className="admin-feature-card">
-                <div className="admin-feature-meta">
-                  <span className="dept-badge">{item.department}</span>
-                  <span className="status-badge status-review">{item.status}</span>
-                </div>
-                <div>
-                  <strong>{item.title}</strong>
-                  <p className="admin-note" style={{ marginTop: '0.35rem' }}>{item.note}</p>
-                </div>
-                <div className="admin-feature-meta">
-                  <span>Adoption Date {item.adoptionDate}</span>
-                  <strong>Impact {item.impact}</strong>
-                </div>
-              </article>
-            ))}
-          </section>
+
         </div>
       </AdminShell>
 
@@ -415,7 +383,6 @@ export function AdminReports() {
                   <select defaultValue="Project Inventory Report">
                     <option>Project Inventory Report</option>
                     <option>Progress Monitoring Report</option>
-                    <option>Technology Transfer Report</option>
                   </select>
                 </div>
                 <div className="form-group">

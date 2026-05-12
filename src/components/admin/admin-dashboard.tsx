@@ -189,13 +189,7 @@ export function AdminDashboard() {
       trend: `${scopedCompleted} completed records`,
       icon: 'fa-diagram-project'
     },
-    {
-      title: 'Technology Transfer',
-      value: scopedDeployed.toString(),
-      subtitle: 'Projects endorsed for pilot use, partner adoption, or deployment support.',
-      trend: `${deploymentRate}% deployment rate`,
-      icon: 'fa-rocket'
-    },
+
     {
       title: 'Pending Approvals',
       value: pendingApprovals.toString(),
@@ -494,7 +488,6 @@ export function AdminDashboard() {
                 <div className="dashboard-quick-actions">
                   <Link className="btn btn-outline" href="/admin/reports"><i className="fas fa-chart-bar"></i> Open Reports</Link>
                   <Link className="btn btn-outline" href="/admin/projects"><i className="fas fa-folder-open"></i> Project Inventory</Link>
-                  <Link className="btn btn-outline" href="/admin/technology-transfer"><i className="fas fa-handshake-angle"></i> Technology Transfer</Link>
                   <Link className="btn btn-outline" href="/admin/announcements"><i className="fas fa-bullhorn"></i> Announcements</Link>
                   <Link className="btn btn-outline" href="/admin/approvals"><i className="fas fa-list-check"></i> Approval Queue</Link>
                 </div>

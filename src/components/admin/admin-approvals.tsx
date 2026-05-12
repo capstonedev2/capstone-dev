@@ -48,29 +48,13 @@ const APPROVAL_RECORDS = [
     milestone: 'Revision Compliance',
     progress: 44,
     notes: 'Adviser comments remain unresolved on methodology scope.'
-  },
-  {
-    id: 'APR-2026-021',
-    title: 'Sustainable Agriculture IoT System',
-    department: 'ESM',
-    adviser: 'Prof. Jose Lopez',
-    type: 'Transfer endorsement',
-    status: 'Under Review',
-    statusClass: 'status-info',
-    submittedAt: 'Apr 29, 2026',
-    dueIn: '2 days',
-    risk: 'Normal',
-    milestone: 'Technology Transfer',
-    progress: 82,
-    notes: 'Partner acceptance letter attached for Research Head routing.'
   }
 ];
 
 const MILESTONE_ROWS = [
   { label: 'Proposal Clearance', completed: 42, pending: 4, progress: 91 },
   { label: 'Ethics / Similarity Review', completed: 31, pending: 9, progress: 78 },
-  { label: 'Final Manuscript', completed: 24, pending: 12, progress: 67 },
-  { label: 'Technology Transfer Routing', completed: 13, pending: 8, progress: 62 }
+  { label: 'Final Manuscript', completed: 24, pending: 12, progress: 67 }
 ];
 
 const STATUS_OPTIONS = ['All Statuses', 'Pending Approval', 'Under Review', 'Needs Revision'];
