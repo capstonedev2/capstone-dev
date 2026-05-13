@@ -57,9 +57,6 @@ const limitedStudentRouteLabels = [
   { href: '/students/milestones', label: 'Milestones' },
   { href: '/students/schedule', label: 'Schedule' },
   { href: '/students/title-submission', label: 'Title Submission' },
-  { href: '/students/technology-transfer', label: 'Technology Transfer' },
-  { href: '/students/upload-documents', label: 'Document Uploads' },
-  { href: '/students/presentations-achievements', label: 'Presentations and Achievements' },
   { href: '/students/timeline', label: 'Timeline' },
   { href: '/students/notifications', label: 'Notifications' },
   { href: '/students/history', label: 'History' }
