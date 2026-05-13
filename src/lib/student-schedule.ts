@@ -1,4 +1,4 @@
-import type { StudentDashboardData } from '@/lib/mock/student-dashboard';
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 export type ScheduleItemType = 'Meeting' | 'Deadline' | 'Event' | 'Reminder' | 'Consultation';
 export type ScheduleItemStatus = 'upcoming' | 'today' | 'overdue' | 'completed';
