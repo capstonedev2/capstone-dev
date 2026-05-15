@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { logout } from '@/lib/mock/auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { STUDENT_NAV_ITEMS, STUDENT_NAV_SECTIONS } from '@/components/students/student-navigation';
-import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 
 const SIDEBAR_STORAGE_KEY = 'studentShellSidebarCollapsed';
 const STUDENT_THEME_STORAGE_KEY = 'studentWorkspaceTheme';
@@ -1448,6 +1447,10 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     : sidebarCollapsed
       ? 'Expand sidebar'
       : 'Collapse sidebar';
+  const activeNavItem = STUDENT_NAV_ITEMS.find((item) => matchesRoute(pathname, item.href));
+  const navbarTitle = activeNavItem?.key === 'dashboard'
+    ? 'Student Dashboard'
+    : activeNavItem?.label ?? 'Student Workspace';
 
   return (
     <div
@@ -1465,16 +1468,14 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
           >
             <i
               aria-hidden="true"
-              className={`fas ${isMobile ? (sidebarOpen ? 'fa-xmark' : 'fa-bars') : sidebarCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}
+              className={`fas ${isMobile ? (sidebarOpen ? 'fa-xmark' : 'fa-bars') : sidebarCollapsed ? 'fa-chevron-right' : 'fa-bars'}`}
             />
           </button>
 
-          <PortalShellBrand
-            className="student-shell-brand"
-            href="/students/dashboard"
-            icon="fa-graduation-cap"
-            title="Thesis Track"
-          />
+          <div className="student-navbar-title" aria-label="Current page">
+            <span className="student-navbar-title-kicker">ThesisTrack</span>
+            <strong>{navbarTitle}</strong>
+          </div>
         </div>
 
         <div className="student-global-navbar-actions">
@@ -1496,7 +1497,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
               </span>
               <span className="notification-trigger-copy">
                 <strong>Notifications</strong>
-                <small>{unreadNotificationsCount ? `${unreadNotificationsCount} unread` : 'All caught up'}</small>
+                <small>{unreadNotificationsCount ? `${unreadNotificationsCount} unread updates` : 'All caught up'}</small>
               </span>
               {unreadNotificationsCount ? <span className="notification-trigger-count" style={{ backgroundColor: '#ef4444', color: 'white' }}>{unreadNotificationsCount}</span> : null}
             </button>
@@ -1733,16 +1734,18 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Student Portal</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className="fas fa-graduation-cap" />
-              <span>Student</span>
-              <strong>Workspace</strong>
+            <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
+              <img
+                alt="ThesisTrack logo"
+                className="system-brand-logo"
+                src="/System%20Logo/logo-transparent.png"
+              />
+              <span className="system-brand-name">
+                <span>Thesis</span>
+                <strong>Track</strong>
+              </span>
+              <span className="system-brand-subtitle">Higher Education Institutions</span>
             </div>
-            <p>
-              {isLimitedWorkspace
-                ? 'Profile and repository access are available while project assignment is pending.'
-                : 'Milestones, submissions, and project planning organized in one consistent academic workspace.'}
-            </p>
           </div>
           <span className="user-badge">
             <i aria-hidden="true" className="fas fa-id-card" />

@@ -1362,6 +1362,612 @@ button {
     color: var(--danger);
 }
 
+/* Final student shell chrome override: Edusync-style compact bar and collapsible rail. */
+.student-shell {
+    --sidebar-width: 248px !important;
+    --student-shell-topbar-height: 38px !important;
+    padding-top: var(--student-shell-topbar-height) !important;
+}
+
+.student-shell .student-global-navbar {
+    position: fixed !important;
+    inset: 0 0 auto 0 !important;
+    z-index: 1100 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #303b3d !important;
+    box-shadow: none !important;
+}
+
+.student-shell .student-global-navbar-main {
+    display: flex !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    height: 38px !important;
+    padding: 0 !important;
+}
+
+.student-shell .student-shell-brand {
+    display: none !important;
+}
+
+.student-shell .student-shell-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #e5e7eb !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.student-shell .student-shell-toggle:hover,
+.student-shell .student-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.09) !important;
+    color: #ffffff !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.student-shell .student-shell-toggle i {
+    color: currentColor !important;
+    font-size: 0.95rem !important;
+}
+
+.student-shell .student-global-navbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.35rem !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    margin-left: auto !important;
+    padding: 0 0.6rem 0 0 !important;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    min-height: 32px !important;
+    height: 32px !important;
+    border: 0 !important;
+    border-radius: 0.45rem !important;
+    background: transparent !important;
+    color: #f8fafc !important;
+    box-shadow: none !important;
+}
+
+.student-shell .notification-trigger:hover,
+.student-shell .profile-pill:hover {
+    background: rgba(255, 255, 255, 0.09) !important;
+}
+
+.student-shell .notification-trigger-copy span,
+.student-shell .profile-nav-btn-copy span,
+.student-shell .profile-nav-btn-copy strong,
+.student-shell .profile-role,
+.student-shell .notification-bell {
+    color: #f8fafc !important;
+}
+
+.student-shell .student-global-sidebar {
+    position: fixed !important;
+    top: 38px !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    width: 248px !important;
+    max-width: 248px !important;
+    height: calc(100vh - 38px) !important;
+    padding: 0 !important;
+    border-right: 1px solid #dbe3ef !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    transform: translateX(0) !important;
+}
+
+.student-shell .student-global-main {
+    width: calc(100% - 248px) !important;
+    max-width: calc(100% - 248px) !important;
+    margin-left: 248px !important;
+}
+
+.student-shell.is-sidebar-collapsed {
+    --sidebar-width: 72px !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar {
+    width: 72px !important;
+    max-width: 72px !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-main {
+    width: calc(100% - 72px) !important;
+    max-width: calc(100% - 72px) !important;
+    margin-left: 72px !important;
+}
+
+.student-shell .sidebar-header {
+    min-height: 114px !important;
+    padding: 0.85rem 1rem 1rem !important;
+    border-bottom: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+}
+
+.student-shell .brand-mark,
+.student-shell .brand-mark span,
+.student-shell .brand-mark strong,
+.student-shell .sidebar-context-kicker,
+.student-shell .sidebar-nav-heading,
+.student-shell .sidebar-link,
+.student-shell .sidebar-link-label {
+    color: #0f172a !important;
+}
+
+.student-shell .brand-mark i,
+.student-shell .sidebar-link-icon {
+    color: #475569 !important;
+}
+
+.student-shell .sidebar-nav {
+    padding: 1rem 1rem 1.25rem !important;
+    gap: 1.15rem !important;
+    background: #ffffff !important;
+}
+
+.student-shell .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    margin: 0 0 0.55rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+}
+
+.student-shell .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: #dbe3ef !important;
+}
+
+.student-shell .sidebar-link {
+    min-height: 38px !important;
+    padding: 0 0.8rem !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.student-shell .sidebar-link:hover {
+    background: #eef4ff !important;
+}
+
+.student-shell .sidebar-link.active {
+    background: #2f63e6 !important;
+    color: #ffffff !important;
+}
+
+.student-shell .sidebar-link.active .sidebar-link-icon,
+.student-shell .sidebar-link.active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header {
+    min-height: 54px !important;
+    padding: 0.75rem 0 !important;
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .brand-mark {
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .brand-mark i {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-context-kicker,
+.student-shell.is-sidebar-collapsed .brand-mark span,
+.student-shell.is-sidebar-collapsed .brand-mark strong,
+.student-shell.is-sidebar-collapsed .sidebar-header-copy p,
+.student-shell.is-sidebar-collapsed .user-badge,
+.student-shell.is-sidebar-collapsed .sidebar-link-label,
+.student-shell.is-sidebar-collapsed .nav-count {
+    display: none !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav {
+    padding: 0.55rem 0.75rem 1rem !important;
+    gap: 1rem !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading {
+    justify-content: center !important;
+    gap: 0.45rem !important;
+    margin-bottom: 0.55rem !important;
+    overflow: hidden !important;
+    color: #2f63e6 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading span {
+    max-width: 1ch !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    color: #2f63e6 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading::before,
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: #b8cdf6 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link-icon {
+    margin: 0 !important;
+    font-size: 1.05rem !important;
+}
+
+.student-shell .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 0.55rem !important;
+    row-gap: 0.06rem !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.student-shell .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 52px !important;
+    height: 52px !important;
+    object-fit: contain !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.student-shell .system-brand-name {
+    display: flex !important;
+    align-items: baseline !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    gap: 0 !important;
+    min-width: 0 !important;
+    color: #0f172a !important;
+    font-size: 1.5rem !important;
+    font-weight: 900 !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.02em !important;
+    text-transform: none !important;
+}
+
+.student-shell .system-brand-name span,
+.student-shell .system-brand-name strong {
+    display: inline !important;
+    color: #0f172a !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.student-shell .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.student-shell .system-brand-subtitle {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: #64748b !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    line-height: 1.15 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.student-shell.is-sidebar-collapsed .system-brand-mark {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .system-brand-logo {
+    width: 34px !important;
+    height: 34px !important;
+}
+
+.student-shell.is-sidebar-collapsed .system-brand-name,
+.student-shell.is-sidebar-collapsed .system-brand-name span,
+.student-shell.is-sidebar-collapsed .system-brand-name strong,
+.student-shell.is-sidebar-collapsed .system-brand-subtitle {
+    display: none !important;
+}
+
+.student-shell .sidebar-header p {
+    display: block !important;
+    margin: 0.45rem 0 0 !important;
+    color: #64748b !important;
+    font-size: 0.76rem !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header p {
+    display: none !important;
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-sidebar,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar {
+        width: 248px !important;
+        max-width: 248px !important;
+        transform: translateX(-104%) !important;
+    }
+
+    .student-shell .student-global-sidebar.is-open,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar.is-open {
+        transform: translateX(0) !important;
+    }
+
+    .student-shell .student-global-main,
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .student-shell .notification-trigger-copy,
+    .student-shell .profile-nav-btn-copy {
+        display: none !important;
+    }
+}
+
+/* FINAL desktop shell placement:
+   sidebar is the left burger-menu rail from top to bottom;
+   navbar starts beside the sidebar, never from the user-button side. */
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        bottom: 0 !important;
+        height: 100vh !important;
+        width: 248px !important;
+        max-width: 248px !important;
+        transform: translateX(0) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-sidebar {
+        width: 72px !important;
+        max-width: 72px !important;
+    }
+
+    .student-shell .student-global-navbar {
+        left: 248px !important;
+        right: auto !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .student-shell .student-global-navbar-main,
+    .student-shell.is-sidebar-collapsed .student-global-navbar-main {
+        padding-left: 0 !important;
+    }
+
+    .student-shell .student-shell-toggle {
+        margin-left: 0 !important;
+    }
+
+    .student-shell .student-global-main {
+        margin-left: 248px !important;
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        margin-left: 72px !important;
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+    }
+
+    .student-shell .sidebar-header .system-brand-name strong {
+        color: #f6be00 !important;
+    }
+
+    .student-shell .sidebar-header {
+        padding: 1rem 0.9rem !important;
+    }
+
+    .student-shell .sidebar-header .system-brand-mark {
+        grid-template-columns: 50px minmax(0, 1fr) !important;
+        column-gap: 0.45rem !important;
+    }
+
+    .student-shell .sidebar-header .system-brand-logo {
+        width: 50px !important;
+        height: 46px !important;
+    }
+
+    .student-shell .sidebar-header .system-brand-name {
+        font-size: 1.35rem !important;
+        letter-spacing: -0.04em !important;
+    }
+
+    .student-shell .sidebar-header .system-brand-subtitle {
+        font-size: 0.68rem !important;
+        letter-spacing: -0.02em !important;
+    }
+}
+
+/* Desktop: sidebar owns the full left edge; navbar connects beside it. */
+@media (min-width: 1101px) {
+    .student-shell .student-global-navbar {
+        left: 248px !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+    }
+
+    .student-shell .student-shell-toggle {
+        margin-left: 0 !important;
+    }
+
+    .student-shell:not(.is-sidebar-collapsed) .student-global-navbar-main {
+        padding-left: 0 !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar-main {
+        padding-left: 0 !important;
+    }
+}
+
+/* Keep the sidebar wordmark on top of all shell color overrides. */
+.student-shell .sidebar-header .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 0.55rem !important;
+    row-gap: 0 !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+}
+
+.student-shell .sidebar-header .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 58px !important;
+    height: 50px !important;
+    object-fit: contain !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.student-shell .sidebar-header .system-brand-name {
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-items: baseline !important;
+    gap: 0 !important;
+    min-width: 0 !important;
+    color: var(--color-primary, #003a8f) !important;
+    font-size: 1.55rem !important;
+    font-weight: 900 !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.035em !important;
+    text-transform: none !important;
+}
+
+.student-shell .sidebar-header .system-brand-name span {
+    display: inline !important;
+    color: var(--color-primary, #003a8f) !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.student-shell .sidebar-header .system-brand-name strong {
+    display: inline !important;
+    color: #f6be00 !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.student-shell .sidebar-header .system-brand-subtitle {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    color: var(--color-text-secondary, #64748b) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-mark {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-logo {
+    width: 34px !important;
+    height: 34px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name span,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name strong,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-subtitle {
+    display: none !important;
+}
+
 .profile-theme-toggle {
     width: 100%;
     display: grid;
@@ -15295,6 +15901,14 @@ html[data-student-theme="dark"] .settings-strength-panel {
     background: linear-gradient(135deg, rgba(0, 58, 143, 0.12), rgba(246, 190, 0, 0.1)), var(--settings-card-strong);
 }
 
+.settings-theme-options button.is-selected strong {
+    color: var(--settings-text);
+}
+
+.settings-theme-options button.is-selected span {
+    color: var(--settings-muted);
+}
+
 .settings-theme-options i {
     width: 2.45rem;
     height: 2.45rem;
@@ -15315,6 +15929,34 @@ html[data-student-theme="dark"] .settings-strength-panel {
     color: var(--settings-muted);
     font-size: 0.8rem;
     line-height: 1.45;
+}
+
+html[data-student-theme="dark"] .settings-theme-options button {
+    border-color: rgba(147, 197, 253, 0.18);
+    background: rgba(8, 26, 49, 0.54);
+    color: #dbeafe;
+}
+
+html[data-student-theme="dark"] .settings-theme-options button:hover {
+    border-color: rgba(147, 197, 253, 0.34);
+    background: rgba(96, 165, 250, 0.12);
+}
+
+html[data-student-theme="dark"] .settings-theme-options button.is-selected {
+    border-color: rgba(246, 190, 0, 0.7);
+    background:
+        radial-gradient(circle at 92% 0%, rgba(246, 190, 0, 0.12), transparent 30%),
+        linear-gradient(180deg, rgba(22, 51, 94, 0.98), rgba(10, 30, 58, 0.96));
+}
+
+html[data-student-theme="dark"] .settings-theme-options button strong,
+html[data-student-theme="dark"] .settings-theme-options button.is-selected strong {
+    color: #f8fbff;
+}
+
+html[data-student-theme="dark"] .settings-theme-options button span,
+html[data-student-theme="dark"] .settings-theme-options button.is-selected span {
+    color: #b9d2f2;
 }
 
 .settings-toggle-list {
@@ -17515,6 +18157,446 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
     }
 }
 
+/* Student shell: compact light sidebar with collapsible icon rail. */
+.student-shell {
+    --sidebar-width: 248px;
+    --student-shell-topbar-height: 38px;
+    padding-top: var(--student-shell-topbar-height);
+    background: #f8fafc;
+}
+
+.student-global-navbar {
+    height: var(--student-shell-topbar-height);
+    padding: 0;
+    background: #303b3d;
+    border-bottom: 0;
+    box-shadow: none;
+}
+
+.student-global-navbar-main {
+    height: 100%;
+    gap: 0;
+}
+
+.student-shell .student-shell-toggle {
+    width: var(--student-shell-topbar-height);
+    height: var(--student-shell-topbar-height);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #e5e7eb;
+    box-shadow: none;
+}
+
+.student-shell .student-shell-toggle:hover {
+    transform: none;
+    border-color: transparent;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+
+.student-shell .student-shell-toggle i {
+    font-size: 1rem;
+}
+
+.student-shell .student-shell-brand {
+    display: none;
+}
+
+.student-global-navbar-actions {
+    height: 100%;
+    margin-left: auto;
+    padding-right: 0.75rem;
+    gap: 0.5rem;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    min-height: 2.2rem;
+    border-radius: 0;
+    border-top: 0;
+    border-bottom: 0;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    box-shadow: none;
+}
+
+.student-shell .notification-trigger:hover,
+.student-shell .profile-pill:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: none;
+}
+
+.student-shell .notification-trigger-copy strong,
+.student-shell .profile-nav-btn-copy strong {
+    color: #f8fafc;
+}
+
+.student-shell .notification-trigger-copy small,
+.student-shell .profile-nav-btn-copy small,
+.student-shell .profile-nav-btn-chevron {
+    color: #cbd5e1;
+}
+
+.student-shell .notification-trigger-icon,
+.student-shell .profile-nav-btn-avatar {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
+    color: #bfdbfe;
+}
+
+.student-global-sidebar {
+    top: var(--student-shell-topbar-height);
+    width: var(--sidebar-width);
+    background: #ffffff;
+    border-right: 1px solid #dbe3ef;
+    box-shadow: none;
+}
+
+.student-shell .sidebar {
+    background: #ffffff;
+    color: #0f172a;
+    border-right: 1px solid #dbe3ef;
+    box-shadow: none;
+}
+
+.student-shell .sidebar::before {
+    display: none;
+}
+
+.student-shell .sidebar-header {
+    min-height: 5.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #dbe3ef;
+    background: #ffffff;
+}
+
+.student-shell .sidebar-header-copy {
+    width: 100%;
+    gap: 0;
+}
+
+.student-shell .sidebar-context-kicker,
+.student-shell .sidebar-header p,
+.student-shell .user-badge {
+    display: none;
+}
+
+.student-shell .brand-mark {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    color: #0f172a;
+    font-size: 1.35rem;
+}
+
+.student-shell .brand-mark i {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: linear-gradient(135deg, #d946ef, #2563eb 45%, #10b981);
+    color: #ffffff;
+    font-size: 1rem;
+    filter: none;
+}
+
+.student-shell .brand-mark span {
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.student-shell .brand-mark strong {
+    color: #334155;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    align-self: flex-start;
+    margin-top: -0.22rem;
+}
+
+.student-shell .sidebar-nav {
+    gap: 0.8rem;
+    padding: 1rem 1rem 1.5rem;
+    background: #ffffff;
+}
+
+.student-shell .sidebar-nav-group {
+    gap: 0.35rem;
+}
+
+.student-shell .sidebar-nav-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0 0 0.25rem;
+    margin: 0;
+    color: #0f172a;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.student-shell .sidebar-nav-heading::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5edf7;
+}
+
+.student-shell .sidebar-link {
+    min-height: 2.35rem;
+    gap: 0.72rem;
+    padding: 0.55rem 0.7rem;
+    margin: 0;
+    border-radius: 0.22rem;
+    color: #0f172a;
+    font-weight: 500;
+    border: 0;
+    box-shadow: none;
+}
+
+.student-shell .sidebar-link::before {
+    display: none;
+}
+
+.student-shell .sidebar-link:hover {
+    transform: none;
+    background: #eef4ff;
+    color: #1d4ed8;
+}
+
+.student-shell .sidebar-link.is-active {
+    background: #2563eb;
+    border-color: transparent;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.student-shell .sidebar-link-icon {
+    width: 1.2rem;
+    color: #475569;
+    font-size: 0.95rem;
+    filter: none;
+}
+
+.student-shell .sidebar-link:hover .sidebar-link-icon {
+    color: #1d4ed8;
+}
+
+.student-shell .sidebar-link.is-active .sidebar-link-icon {
+    color: #ffffff;
+    filter: none;
+}
+
+.student-shell .sidebar-link-label {
+    color: inherit;
+    font-size: 0.8rem;
+    font-weight: inherit;
+}
+
+.student-shell .nav-count {
+    background: #eef2ff;
+    border-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.student-global-main {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    max-width: calc(100% - var(--sidebar-width));
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar {
+    width: 72px;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header {
+    min-height: 5.5rem;
+    padding: 0.85rem 0.5rem;
+}
+
+.student-shell.is-sidebar-collapsed .brand-mark {
+    justify-content: center;
+}
+
+.student-shell.is-sidebar-collapsed .brand-mark i {
+    width: 2.35rem;
+    height: 2.35rem;
+}
+
+.student-shell.is-sidebar-collapsed .brand-mark span,
+.student-shell.is-sidebar-collapsed .brand-mark strong,
+.student-shell.is-sidebar-collapsed .sidebar-link-label,
+.student-shell.is-sidebar-collapsed .nav-count {
+    display: none;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav {
+    padding: 0.75rem 0.7rem 1.25rem;
+    gap: 1rem;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading {
+    justify-content: center;
+    padding: 0;
+    color: #2563eb;
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading::before,
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading::after {
+    content: "";
+    width: 0.9rem;
+    height: 1px;
+    background: #93b4ff;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-links {
+    gap: 0.55rem;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link {
+    width: 3rem;
+    height: 3rem;
+    min-height: 3rem;
+    justify-content: center;
+    padding: 0;
+    margin: 0 auto;
+    border-radius: 0.35rem;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link-icon {
+    width: auto;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-main {
+    margin-left: 72px;
+    width: calc(100% - 72px);
+    max-width: calc(100% - 72px);
+}
+
+html[data-student-theme="dark"] .student-global-sidebar,
+html[data-student-theme="dark"] .student-shell .sidebar,
+.student-shell[data-theme="dark"] .student-global-sidebar,
+.student-shell[data-theme="dark"] .sidebar {
+    background: #ffffff;
+    color: #0f172a;
+    border-right-color: #dbe3ef;
+}
+
+html[data-student-theme="dark"] .student-shell .sidebar-header,
+.student-shell[data-theme="dark"] .sidebar-header {
+    background: #ffffff;
+    border-bottom-color: #dbe3ef;
+}
+
+html[data-student-theme="dark"] .student-shell .brand-mark span,
+html[data-student-theme="dark"] .student-shell .sidebar-nav-heading,
+html[data-student-theme="dark"] .student-shell .sidebar-link,
+.student-shell[data-theme="dark"] .brand-mark span,
+.student-shell[data-theme="dark"] .sidebar-nav-heading,
+.student-shell[data-theme="dark"] .sidebar-link {
+    color: #0f172a;
+}
+
+html[data-student-theme="dark"] .student-shell .brand-mark strong,
+.student-shell[data-theme="dark"] .brand-mark strong {
+    color: #334155;
+}
+
+html[data-student-theme="dark"] .student-shell .sidebar-link-icon,
+.student-shell[data-theme="dark"] .sidebar-link-icon {
+    color: #475569;
+}
+
+html[data-student-theme="dark"] .student-shell .sidebar-link:hover,
+.student-shell[data-theme="dark"] .sidebar-link:hover {
+    background: #eef4ff;
+    color: #1d4ed8;
+}
+
+html[data-student-theme="dark"] .student-shell .sidebar-link.is-active,
+.student-shell[data-theme="dark"] .sidebar-link.is-active {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+html[data-student-theme="dark"] .student-shell .sidebar-link.is-active .sidebar-link-icon,
+.student-shell[data-theme="dark"] .sidebar-link.is-active .sidebar-link-icon {
+    color: #ffffff;
+}
+
+@media (max-width: 1100px) {
+    .student-shell {
+        padding-top: var(--student-shell-topbar-height);
+    }
+
+    .student-global-main,
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        margin-left: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .student-global-sidebar,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar {
+        top: var(--student-shell-topbar-height);
+        width: var(--sidebar-width);
+        padding-top: 0;
+        transform: translateX(-104%);
+    }
+
+    .student-global-sidebar.is-open,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .student-shell.is-sidebar-collapsed .brand-mark span,
+    .student-shell.is-sidebar-collapsed .brand-mark strong,
+    .student-shell.is-sidebar-collapsed .sidebar-link-label,
+    .student-shell.is-sidebar-collapsed .nav-count {
+        display: inline;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-nav-heading {
+        justify-content: flex-start;
+        color: #0f172a;
+        font-size: 0.78rem;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-nav-heading::before {
+        display: none;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-nav-heading::after {
+        flex: 1;
+        width: auto;
+        background: #e5edf7;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-link {
+        width: auto;
+        height: auto;
+        min-height: 2.35rem;
+        justify-content: flex-start;
+        padding: 0.55rem 0.7rem;
+    }
+}
+
 html[data-student-theme="dark"] .student-shell .student-global-content p,
 html[data-student-theme="dark"] .student-shell .student-global-content small,
 html[data-student-theme="dark"] .student-shell .student-global-content span,
@@ -18144,5 +19226,1590 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-stat.is-danger
         background: rgba(8, 26, 49, 0.78) !important;
         color: #f8fbff !important;
         --tw-ring-color: rgba(147, 197, 253, 0.2) !important;
+    }
+}
+
+/* Final wordmark override: use configured branding colors in the student sidebar. */
+.student-shell .sidebar-header .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 0.55rem !important;
+    row-gap: 0 !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.student-shell .sidebar-header .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 58px !important;
+    height: 50px !important;
+    object-fit: contain !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.student-shell .sidebar-header .system-brand-name {
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-items: baseline !important;
+    gap: 0 !important;
+    color: var(--color-primary, #003a8f) !important;
+    font-size: 1.55rem !important;
+    font-weight: 900 !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.035em !important;
+    text-transform: none !important;
+}
+
+.student-shell .sidebar-header .system-brand-name span {
+    display: inline !important;
+    color: var(--color-primary, #003a8f) !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.student-shell .sidebar-header .system-brand-name strong {
+    display: inline !important;
+    color: var(--color-accent, #f6be00) !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.student-shell .sidebar-header .system-brand-subtitle {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    overflow: hidden !important;
+    color: var(--color-text-secondary, #64748b) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-mark {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-logo {
+    width: 34px !important;
+    height: 34px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name span,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name strong,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-subtitle {
+    display: none !important;
+}
+
+/* Final student shell chrome override: must stay last so older theme rules cannot win. */
+.student-shell {
+    --sidebar-width: 248px !important;
+    --student-shell-topbar-height: 38px !important;
+    padding-top: 38px !important;
+}
+
+.student-shell .student-global-navbar {
+    position: fixed !important;
+    inset: 0 0 auto 0 !important;
+    z-index: 1100 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #303b3d !important;
+    box-shadow: none !important;
+}
+
+.student-shell .student-global-navbar-main {
+    display: flex !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    height: 38px !important;
+    padding: 0 !important;
+}
+
+.student-shell .student-shell-brand {
+    display: none !important;
+}
+
+.student-shell .student-shell-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #e5e7eb !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.student-shell .student-shell-toggle:hover,
+.student-shell .student-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.09) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.student-shell .student-global-navbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.35rem !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    margin-left: auto !important;
+    padding: 0 0.6rem 0 0 !important;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    min-height: 32px !important;
+    height: 32px !important;
+    border: 0 !important;
+    border-radius: 0.45rem !important;
+    background: transparent !important;
+    color: #f8fafc !important;
+    box-shadow: none !important;
+}
+
+.student-shell .notification-trigger:hover,
+.student-shell .profile-pill:hover {
+    background: rgba(255, 255, 255, 0.09) !important;
+}
+
+.student-shell .notification-trigger-copy span,
+.student-shell .profile-nav-btn-copy span,
+.student-shell .profile-nav-btn-copy strong,
+.student-shell .profile-role,
+.student-shell .notification-bell {
+    color: #f8fafc !important;
+}
+
+.student-shell .student-global-sidebar {
+    position: fixed !important;
+    top: 38px !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    width: 248px !important;
+    max-width: 248px !important;
+    height: calc(100vh - 38px) !important;
+    padding: 0 !important;
+    border-right: 1px solid #dbe3ef !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    transform: translateX(0) !important;
+}
+
+.student-shell .student-global-main {
+    width: calc(100% - 248px) !important;
+    max-width: calc(100% - 248px) !important;
+    margin-left: 248px !important;
+}
+
+.student-shell .sidebar-header {
+    min-height: 114px !important;
+    padding: 0.85rem 1rem 1rem !important;
+    border-bottom: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+}
+
+.student-shell .brand-mark,
+.student-shell .brand-mark span,
+.student-shell .brand-mark strong,
+.student-shell .sidebar-context-kicker,
+.student-shell .sidebar-nav-heading,
+.student-shell .sidebar-link,
+.student-shell .sidebar-link-label {
+    color: #0f172a !important;
+}
+
+.student-shell .brand-mark i,
+.student-shell .sidebar-link-icon {
+    color: #475569 !important;
+}
+
+.student-shell .sidebar-nav {
+    padding: 1rem 1rem 1.25rem !important;
+    gap: 1.15rem !important;
+    background: #ffffff !important;
+}
+
+.student-shell .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    margin: 0 0 0.55rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+}
+
+.student-shell .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: #dbe3ef !important;
+}
+
+.student-shell .sidebar-link {
+    min-height: 38px !important;
+    padding: 0 0.8rem !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.student-shell .sidebar-link:hover {
+    background: #eef4ff !important;
+}
+
+.student-shell .sidebar-link.active {
+    background: #2f63e6 !important;
+    color: #ffffff !important;
+}
+
+.student-shell .sidebar-link.active .sidebar-link-icon,
+.student-shell .sidebar-link.active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+.student-shell.is-sidebar-collapsed {
+    --sidebar-width: 72px !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar {
+    width: 72px !important;
+    max-width: 72px !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-main {
+    width: calc(100% - 72px) !important;
+    max-width: calc(100% - 72px) !important;
+    margin-left: 72px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header {
+    min-height: 54px !important;
+    padding: 0.75rem 0 !important;
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .brand-mark {
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .brand-mark i {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-context-kicker,
+.student-shell.is-sidebar-collapsed .brand-mark span,
+.student-shell.is-sidebar-collapsed .brand-mark strong,
+.student-shell.is-sidebar-collapsed .sidebar-header-copy p,
+.student-shell.is-sidebar-collapsed .user-badge,
+.student-shell.is-sidebar-collapsed .sidebar-link-label,
+.student-shell.is-sidebar-collapsed .nav-count {
+    display: none !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav {
+    padding: 0.55rem 0.75rem 1rem !important;
+    gap: 1rem !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading {
+    justify-content: center !important;
+    gap: 0.45rem !important;
+    margin-bottom: 0.55rem !important;
+    overflow: hidden !important;
+    color: #2f63e6 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading span {
+    max-width: 1ch !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    color: #2f63e6 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading::before,
+.student-shell.is-sidebar-collapsed .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: #b8cdf6 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link-icon {
+    margin: 0 !important;
+    font-size: 1.05rem !important;
+}
+
+.student-shell .sidebar-header .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 0.55rem !important;
+    row-gap: 0 !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.student-shell .sidebar-header .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 58px !important;
+    height: 50px !important;
+    object-fit: contain !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.student-shell .sidebar-header .system-brand-name {
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-items: baseline !important;
+    gap: 0 !important;
+    color: var(--color-primary, #003a8f) !important;
+    font-size: 1.55rem !important;
+    font-weight: 900 !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.035em !important;
+    text-transform: none !important;
+}
+
+.student-shell .sidebar-header .system-brand-name span {
+    display: inline !important;
+    color: var(--color-primary, #003a8f) !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.student-shell .sidebar-header .system-brand-name strong {
+    display: inline !important;
+    color: var(--color-accent, #f6be00) !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.student-shell .sidebar-header .system-brand-subtitle {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    overflow: hidden !important;
+    color: var(--color-text-secondary, #64748b) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-mark {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-logo {
+    width: 34px !important;
+    height: 34px !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name span,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-name strong,
+.student-shell.is-sidebar-collapsed .sidebar-header .system-brand-subtitle {
+    display: none !important;
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-sidebar,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar {
+        width: 248px !important;
+        max-width: 248px !important;
+        transform: translateX(-104%) !important;
+    }
+
+    .student-shell .student-global-sidebar.is-open,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar.is-open {
+        transform: translateX(0) !important;
+    }
+
+    .student-shell .student-global-main,
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .student-shell .notification-trigger-copy,
+    .student-shell .profile-nav-btn-copy {
+        display: none !important;
+    }
+}
+
+/* FINAL desktop shell placement:
+   sidebar is the left burger-menu rail from top to bottom;
+   navbar starts beside the sidebar, never from the user-button side. */
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        bottom: 0 !important;
+        height: 100vh !important;
+        width: 248px !important;
+        max-width: 248px !important;
+        transform: translateX(0) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-sidebar {
+        width: 72px !important;
+        max-width: 72px !important;
+    }
+
+    .student-shell .student-global-navbar {
+        left: 248px !important;
+        right: auto !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .student-shell .student-global-navbar-main,
+    .student-shell.is-sidebar-collapsed .student-global-navbar-main {
+        padding-left: 0 !important;
+    }
+
+    .student-shell .student-shell-toggle {
+        margin-left: 0 !important;
+    }
+
+    .student-shell .student-global-main {
+        margin-left: 248px !important;
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        margin-left: 72px !important;
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+    }
+
+    .student-shell .sidebar-header .system-brand-name strong {
+        color: #f6be00 !important;
+    }
+}
+
+/* FINAL brand fit: keep the full subtitle visible in the expanded sidebar. */
+@media (min-width: 1101px) {
+    .student-shell:not(.is-sidebar-collapsed) .sidebar-header {
+        min-height: 78px !important;
+        padding: 0.55rem 0.75rem !important;
+        align-items: center !important;
+    }
+
+    .student-shell:not(.is-sidebar-collapsed) .sidebar-header .system-brand-mark {
+        grid-template-columns: 44px minmax(0, 1fr) !important;
+        column-gap: 0.4rem !important;
+    }
+
+    .student-shell:not(.is-sidebar-collapsed) .sidebar-header .system-brand-logo {
+        width: 44px !important;
+        height: 42px !important;
+    }
+
+    .student-shell:not(.is-sidebar-collapsed) .sidebar-header .system-brand-name {
+        font-size: 1.28rem !important;
+        letter-spacing: -0.045em !important;
+        line-height: 0.98 !important;
+    }
+
+    .student-shell:not(.is-sidebar-collapsed) .sidebar-header .system-brand-subtitle {
+        overflow: visible !important;
+        max-width: none !important;
+        color: #475569 !important;
+        font-size: 0.62rem !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.045em !important;
+        line-height: 1.15 !important;
+        text-overflow: clip !important;
+        white-space: nowrap !important;
+    }
+}
+
+/* FINAL navbar comfort sizing. */
+.student-shell {
+    --student-shell-topbar-height: 48px !important;
+    padding-top: 48px !important;
+}
+
+.student-shell .student-global-navbar,
+.student-shell .student-global-navbar-main {
+    height: 48px !important;
+    min-height: 48px !important;
+}
+
+.student-shell .student-shell-toggle {
+    flex-basis: 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+}
+
+.student-shell .student-global-navbar-actions {
+    height: 48px !important;
+    min-height: 48px !important;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    min-height: 38px !important;
+    height: 38px !important;
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-sidebar {
+        top: 48px !important;
+        height: calc(100vh - 48px) !important;
+    }
+}
+
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+    }
+}
+
+/* FINAL navbar branding: use the system theme colors. */
+.student-shell {
+    --student-shell-topbar-height: 64px !important;
+    padding-top: 64px !important;
+}
+
+.student-shell .student-global-navbar {
+    background: linear-gradient(90deg, var(--color-primary, #003a8f), var(--color-secondary, #1e40af)) !important;
+    border-bottom: 3px solid #f6be00 !important;
+    height: 64px !important;
+    min-height: 64px !important;
+}
+
+.student-shell .student-global-navbar-main,
+.student-shell .student-global-navbar-actions {
+    height: 64px !important;
+    min-height: 64px !important;
+}
+
+.student-shell .student-shell-toggle {
+    flex-basis: 64px !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    color: #ffffff !important;
+}
+
+.student-shell .student-shell-toggle:hover,
+.student-shell .student-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    min-height: 44px !important;
+    height: 44px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+.student-shell .notification-trigger:hover,
+.student-shell .profile-pill:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+}
+
+.student-shell .notification-trigger-icon,
+.student-shell .profile-nav-btn-avatar {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+.student-shell .notification-trigger-copy span,
+.student-shell .notification-trigger-copy strong,
+.student-shell .profile-nav-btn-copy span,
+.student-shell .profile-nav-btn-copy strong,
+.student-shell .profile-role,
+.student-shell .profile-nav-btn-chevron,
+.student-shell .notification-bell {
+    color: #ffffff !important;
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-sidebar {
+        top: 64px !important;
+        height: calc(100vh - 64px) !important;
+    }
+}
+
+/* FINAL upgraded student navbar. */
+.student-shell {
+    --student-shell-topbar-height: 58px !important;
+    padding-top: 58px !important;
+}
+
+.student-shell .student-global-navbar {
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 3px solid #f6be00 !important;
+    background:
+        linear-gradient(90deg, rgba(0, 58, 143, 0.98), rgba(30, 64, 175, 0.98)),
+        var(--color-primary, #003a8f) !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+}
+
+.student-shell .student-global-navbar::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 54%),
+        radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.16), transparent 26%) !important;
+}
+
+.student-shell .student-global-navbar-main,
+.student-shell .student-global-navbar-actions {
+    position: relative !important;
+    z-index: 1 !important;
+    height: 58px !important;
+    min-height: 58px !important;
+}
+
+.student-shell .student-global-navbar-main {
+    align-items: center !important;
+}
+
+.student-shell .student-shell-toggle {
+    flex: 0 0 58px !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 0 !important;
+    background: rgba(2, 6, 23, 0.12) !important;
+    color: #ffffff !important;
+}
+
+.student-shell .student-shell-toggle:hover,
+.student-shell .student-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.student-shell .student-shell-toggle i {
+    font-size: 1.05rem !important;
+}
+
+.student-shell .student-global-navbar-actions {
+    gap: 0.55rem !important;
+    padding-right: 0.85rem !important;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0.35rem 0.65rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+.student-shell .notification-trigger:hover,
+.student-shell .profile-pill:hover,
+.student-shell .notification-trigger.is-active,
+.student-shell .profile-pill.is-active {
+    background: rgba(255, 255, 255, 0.18) !important;
+}
+
+.student-shell .notification-trigger-icon,
+.student-shell .profile-nav-btn-avatar {
+    width: 30px !important;
+    height: 30px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    color: #ffffff !important;
+}
+
+.student-shell .notification-trigger-copy strong,
+.student-shell .profile-nav-btn-copy strong {
+    color: #ffffff !important;
+    font-size: 0.84rem !important;
+    font-weight: 800 !important;
+    line-height: 1.05 !important;
+}
+
+.student-shell .notification-trigger-copy small,
+.student-shell .profile-nav-btn-copy small,
+.student-shell .profile-role,
+.student-shell .profile-nav-btn-chevron {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 0.72rem !important;
+    line-height: 1.05 !important;
+}
+
+.student-shell .notification-trigger-count {
+    border: 2px solid var(--color-primary, #003a8f) !important;
+}
+
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+    }
+
+    .student-shell .student-global-navbar {
+        left: 248px !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-sidebar {
+        top: 58px !important;
+        height: calc(100vh - 58px) !important;
+    }
+}
+
+/* FINAL dark-mode sidebar polish. */
+.student-shell[data-theme="dark"] .student-global-sidebar,
+html[data-student-theme="dark"] .student-shell .student-global-sidebar {
+    border-right-color: rgba(147, 197, 253, 0.2) !important;
+    background: linear-gradient(180deg, #081a31 0%, #071526 100%) !important;
+    color: #eaf2ff !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-header,
+html[data-student-theme="dark"] .student-shell .sidebar-header {
+    border-bottom-color: rgba(147, 197, 253, 0.18) !important;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(246, 190, 0, 0.1), transparent 34%),
+        linear-gradient(180deg, rgba(10, 34, 68, 0.98), rgba(8, 26, 49, 0.96)) !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-nav,
+html[data-student-theme="dark"] .student-shell .sidebar-nav {
+    background: transparent !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-nav-heading,
+html[data-student-theme="dark"] .student-shell .sidebar-nav-heading {
+    color: #bfdbfe !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-nav-heading::after,
+html[data-student-theme="dark"] .student-shell .sidebar-nav-heading::after {
+    background: rgba(147, 197, 253, 0.2) !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-link,
+html[data-student-theme="dark"] .student-shell .sidebar-link {
+    color: #dbeafe !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-link-icon,
+html[data-student-theme="dark"] .student-shell .sidebar-link-icon {
+    color: #9fc5f8 !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-link:hover,
+html[data-student-theme="dark"] .student-shell .sidebar-link:hover {
+    background: rgba(96, 165, 250, 0.14) !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-link.active,
+html[data-student-theme="dark"] .student-shell .sidebar-link.active {
+    background: linear-gradient(135deg, var(--color-primary, #003a8f), var(--color-secondary, #1e40af)) !important;
+    color: #ffffff !important;
+    box-shadow: inset 3px 0 0 #f6be00 !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-link.active .sidebar-link-icon,
+.student-shell[data-theme="dark"] .sidebar-link.active .sidebar-link-label,
+html[data-student-theme="dark"] .student-shell .sidebar-link.active .sidebar-link-icon,
+html[data-student-theme="dark"] .student-shell .sidebar-link.active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-header .system-brand-name span,
+html[data-student-theme="dark"] .student-shell .sidebar-header .system-brand-name span {
+    color: #ffffff !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-header .system-brand-name strong,
+html[data-student-theme="dark"] .student-shell .sidebar-header .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-header .system-brand-subtitle,
+html[data-student-theme="dark"] .student-shell .sidebar-header .system-brand-subtitle {
+    color: #c7d7ee !important;
+}
+
+/* FINAL collapsed dark sidebar: icon-only, high contrast. */
+.student-shell.is-sidebar-collapsed .sidebar-link-label,
+.student-shell.is-sidebar-collapsed .nav-count,
+.student-shell.is-sidebar-collapsed .sidebar-header-copy p,
+.student-shell.is-sidebar-collapsed .user-badge {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-link-icon {
+    margin: 0 !important;
+}
+
+.student-shell[data-theme="dark"].is-sidebar-collapsed .sidebar-link,
+html[data-student-theme="dark"] .student-shell.is-sidebar-collapsed .sidebar-link {
+    color: #bfdbfe !important;
+}
+
+.student-shell[data-theme="dark"].is-sidebar-collapsed .sidebar-link-icon,
+html[data-student-theme="dark"] .student-shell.is-sidebar-collapsed .sidebar-link-icon {
+    color: #bfdbfe !important;
+}
+
+.student-shell[data-theme="dark"].is-sidebar-collapsed .sidebar-link:hover,
+html[data-student-theme="dark"] .student-shell.is-sidebar-collapsed .sidebar-link:hover {
+    background: rgba(96, 165, 250, 0.16) !important;
+}
+
+.student-shell[data-theme="dark"].is-sidebar-collapsed .sidebar-link.active,
+html[data-student-theme="dark"] .student-shell.is-sidebar-collapsed .sidebar-link.active {
+    background: linear-gradient(135deg, var(--color-primary, #003a8f), var(--color-secondary, #1e40af)) !important;
+}
+
+.student-shell[data-theme="dark"].is-sidebar-collapsed .sidebar-link.active .sidebar-link-icon,
+html[data-student-theme="dark"] .student-shell.is-sidebar-collapsed .sidebar-link.active .sidebar-link-icon {
+    color: #ffffff !important;
+}
+
+/* FINAL dark expanded sidebar labels: visible names, hidden only when collapsed. */
+.student-shell[data-theme="dark"]:not(.is-sidebar-collapsed) .sidebar-link-label,
+html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sidebar-link-label {
+    display: inline !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: #dbeafe !important;
+}
+
+.student-shell[data-theme="dark"]:not(.is-sidebar-collapsed) .sidebar-link,
+html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sidebar-link {
+    color: #dbeafe !important;
+}
+
+.student-shell[data-theme="dark"]:not(.is-sidebar-collapsed) .sidebar-link.active .sidebar-link-label,
+html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sidebar-link.active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+/* FINAL premium ThesisTrack academic SaaS navbar. */
+.student-shell {
+    --student-shell-topbar-height: 72px !important;
+    padding-top: 72px !important;
+}
+
+.student-shell .student-global-navbar {
+    height: 72px !important;
+    min-height: 72px !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(246, 190, 0, 0.88) !important;
+    background:
+        linear-gradient(90deg, #003a8f 0%, #0f4fb5 48%, #1e40af 100%) !important;
+    box-shadow:
+        0 14px 34px rgba(15, 23, 42, 0.18),
+        0 1px 0 rgba(255, 255, 255, 0.1) inset !important;
+}
+
+.student-shell .student-global-navbar::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: -1px !important;
+    height: 2px !important;
+    pointer-events: none !important;
+    background: linear-gradient(90deg, rgba(246, 190, 0, 0.25), #f6be00 28%, #f6be00 72%, rgba(246, 190, 0, 0.25)) !important;
+    box-shadow: 0 0 12px rgba(246, 190, 0, 0.45) !important;
+}
+
+.student-shell .student-global-navbar::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background:
+        radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.14), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 58%) !important;
+}
+
+.student-shell .student-global-navbar-main,
+.student-shell .student-global-navbar-actions {
+    position: relative !important;
+    z-index: 1 !important;
+    height: 72px !important;
+    min-height: 72px !important;
+}
+
+.student-shell .student-global-navbar-main {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+}
+
+.student-shell .student-shell-toggle {
+    flex: 0 0 72px !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    border: 0 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 0 !important;
+    background: rgba(2, 6, 23, 0.12) !important;
+    color: #ffffff !important;
+    transition: background-color 160ms ease, color 160ms ease !important;
+}
+
+.student-shell .student-shell-toggle:hover,
+.student-shell .student-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+.student-shell .student-shell-toggle i {
+    font-size: 1.15rem !important;
+}
+
+.student-navbar-title {
+    display: grid !important;
+    gap: 0.18rem !important;
+    min-width: 0 !important;
+    padding-left: 1.15rem !important;
+}
+
+.student-navbar-title-kicker {
+    color: rgba(255, 255, 255, 0.68) !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.16em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+}
+
+.student-navbar-title strong {
+    color: #ffffff !important;
+    font-size: 1.08rem !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+}
+
+.student-shell .student-global-navbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.75rem !important;
+    padding-right: 1rem !important;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0.4rem 0.75rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 8px 20px rgba(2, 6, 23, 0.12) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+    transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease !important;
+}
+
+.student-shell .notification-trigger:hover,
+.student-shell .profile-pill:hover,
+.student-shell .notification-trigger.is-active,
+.student-shell .profile-pill.is-active {
+    transform: translateY(-1px) !important;
+    border-color: rgba(246, 190, 0, 0.36) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 10px 24px rgba(2, 6, 23, 0.16) !important;
+}
+
+.student-shell .notification-trigger-icon,
+.student-shell .profile-nav-btn-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+.student-shell .profile-nav-btn-avatar {
+    font-weight: 850 !important;
+}
+
+.student-shell .notification-trigger-copy,
+.student-shell .profile-nav-btn-copy {
+    gap: 0.1rem !important;
+}
+
+.student-shell .notification-trigger-copy strong,
+.student-shell .profile-nav-btn-copy strong {
+    color: #ffffff !important;
+    font-size: 0.86rem !important;
+    font-weight: 850 !important;
+    line-height: 1.05 !important;
+}
+
+.student-shell .notification-trigger-copy small,
+.student-shell .profile-nav-btn-copy small,
+.student-shell .profile-role,
+.student-shell .profile-nav-btn-chevron {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 0.72rem !important;
+    font-weight: 650 !important;
+    line-height: 1.05 !important;
+}
+
+.student-shell .notification-trigger-count {
+    min-width: 1.05rem !important;
+    height: 1.05rem !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.24) !important;
+}
+
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+    }
+
+    .student-shell .student-global-navbar {
+        left: 248px !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .student-shell .student-global-main {
+        margin-left: 248px !important;
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        margin-left: 72px !important;
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-sidebar {
+        top: 72px !important;
+        height: calc(100vh - 72px) !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .student-navbar-title {
+        padding-left: 0.85rem !important;
+    }
+
+    .student-navbar-title-kicker {
+        display: none !important;
+    }
+
+    .student-navbar-title strong {
+        font-size: 0.95rem !important;
+    }
+
+    .student-shell .student-global-navbar-actions {
+        gap: 0.35rem !important;
+        padding-right: 0.55rem !important;
+    }
+}
+
+/* FINAL reference navbar layout: brand block + menu/title + glass actions. */
+.student-shell {
+    --student-shell-topbar-height: 72px !important;
+    padding-top: 72px !important;
+}
+
+.student-shell .student-global-navbar {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    display: flex !important;
+    align-items: stretch !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(246, 190, 0, 0.9) !important;
+    background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 50%, #1e40af 100%) !important;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+}
+
+.student-shell .student-global-navbar::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: -2px !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, rgba(246, 190, 0, 0.55), #f6be00 22%, #f6be00 78%, rgba(246, 190, 0, 0.55)) !important;
+    box-shadow: 0 0 12px rgba(246, 190, 0, 0.42) !important;
+    pointer-events: none !important;
+}
+
+.student-shell .student-global-navbar::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 60%) !important;
+}
+
+.student-shell .student-global-navbar-main,
+.student-shell .student-global-navbar-actions {
+    position: relative !important;
+    z-index: 1 !important;
+    height: 72px !important;
+    min-height: 72px !important;
+}
+
+.student-shell .student-global-navbar-main {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+}
+
+.student-navbar-brand {
+    display: grid !important;
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    flex: 0 0 248px !important;
+    width: 248px !important;
+    height: 72px !important;
+    padding: 0 1rem !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: linear-gradient(90deg, rgba(2, 20, 53, 0.16), rgba(255, 255, 255, 0.04)) !important;
+}
+
+.student-navbar-brand-logo {
+    display: block !important;
+    width: 48px !important;
+    height: 46px !important;
+    object-fit: contain !important;
+}
+
+.student-navbar-brand-copy {
+    display: grid !important;
+    gap: 0.08rem !important;
+    min-width: 0 !important;
+}
+
+.student-navbar-brand-name {
+    display: flex !important;
+    align-items: baseline !important;
+    color: #ffffff !important;
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.03em !important;
+}
+
+.student-navbar-brand-name span,
+.student-navbar-brand-name strong {
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    margin: 0 !important;
+}
+
+.student-navbar-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.student-navbar-brand-tagline {
+    overflow: hidden !important;
+    color: rgba(255, 255, 255, 0.86) !important;
+    font-size: 0.58rem !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+.student-shell .student-shell-toggle {
+    flex: 0 0 52px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    border: 0 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: rgba(2, 6, 23, 0.08) !important;
+}
+
+.student-navbar-title {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding-left: 1rem !important;
+}
+
+.student-navbar-title::before {
+    content: "" !important;
+    width: 1px !important;
+    height: 28px !important;
+    margin-right: 1rem !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.student-navbar-title-kicker {
+    display: none !important;
+}
+
+.student-navbar-title strong {
+    color: #ffffff !important;
+    font-size: 1.08rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.015em !important;
+}
+
+.student-shell .student-global-navbar-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.7rem !important;
+    padding-right: 1.45rem !important;
+}
+
+.student-shell .notification-trigger,
+.student-shell .profile-pill {
+    height: 48px !important;
+    min-height: 48px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 8px 18px rgba(2, 6, 23, 0.12) !important;
+}
+
+.student-shell .notification-trigger {
+    min-width: 166px !important;
+}
+
+.student-shell .profile-pill {
+    min-width: 174px !important;
+}
+
+.student-shell .notification-trigger-icon,
+.student-shell .profile-nav-btn-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+.student-shell .profile-nav-btn-avatar {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(0, 58, 143, 0.95)) !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+}
+
+.student-shell .notification-trigger-copy strong,
+.student-shell .profile-nav-btn-copy strong {
+    color: #ffffff !important;
+    font-size: 0.82rem !important;
+    font-weight: 850 !important;
+}
+
+.student-shell .notification-trigger-copy small,
+.student-shell .profile-nav-btn-copy small,
+.student-shell .profile-role,
+.student-shell .profile-nav-btn-chevron {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+}
+
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar {
+        top: 72px !important;
+        height: calc(100vh - 72px) !important;
+    }
+
+    .student-shell .student-global-main {
+        margin-left: 248px !important;
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        margin-left: 72px !important;
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-navbar-brand {
+        flex-basis: 72px !important;
+        width: 72px !important;
+        grid-template-columns: 1fr !important;
+        justify-items: center !important;
+        padding: 0 !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-navbar-brand-logo {
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-navbar-brand-copy {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .student-navbar-brand {
+        flex-basis: 72px !important;
+        width: 72px !important;
+        grid-template-columns: 1fr !important;
+        justify-items: center !important;
+        padding: 0 !important;
+    }
+
+    .student-navbar-brand-logo {
+        width: 38px !important;
+        height: 38px !important;
+    }
+
+    .student-navbar-brand-copy {
+        display: none !important;
+    }
+
+    .student-shell .student-global-sidebar {
+        top: 72px !important;
+        height: calc(100vh - 72px) !important;
+    }
+}
+
+/* FINAL navbar without brand block: start with menu + page title. */
+.student-shell .student-global-navbar-main {
+    padding-left: 0 !important;
+}
+
+.student-navbar-title {
+    padding-left: 1.15rem !important;
+}
+
+.student-navbar-title::before {
+    display: none !important;
+}
+
+/* FINAL desktop placement: navbar connects beside the sidebar, not edge-to-edge. */
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+    }
+
+    .student-shell .student-global-navbar {
+        left: 248px !important;
+        right: auto !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .student-shell .student-global-main {
+        margin-left: 248px !important;
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        margin-left: 72px !important;
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-navbar {
+        left: 0 !important;
+        width: 100% !important;
+    }
+
+    .student-shell .student-global-sidebar {
+        top: 72px !important;
+        height: calc(100vh - 72px) !important;
+    }
+}
+
+/* FINAL collapsed rail: keep the logo fixed in the sidebar header, hide clipped labels. */
+@media (min-width: 1101px) {
+    .student-shell.is-sidebar-collapsed .sidebar-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 72px !important;
+        height: 72px !important;
+        padding: 0 !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-header-copy {
+        width: 100% !important;
+        height: 72px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-header .system-brand-mark {
+        width: 100% !important;
+        height: 72px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-header .system-brand-logo {
+        width: 38px !important;
+        height: 38px !important;
+        transform: none !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-nav {
+        padding-top: 0.65rem !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-nav-heading {
+        display: block !important;
+        height: 1px !important;
+        min-height: 1px !important;
+        margin: 0.4rem 0.25rem 0.6rem !important;
+        overflow: hidden !important;
+        color: transparent !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
+        text-indent: -999px !important;
+        white-space: nowrap !important;
+        background: rgba(148, 163, 184, 0.28) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .sidebar-nav-heading::before,
+    .student-shell.is-sidebar-collapsed .sidebar-nav-heading::after {
+        display: none !important;
     }
 }
