@@ -1,5 +1,3 @@
-import { cookies } from 'next/headers';
-
 const now = '2026-04-06T00:00:00.000Z';
 
 export type StudentTitleReviewSummary = {
@@ -401,6 +399,15 @@ function getDefaultWorkspaceData(): StudentDashboardData {
   };
 }
 
+function isNextDynamicServerUsageError(error: unknown) {
+  return Boolean(
+    error
+      && typeof error === 'object'
+      && 'digest' in error
+      && (error as { digest?: unknown }).digest === 'DYNAMIC_SERVER_USAGE'
+  );
+}
+
 export async function getStudentDashboardData() {
   const data = getDefaultWorkspaceData();
 
@@ -651,6 +658,10 @@ export async function getStudentDashboardData() {
       }
     }
   } catch (err) {
+    if (isNextDynamicServerUsageError(err)) {
+      throw err;
+    }
+
     console.error('Failed to get authenticated user:', err);
   }
 
