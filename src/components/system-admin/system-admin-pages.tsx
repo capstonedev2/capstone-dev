@@ -22,6 +22,7 @@ type ManagedUser = {
   role: ApiUserRole;
   isSuspended?: boolean;
   suspendedAt?: string | null;
+  suspendedUntil?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   studentId?: string | null;
@@ -55,6 +56,11 @@ type UserFormState = {
 };
 
 type StatusFilter = 'all' | 'active' | 'suspended';
+type SuspensionDuration = {
+  key: string;
+  label: string;
+  helper: string;
+};
 
 type BannerState = {
   tone: 'success' | 'warning';
@@ -132,14 +138,6 @@ const STAFF_ROLE_OPTIONS: Array<{
     icon: 'fa-book-open-reader'
   },
   {
-    value: 'tech_transfer',
-    label: 'Tech Transfer Officer',
-    description: 'Technology transfer deployment and utilization workflow access.',
-    boundary: 'Transfer workflow only.',
-    category: 'workflow',
-    icon: 'fa-arrow-up-right-dots'
-  },
-  {
     value: 'partner',
     label: 'Industry Partner',
     description: 'Partner collaboration, matching, feedback, and deployment status access.',
@@ -176,6 +174,16 @@ const EMPTY_USER_FORM: UserFormState = {
   confirmPassword: ''
 };
 
+const SUSPENSION_DURATIONS: SuspensionDuration[] = [
+  { key: '1m', label: '1 minute', helper: 'Quick access test' },
+  { key: '1h', label: '1 hour', helper: 'Short account hold' },
+  { key: '6h', label: '6 hours', helper: 'Same-day review' },
+  { key: '24h', label: '1 day', helper: 'Temporary suspension' },
+  { key: '7d', label: '1 week', helper: 'Formal review window' },
+  { key: '30d', label: '30 days', helper: 'Extended restriction' },
+  { key: 'indefinite', label: 'Until restored', helper: 'Manual restore required' }
+];
+
 async function parseApiPayload<T>(response: Response) {
   const contentType = response.headers.get('content-type') || '';
 
@@ -201,6 +209,26 @@ function formatDate(value?: string | null) {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
+  }).format(date);
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) {
+    return 'Not available';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Not available';
+  }
+
+  return new Intl.DateTimeFormat('en-PH', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
   }).format(date);
 }
 
@@ -254,6 +282,10 @@ function generateTemporaryPassword() {
     .join('');
 }
 
+function isStaffManagedRole(role: ApiUserRole): role is UserFormState['role'] {
+  return STAFF_ROLE_OPTIONS.some((option) => option.value === role);
+}
+
 function SystemAdminKpi({
   icon,
   label,
@@ -292,7 +324,7 @@ export function SystemAdminDashboard() {
     >
       <div className="admin-page-stack">
         <section className="admin-grid-4">
-          <SystemAdminKpi icon="fa-users-gear" label="Managed Staff Roles" value="8" meta="System, Research, Program, Library, Transfer, Partner, Adviser, Panel" />
+          <SystemAdminKpi icon="fa-users-gear" label="Managed Staff Roles" value="7" meta="System, Research, Program, Library, Partner, Adviser, Panel" />
           <SystemAdminKpi icon="fa-shield-halved" label="RBAC Policies" value="Strict" meta="Route and API access separated by role" />
           <SystemAdminKpi icon="fa-database" label="Last Backup" value="02:10" meta="Automated database backup completed today" />
           <SystemAdminKpi icon="fa-screwdriver-wrench" label="Maintenance" value="Off" meta="Portal is available to users" />
@@ -362,12 +394,14 @@ export function SystemAdminUsers() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [detailsUser, setDetailsUser] = useState<ManagedUser | null>(null);
   const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState<UserFormState>(EMPTY_USER_FORM);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [banner, setBanner] = useState<BannerState | null>(null);
   const [activeSuspensionUserId, setActiveSuspensionUserId] = useState<string | null>(null);
+  const [openSuspensionUserId, setOpenSuspensionUserId] = useState<string | null>(null);
 
   const loadUsers = useCallback(async (mode: 'initial' | 'refresh' = 'initial') => {
     if (mode === 'initial') {
@@ -437,8 +471,23 @@ export function SystemAdminUsers() {
   const activeUsers = users.filter((user) => !user.isSuspended).length;
   const suspendedUsers = users.length - activeUsers;
   const staffUsers = users.filter((user) => user.role !== 'student').length;
+  const studentUsers = users.filter((user) => user.role === 'student').length;
   const technicalUsers = users.filter((user) => user.role === 'system_admin').length;
   const researchOversightUsers = users.filter((user) => user.role === 'research_head' || user.role === 'program_head').length;
+  const filteredActiveUsers = filteredUsers.filter((user) => !user.isSuspended).length;
+  const filteredSuspendedUsers = filteredUsers.length - filteredActiveUsers;
+  const filteredStaffUsers = filteredUsers.filter((user) => user.role !== 'student').length;
+  const activeRate = users.length ? Math.round((activeUsers / users.length) * 100) : 0;
+  const hasActiveFilters = Boolean(query || roleFilter !== 'all' || statusFilter !== 'all' || departmentFilter !== 'all');
+  const roleQuickFilters: Array<{ value: 'all' | ApiUserRole; label: string; icon: string; category: string }> = [
+    { value: 'all', label: 'All', icon: 'fa-layer-group', category: 'technical' },
+    { value: 'student', label: 'Students', icon: ROLE_DECORATION.student.icon, category: ROLE_DECORATION.student.category },
+    { value: 'program_head', label: 'Program Heads', icon: ROLE_DECORATION.program_head.icon, category: ROLE_DECORATION.program_head.category },
+    { value: 'adviser', label: 'Advisers', icon: ROLE_DECORATION.adviser.icon, category: ROLE_DECORATION.adviser.category },
+    { value: 'panel', label: 'Panelists', icon: ROLE_DECORATION.panel.icon, category: ROLE_DECORATION.panel.category },
+    { value: 'library', label: 'Library', icon: ROLE_DECORATION.library.icon, category: ROLE_DECORATION.library.category },
+    { value: 'partner', label: 'Partners', icon: ROLE_DECORATION.partner.icon, category: ROLE_DECORATION.partner.category }
+  ];
   const selectedRoleOption =
     STAFF_ROLE_OPTIONS.find((role) => role.value === form.role) ?? STAFF_ROLE_OPTIONS[0];
   const selectedRoleDecoration = ROLE_DECORATION[selectedRoleOption.value];
@@ -547,8 +596,9 @@ export function SystemAdminUsers() {
     }
   };
 
-  const handleSuspensionToggle = async (user: ManagedUser, suspended: boolean) => {
+  const handleSuspensionToggle = async (user: ManagedUser, suspended: boolean, duration?: SuspensionDuration) => {
     setActiveSuspensionUserId(user.id);
+    setOpenSuspensionUserId(null);
 
     try {
       const response = await fetch(`/api/users/${user.id}/suspension`, {
@@ -557,7 +607,7 @@ export function SystemAdminUsers() {
           'Content-Type': 'application/json'
         },
         credentials: 'same-origin',
-        body: JSON.stringify({ suspended })
+        body: JSON.stringify({ suspended, durationKey: duration?.key, durationLabel: duration?.label })
       });
       const payload = await parseApiPayload<UserMutationResponse>(response);
 
@@ -626,6 +676,40 @@ export function SystemAdminUsers() {
               </button>
             </div>
             <div className="admin-section-body">
+              <div className="system-user-overview">
+                <article>
+                  <span className="admin-kpi-label">Directory View</span>
+                  <strong>{filteredUsers.length}</strong>
+                  <p>{users.length} total accounts</p>
+                </article>
+                <article>
+                  <span className="admin-kpi-label">Access Health</span>
+                  <strong>{activeRate}%</strong>
+                  <div className="admin-progress-track">
+                    <div className="admin-progress-bar" style={{ width: `${activeRate}%` }}></div>
+                  </div>
+                </article>
+                <article>
+                  <span className="admin-kpi-label">Current Mix</span>
+                  <strong>{filteredStaffUsers} staff</strong>
+                  <p>{studentUsers} student accounts remain self-register</p>
+                </article>
+              </div>
+
+              <div className="system-role-filter-row" aria-label="Quick role filters">
+                {roleQuickFilters.map((role) => (
+                  <button
+                    key={role.value}
+                    className={`system-role-filter-chip is-${role.category}${roleFilter === role.value ? ' is-active' : ''}`}
+                    type="button"
+                    onClick={() => setRoleFilter(role.value)}
+                  >
+                    <i className={`fas ${role.icon}`}></i>
+                    {role.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="system-user-toolbar">
                 <div className="admin-toolbar-field system-user-search">
                   <label>Search Directory</label>
@@ -698,6 +782,16 @@ export function SystemAdminUsers() {
                   <i className="fas fa-server"></i>
                   System Admin manages staff access
                 </span>
+                <span className="admin-inline-badge">
+                  <i className="fas fa-circle-check"></i>
+                  {filteredActiveUsers} active
+                </span>
+                {filteredSuspendedUsers ? (
+                  <span className="admin-inline-badge">
+                    <i className="fas fa-user-slash"></i>
+                    {filteredSuspendedUsers} suspended
+                  </span>
+                ) : null}
                 <div className="system-filter-actions">
                   <button
                     className="btn btn-outline small"
@@ -708,7 +802,7 @@ export function SystemAdminUsers() {
                     <i className={`fas ${isRefreshing ? 'fa-spinner fa-spin' : 'fa-rotate'}`}></i>
                     {isRefreshing ? 'Refreshing...' : 'Refresh'}
                   </button>
-                  {(query || roleFilter !== 'all' || statusFilter !== 'all' || departmentFilter !== 'all') ? (
+                  {hasActiveFilters ? (
                     <button
                       className="btn btn-outline small"
                       type="button"
@@ -728,7 +822,7 @@ export function SystemAdminUsers() {
             </div>
           </section>
 
-          <section className="admin-section-card">
+          <section className="admin-section-card system-directory-card">
             <div className="admin-section-head">
               <div>
                 <h3>Account Directory</h3>
@@ -746,7 +840,7 @@ export function SystemAdminUsers() {
                     <th>Access Lane</th>
                     <th>Status</th>
                     <th>Created</th>
-                    <th>Actions</th>
+                    <th className="system-actions-column">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -761,7 +855,7 @@ export function SystemAdminUsers() {
                       const decoration = ROLE_DECORATION[user.role];
 
                       return (
-                        <tr key={user.id}>
+                        <tr key={user.id} className={user.isSuspended ? 'is-suspended-user' : undefined}>
                           <td>
                             <div className="admin-users-user-cell system-user-cell">
                               <span className={`admin-users-row-avatar system-role-avatar is-${decoration.category}`} aria-hidden="true">
@@ -779,7 +873,10 @@ export function SystemAdminUsers() {
                               {ROLE_LABELS[user.role]}
                             </span>
                           </td>
-                          <td>{user.department || 'Unassigned'}</td>
+                          <td>
+                            <span className="table-title">{user.department || 'Unassigned'}</span>
+                            <span className="table-subtitle">{user.studentId || 'No linked ID'}</span>
+                          </td>
                           <td>
                             <span className="table-title">{decoration.lane}</span>
                             <span className="table-subtitle">{user.role === 'student' ? 'Public registration' : 'Provisioned access'}</span>
@@ -788,18 +885,66 @@ export function SystemAdminUsers() {
                             <span className={`status-badge ${user.isSuspended ? 'status-critical' : 'status-approved'}`}>
                               {user.isSuspended ? 'Suspended' : 'Active'}
                             </span>
+                            {user.isSuspended && user.suspendedUntil ? (
+                              <span className="table-subtitle">Until {formatDateTime(user.suspendedUntil)}</span>
+                            ) : null}
                           </td>
-                          <td>{formatDate(user.createdAt)}</td>
                           <td>
-                            <button
-                              className="btn btn-outline small"
-                              disabled={activeSuspensionUserId === user.id}
-                              type="button"
-                              onClick={() => void handleSuspensionToggle(user, !user.isSuspended)}
-                            >
-                              <i className={`fas ${activeSuspensionUserId === user.id ? 'fa-spinner fa-spin' : user.isSuspended ? 'fa-rotate-left' : 'fa-user-slash'}`}></i>
-                              {user.isSuspended ? 'Restore' : 'Suspend'}
-                            </button>
+                            <span className="table-title">{formatDate(user.createdAt)}</span>
+                            <span className="table-subtitle">{user.updatedAt ? `Updated ${formatDate(user.updatedAt)}` : 'No recent update'}</span>
+                          </td>
+                          <td>
+                            <div className="system-user-actions">
+                              <button
+                                className="btn btn-outline small"
+                                type="button"
+                                onClick={() => setDetailsUser(user)}
+                              >
+                                <i className="fas fa-eye"></i>
+                                View
+                              </button>
+
+                              {user.isSuspended ? (
+                                <button
+                                  className="btn btn-outline small"
+                                  disabled={activeSuspensionUserId === user.id}
+                                  type="button"
+                                  onClick={() => void handleSuspensionToggle(user, false)}
+                                >
+                                  <i className={`fas ${activeSuspensionUserId === user.id ? 'fa-spinner fa-spin' : 'fa-rotate-left'}`}></i>
+                                  Restore
+                                </button>
+                              ) : (
+                                <div className="system-suspend-menu">
+                                  <button
+                                    aria-expanded={openSuspensionUserId === user.id ? 'true' : 'false'}
+                                    className="btn btn-outline small"
+                                    disabled={activeSuspensionUserId === user.id}
+                                    type="button"
+                                    onClick={() => setOpenSuspensionUserId((current) => (current === user.id ? null : user.id))}
+                                  >
+                                    <i className={`fas ${activeSuspensionUserId === user.id ? 'fa-spinner fa-spin' : 'fa-user-slash'}`}></i>
+                                    Suspend
+                                    <i className="fas fa-chevron-down"></i>
+                                  </button>
+                                  {openSuspensionUserId === user.id ? (
+                                    <div className="system-suspend-dropdown">
+                                      <span className="system-suspend-dropdown-title">Suspend for</span>
+                                      {SUSPENSION_DURATIONS.map((duration) => (
+                                        <button
+                                          key={duration.key}
+                                          type="button"
+                                          onClick={() => void handleSuspensionToggle(user, true, duration)}
+                                        >
+                                          <strong>{duration.label}</strong>
+                                          <small>{duration.helper}</small>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -822,9 +967,15 @@ export function SystemAdminUsers() {
         <div className="modal show" onClick={(event) => event.target === event.currentTarget && closeCreateModal()}>
           <div className="modal-content admin-users-modal system-staff-modal">
             <div className="modal-header">
-              <div>
-                <h3>Create Staff Account</h3>
-                <p>Provision technical, academic, and workflow roles with clear responsibility boundaries.</p>
+              <div className="system-modal-title">
+                <span className={`system-role-icon is-${selectedRoleOption.category}`} aria-hidden="true">
+                  <i className={`fas ${selectedRoleOption.icon}`}></i>
+                </span>
+                <div>
+                  <span className="admin-kpi-label">System Admin</span>
+                  <h3>Create Staff Account</h3>
+                  <p>Provision a role, identity, and temporary access credentials in one controlled flow.</p>
+                </div>
               </div>
               <button className="close-modal" type="button" onClick={closeCreateModal}>
                 &times;
@@ -832,9 +983,26 @@ export function SystemAdminUsers() {
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
+                <section className="system-create-hero">
+                  <div>
+                    <span className="admin-kpi-label">Selected role</span>
+                    <strong>{selectedRoleOption.label}</strong>
+                    <p>{selectedRoleOption.description}</p>
+                  </div>
+                  <div className="system-create-hero-meta">
+                    <span className={`system-role-pill is-${selectedRoleOption.category}`}>
+                      <i className={`fas ${selectedRoleOption.icon}`}></i>
+                      {selectedRoleDecoration.lane}
+                    </span>
+                    <span className={`status-badge ${passwordScore >= 3 ? 'status-success' : passwordScore ? 'status-review' : 'status-neutral'}`}>
+                      Password: {passwordStrengthLabel}
+                    </span>
+                  </div>
+                </section>
+
                 <div className="system-modal-steps" aria-hidden="true">
                   {['Role', 'Identity', 'Security'].map((step, index) => (
-                    <span key={step} className="system-modal-step">
+                    <span key={step} className={`system-modal-step${index === 0 || (index === 1 && form.email.trim()) || (index === 2 && form.password) ? ' is-active' : ''}`}>
                       <strong>{index + 1}</strong>
                       {step}
                     </span>
@@ -844,8 +1012,11 @@ export function SystemAdminUsers() {
                 <div className="system-staff-grid">
                   <section className="system-role-panel" aria-labelledby="staff-role-title">
                     <div className="system-panel-heading">
-                      <span className="admin-kpi-label">Portal Role</span>
-                      <strong id="staff-role-title">Access profile</strong>
+                      <div>
+                        <span className="admin-kpi-label">Portal Role</span>
+                        <strong id="staff-role-title">Choose access profile</strong>
+                      </div>
+                      <small className="system-panel-count">{STAFF_ROLE_OPTIONS.length} managed roles</small>
                     </div>
                     <div className="system-role-picker" role="radiogroup" aria-label="Staff role">
                       {STAFF_ROLE_OPTIONS.map((role) => (
@@ -863,6 +1034,7 @@ export function SystemAdminUsers() {
                           <span>
                             <strong>{role.label}</strong>
                             <small>{role.description}</small>
+                            <em>{role.boundary}</em>
                           </span>
                         </button>
                       ))}
@@ -880,6 +1052,14 @@ export function SystemAdminUsers() {
                         <strong>{selectedRoleOption.label}</strong>
                         <p>{selectedRoleOption.boundary}</p>
                       </div>
+                    </div>
+
+                    <div className="system-panel-heading is-inline">
+                      <div>
+                        <span className="admin-kpi-label">Identity</span>
+                        <strong>Account information</strong>
+                      </div>
+                      <small>Required fields</small>
                     </div>
 
                     <div className="admin-form-grid">
@@ -932,6 +1112,7 @@ export function SystemAdminUsers() {
                         <div>
                           <span className="admin-kpi-label">Temporary Password</span>
                           <strong>{passwordStrengthLabel}</strong>
+                          <p>Generate a one-time password and require the user to update it after sign-in.</p>
                         </div>
                         <button className="btn btn-outline small" type="button" onClick={handleGeneratePassword}>
                           <i className="fas fa-wand-magic-sparkles"></i>
@@ -986,6 +1167,12 @@ export function SystemAdminUsers() {
                       <div className="system-password-meter" aria-hidden="true">
                         <span className={`level-${passwordScore}`} style={{ width: `${Math.max(passwordScore, 1) * 20}%` }}></span>
                       </div>
+                      <div className="system-password-hints">
+                        <span className={form.password.length >= 8 ? 'is-met' : ''}>8+ characters</span>
+                        <span className={/[A-Z]/.test(form.password) && /[a-z]/.test(form.password) ? 'is-met' : ''}>Mixed case</span>
+                        <span className={/\d/.test(form.password) ? 'is-met' : ''}>Number</span>
+                        <span className={/[^A-Za-z0-9]/.test(form.password) ? 'is-met' : ''}>Symbol</span>
+                      </div>
                     </div>
 
                     <div className="system-account-preview">
@@ -1022,6 +1209,89 @@ export function SystemAdminUsers() {
           </div>
         </div>
       ) : null}
+
+      {detailsUser ? (
+        <div className="modal show" onClick={(event) => event.target === event.currentTarget && setDetailsUser(null)}>
+          <div className="modal-content admin-users-modal system-user-details-modal">
+            <div className="modal-header">
+              <div>
+                <h3>User Details</h3>
+                <p>Read-only account profile and access assignment.</p>
+              </div>
+              <button className="close-modal" type="button" onClick={() => setDetailsUser(null)}>
+                &times;
+              </button>
+            </div>
+            <div className="modal-body">
+              {(() => {
+                const decoration = ROLE_DECORATION[detailsUser.role];
+
+                return (
+                  <div className="system-user-details">
+                    <section className="system-user-details-hero">
+                      <span className={`admin-users-row-avatar system-role-avatar is-${decoration.category}`} aria-hidden="true">
+                        {getInitials(detailsUser)}
+                      </span>
+                      <div>
+                        <span className="admin-kpi-label">Account identity</span>
+                        <h4>{detailsUser.name}</h4>
+                        <p>{detailsUser.email}</p>
+                      </div>
+                      <span className={`status-badge ${detailsUser.isSuspended ? 'status-critical' : 'status-approved'}`}>
+                        {detailsUser.isSuspended ? 'Suspended' : 'Active'}
+                      </span>
+                    </section>
+
+                    <section className="system-user-details-grid">
+                      <div>
+                        <span>Role</span>
+                        <strong>{ROLE_LABELS[detailsUser.role]}</strong>
+                      </div>
+                      <div>
+                        <span>Access Lane</span>
+                        <strong>{decoration.lane}</strong>
+                      </div>
+                      <div>
+                        <span>Department / Office</span>
+                        <strong>{detailsUser.department || 'Unassigned'}</strong>
+                      </div>
+                      <div>
+                        <span>Account Source</span>
+                        <strong>{detailsUser.role === 'student' ? 'Public registration' : 'Provisioned access'}</strong>
+                      </div>
+                      <div>
+                        <span>Created</span>
+                        <strong>{formatDate(detailsUser.createdAt)}</strong>
+                      </div>
+                      <div>
+                        <span>Last Updated</span>
+                        <strong>{formatDate(detailsUser.updatedAt)}</strong>
+                      </div>
+                      <div>
+                        <span>Suspended At</span>
+                        <strong>{formatDate(detailsUser.suspendedAt)}</strong>
+                      </div>
+                      <div>
+                        <span>Suspended Until</span>
+                        <strong>{detailsUser.suspendedUntil ? formatDateTime(detailsUser.suspendedUntil) : 'Manual restore'}</strong>
+                      </div>
+                      <div>
+                        <span>User ID</span>
+                        <strong>{detailsUser.id}</strong>
+                      </div>
+                    </section>
+                  </div>
+                );
+              })()}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-primary" type="button" onClick={() => setDetailsUser(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
@@ -1033,7 +1303,7 @@ export function SystemAdminRoles() {
     ['Program Head', 'Create adviser accounts, monitor students and adviser performance in department', 'No system settings or cross-role management'],
     ['Student', 'Self-register, submit projects, upload files, track progress', 'No admin access'],
     ['Adviser / Panel', 'Academic review, guidance, evaluations, defense workflow', 'No system-level access'],
-    ['Library / Tech Transfer / Partner', 'Research workflow support based on assigned process role', 'No system-level access']
+    ['Library / Partner', 'Research workflow support based on assigned process role', 'No system-level access']
   ];
 
   return (

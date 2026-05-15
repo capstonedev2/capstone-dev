@@ -4,6 +4,7 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { type NextResponse } from 'next/server';
 import { UserRole, type User } from '@/generated/prisma/client';
+import { sendAccountRestoreEmail } from '@/lib/mailer';
 import { prisma } from '@/lib/prisma';
 import {
   HttpError,
@@ -55,6 +56,7 @@ export type PublicUser = Pick<
   | 'displayName'
   | 'isSuspended'
   | 'suspendedAt'
+  | 'suspendedUntil'
   | 'createdAt'
   | 'updatedAt'
 >;
@@ -84,6 +86,7 @@ export const publicUserSelect = {
   displayName: true,
   isSuspended: true,
   suspendedAt: true,
+  suspendedUntil: true,
   createdAt: true,
   updatedAt: true
 } as const;
@@ -167,6 +170,7 @@ export function toPublicUser(user: PublicUser) {
     displayName: user.displayName,
     isSuspended: user.isSuspended,
     suspendedAt: user.suspendedAt,
+    suspendedUntil: user.suspendedUntil,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
   };
@@ -202,8 +206,35 @@ export async function verifyPassword(password: string, passwordHash: string) {
   return bcrypt.compare(password, passwordHash);
 }
 
-export function isAccountSuspended(user: Pick<PublicUser, 'isSuspended'> | null | undefined) {
+export function isAccountSuspended(user: Pick<PublicUser, 'isSuspended' | 'suspendedUntil'> | null | undefined) {
   return Boolean(user?.isSuspended);
+}
+
+export async function restoreExpiredSuspension(user: PublicUser) {
+  if (!user.isSuspended || !user.suspendedUntil || user.suspendedUntil > new Date()) {
+    return user;
+  }
+
+  const restoredUser = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      isSuspended: false,
+      suspendedAt: null,
+      suspendedUntil: null
+    },
+    select: publicUserSelect
+  });
+
+  try {
+    await sendAccountRestoreEmail({
+      to: restoredUser.email,
+      name: restoredUser.name
+    });
+  } catch (emailError) {
+    console.error('Failed to send automatic account restore email', emailError);
+  }
+
+  return restoredUser;
 }
 
 function getJwtSecret() {
@@ -303,10 +334,18 @@ export async function getAuthenticatedUser(request?: Request) {
     return null;
   }
 
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: payload.sub },
     select: publicUserSelect
-  }).then((user) => (isAccountSuspended(user) ? null : user));
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const restoredUser = await restoreExpiredSuspension(user);
+
+  return isAccountSuspended(restoredUser) ? null : restoredUser;
 }
 
 export async function requireAuthenticatedUser(request: Request, allowedRoles?: UserRole[]) {

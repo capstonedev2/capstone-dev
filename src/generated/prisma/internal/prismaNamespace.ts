@@ -1739,6 +1739,7 @@ export const UserScalarFieldEnum = {
   displayName: 'displayName',
   isSuspended: 'isSuspended',
   suspendedAt: 'suspendedAt',
+  suspendedUntil: 'suspendedUntil',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1981,6 +1982,8 @@ export const EvaluationScalarFieldEnum = {
   score: 'score',
   recommendation: 'recommendation',
   remarks: 'remarks',
+  rubricData: 'rubricData',
+  studentEvaluations: 'studentEvaluations',
   submittedAt: 'submittedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

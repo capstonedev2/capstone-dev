@@ -267,6 +267,17 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    setFeedbackData(buildFeedbackRecords(data));
+  }, [data]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [router]);
+
+  useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
       if (!profileMenuRef.current?.contains(event.target as Node)) setProfileMenuOpen(false);
     };
@@ -348,22 +359,43 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
     setSortBy('priority');
   };
 
-  const markRead = (id: string) => {
+  const markRead = async (id: string) => {
     setFeedbackData((previous) => previous.map((item) => (
-      item.id === id ? { ...item, unread: false } : item
+      item.id === id ? { ...item, unread: false, workflowStatus: 'Resolved', status: 'Resolved' } : item
     )));
+    try {
+      await fetch('/api/review-comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId: id, isResolved: true })
+      });
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const resolveFeedback = (id: string) => {
+  const resolveFeedback = async (id: string) => {
     setFeedbackData((previous) => previous.map((item) => (
       item.id === id
         ? {
             ...item,
             workflowStatus: 'Resolved',
-            status: 'Resolved'
+            status: 'Resolved',
+            unread: false
           }
         : item
     )));
+    try {
+      await fetch('/api/review-comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId: id, isResolved: true })
+      });
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const toggleReply = (id: string) => {

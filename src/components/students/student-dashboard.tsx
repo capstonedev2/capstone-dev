@@ -51,6 +51,22 @@ const DEFAULT_QUICK_LINKS = [
   }
 ] as const;
 
+function canPollApi() {
+  return (
+    typeof window !== 'undefined' &&
+    (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
+    window.navigator.onLine
+  );
+}
+
+function isExpectedPollError(error: unknown) {
+  return (
+    error instanceof DOMException && error.name === 'AbortError'
+  ) || (
+    error instanceof TypeError && (!canPollApi() || error.message === 'Failed to fetch')
+  );
+}
+
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type ShellTone =
   | 'completed'
@@ -443,20 +459,53 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
   useEffect(() => {
     if (!data.profile.user_id) return;
 
+    let cancelled = false;
+    let inFlightController: AbortController | null = null;
+
     const fetchNotifications = async () => {
+      if (cancelled || inFlightController || !canPollApi()) {
+        return;
+      }
+
+      const controller = new AbortController();
+      inFlightController = controller;
+
       try {
-        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
+        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
         if (notifRes.ok) {
           const notifs = await notifRes.json();
-          setRealNotifications(notifs);
+          if (!cancelled) {
+            setRealNotifications(notifs);
+          }
         }
       } catch (e) {
-        console.error('Failed to poll notifications', e);
+        if (!isExpectedPollError(e)) {
+          console.warn('Failed to poll dashboard notifications', e);
+        }
+      } finally {
+        if (inFlightController === controller) {
+          inFlightController = null;
+        }
       }
     };
 
-    const intervalId = setInterval(fetchNotifications, 5000);
-    return () => clearInterval(intervalId);
+    const pollNotifications = () => {
+      void fetchNotifications().catch((error) => {
+        if (!isExpectedPollError(error)) {
+          console.warn('Failed to poll dashboard notifications', error);
+        }
+      });
+    };
+
+    const intervalId = setInterval(pollNotifications, 5000);
+    return () => {
+      cancelled = true;
+      inFlightController?.abort();
+      clearInterval(intervalId);
+    };
   }, [data.profile.user_id]);
 
   const handleSubmitTitle = async () => {
@@ -1034,8 +1083,8 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               {projectStatusTone !== 'success' || (realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation')) ? (
                 <>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h2 style={{ opacity: 0.55, fontStyle: 'italic' }}>
-                      <i className="fas fa-lock" style={{ fontSize: '0.7em', marginRight: '0.5rem', opacity: 0.6 }}></i>
+                    <h2 className="student-dashboard-pending-title">
+                      <i className="fas fa-lock" aria-hidden="true"></i>
                       Project title pending approval
                     </h2>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[0.65em] font-semibold text-amber-700 shadow-sm align-middle">
@@ -1481,87 +1530,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   icon="fa-comments"
                 />
               )}
-            </article>
-
-            <article className="surface-card student-dashboard-card student-dashboard-notification-panel">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Notification Summary</span>
-                  <h3>Latest workspace updates</h3>
-                </div>
-                <Link className="inline-link" href="/students/notifications">
-                  Open inbox
-                </Link>
-              </div>
-              <div className="student-summary-strip">
-                <div className="student-summary-metric">
-                  <span>Unread</span>
-                  <strong>{unreadNotificationsCount}</strong>
-                </div>
-                <div className="student-summary-metric">
-                  <span>High priority</span>
-                  <strong>{highPriorityNotificationCount}</strong>
-                </div>
-              </div>
-              {recentNotifications.length ? (
-                <div className="stack-list">
-                  {recentNotifications.map((item) => {
-                    const action = getNotificationRoute(item);
-
-                    return (
-                      <article
-                        key={item.id}
-                        className={`stack-card student-notification-card ${item.read ? '' : 'is-highlighted'}`}
-                      >
-                        <div className="stack-card-head">
-                          <div>
-                            <strong>{item.title}</strong>
-                            <small>{item.dateLabel}</small>
-                          </div>
-                          <Badge
-                            label={item.priority === 'high' ? 'Priority' : 'Update'}
-                            tone={item.priority === 'high' ? 'danger' : 'neutral'}
-                          />
-                        </div>
-                        <p>{createExcerpt(item.message, 148)}</p>
-                        <Link className="inline-link" href={action.href}>
-                          {action.label}
-                        </Link>
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : (
-                <EmptyState
-                  title="No notifications"
-                  description="System reminders, adviser notes, and approval updates will appear here."
-                  icon="fa-bell"
-                />
-              )}
-            </article>
-
-            <article className="student-insight-panel student-dashboard-side-panel student-dashboard-readiness-panel">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Archive Readiness</span>
-                  <h4>Repository and transfer status</h4>
-                </div>
-                <Link className="inline-link" href="/students/project-overview">
-                  Open project
-                </Link>
-              </div>
-              <div className="student-dashboard-readiness-list">
-                {readinessItems.map((item) => (
-                  <article key={item.id} className="student-dashboard-readiness-item">
-                    <div className="student-dashboard-readiness-head">
-                      <span>{item.label}</span>
-                      <Badge label={item.value} tone={item.tone} />
-                    </div>
-                    <strong>{item.value}</strong>
-                    <small>{item.note}</small>
-                  </article>
-                ))}
-              </div>
             </article>
 
             <article className="surface-card student-dashboard-card student-dashboard-team-panel">

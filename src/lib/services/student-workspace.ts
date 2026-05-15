@@ -549,6 +549,102 @@ export async function getStudentDashboardData() {
           };
           data.titleRegistration.proposedTitle = approvedTitleProject?.title || data.titleRegistration.proposedTitle;
           data.titleRegistration.registrationStatus = approvedTitleProject ? 'Approved' : 'Pending';
+          data.titleRegistration.adviser = data.project.adviser;
+
+          const activeProject = approvedTitleProject || await prisma.project.findFirst({
+            where: { groupId: group.id },
+            orderBy: { updatedAt: 'desc' }
+          });
+
+          if (activeProject) {
+            // Fetch Documents
+            const files = await prisma.uploadedFile.findMany({
+              where: { projectId: activeProject.id },
+              include: { user: true },
+              orderBy: { createdAt: 'desc' }
+            });
+            data.documents = files.map(f => ({
+              id: f.id,
+              user_id: f.userId,
+              project_id: activeProject.id,
+              status: f.visibility,
+              created_at: f.createdAt.toISOString(),
+              updated_at: f.updatedAt.toISOString(),
+              category: f.documentCategory || f.category,
+              fileName: f.fileName,
+              fileType: f.fileType,
+              sizeLabel: f.size ? `${Math.round(f.size / 1024)} KB` : 'Unknown',
+              uploadDateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(f.createdAt),
+              uploadedBy: f.user?.name || 'Unknown',
+              reviewStatus: 'Pending Review'
+            }));
+
+            // Fetch Milestones
+            const milestones = await prisma.milestone.findMany({
+              where: { projectId: activeProject.id },
+              orderBy: { sequence: 'asc' }
+            });
+            data.milestones = milestones.map(m => ({
+              id: m.id,
+              user_id: dbUser.id,
+              project_id: activeProject.id,
+              status: m.status,
+              created_at: m.createdAt.toISOString(),
+              updated_at: m.updatedAt.toISOString(),
+              title: m.title,
+              dateLabel: m.dueAt ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(m.dueAt) : 'No date',
+              summary: m.description || '',
+              route: '/students/milestones'
+            }));
+
+            // Fetch Schedules
+            const schedules = await prisma.defenseSchedule.findMany({
+              where: { projectId: activeProject.id },
+              orderBy: { scheduledAt: 'asc' }
+            });
+            data.schedules = schedules.map(s => ({
+              id: s.id,
+              user_id: dbUser.id,
+              project_id: activeProject.id,
+              status: s.status,
+              created_at: s.createdAt.toISOString(),
+              updated_at: s.updatedAt.toISOString(),
+              title: s.title,
+              type: 'Defense',
+              startDate: s.scheduledAt.toISOString(),
+              startDateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(s.scheduledAt),
+              time: new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(s.scheduledAt),
+              location: s.location || 'TBA',
+              description: s.notes || ''
+            }));
+
+            // Fetch Feedback (from Submissions)
+            const submissions = await prisma.submission.findMany({
+              where: { projectId: activeProject.id },
+              include: { comments: { include: { author: true } } }
+            });
+            
+            const allFeedback: any[] = [];
+            submissions.forEach(sub => {
+              sub.comments.forEach(c => {
+                allFeedback.push({
+                  id: c.id,
+                  user_id: dbUser.id,
+                  project_id: activeProject.id,
+                  status: c.isResolved ? 'Resolved' : 'Pending',
+                  created_at: c.createdAt.toISOString(),
+                  updated_at: c.updatedAt.toISOString(),
+                  title: `Feedback on ${sub.title}`,
+                  content: c.body,
+                  facultyName: c.author?.name || 'Faculty',
+                  mode: c.author?.role === 'ADVISER' ? 'Adviser' : 'Panel',
+                  dateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(c.createdAt),
+                  unread: !c.isResolved
+                });
+              });
+            });
+            data.feedback = allFeedback.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          }
         }
       } catch (err) {
         console.error('Failed to overlay db user profile:', err);

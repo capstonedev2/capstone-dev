@@ -30,7 +30,7 @@ const googleLoginMessages: Record<string, string> = {
   cancelled: 'Google sign in was cancelled.',
   invalid_request: 'Google sign in could not be verified. Please try again.',
   account_mismatch: 'This Google account is linked to a different ThesisTrack account.',
-  suspended: 'This account has been suspended. Contact the research office for access.',
+  suspended: 'This account has been suspended. Contact your administrator for assistance.',
   error: 'Unable to complete Google sign in. Please try again.'
 };
 

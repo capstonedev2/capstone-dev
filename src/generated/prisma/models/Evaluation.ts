@@ -71,6 +71,8 @@ export type EvaluationCountAggregateOutputType = {
   score: number
   recommendation: number
   remarks: number
+  rubricData: number
+  studentEvaluations: number
   submittedAt: number
   createdAt: number
   updatedAt: number
@@ -123,6 +125,8 @@ export type EvaluationCountAggregateInputType = {
   score?: true
   recommendation?: true
   remarks?: true
+  rubricData?: true
+  studentEvaluations?: true
   submittedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -224,6 +228,8 @@ export type EvaluationGroupByOutputType = {
   score: number | null
   recommendation: $Enums.EvaluationRecommendation
   remarks: string | null
+  rubricData: runtime.JsonValue | null
+  studentEvaluations: runtime.JsonValue | null
   submittedAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -261,6 +267,8 @@ export type EvaluationWhereInput = {
   score?: Prisma.IntNullableFilter<"Evaluation"> | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFilter<"Evaluation"> | $Enums.EvaluationRecommendation
   remarks?: Prisma.StringNullableFilter<"Evaluation"> | string | null
+  rubricData?: Prisma.JsonNullableFilter<"Evaluation">
+  studentEvaluations?: Prisma.JsonNullableFilter<"Evaluation">
   submittedAt?: Prisma.DateTimeNullableFilter<"Evaluation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Evaluation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Evaluation"> | Date | string
@@ -278,6 +286,8 @@ export type EvaluationOrderByWithRelationInput = {
   score?: Prisma.SortOrderInput | Prisma.SortOrder
   recommendation?: Prisma.SortOrder
   remarks?: Prisma.SortOrderInput | Prisma.SortOrder
+  rubricData?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentEvaluations?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -299,6 +309,8 @@ export type EvaluationWhereUniqueInput = Prisma.AtLeast<{
   score?: Prisma.IntNullableFilter<"Evaluation"> | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFilter<"Evaluation"> | $Enums.EvaluationRecommendation
   remarks?: Prisma.StringNullableFilter<"Evaluation"> | string | null
+  rubricData?: Prisma.JsonNullableFilter<"Evaluation">
+  studentEvaluations?: Prisma.JsonNullableFilter<"Evaluation">
   submittedAt?: Prisma.DateTimeNullableFilter<"Evaluation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Evaluation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Evaluation"> | Date | string
@@ -316,6 +328,8 @@ export type EvaluationOrderByWithAggregationInput = {
   score?: Prisma.SortOrderInput | Prisma.SortOrder
   recommendation?: Prisma.SortOrder
   remarks?: Prisma.SortOrderInput | Prisma.SortOrder
+  rubricData?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentEvaluations?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -338,6 +352,8 @@ export type EvaluationScalarWhereWithAggregatesInput = {
   score?: Prisma.IntNullableWithAggregatesFilter<"Evaluation"> | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationWithAggregatesFilter<"Evaluation"> | $Enums.EvaluationRecommendation
   remarks?: Prisma.StringNullableWithAggregatesFilter<"Evaluation"> | string | null
+  rubricData?: Prisma.JsonNullableWithAggregatesFilter<"Evaluation">
+  studentEvaluations?: Prisma.JsonNullableWithAggregatesFilter<"Evaluation">
   submittedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Evaluation"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Evaluation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Evaluation"> | Date | string
@@ -349,6 +365,8 @@ export type EvaluationCreateInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -366,6 +384,8 @@ export type EvaluationUncheckedCreateInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -377,6 +397,8 @@ export type EvaluationUpdateInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -394,6 +416,8 @@ export type EvaluationUncheckedUpdateInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -408,6 +432,8 @@ export type EvaluationCreateManyInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -419,6 +445,8 @@ export type EvaluationUpdateManyMutationInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -433,6 +461,8 @@ export type EvaluationUncheckedUpdateManyInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -462,6 +492,8 @@ export type EvaluationCountOrderByAggregateInput = {
   score?: Prisma.SortOrder
   recommendation?: Prisma.SortOrder
   remarks?: Prisma.SortOrder
+  rubricData?: Prisma.SortOrder
+  studentEvaluations?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -643,6 +675,8 @@ export type EvaluationCreateWithoutEvaluatorInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -658,6 +692,8 @@ export type EvaluationUncheckedCreateWithoutEvaluatorInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -701,6 +737,8 @@ export type EvaluationScalarWhereInput = {
   score?: Prisma.IntNullableFilter<"Evaluation"> | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFilter<"Evaluation"> | $Enums.EvaluationRecommendation
   remarks?: Prisma.StringNullableFilter<"Evaluation"> | string | null
+  rubricData?: Prisma.JsonNullableFilter<"Evaluation">
+  studentEvaluations?: Prisma.JsonNullableFilter<"Evaluation">
   submittedAt?: Prisma.DateTimeNullableFilter<"Evaluation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Evaluation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Evaluation"> | Date | string
@@ -712,6 +750,8 @@ export type EvaluationCreateWithoutProjectInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -727,6 +767,8 @@ export type EvaluationUncheckedCreateWithoutProjectInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -764,6 +806,8 @@ export type EvaluationCreateWithoutDefenseScheduleInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -779,6 +823,8 @@ export type EvaluationUncheckedCreateWithoutDefenseScheduleInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -818,6 +864,8 @@ export type EvaluationCreateManyEvaluatorInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -829,6 +877,8 @@ export type EvaluationUpdateWithoutEvaluatorInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -844,6 +894,8 @@ export type EvaluationUncheckedUpdateWithoutEvaluatorInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -857,6 +909,8 @@ export type EvaluationUncheckedUpdateManyWithoutEvaluatorInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -870,6 +924,8 @@ export type EvaluationCreateManyProjectInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -881,6 +937,8 @@ export type EvaluationUpdateWithoutProjectInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -896,6 +954,8 @@ export type EvaluationUncheckedUpdateWithoutProjectInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -909,6 +969,8 @@ export type EvaluationUncheckedUpdateManyWithoutProjectInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -922,6 +984,8 @@ export type EvaluationCreateManyDefenseScheduleInput = {
   score?: number | null
   recommendation?: $Enums.EvaluationRecommendation
   remarks?: string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -933,6 +997,8 @@ export type EvaluationUpdateWithoutDefenseScheduleInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -948,6 +1014,8 @@ export type EvaluationUncheckedUpdateWithoutDefenseScheduleInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -961,6 +1029,8 @@ export type EvaluationUncheckedUpdateManyWithoutDefenseScheduleInput = {
   score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommendation?: Prisma.EnumEvaluationRecommendationFieldUpdateOperationsInput | $Enums.EvaluationRecommendation
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rubricData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  studentEvaluations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -977,6 +1047,8 @@ export type EvaluationSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   score?: boolean
   recommendation?: boolean
   remarks?: boolean
+  rubricData?: boolean
+  studentEvaluations?: boolean
   submittedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -994,6 +1066,8 @@ export type EvaluationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   score?: boolean
   recommendation?: boolean
   remarks?: boolean
+  rubricData?: boolean
+  studentEvaluations?: boolean
   submittedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1011,6 +1085,8 @@ export type EvaluationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   score?: boolean
   recommendation?: boolean
   remarks?: boolean
+  rubricData?: boolean
+  studentEvaluations?: boolean
   submittedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1028,12 +1104,14 @@ export type EvaluationSelectScalar = {
   score?: boolean
   recommendation?: boolean
   remarks?: boolean
+  rubricData?: boolean
+  studentEvaluations?: boolean
   submittedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EvaluationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "defenseScheduleId" | "evaluatorId" | "panelRole" | "score" | "recommendation" | "remarks" | "submittedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["evaluation"]>
+export type EvaluationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "defenseScheduleId" | "evaluatorId" | "panelRole" | "score" | "recommendation" | "remarks" | "rubricData" | "studentEvaluations" | "submittedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["evaluation"]>
 export type EvaluationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   defenseSchedule?: boolean | Prisma.Evaluation$defenseScheduleArgs<ExtArgs>
@@ -1066,6 +1144,8 @@ export type $EvaluationPayload<ExtArgs extends runtime.Types.Extensions.Internal
     score: number | null
     recommendation: $Enums.EvaluationRecommendation
     remarks: string | null
+    rubricData: runtime.JsonValue | null
+    studentEvaluations: runtime.JsonValue | null
     submittedAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -1503,6 +1583,8 @@ export interface EvaluationFieldRefs {
   readonly score: Prisma.FieldRef<"Evaluation", 'Int'>
   readonly recommendation: Prisma.FieldRef<"Evaluation", 'EvaluationRecommendation'>
   readonly remarks: Prisma.FieldRef<"Evaluation", 'String'>
+  readonly rubricData: Prisma.FieldRef<"Evaluation", 'Json'>
+  readonly studentEvaluations: Prisma.FieldRef<"Evaluation", 'Json'>
   readonly submittedAt: Prisma.FieldRef<"Evaluation", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Evaluation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Evaluation", 'DateTime'>

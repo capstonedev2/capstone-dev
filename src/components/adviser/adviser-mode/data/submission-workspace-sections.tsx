@@ -39,6 +39,7 @@ type SubmissionFocusPanelProps = {
   activeReviewCount: number;
   completionRate: number;
   nextDueSubmission: AdviserSubmissionRecord | null;
+  isLoading?: boolean;
 };
 
 function WorkspaceSelect<TValue extends string>({
@@ -150,7 +151,7 @@ function getDeadlineVisual(deadline: string, status: SubmissionStatus) {
   };
 }
 
-export function SummaryCards({ metrics }: { metrics: SubmissionSummaryMetric[] }) {
+export function SummaryCards({ metrics, isLoading }: { metrics: SubmissionSummaryMetric[], isLoading?: boolean }) {
   return (
     <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
       {metrics.map((metric) => (
@@ -162,9 +163,13 @@ export function SummaryCards({ metrics }: { metrics: SubmissionSummaryMetric[] }
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--text-light)]">{metric.label}</p>
-              <p className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
-                {metric.value}
-              </p>
+              {isLoading ? (
+                <div className="mt-3 h-10 w-12 animate-pulse rounded bg-slate-100" />
+              ) : (
+                <p className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
+                  {metric.value}
+                </p>
+              )}
             </div>
             <span
               className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
@@ -182,7 +187,8 @@ export function SummaryCards({ metrics }: { metrics: SubmissionSummaryMetric[] }
 export function SubmissionFocusPanel({
   activeReviewCount,
   completionRate,
-  nextDueSubmission
+  nextDueSubmission,
+  isLoading
 }: SubmissionFocusPanelProps) {
   const deadlineVisual = nextDueSubmission
     ? getDeadlineVisual(nextDueSubmission.deadline, nextDueSubmission.status)
@@ -208,11 +214,19 @@ export function SubmissionFocusPanel({
             <div className="grid min-w-[240px] grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-inset ring-white/15">
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-100">Open Reviews</p>
-                <p className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">{activeReviewCount}</p>
+                {isLoading ? (
+                  <div className="mt-2 h-9 w-12 animate-pulse rounded bg-white/20" />
+                ) : (
+                  <p className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">{activeReviewCount}</p>
+                )}
               </div>
               <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-inset ring-white/15">
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-100">Cleared</p>
-                <p className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">{completionRate}%</p>
+                {isLoading ? (
+                  <div className="mt-2 h-9 w-16 animate-pulse rounded bg-white/20" />
+                ) : (
+                  <p className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">{completionRate}%</p>
+                )}
               </div>
             </div>
           </div>
@@ -221,7 +235,13 @@ export function SubmissionFocusPanel({
         <div className="flex flex-col justify-between gap-4 bg-slate-50 p-6">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Next Deadline</p>
-            {nextDueSubmission ? (
+            {isLoading ? (
+              <div className="mt-3 space-y-3">
+                <div className="h-6 w-24 animate-pulse rounded-full bg-slate-200" />
+                <div className="h-5 w-3/4 animate-pulse rounded bg-slate-200" />
+                <div className="h-4 w-1/2 animate-pulse rounded bg-slate-200" />
+              </div>
+            ) : nextDueSubmission ? (
               <>
                 <div className="mt-3 flex items-center gap-2">
                   <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold ${deadlineVisual?.className}`}>

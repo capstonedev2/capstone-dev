@@ -20,6 +20,11 @@ export type AdviserTitleRecord = {
   similarTitles: SimilarTitleRecord[];
   membersCount: number;
   memberPreview: string[];
+  groupMembers?: Array<{
+    name: string;
+    role: string;
+    isLeader: boolean;
+  }>;
   adviserAction: string;
   academicYear: string;
   uploadedFiles: Array<{

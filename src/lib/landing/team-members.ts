@@ -12,28 +12,27 @@ export const teamMembers: TeamMember[] = [
     name: 'Kyle Japheth C. Graniten',
     role: 'Project Manager & Lead Developer',
     image: '/team/Team%20Leader%201.png',
-    shortBio: 'Leads project planning and team coordination while leading system development, ensuring timely delivery and high-quality implementation aligned with project goals..'
+    shortBio: 'Leads planning, coordination, and core system development.'
   },
   {
     id: 'Assistant Developer',
     name: 'James Anthony Z. Juntilla',
     role: 'Assistant Developer',
     image: '/team/member%202.png',
-    shortBio: 'Supports development tasks, assists in coding and testing, and helps ensure a smooth and efficient project workflow.'
+    shortBio: 'Supports coding, testing, and implementation tasks.'
   },
   {
     id: 'System Analyst & Research Lead',
     name: 'Princess Camille N. Achas',
     role: 'System Analyst & Research Lead',
     image: '/team/member%203.png',
-    shortBio:
-      'Analyzes system requirements, conducts interviews, and leads research and documentation to ensure the system meets user needs and project objectives.'
+    shortBio: 'Handles requirements, research, and system analysis.'
   },
   {
     id: 'Documentation Specialist',
     name: 'Ivy A. Bitos',
     role: 'Documentation Specialist',
     image: '/team/member%204.png',
-    shortBio: 'Prepares, organizes, and maintains accurate project documentation and system records.'
+    shortBio: 'Organizes project documents and system records.'
   }
 ];

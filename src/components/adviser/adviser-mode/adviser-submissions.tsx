@@ -414,9 +414,10 @@ export function AdviserSubmissions({ data }: { data: AdviserDashboardData }) {
             activeReviewCount={activeReviewCount}
             completionRate={completionRate}
             nextDueSubmission={nextDueSubmission}
+            isLoading={isLoadingStudentDocuments}
           />
 
-          <SummaryCards metrics={summaryMetrics} />
+          <SummaryCards metrics={summaryMetrics} isLoading={isLoadingStudentDocuments} />
 
           {studentDocumentError ? (
             <div className="project-files-state is-danger">

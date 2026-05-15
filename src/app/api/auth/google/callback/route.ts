@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import {
   isAccountSuspended,
   publicUserSelect,
+  restoreExpiredSuspension,
   setAuthCookie,
   signAuthToken,
   toPublicUser
@@ -131,14 +132,16 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    if (isAccountSuspended(user)) {
+    const authUser = await restoreExpiredSuspension(user);
+
+    if (isAccountSuspended(authUser)) {
       const response = NextResponse.redirect(getLoginRedirect(request, 'suspended'));
       clearGoogleOAuthStateCookie(response);
       return response;
     }
 
     const linkedUser = user.googleSub
-      ? user
+      ? authUser
       : await prisma.user.update({
           where: {
             id: user.id

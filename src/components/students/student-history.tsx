@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { getProjectFileCategoryLabel } from '@/components/students/student-project-files.shared';
@@ -479,10 +480,19 @@ function buildHistoryEntries(data: StudentDashboardData): StudentHistoryEntry[] 
 }
 
 export function StudentHistory({ data }: { data: StudentDashboardData }) {
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<HistoryFilterKey>('all');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+  // Auto-refresh data every 5 seconds for real-time history tracking
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      router.refresh();
+    }, 5000);
+    return () => clearInterval(intervalId);
+  }, [router]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

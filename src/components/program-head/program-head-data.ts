@@ -10,8 +10,7 @@ export type ProgramHeadNavKey =
   | 'schedule'
   | 'reports'
   | 'notifications'
-  | 'profile'
-  | 'users';
+  | 'profile';
 
 export type ProgramHeadStatusTone =
   | 'approved'
@@ -70,7 +69,6 @@ export type ProgramHeadNotification = {
 
 export const PROGRAM_HEAD_NAV_ITEMS = [
   { key: 'dashboard', href: '/program-head/dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
-  { key: 'users', href: '/program-head/users', label: 'User Management', icon: 'fa-users-cog' },
   { key: 'projects', href: '/program-head/projects', label: 'Project Overview', icon: 'fa-chart-pie' },
   { key: 'progress', href: '/program-head/progress', label: 'Progress Monitoring', icon: 'fa-chart-line' },
   { key: 'transfer', href: '/program-head/transfer', label: 'Technology Transfer', icon: 'fa-exchange-alt' },

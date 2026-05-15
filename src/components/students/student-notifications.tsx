@@ -25,6 +25,22 @@ function sortByCreatedAtDesc<T extends { created_at: string }>(items: T[]) {
   return [...items].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
 }
 
+function canPollApi() {
+  return (
+    typeof window !== 'undefined' &&
+    (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
+    window.navigator.onLine
+  );
+}
+
+function isExpectedPollError(error: unknown) {
+  return (
+    error instanceof DOMException && error.name === 'AbortError'
+  ) || (
+    error instanceof TypeError && (!canPollApi() || error.message === 'Failed to fetch')
+  );
+}
+
 function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: BadgeTone; icon?: string }) {
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none ${BADGE_STYLES[tone]}`}>
@@ -262,21 +278,54 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
   useEffect(() => {
     if (!data.profile.user_id) return;
 
+    let cancelled = false;
+    let inFlightController: AbortController | null = null;
+
     const fetchNotifications = async () => {
+      if (cancelled || inFlightController || !canPollApi()) {
+        return;
+      }
+
+      const controller = new AbortController();
+      inFlightController = controller;
+
       try {
-        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
+        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
         if (notifRes.ok) {
           const notifs = await notifRes.json();
-          setRealNotifications(notifs);
+          if (!cancelled) {
+            setRealNotifications(notifs);
+          }
         }
       } catch (e) {
-        console.error('Failed to poll notifications', e);
+        if (!isExpectedPollError(e)) {
+          console.warn('Failed to poll student notifications', e);
+        }
+      } finally {
+        if (inFlightController === controller) {
+          inFlightController = null;
+        }
       }
     };
 
-    fetchNotifications();
-    const intervalId = setInterval(fetchNotifications, 5000);
-    return () => clearInterval(intervalId);
+    const pollNotifications = () => {
+      void fetchNotifications().catch((error) => {
+        if (!isExpectedPollError(error)) {
+          console.warn('Failed to poll student notifications', error);
+        }
+      });
+    };
+
+    pollNotifications();
+    const intervalId = setInterval(pollNotifications, 5000);
+    return () => {
+      cancelled = true;
+      inFlightController?.abort();
+      clearInterval(intervalId);
+    };
   }, [data.profile.user_id]);
 
   useEffect(() => {

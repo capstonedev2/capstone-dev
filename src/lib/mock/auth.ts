@@ -555,7 +555,7 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
   }
 
   if (normalizeText((matchedUser as User & { account_status?: string }).account_status).toLowerCase() === 'suspended') {
-    return buildFailureResponse('This account is suspended. Contact the research office for access.');
+    return buildFailureResponse('This account is suspended. Contact your administrator for assistance.');
   }
 
   if (requestedRole && matchedUser.role !== requestedRole) {

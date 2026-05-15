@@ -296,7 +296,7 @@ export default function Page() {
             </div>
           </section>
 
-          <section id="about" className="relative py-24 sm:py-32 overflow-hidden bg-[#f7fbff]">
+          <section id="about" className={`${styles.homeAboutSection} relative py-24 sm:py-32 overflow-hidden bg-[#f7fbff]`}>
             {/* Premium Ambient Backgrounds */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(0,58,143,0.06),transparent_70%)] pointer-events-none" />
             <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(246,190,0,0.05),transparent_60%)] pointer-events-none blur-3xl" />
@@ -306,7 +306,7 @@ export default function Page() {
               
               <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 mb-8">
                 {/* Left Card: Premium Light Glassmorphism */}
-                <article className="relative overflow-hidden bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-10 sm:p-14 transition-all duration-500 hover:shadow-[0_30px_70px_rgba(15,43,89,0.08)] group" data-reveal="fade-right">
+                <article className={`${styles.homeAboutSummaryCard} relative overflow-hidden bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-10 sm:p-14 transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)] group`} data-reveal="fade-right">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-blue-50/30 pointer-events-none" />
                   
                   <div className="relative z-10">
@@ -315,33 +315,33 @@ export default function Page() {
                 </article>
 
                 {/* Right Card: Dynamic Workflow Display */}
-                <aside className="relative overflow-hidden bg-gradient-to-br from-white/90 to-[#f2f7ff]/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-10 sm:p-14 flex flex-col justify-center transition-all duration-500 hover:shadow-[0_30px_70px_rgba(15,43,89,0.08)]" aria-label="System workflow preview" data-reveal="fade-left">
+                <aside className={`${styles.homeAboutFlowCard} relative overflow-hidden bg-gradient-to-br from-white/90 to-[#f2f7ff]/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-10 sm:p-14 flex flex-col justify-center transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)]`} aria-label="System workflow preview" data-reveal="fade-left">
                   
                   {/* Decorative corner accent */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#f6be00]/20 to-transparent pointer-events-none rounded-bl-[100px]" />
                   
                   <div className="relative z-10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-14">
-                      <span className="text-[0.8rem] font-extrabold uppercase text-[#003a8f] flex items-center gap-2">
+                      <span className={`${styles.homeAboutFlowKicker} text-[0.8rem] font-extrabold uppercase text-[#003a8f] flex items-center gap-2`}>
                         <i className="fas fa-route text-[#f6be00]" />
                         System Flow
                       </span>
-                      <strong className="text-[0.85rem] font-bold text-[#4b6380] bg-white px-3 py-1 rounded-full border border-[#e2eaf5] shadow-sm">From idea to archived output</strong>
+                      <strong className={`${styles.homeAboutFlowBadge} text-[0.85rem] font-bold text-[#4b6380] bg-white px-3 py-1 rounded-full border border-[#e2eaf5] shadow-sm`}>From idea to archived output</strong>
                     </div>
                     
                     <div className="relative px-2">
                       {/* Animated Connecting Line */}
-                      <div className="absolute top-1/2 left-4 right-4 h-1 bg-[#e2eaf5] -translate-y-1/2 rounded-full overflow-hidden shadow-inner">
-                        <div className="absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-[#003a8f] to-transparent animate-[shimmer_2.5s_infinite]" />
+                      <div className={`${styles.homeAboutFlowRail} absolute top-1/2 left-4 right-4 h-1 bg-[#e2eaf5] -translate-y-1/2 rounded-full overflow-hidden shadow-inner`}>
+                        <div className="absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-[#003a8f]/60 to-transparent" />
                       </div>
                       
                       <div className="relative flex justify-between gap-2">
                         {systemFlowItems.map((item, index) => (
                           <div key={item.title} className="flex flex-col items-center gap-4 relative z-10 group/item">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[1rem] bg-white text-[#003a8f] flex items-center justify-center text-xl sm:text-2xl shadow-[0_8px_20px_rgba(15,43,89,0.08)] border border-white ring-1 ring-[#e2eaf5] group-hover/item:scale-110 group-hover/item:bg-[#003a8f] group-hover/item:text-white transition-all duration-400">
+                            <div className={`${styles.homeAboutFlowIcon} w-14 h-14 sm:w-16 sm:h-16 rounded-[1rem] bg-white text-[#003a8f] flex items-center justify-center text-xl sm:text-2xl shadow-[0_8px_20px_rgba(15,43,89,0.08)] border border-white ring-1 ring-[#e2eaf5] group-hover/item:bg-[#003a8f] group-hover/item:text-white transition-colors duration-200`}>
                               <i className={item.icon} />
                             </div>
-                            <strong className="text-[0.7rem] sm:text-[0.75rem] font-black uppercase tracking-wider text-[#102033] bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-md">{item.title}</strong>
+                            <strong className={`${styles.homeAboutFlowLabel} text-[0.7rem] sm:text-[0.75rem] font-black uppercase tracking-wider text-[#102033] bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-md`}>{item.title}</strong>
                           </div>
                         ))}
                       </div>
@@ -355,39 +355,39 @@ export default function Page() {
                 {systemOutcomes.map((outcome, index) => (
                   <article 
                     key={outcome.title} 
-                    className="group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/80 rounded-[1.5rem] p-8 shadow-[0_12px_30px_rgba(15,43,89,0.03)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_24px_50px_rgba(15,43,89,0.08)] hover:bg-white" 
+                    className={`${styles.homeAboutOutcomeCard} group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/80 rounded-[1.5rem] p-8 shadow-[0_12px_30px_rgba(15,43,89,0.03)] transition-colors duration-200 hover:bg-white`}
                     data-reveal="fade-up"
                     style={{ '--reveal-delay': `${index * 0.1}s` } as any}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#f0f5ff]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#f0f5ff]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
                     
                     <div className="relative z-10">
-                      <div className="inline-flex h-[4rem] w-[4rem] items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#ffffff] to-[#eaf3ff] text-[#003a8f] text-[1.5rem] mb-6 shadow-[0_4px_15px_rgba(15,43,89,0.05)] border border-white ring-1 ring-[#dfeaf8] group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                      <div className={`${styles.homeAboutOutcomeIcon} inline-flex h-[4rem] w-[4rem] items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#ffffff] to-[#eaf3ff] text-[#003a8f] text-[1.5rem] mb-6 shadow-[0_4px_15px_rgba(15,43,89,0.05)] border border-white ring-1 ring-[#dfeaf8] transition-colors duration-200`}>
                         <i className={outcome.icon} />
                       </div>
-                      <h3 className="text-[1.15rem] font-black text-[#14243a] mb-3">{outcome.title}</h3>
-                      <p className="text-[0.95rem] text-[#536982] leading-[1.65] font-medium">{outcome.description}</p>
+                      <h3 className={`${styles.homeAboutOutcomeTitle} text-[1.15rem] font-black text-[#14243a] mb-3`}>{outcome.title}</h3>
+                      <p className={`${styles.homeAboutOutcomeText} text-[0.95rem] text-[#536982] leading-[1.65] font-medium`}>{outcome.description}</p>
                     </div>
                   </article>
                 ))}
               </div>
 
               {/* Action Banner: Highly polished call to action */}
-              <div className="relative overflow-hidden rounded-[2rem] bg-white border border-[#e2eaf5] shadow-[0_20px_60px_rgba(15,43,89,0.08)] p-1.5" data-reveal="fade-up" style={{ '--reveal-delay': '0.3s' } as any}>
-                <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6 bg-gradient-to-r from-[#f8fbff] to-[#fffdf5] rounded-[1.6rem] py-8 px-8 sm:px-12">
+              <div className={`${styles.homeAboutCtaShell} relative overflow-hidden rounded-[2rem] bg-white border border-[#e2eaf5] shadow-[0_20px_60px_rgba(15,43,89,0.08)] p-1.5`} data-reveal="fade-up" style={{ '--reveal-delay': '0.3s' } as any}>
+                <div className={`${styles.homeAboutCtaBand} relative flex flex-col sm:flex-row items-center justify-between gap-6 bg-gradient-to-r from-[#f8fbff] to-[#fffdf5] rounded-[1.6rem] py-8 px-8 sm:px-12`}>
                   
                   <div className="text-center sm:text-left max-w-lg">
-                    <h3 className="text-xl font-black text-[#102033] mb-2">Ready to explore ThesisTrack?</h3>
-                    <p className="text-sm text-[#66758a] font-medium">Discover how our unified workflow transforms academic project management.</p>
+                    <h3 className={`${styles.homeAboutCtaTitle} text-xl font-black text-[#102033] mb-2`}>Ready to explore ThesisTrack?</h3>
+                    <p className={`${styles.homeAboutCtaText} text-sm text-[#66758a] font-medium`}>Discover how our unified workflow transforms academic project management.</p>
                   </div>
                   
                   <div className="flex flex-wrap items-center justify-center gap-4">
-                    <Link href="/about#system-model" className="group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#0d61cf]/20 bg-gradient-to-br from-[#0d61cf] via-[#003a8f] to-[#082a67] px-8 py-3 text-[0.95rem] font-black text-white shadow-[0_12px_25px_rgba(0,58,143,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_35px_rgba(0,58,143,0.35)]">
+                    <Link href="/about#system-model" className="group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#0d61cf]/20 bg-gradient-to-br from-[#0d61cf] via-[#003a8f] to-[#082a67] px-8 py-3 text-[0.95rem] font-black text-white shadow-[0_12px_25px_rgba(0,58,143,0.25)] transition-shadow duration-200 hover:shadow-[0_14px_28px_rgba(0,58,143,0.28)]">
                       <span>Explore the System</span>
-                      <i className="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1" />
+                      <i className="fas fa-arrow-right" />
                     </Link>
                     
-                    <Link href="/about#capstone-team" className="group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#f6be00]/40 bg-gradient-to-br from-[#ffe98b] to-[#f6be00] px-8 py-3 text-[0.95rem] font-black text-[#5b4200] shadow-[0_12px_25px_rgba(246,190,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_35px_rgba(246,190,0,0.3)]">
+                    <Link href="/about#capstone-team" className={`${styles.homeAboutSecondaryLink} group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#f6be00]/40 bg-gradient-to-br from-[#ffe98b] to-[#f6be00] px-8 py-3 text-[0.95rem] font-black text-[#5b4200] shadow-[0_12px_25px_rgba(246,190,0,0.2)] transition-shadow duration-200 hover:shadow-[0_14px_28px_rgba(246,190,0,0.24)]`}>
                       <span>Meet the Devs</span>
                       <i className="fas fa-users" />
                     </Link>

@@ -50,8 +50,12 @@ function getNotificationVisual(type: string, entityType: string | null): Pick<Ad
 }
 
 function getNotificationHref(basePath: string, entityType: string | null) {
-  if (entityType === 'uploaded_file') {
+  if (entityType === 'uploaded_file' || entityType === 'review_comment') {
     return basePath.includes('/panel-mode') ? `${basePath}/evaluation-queue` : `${basePath}/submissions`;
+  }
+  
+  if (entityType === 'project') {
+    return basePath.includes('/panel-mode') ? `${basePath}/dashboard` : `${basePath}/title-approvals`;
   }
 
   return `${basePath}/notifications`;

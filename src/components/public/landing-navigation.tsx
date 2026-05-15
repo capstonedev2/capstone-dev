@@ -13,6 +13,7 @@ export function LandingNavigation() {
   const { branding } = useBranding();
   const [isOpen, setIsOpen] = useState(false);
   const [activeHref, setActiveHref] = useState('/#home');
+  const [darkMode, setDarkMode] = useState(false);
   const pathname = usePathname();
   const navigation = branding.navigation;
   const visibleLinks = useMemo(
@@ -23,6 +24,20 @@ export function LandingNavigation() {
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem('thesistrackLandingTheme');
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+    const nextDarkMode = storedTheme ? storedTheme === 'dark' : Boolean(prefersDark);
+
+    setDarkMode(nextDarkMode);
+    document.documentElement.dataset.landingTheme = nextDarkMode ? 'dark' : 'light';
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.landingTheme = darkMode ? 'dark' : 'light';
+    window.localStorage.setItem('thesistrackLandingTheme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   useEffect(() => {
     if (pathname !== '/') {
@@ -136,16 +151,18 @@ export function LandingNavigation() {
           id="landing-navigation"
           className={`${styles.navLinks} ${isOpen ? styles.navLinksOpen : ''}`}
         >
-          {visibleLinks.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={getActiveClassName(link.href)}
-              onClick={() => setIsOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <div className={styles.navLinkList}>
+            {visibleLinks.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={getActiveClassName(link.href)}
+                onClick={() => setIsOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
           <div className={styles.navActions}>
             {navigation.showLogin ? (
@@ -156,14 +173,18 @@ export function LandingNavigation() {
                 </span>
               </Link>
             ) : null}
-            {navigation.showRegister ? (
-              <Link href="/register" className={`${styles.buttonSecondary} ${styles.navActionButton}`}>
-                <span className={styles.buttonText}>{navigation.registerLabel}</span>
-                <span className={styles.buttonIcon} aria-hidden="true">
-                  <i className="fas fa-user-plus" />
-                </span>
-              </Link>
-            ) : null}
+            <button
+              type="button"
+              className={styles.themeToggleButton}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-pressed={darkMode}
+              onClick={() => setDarkMode(current => !current)}
+            >
+              <span className={styles.themeToggleIcon} aria-hidden="true">
+                <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`} />
+              </span>
+              <span className={styles.themeToggleText}>{darkMode ? 'Light' : 'Dark'}</span>
+            </button>
           </div>
         </div>
       </div>

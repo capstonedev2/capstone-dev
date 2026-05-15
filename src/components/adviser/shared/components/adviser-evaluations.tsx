@@ -78,12 +78,8 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   const [statusFilter, setStatusFilter] = useState<EvaluationStatus | 'all'>('all');
   const [dateFilter, setDateFilter] = useState<EvaluationDateFilter>('all');
   const [searchValue, setSearchValue] = useState('');
-  const [adviserRecords, setAdviserRecords] = useState<EvaluationRecord[]>(() =>
-    cloneEvaluationRecords(ADVISER_EVALUATION_RECORDS)
-  );
-  const [panelRecords, setPanelRecords] = useState<EvaluationRecord[]>(() =>
-    cloneEvaluationRecords(PANEL_EVALUATION_RECORDS)
-  );
+  const [adviserRecords, setAdviserRecords] = useState<EvaluationRecord[]>([]);
+  const [panelRecords, setPanelRecords] = useState<EvaluationRecord[]>([]);
   const [draftRecord, setDraftRecord] = useState<EvaluationRecord | null>(null);
   const [readOnlyModal, setReadOnlyModal] = useState(false);
   const [toast, setToast] = useState<{ id: number; message: string; type: ToastType } | null>(null);
@@ -93,6 +89,23 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   const [evaluationFileError, setEvaluationFileError] = useState<string | null>(null);
   const [isEvaluationFileUploading, setIsEvaluationFileUploading] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadLiveEvaluations() {
+      try {
+        const response = await fetch('/api/advisers/evaluations');
+        if (response.ok && !cancelled) {
+          const { evaluations } = await response.json();
+          setAdviserRecords(evaluations);
+          setPanelRecords(evaluations);
+        }
+      } catch (error) {
+        console.error('Failed to load live evaluations:', error);
+      }
+    }
+    loadLiveEvaluations();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = draftRecord ? 'hidden' : '';
@@ -481,7 +494,7 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
     setDraftRecord((current) => (current ? { ...current, recommendation: value } : current));
   }
 
-  function submitEvaluation() {
+  async function submitEvaluation() {
     if (!draftRecord) {
       return;
     }
@@ -524,15 +537,30 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
       submittedAt
     };
 
-    setRecordsForActiveMode((current) =>
-      current.map((record) => (record.id === finalizedRecord.id ? finalizedRecord : record))
-    );
+    try {
+      const response = await fetch('/api/advisers/evaluations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalizedRecord)
+      });
+      
+      const payload = await response.json();
+      if (!response.ok || payload.error) {
+        throw new Error(payload.error || 'Failed to submit evaluation');
+      }
 
-    closeModal();
-    showToast(
-      `Evaluation submitted for ${finalizedRecord.groupId} with ${finalizedStudentEvaluations.length} student reviews.`,
-      'success'
-    );
+      setRecordsForActiveMode((current) =>
+        current.map((record) => (record.id === finalizedRecord.id ? finalizedRecord : record))
+      );
+
+      closeModal();
+      showToast(
+        `Evaluation submitted for ${finalizedRecord.groupId} with ${finalizedStudentEvaluations.length} student reviews.`,
+        'success'
+      );
+    } catch (e: any) {
+      showToast(e.message || 'An error occurred while submitting.', 'error');
+    }
   }
 
   async function uploadEvaluationFile() {

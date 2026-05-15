@@ -104,6 +104,7 @@ export function AdviserShellActions({
       notificationTitle="Workspace Notifications"
       notificationDescription="Latest reviews, schedule changes, and supervision updates for the current adviser workspace."
       notificationItems={notificationItems ?? buildNotificationItems(basePath, workspaceMode)}
+      notificationMarkAllReadEnabled={Boolean(notificationItems)}
       profileName={fullName}
       profileSubtitle={workspaceMeta.pillLabel}
       profileDetail={`${workspaceMeta.headerLabel} • ${getInitials(fullName) || 'AD'}`}

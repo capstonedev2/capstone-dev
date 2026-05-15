@@ -12,19 +12,19 @@ export const DEPARTMENT_BRANDINGS = {
   NAME: {
     code: 'BS NAME',
     departmentName: 'Bachelor of Science in Naval Architecture and Marine Engineering',
-    primaryColor: '#142548',
-    secondaryColor: '#264B7A',
-    accentColor: '#57ABC6',
-    highlightColor: '#C9A247',
+    primaryColor: '#003A8F',
+    secondaryColor: '#0057B8',
+    accentColor: '#DBEAFE',
+    highlightColor: '#60A5FA',
     textColor: '#FFFFFF'
   },
   IT: {
     code: 'BS IT',
     departmentName: 'Bachelor of Science in Information Technology',
-    primaryColor: '#1F2020',
-    secondaryColor: '#3D3D3C',
-    accentColor: '#FFFFFF',
-    highlightColor: '#B08A47',
+    primaryColor: '#111111',
+    secondaryColor: '#2A2418',
+    accentColor: '#F6BE00',
+    highlightColor: '#D4AF37',
     textColor: '#FFFFFF'
   },
   TCM: {
@@ -57,10 +57,10 @@ export const DEPARTMENT_BRANDINGS = {
   MET: {
     code: 'BS MET',
     departmentName: 'Bachelor of Science in Manufacturing Engineering Technology',
-    primaryColor: '#801617',
-    secondaryColor: '#8D1919',
-    accentColor: '#EAC593',
-    highlightColor: '#C79A3C',
+    primaryColor: '#800000',
+    secondaryColor: '#9F1D1D',
+    accentColor: '#F3D7B6',
+    highlightColor: '#D6A15D',
     textColor: '#FFFFFF'
   }
 } satisfies Record<string, DepartmentBranding>;

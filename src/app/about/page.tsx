@@ -196,6 +196,26 @@ const operatingRules = [
   }
 ];
 
+function getTeamRoleIcon(role: string) {
+  if (role.includes('Lead Developer') || role.includes('Project Manager')) {
+    return 'fas fa-code-branch';
+  }
+
+  if (role.includes('Assistant Developer')) {
+    return 'fas fa-code';
+  }
+
+  if (role.includes('System Analyst') || role.includes('Research')) {
+    return 'fas fa-magnifying-glass-chart';
+  }
+
+  if (role.includes('Documentation')) {
+    return 'fas fa-file-lines';
+  }
+
+  return 'fas fa-user-graduate';
+}
+
 export default function AboutPage() {
   return (
     <PublicLayout>
@@ -443,10 +463,6 @@ export default function AboutPage() {
                           <strong>{branding.departmentName}</strong>
                           <p>{department.focus}</p>
                           <div className={styles.departmentCardFooter}>
-                            <span>
-                              <b>{department.metric}</b>
-                              {department.metricLabel}
-                            </span>
                             <em>
                               View Department
                               <i className="fas fa-arrow-right" aria-hidden="true" />
@@ -520,7 +536,10 @@ export default function AboutPage() {
                     </div>
                     <div className={styles.teamCardInfo}>
                       <h3>{member.name}</h3>
-                      <span className={styles.teamRoleBadge}>{member.role}</span>
+                      <span className={styles.teamRoleBadge}>
+                        <i className={getTeamRoleIcon(member.role)} aria-hidden="true" />
+                        {member.role}
+                      </span>
                       <p>{member.shortBio}</p>
                     </div>
                   </article>

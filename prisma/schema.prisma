@@ -120,6 +120,7 @@ model User {
   displayName         String?
   isSuspended         Boolean              @default(false)
   suspendedAt         DateTime?
+  suspendedUntil      DateTime?
   passwordResetTokens PasswordResetToken[]
   passwordResetCodes  PasswordResetCode[]
   uploadedFiles       UploadedFile[]
@@ -138,6 +139,7 @@ model User {
 
   @@index([role])
   @@index([isSuspended])
+  @@index([suspendedUntil])
   @@index([department])
 }
 
@@ -439,10 +441,12 @@ model Evaluation {
   panelRole         DefensePanelRole         @default(MEMBER)
   score             Int?
   recommendation    EvaluationRecommendation @default(PENDING)
-  remarks           String?
-  submittedAt       DateTime?
-  createdAt         DateTime                 @default(now())
-  updatedAt         DateTime                 @updatedAt
+  remarks            String?
+  rubricData         Json?
+  studentEvaluations Json?
+  submittedAt        DateTime?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
 
   @@unique([defenseScheduleId, evaluatorId])
   @@index([projectId])

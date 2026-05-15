@@ -17,6 +17,7 @@ type ApiUser = {
   role: ApiUserRole;
   isSuspended?: boolean;
   suspendedAt?: string | null;
+  suspendedUntil?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   studentId?: string | null;

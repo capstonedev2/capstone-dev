@@ -77,6 +77,114 @@
   }
 }
 
+.session-suspension-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(8px);
+}
+
+.session-suspension-modal {
+  width: min(460px, 100%);
+  display: grid;
+  gap: 1rem;
+  padding: 1.35rem;
+  border: 1px solid rgba(254, 202, 202, 0.9);
+  border-radius: 1.15rem;
+  background: #ffffff;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+  font-family: var(--font-sans), Arial, sans-serif;
+}
+
+.session-suspension-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid #fecaca;
+  border-radius: 1rem;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 1.15rem;
+}
+
+.session-suspension-kicker {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #991b1b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.session-suspension-modal h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.session-suspension-modal p {
+  margin: 0.6rem 0 0;
+  color: #475569;
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.session-suspension-modal p strong {
+  color: #991b1b;
+}
+
+.session-suspension-countdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid #fee2e2;
+  border-radius: 0.9rem;
+  background: #fff7f7;
+}
+
+.session-suspension-countdown span {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.session-suspension-countdown strong {
+  color: #991b1b;
+  font-size: 0.92rem;
+}
+
+.session-suspension-button {
+  min-height: 2.8rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: #003a8f;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+  box-shadow: 0 16px 34px rgba(0, 58, 143, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.session-suspension-button:hover,
+.session-suspension-button:focus-visible {
+  outline: none;
+  transform: translateY(-1px);
+  box-shadow: 0 20px 38px rgba(0, 58, 143, 0.26);
+}
+
 @layer utilities {
   @keyframes page-transition {
     from {

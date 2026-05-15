@@ -436,7 +436,7 @@ function Badge({
   icon?: string;
 }) {
   return (
-    <span className={`ui-badge is-${tone}`}>
+    <span className={`ui-badge is-${tone} whitespace-nowrap`}>
       {icon ? <i className={`fas ${icon}`} aria-hidden="true" /> : null}
       {label}
     </span>
@@ -494,6 +494,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const [isSubmittingTitle, setIsSubmittingTitle] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const createdObjectUrlsRef = useRef(new Set<string>());
+  const suppressAutoDraftRef = useRef(false);
 
   const handleRequestPermission = async () => {
     const leader = data.group.members.find((m) => m.isLeader);
@@ -572,7 +573,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             const allTerminal = mergedReal.length > 0 && mergedReal.every((s) =>
               ['rejected', 'approved', 'needs revision'].includes(s.registrationStatus.toLowerCase())
             );
-            if (allTerminal && localSubmissions.length === 0) {
+            if (allTerminal && localSubmissions.length === 0 && !suppressAutoDraftRef.current) {
               const nextNum = mergedReal.reduce((h, s) => Math.max(h, s.proposalNumber), 0) + 1;
               const autoDraft = createDraftSubmission(data, nextNum, isLeader);
               return [autoDraft, ...mergedReal.map(s => ({ ...s, isCurrent: false }))];
@@ -872,6 +873,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       submissions.reduce((highest, submission) => Math.max(highest, submission.proposalNumber), 0) + 1;
     const draftSubmission = createDraftSubmission(data, nextProposalNumber, isLeader);
 
+    suppressAutoDraftRef.current = false;
     setSubmissions((current) => [
       draftSubmission,
       ...current.map((submission) => ({
@@ -883,6 +885,56 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     setNotice({
       tone: 'info',
       message: `${draftSubmission.proposalLabel} is ready. Upload the title proposal file to prepare it for review.`
+    });
+  };
+
+  const handleDeleteDraftSubmission = () => {
+    if (!activeSubmission || activeSubmission.registrationStatus !== 'Draft') {
+      setNotice({
+        tone: 'warning',
+        message: 'Only draft title proposals can be deleted.'
+      });
+      return;
+    }
+
+    const shouldDelete = window.confirm(`Delete ${activeSubmission.proposalLabel}? Attached files in this draft will be removed from this session.`);
+    if (!shouldDelete) {
+      return;
+    }
+
+    activeSubmission.attachments.forEach((attachment) => {
+      if (attachment.downloadUrl) {
+        URL.revokeObjectURL(attachment.downloadUrl);
+        createdObjectUrlsRef.current.delete(attachment.downloadUrl);
+      }
+    });
+
+    const remainingSubmissions = submissions.filter((submission) => submission.id !== activeSubmission.id);
+
+    if (!remainingSubmissions.length) {
+      const draftSubmission = createDraftSubmission(data, 1, isLeader);
+      suppressAutoDraftRef.current = false;
+      setSubmissions([draftSubmission]);
+      setActiveSubmissionId(draftSubmission.id);
+      setNotice({
+        tone: 'info',
+        message: `${activeSubmission.proposalLabel} was deleted. A new draft is ready.`
+      });
+      return;
+    }
+
+    suppressAutoDraftRef.current = true;
+    const nextActiveSubmission = remainingSubmissions[0];
+    setSubmissions(
+      remainingSubmissions.map((submission) => ({
+        ...submission,
+        isCurrent: submission.id === nextActiveSubmission.id
+      }))
+    );
+    setActiveSubmissionId(nextActiveSubmission.id);
+    setNotice({
+      tone: 'success',
+      message: `${activeSubmission.proposalLabel} draft was deleted.`
     });
   };
 
@@ -1129,21 +1181,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             <h1>Title Submission</h1>
             <p>Upload your title proposal document using the required concept paper format.</p>
           </div>
-          <div className="flex items-center gap-2 mt-4">
-             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1E40AF]/10 px-3 py-1 text-xs font-semibold text-[#1E40AF] ring-1 ring-inset ring-[#1E40AF]/20">
-               <i className="fas fa-layer-group" aria-hidden="true" /> {activeSubmission.proposalLabel}
-             </span>
-             <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} icon="fa-file-signature" />
-          </div>
-        </div>
-        <div className="top-nav-actions">
-          <button 
-            type="button" 
-            onClick={handleCreateSubmission}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-[#003A8F]"
-          >
-            <i className="fas fa-plus text-[#003A8F]" aria-hidden="true" /> Upload Another Title
-          </button>
         </div>
       </header>
 
@@ -1277,48 +1314,109 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           <div className="lg:col-span-2 flex flex-col gap-6">
             
             {/* Upload Card */}
-            <div className="rounded-[1.25rem] border border-slate-200 bg-white overflow-hidden shadow-sm flex flex-col h-full">
-              <div className="border-b border-slate-100 bg-slate-50/80 px-6 py-5">
-                <h3 className="text-lg font-bold text-slate-800">Upload Proposal File</h3>
-                <p className="text-sm text-slate-500 mt-0.5">Upload your concept paper to start the review process.</p>
+            <div className="rounded-3xl border border-slate-200/80 bg-white overflow-hidden shadow-sm flex flex-col h-full transition-shadow duration-300 hover:shadow-md">
+              <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shadow-sm">
+                    <i className="fas fa-file-signature text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Upload Proposal</h3>
+                    <p className="text-sm text-slate-500 font-medium mt-0.5">Prepare and submit your concept paper package</p>
+                  </div>
+                </div>
+
+                <div className="flex max-w-full flex-col sm:flex-row sm:flex-wrap items-center justify-end gap-3 bg-slate-50/50 p-1.5 rounded-2xl border border-slate-100/80">
+                  <div className="flex items-center gap-2">
+                     <div className="relative inline-block w-[190px] sm:w-[220px]">
+                       <select 
+                         className="appearance-none cursor-pointer w-full rounded-xl bg-white pl-9 pr-8 py-2.5 text-sm font-bold text-slate-700 ring-1 ring-inset ring-slate-200/80 hover:bg-slate-50 hover:ring-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all shadow-sm text-ellipsis overflow-hidden"
+                         value={activeSubmissionId}
+                         onChange={(e) => handleSelectSubmission(e.target.value)}
+                       >
+                         {submissions.map((sub) => (
+                           <option key={sub.id} value={sub.id}>
+                             {sub.proposalLabel} {sub.registrationStatus === 'Draft' ? '(Draft)' : ''} - {sub.registrationStatus}
+                           </option>
+                         ))}
+                       </select>
+                       <i className="fas fa-layer-group absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm" aria-hidden="true" />
+                       <i className="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400" aria-hidden="true" />
+                     </div>
+                     <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} />
+                  </div>
+                  
+                  <div className="hidden sm:block w-px h-8 bg-slate-200/60 mx-1"></div>
+                  
+                  <button 
+                    type="button" 
+                    onClick={handleCreateSubmission}
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-blue-600 ring-1 ring-inset ring-slate-200/80 shadow-sm transition hover:bg-blue-50 hover:text-blue-700 hover:ring-blue-200 active:scale-95 w-full sm:w-auto"
+                  >
+                    <i className="fas fa-plus text-blue-500" aria-hidden="true" /> Upload Another
+                  </button>
+
+                  {activeSubmission.registrationStatus === 'Draft' ? (
+                    <button
+                      type="button"
+                      onClick={handleDeleteDraftSubmission}
+                      className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-4 text-sm font-bold text-rose-600 ring-1 ring-inset ring-rose-200/80 shadow-sm transition hover:bg-rose-50 hover:text-rose-700 hover:ring-rose-200 active:scale-95 sm:w-10 sm:px-0"
+                      aria-label={`Delete ${activeSubmission.proposalLabel} draft`}
+                      title="Delete Draft"
+                    >
+                      <i className="fas fa-trash-can text-rose-500" aria-hidden="true" />
+                      <span className="sm:sr-only">Delete Draft</span>
+                    </button>
+                  ) : null}
+                </div>
               </div>
               
-              <div className="p-6 flex-grow flex flex-col">
-                <div className="mb-6">
-                  <label htmlFor="proposedTitle" className="block text-sm font-bold text-slate-700 mb-2">
-                    Proposed Title <span className="text-red-500">*</span>
+              <div className="p-8 flex-grow flex flex-col">
+                <div className="mb-8">
+                  <label htmlFor="proposedTitle" className="block text-sm font-bold text-slate-700 mb-2.5 ml-1">
+                    Proposed Title <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    id="proposedTitle"
-                    type="text"
-                    value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
-                    onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
-                    placeholder="Enter the official title of your project"
-                    className="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-[#003A8F] focus:ring focus:ring-[#003A8F]/20"
-                    disabled={!canUpload}
-                  />
-                  <p className="text-xs text-slate-500 mt-2">
-                    If left blank, the title will be automatically extracted from your uploaded filename.
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                      <i className="fas fa-heading"></i>
+                    </div>
+                    <input
+                      id="proposedTitle"
+                      type="text"
+                      value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
+                      onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
+                      placeholder="Enter the official, finalized title of your study"
+                      className="block w-full rounded-2xl border-0 bg-slate-50 py-3.5 pl-11 pr-4 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 transition-all placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                      disabled={!canUpload}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2 ml-1 font-medium">
+                    <i className="fas fa-magic text-amber-500 mr-1"></i> If left blank, the title will be automatically extracted from your filename.
                   </p>
                 </div>
 
-                <div className="mb-6">
-                  <label htmlFor="briefDescription" className="block text-sm font-bold text-slate-700 mb-2">
-                    Note to Your Adviser <span className="text-slate-400 font-normal">(Optional)</span>
+                <div className="mb-8">
+                  <label htmlFor="briefDescription" className="block text-sm font-bold text-slate-700 mb-2.5 ml-1">
+                    Note to Your Adviser <span className="text-slate-400 font-medium text-xs uppercase tracking-wider ml-1 px-2 py-0.5 bg-slate-100 rounded-md">Optional</span>
                   </label>
-                  <textarea
-                    id="briefDescription"
-                    value={
-                      activeSubmission.briefDescription === 'Title proposal document uploaded for adviser review. The required contents are expected inside the attached file.' || 
-                      activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.' ||
-                      activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.dsfsdfsdfs'
-                      ? '' : activeSubmission.briefDescription
-                    }
-                    onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
-                    placeholder="Add a brief note, context, or specific questions about your proposal for your adviser..."
-                    className="block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-[#003A8F] focus:ring focus:ring-[#003A8F]/20 min-h-[100px] resize-y"
-                    disabled={!canUpload}
-                  />
+                  <div className="relative group">
+                    <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                      <i className="fas fa-comment-dots"></i>
+                    </div>
+                    <textarea
+                      id="briefDescription"
+                      value={
+                        activeSubmission.briefDescription === 'Title proposal document uploaded for adviser review. The required contents are expected inside the attached file.' || 
+                        activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.' ||
+                        activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.dsfsdfsdfs'
+                        ? '' : activeSubmission.briefDescription
+                      }
+                      onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
+                      placeholder="Add specific questions, context, or areas you want your adviser to focus on..."
+                      className="block w-full rounded-2xl border-0 bg-slate-50 py-3.5 pl-11 pr-4 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 transition-all placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 min-h-[120px] resize-y"
+                      disabled={!canUpload}
+                    />
+                  </div>
                 </div>
 
                 <input
@@ -1331,6 +1429,9 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 />
                 
                 {/* Drag and Drop Area */}
+                <div className="mb-2 ml-1 flex items-center justify-between">
+                  <span className="block text-sm font-bold text-slate-700">Concept Paper Document <span className="text-rose-500">*</span></span>
+                </div>
                 <button 
                   type="button"
                   onClick={handleBrowseAttachments}
@@ -1338,26 +1439,23 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                   disabled={!canUpload}
-                  className={`group relative flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed py-12 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
+                  className={`group relative flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed py-14 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
                     isDragging 
-                      ? 'border-[#003A8F] bg-[#003A8F]/5 scale-[1.02]' 
-                      : 'border-slate-300 bg-slate-50 hover:border-[#003A8F] hover:bg-[#003A8F]/5 disabled:hover:border-slate-300 disabled:hover:bg-slate-50'
+                      ? 'border-blue-500 bg-blue-50/50 shadow-inner scale-[1.01]' 
+                      : 'border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-sm disabled:hover:border-slate-300 disabled:hover:bg-slate-50'
                   }`}
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm mb-5 transition-transform group-hover:scale-110 group-hover:text-[#003A8F]">
-                    <i className="fas fa-cloud-arrow-up text-2xl text-[#1E40AF]" aria-hidden="true"></i>
+                  <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-md mb-6 transition-all duration-500 ${isDragging ? 'scale-110 shadow-blue-200' : 'group-hover:scale-110 group-hover:shadow-blue-100'}`}>
+                    <div className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping opacity-0 group-hover:opacity-100 duration-1000"></div>
+                    <i className={`fas fa-cloud-arrow-up text-3xl transition-colors duration-300 ${isDragging ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
                   </div>
-                  <h4 className="text-base font-bold text-slate-700 group-hover:text-[#003A8F]">Drag and drop your file here</h4>
-                  <p className="mt-1.5 text-sm text-slate-500">or click to browse from your computer</p>
+                  <h4 className="text-lg font-extrabold text-slate-700 group-hover:text-blue-700 transition-colors">Drag and drop your file here</h4>
+                  <p className="mt-2 text-sm text-slate-500 font-medium">or click to browse from your computer</p>
                   
-                  <div className="mt-5 flex gap-4 text-xs font-semibold text-slate-400">
-                    <span className="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-200 shadow-sm"><i className="fas fa-file-pdf text-red-500"></i> PDF</span>
-                    <span className="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-200 shadow-sm"><i className="fas fa-file-word text-blue-500"></i> DOCX</span>
-                    <span className="flex items-center gap-1.5 px-2 py-1 bg-white rounded-md border border-slate-200 shadow-sm"><i className="fas fa-weight-hanging text-slate-500"></i> 10MB Max</span>
-                  </div>
-                  
-                  <div className="mt-6 rounded-xl bg-[#003A8F] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1E40AF] hover:shadow-md pointer-events-none">
-                    Select File
+                  <div className="mt-6 flex gap-3 text-xs font-bold text-slate-500">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOCX</span>
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm"><i className="fas fa-weight-hanging text-slate-400 text-sm"></i> 10MB Max</span>
                   </div>
                 </button>
 
@@ -1366,27 +1464,24 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                   {activeSubmission.attachments.length > 0 ? (
                     <div className="space-y-3">
                       {activeSubmission.attachments.map(att => (
-                        <div key={att.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50/30 p-4 transition-colors hover:bg-emerald-50/50">
+                        <div key={att.id} className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/50 to-white p-4 transition-all hover:shadow-md hover:border-emerald-300">
                           <div className="flex items-start sm:items-center gap-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 shadow-sm">
-                              <i className={`fas fa-file-${att.fileType.toLowerCase() === 'pdf' ? 'pdf' : 'word'} text-xl`} aria-hidden="true"></i>
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white border border-emerald-100 text-emerald-600 shadow-sm transition-transform group-hover:scale-105">
+                              <i className={`fas fa-file-${att.fileType.toLowerCase() === 'pdf' ? 'pdf text-rose-500' : 'word text-blue-600'} text-2xl`} aria-hidden="true"></i>
                             </div>
                             <div className="min-w-0">
                               <p className="text-sm font-bold text-slate-800 truncate" title={att.fileName}>{att.fileName}</p>
-                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mt-1 font-medium">
-                                <span className="flex items-center gap-1"><i className="fas fa-calendar-alt text-slate-400"></i> {att.uploadedAtLabel}</span>
-                                <span className="flex items-center gap-1"><i className="fas fa-hdd text-slate-400"></i> {att.sizeLabel}</span>
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-1.5 font-semibold">
+                                <span className="flex items-center gap-1.5"><i className="fas fa-calendar-check text-emerald-500"></i> {att.uploadedAtLabel}</span>
+                                <span className="flex items-center gap-1.5"><i className="fas fa-hard-drive text-slate-400"></i> {att.sizeLabel}</span>
                               </div>
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
-                            <button onClick={() => handleOpenAttachment(att)} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Open File">
-                              <i className="fas fa-eye" aria-hidden="true"></i>
+                            <button onClick={() => handleOpenAttachment(att)} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm" title="Preview">
+                              <i className="fas fa-expand" aria-hidden="true"></i>
                             </button>
-                            <button onClick={() => handleDownloadAttachment(att)} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Download File">
-                              <i className="fas fa-download" aria-hidden="true"></i>
-                            </button>
-                            <button onClick={() => handleRemoveAttachment(att.id)} disabled={!canUpload} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" title="Remove">
+                            <button onClick={() => handleRemoveAttachment(att.id)} disabled={!canUpload} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" title="Remove">
                               <i className="fas fa-trash-can" aria-hidden="true"></i>
                             </button>
                           </div>
@@ -1394,91 +1489,37 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-800 shadow-sm">
-                      <i className="fas fa-circle-info text-xl" aria-hidden="true"></i>
-                      <p className="text-sm font-semibold">No proposal file uploaded yet.</p>
+                    <div className="flex items-center justify-center gap-3 rounded-2xl border border-amber-200/60 bg-amber-50/50 p-6 text-amber-800 shadow-inner">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                         <i className="fas fa-asterisk text-sm" aria-hidden="true"></i>
+                      </div>
+                      <p className="text-sm font-semibold">No proposal document attached. Upload a file to proceed.</p>
                     </div>
                   )}
                 </div>
 
                 {/* Submit Action */}
-                <div className="mt-auto pt-6 flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-500 hidden sm:inline-block">
-                    {activeSubmission.attachments.length === 0 ? 'Upload a file to enable submission.' : !activeSubmission.proposedTitle.trim() ? 'Please enter a proposed title.' : 'Ready for adviser review.'}
-                  </span>
+                <div className="mt-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 mt-8">
+                  <div className="flex items-center gap-3 hidden sm:flex">
+                    <div className={`h-2.5 w-2.5 rounded-full ${activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim() ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`}></div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      {activeSubmission.attachments.length === 0 ? 'Awaiting File' : !activeSubmission.proposedTitle.trim() ? 'Awaiting Title' : 'Ready to Submit'}
+                    </span>
+                  </div>
                   <form onSubmit={handleSubmitProposal} className="w-full sm:w-auto">
                     <button 
                       type="submit"
                       disabled={!canUpload || isSubmittingTitle || activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim()}
-                      className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#003A8F] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#1E40AF] disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
+                      className="group flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0"
                     >
-                      <i className="fas fa-paper-plane" aria-hidden="true"></i>
-                      {isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'}
+                      <span>{isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'}</span>
+                      <i className={`fas fa-paper-plane transition-transform ${isSubmittingTitle ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} aria-hidden="true"></i>
                     </button>
                   </form>
                 </div>
               </div>
             </div>
 
-            {/* Workflow Timeline */}
-            <div className="rounded-[1.25rem] border border-slate-200 bg-white p-6 shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-lg font-bold text-slate-800">Workflow Progress</h3>
-                {!isViewingDraft && (
-                  <button 
-                    onClick={handleCreateSubmission}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
-                  >
-                    <i className="fas fa-rotate-left" aria-hidden="true" /> Upload Another Title
-                  </button>
-                )}
-              </div>
-              <div className="relative flex justify-between px-2 sm:px-6">
-                {/* Connecting Line Base */}
-                <div className="absolute top-5 left-8 right-8 h-1 bg-slate-100 rounded-full -z-10 hidden sm:block"></div>
-                {/* Connecting Line Fill */}
-                <div 
-                  className="absolute top-5 left-8 h-1 bg-emerald-500 rounded-full -z-10 transition-all duration-700 ease-in-out hidden sm:block" 
-                  style={{ width: `calc(${(currentStepIndex / 5) * 100}% - 4rem)` }}
-                ></div>
-                
-                {TIMELINE_STEPS.map((step, idx) => {
-                  const isCompleted = idx < currentStepIndex;
-                  const isCurrent = idx === currentStepIndex;
-                  
-                  let iconBg = 'bg-white text-slate-400 border-slate-200 shadow-sm';
-                  if (isCompleted) iconBg = 'bg-emerald-500 text-white border-emerald-500 shadow-sm';
-                  else if (isCurrent) {
-                    if (activeSubmission.registrationStatus.toLowerCase() === 'rejected') {
-                      iconBg = 'bg-rose-500 text-white border-rose-500 ring-4 ring-rose-500/20 shadow-md scale-110';
-                    } else if (activeSubmission.registrationStatus.toLowerCase() === 'needs revision') {
-                      iconBg = 'bg-blue-500 text-white border-blue-500 ring-4 ring-blue-500/20 shadow-md scale-110';
-                    } else {
-                      iconBg = 'bg-[#003A8F] text-white border-[#003A8F] ring-4 ring-[#1E40AF]/20 shadow-md scale-110';
-                    }
-                  }
-
-                  let textColor = 'text-slate-400';
-                  if (isCompleted) textColor = 'text-slate-700';
-                  else if (isCurrent) {
-                    if (activeSubmission.registrationStatus.toLowerCase() === 'rejected') textColor = 'text-rose-600';
-                    else if (activeSubmission.registrationStatus.toLowerCase() === 'needs revision') textColor = 'text-blue-600';
-                    else textColor = 'text-[#003A8F]';
-                  }
-
-                  return (
-                    <div key={step.id} className="flex flex-col items-center relative z-10 w-16">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${iconBg} transition-all duration-300`}>
-                        <i className={`fas ${step.icon} text-sm`} aria-hidden="true"></i>
-                      </div>
-                      <span className={`mt-3 text-[10px] sm:text-xs font-bold text-center leading-tight transition-colors ${textColor}`}>
-                        {step.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
           </div>
 
@@ -1548,9 +1589,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 </div>
                 <div>
                   <span className="block text-xs font-semibold text-slate-400 mb-1">Latest Action</span>
-                  <p className="text-sm font-medium text-slate-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50 mt-1">
-                    {latestAction}. {activeSubmission.statusNote}
-                  </p>
+                  <div className="mt-1">
+                    <Badge label={latestAction} tone={titleStatusTone} />
+                    {activeSubmission.statusNote && (
+                      <p className="text-sm font-medium text-slate-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50 mt-2 leading-relaxed">
+                        {activeSubmission.statusNote}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

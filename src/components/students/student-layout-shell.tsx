@@ -9,6 +9,7 @@ import { STUDENT_NAV_ITEMS, STUDENT_NAV_SECTIONS } from '@/components/students/s
 import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 
 const SIDEBAR_STORAGE_KEY = 'studentShellSidebarCollapsed';
+const STUDENT_THEME_STORAGE_KEY = 'studentWorkspaceTheme';
 const AUTH_USER_STORAGE_KEY = 'capstoneAuthUser';
 const PROFILE_DRAFT_STORAGE_KEY = 'capstoneStudentProfileDraft';
 const FULL_WORKSPACE_DEMO_STUDENT_IDS = new Set([2, 8, 9, 10, 11]);
@@ -160,6 +161,23 @@ type StudentLayoutShellProps = {
 };
 
 type StudentNotification = StudentDashboardData['notifications'][number];
+type StudentThemeMode = 'light' | 'dark';
+
+function isStudentThemeMode(value: string | null): value is StudentThemeMode {
+  return value === 'light' || value === 'dark';
+}
+
+function getResolvedStudentTheme(value: string | null): StudentThemeMode {
+  if (isStudentThemeMode(value)) {
+    return value;
+  }
+
+  if (typeof window !== 'undefined' && value === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  return 'light';
+}
 
 function sortNotifications(items: StudentNotification[]) {
   return [...items].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
@@ -194,15 +212,39 @@ function getNotificationTypeMeta(type: StudentNotification['type']) {
       return { icon: 'fa-hourglass-half', tone: 'deadline', label: 'Deadline' };
     case 'approval':
       return { icon: 'fa-circle-check', tone: 'approval', label: 'Approval' };
+    case 'success':
+      return { icon: 'fa-circle-check', tone: 'success', label: 'Success' };
+    case 'warning':
+      return { icon: 'fa-triangle-exclamation', tone: 'warning', label: 'Warning' };
+    case 'danger':
+      return { icon: 'fa-circle-exclamation', tone: 'danger', label: 'Urgent' };
     case 'schedule':
       return { icon: 'fa-calendar-check', tone: 'schedule', label: 'Schedule' };
     case 'transfer':
-      return { icon: 'fa-diagram-project', tone: 'general', label: 'Project Update' };
+      return { icon: 'fa-diagram-project', tone: 'transfer', label: 'Project Update' };
     case 'profile':
-      return { icon: 'fa-user-gear', tone: 'general', label: 'Profile' };
+      return { icon: 'fa-user-gear', tone: 'profile', label: 'Profile' };
+    case 'general':
+      return { icon: 'fa-bell', tone: 'general', label: 'General' };
     default:
       return { icon: 'fa-bell', tone: 'general', label: 'General' };
   }
+}
+
+function canPollApi() {
+  return (
+    typeof window !== 'undefined' &&
+    (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
+    window.navigator.onLine
+  );
+}
+
+function isExpectedPollError(error: unknown) {
+  return (
+    error instanceof DOMException && error.name === 'AbortError'
+  ) || (
+    error instanceof TypeError && (!canPollApi() || error.message === 'Failed to fetch')
+  );
 }
 
 type LimitedWorkspaceSetupState = {
@@ -1013,6 +1055,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
   const [isMobile, setIsMobile] = useState(false);
   const [layoutDebug, setLayoutDebug] = useState('Fetching...');
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+  const [themeMode, setThemeMode] = useState<StudentThemeMode>('light');
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -1032,6 +1075,43 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
 
     window.localStorage.setItem(SIDEBAR_STORAGE_KEY, sidebarCollapsed ? 'true' : 'false');
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const applyStoredTheme = () => {
+      const storedTheme = window.localStorage.getItem(STUDENT_THEME_STORAGE_KEY);
+      const nextTheme = getResolvedStudentTheme(storedTheme);
+      setThemeMode(nextTheme);
+      document.documentElement.dataset.studentTheme = nextTheme;
+      window.localStorage.setItem(STUDENT_THEME_STORAGE_KEY, nextTheme);
+    };
+
+    applyStoredTheme();
+
+    window.addEventListener('storage', applyStoredTheme);
+    window.addEventListener('thesistrack:student-theme-changed', applyStoredTheme);
+
+    return () => {
+      window.removeEventListener('storage', applyStoredTheme);
+      window.removeEventListener('thesistrack:student-theme-changed', applyStoredTheme);
+      delete document.documentElement.dataset.studentTheme;
+    };
+  }, []);
+
+  const updateStudentTheme = (nextTheme: StudentThemeMode) => {
+    setThemeMode(nextTheme);
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    document.documentElement.dataset.studentTheme = nextTheme;
+    window.localStorage.setItem(STUDENT_THEME_STORAGE_KEY, nextTheme);
+    window.dispatchEvent(new Event('thesistrack:student-theme-changed'));
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -1217,23 +1297,54 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
   useEffect(() => {
     if (!data.profile.user_id) return;
 
+    let cancelled = false;
+    let inFlightController: AbortController | null = null;
+
     const fetchNotifications = async () => {
+      if (cancelled || inFlightController || !canPollApi()) {
+        return;
+      }
+
+      const controller = new AbortController();
+      inFlightController = controller;
+
       try {
-        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
+        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
         if (notifRes.ok) {
           const notifs = await notifRes.json();
-          setRealNotifications(notifs);
+          if (!cancelled) {
+            setRealNotifications(notifs);
+          }
         }
       } catch (e) {
-        console.error('Failed to poll notifications in shell', e);
+        if (!isExpectedPollError(e)) {
+          console.warn('Failed to poll notifications in shell', e);
+        }
+      } finally {
+        if (inFlightController === controller) {
+          inFlightController = null;
+        }
       }
     };
 
-    fetchNotifications();
-    window.addEventListener('thesistrack:notifications-updated', fetchNotifications);
-    const intervalId = setInterval(fetchNotifications, 5000);
+    const pollNotifications = () => {
+      void fetchNotifications().catch((error) => {
+        if (!isExpectedPollError(error)) {
+          console.warn('Failed to poll notifications in shell', error);
+        }
+      });
+    };
+
+    pollNotifications();
+    window.addEventListener('thesistrack:notifications-updated', pollNotifications);
+    const intervalId = setInterval(pollNotifications, 5000);
     return () => {
-      window.removeEventListener('thesistrack:notifications-updated', fetchNotifications);
+      cancelled = true;
+      inFlightController?.abort();
+      window.removeEventListener('thesistrack:notifications-updated', pollNotifications);
       clearInterval(intervalId);
     };
   }, [data.profile.user_id]);
@@ -1252,8 +1363,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
           priority: notif.type === 'warning' || notif.type === 'danger' ? 'high' : 'normal',
           read: notif.status === 'READ',
           created_at: notif.createdAt,
-          dateLabel: new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          route: '/students/notifications',
+          dateLabel: new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
         } as any);
       });
     }
@@ -1343,6 +1453,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     <div
       className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
+      data-theme={themeMode}
     >
       <header className="student-global-navbar">
         <div className="student-global-navbar-main">
@@ -1397,11 +1508,10 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   <strong>Notifications</strong>
                   <small>Latest feedback, schedule updates, deadlines, and approvals for your workspace.</small>
                 </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div className="notification-menu-actions">
                   {unreadNotificationsCount > 0 && (
                     <button 
-                      className="notification-menu-view-all" 
-                      style={{ background: 'transparent', border: '1px solid #e2e8f0', color: '#64748b', cursor: 'pointer', padding: '4px 8px' }}
+                      className="notification-menu-view-all is-secondary"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1412,7 +1522,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                       Mark all as read
                     </button>
                   )}
-                  <Link className="notification-menu-view-all" style={{ padding: '4px 8px' }} href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
+                  <Link className="notification-menu-view-all is-primary" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
                     {isLimitedWorkspace ? 'View setup' : 'Open center'}
                   </Link>
                 </div>
@@ -1561,6 +1671,30 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                       {shellProfile.projectCode}
                     </span>
                   </div>
+                </div>
+
+                <div className="profile-dropdown-divider" />
+
+                <div className="profile-dropdown-section">
+                  <span className="profile-dropdown-label">Theme</span>
+                  <button
+                    aria-label={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}
+                    aria-pressed={themeMode === 'dark'}
+                    className="profile-theme-toggle"
+                    type="button"
+                    onClick={() => updateStudentTheme(themeMode === 'dark' ? 'light' : 'dark')}
+                  >
+                    <span className="profile-theme-toggle-icon">
+                      <i aria-hidden="true" className={`fas ${themeMode === 'dark' ? 'fa-moon' : 'fa-sun'}`} />
+                    </span>
+                    <span className="profile-theme-toggle-copy">
+                      <strong>{themeMode === 'dark' ? 'Dark Mode' : 'Light Mode'}</strong>
+                      <small>Switch workspace appearance</small>
+                    </span>
+                    <span className="profile-theme-toggle-track" aria-hidden="true">
+                      <span />
+                    </span>
+                  </button>
                 </div>
 
                 <div className="profile-dropdown-divider" />

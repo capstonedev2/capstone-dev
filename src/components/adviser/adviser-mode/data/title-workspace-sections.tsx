@@ -283,169 +283,210 @@ export function TitleDetailsDrawer({
   const documentData = createAdviserTitleDocumentData(record);
 
   return (
-    <div className="fixed inset-0 z-[1300] flex justify-end bg-slate-900/40 backdrop-blur-sm" onClick={onClose}>
-      <aside
-        aria-label="Title details"
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6" onClick={onClose}>
+      <div
+        aria-label="Title details modal"
         aria-modal="true"
-        className="h-full w-full max-w-[540px] overflow-y-auto bg-slate-50/95 backdrop-blur-3xl px-5 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)] sm:px-6 ring-1 ring-white/20"
+        className="flex flex-col max-h-full w-full max-w-[700px] overflow-hidden rounded-[2rem] bg-white/95 backdrop-blur-3xl shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-white/60 transition-all scale-100"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--primary)]/80">Title Details</p>
-            <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">{record.title}</h2>
+        {/* Header - Sticky */}
+        <header className="relative shrink-0 border-b border-slate-100 bg-white/80 backdrop-blur px-6 py-5 sm:px-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-blue-600">
+                <i className="fas fa-file-signature opacity-70" /> Title Proposal Details
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 leading-tight">{record.title}</h2>
+            </div>
+            <button
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100/80 text-slate-500 transition hover:bg-slate-200 hover:text-slate-800 focus:outline-none"
+              type="button"
+              onClick={onClose}
+            >
+              <i className="fas fa-xmark text-lg" />
+            </button>
           </div>
-          <button
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/60 border border-white/80 text-slate-600 shadow-sm backdrop-blur transition hover:bg-white"
-            type="button"
-            onClick={onClose}
-          >
-            <i className="fas fa-xmark" />
-          </button>
-        </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          <span className="inline-flex rounded-full bg-[rgba(0,58,143,0.08)] px-3 py-1 text-xs font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
-            IT
-          </span>
-          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badgeClassName}`}>
-            {statusMeta.label}
-          </span>
-          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-            {record.academicYear}
-          </span>
-        </div>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200/80">
+              IT
+            </span>
+            <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ring-1 ring-inset ring-current/20 ${statusMeta.badgeClassName}`}>
+              {statusMeta.label}
+            </span>
+            <span className="inline-flex rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-200/60">
+              {record.academicYear}
+            </span>
+          </div>
+        </header>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <DrawerMeta label="Group ID" value={record.groupId} />
-          <DrawerMeta label="Members" value={`${record.membersCount} members`} />
-          <DrawerMeta label="Submitted" value={formatTitleDate(record.submittedAt)} />
-          <DrawerMeta label="Current Status" value={statusMeta.label} />
-        </div>
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-8 custom-scrollbar bg-slate-50/30">
+          
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DrawerMeta icon="fa-users-rectangle" label="Group ID" value={record.groupId} />
+            <DrawerMeta icon="fa-user-group" label="Members" value={`${record.membersCount} members`} />
+            <DrawerMeta icon="fa-calendar-day" label="Submitted" value={formatTitleDate(record.submittedAt)} />
+            <DrawerMeta icon="fa-spinner" label="Current Status" value={statusMeta.label} />
+          </div>
 
-        <section className="mt-6 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)] mb-3">
-            Attached Documents
-          </p>
-          {record.uploadedFiles && record.uploadedFiles.length > 0 ? (
-            <div className="grid gap-3">
-              {record.uploadedFiles.map((file) => (
-                <div key={file.id} className="flex items-center justify-between rounded-2xl border border-slate-200/60 bg-white p-3 shadow-sm hover:border-[var(--primary)] hover:shadow-md transition group">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/5 text-[var(--primary)] transition group-hover:bg-[var(--primary)]/10">
-                      <i className="fas fa-file-pdf" aria-hidden="true" />
+          <section className="mt-6 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
+            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-4">
+              <i className="fas fa-paperclip" /> Attached Documents
+            </p>
+            {record.uploadedFiles && record.uploadedFiles.length > 0 ? (
+              <div className="grid gap-3">
+                {record.uploadedFiles.map((file) => (
+                  <div key={file.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition hover:border-blue-300 hover:bg-blue-50 group">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
+                        <i className="fas fa-file-pdf" aria-hidden="true" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-800 group-hover:text-blue-800">{file.name}</p>
+                        <p className="text-xs font-medium text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-slate-800">{file.name}</p>
-                      <p className="text-xs font-medium text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
+                    <a 
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-9 shrink-0 items-center justify-center rounded-lg bg-white px-4 text-xs font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-blue-600 hover:text-white hover:ring-blue-600 ml-2"
+                    >
+                      View File
+                    </a>
                   </div>
-                  <a 
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--primary-dark)] ml-2"
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[1.25rem] bg-blue-50/50 p-4 ring-1 ring-inset ring-blue-100/50">
+                <p className="text-sm font-medium leading-relaxed text-blue-900">
+                  No physical files were uploaded. You can view or download the generated title summary document instead.
+                </p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 hover:shadow"
+                    type="button"
+                    onClick={() => openTitleSubmissionDocument(documentData)}
                   >
-                    View File
-                  </a>
+                    <i className="fas fa-file-lines" aria-hidden="true" />
+                    View Generated Doc
+                  </button>
+                  <button
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 transition hover:bg-blue-50"
+                    type="button"
+                    onClick={() => downloadTitleSubmissionDocument(documentData)}
+                  >
+                    <i className="fas fa-download" aria-hidden="true" />
+                    Download
+                  </button>
                 </div>
+              </div>
+            )}
+          </section>
+
+          <section className="mt-5 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
+            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+               <i className="fas fa-users" /> Group Information
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {record.groupMembers && record.groupMembers.length > 0 ? (
+                record.groupMembers.map((member, idx) => (
+                  <span 
+                    key={idx} 
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold ring-1 ring-inset shadow-sm ${
+                      member.isLeader 
+                        ? 'bg-amber-50 text-amber-700 ring-amber-200/80' 
+                        : 'bg-slate-50 text-slate-700 ring-slate-200/80'
+                    }`}
+                  >
+                    {member.isLeader ? (
+                      <i className="fas fa-crown text-amber-500" />
+                    ) : (
+                      <i className="fas fa-user text-slate-400" />
+                    )}
+                    {member.name}
+                  </span>
+                ))
+              ) : (
+                <p className="text-sm font-semibold text-slate-800">
+                  {formatMemberPreview(record.memberPreview, 5)}
+                </p>
+              )}
+            </div>
+            <p className="mt-4 text-sm font-medium text-slate-500">
+              Assigned IT group under the {record.academicYear} academic year.
+            </p>
+          </section>
+
+          <section className="mt-5 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
+            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+               <i className="fas fa-align-left" /> Project Description
+            </p>
+            <p className="mt-3 text-[0.95rem] leading-relaxed text-slate-700">{record.description}</p>
+          </section>
+
+          <section className="mt-5 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
+            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+               <i className="fas fa-tags" /> Keywords
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {record.keywords.map((keyword) => (
+                <span key={keyword} className="inline-flex rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200">
+                  #{keyword}
+                </span>
               ))}
             </div>
-          ) : (
-            <div className="rounded-[1.25rem] bg-[rgba(0,58,143,0.04)] p-4 ring-1 ring-inset ring-[rgba(0,58,143,0.08)]">
-              <p className="text-sm leading-6 text-[var(--text-dark)] font-medium">
-                No physical files were uploaded. Open the generated summary document for review.
-              </p>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <button
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary-dark)] hover:shadow"
-                  type="button"
-                  onClick={() => openTitleSubmissionDocument(documentData)}
-                >
-                  <i className="fas fa-file-lines" aria-hidden="true" />
-                  View Generated Doc
-                </button>
-                <button
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] shadow-sm transition hover:bg-[rgba(0,58,143,0.04)]"
-                  type="button"
-                  onClick={() => downloadTitleSubmissionDocument(documentData)}
-                >
-                  <i className="fas fa-download" aria-hidden="true" />
-                  Download
-                </button>
-              </div>
-            </div>
-          )}
-        </section>
+          </section>
 
-        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Group Information</p>
-          <p className="mt-3 text-sm font-semibold text-[var(--text-dark)]">
-            {formatMemberPreview(record.memberPreview, 3)}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--text-light)]">
-            Assigned IT group under {record.academicYear}.
-          </p>
-        </section>
+          <section className="mt-5">
+            <SimilarityIndicator score={record.similarityScore} similarTitles={record.similarTitles} />
+          </section>
 
-        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Project Description</p>
-          <p className="mt-3 text-sm leading-7 text-[var(--text-dark)]">{record.description}</p>
-        </section>
-
-        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Keywords</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {record.keywords.map((keyword) => (
-              <span
-                key={keyword}
-                className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]"
-              >
-                {keyword}
-              </span>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-5">
-          <SimilarityIndicator score={record.similarityScore} similarTitles={record.similarTitles} />
-        </section>
-
-        <section className="mt-5 rounded-[1.35rem] bg-white/70 backdrop-blur shadow-sm border border-white/80 p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Adviser Remarks</p>
-          <textarea
-            className="mt-3 min-h-32 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-[var(--text-dark)] outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)]"
-            placeholder="Add a backend-ready adviser note for approval, revision, or rejection."
-            value={remarksDraft}
-            onChange={(event) => onRemarksChange(event.target.value)}
-          />
-        </section>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <button
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--primary-dark)]"
-            type="button"
-            onClick={() => onApprove(record)}
-          >
-            Approve
-          </button>
-          <button
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] transition hover:bg-[rgba(0,58,143,0.04)]"
-            type="button"
-            onClick={() => onRequestRevision(record)}
-          >
-            Request Revision
-          </button>
-          <button
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 sm:col-span-2"
-            type="button"
-            onClick={() => onReject(record)}
-          >
-            Reject
-          </button>
+          <section className="mt-5 rounded-[1.5rem] bg-blue-50/30 p-5 ring-1 ring-blue-100/50 shadow-sm">
+            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-blue-600">
+               <i className="fas fa-comment-dots" /> Adviser Remarks
+            </p>
+            <textarea
+              className="mt-4 min-h-[120px] w-full rounded-xl border border-blue-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+              placeholder="Add your backend-ready notes for approval, revision, or rejection..."
+              value={remarksDraft}
+              onChange={(event) => onRemarksChange(event.target.value)}
+            />
+          </section>
         </div>
-      </aside>
+
+        {/* Footer Actions - Sticky */}
+        <footer className="shrink-0 border-t border-slate-100 bg-white/90 backdrop-blur px-6 py-5 sm:px-8">
+          <div className="flex flex-col sm:flex-row gap-3 justify-end items-center">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <button
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-bold text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition hover:bg-rose-50 hover:ring-rose-300 focus:outline-none"
+                type="button"
+                onClick={() => onReject(record)}
+              >
+                <i className="fas fa-ban" /> Reject
+              </button>
+              <button
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-bold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 transition hover:bg-blue-50 hover:ring-blue-300 focus:outline-none"
+                type="button"
+                onClick={() => onRequestRevision(record)}
+              >
+                <i className="fas fa-rotate-left" /> Request Revision
+              </button>
+            </div>
+            <button
+              className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 text-sm font-bold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-lg focus:outline-none"
+              type="button"
+              onClick={() => onApprove(record)}
+            >
+              <i className="fas fa-check" /> Approve Title
+            </button>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
@@ -462,37 +503,44 @@ export function SimilarityIndicator({
   const similarityMeta = getSimilarityMeta(score, similarTitles);
 
   return (
-    <section className={`rounded-[1.35rem] ${compact ? 'bg-[rgba(248,250,252,0.98)] p-4' : 'bg-slate-50/90 p-4'}`}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <section className={`rounded-[1.5rem] shadow-[0_2px_10px_rgb(0,0,0,0.02)] ring-1 ring-inset ring-slate-200/80 ${compact ? 'bg-gradient-to-br from-white to-slate-50/50 p-5' : 'bg-white p-5'}`}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-slate-100 pb-3 mb-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">Similarity</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className="text-lg font-bold text-[var(--text-dark)]">{score}%</span>
-            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${similarityMeta.toneClass}`}>
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <i className="fas fa-percent text-[10px]" />
+            </span>
+            <p className="text-xs font-extrabold uppercase tracking-widest text-slate-500">Similarity</p>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-2xl font-black text-slate-800 tracking-tight">{score}%</span>
+            <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${similarityMeta.toneClass} ring-current/20`}>
               {similarityMeta.label}
             </span>
           </div>
         </div>
-        <p className={`text-sm font-semibold ${similarityMeta.helperClass}`}>
+      </div>
+
+      <div className="space-y-2.5">
+        <p className={`text-sm font-bold ${similarityMeta.helperClass}`}>
           {similarTitles.length
             ? `${similarTitles.length} related title${similarTitles.length === 1 ? '' : 's'} found`
             : 'No related IT titles found'}
         </p>
-      </div>
-
-      <div className="mt-4 space-y-2">
         {similarTitles.length ? (
           similarTitles.slice(0, compact ? 1 : 2).map((item) => (
-            <article key={item.id} className="rounded-2xl bg-white px-4 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
-                Similar title found
+            <article key={item.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3 shadow-sm transition hover:border-slate-300">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+                Similar title match
               </p>
-              <p className="text-sm font-semibold leading-6 text-[var(--text-dark)]">{item.title}</p>
-              <p className="mt-1 text-xs text-[var(--text-light)]">Closest match: {item.similarityScore}%</p>
+              <p className="mt-1 text-sm font-bold leading-tight text-slate-800">{item.title}</p>
+              <p className="mt-1.5 flex items-center gap-1 text-xs font-bold text-slate-500">
+                <i className="fas fa-bolt text-amber-500" /> Match: <span className="text-slate-700">{item.similarityScore}%</span>
+              </p>
             </article>
           ))
         ) : (
-          <div className="rounded-2xl bg-white px-4 py-3 text-sm text-[var(--text-light)]">
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-3 text-sm font-medium text-slate-500 text-center">
             No strongly related archived titles are listed for this proposal.
           </div>
         )}
@@ -501,7 +549,7 @@ export function SimilarityIndicator({
   );
 }
 
-function TitleCard({
+export function TitleCard({
   record,
   onApprove,
   onRequestRevision,
@@ -518,58 +566,85 @@ function TitleCard({
   const fileCount = record.uploadedFiles?.length ?? 0;
 
   return (
-    <article className="group relative rounded-[1.75rem] bg-white/80 backdrop-blur-sm p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] ring-1 ring-slate-100/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)] hover:ring-[var(--primary)]/20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 rounded-t-[1.75rem] bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00] opacity-60 transition-opacity group-hover:opacity-100" />
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(280px,0.9fr)] xl:items-start">
+    <article className="group relative rounded-[2rem] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/60 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_48px_rgb(0,58,143,0.12)] hover:ring-[var(--primary)]/30 z-10 hover:z-20">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 rounded-t-[2rem] bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400 opacity-80 transition-opacity group-hover:opacity-100" />
+      
+      <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr_1fr] xl:items-start pt-2">
         {/* Left: Title & Group Info */}
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[rgba(0,58,143,0.07)] to-[rgba(0,58,143,0.03)] px-3 py-1 text-xs font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
-              <i className="fas fa-layer-group text-[10px] opacity-60" />
-              IT
+        <div className="min-w-0 pr-4">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-extrabold tracking-wide text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200/80">
+              <i className="fas fa-layer-group text-[10px] text-slate-400" /> IT
             </span>
-            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${statusMeta.badgeClassName}`}>
-              {record.status === 'pending' ? (
-                <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" /></span>
-              ) : null}
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold shadow-sm ring-1 ring-inset ${statusMeta.badgeClassName} ring-current/20`}>
+              {record.status === 'pending' && (
+                <span className="relative flex h-2 w-2 mr-0.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" /></span>
+              )}
               {statusMeta.label}
             </span>
             {fileCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200/60">
-                <i className="fas fa-paperclip text-[10px]" />
-                {fileCount} file{fileCount > 1 ? 's' : ''}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm ring-1 ring-inset ring-emerald-200/80">
+                <i className="fas fa-paperclip opacity-70" /> {fileCount} file{fileCount > 1 ? 's' : ''}
               </span>
             )}
           </div>
 
           <h3
-            className="mt-4 overflow-hidden text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-5 text-[1.4rem] font-extrabold leading-tight tracking-tight text-slate-900 transition-colors group-hover:text-blue-700 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.title}
           >
             {record.title}
           </h3>
-          <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)]">
-            <i className="fas fa-users-rectangle text-xs opacity-70" />
-            {record.groupId}
-          </p>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-[var(--text-light)]">
-            <i className="fas fa-user-group text-[10px] opacity-50" />
-            {record.membersCount} members | {formatMemberPreview(record.memberPreview)}
-          </p>
+          
+          <div className="mt-4 flex flex-col gap-2.5">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
+              <span className="flex items-center gap-1.5 text-blue-700 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100/50 shadow-sm">
+                <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
+              </span>
+              <span className="flex items-center gap-1.5 text-slate-500">
+                <i className="fas fa-user-group opacity-60" />
+                {record.membersCount} members
+              </span>
+            </div>
+
+            {record.groupMembers && record.groupMembers.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {record.groupMembers.map((member, idx) => (
+                  <span 
+                    key={idx} 
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold ring-1 ring-inset shadow-sm ${
+                      member.isLeader 
+                        ? 'bg-amber-50 text-amber-700 ring-amber-200/80' 
+                        : 'bg-white text-slate-600 ring-slate-200/80'
+                    }`}
+                  >
+                    {member.isLeader ? (
+                      <i className="fas fa-crown text-amber-500 text-[10px]" />
+                    ) : (
+                      <i className="fas fa-user text-slate-400 text-[10px]" />
+                    )}
+                    {member.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="flex items-center gap-1.5 text-sm text-slate-500">
+                <span className="opacity-40">|</span> <span className="font-medium">{formatMemberPreview(record.memberPreview)}</span>
+              </p>
+            )}
+          </div>
+
           <p
-            className="mt-4 overflow-hidden text-sm leading-7 text-[var(--text-dark)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+            className="mt-5 text-[0.95rem] leading-relaxed text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
             title={record.description}
           >
             {record.description}
           </p>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-5 flex flex-wrap gap-2">
             {record.keywords.map((keyword) => (
-              <span
-                key={keyword}
-                className="inline-flex rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200"
-              >
-                {keyword}
+              <span key={keyword} className="inline-flex rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 shadow-sm">
+                #{keyword}
               </span>
             ))}
           </div>
@@ -577,28 +652,33 @@ function TitleCard({
 
         {/* Center: Submission Info & Similarity */}
         <div className="space-y-4">
-          <div className="rounded-[1.35rem] bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 ring-1 ring-inset ring-slate-100">
-            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
-              <i className="fas fa-circle-info text-[10px]" />
-              Submission Info
-            </p>
-            <dl className="mt-3 space-y-3 text-sm">
+          <div className="rounded-[1.5rem] bg-gradient-to-b from-slate-50/80 to-white p-5 ring-1 ring-inset ring-slate-200/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                <i className="fas fa-info text-[10px]" />
+              </span>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-slate-500">
+                Submission Info
+              </p>
+            </div>
+            
+            <dl className="space-y-3.5 text-sm">
               <div className="flex items-center justify-between gap-3">
-                <dt className="text-[var(--text-light)]">Submitted</dt>
-                <dd className="font-semibold text-[var(--text-dark)]">{formatTitleDate(record.submittedAt)}</dd>
+                <dt className="text-slate-500 font-medium">Submitted</dt>
+                <dd className="font-bold text-slate-800">{formatTitleDate(record.submittedAt)}</dd>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <dt className="text-[var(--text-light)]">Members</dt>
-                <dd className="font-semibold text-[var(--text-dark)]">{record.membersCount} members</dd>
+                <dt className="text-slate-500 font-medium">Members</dt>
+                <dd className="font-bold text-slate-800">{record.membersCount} members</dd>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <dt className="text-[var(--text-light)]">Academic Year</dt>
-                <dd className="font-semibold text-[var(--text-dark)]">{record.academicYear}</dd>
+                <dt className="text-slate-500 font-medium">Academic Year</dt>
+                <dd className="font-bold text-slate-800">{record.academicYear}</dd>
               </div>
               {fileCount > 0 && (
-                <div className="flex items-center justify-between gap-3">
-                  <dt className="text-[var(--text-light)]">Documents</dt>
-                  <dd className="font-semibold text-emerald-700">{fileCount} attached</dd>
+                <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 border-dashed">
+                  <dt className="text-slate-500 font-medium">Documents</dt>
+                  <dd className="font-bold text-emerald-600">{fileCount} attached</dd>
                 </div>
               )}
             </dl>
@@ -608,50 +688,57 @@ function TitleCard({
         </div>
 
         {/* Right: Actions Panel */}
-        <div className="rounded-[1.5rem] bg-gradient-to-b from-white to-slate-50/80 p-4 ring-1 ring-inset ring-slate-200/70 shadow-sm">
+        <div className="rounded-[1.5rem] bg-gradient-to-br from-blue-50/50 via-white to-white p-5 ring-1 ring-inset ring-blue-100/60 shadow-[0_4px_20px_rgb(59,130,246,0.05)] h-full flex flex-col">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-blue-100/50">
+             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+               <i className="fas fa-clipboard-check text-[10px]" />
+             </span>
+             <p className="text-xs font-extrabold uppercase tracking-widest text-blue-800">
+               Adviser Action
+             </p>
+          </div>
+          
           <div>
-            <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
-              <i className="fas fa-clipboard-check text-[10px]" />
-              Adviser Action
-            </p>
             <p
-              className="mt-3 overflow-hidden text-sm leading-7 text-[var(--text-dark)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+              className="text-[0.95rem] font-medium italic leading-relaxed text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
               title={record.adviserAction}
             >
-              {record.adviserAction}
+              "{record.adviserAction}"
             </p>
           </div>
 
-          <div className="mt-5 grid gap-2">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="mt-6 flex flex-col gap-2.5">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[var(--primary-dark)] hover:-translate-y-0.5 hover:shadow-md"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-sm ring-1 ring-inset ring-blue-700 transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md"
                 type="button"
                 onClick={() => onApprove(record)}
               >
-                <i className="fas fa-check text-xs" /> Approve
+                <i className="fas fa-check" /> Approve
               </button>
               <button
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-[rgba(0,58,143,0.14)] bg-white px-4 text-sm font-semibold text-[var(--primary)] shadow-sm transition-all hover:bg-[rgba(0,58,143,0.04)] hover:-translate-y-0.5"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 transition-all hover:bg-blue-50 hover:-translate-y-0.5 hover:ring-blue-300"
                 type="button"
                 onClick={() => onRequestRevision(record)}
               >
-                <i className="fas fa-rotate-left text-xs" /> Revise
+                <i className="fas fa-rotate-left" /> Revise
               </button>
             </div>
+            
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 shadow-sm transition-all hover:bg-rose-100 hover:-translate-y-0.5"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-rose-50 px-4 text-sm font-bold text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition-all hover:bg-rose-100 hover:-translate-y-0.5 hover:ring-rose-300"
               type="button"
               onClick={() => onReject(record)}
             >
-              <i className="fas fa-ban text-xs" /> Reject
+              <i className="fas fa-ban" /> Reject
             </button>
+            
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-700 px-4 text-sm font-semibold text-white shadow-sm transition-all hover:from-slate-700 hover:to-slate-600 hover:-translate-y-0.5 hover:shadow-md"
+              className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white shadow-md shadow-slate-900/20 transition-all hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/30"
               type="button"
               onClick={() => onViewDetails(record)}
             >
-              <i className="fas fa-expand text-xs" /> View Full Details
+              <i className="fas fa-expand text-slate-300" /> View Full Details
             </button>
           </div>
         </div>
@@ -695,15 +782,20 @@ export function EmptyState({
 }
 
 function DrawerMeta({
+  icon,
   label,
   value
 }: {
+  icon?: string;
   label: string;
   value: string;
 }) {
   return (
     <article className="rounded-[1.15rem] bg-slate-50/90 p-4">
-      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">{label}</p>
+      <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
+        {icon ? <i className={`fas ${icon}`} aria-hidden="true" /> : null}
+        {label}
+      </p>
       <p className="mt-2 text-sm font-semibold text-[var(--text-dark)]">{value}</p>
     </article>
   );

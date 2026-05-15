@@ -19,6 +19,230 @@
   font-family: var(--font-sans), Arial, sans-serif;
 }
 
+:global(html[data-landing-theme='dark']) .landingPage {
+  --background: #07111f;
+  --surface: #0f1b2d;
+  --text-dark: #e5eefb;
+  --text-muted: #98a8bd;
+  --border: #23344c;
+  --footer: #030712;
+  --shadow-soft: 0 16px 38px rgb(0 0 0 / 0.3);
+  --shadow-card: 0 28px 70px rgb(0 0 0 / 0.36);
+}
+
+:global(html[data-landing-theme='dark']) .heroSection {
+  background:
+    radial-gradient(circle at 50% 16%, rgb(30 64 175 / 0.18), transparent 18rem),
+    radial-gradient(circle at 18% 25%, rgb(246 190 0 / 0.08), transparent 18rem),
+    radial-gradient(circle at 85% 38%, rgb(65 139 255 / 0.16), transparent 29rem),
+    linear-gradient(135deg, #07111f 0%, #0d1b2f 100%);
+}
+
+:global(html[data-landing-theme='dark']) .heroContent h1,
+:global(html[data-landing-theme='dark']) .heroContent h1 span {
+  color: #93c5fd !important;
+}
+
+:global(html[data-landing-theme='dark']) .heroContent h1 .heroTitleAccent {
+  color: #bfdbfe !important;
+}
+
+:global(html[data-landing-theme='dark']) .institutionSection,
+:global(html[data-landing-theme='dark']) .modulesSection,
+:global(html[data-landing-theme='dark']) .workflowSection,
+:global(html[data-landing-theme='dark']) .aboutTeaserSection {
+  background:
+    radial-gradient(circle at 16% 18%, rgb(246 190 0 / 0.09), transparent 18rem),
+    radial-gradient(circle at 86% 12%, rgb(59 130 246 / 0.13), transparent 21rem),
+    linear-gradient(180deg, #07111f 0%, #0d1b2f 52%, #081323 100%);
+}
+
+:global(html[data-landing-theme='dark']) .heroInfoCard,
+:global(html[data-landing-theme='dark']) .institutionCard,
+:global(html[data-landing-theme='dark']) .moduleCard,
+:global(html[data-landing-theme='dark']) .workflowStepBody,
+:global(html[data-landing-theme='dark']) .aboutSystemCard,
+:global(html[data-landing-theme='dark']) .aboutLearnCard,
+:global(html[data-landing-theme='dark']) .detailCard {
+  border-color: rgb(51 65 85 / 0.86);
+  background: rgb(15 27 45 / 0.88);
+  box-shadow: var(--shadow-soft);
+}
+
+:global(html[data-landing-theme='dark']) .institutionVisionCard,
+:global(html[data-landing-theme='dark']) .institutionMissionCard {
+  background:
+    radial-gradient(circle at 92% 12%, rgb(59 130 246 / 0.14), transparent 13rem),
+    rgb(15 27 45 / 0.88);
+}
+
+:global(html[data-landing-theme='dark']) .heroInfoCard h2,
+:global(html[data-landing-theme='dark']) .institutionCard h3,
+:global(html[data-landing-theme='dark']) .moduleCard h3,
+:global(html[data-landing-theme='dark']) .workflowStep h3,
+:global(html[data-landing-theme='dark']) .featureItem h3,
+:global(html[data-landing-theme='dark']) .institutionVisionNote strong {
+  color: #e5eefb;
+}
+
+:global(html[data-landing-theme='dark']) .heroContent p,
+:global(html[data-landing-theme='dark']) .heroInfoCard p,
+:global(html[data-landing-theme='dark']) .institutionVisionCard p,
+:global(html[data-landing-theme='dark']) .institutionMissionList li,
+:global(html[data-landing-theme='dark']) .moduleCard p,
+:global(html[data-landing-theme='dark']) .moduleCapabilityList li,
+:global(html[data-landing-theme='dark']) .workflowStep p,
+:global(html[data-landing-theme='dark']) .institutionVisionNote span {
+  color: #a8b6c8;
+}
+
+:global(html[data-landing-theme='dark']) .heroBadge,
+:global(html[data-landing-theme='dark']) .sectionKicker,
+:global(html[data-landing-theme='dark']) .institutionCardHeader > span,
+:global(html[data-landing-theme='dark']) .institutionMissionList li,
+:global(html[data-landing-theme='dark']) .moduleBadge,
+:global(html[data-landing-theme='dark']) .workflowArtifact {
+  border-color: rgb(51 65 85 / 0.86);
+  background: rgb(17 34 58 / 0.9);
+}
+
+:global(html[data-landing-theme='dark']) .institutionIcon,
+:global(html[data-landing-theme='dark']) .moduleIcon,
+:global(html[data-landing-theme='dark']) .detailIcon,
+:global(html[data-landing-theme='dark']) .workflowIcon,
+:global(html[data-landing-theme='dark']) .featureIcon,
+:global(html[data-landing-theme='dark']) .institutionMissionList li > span {
+  border-color: rgb(51 65 85 / 0.78);
+  background: #13233b;
+  box-shadow: none;
+}
+
+:global(html[data-landing-theme='dark']) .workflowTimeline::before {
+  box-shadow:
+    inset 0 0 0 1px rgb(15 23 42 / 0.82),
+    0 12px 28px rgb(0 0 0 / 0.32);
+}
+
+:global(html[data-landing-theme='dark']) .landingPage :global(#about) {
+  background: #07111f !important;
+}
+
+:global(html[data-landing-theme='dark']) .landingPage :global(#about article),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about aside),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about > div > div:last-child) {
+  border-color: rgb(51 65 85 / 0.86) !important;
+  background: rgb(15 27 45 / 0.88) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+:global(html[data-landing-theme='dark']) .landingPage :global(#about h2),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about h3),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about strong) {
+  color: #e5eefb !important;
+}
+
+:global(html[data-landing-theme='dark']) .landingPage :global(#about p) {
+  color: #a8b6c8 !important;
+}
+
+:global(html[data-landing-theme='dark']) .landingPage :global(#about .bg-white),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about .bg-white\/60),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about .bg-white\/70),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about .bg-white\/80),
+:global(html[data-landing-theme='dark']) .landingPage :global(#about .bg-white\/90) {
+  background-color: rgb(17 34 58 / 0.88) !important;
+}
+
+.homeAboutSummaryCard,
+.homeAboutFlowCard,
+.homeAboutOutcomeCard,
+.homeAboutCtaShell {
+  isolation: isolate;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutSection {
+  background:
+    radial-gradient(circle at 18% 18%, rgb(246 190 0 / 0.08), transparent 19rem),
+    radial-gradient(circle at 86% 8%, rgb(59 130 246 / 0.13), transparent 22rem),
+    linear-gradient(180deg, #07111f 0%, #0d1b2f 54%, #081323 100%) !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard,
+:global(html[data-landing-theme='dark']) .homeAboutFlowCard,
+:global(html[data-landing-theme='dark']) .homeAboutOutcomeCard,
+:global(html[data-landing-theme='dark']) .homeAboutCtaShell {
+  border-color: rgb(51 65 85 / 0.86) !important;
+  background: rgb(15 27 45 / 0.88) !important;
+  box-shadow: 0 22px 58px rgb(0 0 0 / 0.34) !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard::before,
+:global(html[data-landing-theme='dark']) .homeAboutFlowCard::before,
+:global(html[data-landing-theme='dark']) .homeAboutOutcomeCard::before {
+  background: linear-gradient(135deg, rgb(59 130 246 / 0.08), transparent) !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard :global(.text-\[\#003a8f\]),
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard :global(.text-\[\#102033\]),
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard :global(.text-\[\#14243a\]) {
+  color: #e5eefb !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard :global(.text-\[\#536982\]),
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard :global(.text-\[\#66758a\]) {
+  color: #a8b6c8 !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard :global(.bg-\[\#ebf5ff\]\/80),
+:global(html[data-landing-theme='dark']) .homeAboutSummaryCard :global(.bg-white\/90) {
+  border-color: rgb(51 65 85 / 0.86) !important;
+  background-color: rgb(17 34 58 / 0.88) !important;
+  box-shadow: none !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutFlowKicker {
+  color: #dbeafe !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutFlowBadge,
+:global(html[data-landing-theme='dark']) .homeAboutFlowLabel {
+  border-color: rgb(51 65 85 / 0.86) !important;
+  background: rgb(17 34 58 / 0.9) !important;
+  color: #cbd5e1 !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutFlowRail {
+  background: rgb(51 65 85 / 0.82) !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutFlowIcon,
+:global(html[data-landing-theme='dark']) .homeAboutOutcomeIcon {
+  border-color: rgb(51 65 85 / 0.82) !important;
+  background: #13233b !important;
+  color: #93c5fd !important;
+  box-shadow: none !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutOutcomeTitle,
+:global(html[data-landing-theme='dark']) .homeAboutCtaTitle {
+  color: #e5eefb !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutOutcomeText,
+:global(html[data-landing-theme='dark']) .homeAboutCtaText {
+  color: #a8b6c8 !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutCtaBand {
+  background:
+    linear-gradient(135deg, rgb(0 58 143 / 0.18), transparent 48%),
+    rgb(17 34 58 / 0.88) !important;
+}
+
+:global(html[data-landing-theme='dark']) .homeAboutSecondaryLink {
+  color: #4a3500 !important;
+}
+
 .landingPage *,
 .landingPage *::before,
 .landingPage *::after {
@@ -91,10 +315,14 @@
   position: fixed;
   inset: 0 0 auto;
   z-index: 40;
-  border-bottom: 1px solid rgb(226 234 245 / 0.9);
-  background: rgb(255 255 255 / 0.96);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: blur(16px);
   box-shadow: 0 12px 35px rgb(15 43 89 / 0.07);
+}
+
+:global(html[data-landing-theme='dark']) .navbar {
+  box-shadow: 0 12px 35px rgb(0 0 0 / 0.28);
 }
 
 .departmentNavbar {
@@ -220,7 +448,7 @@
 .brand {
   display: block;
   flex: 0 0 auto;
-  margin-right: auto;
+  margin-right: 0;
 }
 
 .brand h2 {
@@ -246,11 +474,21 @@
 .navLinks {
   display: flex;
   flex-wrap: wrap;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   align-items: center;
   justify-content: flex-end;
   gap: 0.7rem 1rem;
-  margin-left: auto;
+  margin-left: 0;
+}
+
+.navLinkList {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.05rem;
+  transform: translateX(-50%);
 }
 
 .navLink {
@@ -258,7 +496,7 @@
   display: inline-flex;
   min-height: 2.3rem;
   align-items: center;
-  color: #1b2b42;
+  color: var(--text-dark);
   font-size: 0.92rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -293,7 +531,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin-left: 0.25rem;
+  margin-left: auto;
 }
 
 .buttonPrimary,
@@ -313,7 +551,7 @@
   font-size: 0.94rem;
   font-weight: 900;
   letter-spacing: 0;
-  transition: transform 0.55s var(--motion-luxe), box-shadow 0.55s var(--motion-luxe), background 0.4s ease, color 0.4s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .buttonPrimary::before,
@@ -353,13 +591,13 @@
 .buttonPrimary:hover,
 .buttonSecondary:hover,
 .buttonGhost:hover {
-  transform: translateY(-3px) scale(1.015);
+  transform: translateY(-1px);
 }
 
 .buttonPrimary:hover::before,
 .buttonSecondary:hover::before,
 .buttonGhost:hover::before {
-  animation: luxeSurfaceSweep 1.15s var(--motion-silk);
+  animation: none;
 }
 
 .buttonIcon {
@@ -383,6 +621,57 @@
   min-width: 6.8rem;
   min-height: 2.8rem;
   padding-block: 0.42rem;
+}
+
+.themeToggleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.65rem;
+  height: 2.8rem;
+  gap: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 90%, white 10%);
+  color: var(--primary-blue);
+  padding: 0 0.75rem 0 0.58rem;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgb(15 43 89 / 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+.themeToggleIcon {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-blue) 10%, white);
+  font-size: 0.78rem;
+}
+
+.themeToggleText {
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.themeToggleButton:hover,
+.themeToggleButton:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgb(15 43 89 / 0.14);
+}
+
+:global(html[data-landing-theme='dark']) .themeToggleButton {
+  border-color: rgb(71 85 105 / 0.72);
+  background: #17243a;
+  color: var(--accent-gold);
+  box-shadow: 0 16px 30px rgb(0 0 0 / 0.24);
+}
+
+:global(html[data-landing-theme='dark']) .themeToggleIcon {
+  background: rgb(246 190 0 / 0.14);
 }
 
 .mobileMenuButton {
@@ -454,16 +743,7 @@
 }
 
 .heroSection::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(105deg, transparent 0 38%, rgb(255 255 255 / 0.5) 48%, transparent 58% 100%);
-  mix-blend-mode: screen;
-  opacity: 0.42;
-  transform: translateX(-62%);
-  animation: luxeSurfaceSweep 8.5s var(--motion-silk) 0.6s infinite;
-  pointer-events: none;
+  display: none;
 }
 
 .heroGrid {
@@ -485,23 +765,23 @@
 .heroContent[data-visible='true'] h1,
 .heroContent[data-visible='true'] p,
 .heroContent[data-visible='true'] a {
-  animation: luxeHeroSettle 1s var(--motion-luxe) both;
+  animation: luxeHeroSettle 0.38s ease-out both;
 }
 
 .heroContent[data-visible='true'] h1 {
-  animation-delay: 0.08s;
+  animation-delay: 0.04s;
 }
 
 .heroContent[data-visible='true'] p {
-  animation-delay: 0.16s;
+  animation-delay: 0.08s;
 }
 
 .heroContent[data-visible='true'] a:nth-of-type(1) {
-  animation-delay: 0.24s;
+  animation-delay: 0.1s;
 }
 
 .heroContent[data-visible='true'] a:nth-of-type(2) {
-  animation-delay: 0.3s;
+  animation-delay: 0.12s;
 }
 
 .heroBadge {
@@ -569,7 +849,7 @@
   padding: 1.35rem 1.55rem;
   box-shadow: 0 22px 52px rgb(15 43 89 / 0.11);
   backdrop-filter: blur(18px);
-  transition: transform 0.65s var(--motion-luxe), box-shadow 0.65s var(--motion-luxe), border-color 0.65s var(--motion-luxe);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .heroInfoCard::before {
@@ -587,11 +867,11 @@
 .heroInfoCard:hover {
   border-color: color-mix(in srgb, var(--primary-blue) 22%, white);
   box-shadow: 0 34px 78px rgb(15 43 89 / 0.16);
-  transform: translateY(-5px);
+  transform: translateY(-1px);
 }
 
 .heroInfoCard:hover::before {
-  animation: luxeSurfaceSweep 1.25s var(--motion-silk);
+  animation: none;
 }
 
 .heroInfoIcon {
@@ -640,11 +920,11 @@
   min-height: 7.4rem;
   padding: 0.65rem 1.1rem;
   text-align: center;
-  transition: transform 0.55s var(--motion-luxe);
+  transition: transform 0.18s ease;
 }
 
 .featureItem:hover {
-  transform: translateY(-4px);
+  transform: translateY(-1px);
 }
 
 .featureItem + .featureItem {
@@ -660,14 +940,14 @@
   background: #eef6ff;
   color: var(--primary-blue);
   font-size: 1.05rem;
-  transition: transform 0.55s var(--motion-luxe), background 0.55s var(--motion-luxe), color 0.55s var(--motion-luxe), box-shadow 0.55s var(--motion-luxe);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .featureItem:hover .featureIcon {
   background: var(--primary-blue);
   color: #fff;
   box-shadow: 0 16px 30px rgb(0 58 143 / 0.18);
-  transform: translateY(-2px) scale(1.08);
+  transform: scale(1.02);
 }
 
 .featureItem h3 {
@@ -852,8 +1132,8 @@
   border-radius: 1rem;
   background: rgb(255 255 255 / 0.94);
   padding: 1.7rem;
-  transform-style: preserve-3d;
-  transition: transform 0.7s var(--motion-luxe), box-shadow 0.7s var(--motion-luxe), border-color 0.7s var(--motion-luxe);
+  transform-style: flat;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .institutionCard::before {
@@ -878,11 +1158,11 @@
 .institutionCard:hover {
   border-color: color-mix(in srgb, var(--primary-blue) 20%, white);
   box-shadow: 0 34px 78px rgb(15 43 89 / 0.13);
-  transform: translateY(-7px) rotateX(1.2deg);
+  transform: translateY(-1px);
 }
 
 .institutionCard:hover::after {
-  animation: luxeSurfaceSweep 1.3s var(--motion-silk);
+  animation: none;
 }
 
 .institutionVisionCard {
@@ -1133,8 +1413,8 @@
   background: rgb(255 255 255 / 0.94);
   padding: 1.25rem;
   text-align: left;
-  transform-style: preserve-3d;
-  transition: transform 0.72s var(--motion-luxe), box-shadow 0.72s var(--motion-luxe), border-color 0.72s var(--motion-luxe), background 0.72s var(--motion-luxe);
+  transform-style: flat;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .moduleCard::before {
@@ -1175,11 +1455,11 @@
   border-color: color-mix(in srgb, var(--module-accent) 34%, white);
   background: rgb(255 255 255 / 0.98);
   box-shadow: 0 34px 74px rgb(15 43 89 / 0.16);
-  transform: translateY(-8px) rotateX(1.4deg);
+  transform: translateY(-1px);
 }
 
 .moduleCard:hover::after {
-  animation: luxeTraceFlow 1.45s var(--motion-silk);
+  animation: none;
 }
 
 .moduleCardHeader {
@@ -1199,14 +1479,14 @@
   color: var(--module-accent);
   font-size: 1.35rem;
   box-shadow: inset 0 0 0 0.45rem rgb(255 255 255 / 0.58);
-  transition: transform 0.65s var(--motion-luxe), box-shadow 0.65s var(--motion-luxe), background 0.65s var(--motion-luxe), color 0.65s var(--motion-luxe);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .moduleCard:hover .moduleIcon {
   background: var(--module-accent);
   color: #fff;
   box-shadow: 0 20px 40px color-mix(in srgb, var(--module-accent) 24%, transparent);
-  transform: translateZ(20px) scale(1.08);
+  transform: scale(1.02);
 }
 
 .moduleBadge {
@@ -1283,13 +1563,13 @@
   font-family: 'Font Awesome 6 Free';
   font-size: 0.56rem;
   font-weight: 900;
-  transition: transform 0.38s var(--motion-luxe), background 0.38s var(--motion-luxe), color 0.38s var(--motion-luxe);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
 
 .moduleCard:hover .moduleCapabilityList li::before {
   background: var(--module-accent);
   color: #fff;
-  transform: scale(1.08);
+  transform: scale(1.02);
 }
 
 .cardCheckList {
@@ -1363,19 +1643,7 @@
 }
 
 .workflowTimeline::after {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  top: 2.25rem;
-  right: 4rem;
-  left: 4rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, transparent 0 22%, rgb(255 255 255 / 0.9) 38%, transparent 54% 100%);
-  background-size: 240% 100%;
-  animation: luxeTraceFlow 4.8s var(--motion-silk) infinite;
-  pointer-events: none;
+  display: none;
 }
 
 .workflowStep {
@@ -1438,16 +1706,14 @@
     0 18px 34px rgb(15 43 89 / 0.1),
     inset 0 0 0 0.55rem rgb(255 255 255 / 0.72);
   font-size: 1.55rem;
-  transition: transform 0.65s var(--motion-luxe), box-shadow 0.65s var(--motion-luxe), background 0.65s var(--motion-luxe), color 0.65s var(--motion-luxe);
-  animation: luxeIconBreath 5.5s ease-in-out infinite;
-  animation-delay: var(--reveal-delay, 0s);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  animation: none;
 }
 
 .workflowStep:hover .workflowIcon {
   background: var(--stage-accent);
   color: #fff;
-  transform: translateY(-5px) scale(1.08);
-  animation-play-state: paused;
+  transform: translateY(-1px) scale(1.02);
 }
 
 .stepNumber {
@@ -1480,8 +1746,8 @@
   background: rgb(255 255 255 / 0.94);
   padding: 1.25rem;
   box-shadow: 0 20px 46px rgb(15 43 89 / 0.08);
-  transform-style: preserve-3d;
-  transition: transform 0.68s var(--motion-luxe), box-shadow 0.68s var(--motion-luxe), border-color 0.68s var(--motion-luxe), background 0.68s var(--motion-luxe);
+  transform-style: flat;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .workflowStepBody::before {
@@ -1496,7 +1762,7 @@
   border-color: color-mix(in srgb, var(--stage-accent) 42%, white);
   background: rgb(255 255 255 / 0.98);
   box-shadow: 0 34px 74px rgb(15 43 89 / 0.15);
-  transform: translateY(-7px) rotateX(1.2deg);
+  transform: translateY(-1px);
 }
 
 .workflowStep h3 {
@@ -1536,6 +1802,37 @@
   font-family: 'Font Awesome 6 Free';
   font-size: 0.66rem;
   font-weight: 900;
+}
+
+:global(html[data-landing-theme='dark']) .workflowStepBody,
+:global(html[data-landing-theme='dark']) .workflowStep:hover .workflowStepBody {
+  border-color: rgb(51 65 85 / 0.86);
+  background: rgb(15 27 45 / 0.88);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 0.28);
+}
+
+:global(html[data-landing-theme='dark']) .workflowStep h3 {
+  color: #e5eefb;
+}
+
+:global(html[data-landing-theme='dark']) .workflowStep p {
+  color: #a8b6c8;
+}
+
+:global(html[data-landing-theme='dark']) .workflowIcon,
+:global(html[data-landing-theme='dark']) .workflowStep:hover .workflowIcon {
+  border-color: rgb(51 65 85 / 0.86);
+  background: #13233b;
+  color: var(--stage-accent);
+  box-shadow:
+    0 14px 28px rgb(0 0 0 / 0.24),
+    inset 0 0 0 0.45rem rgb(255 255 255 / 0.04);
+}
+
+:global(html[data-landing-theme='dark']) .workflowArtifact {
+  border-color: color-mix(in srgb, var(--stage-accent) 34%, #334155);
+  background: rgb(17 34 58 / 0.9);
+  color: color-mix(in srgb, var(--stage-accent) 58%, #e5eefb);
 }
 
 .aboutTeaserSection {
@@ -2041,11 +2338,11 @@
 .teamSection {
   position: relative;
   overflow: hidden;
-  padding: 5.5rem 0 5rem;
+  padding: 5.6rem 0 5.2rem;
   background:
-    radial-gradient(circle at 10% 70%, rgb(21 103 211 / 0.28), transparent 18rem),
-    radial-gradient(circle at 90% 18%, rgb(246 190 0 / 0.14), transparent 18rem),
-    linear-gradient(180deg, #061b3a, #06172f);
+    radial-gradient(circle at 14% 76%, rgb(0 58 143 / 0.34), transparent 20rem),
+    radial-gradient(circle at 88% 16%, rgb(246 190 0 / 0.15), transparent 18rem),
+    linear-gradient(135deg, #06172f 0%, #08244a 48%, #06162f 100%);
   color: #fff;
 }
 
@@ -2053,35 +2350,67 @@
 .teamSection::after {
   content: '';
   position: absolute;
-  width: 15rem;
-  height: 15rem;
-  background-image: radial-gradient(rgb(255 255 255 / 0.16) 1px, transparent 1px);
-  background-size: 0.7rem 0.7rem;
-  opacity: 0.55;
+  pointer-events: none;
 }
 
 .teamSection::before {
-  bottom: 4rem;
-  left: -4rem;
+  right: -4rem;
+  top: 2rem;
+  width: 19rem;
+  height: 19rem;
+  background-image: radial-gradient(rgb(255 255 255 / 0.15) 1px, transparent 1px);
+  background-size: 0.72rem 0.72rem;
+  opacity: 0.45;
+  animation: teamAmbientDrift 16s ease-in-out infinite alternate;
 }
 
 .teamSection::after {
-  top: 4rem;
-  right: -3rem;
+  left: -8rem;
+  bottom: -8rem;
+  width: 24rem;
+  height: 24rem;
+  border: 1px solid rgb(96 165 250 / 0.16);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgb(30 64 175 / 0.18), transparent 64%);
+  animation: teamAmbientPulse 12s ease-in-out infinite alternate;
+}
+
+@keyframes teamAmbientDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-1.2rem, 0.8rem, 0);
+  }
+}
+
+@keyframes teamAmbientPulse {
+  from {
+    opacity: 0.46;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 0.72;
+    transform: scale(1.04);
+  }
 }
 
 .teamIntro {
   position: relative;
   z-index: 1;
-  max-width: 45rem;
-  margin: 0 auto 2.5rem;
+  max-width: 46rem;
+  margin: 0 auto 2.4rem;
   text-align: center;
 }
 
 .teamIntro .sectionKicker {
-  border-color: rgb(246 190 0 / 0.28);
-  background: rgb(246 190 0 / 0.1);
+  border-color: rgb(246 190 0 / 0.32);
+  background: rgb(246 190 0 / 0.12);
   color: var(--accent-gold);
+  box-shadow: 0 10px 24px rgb(246 190 0 / 0.08);
 }
 
 .teamIntro .sectionKicker::before {
@@ -2090,13 +2419,16 @@
 
 .teamIntro h2 {
   color: #fff;
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  line-height: 1.06;
 }
 
 .teamIntro p {
   max-width: 42rem;
-  margin: 1rem auto 0;
-  color: rgb(255 255 255 / 0.78);
-  line-height: 1.72;
+  margin: 0.85rem auto 0;
+  color: rgb(219 234 254 / 0.82);
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
 .teamGrid {
@@ -2104,37 +2436,47 @@
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.5rem;
+  width: min(1240px, 100%);
+  gap: 1.15rem;
+  margin-inline: auto;
 }
 
 .teamCard {
   position: relative;
-  display: flex;
+  display: grid;
   min-height: 100%;
-  flex-direction: column;
-  align-items: center;
+  grid-template-rows: auto 1fr;
+  justify-items: center;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 0.1);
-  border-radius: 1.25rem;
-  background: rgb(255 255 255 / 0.05);
-  padding: 0 1.35rem 1.65rem;
+  border: 1px solid rgb(219 234 254 / 0.18);
+  border-radius: 1.2rem;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.13), rgb(255 255 255 / 0.055)),
+    radial-gradient(circle at 50% 0%, rgb(96 165 250 / 0.14), transparent 58%);
+  padding: 1.35rem 1.1rem 1.25rem;
   text-align: center;
-  box-shadow: 0 24px 60px rgb(0 0 0 / 0.28);
-  backdrop-filter: blur(16px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.12);
+  backdrop-filter: blur(18px);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, background 0.24s ease;
 }
 
 .teamCard:hover {
-  border-color: rgb(246 190 0 / 0.3);
-  box-shadow: 0 32px 72px rgb(0 0 0 / 0.35);
-  transform: translateY(-6px);
+  border-color: rgb(246 190 0 / 0.42);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.07)),
+    radial-gradient(circle at 50% 0%, rgb(246 190 0 / 0.16), transparent 60%);
+  box-shadow:
+    0 26px 64px rgb(0 58 143 / 0.32),
+    0 0 34px rgb(246 190 0 / 0.12),
+    inset 0 1px 0 rgb(255 255 255 / 0.16);
+  transform: translateY(-8px);
 }
 
 .teamCardAccent {
   position: absolute;
   inset: 0 0 auto;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary-blue), var(--accent-gold));
+  background: linear-gradient(90deg, var(--primary-blue), #1E40AF, var(--accent-gold));
 }
 
 .teamImageFrame {
@@ -2142,23 +2484,25 @@
   z-index: 1;
   width: 7rem;
   height: 7rem;
-  margin-top: 1.65rem;
+  margin-top: 0.2rem;
   overflow: hidden;
-  border: 3px solid rgb(255 255 255 / 0.9);
-  border-radius: 999px;
-  background: #dbe7f5;
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.3);
+  border: 3px solid var(--accent-gold);
+  border-radius: 1.15rem;
+  background: #dbeafe;
+  box-shadow:
+    0 16px 34px rgb(0 0 0 / 0.28),
+    0 0 0 5px rgb(255 255 255 / 0.08);
 }
 
 .teamImageFrame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.32s ease;
 }
 
 .teamCard:hover .teamImageFrame img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .teamCard:nth-child(2) .teamImageFrame img {
@@ -2170,41 +2514,51 @@
 }
 
 .teamCardInfo {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   align-items: center;
-  flex: 1;
+  align-content: start;
+  gap: 0.72rem;
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .teamCard h3 {
-  margin: 1rem 0 0;
-  color: #fff;
-  font-size: 1.02rem;
+  margin: 0;
+  color: #eff6ff;
+  font-size: 1.08rem;
   font-weight: 900;
-  line-height: 1.3;
+  line-height: 1.22;
 }
 
 .teamRoleBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.65rem;
-  border: 1px solid rgb(246 190 0 / 0.22);
+  justify-content: center;
+  gap: 0.42rem;
+  width: min(100%, 16.5rem);
+  min-height: 1.9rem;
+  border: 1px solid rgb(246 190 0 / 0.26);
   border-radius: 999px;
-  background: rgb(246 190 0 / 0.12);
-  color: var(--accent-gold);
-  padding: 0.38rem 0.82rem;
-  font-size: 0.68rem;
+  background:
+    linear-gradient(180deg, rgb(246 190 0 / 0.14), rgb(0 58 143 / 0.12));
+  color: #fde68a;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.66rem;
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.15;
+}
+
+.teamRoleBadge i {
+  color: var(--accent-gold);
+  font-size: 0.72rem;
 }
 
 .teamCard p {
-  flex: 1;
-  margin: 0.85rem 0 0;
-  color: rgb(255 255 255 / 0.68);
-  font-size: 0.82rem;
-  line-height: 1.62;
+  margin: 0;
+  max-width: 18rem;
+  color: rgb(219 234 254 / 0.78);
+  font-size: 0.76rem;
+  line-height: 1.48;
 }
 
 .teamQuoteBand {
@@ -2214,25 +2568,30 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-top: 2.5rem;
-  border: 1px solid rgb(255 255 255 / 0.08);
-  border-radius: 0.75rem;
-  background: rgb(255 255 255 / 0.04);
-  padding: 1.25rem 2rem;
-  backdrop-filter: blur(8px);
+  width: min(1240px, 100%);
+  margin-top: 1.75rem;
+  margin-inline: auto;
+  border: 1px solid rgb(219 234 254 / 0.14);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.04));
+  padding: 1.1rem 1.5rem;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 14px 34px rgb(0 0 0 / 0.18);
+  backdrop-filter: blur(12px);
 }
 
 .teamQuoteBand i {
   color: var(--accent-gold);
-  font-size: 1.25rem;
-  opacity: 0.7;
+  font-size: 1.35rem;
+  opacity: 0.9;
 }
 
 .teamQuoteBand p {
   margin: 0;
-  color: rgb(255 255 255 / 0.6);
+  color: rgb(219 234 254 / 0.78);
   font-family: var(--font-serif), Georgia, serif;
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-style: italic;
   line-height: 1.6;
 }
@@ -3359,13 +3718,14 @@
   gap: 1rem;
   min-height: 14rem;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--department-secondary) 16%, #d3e0f2);
+  border: 1px solid color-mix(in srgb, var(--department-highlight) 36%, var(--department-secondary));
   border-radius: 0.85rem;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--department-primary) 7%, white), #fff 42%),
-    #fff;
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--department-highlight) 18%, transparent), transparent 10rem),
+    linear-gradient(135deg, var(--department-primary), var(--department-secondary));
+  color: var(--department-text);
   padding: 1rem;
-  box-shadow: 0 16px 38px rgb(15 43 89 / 0.07);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--department-primary) 24%, transparent);
   transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
 
@@ -3397,9 +3757,9 @@
 }
 
 .departmentLogoCard:hover {
-  border-color: color-mix(in srgb, var(--department-secondary) 48%, white);
-  box-shadow: 0 24px 54px rgb(15 43 89 / 0.13);
-  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--department-highlight) 72%, white);
+  box-shadow: 0 24px 54px color-mix(in srgb, var(--department-primary) 34%, transparent);
+  transform: translateY(-1px);
 }
 
 .departmentLogoMark {
@@ -3407,10 +3767,10 @@
   width: 4.45rem;
   height: 4.45rem;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--department-secondary) 22%, white);
+  border: 1px solid color-mix(in srgb, var(--department-highlight) 38%, white);
   border-radius: 0.75rem;
-  background: rgb(255 255 255 / 0.9);
-  box-shadow: inset 0 0 0 0.42rem color-mix(in srgb, var(--department-primary) 7%, white);
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: inset 0 0 0 0.42rem color-mix(in srgb, var(--department-highlight) 12%, white);
 }
 
 .departmentLogoMark img {
@@ -3436,9 +3796,9 @@
   display: inline-flex;
   min-height: 1.65rem;
   align-items: center;
-  border: 1px solid color-mix(in srgb, var(--department-secondary) 18%, white);
+  border: 1px solid color-mix(in srgb, var(--department-highlight) 45%, transparent);
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--department-primary), var(--department-secondary));
+  background: color-mix(in srgb, var(--department-highlight) 20%, transparent);
   color: var(--department-text);
   padding: 0.25rem 0.6rem;
   font-size: 0.67rem;
@@ -3452,14 +3812,14 @@
   height: 1.9rem;
   place-items: center;
   border-radius: 0.55rem;
-  background: color-mix(in srgb, var(--department-highlight) 18%, white);
-  color: var(--department-secondary);
+  background: color-mix(in srgb, var(--department-highlight) 22%, transparent);
+  color: var(--department-highlight);
   font-size: 1rem;
 }
 
 .departmentLogoCard strong {
   display: block;
-  color: var(--department-primary);
+  color: var(--department-text);
   font-size: 1.04rem;
   font-weight: 900;
   line-height: 1.24;
@@ -3467,7 +3827,7 @@
 
 .departmentLogoCard p {
   margin: 0;
-  color: #536982;
+  color: color-mix(in srgb, var(--department-text) 76%, transparent);
   font-size: 0.84rem;
   line-height: 1.55;
 }
@@ -3475,11 +3835,11 @@
 .departmentCardFooter {
   display: flex;
   align-items: end;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 1rem;
   margin-top: 0.2rem;
   padding-top: 0.8rem;
-  border-top: 1px solid rgb(226 234 245 / 0.85);
+  border-top: 1px solid color-mix(in srgb, var(--department-highlight) 24%, transparent);
 }
 
 .departmentCardFooter span,
@@ -3489,7 +3849,7 @@
 }
 
 .departmentCardFooter span {
-  color: #64748b;
+  color: color-mix(in srgb, var(--department-text) 72%, transparent);
   font-size: 0.72rem;
   font-weight: 850;
   line-height: 1.25;
@@ -3497,7 +3857,7 @@
 
 .departmentCardFooter b {
   margin-bottom: 0.12rem;
-  color: var(--department-primary);
+  color: var(--department-highlight);
   font-size: 1.08rem;
   font-weight: 950;
   line-height: 1;
@@ -3507,7 +3867,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
-  color: var(--department-secondary);
+  color: var(--department-highlight);
   font-size: 0.72rem;
   font-style: normal;
   font-weight: 950;
@@ -3574,6 +3934,186 @@
   background: #f7fbff;
 }
 
+:global(html[data-landing-theme='dark']) .aboutPageHero {
+  background:
+    radial-gradient(circle at 14% 18%, rgb(246 190 0 / 0.08), transparent 18rem),
+    radial-gradient(circle at 86% 12%, rgb(59 130 246 / 0.14), transparent 24rem),
+    linear-gradient(135deg, #07111f 0%, #0d1b2f 54%, #081323 100%);
+}
+
+:global(html[data-landing-theme='dark']) .aboutPageHero::before {
+  background:
+    linear-gradient(90deg, rgb(148 163 184 / 0.05) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(148 163 184 / 0.04) 1px, transparent 1px);
+}
+
+:global(html[data-landing-theme='dark']) .aboutHeroContent h1 {
+  color: #facc15;
+}
+
+:global(html[data-landing-theme='dark']) .aboutHeroContent h1 span {
+  color: #e5eefb;
+}
+
+:global(html[data-landing-theme='dark']) .aboutHeroContent p,
+:global(html[data-landing-theme='dark']) .departmentSystemIntro p,
+:global(html[data-landing-theme='dark']) .systemDefinitionPanel p,
+:global(html[data-landing-theme='dark']) .processCard p,
+:global(html[data-landing-theme='dark']) .capabilityCard p,
+:global(html[data-landing-theme='dark']) .roleCard p,
+:global(html[data-landing-theme='dark']) .systemRuleCard p {
+  color: #a8b6c8;
+}
+
+:global(html[data-landing-theme='dark']) .aboutHeroMetrics div,
+:global(html[data-landing-theme='dark']) .aboutScenePanel,
+:global(html[data-landing-theme='dark']) .aboutSceneWidePanel,
+:global(html[data-landing-theme='dark']) .systemDefinitionPanel,
+:global(html[data-landing-theme='dark']) .processCard,
+:global(html[data-landing-theme='dark']) .capabilityCard,
+:global(html[data-landing-theme='dark']) .roleCard,
+:global(html[data-landing-theme='dark']) .departmentInsightCard,
+:global(html[data-landing-theme='dark']) .systemRuleCard {
+  border-color: rgb(51 65 85 / 0.86);
+  background: rgb(15 27 45 / 0.88);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 0.28);
+}
+
+:global(html[data-landing-theme='dark']) .aboutHeroMetrics span,
+:global(html[data-landing-theme='dark']) .aboutScenePanel span,
+:global(html[data-landing-theme='dark']) .aboutSceneWidePanel span,
+:global(html[data-landing-theme='dark']) .departmentInsightCard span {
+  color: #94a3b8;
+}
+
+:global(html[data-landing-theme='dark']) .aboutScenePanel strong,
+:global(html[data-landing-theme='dark']) .processCard h3,
+:global(html[data-landing-theme='dark']) .capabilityCard h3,
+:global(html[data-landing-theme='dark']) .roleCard h3,
+:global(html[data-landing-theme='dark']) .systemRuleCard h3 {
+  color: #e5eefb;
+}
+
+:global(html[data-landing-theme='dark']) .aboutHeroScene {
+  border-color: rgb(51 65 85 / 0.86);
+  background: rgb(15 27 45 / 0.78);
+  box-shadow: 0 28px 70px rgb(0 0 0 / 0.36);
+}
+
+:global(html[data-landing-theme='dark']) .aboutHeroScene::before {
+  background:
+    linear-gradient(90deg, rgb(148 163 184 / 0.06) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(148 163 184 / 0.05) 1px, transparent 1px);
+}
+
+:global(html[data-landing-theme='dark']) .aboutSceneChrome {
+  border-bottom-color: rgb(51 65 85 / 0.86);
+  background: rgb(17 34 58 / 0.92);
+}
+
+:global(html[data-landing-theme='dark']) .aboutSceneWidePanel b,
+:global(html[data-landing-theme='dark']) .capabilityCard > span,
+:global(html[data-landing-theme='dark']) .roleIcon,
+:global(html[data-landing-theme='dark']) .systemRuleCard i,
+:global(html[data-landing-theme='dark']) .processCardTop i {
+  border-color: rgb(51 65 85 / 0.72);
+  background: #13233b;
+  color: #93c5fd;
+}
+
+:global(html[data-landing-theme='dark']) .aboutSceneWidePanel b:nth-child(2),
+:global(html[data-landing-theme='dark']) .capabilityCard:nth-child(2) > span {
+  background: rgb(246 190 0 / 0.12);
+  color: #facc15;
+}
+
+:global(html[data-landing-theme='dark']) .aboutSceneWidePanel b:nth-child(3),
+:global(html[data-landing-theme='dark']) .capabilityCard:nth-child(3) > span {
+  background: rgb(15 118 110 / 0.18);
+  color: #5eead4;
+}
+
+:global(html[data-landing-theme='dark']) .aboutSceneWidePanel b:nth-child(4),
+:global(html[data-landing-theme='dark']) .capabilityCard:nth-child(4) > span {
+  background: rgb(100 116 139 / 0.2);
+  color: #cbd5e1;
+}
+
+:global(html[data-landing-theme='dark']) .systemModelSection,
+:global(html[data-landing-theme='dark']) .roleWorkspaceSection,
+:global(html[data-landing-theme='dark']) .systemRulesSection,
+:global(html[data-landing-theme='dark']) .detailSection {
+  background: #07111f;
+}
+
+:global(html[data-landing-theme='dark']) .capabilitySection,
+:global(html[data-landing-theme='dark']) .departmentSystemSection {
+  background:
+    linear-gradient(90deg, rgb(148 163 184 / 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, #07111f 0%, #0d1b2f 54%, #081323 100%);
+}
+
+:global(html[data-landing-theme='dark']) .systemDefinitionPanel {
+  border-left-color: #60a5fa;
+}
+
+:global(html[data-landing-theme='dark']) .systemDefinitionPanel span,
+:global(html[data-landing-theme='dark']) .processCardTop span,
+:global(html[data-landing-theme='dark']) .departmentSystemIntro h2,
+:global(html[data-landing-theme='dark']) .departmentInsightCard strong {
+  color: #e5eefb;
+}
+
+:global(html[data-landing-theme='dark']) .processCard em,
+:global(html[data-landing-theme='dark']) .departmentExploreLink {
+  border-color: rgb(51 65 85 / 0.86);
+  background: rgb(17 34 58 / 0.9);
+  color: #dbeafe;
+}
+
+:global(html[data-landing-theme='dark']) .roleCard strong {
+  color: #5eead4;
+}
+
+:global(html[data-landing-theme='dark']) .departmentCardTopline i,
+:global(html[data-landing-theme='dark']) .departmentExploreLink i {
+  background: rgb(255 255 255 / 0.08);
+  color: currentColor;
+}
+
+:global(html[data-landing-theme='dark']) .systemRulesBand {
+  border-color: rgb(51 65 85 / 0.86);
+}
+
+:global(html[data-landing-theme='dark']) .departmentLogoCard {
+  border-color: color-mix(in srgb, var(--department-highlight) 42%, var(--department-secondary));
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--department-highlight) 20%, transparent), transparent 10rem),
+    linear-gradient(135deg, var(--department-primary), var(--department-secondary));
+  color: var(--department-text);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--department-primary) 34%, transparent);
+}
+
+:global(html[data-landing-theme='dark']) .departmentLogoCard strong {
+  color: var(--department-text);
+}
+
+:global(html[data-landing-theme='dark']) .departmentLogoCard p,
+:global(html[data-landing-theme='dark']) .departmentCardFooter span {
+  color: color-mix(in srgb, var(--department-text) 76%, transparent);
+}
+
+:global(html[data-landing-theme='dark']) .departmentCardFooter b,
+:global(html[data-landing-theme='dark']) .departmentCardFooter em {
+  color: var(--department-highlight);
+}
+
+:global(html[data-landing-theme='dark']) .departmentLogoMark {
+  border-color: color-mix(in srgb, var(--department-highlight) 38%, white);
+  background: rgb(255 255 255 / 0.94);
+  box-shadow: inset 0 0 0 0.42rem color-mix(in srgb, var(--department-highlight) 12%, white);
+}
+
 .detailGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3596,25 +4136,25 @@
 
 .landingPage [data-reveal] {
   opacity: 0;
-  transform: translate3d(0, 34px, 0) scale(0.985);
+  transform: translate3d(0, 10px, 0);
   transform-origin: 50% 70%;
   transition:
-    opacity 0.95s var(--motion-silk),
-    transform 0.95s var(--motion-silk);
+    opacity 0.32s ease-out,
+    transform 0.32s ease-out;
   transition-delay: var(--reveal-delay, 0s);
   will-change: opacity, transform;
 }
 
 .landingPage [data-reveal='fade-left'] {
-  transform: translate3d(44px, 0, 0) scale(0.985);
+  transform: translate3d(10px, 0, 0);
 }
 
 .landingPage [data-reveal='fade-right'] {
-  transform: translate3d(-44px, 0, 0) scale(0.985);
+  transform: translate3d(-10px, 0, 0);
 }
 
 .landingPage [data-reveal='zoom-in'] {
-  transform: translate3d(0, 22px, 0) scale(0.94);
+  transform: translate3d(0, 8px, 0) scale(0.99);
 }
 
 .landingPage [data-visible='true'] {
@@ -3817,9 +4357,9 @@
     grid-template-columns: 1fr;
     gap: 0.35rem;
     visibility: hidden;
-    border: 1px solid rgb(226 234 245 / 0.95);
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
     border-radius: 1.1rem;
-    background: rgb(255 255 255 / 0.98);
+    background: color-mix(in srgb, var(--surface) 98%, transparent);
     box-shadow: var(--shadow-card);
     opacity: 0;
     padding: 0.85rem;
@@ -3832,6 +4372,13 @@
     visibility: visible;
     opacity: 1;
     pointer-events: auto;
+    transform: none;
+  }
+
+  .navLinkList {
+    position: static;
+    display: grid;
+    gap: 0.2rem;
     transform: none;
   }
 
@@ -3851,12 +4398,29 @@
 
   .navActions {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     gap: 0.55rem;
+    margin-left: 0;
   }
 
   .navActionButton {
     width: 100%;
+  }
+
+  .themeToggleButton {
+    width: 2.8rem;
+    min-width: 2.8rem;
+    padding: 0;
+  }
+
+  .themeToggleText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   .aboutHeroGrid,

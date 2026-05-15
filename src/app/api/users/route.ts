@@ -8,6 +8,7 @@ import {
   toPublicUser,
   validatePassword
 } from '@/lib/auth';
+import { sendAccountRestoreEmail } from '@/lib/mailer';
 import { prisma } from '@/lib/prisma';
 import {
   HttpError,
@@ -122,6 +123,48 @@ function validateManagedUserInput({
 export async function GET(request: Request) {
   try {
     const authUser = await requireAuthenticatedUser(request, USER_DIRECTORY_ROLES);
+    const now = new Date();
+
+    const expiredSuspensions = await prisma.user.findMany({
+      where: {
+        isSuspended: true,
+        suspendedUntil: {
+          lte: now
+        }
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true
+      }
+    });
+
+    await prisma.user.updateMany({
+      where: {
+        id: {
+          in: expiredSuspensions.map((user) => user.id)
+        },
+        isSuspended: true
+      },
+      data: {
+        isSuspended: false,
+        suspendedAt: null,
+        suspendedUntil: null
+      }
+    });
+
+    await Promise.all(
+      expiredSuspensions.map(async (user) => {
+        try {
+          await sendAccountRestoreEmail({
+            to: user.email,
+            name: user.name
+          });
+        } catch (emailError) {
+          console.error('Failed to send automatic account restore email', emailError);
+        }
+      })
+    );
 
     const whereClause: Prisma.UserWhereInput = {};
 

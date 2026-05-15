@@ -63,10 +63,10 @@ export function LandingManagedHero() {
         <p style={paragraphStyle}>{landing.description}</p>
         {landing.showCtaButtons ? (
           <div className={`mt-7 flex flex-wrap gap-3 ${ctaAlignmentClass}`}>
-            <Link href={landing.primaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-black text-white transition hover:-translate-y-0.5" style={primaryCtaStyle}>
+            <Link href={landing.primaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-black text-white transition-colors duration-200" style={primaryCtaStyle}>
               {landing.primaryCtaText}
             </Link>
-            <Link href={landing.secondaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full border bg-white px-6 text-sm font-black shadow-sm transition hover:-translate-y-0.5" style={secondaryCtaStyle}>
+            <Link href={landing.secondaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full border bg-white px-6 text-sm font-black shadow-sm transition-colors duration-200" style={secondaryCtaStyle}>
               {landing.secondaryCtaText}
             </Link>
           </div>
@@ -124,7 +124,7 @@ export function LandingManagedAboutSummary() {
       </p>
       <div className="grid grid-cols-3 gap-5" aria-label="System scope">
         {metrics.map((metric) => (
-          <div key={metric.id} className="bg-white/90 backdrop-blur-sm border border-[#e2eaf5] shadow-[0_8px_20px_rgba(15,43,89,0.03)] rounded-[1.2rem] p-5 text-center group-hover:border-[#c6d7ef] hover:-translate-y-1 hover:shadow-[0_12px_25px_rgba(15,43,89,0.08)] transition-all duration-300">
+          <div key={metric.id} className="bg-white/90 backdrop-blur-sm border border-[#e2eaf5] shadow-[0_8px_20px_rgba(15,43,89,0.03)] rounded-[1.2rem] p-5 text-center group-hover:border-[#c6d7ef] hover:shadow-[0_10px_22px_rgba(15,43,89,0.06)] transition-shadow duration-200">
             <strong className="block text-[1.8rem] font-black text-[#003a8f] mb-1">{metric.value}</strong>
             <span className="text-[0.7rem] font-bold text-[#66758a] uppercase tracking-wider">{metric.label}</span>
           </div>

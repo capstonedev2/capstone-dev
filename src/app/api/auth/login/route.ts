@@ -2,6 +2,7 @@ import {
   ensureAuthConfig,
   isAccountSuspended,
   publicUserSelect,
+  restoreExpiredSuspension,
   setAuthCookie,
   signAuthToken,
   toPublicUser,
@@ -65,12 +66,14 @@ export async function POST(request: Request) {
       });
     }
 
-    if (isAccountSuspended(user)) {
-      throw new HttpError('This account has been suspended. Contact the research office for access.', 403);
+    const authUser = await restoreExpiredSuspension(user);
+
+    if (isAccountSuspended(authUser)) {
+      throw new HttpError('This account has been suspended. Contact your administrator for assistance.', 403);
     }
 
-    const token = signAuthToken(user);
-    const response = successResponse({ user: toPublicUser(user) });
+    const token = signAuthToken(authUser);
+    const response = successResponse({ user: toPublicUser(authUser) });
     setAuthCookie(response, token);
 
     return response;

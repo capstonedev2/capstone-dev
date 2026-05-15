@@ -1,5 +1,6 @@
 import { UserRole } from '@/generated/prisma/client';
 import { publicUserSelect, requireAuthenticatedUser, toPublicUser } from '@/lib/auth';
+import { sendAccountRestoreEmail, sendAccountSuspensionEmail } from '@/lib/mailer';
 import { prisma } from '@/lib/prisma';
 import {
   HttpError,
@@ -11,10 +12,12 @@ import {
 
 export const runtime = 'nodejs';
 
-const SUSPENSION_MANAGER_ROLES: UserRole[] = [UserRole.SYSTEM_ADMIN, UserRole.PROGRAM_HEAD];
+const SUSPENSION_MANAGER_ROLES: UserRole[] = [UserRole.ADMIN, UserRole.SYSTEM_ADMIN, UserRole.PROGRAM_HEAD];
 
 type SuspensionBody = {
   suspended?: unknown;
+  durationKey?: unknown;
+  durationLabel?: unknown;
 };
 
 type RouteContext = {
@@ -43,6 +46,30 @@ function parseSuspendedValue(value: unknown) {
   });
 }
 
+const SUSPENSION_DURATION_MS: Record<string, number | null> = {
+  '1m': 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '6h': 6 * 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+  '7d': 7 * 24 * 60 * 60 * 1000,
+  '30d': 30 * 24 * 60 * 60 * 1000,
+  indefinite: null
+};
+
+function getSuspensionExpiry(durationKey: string, suspended: boolean) {
+  if (!suspended || !durationKey) {
+    return null;
+  }
+
+  const durationMs = SUSPENSION_DURATION_MS[durationKey];
+
+  if (!durationMs) {
+    return null;
+  }
+
+  return new Date(Date.now() + durationMs);
+}
+
 export async function PATCH(request: Request, context: RouteContext) {
   try {
     const actor = await requireAuthenticatedUser(request, SUSPENSION_MANAGER_ROLES);
@@ -55,6 +82,9 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const body = await parseJsonBody<SuspensionBody>(request);
     const suspended = parseSuspendedValue(body.suspended);
+    const durationKey = normalizeText(body.durationKey);
+    const durationLabel = normalizeText(body.durationLabel);
+    const suspendedUntil = getSuspensionExpiry(durationKey, suspended);
 
     if (actor.id === userId && suspended) {
       throw new HttpError('You cannot suspend the account you are currently using.', 400);
@@ -65,6 +95,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       select: {
         id: true,
         name: true,
+        email: true,
         role: true,
         isSuspended: true,
         department: true
@@ -89,15 +120,36 @@ export async function PATCH(request: Request, context: RouteContext) {
       where: { id: userId },
       data: {
         isSuspended: suspended,
-        suspendedAt: suspended ? new Date() : null
+        suspendedAt: suspended ? new Date() : null,
+        suspendedUntil
       },
       select: publicUserSelect
     });
 
+    let emailNotice = '';
+
+    try {
+      if (suspended) {
+        await sendAccountSuspensionEmail({
+          to: existingUser.email,
+          name: existingUser.name,
+          durationLabel
+        });
+      } else {
+        await sendAccountRestoreEmail({
+          to: existingUser.email,
+          name: existingUser.name
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send account suspension notification email', emailError);
+      emailNotice = ' The account was updated, but the notification email could not be sent.';
+    }
+
     return successResponse({
       message: suspended
-        ? `${existingUser.name} has been suspended.`
-        : `${existingUser.name} has been restored.`,
+        ? `${existingUser.name} has been suspended${durationLabel ? ` for ${durationLabel}` : ''}.${emailNotice}`
+        : `${existingUser.name} has been restored.${emailNotice}`,
       user: toPublicUser(user)
     });
   } catch (error) {

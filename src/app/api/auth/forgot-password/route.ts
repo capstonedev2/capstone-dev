@@ -44,8 +44,8 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return successResponse({
-        message: PASSWORD_RESET_MESSAGE
+      throw new HttpError('Account does not exist. Cannot proceed.', 404, {
+        email: 'Account does not exist.'
       });
     }
 

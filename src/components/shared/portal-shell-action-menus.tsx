@@ -38,6 +38,7 @@ type PortalShellActionMenusProps = {
   notificationTitle: string;
   notificationDescription: string;
   notificationItems: PortalNotificationItem[];
+  notificationMarkAllReadEnabled?: boolean;
   notificationFooterLabel?: string;
   notificationEmptyTitle?: string;
   notificationEmptyMessage?: string;
@@ -69,6 +70,7 @@ export function PortalShellActionMenus({
   notificationTitle,
   notificationDescription,
   notificationItems,
+  notificationMarkAllReadEnabled = false,
   notificationFooterLabel = 'See all notifications',
   notificationEmptyTitle = 'All caught up',
   notificationEmptyMessage = 'No notification is waiting right now.',
@@ -124,6 +126,33 @@ export function PortalShellActionMenus({
     });
   };
 
+  const markAllNotificationsRead = () => {
+    const unreadItems = notificationItems.filter((item) => item.unread !== false && !readNotificationIds.has(item.id));
+
+    if (!unreadItems.length) {
+      return;
+    }
+
+    setReadNotificationIds((current) => {
+      const next = new Set(current);
+      unreadItems.forEach((item) => next.add(item.id));
+      return next;
+    });
+
+    void Promise.allSettled(
+      unreadItems.map((item) =>
+        fetch('/api/notifications', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notificationId: item.id, action: 'read' }),
+          keepalive: true
+        })
+      )
+    ).finally(() => {
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    });
+  };
+
   const unreadPreviewCount = notificationItems.filter((item) => item.unread !== false && !readNotificationIds.has(item.id)).length;
   const urgentPreviewCount = notificationItems.filter((item) => item.tone === 'danger' || item.tone === 'warning').length;
   const visibleNotificationCount = Math.max(0, notificationCount - readNotificationIds.size);
@@ -159,13 +188,28 @@ export function PortalShellActionMenus({
               <strong>{notificationTitle}</strong>
               <small>{notificationDescription}</small>
             </div>
-            <Link
-              className="portal-shell-notification-menu-view-all"
-              href={notificationHref}
-              onClick={() => setNotificationMenuOpen(false)}
-            >
-              Open center
-            </Link>
+            <div className="portal-shell-notification-menu-actions">
+              {notificationMarkAllReadEnabled && unreadPreviewCount ? (
+                <button
+                  className="portal-shell-notification-menu-view-all is-secondary"
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    markAllNotificationsRead();
+                  }}
+                >
+                  Mark all read
+                </button>
+              ) : null}
+              <Link
+                className="portal-shell-notification-menu-view-all is-primary"
+                href={notificationHref}
+                onClick={() => setNotificationMenuOpen(false)}
+              >
+                Open center
+              </Link>
+            </div>
           </div>
 
           <div className="portal-shell-notification-menu-summary">

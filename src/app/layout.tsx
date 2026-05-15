@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display, Poppins } from 'next/font/google';
+import { SessionSuspensionWatcher } from '@/components/auth/session-suspension-watcher';
 import { BrandingProvider } from '@/components/branding/branding-provider';
 import { SYSTEM_LOGO_SRC } from '@/lib/branding';
 import './globals.css';
@@ -46,7 +47,10 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <BrandingProvider>{children}</BrandingProvider>
+        <BrandingProvider>
+          {children}
+          <SessionSuspensionWatcher />
+        </BrandingProvider>
       </body>
     </html>
   );

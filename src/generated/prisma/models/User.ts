@@ -46,6 +46,7 @@ export type UserMinAggregateOutputType = {
   displayName: string | null
   isSuspended: boolean | null
   suspendedAt: Date | null
+  suspendedUntil: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +73,7 @@ export type UserMaxAggregateOutputType = {
   displayName: string | null
   isSuspended: boolean | null
   suspendedAt: Date | null
+  suspendedUntil: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -98,6 +100,7 @@ export type UserCountAggregateOutputType = {
   displayName: number
   isSuspended: number
   suspendedAt: number
+  suspendedUntil: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -126,6 +129,7 @@ export type UserMinAggregateInputType = {
   displayName?: true
   isSuspended?: true
   suspendedAt?: true
+  suspendedUntil?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -152,6 +156,7 @@ export type UserMaxAggregateInputType = {
   displayName?: true
   isSuspended?: true
   suspendedAt?: true
+  suspendedUntil?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -178,6 +183,7 @@ export type UserCountAggregateInputType = {
   displayName?: true
   isSuspended?: true
   suspendedAt?: true
+  suspendedUntil?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -277,6 +283,7 @@ export type UserGroupByOutputType = {
   displayName: string | null
   isSuspended: boolean
   suspendedAt: Date | null
+  suspendedUntil: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -324,6 +331,7 @@ export type UserWhereInput = {
   displayName?: Prisma.StringNullableFilter<"User"> | string | null
   isSuspended?: Prisma.BoolFilter<"User"> | boolean
   suspendedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  suspendedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
@@ -363,6 +371,7 @@ export type UserOrderByWithRelationInput = {
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   isSuspended?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
@@ -405,6 +414,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   displayName?: Prisma.StringNullableFilter<"User"> | string | null
   isSuspended?: Prisma.BoolFilter<"User"> | boolean
   suspendedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  suspendedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
@@ -444,6 +454,7 @@ export type UserOrderByWithAggregationInput = {
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   isSuspended?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspendedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -476,6 +487,7 @@ export type UserScalarWhereWithAggregatesInput = {
   displayName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isSuspended?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   suspendedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  suspendedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -502,6 +514,7 @@ export type UserCreateInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -541,6 +554,7 @@ export type UserUncheckedCreateInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -580,6 +594,7 @@ export type UserUpdateInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -619,6 +634,7 @@ export type UserUncheckedUpdateInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -658,6 +674,7 @@ export type UserCreateManyInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -684,6 +701,7 @@ export type UserUpdateManyMutationInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -710,6 +728,7 @@ export type UserUncheckedUpdateManyInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -736,6 +755,7 @@ export type UserCountOrderByAggregateInput = {
   displayName?: Prisma.SortOrder
   isSuspended?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
+  suspendedUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -762,6 +782,7 @@ export type UserMaxOrderByAggregateInput = {
   displayName?: Prisma.SortOrder
   isSuspended?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
+  suspendedUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -788,6 +809,7 @@ export type UserMinOrderByAggregateInput = {
   displayName?: Prisma.SortOrder
   isSuspended?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
+  suspendedUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1046,6 +1068,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetCodes?: Prisma.PasswordResetCodeCreateNestedManyWithoutUserInput
@@ -1084,6 +1107,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetCodes?: Prisma.PasswordResetCodeUncheckedCreateNestedManyWithoutUserInput
@@ -1138,6 +1162,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetCodes?: Prisma.PasswordResetCodeUpdateManyWithoutUserNestedInput
@@ -1176,6 +1201,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetCodes?: Prisma.PasswordResetCodeUncheckedUpdateManyWithoutUserNestedInput
@@ -1214,6 +1240,7 @@ export type UserCreateWithoutPasswordResetCodesInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1252,6 +1279,7 @@ export type UserUncheckedCreateWithoutPasswordResetCodesInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1306,6 +1334,7 @@ export type UserUpdateWithoutPasswordResetCodesInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1344,6 +1373,7 @@ export type UserUncheckedUpdateWithoutPasswordResetCodesInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1382,6 +1412,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1420,6 +1451,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1474,6 +1506,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1512,6 +1545,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1550,6 +1584,7 @@ export type UserCreateWithoutGroupMembershipsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1588,6 +1623,7 @@ export type UserUncheckedCreateWithoutGroupMembershipsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1642,6 +1678,7 @@ export type UserUpdateWithoutGroupMembershipsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1680,6 +1717,7 @@ export type UserUncheckedUpdateWithoutGroupMembershipsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1718,6 +1756,7 @@ export type UserCreateWithoutOwnedProjectsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1756,6 +1795,7 @@ export type UserUncheckedCreateWithoutOwnedProjectsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1799,6 +1839,7 @@ export type UserCreateWithoutAdvisedProjectsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1837,6 +1878,7 @@ export type UserUncheckedCreateWithoutAdvisedProjectsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1891,6 +1933,7 @@ export type UserUpdateWithoutOwnedProjectsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1929,6 +1972,7 @@ export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1978,6 +2022,7 @@ export type UserUpdateWithoutAdvisedProjectsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2016,6 +2061,7 @@ export type UserUncheckedUpdateWithoutAdvisedProjectsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2054,6 +2100,7 @@ export type UserCreateWithoutSubmissionsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -2092,6 +2139,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2146,6 +2194,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2184,6 +2233,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2222,6 +2272,7 @@ export type UserCreateWithoutReviewCommentsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -2260,6 +2311,7 @@ export type UserUncheckedCreateWithoutReviewCommentsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2303,6 +2355,7 @@ export type UserCreateWithoutResolvedCommentsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -2341,6 +2394,7 @@ export type UserUncheckedCreateWithoutResolvedCommentsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2395,6 +2449,7 @@ export type UserUpdateWithoutReviewCommentsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2433,6 +2488,7 @@ export type UserUncheckedUpdateWithoutReviewCommentsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2482,6 +2538,7 @@ export type UserUpdateWithoutResolvedCommentsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2520,6 +2577,7 @@ export type UserUncheckedUpdateWithoutResolvedCommentsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2558,6 +2616,7 @@ export type UserCreateWithoutScheduledDefensesInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -2596,6 +2655,7 @@ export type UserUncheckedCreateWithoutScheduledDefensesInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2650,6 +2710,7 @@ export type UserUpdateWithoutScheduledDefensesInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2688,6 +2749,7 @@ export type UserUncheckedUpdateWithoutScheduledDefensesInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2726,6 +2788,7 @@ export type UserCreateWithoutEvaluationsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -2764,6 +2827,7 @@ export type UserUncheckedCreateWithoutEvaluationsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2818,6 +2882,7 @@ export type UserUpdateWithoutEvaluationsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2856,6 +2921,7 @@ export type UserUncheckedUpdateWithoutEvaluationsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2894,6 +2960,7 @@ export type UserCreateWithoutNotificationsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -2932,6 +2999,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2986,6 +3054,7 @@ export type UserUpdateWithoutNotificationsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -3024,6 +3093,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3062,6 +3132,7 @@ export type UserCreateWithoutAuditLogsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -3100,6 +3171,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   displayName?: string | null
   isSuspended?: boolean
   suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3154,6 +3226,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -3192,6 +3265,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3369,6 +3443,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   displayName?: boolean
   isSuspended?: boolean
   suspendedAt?: boolean
+  suspendedUntil?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
@@ -3409,6 +3484,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   displayName?: boolean
   isSuspended?: boolean
   suspendedAt?: boolean
+  suspendedUntil?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -3435,6 +3511,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   displayName?: boolean
   isSuspended?: boolean
   suspendedAt?: boolean
+  suspendedUntil?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -3461,11 +3538,12 @@ export type UserSelectScalar = {
   displayName?: boolean
   isSuspended?: boolean
   suspendedAt?: boolean
+  suspendedUntil?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "googleSub" | "name" | "firstName" | "lastName" | "studentId" | "department" | "yearLevel" | "role" | "contactNumber" | "address" | "birthDate" | "profileImage" | "section" | "accountSummary" | "office" | "displayName" | "isSuspended" | "suspendedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "googleSub" | "name" | "firstName" | "lastName" | "studentId" | "department" | "yearLevel" | "role" | "contactNumber" | "address" | "birthDate" | "profileImage" | "section" | "accountSummary" | "office" | "displayName" | "isSuspended" | "suspendedAt" | "suspendedUntil" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   passwordResetCodes?: boolean | Prisma.User$passwordResetCodesArgs<ExtArgs>
@@ -3524,6 +3602,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     displayName: string | null
     isSuspended: boolean
     suspendedAt: Date | null
+    suspendedUntil: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -3983,6 +4062,7 @@ export interface UserFieldRefs {
   readonly displayName: Prisma.FieldRef<"User", 'String'>
   readonly isSuspended: Prisma.FieldRef<"User", 'Boolean'>
   readonly suspendedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly suspendedUntil: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
