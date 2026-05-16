@@ -242,6 +242,29 @@ button {
     overscroll-behavior: contain;
 }
 
+.student-shell .student-role-sidebar-nav {
+    flex: 1;
+    display: grid;
+    align-content: start;
+    gap: 0.32rem;
+    overflow-y: auto;
+    padding: 1.1rem 0;
+    overscroll-behavior: contain;
+}
+
+.student-shell .student-role-sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.student-shell .student-role-sidebar-nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.student-shell .student-role-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+}
+
 .sidebar-nav::-webkit-scrollbar {
     width: 4px;
 }
@@ -20812,4 +20835,185 @@ html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sideb
     .student-shell.is-sidebar-collapsed .sidebar-nav-heading::after {
         display: none !important;
     }
+}
+
+/* Fix for collapsed sidebar logo positioning */
+.student-shell.is-sidebar-collapsed .sidebar-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+}
+
+.student-shell.is-sidebar-collapsed .sidebar-header-copy {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+.student-shell.is-sidebar-collapsed .system-brand-mark {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.student-shell.is-sidebar-collapsed .system-brand-logo {
+    margin: 0 !important;
+}
+
+/* Fix to push the collapsed sidebar all the way to the top to fill the empty hole left by the navbar */
+.student-shell.is-sidebar-collapsed .student-global-sidebar {
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 1200 !important;
+}
+
+/* Dark-mode shell corrections. Keep these after the repeated navbar/sidebar overrides. */
+.student-shell {
+    padding-top: 96px !important;
+}
+
+.student-shell .student-global-navbar {
+    border-bottom-color: rgba(0, 58, 143, 0.72) !important;
+}
+
+.student-shell .student-global-navbar::before {
+    height: 3px !important;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 58, 143, 0.2),
+            var(--primary, #003a8f) 18%,
+            var(--primary, #003a8f) 46%,
+            var(--accent, #f6be00) 72%,
+            rgba(246, 190, 0, 0.45)
+        ) !important;
+    box-shadow:
+        0 0 10px rgba(0, 58, 143, 0.28),
+        0 0 12px rgba(246, 190, 0, 0.34) !important;
+}
+
+.student-shell[data-theme="dark"] .student-global-main,
+html[data-student-theme="dark"] .student-shell .student-global-main {
+    background:
+        radial-gradient(circle at 18% 0%, rgba(96, 165, 250, 0.14), transparent 28%),
+        radial-gradient(circle at 92% 4%, rgba(246, 190, 0, 0.08), transparent 24%),
+        linear-gradient(180deg, #06111f 0%, #081a31 48%, #07101f 100%) !important;
+}
+
+.student-shell[data-theme="dark"] .student-global-navbar,
+html[data-student-theme="dark"] .student-shell .student-global-navbar {
+    background:
+        radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.08), transparent 30%),
+        linear-gradient(90deg, #081a31 0%, #071526 55%, #06111f 100%) !important;
+    border-bottom-color: rgba(96, 165, 250, 0.34) !important;
+    box-shadow:
+        0 16px 32px rgba(2, 6, 23, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.student-shell[data-theme="dark"] .student-global-navbar::before,
+html[data-student-theme="dark"] .student-shell .student-global-navbar::before {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(37, 99, 235, 0.12),
+            rgba(37, 99, 235, 0.72) 18%,
+            rgba(37, 99, 235, 0.62) 48%,
+            rgba(246, 190, 0, 0.74) 74%,
+            rgba(246, 190, 0, 0.22)
+        ) !important;
+    box-shadow:
+        0 0 8px rgba(37, 99, 235, 0.18),
+        0 0 10px rgba(246, 190, 0, 0.2) !important;
+}
+
+.student-shell[data-theme="dark"] .student-global-navbar::after,
+html[data-student-theme="dark"] .student-shell .student-global-navbar::after {
+    background: linear-gradient(180deg, rgba(147, 197, 253, 0.08), transparent 62%) !important;
+}
+
+.student-shell .student-shell-toggle,
+.student-shell[data-theme="dark"] .student-shell-toggle,
+html[data-student-theme="dark"] .student-shell .student-shell-toggle {
+    flex-basis: 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    border-right: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.student-shell .student-shell-toggle:hover,
+.student-shell .student-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-link.is-active,
+html[data-student-theme="dark"] .student-shell .sidebar-link.is-active {
+    background: linear-gradient(135deg, rgba(246, 190, 0, 0.22), rgba(96, 165, 250, 0.14)) !important;
+    border-color: rgba(246, 190, 0, 0.34) !important;
+    color: #ffffff !important;
+    box-shadow: inset 3px 0 0 #f6be00, 0 10px 24px rgba(2, 6, 23, 0.2) !important;
+}
+
+.student-shell[data-theme="dark"] .sidebar-link.is-active .sidebar-link-icon,
+.student-shell[data-theme="dark"] .sidebar-link.is-active .sidebar-link-label,
+html[data-student-theme="dark"] .student-shell .sidebar-link.is-active .sidebar-link-icon,
+html[data-student-theme="dark"] .student-shell .sidebar-link.is-active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+.student-shell[data-theme="dark"] .student-dashboard-workspace-hero,
+html[data-student-theme="dark"] .student-shell .student-dashboard-workspace-hero {
+    border-color: rgba(147, 197, 253, 0.26) !important;
+    background:
+        radial-gradient(circle at 92% 0%, rgba(246, 190, 0, 0.1), transparent 28%),
+        linear-gradient(90deg, rgba(96, 165, 250, 0.16), transparent 38%),
+        linear-gradient(180deg, rgba(18, 40, 73, 0.98), rgba(9, 26, 51, 0.96)) !important;
+    box-shadow:
+        inset 0 3px 0 #f6be00,
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 18px 42px rgba(2, 6, 23, 0.3) !important;
+}
+
+/* Keep the student notification action icon-only. */
+.student-shell .student-global-navbar-actions .notification-trigger {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.student-shell .student-global-navbar-actions .notification-trigger-copy {
+    display: none !important;
+}
+
+.student-shell .student-global-navbar-actions .notification-trigger-icon {
+    margin: 0 !important;
+}
+
+.student-shell .student-global-navbar-actions .notification-trigger-count {
+    display: inline-flex !important;
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 999px !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
 }

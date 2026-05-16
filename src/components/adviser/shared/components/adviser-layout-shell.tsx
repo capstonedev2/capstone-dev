@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
 import { ADVISER_NAV_ITEMS, ADVISER_NAV_SECTIONS } from '@/components/adviser/shared/config/adviser-navigation';
 import {
@@ -20,6 +19,9 @@ import type { AdviserNotificationRecord } from '@/components/adviser/shared/comp
 import type { PortalNotificationItem } from '@/components/shared/portal-shell-action-menus';
 
 const SIDEBAR_STORAGE_KEY = 'adviserShellSidebarCollapsed';
+const STUDENT_THEME_STORAGE_KEY = 'studentWorkspaceTheme';
+
+type ShellThemeMode = 'light' | 'dark' | 'system';
 
 type AdviserLayoutShellProps = {
   children: React.ReactNode;
@@ -61,10 +63,10 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [themeMode, setThemeMode] = useState<ShellThemeMode>('light');
 
   const workspaceMode: WorkspaceMode = getWorkspaceModeFromPathname(pathname);
   const basePath = getWorkspaceBasePath(workspaceMode);
-  const dashboardPath = getWorkspaceDashboardPath(workspaceMode);
   const meta = WORKSPACE_META[workspaceMode];
   const notificationPreviewItems = toNotificationPreviewItems(notifications, basePath);
 
@@ -109,6 +111,37 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
     setSidebarOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const readTheme = () => {
+      const storedTheme = window.localStorage.getItem(STUDENT_THEME_STORAGE_KEY);
+      setThemeMode(storedTheme === 'dark' || storedTheme === 'system' ? storedTheme : 'light');
+      document.documentElement.dataset.studentTheme = storedTheme === 'dark' || storedTheme === 'system' ? storedTheme : 'light';
+    };
+
+    readTheme();
+    window.addEventListener('thesistrack:student-theme-changed', readTheme);
+    window.addEventListener('storage', readTheme);
+
+    return () => {
+      window.removeEventListener('thesistrack:student-theme-changed', readTheme);
+      window.removeEventListener('storage', readTheme);
+    };
+  }, []);
+
+  const updateAdviserTheme = (nextTheme: ShellThemeMode) => {
+    setThemeMode(nextTheme);
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    document.documentElement.dataset.studentTheme = nextTheme;
+    window.localStorage.setItem(STUDENT_THEME_STORAGE_KEY, nextTheme);
+    window.dispatchEvent(new Event('thesistrack:student-theme-changed'));
+  };
+
   const navigationSections = useMemo(() => {
     const sections = ADVISER_NAV_SECTIONS[workspaceMode];
     const items = ADVISER_NAV_ITEMS[workspaceMode];
@@ -126,58 +159,70 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
   const toggleLabel = isMobile
     ? sidebarOpen ? 'Close sidebar' : 'Open sidebar'
     : sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  const activeNavItem = ADVISER_NAV_ITEMS[workspaceMode].find((item) => isNavItemActive(pathname, item.href));
+  const navbarTitle = activeNavItem?.key === 'dashboard'
+    ? workspaceMode === 'adviser' ? 'Adviser Dashboard' : 'Panel Dashboard'
+    : activeNavItem?.label ?? meta.navLabel;
 
   return (
     <div
-      className={`adviser-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      className={`adviser-shell student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
+      data-theme={themeMode}
     >
       {/* ─── Top Navbar ─── */}
-      <header className="adviser-global-navbar">
-        <div className="adviser-global-navbar-main">
+      <header className="adviser-global-navbar student-global-navbar">
+        <div className="adviser-global-navbar-main student-global-navbar-main">
           <button
             aria-label={toggleLabel}
-            className="icon-btn adviser-shell-toggle"
+            className="icon-btn adviser-shell-toggle student-shell-toggle"
             type="button"
             onClick={toggleSidebar}
           >
             <i
               aria-hidden="true"
-              className={`fas ${isMobile ? (sidebarOpen ? 'fa-xmark' : 'fa-bars') : sidebarCollapsed ? 'fa-angles-right' : 'fa-angles-left'}`}
+              className={`fas ${isMobile ? (sidebarOpen ? 'fa-xmark' : 'fa-bars') : sidebarCollapsed ? 'fa-chevron-right' : 'fa-bars'}`}
             />
           </button>
 
-          <PortalShellBrand
-            className="adviser-shell-brand"
-            href={dashboardPath}
-            icon="fa-user-graduate"
-            title="Thesis Track"
-          />
+          <div className="adviser-navbar-title student-navbar-title" aria-label="Current page">
+            <span className="adviser-navbar-title-kicker student-navbar-title-kicker">ThesisTrack</span>
+            <strong>{navbarTitle}</strong>
+          </div>
         </div>
 
-        <div className="adviser-global-navbar-actions">
+        <div className="adviser-global-navbar-actions student-global-navbar-actions">
           <AdviserShellActions 
             basePath={basePath}
             fullName={data.profile.fullName}
             notificationCount={data.profile.notificationCount}
             notificationItems={notificationPreviewItems}
+            themeMode={themeMode}
             workspaceMode={workspaceMode}
+            onToggleTheme={() => updateAdviserTheme(themeMode === 'dark' ? 'light' : 'dark')}
             onSwitchWorkspace={switchWorkspace}
           />
         </div>
       </header>
 
       {/* ─── Sidebar ─── */}
-      <aside className={`adviser-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`adviser-global-sidebar student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{meta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
+            <span className="sidebar-context-kicker">Adviser Portal</span>
+            <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
+              <img
+                alt="ThesisTrack logo"
+                className="system-brand-logo"
+                src={themeMode === 'dark' ? '/System%20Logo/image.png' : '/System%20Logo/logo-transparent.png'}
+                style={{ transform: themeMode === 'dark' ? 'scale(1.15)' : 'none' }}
+              />
+              <span className="system-brand-name">
+                <span>Thesis</span>
+                <strong>Track</strong>
+              </span>
+              <span className="system-brand-subtitle">Higher Education Institutions</span>
             </div>
-            <p>{meta.pageCopy}</p>
           </div>
           <span className="user-badge">
             <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
@@ -222,7 +267,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
       />
 
       {/* ─── Main content ─── */}
-      <main className="adviser-global-main">
+      <main className="adviser-global-main student-global-main">
         <div className="adviser-global-content">{children}</div>
       </main>
     </div>

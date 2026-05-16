@@ -124,7 +124,7 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
           }
         />
 
-        <div className="mx-auto max-w-[1600px] space-y-6">
+        <div className="adviser-reports-page mx-auto max-w-[1600px] space-y-6">
           <ReportOverviewPanel
             dateRangeLabel={dateRangeLabel}
             reportModule={reportModule}

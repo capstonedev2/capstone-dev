@@ -71,7 +71,7 @@ function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+    <section className="adviser-report-section overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
       <div className="relative flex flex-col gap-4 border-b border-slate-200/80 bg-[linear-gradient(135deg,rgba(0,58,143,0.035),rgba(248,250,252,0.96))] px-5 py-5 sm:px-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#003A8F] via-[#1E40AF] to-[#F6BE00]" />
         <div className="min-w-0">
@@ -173,7 +173,7 @@ export function ReportOverviewPanel({
   visibleSectionCount: number;
 }) {
   return (
-    <section className="overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+    <section className="adviser-report-overview-panel overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
         <div className="relative overflow-hidden bg-[linear-gradient(135deg,rgba(0,58,143,0.98),rgba(30,64,175,0.94))] p-6 text-white">
           <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(246,190,0,0.22),transparent_42%)]" />
@@ -274,7 +274,7 @@ export function ReportFilters({
   ].filter((label): label is string => Boolean(label));
 
   return (
-    <section className="rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+    <section className="adviser-report-filters rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-lg font-bold tracking-[-0.03em] text-[var(--text-dark)]">Report Filters</h2>

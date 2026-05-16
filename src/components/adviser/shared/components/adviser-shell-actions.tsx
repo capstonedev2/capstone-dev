@@ -10,7 +10,9 @@ type AdviserShellActionsProps = {
   fullName: string;
   notificationCount: number;
   notificationItems?: PortalNotificationItem[];
+  themeMode?: 'light' | 'dark' | 'system';
   workspaceMode: WorkspaceMode;
+  onToggleTheme?: () => void;
   onSwitchWorkspace: (mode: WorkspaceMode) => void;
 };
 
@@ -91,7 +93,9 @@ export function AdviserShellActions({
   fullName,
   notificationCount,
   notificationItems,
+  themeMode = 'light',
   workspaceMode,
+  onToggleTheme,
   onSwitchWorkspace
 }: AdviserShellActionsProps) {
   const router = useRouter();
@@ -114,6 +118,32 @@ export function AdviserShellActions({
       ]}
       extraProfileSection={
         <>
+          {onToggleTheme ? (
+            <>
+              <span className="portal-shell-profile-dropdown-label profile-dropdown-label">Theme</span>
+              <button
+                aria-label={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}
+                aria-pressed={themeMode === 'dark'}
+                className="profile-theme-toggle adviser-profile-theme-toggle"
+                type="button"
+                onClick={onToggleTheme}
+              >
+                <span className="profile-theme-toggle-icon">
+                  <i aria-hidden="true" className={`fas ${themeMode === 'dark' ? 'fa-moon' : 'fa-sun'}`} />
+                </span>
+                <span className="profile-theme-toggle-copy">
+                  <strong>{themeMode === 'dark' ? 'Dark Mode' : 'Light Mode'}</strong>
+                  <small>Switch workspace appearance</small>
+                </span>
+                <span className="profile-theme-toggle-track" aria-hidden="true">
+                  <span />
+                </span>
+              </button>
+
+              <div className="portal-shell-profile-dropdown-divider" />
+            </>
+          ) : null}
+
           <span className="portal-shell-profile-dropdown-label">Workspace Mode</span>
           <div className="dashboard-mode-switch" aria-label="Switch dashboard mode">
             <button type="button" className={workspaceMode === 'adviser' ? 'active' : ''} onClick={() => onSwitchWorkspace('adviser')}>

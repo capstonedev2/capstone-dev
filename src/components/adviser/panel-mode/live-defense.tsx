@@ -60,6 +60,7 @@ type DefenseAssignment = {
   groupCode: string;
   groupTitle?: string;
   projectTitle: string;
+  scheduleType?: string;
   department?: string;
   students?: string[];
   leader?: string;
@@ -115,7 +116,7 @@ function toAssignedScheduleItem(assignment: DefenseAssignment): LiveDefenseSched
     leader,
     adviser: assignment.adviserName || 'Adviser pending',
     room: assignment.room || 'Room pending',
-    program: assignment.department ? `${assignment.department} Capstone` : 'Capstone Defense',
+    program: assignment.scheduleType || (assignment.department ? `${assignment.department} Capstone` : 'Capstone Defense'),
     deckUrl: '#',
     attendance: members.reduce<Record<string, boolean>>((record, member) => {
       record[member] = true;

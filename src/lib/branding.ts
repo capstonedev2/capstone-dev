@@ -26,6 +26,7 @@ export type BrandingAssets = {
   mainLogo: string;
   lightLogo: string;
   darkLogo: string;
+  institutionLogo: string;
   favicon: string;
   loginBackground: string;
 };
@@ -138,6 +139,8 @@ export type BrandingSettings = {
   systemName: string;
   systemShortName: string;
   tagline: string;
+  institutionName: string;
+  institutionTagline: string;
   themePreset: string;
   colors: BrandingColors;
   derivedColors: BrandingDerivedColors;
@@ -151,6 +154,8 @@ export type BrandingSettings = {
 };
 
 export const SYSTEM_LOGO_SRC = '/System%20Logo/logo-transparent.png';
+export const DEFAULT_INSTITUTION_LOGO_SRC = '/System%20Logo/ustp-logo.png';
+export const DEFAULT_AUTH_BACKGROUND_SRC = '/System%20Logo/campus.png';
 
 export type ThemePreset = {
   id: string;
@@ -192,8 +197,9 @@ const DEFAULT_ASSETS: BrandingAssets = {
   mainLogo: SYSTEM_LOGO_SRC,
   lightLogo: SYSTEM_LOGO_SRC,
   darkLogo: SYSTEM_LOGO_SRC,
+  institutionLogo: DEFAULT_INSTITUTION_LOGO_SRC,
   favicon: SYSTEM_LOGO_SRC,
-  loginBackground: ''
+  loginBackground: DEFAULT_AUTH_BACKGROUND_SRC
 };
 
 const DEFAULT_LANDING: BrandingLandingSettings = {
@@ -377,6 +383,8 @@ export const DEFAULT_BRANDING: BrandingSettings = {
   systemName: 'Thesis Track',
   systemShortName: 'TT',
   tagline: 'Higher Education Institutions',
+  institutionName: 'University of Science and Technology',
+  institutionTagline: 'Empowering Research, Innovation, and Academic Excellence',
   themePreset: 'academic-blue',
   colors: DEFAULT_COLORS,
   derivedColors: FALLBACK_DERIVED_COLORS,
@@ -1009,8 +1017,9 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
     mainLogo: String(assetValue.mainLogo ?? ''),
     lightLogo: String(assetValue.lightLogo ?? ''),
     darkLogo: String(assetValue.darkLogo ?? ''),
+    institutionLogo: readStringValue(assetValue.institutionLogo, DEFAULT_ASSETS.institutionLogo),
     favicon: String(assetValue.favicon ?? ''),
-    loginBackground: String(assetValue.loginBackground ?? '')
+    loginBackground: readStringValue(assetValue.loginBackground, DEFAULT_ASSETS.loginBackground)
   };
 
   return {
@@ -1018,6 +1027,8 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
     systemName: String(value.systemName ?? DEFAULT_BRANDING.systemName).trim() || DEFAULT_BRANDING.systemName,
     systemShortName: String(value.systemShortName ?? DEFAULT_BRANDING.systemShortName).trim() || DEFAULT_BRANDING.systemShortName,
     tagline: DEFAULT_BRANDING.tagline,
+    institutionName: String(value.institutionName ?? DEFAULT_BRANDING.institutionName).trim() || DEFAULT_BRANDING.institutionName,
+    institutionTagline: String(value.institutionTagline ?? DEFAULT_BRANDING.institutionTagline).trim() || DEFAULT_BRANDING.institutionTagline,
     themePreset: String(value.themePreset ?? DEFAULT_BRANDING.themePreset).trim() || DEFAULT_BRANDING.themePreset,
     colors,
     derivedColors,

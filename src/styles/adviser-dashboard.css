@@ -4012,3 +4012,3404 @@ tr:hover {
         display: none;
     }
 }
+
+/* Adviser shell uses the same stored light/dark/system theme as the student workspace. */
+.adviser-shell[data-theme="dark"] {
+    background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, 0.1), transparent 28%),
+        radial-gradient(circle at top right, rgba(246, 190, 0, 0.07), transparent 22%),
+        linear-gradient(180deg, #071526 0%, #081a31 100%);
+    color: #e5eefb;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-navbar {
+    border-bottom-color: rgba(147, 197, 253, 0.18);
+    background:
+        radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.08), transparent 30%),
+        linear-gradient(90deg, rgba(8, 26, 49, 0.98), rgba(11, 31, 59, 0.98) 50%, rgba(15, 30, 56, 0.98));
+    box-shadow:
+        0 14px 34px rgba(2, 6, 23, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.adviser-shell[data-theme="dark"] .adviser-shell-toggle {
+    border-color: rgba(147, 197, 253, 0.14);
+    background: transparent;
+    color: #e5eefb;
+    box-shadow: none;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-shell-toggle:hover,
+.adviser-shell[data-theme="dark"] .adviser-shell-toggle:focus-visible {
+    border-color: rgba(96, 165, 250, 0.28);
+    background: rgba(96, 165, 250, 0.14);
+    color: #ffffff;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-shell-brand,
+.adviser-shell[data-theme="dark"] .adviser-shell-brand-primary,
+.adviser-shell[data-theme="dark"] .adviser-shell-brand [class*="text-[#1A1851]"] {
+    color: #f8fbff;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-shell-brand [class*="text-[#F6BE00]"] {
+    color: #f6be00;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-main,
+.adviser-shell[data-theme="dark"] .main-content {
+    background: transparent;
+}
+
+.adviser-shell[data-theme="dark"] .top-nav {
+    border-color: rgba(147, 197, 253, 0.18);
+    background:
+        radial-gradient(circle at 88% 14%, rgba(246, 190, 0, 0.1), transparent 28%),
+        linear-gradient(180deg, rgba(15, 30, 56, 0.94), rgba(10, 25, 47, 0.9));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 42px rgba(2, 6, 23, 0.28);
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-trigger,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-trigger,
+.adviser-shell[data-theme="dark"] .notification-trigger,
+.adviser-shell[data-theme="dark"] .profile-pill {
+    border-color: rgba(147, 197, 253, 0.18);
+    background: rgba(15, 30, 56, 0.78);
+    color: #e5eefb;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 8px 20px rgba(2, 6, 23, 0.24);
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-trigger:hover,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-trigger:hover,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-trigger.is-open,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-menu.is-open .portal-shell-profile-trigger,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-trigger[aria-expanded='true'],
+.adviser-shell[data-theme="dark"] .notification-trigger:hover,
+.adviser-shell[data-theme="dark"] .profile-pill:hover,
+.adviser-shell[data-theme="dark"] .notification-trigger.is-active,
+.adviser-shell[data-theme="dark"] .profile-pill.is-active {
+    border-color: rgba(96, 165, 250, 0.28);
+    background: rgba(96, 165, 250, 0.16);
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-trigger-icon,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-avatar,
+.adviser-shell[data-theme="dark"] .notification-trigger-icon,
+.adviser-shell[data-theme="dark"] .profile-nav-btn-avatar {
+    border-color: rgba(147, 197, 253, 0.18);
+    background: rgba(96, 165, 250, 0.14);
+    color: #bfdbfe;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-trigger-copy strong,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-copy strong,
+.adviser-shell[data-theme="dark"] .notification-trigger-copy strong,
+.adviser-shell[data-theme="dark"] .profile-nav-btn-copy strong {
+    color: #f8fbff;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-trigger-copy small,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-copy small,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-chevron,
+.adviser-shell[data-theme="dark"] .notification-trigger-copy small,
+.adviser-shell[data-theme="dark"] .profile-nav-btn-copy small,
+.adviser-shell[data-theme="dark"] .profile-nav-btn-chevron {
+    color: #a9c3e8;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-dropdown,
+.adviser-shell[data-theme="dark"] .notification-menu,
+.adviser-shell[data-theme="dark"] .profile-dropdown {
+    border-color: rgba(147, 197, 253, 0.18);
+    background:
+        radial-gradient(circle at 100% 0%, rgba(246, 190, 0, 0.07), transparent 28%),
+        linear-gradient(180deg, rgba(15, 30, 56, 0.98), rgba(8, 26, 49, 0.98));
+    color: #dbeafe;
+    box-shadow: 0 28px 60px rgba(2, 6, 23, 0.34), 0 4px 16px rgba(2, 6, 23, 0.24);
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-hero,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-dropdown-header,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-footer,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-dropdown-divider {
+    border-color: rgba(147, 197, 253, 0.18);
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-profile-dropdown-divider {
+    background: rgba(147, 197, 253, 0.18);
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-kicker,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-dropdown-label,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-hero-copy small,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-dropdown-header span,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-empty p {
+    color: #a9c3e8;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-hero-copy strong,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-dropdown-header strong,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-empty strong {
+    color: #f8fbff;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-summary-pill,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-link,
+.adviser-shell[data-theme="dark"] .dashboard-mode-switch,
+.adviser-shell[data-theme="dark"] .dashboard-mode-switch button {
+    border-color: rgba(147, 197, 253, 0.14);
+    background: rgba(8, 26, 49, 0.72);
+    color: #dbeafe;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item:hover,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-link:hover,
+.adviser-shell[data-theme="dark"] .dashboard-mode-switch button:hover {
+    border-color: rgba(96, 165, 250, 0.26);
+    background: rgba(96, 165, 250, 0.16);
+    color: #ffffff;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item-copy strong,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item-head strong {
+    color: #f8fbff;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item-copy small,
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item-meta {
+    color: #a9c3e8;
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item-meta {
+    background: rgba(96, 165, 250, 0.12);
+}
+
+.adviser-shell[data-theme="dark"] .portal-shell-notification-menu-item-cta,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-link i {
+    color: #60a5fa;
+}
+
+.adviser-shell[data-theme="dark"] .dashboard-mode-switch button.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #ffffff;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-profile-dropdown-pill,
+.adviser-shell[data-theme="dark"] .portal-shell-profile-badge {
+    border-color: rgba(147, 197, 253, 0.14);
+    background: rgba(96, 165, 250, 0.1);
+    color: #b9d2f2;
+}
+
+.adviser-shell .adviser-profile-theme-toggle {
+    margin-top: 0.45rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] {
+        background:
+            radial-gradient(circle at top left, rgba(96, 165, 250, 0.1), transparent 28%),
+            radial-gradient(circle at top right, rgba(246, 190, 0, 0.07), transparent 22%),
+            linear-gradient(180deg, #071526 0%, #081a31 100%);
+        color: #e5eefb;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-global-navbar {
+        border-bottom-color: rgba(147, 197, 253, 0.18);
+        background:
+            radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.08), transparent 30%),
+            linear-gradient(90deg, rgba(8, 26, 49, 0.98), rgba(11, 31, 59, 0.98) 50%, rgba(15, 30, 56, 0.98));
+        box-shadow:
+            0 14px 34px rgba(2, 6, 23, 0.34),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-shell-toggle {
+        border-color: rgba(147, 197, 253, 0.14);
+        background: transparent;
+        color: #e5eefb;
+        box-shadow: none;
+    }
+
+    .adviser-shell[data-theme="system"] .portal-shell-notification-trigger,
+    .adviser-shell[data-theme="system"] .portal-shell-profile-trigger,
+    .adviser-shell[data-theme="system"] .notification-trigger,
+    .adviser-shell[data-theme="system"] .profile-pill {
+        border-color: rgba(147, 197, 253, 0.18);
+        background: rgba(15, 30, 56, 0.78);
+        color: #e5eefb;
+    }
+
+    .adviser-shell[data-theme="system"] .portal-shell-notification-menu,
+    .adviser-shell[data-theme="system"] .portal-shell-profile-dropdown,
+    .adviser-shell[data-theme="system"] .notification-menu,
+    .adviser-shell[data-theme="system"] .profile-dropdown {
+        border-color: rgba(147, 197, 253, 0.18);
+        background:
+            radial-gradient(circle at 100% 0%, rgba(246, 190, 0, 0.07), transparent 28%),
+            linear-gradient(180deg, rgba(15, 30, 56, 0.98), rgba(8, 26, 49, 0.98));
+        color: #dbeafe;
+    }
+}
+
+/* Match adviser shell chrome to the student navbar/sidebar treatment. */
+.adviser-shell {
+    --adviser-shell-topbar-height: 72px !important;
+    --adviser-sidebar-width: 248px !important;
+    padding-top: var(--adviser-shell-topbar-height) !important;
+}
+
+.adviser-global-navbar {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    display: flex !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(246, 190, 0, 0.9) !important;
+    background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 50%, #1e40af 100%) !important;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+}
+
+.adviser-global-navbar::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: -2px !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, rgba(246, 190, 0, 0.55), #f6be00 22%, #f6be00 78%, rgba(246, 190, 0, 0.55)) !important;
+    box-shadow: 0 0 12px rgba(246, 190, 0, 0.42) !important;
+    pointer-events: none !important;
+}
+
+.adviser-global-navbar::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 60%) !important;
+}
+
+.adviser-global-navbar-main,
+.adviser-global-navbar-actions {
+    position: relative !important;
+    z-index: 1 !important;
+    height: 72px !important;
+    min-height: 72px !important;
+}
+
+.adviser-global-navbar-main {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+    min-width: 0 !important;
+    padding-left: 0 !important;
+}
+
+.adviser-shell .adviser-shell-toggle {
+    flex: 0 0 52px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell .adviser-shell-toggle:hover,
+.adviser-shell .adviser-shell-toggle:focus-visible {
+    border-color: transparent !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell .adviser-shell-toggle i {
+    font-size: 1.05rem !important;
+}
+
+.adviser-shell-brand {
+    height: 72px !important;
+    min-width: 0 !important;
+    padding-left: 1.15rem !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell-brand > span:first-child {
+    width: 38px !important;
+    height: 38px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell-brand img {
+    padding: 0.35rem !important;
+}
+
+.adviser-shell-brand [class*="text-[#1A1851]"],
+.adviser-shell-brand [class*="text-slate-500"] {
+    color: #ffffff !important;
+}
+
+.adviser-shell-brand [class*="text-[#F6BE00]"] {
+    color: #f6be00 !important;
+}
+
+.adviser-global-navbar-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.7rem !important;
+    margin-left: auto !important;
+    padding-right: 1.45rem !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger,
+.adviser-shell .portal-shell-profile-trigger,
+.adviser-shell .notification-trigger,
+.adviser-shell .profile-pill {
+    height: 48px !important;
+    min-height: 48px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 8px 18px rgba(2, 6, 23, 0.12) !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger:hover,
+.adviser-shell .portal-shell-profile-trigger:hover,
+.adviser-shell .portal-shell-notification-trigger.is-open,
+.adviser-shell .portal-shell-profile-menu.is-open .portal-shell-profile-trigger,
+.adviser-shell .portal-shell-profile-trigger[aria-expanded='true'],
+.adviser-shell .notification-trigger:hover,
+.adviser-shell .profile-pill:hover,
+.adviser-shell .notification-trigger.is-active,
+.adviser-shell .profile-pill.is-active {
+    border-color: rgba(246, 190, 0, 0.36) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 10px 24px rgba(2, 6, 23, 0.16) !important;
+    transform: translateY(-1px) !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-icon,
+.adviser-shell .portal-shell-profile-avatar,
+.adviser-shell .notification-trigger-icon,
+.adviser-shell .profile-nav-btn-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-copy strong,
+.adviser-shell .portal-shell-profile-copy strong,
+.adviser-shell .notification-trigger-copy strong,
+.adviser-shell .profile-nav-btn-copy strong {
+    color: #ffffff !important;
+    font-size: 0.82rem !important;
+    font-weight: 850 !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-copy small,
+.adviser-shell .portal-shell-profile-copy small,
+.adviser-shell .portal-shell-profile-chevron,
+.adviser-shell .notification-trigger-copy small,
+.adviser-shell .profile-nav-btn-copy small,
+.adviser-shell .profile-role,
+.adviser-shell .profile-nav-btn-chevron {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+}
+
+.adviser-global-sidebar,
+.adviser-shell .adviser-global-sidebar {
+    top: 72px !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 248px !important;
+    max-width: 248px !important;
+    height: calc(100vh - 72px) !important;
+    padding: 0 !important;
+    border-right: 1px solid #dbe3ef !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    transform: translateX(0) !important;
+}
+
+.adviser-shell .sidebar::before {
+    display: none !important;
+}
+
+.adviser-shell .sidebar-header {
+    min-height: 114px !important;
+    padding: 0.85rem 1rem 1rem !important;
+    border-bottom: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+}
+
+.adviser-shell .adviser-global-sidebar > .sidebar-header {
+    display: none !important;
+}
+
+.adviser-shell .sidebar-nav {
+    gap: 1.15rem !important;
+    padding: 1rem 1rem 1.25rem !important;
+    background: #ffffff !important;
+}
+
+.adviser-shell .sidebar-context-kicker,
+.adviser-shell .sidebar-nav-heading,
+.adviser-shell .brand-mark,
+.adviser-shell .brand-mark span,
+.adviser-shell .sidebar-link,
+.adviser-shell .sidebar-link-label {
+    color: #0f172a !important;
+}
+
+.adviser-shell .brand-mark strong {
+    color: #003a8f !important;
+}
+
+.adviser-shell .brand-mark i,
+.adviser-shell .sidebar-link-icon,
+.adviser-shell .sidebar-link-icon i {
+    color: #475569 !important;
+    filter: none !important;
+}
+
+.adviser-shell .sidebar-header p {
+    color: #64748b !important;
+}
+
+.adviser-shell .user-badge {
+    border-color: rgba(0, 58, 143, 0.12) !important;
+    background: rgba(0, 58, 143, 0.06) !important;
+    color: #003a8f !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .user-badge i {
+    color: #003a8f !important;
+}
+
+.adviser-shell .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    margin: 0 0 0.55rem !important;
+    padding: 0 !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+}
+
+.adviser-shell .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: #dbe3ef !important;
+}
+
+.adviser-shell .sidebar-link {
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 0.8rem !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell .sidebar-link::before {
+    display: none !important;
+}
+
+.adviser-shell .sidebar-link:hover {
+    background: #eef4ff !important;
+    border-color: transparent !important;
+    color: #0f172a !important;
+    transform: none !important;
+}
+
+.adviser-shell .sidebar-link:hover .sidebar-link-icon,
+.adviser-shell .sidebar-link:hover .sidebar-link-icon i {
+    color: #003a8f !important;
+    filter: none !important;
+}
+
+.adviser-shell .sidebar-link.is-active {
+    background: #2f63e6 !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell .sidebar-link.is-active .sidebar-link-label {
+    color: #ffffff !important;
+    filter: none !important;
+}
+
+.adviser-global-main,
+.adviser-shell .adviser-global-main {
+    margin-left: 248px !important;
+    width: calc(100% - 248px) !important;
+    max-width: calc(100% - 248px) !important;
+    padding: 0 1rem 2.5rem !important;
+}
+
+.adviser-shell.is-sidebar-collapsed {
+    --adviser-sidebar-width: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
+    width: 72px !important;
+    max-width: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-main {
+    margin-left: 72px !important;
+    width: calc(100% - 72px) !important;
+    max-width: calc(100% - 72px) !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 72px !important;
+    height: 72px !important;
+    padding: 0 !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-header-copy {
+    width: 100% !important;
+    height: 72px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-context-kicker,
+.adviser-shell.is-sidebar-collapsed .brand-mark span,
+.adviser-shell.is-sidebar-collapsed .brand-mark strong,
+.adviser-shell.is-sidebar-collapsed .sidebar-header-copy p,
+.adviser-shell.is-sidebar-collapsed .user-badge,
+.adviser-shell.is-sidebar-collapsed .sidebar-link-label,
+.adviser-shell.is-sidebar-collapsed .nav-count {
+    display: none !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .brand-mark {
+    justify-content: center !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .brand-mark i {
+    width: 38px !important;
+    height: 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 12px !important;
+    background: rgba(0, 58, 143, 0.06) !important;
+    color: #003a8f !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-nav {
+    padding: 0.65rem 0.75rem 1rem !important;
+    gap: 1rem !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-nav-heading {
+    display: block !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    margin: 0.4rem 0.25rem 0.6rem !important;
+    overflow: hidden !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-indent: -999px !important;
+    white-space: nowrap !important;
+    background: rgba(148, 163, 184, 0.28) !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-nav-heading::before,
+.adviser-shell.is-sidebar-collapsed .sidebar-nav-heading::after {
+    display: none !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    border-radius: 6px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-link-icon {
+    margin: 0 !important;
+    font-size: 1.05rem !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar {
+    border-right-color: rgba(147, 197, 253, 0.2) !important;
+    background: linear-gradient(180deg, #081a31 0%, #071526 100%) !important;
+    color: #eaf2ff !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-header {
+    border-bottom-color: rgba(147, 197, 253, 0.18) !important;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(246, 190, 0, 0.1), transparent 34%),
+        linear-gradient(180deg, rgba(10, 34, 68, 0.98), rgba(8, 26, 49, 0.96)) !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-nav {
+    background: transparent !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-context-kicker,
+.adviser-shell[data-theme="dark"] .sidebar-nav-heading,
+.adviser-shell[data-theme="dark"] .brand-mark,
+.adviser-shell[data-theme="dark"] .brand-mark span,
+.adviser-shell[data-theme="dark"] .sidebar-link,
+.adviser-shell[data-theme="dark"] .sidebar-link-label {
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] .brand-mark strong {
+    color: #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] .brand-mark i,
+.adviser-shell[data-theme="dark"] .sidebar-link-icon,
+.adviser-shell[data-theme="dark"] .sidebar-link-icon i {
+    color: #bfdbfe !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-header p {
+    color: #a9c3e8 !important;
+}
+
+.adviser-shell[data-theme="dark"] .user-badge {
+    border-color: rgba(246, 190, 0, 0.22) !important;
+    background: rgba(246, 190, 0, 0.1) !important;
+    color: #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] .user-badge i {
+    color: #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-nav-heading::after {
+    background: rgba(147, 197, 253, 0.2) !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-link:hover {
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-link:hover .sidebar-link-icon,
+.adviser-shell[data-theme="dark"] .sidebar-link:hover .sidebar-link-icon i {
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-link.is-active {
+    background: linear-gradient(135deg, var(--primary, #003a8f), var(--primary-dark, #1a1851)) !important;
+    color: #ffffff !important;
+    box-shadow: inset 3px 0 0 #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"].is-sidebar-collapsed .brand-mark i {
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #bfdbfe !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-global-sidebar {
+        border-right-color: rgba(147, 197, 253, 0.2) !important;
+        background: linear-gradient(180deg, #081a31 0%, #071526 100%) !important;
+        color: #eaf2ff !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-header {
+        border-bottom-color: rgba(147, 197, 253, 0.18) !important;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(246, 190, 0, 0.1), transparent 34%),
+            linear-gradient(180deg, rgba(10, 34, 68, 0.98), rgba(8, 26, 49, 0.96)) !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-nav {
+        background: transparent !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-context-kicker,
+    .adviser-shell[data-theme="system"] .sidebar-nav-heading,
+    .adviser-shell[data-theme="system"] .brand-mark,
+    .adviser-shell[data-theme="system"] .brand-mark span,
+    .adviser-shell[data-theme="system"] .sidebar-link,
+    .adviser-shell[data-theme="system"] .sidebar-link-label {
+        color: #dbeafe !important;
+    }
+
+    .adviser-shell[data-theme="system"] .brand-mark strong {
+        color: #f6be00 !important;
+    }
+
+    .adviser-shell[data-theme="system"] .brand-mark i,
+    .adviser-shell[data-theme="system"] .sidebar-link-icon,
+    .adviser-shell[data-theme="system"] .sidebar-link-icon i {
+        color: #bfdbfe !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-link:hover {
+        background: rgba(96, 165, 250, 0.14) !important;
+        color: #ffffff !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .adviser-global-navbar {
+        left: 0 !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .adviser-global-navbar-actions {
+        padding-right: 0.85rem !important;
+    }
+
+    .adviser-global-main,
+    .adviser-shell .adviser-global-main,
+    .adviser-shell.is-sidebar-collapsed .adviser-global-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 1rem 2rem !important;
+    }
+
+    .adviser-global-sidebar,
+    .adviser-shell .adviser-global-sidebar,
+    .adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
+        top: 72px !important;
+        height: calc(100vh - 72px) !important;
+        width: 248px !important;
+        max-width: 248px !important;
+        transform: translateX(-104%) !important;
+    }
+
+    .adviser-global-sidebar.is-open,
+    .adviser-shell .adviser-global-sidebar.is-open {
+        transform: translateX(0) !important;
+    }
+}
+
+
+/* Adviser now mirrors the student shell header/title structure. */
+.adviser-navbar-title {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding-left: 1.15rem !important;
+}
+
+.adviser-navbar-title-kicker {
+    display: none !important;
+}
+
+.adviser-navbar-title strong {
+    color: #ffffff !important;
+    font-size: 1.08rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell .adviser-global-sidebar > .sidebar-header {
+    display: grid !important;
+}
+
+.adviser-shell .adviser-global-sidebar > .sidebar-header .sidebar-context-kicker,
+.adviser-shell .adviser-global-sidebar > .sidebar-header .user-badge {
+    display: none !important;
+}
+
+.adviser-shell .sidebar-header .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 0.55rem !important;
+    row-gap: 0.06rem !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.adviser-shell .sidebar-header .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 52px !important;
+    height: 52px !important;
+    object-fit: contain !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .sidebar-header .system-brand-name {
+    display: flex !important;
+    align-items: baseline !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    gap: 0 !important;
+    min-width: 0 !important;
+    color: #0f172a !important;
+    font-size: 1.5rem !important;
+    font-weight: 900 !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.02em !important;
+    text-transform: none !important;
+}
+
+.adviser-shell .sidebar-header .system-brand-name span,
+.adviser-shell .sidebar-header .system-brand-name strong {
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    margin: 0 !important;
+}
+
+.adviser-shell .sidebar-header .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.adviser-shell .sidebar-header .system-brand-subtitle {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    overflow: hidden !important;
+    color: #475569 !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    line-height: 1.05 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-header .system-brand-mark {
+    width: 100% !important;
+    height: 72px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-header .system-brand-logo {
+    width: 38px !important;
+    height: 38px !important;
+    transform: none !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-header .system-brand-name,
+.adviser-shell.is-sidebar-collapsed .sidebar-header .system-brand-name span,
+.adviser-shell.is-sidebar-collapsed .sidebar-header .system-brand-name strong,
+.adviser-shell.is-sidebar-collapsed .sidebar-header .system-brand-subtitle {
+    display: none !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-navbar-title-kicker {
+    color: #a9c3e8 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-navbar-title strong {
+    color: #f8fbff !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-header .system-brand-name {
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-header .system-brand-name span {
+    color: #60a5fa !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-header .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] .sidebar-header .system-brand-subtitle {
+    color: #c7d7ee !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-navbar-title strong {
+        color: #f8fbff !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-header .system-brand-name {
+        color: #ffffff !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-header .system-brand-name span {
+        color: #60a5fa !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-header .system-brand-name strong {
+        color: #f6be00 !important;
+    }
+
+    .adviser-shell[data-theme="system"] .sidebar-header .system-brand-subtitle {
+        color: #c7d7ee !important;
+    }
+}
+
+/* Dark-mode adviser page content, aligned with the student workspace dark surfaces. */
+.adviser-shell[data-theme="dark"] .adviser-page-header,
+.adviser-shell[data-theme="dark"] .hero-card,
+.adviser-shell[data-theme="dark"] .welcome-card,
+.adviser-shell[data-theme="dark"] .stat-card,
+.adviser-shell[data-theme="dark"] .toolbar-card,
+.adviser-shell[data-theme="dark"] .panel-card,
+.adviser-shell[data-theme="dark"] .health-card,
+.adviser-shell[data-theme="dark"] .quick-action-card,
+.adviser-shell[data-theme="dark"] .activity-feed,
+.adviser-shell[data-theme="dark"] .panel-focus-card,
+.adviser-shell[data-theme="dark"] .adviser-evaluation-files-panel,
+.adviser-shell[data-theme="dark"] [class*="rounded-"][class*="bg-white"],
+.adviser-shell[data-theme="dark"] [class*="bg-slate-50"] {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background:
+        radial-gradient(circle at 92% 8%, rgba(246, 190, 0, 0.06), transparent 26%),
+        linear-gradient(180deg, rgba(15, 30, 56, 0.92), rgba(10, 25, 47, 0.88)) !important;
+    color: #dbeafe !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 42px rgba(2, 6, 23, 0.24) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-page-header .page-title h1,
+.adviser-shell[data-theme="dark"] .page-title h1,
+.adviser-shell[data-theme="dark"] .stat-card h2,
+.adviser-shell[data-theme="dark"] .stat-card h3,
+.adviser-shell[data-theme="dark"] .stat-card-value,
+.adviser-shell[data-theme="dark"] .panel-card h2,
+.adviser-shell[data-theme="dark"] .panel-card h3,
+.adviser-shell[data-theme="dark"] .quick-action-card h4,
+.adviser-shell[data-theme="dark"] [class*="text-slate-950"],
+.adviser-shell[data-theme="dark"] [class*="text-slate-900"],
+.adviser-shell[data-theme="dark"] [class*="text-slate-800"],
+.adviser-shell[data-theme="dark"] [class*="text-slate-700"] {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-page-header .page-title p,
+.adviser-shell[data-theme="dark"] .page-title p,
+.adviser-shell[data-theme="dark"] .stat-card p,
+.adviser-shell[data-theme="dark"] .stat-card-footer,
+.adviser-shell[data-theme="dark"] .quick-action-card p,
+.adviser-shell[data-theme="dark"] [class*="text-slate-600"],
+.adviser-shell[data-theme="dark"] [class*="text-slate-500"],
+.adviser-shell[data-theme="dark"] [class*="text-slate-400"] {
+    color: #a9c3e8 !important;
+}
+
+.adviser-shell[data-theme="dark"] .page-breadcrumb,
+.adviser-shell[data-theme="dark"] .ui-badge,
+.adviser-shell[data-theme="dark"] .status-badge,
+.adviser-shell[data-theme="dark"] [class*="bg-blue-50"],
+.adviser-shell[data-theme="dark"] [class*="bg-sky-50"],
+.adviser-shell[data-theme="dark"] [class*="bg-indigo-50"] {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(96, 165, 250, 0.12) !important;
+    color: #bfdbfe !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="bg-amber-50"],
+.adviser-shell[data-theme="dark"] [class*="bg-yellow-50"] {
+    border-color: rgba(246, 190, 0, 0.22) !important;
+    background: rgba(246, 190, 0, 0.12) !important;
+    color: #fde68a !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="bg-rose-50"],
+.adviser-shell[data-theme="dark"] [class*="bg-red-50"] {
+    border-color: rgba(251, 113, 133, 0.22) !important;
+    background: rgba(244, 63, 94, 0.12) !important;
+    color: #fecaca !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="bg-emerald-50"],
+.adviser-shell[data-theme="dark"] [class*="bg-green-50"] {
+    border-color: rgba(52, 211, 153, 0.2) !important;
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #bbf7d0 !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="border-slate"],
+.adviser-shell[data-theme="dark"] [class*="border-blue"],
+.adviser-shell[data-theme="dark"] [class*="border-amber"],
+.adviser-shell[data-theme="dark"] [class*="border-yellow"],
+.adviser-shell[data-theme="dark"] [class*="border-rose"],
+.adviser-shell[data-theme="dark"] [class*="border-red"],
+.adviser-shell[data-theme="dark"] [class*="border-emerald"],
+.adviser-shell[data-theme="dark"] [class*="border-green"] {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+}
+
+.adviser-shell[data-theme="dark"] input,
+.adviser-shell[data-theme="dark"] select,
+.adviser-shell[data-theme="dark"] textarea {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(8, 26, 49, 0.72) !important;
+    color: #f8fbff !important;
+}
+
+.adviser-shell[data-theme="dark"] input::placeholder,
+.adviser-shell[data-theme="dark"] textarea::placeholder {
+    color: #7ea6d8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-page-header,
+    .adviser-shell[data-theme="system"] .hero-card,
+    .adviser-shell[data-theme="system"] .welcome-card,
+    .adviser-shell[data-theme="system"] .stat-card,
+    .adviser-shell[data-theme="system"] .toolbar-card,
+    .adviser-shell[data-theme="system"] .panel-card,
+    .adviser-shell[data-theme="system"] .health-card,
+    .adviser-shell[data-theme="system"] .quick-action-card,
+    .adviser-shell[data-theme="system"] .activity-feed,
+    .adviser-shell[data-theme="system"] .panel-focus-card,
+    .adviser-shell[data-theme="system"] [class*="rounded-"][class*="bg-white"],
+    .adviser-shell[data-theme="system"] [class*="bg-slate-50"] {
+        border-color: rgba(147, 197, 253, 0.18) !important;
+        background:
+            radial-gradient(circle at 92% 8%, rgba(246, 190, 0, 0.06), transparent 26%),
+            linear-gradient(180deg, rgba(15, 30, 56, 0.92), rgba(10, 25, 47, 0.88)) !important;
+        color: #dbeafe !important;
+    }
+
+    .adviser-shell[data-theme="system"] [class*="text-slate-950"],
+    .adviser-shell[data-theme="system"] [class*="text-slate-900"],
+    .adviser-shell[data-theme="system"] [class*="text-slate-800"],
+    .adviser-shell[data-theme="system"] [class*="text-slate-700"] {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] [class*="text-slate-600"],
+    .adviser-shell[data-theme="system"] [class*="text-slate-500"],
+    .adviser-shell[data-theme="system"] [class*="text-slate-400"] {
+        color: #a9c3e8 !important;
+    }
+}
+
+/* Final adviser dark-mode readability pass: keep variable-based text bright. */
+.adviser-shell[data-theme="dark"] {
+    --text-dark: #f8fbff !important;
+    --text-light: #a9c3e8 !important;
+    --primary: #93c5fd !important;
+    --primary-dark: #60a5fa !important;
+    --secondary-dark: #fde68a !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-content,
+.adviser-shell[data-theme="dark"] .dashboard-wrapper,
+.adviser-shell[data-theme="dark"] .main-content {
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] h1,
+.adviser-shell[data-theme="dark"] h2,
+.adviser-shell[data-theme="dark"] h3,
+.adviser-shell[data-theme="dark"] h4,
+.adviser-shell[data-theme="dark"] strong,
+.adviser-shell[data-theme="dark"] th,
+.adviser-shell[data-theme="dark"] [class*="text-[var(--text-dark)]"] {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] p,
+.adviser-shell[data-theme="dark"] small,
+.adviser-shell[data-theme="dark"] td,
+.adviser-shell[data-theme="dark"] [class*="text-[var(--text-light)]"],
+.adviser-shell[data-theme="dark"] [class*="text-slate-600"],
+.adviser-shell[data-theme="dark"] [class*="text-slate-500"] {
+    color: #a9c3e8 !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="text-[var(--primary)]"],
+.adviser-shell[data-theme="dark"] [class*="text-blue-700"],
+.adviser-shell[data-theme="dark"] [class*="text-indigo-700"],
+.adviser-shell[data-theme="dark"] [class*="text-[rgba(0,58,143"] {
+    color: #93c5fd !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .stat-card-value,
+.adviser-shell[data-theme="dark"] .stat-card strong,
+.adviser-shell[data-theme="dark"] article > strong,
+.adviser-shell[data-theme="dark"] .quick-action-card strong {
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-page-header .page-breadcrumb,
+.adviser-shell[data-theme="dark"] .adviser-page-header [class*="tracking-[0.16em]"] {
+    color: #b9d2f2 !important;
+}
+
+.adviser-shell[data-theme="dark"] table,
+.adviser-shell[data-theme="dark"] thead,
+.adviser-shell[data-theme="dark"] tbody,
+.adviser-shell[data-theme="dark"] tr,
+.adviser-shell[data-theme="dark"] [class*="divide-slate"] {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] {
+        --text-dark: #f8fbff !important;
+        --text-light: #a9c3e8 !important;
+        --primary: #93c5fd !important;
+        --primary-dark: #60a5fa !important;
+        --secondary-dark: #fde68a !important;
+    }
+
+    .adviser-shell[data-theme="system"] h1,
+    .adviser-shell[data-theme="system"] h2,
+    .adviser-shell[data-theme="system"] h3,
+    .adviser-shell[data-theme="system"] h4,
+    .adviser-shell[data-theme="system"] strong,
+    .adviser-shell[data-theme="system"] th,
+    .adviser-shell[data-theme="system"] [class*="text-[var(--text-dark)]"] {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] p,
+    .adviser-shell[data-theme="system"] small,
+    .adviser-shell[data-theme="system"] td,
+    .adviser-shell[data-theme="system"] [class*="text-[var(--text-light)]"],
+    .adviser-shell[data-theme="system"] [class*="text-slate-600"],
+    .adviser-shell[data-theme="system"] [class*="text-slate-500"] {
+        color: #a9c3e8 !important;
+    }
+
+    .adviser-shell[data-theme="system"] [class*="text-[var(--primary)]"],
+    .adviser-shell[data-theme="system"] [class*="text-blue-700"],
+    .adviser-shell[data-theme="system"] [class*="text-indigo-700"],
+    .adviser-shell[data-theme="system"] [class*="text-[rgba(0,58,143"] {
+        color: #93c5fd !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Dark adviser tables and alert rows need explicit overrides for Tailwind bg/text utilities. */
+.adviser-shell[data-theme="dark"] table,
+.adviser-shell[data-theme="dark"] thead,
+.adviser-shell[data-theme="dark"] tbody,
+.adviser-shell[data-theme="dark"] tr,
+.adviser-shell[data-theme="dark"] td,
+.adviser-shell[data-theme="dark"] th {
+    background: transparent !important;
+}
+
+.adviser-shell[data-theme="dark"] thead,
+.adviser-shell[data-theme="dark"] [class*="bg-slate-50/90"] {
+    background: rgba(15, 30, 56, 0.95) !important;
+}
+
+.adviser-shell[data-theme="dark"] tbody,
+.adviser-shell[data-theme="dark"] [class*="bg-white"] {
+    background: rgba(8, 26, 49, 0.5) !important;
+}
+
+.adviser-shell[data-theme="dark"] tr:hover,
+.adviser-shell[data-theme="dark"] [class*="hover:bg-slate-50"]:hover,
+.adviser-shell[data-theme="dark"] [class*="hover:bg-white"]:hover {
+    background: rgba(96, 165, 250, 0.12) !important;
+}
+
+.adviser-shell[data-theme="dark"] th,
+.adviser-shell[data-theme="dark"] td,
+.adviser-shell[data-theme="dark"] td strong,
+.adviser-shell[data-theme="dark"] td span {
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] .table-btn,
+.adviser-shell[data-theme="dark"] button[class*="border-slate"],
+.adviser-shell[data-theme="dark"] a[class*="border-slate"] {
+    border-color: rgba(147, 197, 253, 0.2) !important;
+    background: rgba(96, 165, 250, 0.1) !important;
+    color: #bfdbfe !important;
+}
+
+.adviser-shell[data-theme="dark"] .table-btn:hover,
+.adviser-shell[data-theme="dark"] button[class*="border-slate"]:hover,
+.adviser-shell[data-theme="dark"] a[class*="border-slate"]:hover {
+    border-color: rgba(96, 165, 250, 0.32) !important;
+    background: rgba(96, 165, 250, 0.18) !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="bg-amber-50/70"],
+.adviser-shell[data-theme="dark"] [class*="bg-rose-50/70"],
+.adviser-shell[data-theme="dark"] [class*="bg-slate-50/85"] {
+    background: rgba(15, 30, 56, 0.86) !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="border-l-[var(--warning)]"] {
+    border-left-color: #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="border-l-[var(--danger)]"] {
+    border-left-color: #fb7185 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] table,
+    .adviser-shell[data-theme="system"] thead,
+    .adviser-shell[data-theme="system"] tbody,
+    .adviser-shell[data-theme="system"] tr,
+    .adviser-shell[data-theme="system"] td,
+    .adviser-shell[data-theme="system"] th {
+        background: transparent !important;
+    }
+
+    .adviser-shell[data-theme="system"] thead,
+    .adviser-shell[data-theme="system"] [class*="bg-slate-50/90"] {
+        background: rgba(15, 30, 56, 0.95) !important;
+    }
+
+    .adviser-shell[data-theme="system"] tbody,
+    .adviser-shell[data-theme="system"] [class*="bg-white"] {
+        background: rgba(8, 26, 49, 0.5) !important;
+    }
+
+    .adviser-shell[data-theme="system"] th,
+    .adviser-shell[data-theme="system"] td,
+    .adviser-shell[data-theme="system"] td strong,
+    .adviser-shell[data-theme="system"] td span {
+        color: #dbeafe !important;
+    }
+}
+
+/* Light pills that remain intentionally white in dark mode need dark readable text. */
+.adviser-shell[data-theme="dark"] .adviser-page-header .rounded-full.bg-white,
+.adviser-shell[data-theme="dark"] .adviser-page-header [class*="bg-white"],
+.adviser-shell[data-theme="dark"] [class*="rounded-full"][class*="bg-white"],
+.adviser-shell[data-theme="dark"] [class*="bg-white"][class*="text-slate"],
+.adviser-shell[data-theme="dark"] [class*="bg-white"] [class*="text-slate"],
+.adviser-shell[data-theme="dark"] [class*="bg-slate-100"] {
+    color: #0f172a !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-page-header .rounded-full.bg-white *,
+.adviser-shell[data-theme="dark"] .adviser-page-header [class*="bg-white"] *,
+.adviser-shell[data-theme="dark"] [class*="rounded-full"][class*="bg-white"] *,
+.adviser-shell[data-theme="dark"] [class*="bg-white"][class*="text-slate"] *,
+.adviser-shell[data-theme="dark"] [class*="bg-slate-100"] * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] [class*="bg-slate-100"][class*="text-slate-600"],
+.adviser-shell[data-theme="dark"] [class*="bg-slate-100"] [class*="text-slate-600"] {
+    color: #334155 !important;
+}
+
+.adviser-shell[data-theme="dark"] a[class*="bg-[var(--primary)]"],
+.adviser-shell[data-theme="dark"] button[class*="bg-[var(--primary)]"] {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] a[class*="bg-[var(--primary)]"] *,
+.adviser-shell[data-theme="dark"] button[class*="bg-[var(--primary)]"] * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-page-header .rounded-full.bg-white,
+    .adviser-shell[data-theme="system"] .adviser-page-header [class*="bg-white"],
+    .adviser-shell[data-theme="system"] [class*="rounded-full"][class*="bg-white"],
+    .adviser-shell[data-theme="system"] [class*="bg-white"][class*="text-slate"],
+    .adviser-shell[data-theme="system"] [class*="bg-white"] [class*="text-slate"],
+    .adviser-shell[data-theme="system"] [class*="bg-slate-100"] {
+        color: #0f172a !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-page-header .rounded-full.bg-white *,
+    .adviser-shell[data-theme="system"] .adviser-page-header [class*="bg-white"] *,
+    .adviser-shell[data-theme="system"] [class*="rounded-full"][class*="bg-white"] *,
+    .adviser-shell[data-theme="system"] [class*="bg-white"][class*="text-slate"] *,
+    .adviser-shell[data-theme="system"] [class*="bg-slate-100"] * {
+        color: #0f172a !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Adviser dark-mode content polish: hard-coded Tailwind light utilities become dark surfaces here. */
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is([class*="bg-white"], [class*="bg-slate-50"], [class*="bg-slate-100"]),
+.adviser-shell[data-theme="dark"] .modal-content,
+.adviser-shell[data-theme="dark"] .modal-header,
+.adviser-shell[data-theme="dark"] .modal-body,
+.adviser-shell[data-theme="dark"] .modal-footer {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(10, 28, 54, 0.94) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(
+    [class*="text-slate-950"],
+    [class*="text-slate-900"],
+    [class*="text-slate-800"],
+    [class*="text-slate-700"],
+    [class*="text-slate-600"],
+    [class*="text-slate-500"],
+    [class*="text-gray-900"],
+    [class*="text-gray-800"],
+    [class*="text-gray-700"]
+) {
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    label,
+    th,
+    [class*="font-bold"],
+    [class*="font-black"],
+    [class*="font-semibold"]
+) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(
+    p,
+    small,
+    td,
+    span,
+    [class*="placeholder:text-slate"]
+) {
+    color: #a9c3e8 !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(input, select, textarea),
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) [role="combobox"] {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(8, 24, 47, 0.95) !important;
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(input, select, textarea)::placeholder {
+    color: #8fb0d8 !important;
+    -webkit-text-fill-color: #8fb0d8 !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(
+    table,
+    thead,
+    tbody,
+    tr,
+    td,
+    th,
+    [class*="divide-slate"],
+    [class*="border-slate"]
+) {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) thead,
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) [class*="bg-slate-50/90"] {
+    background: rgba(17, 37, 68, 0.98) !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) tbody tr,
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) [class*="bg-white/90"],
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) [class*="bg-white/80"] {
+    background: rgba(13, 35, 66, 0.86) !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(.status-badge, .dept-badge, [class*="rounded-full"][class*="bg-white"], [class*="rounded-lg"][class*="bg-white"]) {
+    border-color: rgba(147, 197, 253, 0.24) !important;
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(.status-badge, .dept-badge, [class*="rounded-full"][class*="bg-white"], [class*="rounded-lg"][class*="bg-white"]) * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(.btn, button, a)[class*="bg-[var(--primary)]"],
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(.btn, button, a)[class*="bg-blue"] {
+    background: #60a5fa !important;
+    border-color: rgba(147, 197, 253, 0.42) !important;
+    color: #041328 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(.btn, button, a)[class*="bg-[var(--primary)]"] *,
+.adviser-shell[data-theme="dark"] :is(.main-content, .modal) :is(.btn, button, a)[class*="bg-blue"] * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal-footer {
+    box-shadow: 0 -18px 40px rgba(2, 8, 23, 0.32) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] :is(.main-content, .modal) :is([class*="bg-white"], [class*="bg-slate-50"], [class*="bg-slate-100"]),
+    .adviser-shell[data-theme="system"] .modal-content,
+    .adviser-shell[data-theme="system"] .modal-header,
+    .adviser-shell[data-theme="system"] .modal-body,
+    .adviser-shell[data-theme="system"] .modal-footer {
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(10, 28, 54, 0.94) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.main-content, .modal) :is(
+        [class*="text-slate-950"],
+        [class*="text-slate-900"],
+        [class*="text-slate-800"],
+        [class*="text-slate-700"],
+        [class*="text-slate-600"],
+        [class*="text-slate-500"],
+        [class*="text-gray-900"],
+        [class*="text-gray-800"],
+        [class*="text-gray-700"]
+    ) {
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.main-content, .modal) :is(
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        strong,
+        label,
+        th,
+        [class*="font-bold"],
+        [class*="font-black"],
+        [class*="font-semibold"]
+    ) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.main-content, .modal) :is(input, select, textarea),
+    .adviser-shell[data-theme="system"] :is(.main-content, .modal) [role="combobox"] {
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(8, 24, 47, 0.95) !important;
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Create-group modal: remove leftover light gradients and pale cards in adviser dark mode. */
+.adviser-shell[data-theme="dark"] .modal :is(
+    [class*="bg-gradient-to-br"],
+    [class*="bg-indigo-50"],
+    [class*="bg-indigo-100"],
+    [class*="bg-blue-50"],
+    [class*="bg-emerald-50"],
+    [class*="bg-amber-50"],
+    [class*="bg-red-50"]
+) {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(18, 45, 82, 0.92) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal :is(
+    [class*="text-amber-"],
+    [class*="text-blue-"],
+    [class*="text-indigo-"],
+    [class*="text-emerald-"],
+    [class*="text-red-"]
+) {
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal :is(
+    [class*="bg-indigo-100"],
+    [class*="bg-emerald-100"],
+    [class*="bg-amber-100"],
+    [class*="bg-slate-100"]
+) {
+    background: rgba(96, 165, 250, 0.18) !important;
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal :is(
+    [class*="bg-indigo-100"],
+    [class*="bg-emerald-100"],
+    [class*="bg-amber-100"],
+    [class*="bg-slate-100"]
+) * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal .modal-header [class*="bg-white/90"],
+.adviser-shell[data-theme="dark"] .modal .modal-header [class*="bg-white/80"],
+.adviser-shell[data-theme="dark"] .modal .modal-header [class*="bg-white"] {
+    background: rgba(15, 38, 70, 0.9) !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal .modal-footer .btn-outline {
+    border-color: rgba(147, 197, 253, 0.26) !important;
+    background: rgba(248, 251, 255, 0.96) !important;
+    color: #0f2b52 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal .modal-footer .btn-primary {
+    background: #60a5fa !important;
+    color: #052042 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .modal .modal-footer .btn-primary:disabled {
+    background: rgba(147, 197, 253, 0.78) !important;
+    color: rgba(5, 32, 66, 0.86) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .modal :is(
+        [class*="bg-gradient-to-br"],
+        [class*="bg-indigo-50"],
+        [class*="bg-indigo-100"],
+        [class*="bg-blue-50"],
+        [class*="bg-emerald-50"],
+        [class*="bg-amber-50"],
+        [class*="bg-red-50"]
+    ) {
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(18, 45, 82, 0.92) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .modal :is(
+        [class*="text-amber-"],
+        [class*="text-blue-"],
+        [class*="text-indigo-"],
+        [class*="text-emerald-"],
+        [class*="text-red-"]
+    ) {
+        color: #bfdbfe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .modal .modal-footer .btn-outline {
+        border-color: rgba(147, 197, 253, 0.26) !important;
+        background: rgba(248, 251, 255, 0.96) !important;
+        color: #0f2b52 !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Adviser content pages: primary blue actions should stay white-on-blue in dark mode. */
+.adviser-shell[data-theme="dark"] .main-content :is(.btn, button, a)[class*="bg-blue"],
+.adviser-shell[data-theme="dark"] .main-content :is(.btn, button, a)[class*="bg-[var(--primary)]"],
+.adviser-shell[data-theme="dark"] .main-content .btn-primary {
+    background: #60a5fa !important;
+    border-color: rgba(147, 197, 253, 0.45) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content :is(.btn, button, a)[class*="bg-blue"] *,
+.adviser-shell[data-theme="dark"] .main-content :is(.btn, button, a)[class*="bg-[var(--primary)]"] *,
+.adviser-shell[data-theme="dark"] .main-content .btn-primary * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .main-content :is(.btn, button, a)[class*="bg-blue"],
+    .adviser-shell[data-theme="system"] .main-content :is(.btn, button, a)[class*="bg-[var(--primary)]"],
+    .adviser-shell[data-theme="system"] .main-content .btn-primary {
+        background: #60a5fa !important;
+        border-color: rgba(147, 197, 253, 0.45) !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .main-content :is(.btn, button, a)[class*="bg-blue"] *,
+    .adviser-shell[data-theme="system"] .main-content :is(.btn, button, a)[class*="bg-[var(--primary)]"] *,
+    .adviser-shell[data-theme="system"] .main-content .btn-primary * {
+        color: #ffffff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Submission review panel uses standalone markup, so it needs its own dark-mode pass. */
+.adviser-shell[data-theme="dark"] .adviser-review-modal {
+    border: 1px solid rgba(147, 197, 253, 0.22) !important;
+    background: rgba(10, 28, 54, 0.98) !important;
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal > div {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal :is(h2, strong, label, [class*="text-slate-950"], [class*="text-slate-900"], [class*="text-slate-800"]) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal :is(p, span, [class*="text-slate-500"]) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal :is(button[class*="bg-white"], textarea) {
+    border-color: rgba(147, 197, 253, 0.24) !important;
+    background: rgba(8, 24, 47, 0.94) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal textarea:disabled {
+    background: rgba(15, 34, 61, 0.92) !important;
+    color: #c9dcf5 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal textarea::placeholder {
+    color: #8fb0d8 !important;
+    -webkit-text-fill-color: #8fb0d8 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal [class*="bg-emerald-50"] {
+    background: rgba(5, 95, 78, 0.35) !important;
+    color: #bbf7d0 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal [class*="bg-emerald-50"] * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-modal button[aria-label="Close review panel"] {
+    border-color: rgba(147, 197, 253, 0.26) !important;
+    background: rgba(96, 165, 250, 0.12) !important;
+    color: #bfdbfe !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-review-modal {
+        border: 1px solid rgba(147, 197, 253, 0.22) !important;
+        background: rgba(10, 28, 54, 0.98) !important;
+        color: #dbeafe !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-review-modal :is(h2, strong, label, [class*="text-slate-950"], [class*="text-slate-900"], [class*="text-slate-800"]) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-review-modal :is(p, span, [class*="text-slate-500"]) {
+        color: #a9c3e8 !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-review-modal :is(button[class*="bg-white"], textarea) {
+        border-color: rgba(147, 197, 253, 0.24) !important;
+        background: rgba(8, 24, 47, 0.94) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Progress workspace: arbitrary rgba utility cards need explicit dark surfaces. */
+.adviser-shell[data-theme="dark"] .main-content :is(
+    [class*="bg-[rgba(248,250,252"],
+    [class*="bg-[rgba(0,58,143,0.02"],
+    [class*="bg-[rgba(0,58,143,0.06"],
+    [class*="bg-[rgba(0,58,143,0.08"]
+) {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(15, 38, 70, 0.92) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content :is(
+    [class*="bg-[rgba(248,250,252"],
+    [class*="bg-[rgba(0,58,143,0.02"],
+    [class*="bg-[rgba(0,58,143,0.06"],
+    [class*="bg-[rgba(0,58,143,0.08"]
+) :is(h2, h3, h4, strong, dd, [class*="font-bold"], [class*="font-semibold"]) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content :is(
+    [class*="bg-[rgba(248,250,252"],
+    [class*="bg-[rgba(0,58,143,0.02"],
+    [class*="bg-[rgba(0,58,143,0.06"],
+    [class*="bg-[rgba(0,58,143,0.08"]
+) :is(p, span, dt) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content :is([class*="text-blue-"], [class*="text-indigo-"]) {
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content [class*="text-emerald-"] {
+    color: #bbf7d0 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content [class*="text-amber-"] {
+    color: #fde68a !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content [class*="text-rose-"] {
+    color: #fecdd3 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content :is([class*="bg-slate-200"], [class*="bg-slate-100"]) {
+    background: rgba(147, 197, 253, 0.16) !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content :is([class*="ring-slate"], [class*="border-slate"]) {
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.24) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .main-content :is(
+        [class*="bg-[rgba(248,250,252"],
+        [class*="bg-[rgba(0,58,143,0.02"],
+        [class*="bg-[rgba(0,58,143,0.06"],
+        [class*="bg-[rgba(0,58,143,0.08"]
+    ) {
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(15, 38, 70, 0.92) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .main-content :is(
+        [class*="bg-[rgba(248,250,252"],
+        [class*="bg-[rgba(0,58,143,0.02"],
+        [class*="bg-[rgba(0,58,143,0.06"],
+        [class*="bg-[rgba(0,58,143,0.08"]
+    ) :is(h2, h3, h4, strong, dd, [class*="font-bold"], [class*="font-semibold"]) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .main-content :is(
+        [class*="bg-[rgba(248,250,252"],
+        [class*="bg-[rgba(0,58,143,0.02"],
+        [class*="bg-[rgba(0,58,143,0.06"],
+        [class*="bg-[rgba(0,58,143,0.08"]
+    ) :is(p, span, dt) {
+        color: #a9c3e8 !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Title approvals: darken standalone title cards and the detail drawer. */
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) {
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(10, 28, 54, 0.98) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+    [class*="bg-white"],
+    [class*="bg-slate-50"],
+    [class*="bg-slate-100"],
+    [class*="bg-blue-50"],
+    [class*="bg-emerald-50"],
+    [class*="bg-amber-50"],
+    [class*="bg-rose-50"],
+    [class*="from-slate-50"],
+    [class*="from-blue-50"],
+    [class*="from-white"],
+    [class*="to-white"],
+    [class*="to-slate-50"],
+    [class*="to-blue-50"]
+) {
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(15, 38, 70, 0.92) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+    h2,
+    h3,
+    h4,
+    strong,
+    dd,
+    label,
+    [class*="text-slate-950"],
+    [class*="text-slate-900"],
+    [class*="text-slate-800"],
+    [class*="font-black"],
+    [class*="font-extrabold"],
+    [class*="font-bold"],
+    [class*="font-semibold"]
+) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+    p,
+    span,
+    dt,
+    [class*="text-slate-700"],
+    [class*="text-slate-600"],
+    [class*="text-slate-500"],
+    [class*="text-slate-400"]
+) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+    [class*="text-blue-"],
+    [class*="text-indigo-"]
+) {
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) [class*="text-emerald-"] {
+    color: #bbf7d0 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) [class*="text-amber-"] {
+    color: #fde68a !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) [class*="text-rose-"] {
+    color: #fecdd3 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-title-details-modal :is(header, footer) {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(10, 28, 54, 0.96) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-title-details-modal textarea {
+    border-color: rgba(147, 197, 253, 0.24) !important;
+    background: rgba(8, 24, 47, 0.94) !important;
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-title-details-modal textarea::placeholder {
+    color: #8fb0d8 !important;
+    -webkit-text-fill-color: #8fb0d8 !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+    button[class*="bg-blue-600"],
+    a[class*="bg-blue-600"]
+) {
+    background: #60a5fa !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+    button[class*="bg-blue-600"],
+    a[class*="bg-blue-600"]
+) * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+    button[class*="bg-slate-900"],
+    a[class*="bg-slate-900"]
+) {
+    background: rgba(3, 12, 28, 0.96) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] :is(.adviser-title-card, .adviser-title-details-modal) {
+        --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(10, 28, 54, 0.98) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+        [class*="bg-white"],
+        [class*="bg-slate-50"],
+        [class*="bg-slate-100"],
+        [class*="bg-blue-50"],
+        [class*="bg-emerald-50"],
+        [class*="bg-amber-50"],
+        [class*="bg-rose-50"],
+        [class*="from-slate-50"],
+        [class*="from-blue-50"],
+        [class*="from-white"],
+        [class*="to-white"],
+        [class*="to-slate-50"],
+        [class*="to-blue-50"]
+    ) {
+        --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(15, 38, 70, 0.92) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.adviser-title-card, .adviser-title-details-modal) :is(
+        h2,
+        h3,
+        h4,
+        strong,
+        dd,
+        label,
+        [class*="text-slate-950"],
+        [class*="text-slate-900"],
+        [class*="text-slate-800"],
+        [class*="font-black"],
+        [class*="font-extrabold"],
+        [class*="font-bold"],
+        [class*="font-semibold"]
+    ) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Title approval similarity panels can be gradient-only, so keep them dark explicitly. */
+.adviser-shell[data-theme="dark"] .adviser-title-card section[class*="from-white"][class*="to-slate-50"],
+.adviser-shell[data-theme="dark"] .adviser-title-details-modal section[class*="from-white"][class*="to-slate-50"] {
+    --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(15, 38, 70, 0.96) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-title-card section[class*="from-white"][class*="to-slate-50"] [class*="ring-current"],
+.adviser-shell[data-theme="dark"] .adviser-title-details-modal section[class*="from-white"][class*="to-slate-50"] [class*="ring-current"] {
+    background: rgba(16, 185, 129, 0.22) !important;
+    color: #bbf7d0 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-title-card section[class*="from-white"][class*="to-slate-50"],
+    .adviser-shell[data-theme="system"] .adviser-title-details-modal section[class*="from-white"][class*="to-slate-50"] {
+        --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+        --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+        --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(15, 38, 70, 0.96) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Evaluation workspace: keep upload cards and empty states on dark adviser surfaces. */
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page :is(
+    .adviser-evaluation-file-stats span,
+    .adviser-evaluation-upload-card,
+    .adviser-evaluation-selected-file,
+    .adviser-evaluation-record-preview,
+    .adviser-evaluation-document-list .project-files-empty-state,
+    .adviser-evaluations-page .project-files-empty-state,
+    [class*="from-slate-50"],
+    [class*="to-blue-50"],
+    [class*="from-white"],
+    [class*="to-slate-50"]
+) {
+    --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(15, 38, 70, 0.92) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page :is(
+    .adviser-evaluation-file-stats strong,
+    .adviser-evaluation-upload-card-head strong,
+    .adviser-evaluation-selected-file strong,
+    .adviser-evaluation-record-preview p,
+    .project-files-empty-state strong,
+    .project-files-empty-state h3,
+    h2,
+    h3,
+    label,
+    [class*="font-bold"],
+    [class*="font-semibold"],
+    [class*="font-extrabold"]
+) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page :is(
+    .adviser-evaluation-file-stats small,
+    .adviser-evaluation-upload-card-head span,
+    .adviser-evaluation-upload-card-head em,
+    .adviser-evaluation-selected-file p,
+    .adviser-evaluation-record-preview span,
+    .project-files-empty-state p,
+    [class*="text-slate-500"],
+    [class*="text-slate-400"]
+) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page :is(
+    .adviser-evaluation-file-stats i,
+    .adviser-evaluation-selected-file > span,
+    .adviser-evaluation-upload-card-head em,
+    [class*="text-blue-"],
+    [class*="text-sky-"],
+    [class*="text-indigo-"]
+) {
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page :is(select, input[type="search"]) {
+    border-color: rgba(147, 197, 253, 0.24) !important;
+    background: rgba(8, 24, 47, 0.94) !important;
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page :is(input[type="search"])::placeholder {
+    color: #8fb0d8 !important;
+    -webkit-text-fill-color: #8fb0d8 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page .adviser-evaluation-upload-actions :is(.table-btn, .btn),
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page .adviser-evaluation-secure-upload {
+    border-color: rgba(147, 197, 253, 0.26) !important;
+    background: rgba(96, 165, 250, 0.16) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page .adviser-evaluation-secure-upload:not(:disabled) {
+    background: #60a5fa !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-evaluations-page .adviser-evaluation-secure-upload * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-evaluations-page :is(
+        .adviser-evaluation-file-stats span,
+        .adviser-evaluation-upload-card,
+        .adviser-evaluation-selected-file,
+        .adviser-evaluation-record-preview,
+        .adviser-evaluation-document-list .project-files-empty-state,
+        .adviser-evaluations-page .project-files-empty-state,
+        [class*="from-slate-50"],
+        [class*="to-blue-50"],
+        [class*="from-white"],
+        [class*="to-slate-50"]
+    ) {
+        --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+        --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+        --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(15, 38, 70, 0.92) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-evaluations-page :is(
+        .adviser-evaluation-file-stats strong,
+        .adviser-evaluation-upload-card-head strong,
+        .adviser-evaluation-selected-file strong,
+        .adviser-evaluation-record-preview p,
+        .project-files-empty-state strong,
+        .project-files-empty-state h3,
+        h2,
+        h3,
+        label,
+        [class*="font-bold"],
+        [class*="font-semibold"],
+        [class*="font-extrabold"]
+    ) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Schedule workspace: tone badges should not remain bright light pills in dark mode. */
+.adviser-shell[data-theme="dark"] .main-content :is(
+    [class*="bg-amber-100"],
+    [class*="bg-sky-100"],
+    [class*="bg-emerald-100"],
+    [class*="bg-rose-100"]
+) {
+    border-color: rgba(147, 197, 253, 0.2) !important;
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content [class*="bg-amber-100"] {
+    background: rgba(245, 158, 11, 0.18) !important;
+    color: #fde68a !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content [class*="bg-sky-100"] {
+    background: rgba(14, 165, 233, 0.18) !important;
+    color: #bae6fd !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content [class*="bg-emerald-100"] {
+    background: rgba(16, 185, 129, 0.18) !important;
+    color: #bbf7d0 !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content [class*="bg-rose-100"] {
+    background: rgba(244, 63, 94, 0.18) !important;
+    color: #fecdd3 !important;
+}
+
+.adviser-shell[data-theme="dark"] .main-content :is(
+    [class*="bg-amber-100"],
+    [class*="bg-sky-100"],
+    [class*="bg-emerald-100"],
+    [class*="bg-rose-100"]
+) * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .main-content :is(
+        [class*="bg-amber-100"],
+        [class*="bg-sky-100"],
+        [class*="bg-emerald-100"],
+        [class*="bg-rose-100"]
+    ) {
+        border-color: rgba(147, 197, 253, 0.2) !important;
+        background: rgba(96, 165, 250, 0.14) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .main-content [class*="bg-amber-100"] {
+        background: rgba(245, 158, 11, 0.18) !important;
+        color: #fde68a !important;
+    }
+
+    .adviser-shell[data-theme="system"] .main-content [class*="bg-sky-100"] {
+        background: rgba(14, 165, 233, 0.18) !important;
+        color: #bae6fd !important;
+    }
+
+    .adviser-shell[data-theme="system"] .main-content [class*="bg-emerald-100"] {
+        background: rgba(16, 185, 129, 0.18) !important;
+        color: #bbf7d0 !important;
+    }
+
+    .adviser-shell[data-theme="system"] .main-content [class*="bg-rose-100"] {
+        background: rgba(244, 63, 94, 0.18) !important;
+        color: #fecdd3 !important;
+    }
+}
+
+/* Reports workspace: section headers, summary panels, and export cards in dark mode. */
+.adviser-shell[data-theme="dark"] .adviser-reports-page :is(
+    .adviser-report-overview-panel,
+    .adviser-report-filters,
+    .adviser-report-section,
+    article,
+    [class*="bg-white"],
+    [class*="bg-slate-50"],
+    [class*="bg-slate-100"],
+    [class*="from-slate-50"],
+    [class*="to-blue-50"],
+    [class*="from-white"],
+    [class*="to-slate-50"],
+    [class*="bg-[linear-gradient"]
+) {
+    --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(15, 38, 70, 0.92) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page .adviser-report-overview-panel > div > div:first-child {
+    background: linear-gradient(135deg, rgba(29, 78, 216, 0.9), rgba(30, 64, 175, 0.78)) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page :is(
+    h2,
+    h3,
+    strong,
+    label,
+    [class*="text-slate-950"],
+    [class*="text-slate-900"],
+    [class*="text-slate-800"],
+    [class*="font-bold"],
+    [class*="font-semibold"],
+    [class*="font-extrabold"]
+) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page :is(
+    p,
+    span,
+    td,
+    th,
+    [class*="text-slate-700"],
+    [class*="text-slate-600"],
+    [class*="text-slate-500"],
+    [class*="text-slate-400"]
+) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page :is([class*="text-blue-"], [class*="text-indigo-"]) {
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page [class*="text-emerald-"] {
+    color: #bbf7d0 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page [class*="text-amber-"] {
+    color: #fde68a !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page [class*="text-rose-"] {
+    color: #fecdd3 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page :is(select, input) {
+    border-color: rgba(147, 197, 253, 0.24) !important;
+    background: rgba(8, 24, 47, 0.94) !important;
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page :is(button, a)[class*="bg-white"] {
+    border-color: rgba(147, 197, 253, 0.26) !important;
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-reports-page :is(button, a)[class*="bg-white"] * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-reports-page :is(
+        .adviser-report-overview-panel,
+        .adviser-report-filters,
+        .adviser-report-section,
+        article,
+        [class*="bg-white"],
+        [class*="bg-slate-50"],
+        [class*="bg-slate-100"],
+        [class*="from-slate-50"],
+        [class*="to-blue-50"],
+        [class*="from-white"],
+        [class*="to-slate-50"],
+        [class*="bg-[linear-gradient"]
+    ) {
+        --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+        --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+        --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(15, 38, 70, 0.92) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-reports-page :is(
+        h2,
+        h3,
+        strong,
+        label,
+        [class*="text-slate-950"],
+        [class*="text-slate-900"],
+        [class*="text-slate-800"],
+        [class*="font-bold"],
+        [class*="font-semibold"],
+        [class*="font-extrabold"]
+    ) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Final header chip override: keep adviser page metadata pills dark in dark mode. */
+.adviser-shell[data-theme="dark"] .adviser-page-header-meta .adviser-page-header-chip,
+.adviser-shell[data-theme="dark"] .adviser-page-header-meta .adviser-page-header-chip-primary {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(15, 38, 70, 0.88) !important;
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-page-header-meta .adviser-page-header-chip *,
+.adviser-shell[data-theme="dark"] .adviser-page-header-meta .adviser-page-header-chip-primary * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-page-header-meta .adviser-page-header-chip i,
+.adviser-shell[data-theme="dark"] .adviser-page-header-meta .adviser-page-header-chip-primary i {
+    color: #93c5fd !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-page-header-meta .adviser-page-header-chip,
+    .adviser-shell[data-theme="system"] .adviser-page-header-meta .adviser-page-header-chip-primary {
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(15, 38, 70, 0.88) !important;
+        color: #bfdbfe !important;
+        -webkit-text-fill-color: currentColor !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-page-header-meta .adviser-page-header-chip *,
+    .adviser-shell[data-theme="system"] .adviser-page-header-meta .adviser-page-header-chip-primary * {
+        color: inherit !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Profile workspace: darken profile cards, white header strips, and edit modal. */
+.adviser-shell[data-theme="dark"] .adviser-profile-page :is(
+    article,
+    .info-card,
+    .profile-card,
+    .info-header,
+    .info-body,
+    [class*="bg-white"],
+    [class*="bg-slate-50"],
+    [class*="from-transparent"],
+    [class*="to-slate-50"]
+) {
+    --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(15, 38, 70, 0.92) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-profile-page :is(
+    h2,
+    h3,
+    h4,
+    strong,
+    .profile-name h2,
+    .info-label,
+    .info-value,
+    [class*="text-slate-900"],
+    [class*="text-slate-800"],
+    [class*="font-bold"],
+    [class*="font-semibold"],
+    [class*="font-black"]
+) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-profile-page :is(
+    p,
+    span,
+    small,
+    .profile-updated-line,
+    [class*="text-slate-700"],
+    [class*="text-slate-600"],
+    [class*="text-slate-500"],
+    [class*="text-slate-400"]
+) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-profile-page :is(.dept-badge, .info-badge, [class*="rounded-full"][class*="bg-indigo"], [class*="rounded-full"][class*="bg-slate"]) {
+    border-color: rgba(147, 197, 253, 0.24) !important;
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-profile-page :is(.dept-badge, .info-badge, [class*="rounded-full"][class*="bg-indigo"], [class*="rounded-full"][class*="bg-slate"]) * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-profile-page :is(.profile-actions a, .profile-actions button, a[class*="bg-white"]) {
+    border-color: rgba(147, 197, 253, 0.26) !important;
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-profile-page button[class*="bg-indigo"] {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.fixed) > div[class*="bg-slate-50"][class*="max-w-3xl"],
+.adviser-shell[data-theme="dark"] :is(.fixed) > div[class*="bg-slate-50"][class*="max-w-3xl"] :is([class*="bg-white"], [class*="bg-slate-50"]) {
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(10, 28, 54, 0.98) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.fixed) > div[class*="bg-slate-50"][class*="max-w-3xl"] :is(h3, h4, strong, label, [class*="text-slate-900"], [class*="text-slate-800"], [class*="text-slate-700"]) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.fixed) > div[class*="bg-slate-50"][class*="max-w-3xl"] :is(p, span, [class*="text-slate-500"], [class*="text-slate-400"]) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.fixed) > div[class*="bg-slate-50"][class*="max-w-3xl"] :is(input, textarea) {
+    border-color: rgba(147, 197, 253, 0.24) !important;
+    background: rgba(8, 24, 47, 0.94) !important;
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.fixed) > div[class*="bg-slate-50"][class*="max-w-3xl"] :is(input, textarea)::placeholder {
+    color: #8fb0d8 !important;
+    -webkit-text-fill-color: #8fb0d8 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] .adviser-profile-page :is(
+        article,
+        .info-card,
+        .profile-card,
+        .info-header,
+        .info-body,
+        [class*="bg-white"],
+        [class*="bg-slate-50"],
+        [class*="from-transparent"],
+        [class*="to-slate-50"]
+    ) {
+        --tw-gradient-from: rgba(15, 38, 70, 0.96) var(--tw-gradient-from-position) !important;
+        --tw-gradient-to: rgba(10, 28, 54, 0.96) var(--tw-gradient-to-position) !important;
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+        --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(15, 38, 70, 0.92) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] .adviser-profile-page :is(
+        h2,
+        h3,
+        h4,
+        strong,
+        .profile-name h2,
+        .info-label,
+        .info-value,
+        [class*="text-slate-900"],
+        [class*="text-slate-800"],
+        [class*="font-bold"],
+        [class*="font-semibold"],
+        [class*="font-black"]
+    ) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
+/* Fix for collapsed sidebar logo positioning in adviser shell */
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar > .sidebar-header,
+.adviser-shell.is-sidebar-collapsed .student-global-sidebar > .sidebar-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    min-height: 72px !important;
+    height: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .sidebar-header-copy {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .system-brand-mark {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .system-brand-logo {
+    margin: 0 !important;
+}
+
+/* Fix to push the collapsed sidebar all the way to the top to fill the empty hole left by the navbar */
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 1200 !important;
+}
+
+/* Final adviser chrome parity with the current student shell. */
+.adviser-shell {
+    --adviser-shell-topbar-height: 72px !important;
+    --adviser-sidebar-width: 248px !important;
+    padding-top: 96px !important;
+}
+
+.adviser-shell .adviser-global-navbar {
+    height: 72px !important;
+    min-height: 72px !important;
+    border-bottom-color: rgba(0, 58, 143, 0.72) !important;
+    background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 50%, #1e40af 100%) !important;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+}
+
+.adviser-shell .adviser-global-navbar::before {
+    height: 3px !important;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 58, 143, 0.2),
+            var(--primary, #003a8f) 18%,
+            var(--primary, #003a8f) 46%,
+            var(--secondary, #f6be00) 72%,
+            rgba(246, 190, 0, 0.45)
+        ) !important;
+    box-shadow:
+        0 0 10px rgba(0, 58, 143, 0.28),
+        0 0 12px rgba(246, 190, 0, 0.34) !important;
+}
+
+.adviser-shell .adviser-shell-toggle {
+    flex-basis: 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    border-right: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .adviser-shell-toggle:hover,
+.adviser-shell .adviser-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.adviser-shell .adviser-global-sidebar {
+    border-right: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar > .sidebar-header {
+    display: grid !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-header {
+    border-bottom-color: #dbe3ef !important;
+    background: #ffffff !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav {
+    background: #ffffff !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-context-kicker,
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading {
+    color: #0f172a !important;
+}
+
+.adviser-shell .adviser-global-sidebar .brand-mark,
+.adviser-shell .adviser-global-sidebar .brand-mark span,
+.adviser-shell .adviser-global-sidebar .sidebar-link,
+.adviser-shell .adviser-global-sidebar .sidebar-link-label {
+    color: #0f172a !important;
+}
+
+.adviser-shell .adviser-global-sidebar .brand-mark strong {
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon i {
+    color: #475569 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .user-badge {
+    border-color: rgba(0, 58, 143, 0.12) !important;
+    background: rgba(0, 58, 143, 0.06) !important;
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-sidebar .user-badge i {
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link {
+    min-height: 3.1rem !important;
+    margin: 0 0.85rem !important;
+    padding: 0.86rem 1rem 0.86rem 1.15rem !important;
+    border: 1px solid transparent !important;
+    border-radius: 1rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link:hover {
+    background: #eef4ff !important;
+    border-color: rgba(147, 197, 253, 0.14) !important;
+    color: #0f172a !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active {
+    background: rgba(0, 58, 143, 0.08) !important;
+    border-color: rgba(0, 58, 143, 0.12) !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #0f172a !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-main {
+    background:
+        radial-gradient(circle at 18% 0%, rgba(96, 165, 250, 0.14), transparent 28%),
+        radial-gradient(circle at 92% 4%, rgba(246, 190, 0, 0.08), transparent 24%),
+        linear-gradient(180deg, #06111f 0%, #081a31 48%, #07101f 100%) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-navbar {
+    border-bottom-color: rgba(96, 165, 250, 0.34) !important;
+    background:
+        radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.08), transparent 30%),
+        linear-gradient(90deg, #081a31 0%, #071526 55%, #06111f 100%) !important;
+    box-shadow:
+        0 16px 32px rgba(2, 6, 23, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-navbar::before {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(37, 99, 235, 0.12),
+            rgba(37, 99, 235, 0.72) 18%,
+            rgba(37, 99, 235, 0.62) 48%,
+            rgba(246, 190, 0, 0.74) 74%,
+            rgba(246, 190, 0, 0.22)
+        ) !important;
+    box-shadow:
+        0 0 8px rgba(37, 99, 235, 0.18),
+        0 0 10px rgba(246, 190, 0, 0.2) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar {
+    border-right-color: rgba(147, 197, 253, 0.2) !important;
+    background: linear-gradient(180deg, #081a31 0%, #071526 100%) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active {
+    background: linear-gradient(135deg, rgba(246, 190, 0, 0.22), rgba(96, 165, 250, 0.14)) !important;
+    border-color: rgba(246, 190, 0, 0.34) !important;
+    box-shadow: inset 3px 0 0 #f6be00, 0 10px 24px rgba(2, 6, 23, 0.2) !important;
+}
+
+@media (min-width: 1101px) {
+    .adviser-shell .adviser-global-sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+    }
+
+    .adviser-shell .adviser-global-navbar {
+        left: 248px !important;
+        right: auto !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+}
+
+/* Exact adviser/student sidebar layout parity. */
+.adviser-shell .adviser-global-content {
+    width: 100% !important;
+    max-width: 1600px !important;
+    min-width: 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-header {
+    display: grid !important;
+    gap: 0.95rem !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 1.5rem 1.35rem 1.2rem !important;
+    border-bottom: 1px solid #dbe3ef !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-header-copy {
+    display: grid !important;
+    gap: 0.62rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 0.55rem !important;
+    row-gap: 0 !important;
+    align-items: center !important;
+    width: 100% !important;
+    font-size: 1.34rem !important;
+    line-height: 1 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-logo {
+    grid-row: 1 / 3 !important;
+    width: 58px !important;
+    height: 50px !important;
+    object-fit: contain !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 0 !important;
+    color: #003a8f !important;
+    font-size: 1.55rem !important;
+    font-weight: 900 !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.035em !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name span {
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-subtitle {
+    grid-column: 2 !important;
+    color: #475569 !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-context-kicker,
+.adviser-shell .adviser-global-sidebar .user-badge {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav {
+    gap: 0.32rem !important;
+    padding: 1.1rem 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-group {
+    gap: 0.48rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    margin: 0.5rem 1.05rem 0 !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: #dbe3ef !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-links {
+    gap: 0.34rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link {
+    min-height: 3.1rem !important;
+    margin: 0 0.85rem !important;
+    padding: 0.86rem 1rem 0.86rem 1.15rem !important;
+    border: 1px solid transparent !important;
+    border-radius: 0.45rem !important;
+    background: transparent !important;
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link:hover {
+    background: rgba(0, 58, 143, 0.05) !important;
+    border-color: transparent !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #0f172a !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-header {
+    border-bottom-color: rgba(147, 197, 253, 0.18) !important;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(246, 190, 0, 0.1), transparent 34%),
+        linear-gradient(180deg, rgba(10, 34, 68, 0.98), rgba(8, 26, 49, 0.96)) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .system-brand-name span {
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .system-brand-subtitle,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-nav-heading {
+    color: #c7d7ee !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-nav-heading::after {
+    background: rgba(147, 197, 253, 0.2) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link {
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link:hover {
+    background: rgba(96, 165, 250, 0.14) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active {
+    background: linear-gradient(135deg, rgba(246, 190, 0, 0.22), rgba(96, 165, 250, 0.14)) !important;
+    border-color: rgba(246, 190, 0, 0.34) !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+/* Last-mile adviser/student parity. These selectors match the actual combined classes in AdviserLayoutShell. */
+.adviser-shell.student-shell {
+    --sidebar-width: 248px !important;
+    --student-shell-topbar-height: 72px !important;
+    padding-top: 96px !important;
+}
+
+.adviser-shell.student-shell .adviser-global-navbar.student-global-navbar {
+    left: 248px !important;
+    right: auto !important;
+    width: calc(100% - 248px) !important;
+    height: 72px !important;
+    min-height: 72px !important;
+}
+
+.adviser-shell.student-shell .adviser-global-navbar-main.student-global-navbar-main,
+.adviser-shell.student-shell .adviser-global-navbar-actions.student-global-navbar-actions {
+    height: 72px !important;
+    min-height: 72px !important;
+}
+
+.adviser-shell.student-shell .adviser-shell-toggle.student-shell-toggle {
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    border: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell.student-shell .adviser-navbar-title.student-navbar-title {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding-left: 1.15rem !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    width: 248px !important;
+    max-width: 248px !important;
+    height: 100vh !important;
+    padding: 0 !important;
+    border-right: 1px solid #dbe3ef !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    transform: translateX(0) !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-header {
+    display: grid !important;
+    align-items: center !important;
+    min-height: 78px !important;
+    height: auto !important;
+    padding: 0.55rem 0.75rem !important;
+    border-bottom: 1px solid #dbe3ef !important;
+    background: #ffffff !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-header-copy {
+    display: grid !important;
+    gap: 0.62rem !important;
+    width: 100% !important;
+    justify-items: start !important;
+    justify-content: start !important;
+    align-items: center !important;
+    place-items: center start !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 0.38rem !important;
+    row-gap: 0 !important;
+    align-items: center !important;
+    justify-content: start !important;
+    justify-items: start !important;
+    justify-self: start !important;
+    place-self: center start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 42px !important;
+    height: 40px !important;
+    object-fit: contain !important;
+    transform: none !important;
+    margin: 0 !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-name {
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-items: baseline !important;
+    gap: 0 !important;
+    color: var(--color-primary, #003a8f) !important;
+    font-size: 1.22rem !important;
+    font-weight: 900 !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.045em !important;
+    margin: 0 !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-name span {
+    color: var(--color-primary, #003a8f) !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-name strong {
+    color: #f6be00 !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    letter-spacing: inherit !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-subtitle {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    overflow: visible !important;
+    max-width: none !important;
+    color: #475569 !important;
+    font-size: 0.58rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 1.15 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-context-kicker,
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .user-badge {
+    display: none !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-nav {
+    display: grid !important;
+    align-content: start !important;
+    gap: 1.15rem !important;
+    padding: 1rem 1rem 1.25rem !important;
+    background: #ffffff !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    margin: 0 0 0.55rem !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: #dbe3ef !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 0.8rem !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link:hover {
+    background: #eef4ff !important;
+    color: #0f172a !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active {
+    background: transparent !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+}
+
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link-icon,
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link-icon i,
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link-label,
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #0f172a !important;
+}
+
+.adviser-shell.student-shell .adviser-global-main.student-global-main {
+    margin-left: 248px !important;
+    width: calc(100% - 248px) !important;
+    max-width: calc(100% - 248px) !important;
+    padding: 0 1rem 2.5rem !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar {
+    width: 72px !important;
+    max-width: 72px !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-navbar.student-global-navbar {
+    left: 72px !important;
+    width: calc(100% - 72px) !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-main.student-global-main {
+    margin-left: 72px !important;
+    width: calc(100% - 72px) !important;
+    max-width: calc(100% - 72px) !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-header {
+    display: flex !important;
+    min-height: 72px !important;
+    height: 72px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-mark {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-logo {
+    width: 38px !important;
+    height: 38px !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-name,
+.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-subtitle,
+.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-link-label,
+.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-nav-heading {
+    display: none !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-nav {
+    padding: 0.65rem 0.75rem 1rem !important;
+    gap: 1rem !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    margin: 0 auto !important;
+    border-radius: 6px !important;
+}
+
+@media (max-width: 1100px) {
+    .adviser-shell.student-shell .adviser-global-navbar.student-global-navbar {
+        left: 0 !important;
+        width: 100% !important;
+    }
+
+    .adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar,
+    .adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar {
+        top: 72px !important;
+        width: 248px !important;
+        max-width: 248px !important;
+        height: calc(100vh - 72px) !important;
+        transform: translateX(-104%) !important;
+    }
+
+    .adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar.is-open {
+        transform: translateX(0) !important;
+    }
+
+    .adviser-shell.student-shell .adviser-global-main.student-global-main,
+    .adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-main.student-global-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Adviser collapsed rail should match the student collapsed sidebar reference. */
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar > .sidebar-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 72px !important;
+    height: 72px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .sidebar-header-copy {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 72px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-mark {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-logo {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    max-height: 38px !important;
+    object-fit: contain !important;
+    object-position: left center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-name,
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-name span,
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-name strong,
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-subtitle,
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .sidebar-context-kicker,
+.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .user-badge {
+    display: none !important;
+}

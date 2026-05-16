@@ -1,5 +1,6 @@
 import '@/styles/admin-dashboard.css';
 import '@/styles/program-head-portal.css';
+import '@/styles/student-workspace.css';
 import { ProgramHeadLayout } from '@/components/layouts/program-head-layout';
 
 export default function Layout({

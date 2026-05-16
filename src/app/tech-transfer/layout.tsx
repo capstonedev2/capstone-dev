@@ -1,4 +1,5 @@
 import '@/styles/role-portal-shared.css';
+import '@/styles/student-workspace.css';
 import { TechTransferLayout } from '@/components/layouts/tech-transfer-layout';
 
 export default function Layout({

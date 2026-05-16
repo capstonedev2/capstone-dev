@@ -8,7 +8,7 @@ export const authUi = {
   page:
     'relative min-h-dvh overflow-y-auto bg-slate-50 px-4 py-4 font-sans text-gray-900 sm:px-6 sm:py-5 lg:px-8',
   pageWash:
-    'pointer-events-none absolute inset-0 overflow-hidden before:absolute before:-top-[20%] before:-left-[10%] before:h-[80%] before:w-[70%] before:rounded-[100%] before:bg-[#003A8F]/[0.08] before:blur-[120px] before:animate-[pulse_8s_ease-in-out_infinite] after:absolute after:-bottom-[20%] after:-right-[10%] after:h-[80%] after:w-[70%] after:rounded-[100%] after:bg-[#F6BE00]/[0.07] after:blur-[120px] after:animate-[pulse_10s_ease-in-out_infinite_alternate]',
+    'pointer-events-none absolute inset-0 overflow-hidden bg-slate-950/24 backdrop-blur-[5px] before:absolute before:-top-[20%] before:-left-[10%] before:h-[80%] before:w-[70%] before:rounded-[100%] before:bg-[#003A8F]/[0.08] before:blur-[104px] before:animate-[pulse_8s_ease-in-out_infinite] after:absolute after:-bottom-[20%] after:-right-[10%] after:h-[80%] after:w-[70%] after:rounded-[100%] after:bg-[#F6BE00]/[0.06] after:blur-[104px] after:animate-[pulse_10s_ease-in-out_infinite_alternate]',
   pagePattern:
     'pointer-events-none absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle,rgba(15,23,42,0.25)_1px,transparent_1px)] [background-size:18px_18px] mix-blend-overlay',
   topStripe: 'pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-[#003A8F]',
@@ -139,35 +139,37 @@ export const authUi = {
   fieldsetTitle:
     'mb-4 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.13em] text-slate-500',
   form: 'space-y-3 sm:space-y-3.5',
-  formRow: 'grid gap-4 sm:grid-cols-2',
+  formRow: 'grid gap-3.5 sm:grid-cols-2 sm:gap-5',
   formGroup: 'min-w-0',
-  label: 'mb-2 block text-sm font-bold text-slate-800',
+  label: 'mb-2 block text-sm font-extrabold text-slate-700',
   input:
-    'h-10 w-full rounded-xl border bg-white/80 backdrop-blur-md px-4 text-sm font-medium text-slate-900 shadow-[0_2px_10px_rgba(0,0,0,0.02)] outline-none transition-all duration-300 ease-out placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 hover:border-[#003A8F]/30 hover:shadow-[0_8px_20px_rgba(0,58,143,0.05)] focus:-translate-y-0.5 focus:border-[#003A8F] focus:bg-white focus:shadow-[0_12px_24px_rgba(0,58,143,0.12)] focus:ring-4 focus:ring-[#003A8F]/10 sm:h-12 sm:rounded-2xl sm:px-5 sm:text-[0.95rem]',
-  inputDefault: 'border-slate-200 hover:border-slate-300 hover:shadow-[0_8px_18px_rgba(15,23,42,0.04)] focus:-translate-y-px focus:border-[#003A8F] focus:bg-white focus:shadow-[0_12px_24px_rgba(0,58,143,0.08)] focus:ring-4 focus:ring-[#003A8F]/10',
-  inputError: 'border-red-300 bg-red-50/30 focus:-translate-y-px focus:border-red-500 focus:ring-4 focus:ring-red-500/10',
+    'h-11 w-full rounded-xl px-4 text-sm font-semibold text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),inset_0_-1px_0_rgba(255,255,255,0.28),0_10px_24px_rgba(15,23,42,0.06)] outline-none backdrop-blur-[14px] transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out placeholder:text-slate-500 placeholder:font-medium placeholder:opacity-90 disabled:cursor-not-allowed disabled:bg-white/55 disabled:text-slate-500 disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.58)] sm:h-11 sm:px-5 sm:text-[0.95rem]',
+  inputDefault: 
+    'border border-[rgba(255,255,255,0.64)] bg-[rgba(255,255,255,0.64)] hover:border-white hover:bg-[rgba(255,255,255,0.74)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.88),inset_0_-1px_0_rgba(255,255,255,0.30),0_14px_30px_rgba(15,23,42,0.08)] focus:border-[#003A8F] focus:bg-[rgba(255,255,255,0.84)] focus:shadow-[inset_0_1px_0_rgba(255,255,255,0.94),inset_0_-1px_0_rgba(255,255,255,0.36),0_0_0_4px_rgba(0,58,143,0.16),0_16px_34px_rgba(0,58,143,0.14)] focus:outline-none focus-visible:outline-none',
+  inputError: 
+    'border border-red-300 bg-[rgba(254,242,242,0.86)] focus:border-red-500 focus:bg-white focus:shadow-[inset_0_1px_0_rgba(255,255,255,0.94),0_0_0_4px_rgba(239,68,68,0.15),0_16px_34px_rgba(127,29,29,0.12)] focus:outline-none focus-visible:outline-none',
   select:
-    'h-12 w-full appearance-none rounded-[8px] border bg-white px-4 pr-11 text-[0.95rem] font-medium text-slate-900 shadow-[0_1px_0_rgba(15,23,42,0.03)] outline-none transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
+    'h-11 w-full appearance-none rounded-xl border border-[rgba(255,255,255,0.64)] bg-[rgba(255,255,255,0.64)] px-4 pr-11 text-sm font-semibold text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),inset_0_-1px_0_rgba(255,255,255,0.24),0_10px_24px_rgba(15,23,42,0.06)] outline-none backdrop-blur-[14px] transition-[background-color,border-color,box-shadow,transform] duration-300 ease-out hover:border-white hover:bg-[rgba(255,255,255,0.74)] focus:border-[#003A8F] focus:bg-[rgba(255,255,255,0.84)] focus:shadow-[inset_0_1px_0_rgba(255,255,255,0.94),inset_0_-1px_0_rgba(255,255,255,0.36),0_0_0_4px_rgba(0,58,143,0.16),0_16px_34px_rgba(0,58,143,0.14)] focus:outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-white/55 disabled:text-slate-500 sm:h-11 sm:px-5 sm:text-[0.95rem]',
   selectWrap: 'relative',
-  selectIcon: 'pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400',
+  selectIcon: 'pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#003A8F]/75 transition-colors duration-300',
   passwordField: 'relative',
   passwordInput: 'pr-12',
   passwordToggle:
-    'absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] border border-slate-200 bg-white text-sm text-[#003A8F] transition-all duration-200 ease-out hover:-translate-y-[55%] hover:border-[#003A8F]/25 hover:bg-slate-50 hover:text-[#002C6B] hover:shadow-soft focus-visible:outline focus-visible:outline-4 focus-visible:outline-[#003A8F]/20 disabled:cursor-not-allowed disabled:opacity-60',
-  helperText: 'mt-2 block text-xs leading-5 text-slate-500',
+    'absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[10px] border border-white/60 bg-white/55 text-sm text-[#003A8F] shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_6px_14px_rgba(15,23,42,0.05)] backdrop-blur-[10px] transition-all duration-300 ease-out hover:border-white hover:bg-white/85 hover:text-[#002C6B] hover:shadow-[0_8px_18px_rgba(0,58,143,0.10)] focus:outline-none focus:ring-2 focus:ring-[#003A8F]/20 disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:w-9',
+  helperText: 'mt-2 block text-xs font-semibold leading-5 text-slate-700',
   fieldError: 'mt-2 block text-xs font-semibold leading-5 text-red-700',
   formOptions: 'flex flex-nowrap items-center justify-between gap-2 rounded-[8px] bg-slate-50 px-3 py-2 text-xs transition-colors duration-200 focus-within:bg-[#003A8F]/5 sm:gap-3 sm:text-sm',
-  checkbox: 'inline-flex items-center gap-2 font-semibold text-slate-700',
+  checkbox: 'inline-flex items-center gap-2 font-bold text-slate-800',
   checkboxInput:
     'h-4 w-4 rounded border-slate-300 accent-[#003A8F] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[#003A8F]/20 disabled:cursor-not-allowed',
   forgotLink:
-    'border-0 bg-transparent p-0 text-sm font-bold text-[#003A8F] transition hover:text-[#002C6B] hover:underline disabled:cursor-not-allowed disabled:opacity-60',
+    'border-0 bg-transparent p-0 text-sm font-extrabold text-[#003A8F] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)] transition hover:text-[#002C6B] hover:underline disabled:cursor-not-allowed disabled:opacity-60',
   message:
     'rounded-[8px] border px-4 py-3 text-sm font-medium leading-6 shadow-[0_8px_18px_rgba(15,23,42,0.04)]',
   successMessage: 'border-emerald-200 bg-emerald-50 text-emerald-800',
   errorMessage: 'border-red-200 bg-red-50 text-red-800',
   submitButton:
-    'group relative overflow-hidden inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#003A8F] bg-[#003A8F] px-5 text-sm font-extrabold text-white shadow-[0_8px_20px_rgba(0,58,143,0.2)] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,58,143,0.3)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[#003A8F]/20 disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0 before:absolute before:inset-0 before:w-[200%] before:-translate-x-[150%] hover:before:translate-x-[150%] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:transition-transform before:duration-1000 sm:h-12 sm:rounded-2xl',
+    'group relative overflow-hidden inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#003A8F] bg-[#003A8F] px-5 text-sm font-extrabold text-white shadow-[0_10px_24px_rgba(0,58,143,0.24)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-[#002F75] hover:shadow-[0_16px_34px_rgba(0,58,143,0.32)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[#003A8F]/20 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0 before:absolute before:inset-0 before:w-[200%] before:-translate-x-[150%] hover:before:translate-x-[150%] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:transition-transform before:duration-1000 sm:h-12',
   secondaryButton:
     'inline-flex h-12 items-center justify-center gap-2 rounded-[8px] border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-800 shadow-soft transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-[#003A8F]/25 hover:bg-slate-50 hover:text-[#003A8F] hover:shadow-card active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70',
   spinner:

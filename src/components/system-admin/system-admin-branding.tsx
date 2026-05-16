@@ -9,6 +9,7 @@ import {
   type CSSProperties,
   type ChangeEvent
 } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   clearBrandingPreview,
   publishBrandingPreview,
@@ -59,6 +60,7 @@ type BannerState = {
 
 type BrandingAssetKey = keyof BrandingAssets;
 type BrandingPreviewMode = 'dashboard' | 'login' | 'landing' | 'portal';
+type BrandingSectionKey = 'overview' | 'logos' | 'colors' | 'auth' | 'landing' | 'backup';
 
 const COLOR_FIELDS: Array<{
   key: BrandingColorKey;
@@ -110,6 +112,13 @@ const ASSET_FIELDS: Array<{
     maxBytes: 1_500_000
   },
   {
+    key: 'institutionLogo',
+    label: 'School Logo',
+    description: 'Shown beside the ThesisTrack logo on login and registration forms.',
+    accept: 'image/png,image/jpeg,image/webp,image/svg+xml',
+    maxBytes: 1_500_000
+  },
+  {
     key: 'favicon',
     label: 'Favicon',
     description: 'Browser tab icon, preferably square.',
@@ -137,6 +146,56 @@ const PREVIEW_MODES: Array<{
   { key: 'landing', label: 'Landing', icon: 'fa-globe' },
   { key: 'portal', label: 'Role Portal', icon: 'fa-users-gear' }
 ];
+
+const BRANDING_SECTION_PREVIEW: Record<BrandingSectionKey, BrandingPreviewMode> = {
+  overview: 'portal',
+  logos: 'login',
+  colors: 'portal',
+  auth: 'login',
+  landing: 'landing',
+  backup: 'dashboard'
+};
+
+const BRANDING_SECTION_PREVIEW_COPY: Record<BrandingSectionKey, { title: string; body: string }> = {
+  overview: {
+    title: 'Brand Overview Preview',
+    body: 'Live enterprise portal preview for ThesisTrack identity, shell copy, and academic navigation context.'
+  },
+  logos: {
+    title: 'Login Header Logo Preview',
+    body: 'Preview the login header treatment for main, school, light, dark, favicon, and background assets.'
+  },
+  colors: {
+    title: 'Color Theme Preview',
+    body: 'Preview buttons, sidebar, cards, status badges, forms, and shared UI colors.'
+  },
+  auth: {
+    title: 'Authentication Preview',
+    body: 'Preview login and registration page copy, labels, logos, and background image.'
+  },
+  landing: {
+    title: 'Landing Page Preview',
+    body: 'Preview the public hero, navigation, call-to-action buttons, feature row, and sections.'
+  },
+  backup: {
+    title: 'Branding Backup Preview',
+    body: 'Preview the currently staged branding while exporting, importing, saving, or restoring.'
+  }
+};
+
+function getBrandingSection(value: string | null): BrandingSectionKey {
+  if (
+    value === 'logos' ||
+    value === 'colors' ||
+    value === 'auth' ||
+    value === 'landing' ||
+    value === 'backup'
+  ) {
+    return value;
+  }
+
+  return 'overview';
+}
 
 const DEFAULT_DEPARTMENT_IDS = new Set(DEFAULT_BRANDING.departments.map((department) => department.id.toUpperCase()));
 
@@ -761,6 +820,7 @@ function LiveSystemPreview({ branding, mode }: { branding: BrandingSettings; mod
 }
 
 export function SystemAdminBranding() {
+  const searchParams = useSearchParams();
   const { branding: activeBranding, setBranding } = useBranding();
   const [savedBranding, setSavedBranding] = useState<BrandingSettings>(() => sanitizeBrandingSettings(activeBranding));
   const [draft, setDraft] = useState<BrandingSettings>(() => sanitizeBrandingSettings(activeBranding));
@@ -768,10 +828,13 @@ export function SystemAdminBranding() {
   const [banner, setBanner] = useState<BannerState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [previewMode, setPreviewMode] = useState<BrandingPreviewMode>('dashboard');
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const savedBrandingRef = useRef(savedBranding);
+  const activeSection = getBrandingSection(searchParams.get('section'));
+  const previewMode = BRANDING_SECTION_PREVIEW[activeSection];
+  const previewCopy = BRANDING_SECTION_PREVIEW_COPY[activeSection];
+  const isSectionActive = (section: BrandingSectionKey) => activeSection === section;
 
   useEffect(() => {
     savedBrandingRef.current = savedBranding;
@@ -831,7 +894,10 @@ export function SystemAdminBranding() {
     setDraft((current) => sanitizeBrandingSettings(updater(cloneBranding(current))));
   };
 
-  const updateIdentityField = (field: 'systemName' | 'systemShortName' | 'tagline', value: string) => {
+  const updateIdentityField = (
+    field: 'systemName' | 'systemShortName' | 'tagline' | 'institutionName' | 'institutionTagline',
+    value: string
+  ) => {
     updateDraft((current) => ({
       ...current,
       [field]: value
@@ -1467,7 +1533,7 @@ export function SystemAdminBranding() {
 
         <div className={`branding-layout ${isPreviewExpanded ? 'is-preview-expanded' : ''}`}>
           <div className="branding-controls-column">
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('overview') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>System Name Settings</h3>
@@ -1501,11 +1567,27 @@ export function SystemAdminBranding() {
                       onChange={(event) => updateIdentityField('tagline', event.target.value)}
                     />
                   </div>
+                  <div className="form-field">
+                    <label htmlFor="branding-institution-name">School Name</label>
+                    <input
+                      id="branding-institution-name"
+                      value={draft.institutionName}
+                      onChange={(event) => updateIdentityField('institutionName', event.target.value)}
+                    />
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="branding-institution-tagline">School Tagline</label>
+                    <input
+                      id="branding-institution-tagline"
+                      value={draft.institutionTagline}
+                      onChange={(event) => updateIdentityField('institutionTagline', event.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             </section>
 
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('landing') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Landing Page Content</h3>
@@ -1708,7 +1790,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('auth') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Login and Register Pages</h3>
@@ -1806,7 +1888,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('overview') || isSectionActive('landing') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Navbar and Sidebar</h3>
@@ -1890,7 +1972,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('overview') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Departments</h3>
@@ -1986,11 +2068,11 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('logos') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Logo Upload</h3>
-                  <p>Main, light, dark, favicon, and login background assets.</p>
+                  <p>Main, light, dark, school logo, favicon, and login background assets.</p>
                 </div>
               </div>
               <div className="admin-section-body">
@@ -2019,7 +2101,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('colors') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Preset Themes</h3>
@@ -2059,7 +2141,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className="admin-section-card">
+            <section className={`admin-section-card ${isSectionActive('colors') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Color Settings</h3>
@@ -2110,7 +2192,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className="branding-command-bar">
+            <section className={`branding-command-bar ${isSectionActive('backup') ? '' : 'branding-section-hidden'}`}>
               <div>
                 <strong>Branding Actions</strong>
                 <span>{pendingFileCount ? `${pendingFileCount} asset upload pending` : 'Ready to save when changes are reviewed'}</span>
@@ -2149,25 +2231,10 @@ export function SystemAdminBranding() {
             <section className="admin-section-card branding-preview-card">
               <div className="admin-section-head">
                 <div>
-                  <h3>Live System Preview</h3>
-                  <p>Switch screens to preview where the selected branding will appear.</p>
+                  <h3>{previewCopy.title}</h3>
+                  <p>{previewCopy.body}</p>
                 </div>
                 <div className="branding-preview-head-actions">
-                  <div className="branding-preview-mode-tabs" role="tablist" aria-label="Preview screen">
-                    {PREVIEW_MODES.map((mode) => (
-                      <button
-                        key={mode.key}
-                        aria-selected={previewMode === mode.key}
-                        className={previewMode === mode.key ? 'is-active' : ''}
-                        role="tab"
-                        type="button"
-                        onClick={() => setPreviewMode(mode.key)}
-                      >
-                        <i className={`fas ${mode.icon}`}></i>
-                        {mode.label}
-                      </button>
-                    ))}
-                  </div>
                   <button
                     className="btn btn-outline small branding-preview-expand-btn"
                     type="button"

@@ -1,3 +1,4 @@
+import '@/styles/student-workspace.css';
 import '@/styles/adviser-dashboard.css';
 import { AdviserLayout } from '@/components/layouts/adviser-layout';
 import { AdviserLayoutShell } from '@/components/adviser/shared/components/adviser-layout-shell';

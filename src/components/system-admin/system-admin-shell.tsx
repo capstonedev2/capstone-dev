@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
@@ -22,6 +22,21 @@ const SYSTEM_ADMIN_NAV_ITEMS = [
 
 export type SystemAdminNavKey = (typeof SYSTEM_ADMIN_NAV_ITEMS)[number]['key'];
 
+const BRANDING_SUBMENU_ITEMS = [
+  { key: 'overview', href: '/system-admin/branding?section=overview', label: 'Brand Overview', icon: 'fa-building-columns' },
+  { key: 'logos', href: '/system-admin/branding?section=logos', label: 'Logo Management', icon: 'fa-image' },
+  { key: 'colors', href: '/system-admin/branding?section=colors', label: 'Color Theme', icon: 'fa-droplet' },
+  { key: 'auth', href: '/system-admin/branding?section=auth', label: 'Login & Register', icon: 'fa-right-to-bracket' },
+  { key: 'landing', href: '/system-admin/branding?section=landing', label: 'Landing Page', icon: 'fa-globe' },
+  { key: 'backup', href: '/system-admin/branding?section=backup', label: 'Backup & Restore Branding', icon: 'fa-file-export' }
+] as const;
+
+function getActiveBrandingSection(value: string | null): (typeof BRANDING_SUBMENU_ITEMS)[number]['key'] {
+  const matchedItem = BRANDING_SUBMENU_ITEMS.find((item) => item.key === value);
+
+  return matchedItem?.key ?? 'overview';
+}
+
 type SystemAdminShellProps = {
   activeNav: SystemAdminNavKey;
   title: string;
@@ -38,11 +53,16 @@ export function SystemAdminShell({
   notificationCount = 2
 }: SystemAdminShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { branding } = useBranding();
   const shellBranding = branding.shell;
   const [displayName, setDisplayName] = useState('System Administrator');
   const [displayEmail, setDisplayEmail] = useState('system.admin@university.edu.ph');
   const currentNavItem = SYSTEM_ADMIN_NAV_ITEMS.find((item) => item.key === activeNav);
+  const activeBrandingSection = getActiveBrandingSection(searchParams.get('section'));
+  const isBrandingPath = pathname.startsWith('/system-admin/branding');
+  const [brandingMenuOpen, setBrandingMenuOpen] = useState(activeNav === 'branding' || isBrandingPath);
   const {
     closeSidebar,
     sidebarCollapsed,
@@ -79,6 +99,12 @@ export function SystemAdminShell({
     };
   }, [closeSidebar]);
 
+  useEffect(() => {
+    if (activeNav === 'branding' || isBrandingPath) {
+      setBrandingMenuOpen(true);
+    }
+  }, [activeNav, isBrandingPath]);
+
   const handleLogout = () => {
     logout();
     router.push('/login');
@@ -110,17 +136,59 @@ export function SystemAdminShell({
             </div>
           </div>
           <nav className="sidebar-nav">
-            {SYSTEM_ADMIN_NAV_ITEMS.map((item) => (
-              <Link
-                key={item.key}
-                className={item.key === activeNav ? 'active' : ''}
-                href={item.href}
-                title={sidebarCollapsed ? item.label : undefined}
-              >
-                <i className={`fas ${item.icon}`}></i>
-                <span>{item.label}</span>
-              </Link>
-            ))}
+            {SYSTEM_ADMIN_NAV_ITEMS.map((item) => {
+              if (item.key === 'branding') {
+                return (
+                  <div
+                    key={item.key}
+                    className={`sidebar-nav-dropdown${brandingMenuOpen ? ' is-open' : ''}${activeNav === 'branding' ? ' is-active' : ''}`}
+                  >
+                    <button
+                      aria-controls="system-admin-branding-submenu"
+                      aria-expanded={brandingMenuOpen}
+                      className={activeNav === 'branding' ? 'active' : ''}
+                      title={sidebarCollapsed ? item.label : undefined}
+                      type="button"
+                      onClick={() => setBrandingMenuOpen((current) => !current)}
+                    >
+                      <i className={`fas ${item.icon}`}></i>
+                      <span>{item.label}</span>
+                      <i className="fas fa-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
+                    </button>
+                    <div
+                      id="system-admin-branding-submenu"
+                      className="sidebar-submenu"
+                      aria-label="Theme and Branding sections"
+                    >
+                      {BRANDING_SUBMENU_ITEMS.map((subItem) => (
+                        <Link
+                          key={subItem.key}
+                          className={activeBrandingSection === subItem.key ? 'active' : ''}
+                          href={subItem.href}
+                          title={sidebarCollapsed ? subItem.label : undefined}
+                          onClick={closeSidebar}
+                        >
+                          <i className={`fas ${subItem.icon}`}></i>
+                          <span>{subItem.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.key}
+                  className={item.key === activeNav ? 'active' : ''}
+                  href={item.href}
+                  title={sidebarCollapsed ? item.label : undefined}
+                >
+                  <i className={`fas ${item.icon}`}></i>
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </nav>
         </aside>
 

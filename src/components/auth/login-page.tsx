@@ -59,8 +59,14 @@ export function LoginPage() {
   const [resetCodeSent, setResetCodeSent] = useState(false);
   const isSubmitting = activeAction !== null;
   const loginBranding = branding.auth.login;
+  const institutionInitials = branding.institutionName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('');
   const loginBackgroundStyle = branding.assets.loginBackground ? {
-    backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.54), rgba(0, 58, 143, 0.32)), url("${branding.assets.loginBackground.replace(/"/g, '\\"')}")`,
+    backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.34), rgba(0, 58, 143, 0.18)), url("${branding.assets.loginBackground.replace(/"/g, '\\"')}")`,
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'cover'
@@ -330,63 +336,98 @@ export function LoginPage() {
       </Link>
 
       <section className={authUi.shell} aria-labelledby="login-title">
-        <div className={authUi.authFrame}>
+        <div className="w-full max-w-[520px] overflow-hidden bg-transparent">
 
+          <div className="flex min-w-0 flex-col justify-center px-4 py-5 sm:py-7">
+            <div className="mb-6 border-b border-white/20 pb-6">
+              <div className="flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
+                <div className="flex min-w-[180px] items-center gap-2 drop-shadow-md">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm">
+                    <LogoIcon style={{ width: 'auto' }} className="h-7" />
+                  </div>
+                  <div>
+                    <h1 className="m-0 text-lg font-extrabold leading-none text-white drop-shadow">
+                      {branding.systemName.trim().toLowerCase() === 'thesis track' ? (
+                        <>
+                          <span className="text-[#003A8F] drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]">Thesis</span>
+                          <span className="text-[#F6BE00]">Track</span>
+                        </>
+                      ) : (
+                        branding.systemName
+                      )}
+                    </h1>
+                    <p className="mt-0.5 whitespace-nowrap text-[0.6rem] font-medium leading-3 text-slate-200 drop-shadow">
+                      {branding.tagline}
+                    </p>
+                  </div>
+                </div>
 
-          <div className={authUi.formColumn}>
-            <div className={authUi.mobileBrand} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <LogoIcon style={{ width: 'auto', marginBottom: '0.25rem' }} className="h-12 sm:h-[68px]" />
-              <h1 className={authUi.brandTitle}>
-                {branding.systemName.trim().toLowerCase() === 'thesis track' ? (
-                  <>
-                    Thesis<span className={authUi.brandAccent}>Track</span>
-                  </>
-                ) : (
-                  branding.systemName
-                )}
-              </h1>
-              <p className={authUi.brandSubtitle}>
-                {branding.tagline}
-              </p>
+                <div className="hidden h-11 w-px bg-white/20 sm:block" aria-hidden="true" />
+
+                <div className="flex items-center gap-2.5 drop-shadow-md">
+                  {branding.assets.institutionLogo ? (
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1 shadow-sm">
+                      <img
+                        alt={`${branding.institutionName} logo`}
+                        className="h-full w-full rounded-full object-contain"
+                        src={branding.assets.institutionLogo}
+                      />
+                    </span>
+                  ) : (
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-white shadow-sm backdrop-blur">
+                      <i className="fas fa-building-columns text-sm" aria-hidden="true" />
+                    </span>
+                  )}
+                  <div>
+                    <strong className="block whitespace-nowrap text-xs font-extrabold leading-tight text-white drop-shadow">
+                      {branding.institutionName}
+                    </strong>
+                    <span className="mt-0.5 block max-w-[240px] text-[0.62rem] font-medium leading-4 text-slate-200 drop-shadow">
+                      {branding.institutionTagline}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className={authUi.container}>
-              <div className={authUi.card}>
-                <div className={authUi.cardStripe} aria-hidden="true" />
-                <div className={authUi.header}>
-                  <span className={authUi.headerPill}>
+            <div className="w-full flex justify-center">
+              <div className="w-full max-w-[500px] rounded-[24px] border border-white/50 bg-white/[0.30] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-8">
+                <div className="mb-8 flex flex-col items-center text-center">
+                  <span className="mb-3 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
                     <i className="fas fa-right-to-bracket" aria-hidden="true" />
                     {loginBranding.pill}
                   </span>
-                  <h2 className={authUi.headerTitle} id="login-title">
+                  <h2 className="m-0 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-slate-800" id="login-title">
                     {loginBranding.title}
                   </h2>
-                  <p className={authUi.headerTextLeft}>{loginBranding.subtitle}</p>
                 </div>
 
-                <form className={authUi.form} aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
+                <form className="space-y-4" aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
               <div className={authUi.formGroup}>
                 <label className={authUi.label} htmlFor="identifier">
                   {loginBranding.identifierLabel}
                 </label>
-                <input
-                  id="identifier"
-                  className={getInputClass(Boolean(fieldErrors.identifier))}
-                  type="text"
-                  placeholder={loginBranding.identifierPlaceholder}
-                  autoComplete="username"
-                  value={identifier}
-                  onChange={(event) => {
-                    setIdentifier(event.target.value);
-                    setError('');
-                    setStatusMessage('');
-                    clearLoginFieldError('identifier');
-                  }}
-                  aria-describedby={fieldErrors.identifier ? 'login-identifier-error' : undefined}
-                  aria-invalid={fieldErrors.identifier ? 'true' : 'false'}
-                  disabled={isSubmitting}
-                  required
-                />
+                <div className="relative">
+                  <i className="fas fa-user pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
+                  <input
+                    id="identifier"
+                    className={cx(getInputClass(Boolean(fieldErrors.identifier)), '!pl-11 text-sm')}
+                    type="text"
+                    placeholder={loginBranding.identifierPlaceholder}
+                    autoComplete="username"
+                    value={identifier}
+                    onChange={(event) => {
+                      setIdentifier(event.target.value);
+                      setError('');
+                      setStatusMessage('');
+                      clearLoginFieldError('identifier');
+                    }}
+                    aria-describedby={fieldErrors.identifier ? 'login-identifier-error' : undefined}
+                    aria-invalid={fieldErrors.identifier ? 'true' : 'false'}
+                    disabled={isSubmitting}
+                    required
+                  />
+                </div>
                 {fieldErrors.identifier ? (
                   <span className={authUi.fieldError} id="login-identifier-error">
                     {fieldErrors.identifier}
@@ -399,9 +440,10 @@ export function LoginPage() {
                   {loginBranding.passwordLabel}
                 </label>
                 <div className={authUi.passwordField}>
+                  <i className="fas fa-lock pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
                   <input
                     id="password"
-                    className={getPasswordInputClass(Boolean(fieldErrors.password))}
+                    className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), '!pl-11 text-sm')}
                     type={showPassword ? 'text' : 'password'}
                     placeholder={loginBranding.passwordPlaceholder}
                     autoComplete="current-password"
@@ -419,7 +461,7 @@ export function LoginPage() {
                   />
                   <button
                     type="button"
-                    className={authUi.passwordToggle}
+                    className={cx(authUi.passwordToggle, 'right-2')}
                     onClick={() => setShowPassword((current) => !current)}
                     aria-controls="password"
                     aria-pressed={showPassword}
@@ -440,8 +482,8 @@ export function LoginPage() {
                 ) : null}
               </div>
 
-              <div className={authUi.formOptions}>
-                <label className={authUi.checkbox}>
+              <div className="flex flex-nowrap items-center justify-between gap-2 text-xs">
+                <label className="inline-flex items-center gap-2 font-bold text-slate-800">
                   <input
                     className={authUi.checkboxInput}
                     type="checkbox"
@@ -485,15 +527,15 @@ export function LoginPage() {
                 )}
               </button>
 
-              <div className="relative flex items-center py-2">
-                <div className="grow border-t border-slate-200"></div>
-                <span className="mx-4 shrink-0 text-xs font-semibold text-slate-400 uppercase tracking-wider">Or continue with</span>
-                <div className="grow border-t border-slate-200"></div>
+              <div className="relative flex items-center py-1.5">
+                <div className="grow border-t border-white/70"></div>
+                <span className="mx-4 shrink-0 text-xs font-extrabold uppercase tracking-wider text-slate-700">Or continue with</span>
+                <div className="grow border-t border-white/70"></div>
               </div>
 
               <button
                 type="button"
-                className="group relative inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-slate-200 disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0 sm:h-12 sm:rounded-2xl"
+                className="group relative inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-white/70 bg-white/80 px-5 text-sm font-bold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[14px] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white hover:bg-white hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-slate-200 disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0 sm:h-12"
                 disabled={isSubmitting}
                 onClick={() => {
                   window.location.href = '/api/auth/google';
@@ -509,8 +551,8 @@ export function LoginPage() {
               </button>
                 </form>
 
-                <div className={authUi.footer}>
-                  <p className={authUi.footerText}>
+                <div className="mt-3 text-center">
+                  <p className="text-sm font-semibold leading-6 text-slate-700">
                     {loginBranding.alternatePrompt}{' '}
                     <Link
                       href="/register"
@@ -520,6 +562,10 @@ export function LoginPage() {
                       <i className="fas fa-arrow-right" aria-hidden="true" />
                     </Link>
                   </p>
+                </div>
+                <div className="mt-4 border-t border-white/70 pt-4 text-center text-xs font-bold text-slate-700">
+                  <i className="fas fa-shield-halved mr-2 text-slate-700" aria-hidden="true" />
+                  Secure access for ThesisTrack users only.
                 </div>
               </div>
             </div>

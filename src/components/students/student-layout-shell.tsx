@@ -1738,7 +1738,8 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
               <img
                 alt="ThesisTrack logo"
                 className="system-brand-logo"
-                src="/System%20Logo/logo-transparent.png"
+                src={themeMode === 'dark' ? '/System%20Logo/image.png' : '/System%20Logo/logo-transparent.png'}
+                style={{ transform: themeMode === 'dark' ? 'scale(1.15)' : 'none' }}
               />
               <span className="system-brand-name">
                 <span>Thesis</span>

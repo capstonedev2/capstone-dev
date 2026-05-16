@@ -287,7 +287,7 @@ export function TitleDetailsDrawer({
       <div
         aria-label="Title details modal"
         aria-modal="true"
-        className="flex flex-col max-h-full w-full max-w-[700px] overflow-hidden rounded-[2rem] bg-white/95 backdrop-blur-3xl shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-white/60 transition-all scale-100"
+        className="adviser-title-details-modal flex flex-col max-h-full w-full max-w-[700px] overflow-hidden rounded-[2rem] bg-white/95 backdrop-blur-3xl shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-white/60 transition-all scale-100"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
@@ -566,7 +566,7 @@ export function TitleCard({
   const fileCount = record.uploadedFiles?.length ?? 0;
 
   return (
-    <article className="group relative rounded-[2rem] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/60 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_48px_rgb(0,58,143,0.12)] hover:ring-[var(--primary)]/30 z-10 hover:z-20">
+    <article className="adviser-title-card group relative rounded-[2rem] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/60 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_48px_rgb(0,58,143,0.12)] hover:ring-[var(--primary)]/30 z-10 hover:z-20">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 rounded-t-[2rem] bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400 opacity-80 transition-opacity group-hover:opacity-100" />
       
       <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr_1fr] xl:items-start pt-2">

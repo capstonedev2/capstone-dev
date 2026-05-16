@@ -8,7 +8,6 @@ import {
   PROGRAM_HEAD_NAV_ITEMS,
   type ProgramHeadNavKey
 } from '@/components/program-head/program-head-data';
-import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
@@ -74,63 +73,28 @@ export function ProgramHeadShell({
   };
 
   return (
-    <>
-      <div
-        className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-      <div className={`dashboard-wrapper${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
-        <aside className="sidebar" style={{ transform: sidebarOpen ? 'translateX(0)' : '' }}>
-          <div className="sidebar-header">
-            <div className="admin-sidebar-context">
-              <span aria-hidden="true" className="admin-sidebar-emblem">
-                <i className="fas fa-user-tie"></i>
-              </span>
-              <div className="admin-sidebar-copy">
-                <span className="admin-sidebar-kicker">Academic Unit</span>
-                <h2>Department Chair</h2>
-                <p>Program oversight, evaluations, and transfer readiness</p>
-              </div>
-            </div>
-            <div className="user-badge">
-              <i className="fas fa-building-columns"></i>
-              <span>{departmentLabel}</span>
-            </div>
-          </div>
-          <nav className="sidebar-nav">
-            {PROGRAM_HEAD_NAV_ITEMS.map((item) => (
-              <Link
-                key={item.key}
-                className={item.key === activeNav ? 'active' : ''}
-                href={item.href}
-                title={sidebarCollapsed ? item.label : undefined}
-              >
-                <i className={`fas ${item.icon}`}></i>
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </aside>
+    <div
+      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
+    >
+      <header className="student-global-navbar">
+        <div className="student-global-navbar-main">
+          <button
+            aria-label={toggleLabel}
+            className="icon-btn student-shell-toggle"
+            type="button"
+            onClick={toggleSidebar}
+          >
+            <i aria-hidden="true" className={`fas ${toggleIconClass}`} />
+          </button>
 
-        <main className="main-content">
-          <header className="top-nav">
-            <div className="top-nav-main">
-              <button
-                aria-label={toggleLabel}
-                className="mobile-menu-btn"
-                type="button"
-                onClick={toggleSidebar}
-              >
-                <i className={`fas ${toggleIconClass}`}></i>
-              </button>
-              <PortalShellBrand
-                className="shell-top-brand"
-                href="/program-head/dashboard"
-                icon="fa-user-tie"
-                title="Thesis Track"
-              />
-            </div>
-            <div className="user-area">
+          <div className="student-navbar-title" aria-label="Current page">
+            <span className="student-navbar-title-kicker">ThesisTrack</span>
+            <strong>{title}</strong>
+          </div>
+        </div>
+
+        <div className="student-global-navbar-actions">
               <PortalShellActionMenus
                 notificationHref="/program-head/notifications"
                 notificationCount={notificationCount}
@@ -180,9 +144,64 @@ export function ProgramHeadShell({
                   { label: 'Sign Out', icon: 'fa-right-from-bracket', danger: true, onClick: handleLogout }
                 ]}
               />
+        </div>
+      </header>
+
+      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-header-copy">
+            <span className="sidebar-context-kicker">Program Head Portal</span>
+            <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
+              <img
+                alt="ThesisTrack logo"
+                className="system-brand-logo"
+                src="/System%20Logo/logo-transparent.png"
+              />
+              <span className="system-brand-name">
+                <span>Thesis</span>
+                <strong>Track</strong>
+              </span>
+              <span className="system-brand-subtitle">Higher Education Institutions</span>
             </div>
-          </header>
-          
+          </div>
+          <span className="user-badge">
+            <i aria-hidden="true" className="fas fa-building-columns" />
+            <span>{departmentLabel}</span>
+          </span>
+        </div>
+
+        <nav className="student-role-sidebar-nav" aria-label="Program head navigation">
+          <div className="sidebar-nav-group">
+            <span className="sidebar-nav-heading">Academic Unit</span>
+            <div className="sidebar-nav-links">
+              {PROGRAM_HEAD_NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.key}
+                  aria-current={item.key === activeNav ? 'page' : undefined}
+                  className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
+                  href={item.href}
+                  title={sidebarCollapsed ? item.label : undefined}
+                >
+                  <span className="sidebar-link-icon">
+                    <i aria-hidden="true" className={`fas ${item.icon}`} />
+                  </span>
+                  <span className="sidebar-link-label">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <button
+        aria-label="Close sidebar"
+        className={`student-global-backdrop sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
+        type="button"
+        onClick={closeSidebar}
+      />
+
+      <main className="student-global-main">
+        <div className="student-global-content">
           <header className="shell-page-header" aria-labelledby="ph-page-title">
             <div className="page-title">
               <div className="page-title-context">
@@ -198,8 +217,8 @@ export function ProgramHeadShell({
           </header>
           
           {children}
-        </main>
-      </div>
-    </>
+        </div>
+      </main>
+    </div>
   );
 }

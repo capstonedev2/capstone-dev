@@ -3082,6 +3082,10 @@
   align-items: start;
 }
 
+.branding-section-hidden {
+  display: none !important;
+}
+
 .branding-controls-column,
 .branding-preview-column {
   display: grid;

@@ -8,7 +8,6 @@ import {
   LIBRARY_NAV_ITEMS,
   type LibraryNavKey
 } from '@/components/library/library-data';
-import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
@@ -66,67 +65,28 @@ export function LibraryShell({
   }, [closeSidebar]);
 
   return (
-    <div className={`library-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
-      <button
-        aria-label="Close navigation"
-        className={`library-sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
-        type="button"
-        onClick={closeSidebar}
-      />
+    <div
+      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
+    >
+      <header className="student-global-navbar">
+        <div className="student-global-navbar-main">
+          <button
+            aria-label={toggleLabel}
+            className="icon-btn student-shell-toggle"
+            type="button"
+            onClick={toggleSidebar}
+          >
+            <i className={`fas ${toggleIconClass}`} aria-hidden="true" />
+          </button>
 
-      <aside className={`library-sidebar${sidebarOpen ? ' is-open' : ''}`}>
-        <div className="library-sidebar-header">
-          <div className="library-sidebar-context">
-            <span aria-hidden="true" className="library-sidebar-emblem">
-              <i className="fas fa-book-open" />
-            </span>
-            <div className="library-sidebar-copy">
-              <span className="library-sidebar-kicker">Repository</span>
-              <h2>Library Access</h2>
-              <p>Digital archive, saved collections, and document search</p>
-            </div>
-          </div>
-          <div className="library-user-badge">
-            <i className="fas fa-book-open" aria-hidden="true" />
-            <span>E-Library Access</span>
+          <div className="student-navbar-title" aria-label="Current page">
+            <span className="student-navbar-title-kicker">ThesisTrack</span>
+            <strong>{title}</strong>
           </div>
         </div>
 
-        <nav className="library-sidebar-nav">
-          {LIBRARY_NAV_ITEMS.map((item) => (
-            <Link
-              key={item.key}
-              className={item.key === activeNav ? 'is-active' : ''}
-              href={item.href}
-              title={sidebarCollapsed ? item.label : undefined}
-            >
-              <i className={`fas ${item.icon}`} aria-hidden="true" />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="library-main">
-        <header className="library-top-nav">
-          <div className="library-top-main">
-            <button
-              aria-label={toggleLabel}
-              className="library-icon-btn library-mobile-nav"
-              type="button"
-              onClick={toggleSidebar}
-            >
-              <i className={`fas ${toggleIconClass}`} aria-hidden="true" />
-            </button>
-            <PortalShellBrand
-              className="shell-top-brand"
-              href="/library/dashboard"
-              icon="fa-book-open"
-              title="Thesis Track"
-            />
-          </div>
-
-          <div className="library-top-actions">
+        <div className="student-global-navbar-actions">
             <PortalShellActionMenus
               notificationHref="/library/notifications"
               notificationCount={notificationCount}
@@ -185,16 +145,73 @@ export function LibraryShell({
                 }
               ]}
             />
+        </div>
+      </header>
+
+      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-header-copy">
+            <span className="sidebar-context-kicker">Repository</span>
+            <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
+              <img
+                alt="ThesisTrack logo"
+                className="system-brand-logo"
+                src="/System%20Logo/logo-transparent.png"
+              />
+              <span className="system-brand-name">
+                <span>Thesis</span>
+                <strong>Track</strong>
+              </span>
+              <span className="system-brand-subtitle">Higher Education Institutions</span>
+            </div>
           </div>
-        </header>
-        <div className="library-page-header">
-          <div className="library-page-title">
-            <h1>{title}</h1>
-            <p>{description}</p>
-          </div>
+          <span className="user-badge">
+            <i className="fas fa-book-open" aria-hidden="true" />
+            <span>E-Library Access</span>
+          </span>
         </div>
 
-        <div className="library-page-content">{children}</div>
+        <nav className="student-role-sidebar-nav" aria-label="Library navigation">
+          <div className="sidebar-nav-group">
+            <span className="sidebar-nav-heading">Digital Library</span>
+            <div className="sidebar-nav-links">
+              {LIBRARY_NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.key}
+                  aria-current={item.key === activeNav ? 'page' : undefined}
+                  className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
+                  href={item.href}
+                  title={sidebarCollapsed ? item.label : undefined}
+                >
+                  <span className="sidebar-link-icon">
+                    <i className={`fas ${item.icon}`} aria-hidden="true" />
+                  </span>
+                  <span className="sidebar-link-label">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <button
+        aria-label="Close sidebar"
+        className={`student-global-backdrop sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
+        type="button"
+        onClick={closeSidebar}
+      />
+
+      <main className="student-global-main">
+        <div className="student-global-content library-shell">
+          <div className="library-page-header">
+            <div className="library-page-title">
+            <h1>{title}</h1>
+            <p>{description}</p>
+            </div>
+          </div>
+
+          <div className="library-page-content">{children}</div>
+        </div>
       </main>
     </div>
   );

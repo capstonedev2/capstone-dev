@@ -80,6 +80,7 @@ type DefenseAssignmentRecord = Prisma.DefenseScheduleGetPayload<{
 type SaveDefenseScheduleBody = {
   groupCode?: unknown;
   projectTitle?: unknown;
+  scheduleType?: unknown;
   department?: unknown;
   adviserName?: unknown;
   students?: unknown;
@@ -146,6 +147,7 @@ function formatAssignment(schedule: DefenseAssignmentRecord) {
     groupCode: schedule.project.group?.code || '',
     groupTitle: schedule.project.group?.title || '',
     projectTitle: schedule.project.title,
+    scheduleType: schedule.title,
     department: schedule.project.group?.department || schedule.project.adviser?.department || '',
     students: schedule.project.group?.students || [],
     leader: schedule.project.group?.leader || schedule.project.group?.students?.[0] || '',
@@ -226,6 +228,7 @@ export async function POST(request: Request) {
 
     const groupCode = normalizeText(body.groupCode);
     const projectTitle = normalizeText(body.projectTitle);
+    const scheduleType = normalizeText(body.scheduleType) || 'Concept Proposal';
     const department = normalizeText(body.department);
     const adviserName = normalizeText(body.adviserName);
     const date = normalizeText(body.date);
@@ -240,6 +243,7 @@ export async function POST(request: Request) {
 
     if (!groupCode) fieldErrors.group = 'Select a group to schedule.';
     if (!projectTitle) fieldErrors.projectTitle = 'Project title is required.';
+    if (!scheduleType) fieldErrors.scheduleType = 'Choose the schedule type.';
     if (!date) fieldErrors.date = 'Choose a defense date.';
     if (!time) fieldErrors.time = 'Choose a defense time.';
     if (!room) fieldErrors.room = 'Choose a venue.';
@@ -372,7 +376,7 @@ export async function POST(request: Request) {
     const existingSchedule = await prisma.defenseSchedule.findFirst({
       where: {
         projectId: project.id,
-        title: 'Final Defense',
+        title: scheduleType,
         status: { not: DefenseStatus.CANCELLED }
       },
       orderBy: {
@@ -385,21 +389,22 @@ export async function POST(request: Request) {
           where: { id: existingSchedule.id },
           data: {
             scheduledById: authUser.id,
+            title: scheduleType,
             scheduledAt,
             location: room,
             status: DefenseStatus.SCHEDULED,
-            notes: `Panel chair assigned to ${panelUsers.find((user) => user.id === chairId)?.name || 'selected faculty'}.`
+            notes: `${scheduleType} scheduled. Panel chair assigned to ${panelUsers.find((user) => user.id === chairId)?.name || 'selected faculty'}.`
           }
         })
       : await prisma.defenseSchedule.create({
           data: {
             projectId: project.id,
             scheduledById: authUser.id,
-            title: 'Final Defense',
+            title: scheduleType,
             scheduledAt,
             location: room,
             status: DefenseStatus.SCHEDULED,
-            notes: `Panel chair assigned to ${panelUsers.find((user) => user.id === chairId)?.name || 'selected faculty'}.`
+            notes: `${scheduleType} scheduled. Panel chair assigned to ${panelUsers.find((user) => user.id === chairId)?.name || 'selected faculty'}.`
           }
         });
 

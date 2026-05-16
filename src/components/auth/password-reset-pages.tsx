@@ -7,10 +7,10 @@ import {
   type FormEvent,
   type ReactNode,
   useEffect,
+  useRef,
   useState
 } from 'react';
 import { useBranding } from '@/components/branding/branding-provider';
-import { LogoIcon } from '@/components/branding/logo-icon';
 import {
   authUi,
   cx,
@@ -115,7 +115,7 @@ function PasswordResetShell({
   const { branding } = useBranding();
   const loginBackgroundStyle = branding.assets.loginBackground
     ? ({
-        backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.54), rgba(0, 58, 143, 0.32)), url("${branding.assets.loginBackground.replace(/"/g, '\\"')}")`,
+        backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.34), rgba(0, 58, 143, 0.18)), url("${branding.assets.loginBackground.replace(/"/g, '\\"')}")`,
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'cover'
@@ -134,43 +134,25 @@ function PasswordResetShell({
       </Link>
 
       <section className={authUi.shell} aria-labelledby={titleId}>
-        <div className={authUi.authFrame}>
-          <div className={authUi.formColumn}>
-            <div
-              className={authUi.mobileBrand}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-            >
-              <LogoIcon style={{ width: 'auto', marginBottom: '0.25rem' }} className="h-12 sm:h-[68px]" />
-              <h1 className={authUi.brandTitle}>
-                {branding.systemName.trim().toLowerCase() === 'thesis track' ? (
-                  <>
-                    Thesis<span className={authUi.brandAccent}>Track</span>
-                  </>
-                ) : (
-                  branding.systemName
-                )}
-              </h1>
-              <p className={authUi.brandSubtitle}>{branding.tagline}</p>
-            </div>
-
-            <div className={authUi.container}>
-              <div className={authUi.card}>
-                <div className={authUi.cardStripe} aria-hidden="true" />
-                <div className={authUi.header}>
-                  <span className={authUi.headerPill}>
+        <div className="w-full max-w-[560px] overflow-hidden bg-transparent">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-5 sm:py-7">
+            <div className="w-full flex justify-center">
+              <div className="w-full max-w-[500px] rounded-[24px] border border-white/50 bg-white/[0.30] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-8">
+                <div className="mb-7 flex flex-col items-center text-center">
+                  <span className="mb-3 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
                     <i className={icon} aria-hidden="true" />
                     {label}
                   </span>
-                  <h2 className={authUi.headerTitle} id={titleId}>
+                  <h2 className="m-0 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-slate-800" id={titleId}>
                     {title}
                   </h2>
-                  <p className={authUi.headerTextLeft}>{description}</p>
+                  <p className="mt-3 max-w-md text-sm font-semibold leading-6 text-slate-700">{description}</p>
                 </div>
 
                 {children}
 
-                <div className={authUi.footer}>
-                  <p className={authUi.footerText}>
+                <div className="mt-5 border-t border-white/70 pt-4 text-center">
+                  <p className="text-sm font-semibold leading-6 text-slate-700">
                     Remember your password?{' '}
                     <Link href="/login" className={authUi.bookLink}>
                       Back to Login
@@ -300,10 +282,12 @@ export function VerifyResetCodePage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [codeDigits, setCodeDigits] = useState<string[]>(() => Array(6).fill(''));
   const [statusMessage, setStatusMessage] = useState('');
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<VerifyResetCodeErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const codeInputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
     setEmail(getStoredResetEmail());
@@ -364,6 +348,30 @@ export function VerifyResetCodePage() {
     router.push('/reset-password');
   };
 
+  const updateCodeDigit = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, '').slice(-1);
+
+    setCodeDigits((current) => {
+      const nextDigits = [...current];
+      nextDigits[index] = digit;
+      setCode(nextDigits.join(''));
+      return nextDigits;
+    });
+    setError('');
+    setStatusMessage('');
+    setFieldErrors((current) => ({ ...current, code: undefined }));
+
+    if (digit && index < 5) {
+      codeInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleCodeKeyDown = (index: number, key: string) => {
+    if (key === 'Backspace' && !codeDigits[index] && index > 0) {
+      codeInputRefs.current[index - 1]?.focus();
+    }
+  };
+
   return (
     <PasswordResetShell
       titleId="verify-reset-code-title"
@@ -374,69 +382,47 @@ export function VerifyResetCodePage() {
     >
       <form className={authUi.form} aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
         <div className={authUi.formGroup}>
-          <label className={authUi.label} htmlFor="verifyEmail">
-            Email Address
-          </label>
-          <input
-            id="verifyEmail"
-            className={getInputClass(Boolean(fieldErrors.email))}
-            type="email"
-            placeholder="user@university.edu.ph"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              setError('');
-              setStatusMessage('');
-              setFieldErrors((current) => ({ ...current, email: undefined }));
-            }}
-            aria-describedby={fieldErrors.email ? 'verify-email-error' : undefined}
-            aria-invalid={fieldErrors.email ? 'true' : 'false'}
-            disabled={isSubmitting}
-            required
-          />
-          {fieldErrors.email ? (
-            <span className={authUi.fieldError} id="verify-email-error">
-              {fieldErrors.email}
-            </span>
-          ) : null}
-        </div>
-
-        <div className={authUi.formGroup}>
-          <label className={authUi.label} htmlFor="resetCode">
+          <label className={authUi.label} id="reset-code-label">
             Reset Code
           </label>
-          <input
-            id="resetCode"
-            className={getInputClass(Boolean(fieldErrors.code))}
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            placeholder="000000"
-            value={code}
-            onChange={(event) => {
-              setCode(event.target.value.replace(/\D/g, '').slice(0, 6));
-              setError('');
-              setStatusMessage('');
-              setFieldErrors((current) => ({ ...current, code: undefined }));
-            }}
+          <div
+            className="grid grid-cols-6 gap-2 sm:gap-3"
+            role="group"
+            aria-labelledby="reset-code-label"
             aria-describedby={fieldErrors.code ? 'verify-code-error' : undefined}
-            aria-invalid={fieldErrors.code ? 'true' : 'false'}
-            disabled={isSubmitting}
-            required
-          />
+          >
+            {Array.from({ length: 6 }).map((_, index) => (
+              <input
+                key={index}
+                ref={(element) => {
+                  codeInputRefs.current[index] = element;
+                }}
+                className="h-12 min-w-0 rounded-xl border border-[rgba(255,255,255,0.64)] bg-[rgba(255,255,255,0.64)] text-center text-lg font-extrabold text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_rgba(15,23,42,0.06)] outline-none backdrop-blur-[14px] transition-all duration-300 ease-out focus:border-[#003A8F] focus:bg-[rgba(255,255,255,0.84)] focus:shadow-[inset_0_1px_0_rgba(255,255,255,0.94),0_0_0_4px_rgba(0,58,143,0.16),0_16px_34px_rgba(0,58,143,0.14)] focus:outline-none"
+                type="text"
+                inputMode="numeric"
+                autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                maxLength={1}
+                value={codeDigits[index] || ''}
+                onChange={(event) => updateCodeDigit(index, event.target.value)}
+                onKeyDown={(event) => handleCodeKeyDown(index, event.key)}
+                aria-label={`Reset code digit ${index + 1}`}
+                aria-invalid={fieldErrors.code ? 'true' : 'false'}
+                disabled={isSubmitting}
+                required
+              />
+            ))}
+          </div>
           {fieldErrors.code ? (
             <span className={authUi.fieldError} id="verify-code-error">
               {fieldErrors.code}
             </span>
           ) : null}
+          {fieldErrors.email ? (
+            <span className={authUi.fieldError}>
+              Request a new reset code before continuing.
+            </span>
+          ) : null}
         </div>
-
-        {statusMessage ? (
-          <div className={getMessageClass('success')} role="status" aria-live="polite">
-            {statusMessage}
-          </div>
-        ) : null}
 
         {error ? (
           <div className={getMessageClass('error')} role="alert" aria-live="polite">

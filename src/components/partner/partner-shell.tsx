@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import { PARTNER_NAV_ITEMS, type PartnerNavKey } from '@/components/partner/partner-data';
-import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
@@ -63,68 +62,28 @@ export function PartnerShell({
   }, [closeSidebar]);
 
   return (
-    <div className={`partner-app${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
-      <button
-        aria-label="Close navigation"
-        className={`portal-sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
-        type="button"
-        onClick={closeSidebar}
-      />
+    <div
+      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
+    >
+      <header className="student-global-navbar">
+        <div className="student-global-navbar-main">
+          <button
+            aria-label={toggleLabel}
+            className="icon-btn student-shell-toggle"
+            type="button"
+            onClick={toggleSidebar}
+          >
+            <i aria-hidden="true" className={`fas ${toggleIconClass}`} />
+          </button>
 
-      <div className="dashboard-wrapper">
-        <aside className={`sidebar${sidebarOpen ? ' is-open' : ''}`}>
-          <div className="sidebar-header">
-            <div className="portal-sidebar-context">
-              <span aria-hidden="true" className="portal-sidebar-emblem">
-                <i className="fas fa-handshake"></i>
-              </span>
-              <div className="portal-sidebar-copy">
-                <span className="portal-sidebar-kicker">Partner Desk</span>
-                <h2>Industry Partner</h2>
-                <p>Collaboration requests and implementation tracking</p>
-              </div>
-            </div>
-            <div className="user-badge">
-              <i aria-hidden="true" className="fas fa-building" />
-              <span>{badgeLabel}</span>
-            </div>
+          <div className="student-navbar-title" aria-label="Current page">
+            <span className="student-navbar-title-kicker">ThesisTrack</span>
+            <strong>{title}</strong>
           </div>
+        </div>
 
-          <nav className="sidebar-nav">
-            {PARTNER_NAV_ITEMS.map((item) => (
-              <Link
-                key={item.key}
-                className={item.key === activeNav ? 'active' : undefined}
-                href={item.href}
-                title={sidebarCollapsed ? item.label : undefined}
-              >
-                <i aria-hidden="true" className={`fas ${item.icon}`} />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </aside>
-
-        <main className="main-content">
-          <div className="top-nav">
-            <div className="top-nav-main">
-              <button
-                aria-label={toggleLabel}
-                className="portal-mobile-nav"
-                type="button"
-                onClick={toggleSidebar}
-              >
-                <i aria-hidden="true" className={`fas ${toggleIconClass}`} />
-              </button>
-              <PortalShellBrand
-                className="shell-top-brand"
-                href="/partner/dashboard"
-                icon="fa-handshake"
-                title="Thesis Track"
-              />
-            </div>
-
-            <div className="user-area">
+        <div className="student-global-navbar-actions">
               <PortalShellActionMenus
                 notificationHref="/partner/notifications"
                 notificationCount={notificationCount}
@@ -184,8 +143,64 @@ export function PartnerShell({
                   }
                 ]}
               />
+        </div>
+      </header>
+
+      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-header-copy">
+            <span className="sidebar-context-kicker">Partner Desk</span>
+            <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
+              <img
+                alt="ThesisTrack logo"
+                className="system-brand-logo"
+                src="/System%20Logo/logo-transparent.png"
+              />
+              <span className="system-brand-name">
+                <span>Thesis</span>
+                <strong>Track</strong>
+              </span>
+              <span className="system-brand-subtitle">Higher Education Institutions</span>
             </div>
           </div>
+          <span className="user-badge">
+            <i aria-hidden="true" className="fas fa-building" />
+            <span>{badgeLabel}</span>
+          </span>
+        </div>
+
+        <nav className="student-role-sidebar-nav" aria-label="Partner navigation">
+          <div className="sidebar-nav-group">
+            <span className="sidebar-nav-heading">Industry Partner</span>
+            <div className="sidebar-nav-links">
+              {PARTNER_NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.key}
+                  aria-current={item.key === activeNav ? 'page' : undefined}
+                  className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
+                  href={item.href}
+                  title={sidebarCollapsed ? item.label : undefined}
+                >
+                  <span className="sidebar-link-icon">
+                    <i aria-hidden="true" className={`fas ${item.icon}`} />
+                  </span>
+                  <span className="sidebar-link-label">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <button
+        aria-label="Close sidebar"
+        className={`student-global-backdrop sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
+        type="button"
+        onClick={closeSidebar}
+      />
+
+      <main className="student-global-main">
+        <div className="student-global-content partner-app">
           <div className="shell-page-header">
             <div className="page-title">
               <h1>{title}</h1>
@@ -194,8 +209,8 @@ export function PartnerShell({
           </div>
 
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
