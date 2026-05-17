@@ -394,7 +394,7 @@ export function LoginPage() {
                     </span>
                   )}
                   <div>
-                    <strong className="block whitespace-nowrap text-xs font-extrabold leading-tight text-white drop-shadow">
+                    <strong className="block max-w-[240px] sm:max-w-[300px] text-balance text-xs font-extrabold leading-tight text-white drop-shadow">
                       {branding.institutionName}
                     </strong>
                     <span className="mt-0.5 block max-w-[240px] text-[0.62rem] font-medium leading-4 text-slate-200 drop-shadow">

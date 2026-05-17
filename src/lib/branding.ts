@@ -29,6 +29,7 @@ export type BrandingAssets = {
   institutionLogo: string;
   favicon: string;
   loginBackground: string;
+  registerBackground: string;
 };
 
 export type BrandingLandingFeature = {
@@ -199,7 +200,8 @@ const DEFAULT_ASSETS: BrandingAssets = {
   darkLogo: SYSTEM_LOGO_SRC,
   institutionLogo: DEFAULT_INSTITUTION_LOGO_SRC,
   favicon: SYSTEM_LOGO_SRC,
-  loginBackground: DEFAULT_AUTH_BACKGROUND_SRC
+  loginBackground: DEFAULT_AUTH_BACKGROUND_SRC,
+  registerBackground: DEFAULT_AUTH_BACKGROUND_SRC
 };
 
 const DEFAULT_LANDING: BrandingLandingSettings = {
@@ -383,7 +385,7 @@ export const DEFAULT_BRANDING: BrandingSettings = {
   systemName: 'Thesis Track',
   systemShortName: 'TT',
   tagline: 'Higher Education Institutions',
-  institutionName: 'University of Science and Technology',
+  institutionName: 'University of Science and Technology of Southern Philippines (USTP)',
   institutionTagline: 'Empowering Research, Innovation, and Academic Excellence',
   themePreset: 'academic-blue',
   colors: DEFAULT_COLORS,
@@ -1019,16 +1021,17 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
     darkLogo: String(assetValue.darkLogo ?? ''),
     institutionLogo: readStringValue(assetValue.institutionLogo, DEFAULT_ASSETS.institutionLogo),
     favicon: String(assetValue.favicon ?? ''),
-    loginBackground: readStringValue(assetValue.loginBackground, DEFAULT_ASSETS.loginBackground)
+    loginBackground: readStringValue(assetValue.loginBackground, DEFAULT_ASSETS.loginBackground),
+    registerBackground: readStringValue(assetValue.registerBackground, DEFAULT_ASSETS.registerBackground)
   };
 
   return {
     version: BRANDING_VERSION,
     systemName: String(value.systemName ?? DEFAULT_BRANDING.systemName).trim() || DEFAULT_BRANDING.systemName,
     systemShortName: String(value.systemShortName ?? DEFAULT_BRANDING.systemShortName).trim() || DEFAULT_BRANDING.systemShortName,
-    tagline: DEFAULT_BRANDING.tagline,
+    tagline: value.tagline !== undefined ? String(value.tagline) : DEFAULT_BRANDING.tagline,
     institutionName: String(value.institutionName ?? DEFAULT_BRANDING.institutionName).trim() || DEFAULT_BRANDING.institutionName,
-    institutionTagline: String(value.institutionTagline ?? DEFAULT_BRANDING.institutionTagline).trim() || DEFAULT_BRANDING.institutionTagline,
+    institutionTagline: value.institutionTagline !== undefined ? String(value.institutionTagline) : DEFAULT_BRANDING.institutionTagline,
     themePreset: String(value.themePreset ?? DEFAULT_BRANDING.themePreset).trim() || DEFAULT_BRANDING.themePreset,
     colors,
     derivedColors,

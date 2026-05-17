@@ -71,14 +71,14 @@ export function RegisterPage() {
     .slice(0, 3)
     .map((part) => part.charAt(0).toUpperCase())
     .join('');
-  const isVideoBackground = branding.assets.loginBackground?.match(/\.(mp4|webm)$/i) || branding.assets.loginBackground?.includes('/video/upload/');
+  const isVideoBackground = branding.assets.registerBackground?.match(/\.(mp4|webm)$/i) || branding.assets.registerBackground?.includes('/video/upload/');
 
-  const registerBackgroundStyle = branding.assets.loginBackground && !isVideoBackground ? {
-    backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.34), rgba(0, 58, 143, 0.18)), url("${branding.assets.loginBackground.replace(/"/g, '\\"')}")`,
+  const registerBackgroundStyle = branding.assets.registerBackground && !isVideoBackground ? {
+    backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.34), rgba(0, 58, 143, 0.18)), url("${branding.assets.registerBackground.replace(/"/g, '\\"')}")`,
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'cover'
-  } satisfies CSSProperties : undefined;
+  } satisfies CSSProperties : (isVideoBackground ? { backgroundColor: 'transparent' } : undefined);
   const departmentOptions = [
     { value: '', label: 'Select Department' },
     ...branding.departments
@@ -273,7 +273,7 @@ export function RegisterPage() {
             loop
             muted
             playsInline
-            src={branding.assets.loginBackground}
+            src={branding.assets.registerBackground}
             style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -10 }}
           />
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.45)', zIndex: -9 }} />
@@ -334,7 +334,7 @@ export function RegisterPage() {
                     </span>
                   )}
                   <div>
-                    <strong className="block whitespace-nowrap text-xs font-extrabold leading-tight text-white drop-shadow">
+                    <strong className="block max-w-[240px] sm:max-w-[300px] text-balance text-xs font-extrabold leading-tight text-white drop-shadow">
                       {branding.institutionName}
                     </strong>
                     <span className="mt-0.5 block max-w-[240px] text-[0.62rem] font-medium leading-4 text-slate-200 drop-shadow">

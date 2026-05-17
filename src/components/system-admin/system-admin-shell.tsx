@@ -213,10 +213,25 @@ export function SystemAdminShell({
                       <button
                         aria-controls="system-admin-branding-submenu"
                         aria-expanded={brandingMenuOpen}
-                        className={`sidebar-link ${activeNav === 'branding' ? 'is-active' : ''}`}
+                        className="sidebar-link"
+                        style={
+                          activeNav === 'branding' || brandingMenuOpen
+                            ? {
+                                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                                color: '#ffffff',
+                                border: '1px solid transparent',
+                                boxShadow: 'none'
+                              }
+                            : undefined
+                        }
                         title={sidebarCollapsed ? item.label : undefined}
                         type="button"
-                        onClick={() => setBrandingMenuOpen((current) => !current)}
+                        onClick={() => {
+                          setBrandingMenuOpen((current) => !current);
+                          if (!isBrandingPath) {
+                            router.push(item.href);
+                          }
+                        }}
                       >
                         <span className="sidebar-link-icon">
                           <i aria-hidden="true" className={`fas ${item.icon}`}></i>
@@ -236,6 +251,7 @@ export function SystemAdminShell({
                             href={subItem.href}
                             title={sidebarCollapsed ? subItem.label : undefined}
                             onClick={closeSidebar}
+                            style={{ margin: '0.28rem 0.85rem', paddingLeft: '1.15rem' }}
                           >
                             <span className="sidebar-link-icon">
                               <i aria-hidden="true" className={`fas ${subItem.icon}`}></i>

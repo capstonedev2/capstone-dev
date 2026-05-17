@@ -131,6 +131,13 @@ const ASSET_FIELDS: Array<{
     description: 'Authentication background image or video (max 20MB).',
     accept: 'image/png,image/jpeg,image/webp,video/mp4,video/webm',
     maxBytes: 20_000_000
+  },
+  {
+    key: 'registerBackground',
+    label: 'Register Page Background',
+    description: 'Registration background image or video (max 20MB).',
+    accept: 'image/png,image/jpeg,image/webp,video/mp4,video/webm',
+    maxBytes: 20_000_000
   }
 ];
 
@@ -250,7 +257,7 @@ function getSuggestedColors(value: string) {
 
 function getAssetPreviewLabel(key: BrandingAssetKey) {
   if (key === 'favicon') return 'Icon';
-  if (key === 'loginBackground') return 'Background';
+  if (key === 'loginBackground' || key === 'registerBackground') return 'Background';
   return 'Logo';
 }
 
@@ -447,7 +454,7 @@ function AssetUploadControl({
   isSaving?: boolean;
 }) {
   const inputId = `branding-asset-${assetKey}`;
-  const isBackground = assetKey === 'loginBackground';
+  const isBackground = assetKey === 'loginBackground' || assetKey === 'registerBackground';
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -2235,7 +2242,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className={`branding-command-bar ${isSectionActive('backup') ? '' : 'branding-section-hidden'}`}>
+            <section className="branding-command-bar">
               <div>
                 <strong>Branding Actions</strong>
                 <span>{pendingFileCount ? `${pendingFileCount} asset upload pending` : 'Ready to save when changes are reviewed'}</span>
