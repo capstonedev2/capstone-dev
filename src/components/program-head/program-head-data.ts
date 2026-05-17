@@ -10,7 +10,8 @@ export type ProgramHeadNavKey =
   | 'schedule'
   | 'reports'
   | 'notifications'
-  | 'profile';
+  | 'profile'
+  | 'users';
 
 export type ProgramHeadStatusTone =
   | 'approved'
