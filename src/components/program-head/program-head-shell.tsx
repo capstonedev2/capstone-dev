@@ -202,21 +202,25 @@ export function ProgramHeadShell({
 
       <main className="student-global-main">
         <div className="student-global-content">
-          <header className="shell-page-header" aria-labelledby="ph-page-title">
-            <div className="page-title">
-              <div className="page-title-context">
-                <span className="page-kicker">Program Head Portal</span>
-                <span className="page-breadcrumb" aria-hidden="true">
-                  <i className="fas fa-angle-right" />
-                  <span>{title}</span>
-                </span>
+          <header className="top-nav" aria-labelledby="ph-page-title">
+            <div className="top-nav-leading">
+              <div className="page-title">
+                <div className="page-title-context">
+                  <span className="page-kicker">Program Head Portal</span>
+                  <span className="page-breadcrumb" aria-hidden="true">
+                    <i className="fas fa-angle-right" />
+                    <span>{title}</span>
+                  </span>
+                </div>
+                <h1 id="ph-page-title">{title}</h1>
+                <p>{description}</p>
               </div>
-              <h1 id="ph-page-title">{title}</h1>
-              <p>{description}</p>
             </div>
           </header>
           
-          {children}
+          <div className="page-body">
+            {children}
+          </div>
         </div>
       </main>
     </div>

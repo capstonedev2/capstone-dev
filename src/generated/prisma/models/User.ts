@@ -347,6 +347,7 @@ export type UserWhereInput = {
   evaluations?: Prisma.EvaluationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  brandingAssets?: Prisma.BrandingAssetListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -387,6 +388,7 @@ export type UserOrderByWithRelationInput = {
   evaluations?: Prisma.EvaluationOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  brandingAssets?: Prisma.BrandingAssetOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -430,6 +432,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   evaluations?: Prisma.EvaluationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  brandingAssets?: Prisma.BrandingAssetListRelationFilter
 }, "id" | "email" | "googleSub" | "studentId">
 
 export type UserOrderByWithAggregationInput = {
@@ -530,6 +533,7 @@ export type UserCreateInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -570,6 +574,7 @@ export type UserUncheckedCreateInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUpdateInput = {
@@ -610,6 +615,7 @@ export type UserUpdateInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -650,6 +656,7 @@ export type UserUncheckedUpdateInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1046,6 +1053,22 @@ export type UserUpdateOneWithoutAuditLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.UserUpdateWithoutAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutAuditLogsInput>
 }
 
+export type UserCreateNestedOneWithoutBrandingAssetsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBrandingAssetsInput, Prisma.UserUncheckedCreateWithoutBrandingAssetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBrandingAssetsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutBrandingAssetsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBrandingAssetsInput, Prisma.UserUncheckedCreateWithoutBrandingAssetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBrandingAssetsInput
+  upsert?: Prisma.UserUpsertWithoutBrandingAssetsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBrandingAssetsInput, Prisma.UserUpdateWithoutBrandingAssetsInput>, Prisma.UserUncheckedUpdateWithoutBrandingAssetsInput>
+}
+
 export type UserCreateWithoutPasswordResetTokensInput = {
   id?: string
   email: string
@@ -1083,6 +1106,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1122,6 +1146,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1177,6 +1202,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1216,6 +1242,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutPasswordResetCodesInput = {
@@ -1255,6 +1282,7 @@ export type UserCreateWithoutPasswordResetCodesInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetCodesInput = {
@@ -1294,6 +1322,7 @@ export type UserUncheckedCreateWithoutPasswordResetCodesInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetCodesInput = {
@@ -1349,6 +1378,7 @@ export type UserUpdateWithoutPasswordResetCodesInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetCodesInput = {
@@ -1388,6 +1418,7 @@ export type UserUncheckedUpdateWithoutPasswordResetCodesInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutUploadedFilesInput = {
@@ -1427,6 +1458,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutUploadedFilesInput = {
@@ -1466,6 +1498,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutUploadedFilesInput = {
@@ -1521,6 +1554,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedFilesInput = {
@@ -1560,6 +1594,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutGroupMembershipsInput = {
@@ -1599,6 +1634,7 @@ export type UserCreateWithoutGroupMembershipsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutGroupMembershipsInput = {
@@ -1638,6 +1674,7 @@ export type UserUncheckedCreateWithoutGroupMembershipsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutGroupMembershipsInput = {
@@ -1693,6 +1730,7 @@ export type UserUpdateWithoutGroupMembershipsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGroupMembershipsInput = {
@@ -1732,6 +1770,7 @@ export type UserUncheckedUpdateWithoutGroupMembershipsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutOwnedProjectsInput = {
@@ -1771,6 +1810,7 @@ export type UserCreateWithoutOwnedProjectsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutOwnedProjectsInput = {
@@ -1810,6 +1850,7 @@ export type UserUncheckedCreateWithoutOwnedProjectsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutOwnedProjectsInput = {
@@ -1854,6 +1895,7 @@ export type UserCreateWithoutAdvisedProjectsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutAdvisedProjectsInput = {
@@ -1893,6 +1935,7 @@ export type UserUncheckedCreateWithoutAdvisedProjectsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutAdvisedProjectsInput = {
@@ -1948,6 +1991,7 @@ export type UserUpdateWithoutOwnedProjectsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
@@ -1987,6 +2031,7 @@ export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUpsertWithoutAdvisedProjectsInput = {
@@ -2037,6 +2082,7 @@ export type UserUpdateWithoutAdvisedProjectsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdvisedProjectsInput = {
@@ -2076,6 +2122,7 @@ export type UserUncheckedUpdateWithoutAdvisedProjectsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutSubmissionsInput = {
@@ -2115,6 +2162,7 @@ export type UserCreateWithoutSubmissionsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutSubmissionsInput = {
@@ -2154,6 +2202,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutSubmissionsInput = {
@@ -2209,6 +2258,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmissionsInput = {
@@ -2248,6 +2298,7 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutReviewCommentsInput = {
@@ -2287,6 +2338,7 @@ export type UserCreateWithoutReviewCommentsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutReviewCommentsInput = {
@@ -2326,6 +2378,7 @@ export type UserUncheckedCreateWithoutReviewCommentsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutReviewCommentsInput = {
@@ -2370,6 +2423,7 @@ export type UserCreateWithoutResolvedCommentsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutResolvedCommentsInput = {
@@ -2409,6 +2463,7 @@ export type UserUncheckedCreateWithoutResolvedCommentsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutResolvedCommentsInput = {
@@ -2464,6 +2519,7 @@ export type UserUpdateWithoutReviewCommentsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewCommentsInput = {
@@ -2503,6 +2559,7 @@ export type UserUncheckedUpdateWithoutReviewCommentsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUpsertWithoutResolvedCommentsInput = {
@@ -2553,6 +2610,7 @@ export type UserUpdateWithoutResolvedCommentsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResolvedCommentsInput = {
@@ -2592,6 +2650,7 @@ export type UserUncheckedUpdateWithoutResolvedCommentsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutScheduledDefensesInput = {
@@ -2631,6 +2690,7 @@ export type UserCreateWithoutScheduledDefensesInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutScheduledDefensesInput = {
@@ -2670,6 +2730,7 @@ export type UserUncheckedCreateWithoutScheduledDefensesInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutScheduledDefensesInput = {
@@ -2725,6 +2786,7 @@ export type UserUpdateWithoutScheduledDefensesInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutScheduledDefensesInput = {
@@ -2764,6 +2826,7 @@ export type UserUncheckedUpdateWithoutScheduledDefensesInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutEvaluationsInput = {
@@ -2803,6 +2866,7 @@ export type UserCreateWithoutEvaluationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutEvaluationsInput = {
@@ -2842,6 +2906,7 @@ export type UserUncheckedCreateWithoutEvaluationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutEvaluationsInput = {
@@ -2897,6 +2962,7 @@ export type UserUpdateWithoutEvaluationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEvaluationsInput = {
@@ -2936,6 +3002,7 @@ export type UserUncheckedUpdateWithoutEvaluationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -2975,6 +3042,7 @@ export type UserCreateWithoutNotificationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -3014,6 +3082,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -3069,6 +3138,7 @@ export type UserUpdateWithoutNotificationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -3108,6 +3178,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -3147,6 +3218,7 @@ export type UserCreateWithoutAuditLogsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -3186,6 +3258,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -3241,6 +3314,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -3280,6 +3354,183 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+}
+
+export type UserCreateWithoutBrandingAssetsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutBrandingAssetsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutBrandingAssetsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBrandingAssetsInput, Prisma.UserUncheckedCreateWithoutBrandingAssetsInput>
+}
+
+export type UserUpsertWithoutBrandingAssetsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBrandingAssetsInput, Prisma.UserUncheckedUpdateWithoutBrandingAssetsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBrandingAssetsInput, Prisma.UserUncheckedCreateWithoutBrandingAssetsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBrandingAssetsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBrandingAssetsInput, Prisma.UserUncheckedUpdateWithoutBrandingAssetsInput>
+}
+
+export type UserUpdateWithoutBrandingAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBrandingAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUncheckedUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
 }
 
 
@@ -3301,6 +3552,7 @@ export type UserCountOutputType = {
   evaluations: number
   notifications: number
   auditLogs: number
+  brandingAssets: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3317,6 +3569,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   evaluations?: boolean | UserCountOutputTypeCountEvaluationsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+  brandingAssets?: boolean | UserCountOutputTypeCountBrandingAssetsArgs
 }
 
 /**
@@ -3420,6 +3673,13 @@ export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.AuditLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBrandingAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BrandingAssetWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3459,6 +3719,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   evaluations?: boolean | Prisma.User$evaluationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  brandingAssets?: boolean | Prisma.User$brandingAssetsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3558,6 +3819,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   evaluations?: boolean | Prisma.User$evaluationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  brandingAssets?: boolean | Prisma.User$brandingAssetsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3579,6 +3841,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     evaluations: Prisma.$EvaluationPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    brandingAssets: Prisma.$BrandingAssetPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4012,6 +4275,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   evaluations<T extends Prisma.User$evaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$evaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  brandingAssets<T extends Prisma.User$brandingAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$brandingAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BrandingAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4767,6 +5031,30 @@ export type User$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * User.brandingAssets
+ */
+export type User$brandingAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BrandingAsset
+   */
+  select?: Prisma.BrandingAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BrandingAsset
+   */
+  omit?: Prisma.BrandingAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BrandingAssetInclude<ExtArgs> | null
+  where?: Prisma.BrandingAssetWhereInput
+  orderBy?: Prisma.BrandingAssetOrderByWithRelationInput | Prisma.BrandingAssetOrderByWithRelationInput[]
+  cursor?: Prisma.BrandingAssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BrandingAssetScalarFieldEnum | Prisma.BrandingAssetScalarFieldEnum[]
 }
 
 /**

@@ -202,15 +202,26 @@ export function LibraryShell({
       />
 
       <main className="student-global-main">
-        <div className="student-global-content library-shell">
-          <div className="library-page-header">
-            <div className="library-page-title">
-            <h1>{title}</h1>
-            <p>{description}</p>
+        <div className="student-global-content">
+          <header className="top-nav" aria-labelledby="library-page-title">
+            <div className="top-nav-leading">
+              <div className="page-title">
+                <div className="page-title-context">
+                  <span className="page-kicker">E-Library</span>
+                  <span className="page-breadcrumb" aria-hidden="true">
+                    <i className="fas fa-angle-right" />
+                    <span>{title}</span>
+                  </span>
+                </div>
+                <h1 id="library-page-title">{title}</h1>
+                <p>{description}</p>
+              </div>
             </div>
-          </div>
+          </header>
 
-          <div className="library-page-content">{children}</div>
+          <div className="page-body">
+            {children}
+          </div>
         </div>
       </main>
     </div>

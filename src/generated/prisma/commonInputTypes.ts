@@ -491,6 +491,23 @@ export type EnumNotificationStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumNotificationStatusFilter<$PrismaModel>
 }
 
+export type EnumBrandingAssetTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrandingAssetType | Prisma.EnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel> | $Enums.BrandingAssetType
+}
+
+export type EnumBrandingAssetTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrandingAssetType | Prisma.EnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrandingAssetTypeWithAggregatesFilter<$PrismaModel> | $Enums.BrandingAssetType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -925,6 +942,23 @@ export type NestedEnumNotificationStatusWithAggregatesFilter<$PrismaModel = neve
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumNotificationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumNotificationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumBrandingAssetTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrandingAssetType | Prisma.EnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel> | $Enums.BrandingAssetType
+}
+
+export type NestedEnumBrandingAssetTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BrandingAssetType | Prisma.EnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BrandingAssetType[] | Prisma.ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBrandingAssetTypeWithAggregatesFilter<$PrismaModel> | $Enums.BrandingAssetType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel>
 }
 
 

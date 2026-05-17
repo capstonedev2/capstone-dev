@@ -94,8 +94,8 @@ export function useShellSidebar({
       ? 'fa-xmark'
       : 'fa-bars'
     : sidebarCollapsed
-      ? 'fa-angles-right'
-      : 'fa-angles-left';
+      ? 'fa-chevron-right'
+      : 'fa-bars';
 
   return {
     closeSidebar,

@@ -25,6 +25,17 @@ export const UserRole = {
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 
+export const BrandingAssetType = {
+  SYSTEM_LOGO: 'SYSTEM_LOGO',
+  SCHOOL_LOGO: 'SCHOOL_LOGO',
+  LANDING_IMAGE: 'LANDING_IMAGE',
+  CERTIFICATE_LOGO: 'CERTIFICATE_LOGO',
+  OTHER: 'OTHER'
+} as const
+
+export type BrandingAssetType = (typeof BrandingAssetType)[keyof typeof BrandingAssetType]
+
+
 export const GroupLifecycleStatus = {
   PENDING: 'PENDING',
   ACTIVE: 'ACTIVE',

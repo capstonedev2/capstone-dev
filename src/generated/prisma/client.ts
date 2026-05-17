@@ -126,3 +126,8 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model BrandingAsset
+ * 
+ */
+export type BrandingAsset = Prisma.BrandingAssetModel

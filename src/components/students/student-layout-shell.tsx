@@ -1806,6 +1806,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
           )}
         </div>
       </main>
-    </div>
+</div>
   );
 }
+

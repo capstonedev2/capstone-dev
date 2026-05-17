@@ -112,165 +112,190 @@ export function SystemAdminShell({
   };
 
   return (
-    <>
-      <div
-        className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-      <div className={`dashboard-wrapper${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
-        <aside className="sidebar" style={{ transform: sidebarOpen ? 'translateX(0)' : '' }}>
-          <div className="sidebar-header">
-            <div className="admin-sidebar-context">
-              <span aria-hidden="true" className="admin-sidebar-emblem">
-                <i className="fas fa-server"></i>
+    <div
+      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
+    >
+      <header className="student-global-navbar">
+        <div className="student-global-navbar-main">
+          <button
+            aria-label={toggleLabel}
+            className="icon-btn student-shell-toggle"
+            type="button"
+            onClick={toggleSidebar}
+          >
+            <i aria-hidden="true" className={`fas ${toggleIconClass}`} />
+          </button>
+          <div className="student-navbar-title" aria-label="Current page">
+            <span className="student-navbar-title-kicker">System Admin</span>
+            <strong>{currentNavItem?.label ?? title}</strong>
+          </div>
+        </div>
+        <div className="student-global-navbar-actions" style={{ display: 'flex', alignItems: 'center', height: '100%', gap: '1rem', paddingRight: '1rem' }}>
+          <PortalShellActionMenus
+            notificationHref="/system-admin/logs"
+            notificationCount={notificationCount}
+            notificationTitle="System Admin Alerts"
+            notificationDescription="Security, configuration, and maintenance events that need technical review."
+            notificationItems={[
+              {
+                id: 'maintenance-window',
+                title: 'Maintenance window pending',
+                message: 'A scheduled patch window is waiting for activation.',
+                href: '/system-admin/maintenance',
+                icon: 'fa-screwdriver-wrench',
+                meta: 'Maintenance',
+                tone: 'warning',
+                actionLabel: 'Review'
+              },
+              {
+                id: 'backup-complete',
+                title: 'Backup completed',
+                message: 'The latest database backup finished successfully.',
+                href: '/system-admin/backups',
+                icon: 'fa-database',
+                meta: 'Backup',
+                tone: 'success',
+                actionLabel: 'Open',
+                unread: false
+              }
+            ]}
+            profileName={displayName}
+            profileSubtitle="System Administrator"
+            profileDetail={displayEmail}
+            profileBadges={[
+              { label: 'Super Admin', icon: 'fa-lock', tone: 'primary' },
+              { label: 'Technical Manager', icon: 'fa-server' }
+            ]}
+            profileActions={[
+              { label: 'Logs & Security', icon: 'fa-file-shield', href: '/system-admin/logs' },
+              { label: 'System Settings', icon: 'fa-sliders', href: '/system-admin/settings' },
+              { label: 'Sign Out', icon: 'fa-right-from-bracket', danger: true, onClick: handleLogout }
+            ]}
+          />
+        </div>
+      </header>
+
+      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-header-copy">
+            <span className="sidebar-context-kicker">System Admin Portal</span>
+            <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
+              <img
+                alt="ThesisTrack logo"
+                className="system-brand-logo"
+                src="/System%20Logo/logo-transparent.png"
+              />
+              <span className="system-brand-name">
+                <span>Thesis</span>
+                <strong>Track</strong>
               </span>
-              <div className="admin-sidebar-copy">
-                <span className="admin-sidebar-kicker">{shellBranding.sidebarKicker}</span>
-                <h2>{shellBranding.sidebarTitle}</h2>
-                <p>{shellBranding.sidebarDescription}</p>
-              </div>
-            </div>
-            <div className="user-badge">
-              <i className="fas fa-lock"></i>
-              <span>{shellBranding.sidebarBadge}</span>
+              <span className="system-brand-subtitle">Higher Education Institutions</span>
             </div>
           </div>
-          <nav className="sidebar-nav">
-            {SYSTEM_ADMIN_NAV_ITEMS.map((item) => {
-              if (item.key === 'branding') {
-                return (
-                  <div
-                    key={item.key}
-                    className={`sidebar-nav-dropdown${brandingMenuOpen ? ' is-open' : ''}${activeNav === 'branding' ? ' is-active' : ''}`}
-                  >
-                    <button
-                      aria-controls="system-admin-branding-submenu"
-                      aria-expanded={brandingMenuOpen}
-                      className={activeNav === 'branding' ? 'active' : ''}
-                      title={sidebarCollapsed ? item.label : undefined}
-                      type="button"
-                      onClick={() => setBrandingMenuOpen((current) => !current)}
-                    >
-                      <i className={`fas ${item.icon}`}></i>
-                      <span>{item.label}</span>
-                      <i className="fas fa-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
-                    </button>
+          <span className="user-badge">
+            <i aria-hidden="true" className="fas fa-lock" />
+            <span>{shellBranding.sidebarBadge}</span>
+          </span>
+        </div>
+
+        <nav className="student-role-sidebar-nav" aria-label="System admin workspace navigation">
+          <div className="sidebar-nav-group">
+            <span className="sidebar-nav-heading">Management Tools</span>
+            <div className="sidebar-nav-links">
+              {SYSTEM_ADMIN_NAV_ITEMS.map((item) => {
+                if (item.key === 'branding') {
+                  return (
                     <div
-                      id="system-admin-branding-submenu"
-                      className="sidebar-submenu"
-                      aria-label="Theme and Branding sections"
+                      key={item.key}
+                      className={`sidebar-nav-dropdown${brandingMenuOpen ? ' is-open' : ''}${activeNav === 'branding' ? ' is-active' : ''}`}
                     >
-                      {BRANDING_SUBMENU_ITEMS.map((subItem) => (
-                        <Link
-                          key={subItem.key}
-                          className={activeBrandingSection === subItem.key ? 'active' : ''}
-                          href={subItem.href}
-                          title={sidebarCollapsed ? subItem.label : undefined}
-                          onClick={closeSidebar}
-                        >
-                          <i className={`fas ${subItem.icon}`}></i>
-                          <span>{subItem.label}</span>
-                        </Link>
-                      ))}
+                      <button
+                        aria-controls="system-admin-branding-submenu"
+                        aria-expanded={brandingMenuOpen}
+                        className={`sidebar-link ${activeNav === 'branding' ? 'is-active' : ''}`}
+                        title={sidebarCollapsed ? item.label : undefined}
+                        type="button"
+                        onClick={() => setBrandingMenuOpen((current) => !current)}
+                      >
+                        <span className="sidebar-link-icon">
+                          <i aria-hidden="true" className={`fas ${item.icon}`}></i>
+                        </span>
+                        <span className="sidebar-link-label">{item.label}</span>
+                        <i className="fas fa-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
+                      </button>
+                      <div
+                        id="system-admin-branding-submenu"
+                        className="sidebar-submenu"
+                        aria-label="Theme and Branding sections"
+                      >
+                        {BRANDING_SUBMENU_ITEMS.map((subItem) => (
+                          <Link
+                            key={subItem.key}
+                            className={`sidebar-link ${activeBrandingSection === subItem.key ? 'is-active' : ''}`}
+                            href={subItem.href}
+                            title={sidebarCollapsed ? subItem.label : undefined}
+                            onClick={closeSidebar}
+                          >
+                            <span className="sidebar-link-icon">
+                              <i aria-hidden="true" className={`fas ${subItem.icon}`}></i>
+                            </span>
+                            <span className="sidebar-link-label">{subItem.label}</span>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.key}
+                    className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
+                    href={item.href}
+                    title={sidebarCollapsed ? item.label : undefined}
+                  >
+                    <span className="sidebar-link-icon">
+                      <i aria-hidden="true" className={`fas ${item.icon}`}></i>
+                    </span>
+                    <span className="sidebar-link-label">{item.label}</span>
+                  </Link>
                 );
-              }
-
-              return (
-                <Link
-                  key={item.key}
-                  className={item.key === activeNav ? 'active' : ''}
-                  href={item.href}
-                  title={sidebarCollapsed ? item.label : undefined}
-                >
-                  <i className={`fas ${item.icon}`}></i>
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </aside>
-
-        <main className="main-content">
-          <header className="top-nav">
-            <div className="top-nav-main">
-              <button
-                aria-label={toggleLabel}
-                className="mobile-menu-btn"
-                type="button"
-                onClick={toggleSidebar}
-              >
-                <i className={`fas ${toggleIconClass}`}></i>
-              </button>
-              <PortalShellBrand
-                className="shell-top-brand"
-                href="/system-admin/dashboard"
-                icon="fa-server"
-                subtitle={shellBranding.navbarSubtitle}
-                title={shellBranding.navbarTitle}
-              />
+              })}
             </div>
-            <div className="user-area">
-              <PortalShellActionMenus
-                notificationHref="/system-admin/logs"
-                notificationCount={notificationCount}
-                notificationTitle="System Admin Alerts"
-                notificationDescription="Security, configuration, and maintenance events that need technical review."
-                notificationItems={[
-                  {
-                    id: 'maintenance-window',
-                    title: 'Maintenance window pending',
-                    message: 'A scheduled patch window is waiting for activation.',
-                    href: '/system-admin/maintenance',
-                    icon: 'fa-screwdriver-wrench',
-                    meta: 'Maintenance',
-                    tone: 'warning',
-                    actionLabel: 'Review'
-                  },
-                  {
-                    id: 'backup-complete',
-                    title: 'Backup completed',
-                    message: 'The latest database backup finished successfully.',
-                    href: '/system-admin/backups',
-                    icon: 'fa-database',
-                    meta: 'Backup',
-                    tone: 'success',
-                    actionLabel: 'Open',
-                    unread: false
-                  }
-                ]}
-                profileName={displayName}
-                profileSubtitle="System Administrator"
-                profileDetail={displayEmail}
-                profileBadges={[
-                  { label: 'Super Admin', icon: 'fa-lock', tone: 'primary' },
-                  { label: 'Technical Manager', icon: 'fa-server' }
-                ]}
-                profileActions={[
-                  { label: 'Logs & Security', icon: 'fa-file-shield', href: '/system-admin/logs' },
-                  { label: 'System Settings', icon: 'fa-sliders', href: '/system-admin/settings' },
-                  { label: 'Sign Out', icon: 'fa-right-from-bracket', danger: true, onClick: handleLogout }
-                ]}
-              />
-            </div>
-          </header>
-          <header className="shell-page-header" aria-labelledby="system-admin-page-title">
-            <div className="page-title">
-              <div className="page-title-context">
-                <span className="page-kicker">System Administrator</span>
-                <span className="page-breadcrumb" aria-hidden="true">
-                  <i className="fas fa-angle-right" />
-                  <span>{currentNavItem?.label ?? title}</span>
-                </span>
+          </div>
+        </nav>
+      </aside>
+
+      <button
+        aria-label="Close sidebar"
+        className={`student-global-backdrop sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
+        type="button"
+        onClick={closeSidebar}
+      />
+
+      <main className="student-global-main">
+        <div className="student-global-content">
+          <header className="top-nav" aria-labelledby="system-admin-page-title">
+            <div className="top-nav-leading">
+              <div className="page-title">
+                <div className="page-title-context">
+                  <span className="page-kicker">System Administrator</span>
+                  <span className="page-breadcrumb" aria-hidden="true">
+                    <i className="fas fa-angle-right" />
+                    <span>{currentNavItem?.label ?? title}</span>
+                  </span>
+                </div>
+                <h1 id="system-admin-page-title">{title}</h1>
+                <p>{description}</p>
               </div>
-              <h1 id="system-admin-page-title">{title}</h1>
-              <p>{description}</p>
             </div>
           </header>
-          {children}
-        </main>
-      </div>
-    </>
+          <div className="page-body">
+            {children}
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

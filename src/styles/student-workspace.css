@@ -18393,17 +18393,18 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
 }
 
 .student-shell .sidebar-link:hover {
-    transform: none;
-    background: #eef4ff;
-    color: #1d4ed8;
+    transform: none !important;
+    background: rgba(37, 99, 235, 0.06) !important;
+    color: #1e40af !important;
 }
 
 .student-shell .sidebar-link.is-active {
-    background: #2563eb;
-    border-color: transparent;
-    color: #ffffff;
-    font-weight: 700;
-    box-shadow: none;
+    background: rgba(37, 99, 235, 0.09) !important;
+    border-color: transparent !important;
+    border-left: 3px solid #2563eb !important;
+    color: #1e3a8a !important;
+    font-weight: 700 !important;
+    box-shadow: none !important;
 }
 
 .student-shell .sidebar-link-icon {
@@ -18414,12 +18415,12 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
 }
 
 .student-shell .sidebar-link:hover .sidebar-link-icon {
-    color: #1d4ed8;
+    color: #2563eb !important;
 }
 
 .student-shell .sidebar-link.is-active .sidebar-link-icon {
-    color: #ffffff;
-    filter: none;
+    color: #2563eb !important;
+    filter: none !important;
 }
 
 .student-shell .sidebar-link-label {

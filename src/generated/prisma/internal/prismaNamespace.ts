@@ -400,7 +400,8 @@ export const ModelName = {
   DefenseSchedule: 'DefenseSchedule',
   Evaluation: 'Evaluation',
   Notification: 'Notification',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  BrandingAsset: 'BrandingAsset'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "submission" | "reviewComment" | "defenseSchedule" | "evaluation" | "notification" | "auditLog"
+    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "submission" | "reviewComment" | "defenseSchedule" | "evaluation" | "notification" | "auditLog" | "brandingAsset"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1678,6 +1679,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BrandingAsset: {
+      payload: Prisma.$BrandingAssetPayload<ExtArgs>
+      fields: Prisma.BrandingAssetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BrandingAssetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BrandingAssetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>
+        }
+        findFirst: {
+          args: Prisma.BrandingAssetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BrandingAssetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>
+        }
+        findMany: {
+          args: Prisma.BrandingAssetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>[]
+        }
+        create: {
+          args: Prisma.BrandingAssetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>
+        }
+        createMany: {
+          args: Prisma.BrandingAssetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BrandingAssetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>[]
+        }
+        delete: {
+          args: Prisma.BrandingAssetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>
+        }
+        update: {
+          args: Prisma.BrandingAssetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>
+        }
+        deleteMany: {
+          args: Prisma.BrandingAssetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BrandingAssetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BrandingAssetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>[]
+        }
+        upsert: {
+          args: Prisma.BrandingAssetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BrandingAssetPayload>
+        }
+        aggregate: {
+          args: Prisma.BrandingAssetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBrandingAsset>
+        }
+        groupBy: {
+          args: Prisma.BrandingAssetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BrandingAssetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BrandingAssetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BrandingAssetCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2023,6 +2098,20 @@ export const AuditLogScalarFieldEnum = {
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
+export const BrandingAssetScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  label: 'label',
+  url: 'url',
+  publicId: 'publicId',
+  uploadedById: 'uploadedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BrandingAssetScalarFieldEnum = (typeof BrandingAssetScalarFieldEnum)[keyof typeof BrandingAssetScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2295,6 +2384,20 @@ export type ListEnumNotificationStatusFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
+ * Reference to a field of type 'BrandingAssetType'
+ */
+export type EnumBrandingAssetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BrandingAssetType'>
+    
+
+
+/**
+ * Reference to a field of type 'BrandingAssetType[]'
+ */
+export type ListEnumBrandingAssetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BrandingAssetType[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2434,6 +2537,7 @@ export type GlobalOmitConfig = {
   evaluation?: Prisma.EvaluationOmit
   notification?: Prisma.NotificationOmit
   auditLog?: Prisma.AuditLogOmit
+  brandingAsset?: Prisma.BrandingAssetOmit
 }
 
 /* Types for Logging */

@@ -95,42 +95,42 @@ const ASSET_FIELDS: Array<{
     label: 'Main Logo',
     description: 'Used in headers and standard light interfaces.',
     accept: 'image/png,image/jpeg,image/webp,image/svg+xml',
-    maxBytes: 1_500_000
+    maxBytes: 5_000_000
   },
   {
     key: 'lightLogo',
     label: 'Light Logo',
     description: 'Used over dark backgrounds such as the sidebar.',
     accept: 'image/png,image/jpeg,image/webp,image/svg+xml',
-    maxBytes: 1_500_000
+    maxBytes: 5_000_000
   },
   {
     key: 'darkLogo',
     label: 'Dark Logo',
     description: 'Used over white and pale surfaces.',
     accept: 'image/png,image/jpeg,image/webp,image/svg+xml',
-    maxBytes: 1_500_000
+    maxBytes: 5_000_000
   },
   {
     key: 'institutionLogo',
     label: 'School Logo',
     description: 'Shown beside the ThesisTrack logo on login and registration forms.',
     accept: 'image/png,image/jpeg,image/webp,image/svg+xml',
-    maxBytes: 1_500_000
+    maxBytes: 5_000_000
   },
   {
     key: 'favicon',
     label: 'Favicon',
     description: 'Browser tab icon, preferably square.',
     accept: 'image/png,image/x-icon,image/svg+xml',
-    maxBytes: 500_000
+    maxBytes: 1_000_000
   },
   {
     key: 'loginBackground',
     label: 'Login Page Background',
-    description: 'Authentication background image.',
-    accept: 'image/png,image/jpeg,image/webp',
-    maxBytes: 3_000_000
+    description: 'Authentication background image or video (max 20MB).',
+    accept: 'image/png,image/jpeg,image/webp,video/mp4,video/webm',
+    maxBytes: 20_000_000
   }
 ];
 
@@ -428,7 +428,9 @@ function AssetUploadControl({
   onChange,
   onFile,
   onReset,
-  onWarning
+  onWarning,
+  onSave,
+  isSaving
 }: {
   assetKey: BrandingAssetKey;
   description: string;
@@ -441,6 +443,8 @@ function AssetUploadControl({
   onFile: (file: File, previewUrl: string) => void;
   onReset: () => void;
   onWarning: (message: string) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
 }) {
   const inputId = `branding-asset-${assetKey}`;
   const isBackground = assetKey === 'loginBackground';
@@ -452,8 +456,8 @@ function AssetUploadControl({
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
-      onWarning('Only image files can be used for branding assets.');
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      onWarning('Only image or video files can be used for branding assets.');
       event.target.value = '';
       return;
     }
@@ -475,11 +479,17 @@ function AssetUploadControl({
     reader.readAsDataURL(file);
   };
 
+  const isVideo = value && (value.startsWith('data:video/') || value.match(/\.(mp4|webm)$/i) || value.includes('/video/upload/'));
+
   return (
     <div className={`branding-asset-control ${isBackground ? 'is-wide' : ''}`}>
       <div className={`branding-asset-preview ${isBackground ? 'is-background' : ''}`}>
         {value ? (
-          <img alt={`${label} preview`} src={value} />
+          isVideo ? (
+            <video autoPlay loop muted playsInline src={value} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+          ) : (
+            <img alt={`${label} preview`} src={value} />
+          )
         ) : (
           <span>
             <i className={`fas ${isBackground ? 'fa-image' : 'fa-building-columns'}`}></i>
@@ -498,10 +508,21 @@ function AssetUploadControl({
           Upload
         </label>
         <input id={inputId} accept={accept} hidden type="file" onChange={handleFileChange} />
-        <button className="btn btn-outline small" type="button" onClick={onReset}>
+        <button className="btn btn-outline small" type="button" disabled={isSaving} onClick={onReset}>
           <i className="fas fa-rotate-left"></i>
           Reset
         </button>
+        {pendingFile && onSave && (
+          <button 
+            className="btn btn-primary small" 
+            type="button" 
+            disabled={isSaving} 
+            onClick={onSave}
+          >
+            <i className={`fas ${isSaving ? 'fa-spinner fa-spin' : 'fa-check'}`}></i>
+            Save
+          </button>
+        )}
       </div>
       <div className="form-field branding-asset-url">
         <label htmlFor={`${inputId}-url`}>Asset URL</label>
@@ -916,6 +937,26 @@ export function SystemAdminBranding() {
     }));
   };
 
+  const resetAsset = (key: BrandingAssetKey) => {
+    if (!window.confirm('Reset this asset to the system default?')) {
+      return;
+    }
+
+    updateDraft((current) => ({
+      ...current,
+      assets: {
+        ...current.assets,
+        [key]: DEFAULT_BRANDING.assets[key]
+      }
+    }));
+    setPendingFiles((current) => {
+      if (!current[key]) return current;
+      const nextFiles = { ...current };
+      delete nextFiles[key];
+      return nextFiles;
+    });
+  };
+
   const updateAsset = (key: BrandingAssetKey, value: string) => {
     updateDraft((current) => ({
       ...current,
@@ -949,9 +990,7 @@ export function SystemAdminBranding() {
     }));
   };
 
-  const resetAsset = (key: BrandingAssetKey) => {
-    updateAsset(key, DEFAULT_BRANDING.assets[key]);
-  };
+
 
   const updateLandingField = <K extends keyof BrandingLandingSettings>(
     field: K,
@@ -1189,29 +1228,31 @@ export function SystemAdminBranding() {
       try {
         const formData = new FormData();
         formData.set('file', file);
-        formData.set('folder', 'thesistrack/branding');
-        formData.set('category', `Branding ${key}`);
+        
+        // Map BrandingAssetKey to BrandingAssetType if needed, or pass the key
+        let type = 'OTHER';
+        if (key === 'mainLogo') type = 'SYSTEM_LOGO';
+        else if (key === 'institutionLogo') type = 'SCHOOL_LOGO';
+        else if (key === 'loginBackground') type = 'LANDING_IMAGE';
+        
+        formData.set('type', type);
+        formData.set('label', key);
 
-        const response = await fetch('/api/uploads', {
+        const response = await fetch('/api/admin/media/upload', {
           method: 'POST',
           body: formData,
           credentials: 'same-origin'
         });
-        const payload = await parseApiPayload<{
-          success?: boolean;
-          file?: {
-            secureUrl?: string;
-          };
-          message?: string;
-        }>(response);
+        const payload = await response.json();
 
-        if (!response.ok || !payload?.success || !payload.file?.secureUrl) {
-          throw new Error(payload?.message || 'Upload failed.');
+        if (!response.ok || !payload?.success || !payload.data?.secure_url) {
+          throw new Error(payload?.error || payload?.message || 'Upload failed.');
         }
 
-        nextBranding.assets[key] = payload.file.secureUrl;
-      } catch {
-        usedInlineAssets = true;
+        nextBranding.assets[key] = payload.data.secure_url;
+      } catch (err: any) {
+        console.error(`Upload failed for ${key}:`, err);
+        throw err; // Stop upload and propagate error to saveBranding
       }
     }
 
@@ -2090,6 +2131,8 @@ export function SystemAdminBranding() {
                       onChange={(value) => updateAsset(asset.key, value)}
                       onFile={(file, previewUrl) => handleAssetFile(asset.key, file, previewUrl)}
                       onReset={() => resetAsset(asset.key)}
+                      onSave={() => saveBranding()}
+                      isSaving={isSaving}
                       onWarning={(message) => setBanner({
                         tone: 'warning',
                         title: 'Asset not accepted',
@@ -2198,9 +2241,9 @@ export function SystemAdminBranding() {
                 <span>{pendingFileCount ? `${pendingFileCount} asset upload pending` : 'Ready to save when changes are reviewed'}</span>
               </div>
               <div className="branding-command-actions">
-                <button className="btn btn-primary" disabled={isSaving} type="button" onClick={() => void saveBranding()}>
-                  <i className={`fas ${isSaving ? 'fa-spinner fa-spin' : 'fa-floppy-disk'}`}></i>
-                  {isSaving ? 'Saving...' : 'Save Branding'}
+                <button className="btn btn-primary" disabled={isSaving || isLoading} type="button" onClick={() => saveBranding()}>
+                  {isSaving ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-check"></i>}
+                  Save Changes
                 </button>
                 <button className="btn btn-outline" disabled={isSaving} type="button" onClick={() => void restoreDefaultBranding()}>
                   <i className="fas fa-rotate-left"></i>

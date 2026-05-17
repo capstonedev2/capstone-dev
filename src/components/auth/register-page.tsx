@@ -71,7 +71,9 @@ export function RegisterPage() {
     .slice(0, 3)
     .map((part) => part.charAt(0).toUpperCase())
     .join('');
-  const registerBackgroundStyle = branding.assets.loginBackground ? {
+  const isVideoBackground = branding.assets.loginBackground?.match(/\.(mp4|webm)$/i) || branding.assets.loginBackground?.includes('/video/upload/');
+
+  const registerBackgroundStyle = branding.assets.loginBackground && !isVideoBackground ? {
     backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.34), rgba(0, 58, 143, 0.18)), url("${branding.assets.loginBackground.replace(/"/g, '\\"')}")`,
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
@@ -264,6 +266,19 @@ export function RegisterPage() {
 
   return (
     <main className={authUi.page} style={registerBackgroundStyle}>
+      {isVideoBackground && (
+        <>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            src={branding.assets.loginBackground}
+            style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -10 }}
+          />
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.45)', zIndex: -9 }} />
+        </>
+      )}
       <div className={authUi.pageWash} aria-hidden="true" />
       <div className={authUi.pagePattern} aria-hidden="true" />
       <div className={authUi.topStripe} aria-hidden="true" />
