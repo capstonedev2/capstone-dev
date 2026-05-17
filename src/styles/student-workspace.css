@@ -18859,6 +18859,14 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-page .student-
     background: rgba(255, 255, 255, 0.16) !important;
 }
 
+html[data-student-theme="dark"] .student-shell .student-dashboard-page .student-workspace-action-icon,
+.student-shell[data-theme="dark"] .student-dashboard-page .student-workspace-action-icon,
+html[data-student-theme="dark"] .student-shell .student-dashboard-page .dashboard-action-icon,
+.student-shell[data-theme="dark"] .student-dashboard-page .dashboard-action-icon {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #e2e8f0 !important;
+}
+
 
 html[data-student-theme="dark"] .student-shell .student-dashboard-page .dashboard-pulse-item,
 html[data-student-theme="dark"] .student-shell .student-dashboard-page .dashboard-pulse-item.is-warning,

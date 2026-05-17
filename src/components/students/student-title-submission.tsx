@@ -869,6 +869,18 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       return;
     }
 
+    const hasEmptyDraft = submissions.some(
+      (s) => s.registrationStatus === 'Draft' && s.attachments.length === 0 && (!s.proposedTitle || !s.proposedTitle.trim())
+    );
+
+    if (hasEmptyDraft) {
+      setNotice({
+        tone: 'warning',
+        message: 'You already have an empty draft proposal. Please use it or delete it first.'
+      });
+      return;
+    }
+
     const nextProposalNumber =
       submissions.reduce((highest, submission) => Math.max(highest, submission.proposalNumber), 0) + 1;
     const draftSubmission = createDraftSubmission(data, nextProposalNumber, isLeader);

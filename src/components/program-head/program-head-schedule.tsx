@@ -2,16 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { PROGRAM_HEAD_PROJECTS, PROGRAM_HEAD_ADVISERS, type ProgramHeadProject } from './program-head-data';
-import { ProgramHeadStatCard } from './program-head-primitives';
 
-const ROOMS = ['Room 401', 'Room 402', 'Room 403', 'Conference Room A'];
+const ROOMS = ['Room 401', 'Room 402', 'Room 403', 'Conference Room A', 'Virtual - Zoom'];
 const SCHEDULE_STAGES = [
-  { type: 'Concept Proposal', icon: 'fa-lightbulb', helper: 'First validation of problem, scope, and feasibility.', tone: 'from-[#003a8f] to-[#002c6b]' },
-  { type: 'Proposal Defense', icon: 'fa-file-signature', helper: 'Formal proposal panel review before development.', tone: 'from-blue-600 to-indigo-700' },
+  { type: 'Concept Presentation', icon: 'fa-lightbulb', helper: 'First validation of problem, scope, and feasibility.', tone: 'from-blue-600 to-indigo-700' },
+  { type: 'Proposal Defense', icon: 'fa-file-signature', helper: 'Formal proposal panel review before development.', tone: 'from-[#003a8f] to-[#002c6b]' },
   { type: 'Mock Defense', icon: 'fa-chalkboard-user', helper: 'Practice defense for readiness and delivery checks.', tone: 'from-amber-500 to-orange-600' },
   { type: 'Final Defense', icon: 'fa-gavel', helper: 'Final evaluation session for completion decision.', tone: 'from-emerald-600 to-teal-700' }
 ];
-const SCHEDULE_TYPES = SCHEDULE_STAGES.map((stage) => stage.type);
 
 type FacultyOption = { id: string; name: string; email?: string; department?: string | null; role?: string | null; };
 
@@ -21,7 +19,6 @@ type DefenseAssignment = {
 };
 
 type AdviserApiResponse = { advisers?: FacultyOption[]; panelists?: FacultyOption[]; data?: { advisers?: FacultyOption[]; panelists?: FacultyOption[]; }; };
-
 type DefenseSchedulesApiResponse = { success?: boolean; message?: string; assignment?: DefenseAssignment | null; assignments?: DefenseAssignment[]; fieldErrors?: Record<string, string>; };
 
 function getFacultyName(faculty: FacultyOption) { return faculty.name || faculty.email || 'Faculty'; }
@@ -30,15 +27,64 @@ function normalizeFacultyIdentity(value: string) {
   return value.trim().toLowerCase().replace(/(^|\s)(dr|prof|professor|engr|engineer|mr|mrs|ms)\.?(?=\s|$)/g, ' ').replace(/[^\p{L}\p{N}@.]+/gu, ' ').replace(/\s+/g, ' ').trim();
 }
 
-function formatScheduleLine(assignment?: DefenseAssignment) {
-  if (!assignment) return { time: 'Schedule pending', room: 'No room assigned', panel: 'No panel assigned', type: 'Schedule pending' };
-  return { time: `${assignment.date} at ${assignment.time}`, room: assignment.room || 'No room assigned', panel: `${assignment.panelists.length} panelist${assignment.panelists.length === 1 ? '' : 's'}`, type: assignment.scheduleType || 'Defense Schedule' };
+// ─── EXTENDED MOCK LOGIC FOR REDESIGN ──────────────────────────────────────────
+
+type ScheduleStatus = 'Ready First Schedule' | 'Ready for Reschedule' | 'Scheduled' | 'Revision Required' | 'Re-proposal Required';
+
+interface EnrichedProject extends ProgramHeadProject {
+  batchSection: string;
+  attemptCount: number;
+  scheduleStatus: ScheduleStatus;
+  eligibleStage: string;
 }
 
-function getScheduleStageMeta(type: string) { return SCHEDULE_STAGES.find((stage) => stage.type === type) ?? SCHEDULE_STAGES[0]; }
+// Map existing mocked projects to the new scheduling logic
+function enrichProjects(projects: readonly ProgramHeadProject[], assignmentsByCode: Record<string, DefenseAssignment>): EnrichedProject[] {
+  return projects.map((p, index) => {
+    let eligibleStage = 'Concept Presentation';
+    if (p.currentStage === 'Chapter 1' || p.currentStage === 'Chapter 2') eligibleStage = 'Proposal Defense';
+    if (p.currentStage === 'Chapter 3' || p.currentStage === 'Data Analysis') eligibleStage = 'Mock Defense';
+    if (p.currentStage === 'Final Defense' || p.status === 'Completed') eligibleStage = 'Final Defense';
+
+    let attemptCount = 1;
+    let scheduleStatus: ScheduleStatus = 'Ready First Schedule';
+
+    if (assignmentsByCode[p.code]) {
+      scheduleStatus = 'Scheduled';
+    } else {
+      // Create some fake variety based on index
+      if (index % 7 === 0) {
+        scheduleStatus = 'Ready for Reschedule';
+        attemptCount = 2;
+      } else if (index % 5 === 0) {
+        scheduleStatus = 'Revision Required';
+      } else if (index % 8 === 0) {
+        scheduleStatus = 'Re-proposal Required';
+      }
+    }
+
+    return {
+      ...p,
+      batchSection: `BS${p.department}-${(index % 4) + 1}${(index % 2 === 0 ? 'A' : 'B')}`,
+      attemptCount,
+      scheduleStatus,
+      eligibleStage,
+    };
+  });
+}
+
+const TABS: Array<{ label: ScheduleStatus; colorClass: string; activeClass: string; icon: string }> = [
+  { label: 'Ready First Schedule', colorClass: 'bg-blue-100 text-blue-700', activeClass: 'border-blue-600 text-blue-700', icon: 'fa-calendar-plus' },
+  { label: 'Ready for Reschedule', colorClass: 'bg-purple-100 text-purple-700', activeClass: 'border-purple-600 text-purple-700', icon: 'fa-calendar-day' },
+  { label: 'Scheduled', colorClass: 'bg-emerald-100 text-emerald-700', activeClass: 'border-emerald-600 text-emerald-700', icon: 'fa-calendar-check' },
+  { label: 'Revision Required', colorClass: 'bg-orange-100 text-orange-700', activeClass: 'border-orange-500 text-orange-700', icon: 'fa-file-pen' },
+  { label: 'Re-proposal Required', colorClass: 'bg-rose-100 text-rose-700', activeClass: 'border-rose-600 text-rose-700', icon: 'fa-rotate-left' },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function ProgramHeadSchedule() {
-  const [activeTab, setActiveTab] = useState<'queue' | 'scheduled'>('queue');
+  const [activeTab, setActiveTab] = useState<ScheduleStatus>('Ready First Schedule');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Bulk selection and queue state
@@ -46,14 +92,15 @@ export function ProgramHeadSchedule() {
   const [presentationOrder, setPresentationOrder] = useState<string[]>([]);
   
   // Schedule settings state
-  const [scheduleType, setScheduleType] = useState(SCHEDULE_TYPES[0]);
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
-  const [durationMinutes, setDurationMinutes] = useState('45');
   const [room, setRoom] = useState('');
   const [chair, setChair] = useState('');
   const [member1, setMember1] = useState('');
   const [member2, setMember2] = useState('');
+  const [member3, setMember3] = useState('');
+  const [member4, setMember4] = useState('');
+  const [member5, setMember5] = useState('');
   
   const [facultyOptions, setFacultyOptions] = useState<FacultyOption[]>([]);
   const [assignments, setAssignments] = useState<DefenseAssignment[]>([]);
@@ -69,9 +116,9 @@ export function ProgramHeadSchedule() {
     return map;
   }, [assignments]);
 
-  const pendingGroups = useMemo(() => PROGRAM_HEAD_PROJECTS.filter((p) => !assignmentsByCode[p.code] && (p.status === 'Active' || p.status === 'Pending')), [assignmentsByCode]);
-  const scheduledGroups = useMemo(() => PROGRAM_HEAD_PROJECTS.filter((p) => assignmentsByCode[p.code] || p.status === 'Completed'), [assignmentsByCode]);
-  const activeList = activeTab === 'queue' ? pendingGroups : scheduledGroups;
+  const enrichedGroups = useMemo(() => enrichProjects(PROGRAM_HEAD_PROJECTS, assignmentsByCode), [assignmentsByCode]);
+
+  const activeList = useMemo(() => enrichedGroups.filter((g) => g.scheduleStatus === activeTab), [enrichedGroups, activeTab]);
 
   const filteredList = useMemo(() => {
     if (!searchQuery.trim()) return activeList;
@@ -81,7 +128,6 @@ export function ProgramHeadSchedule() {
 
   useEffect(() => {
     let cancelled = false;
-
     async function loadFaculty() {
       try {
         const response = await fetch('/api/advisers', { cache: 'no-store', credentials: 'same-origin' });
@@ -99,7 +145,6 @@ export function ProgramHeadSchedule() {
         if (!cancelled) setFacultyOptions([]);
       }
     }
-
     async function loadAssignments() {
       try {
         const response = await fetch('/api/defense-schedules', { cache: 'no-store', credentials: 'same-origin' });
@@ -110,10 +155,8 @@ export function ProgramHeadSchedule() {
         if (!cancelled) setAssignments([]);
       }
     }
-
     void loadFaculty();
     void loadAssignments();
-
     return () => { cancelled = true; };
   }, []);
 
@@ -142,6 +185,11 @@ export function ProgramHeadSchedule() {
     setPresentationOrder(newOrder);
   };
 
+  const removeGroup = (code: string) => {
+    setSelectedGroupCodes(prev => prev.filter(c => c !== code));
+    setPresentationOrder(prev => prev.filter(c => c !== code));
+  };
+
   const clearSelection = () => {
     setSelectedGroupCodes([]);
     setPresentationOrder([]);
@@ -155,7 +203,7 @@ export function ProgramHeadSchedule() {
   };
 
   const calculatedTimes = useMemo(() => {
-    const times: Record<string, string> = {};
+    const times: Array<{ code: string; start: string; end: string }> = [];
     if (!startTime) return times;
     
     let currentMs = 0;
@@ -166,31 +214,45 @@ export function ProgramHeadSchedule() {
       return times;
     }
 
-    const duration = parseInt(durationMinutes, 10) || 45;
+    const duration = 45;
+    const breakMins = 0;
+
     presentationOrder.forEach((code) => {
-      const d = new Date(currentMs);
-      const hours = d.getHours().toString().padStart(2, '0');
-      const mins = d.getMinutes().toString().padStart(2, '0');
-      times[code] = `${hours}:${mins}`;
+      const startD = new Date(currentMs);
+      const startHours = startD.getHours().toString().padStart(2, '0');
+      const startMins = startD.getMinutes().toString().padStart(2, '0');
+      
       currentMs += duration * 60000;
+      
+      const endD = new Date(currentMs);
+      const endHours = endD.getHours().toString().padStart(2, '0');
+      const endMins = endD.getMinutes().toString().padStart(2, '0');
+      
+      times.push({ code, start: `${startHours}:${startMins}`, end: `${endHours}:${endMins}` });
+      currentMs += breakMins * 60000; // add break after group
     });
     return times;
-  }, [presentationOrder, startTime, durationMinutes]);
+  }, [presentationOrder, startTime]);
+
+  const getTimeSlot = (code: string) => {
+    const slot = calculatedTimes.find(t => t.code === code);
+    return slot ? `${slot.start} - ${slot.end}` : '--:--';
+  };
 
   const selectedAdvisers = useMemo(() => {
-    const names = presentationOrder.map(code => activeList.find(p => p.code === code)?.adviser).filter(Boolean);
+    const names = presentationOrder.map(code => enrichedGroups.find(p => p.code === code)?.adviser).filter(Boolean);
     return new Set(names.map(name => normalizeFacultyIdentity(name!)));
-  }, [presentationOrder, activeList]);
+  }, [presentationOrder, enrichedGroups]);
 
   const handlePublish = async () => {
     if (!presentationOrder.length || isSaving) return;
 
     setFormMessage(null);
-    const panelIds = [chair, member1, member2].filter(Boolean);
+    const panelIds = [chair, member1, member2, member3, member4, member5].filter(Boolean);
     const uniquePanelIds = new Set(panelIds);
 
-    if (!scheduleType || !date || !startTime || !room || !chair) {
-      setFormMessage({ tone: 'danger', text: 'Fill out all batch settings (Stage, Date, Start Time, Venue, Panel Chair).' });
+    if (!date || !startTime || !room || !chair) {
+      setFormMessage({ tone: 'danger', text: 'Fill out all batch settings (Date, Start Time, Venue, Panel Chair).' });
       return;
     }
 
@@ -211,9 +273,9 @@ export function ProgramHeadSchedule() {
       const newAssignments: DefenseAssignment[] = [];
       
       for (const code of presentationOrder) {
-        const group = activeList.find(p => p.code === code);
+        const group = enrichedGroups.find(p => p.code === code);
         if (!group) continue;
-        const timeSlot = calculatedTimes[code];
+        const timeSlot = calculatedTimes.find(t => t.code === code)?.start || startTime;
 
         const response = await fetch('/api/defense-schedules', {
           method: 'POST',
@@ -222,7 +284,7 @@ export function ProgramHeadSchedule() {
           body: JSON.stringify({
             groupCode: group.code,
             projectTitle: group.title,
-            scheduleType,
+            scheduleType: group.eligibleStage,
             department: group.department,
             adviserName: group.adviser,
             students: group.students,
@@ -230,7 +292,7 @@ export function ProgramHeadSchedule() {
             time: timeSlot,
             room,
             chairId: chair,
-            memberIds: [member1, member2].filter(Boolean)
+            memberIds: [member1, member2, member3, member4, member5].filter(Boolean)
           })
         });
         const payload = await response.json();
@@ -248,7 +310,7 @@ export function ProgramHeadSchedule() {
       
       setFormMessage({ tone: 'success', text: `Successfully published ${successCount} schedules.` });
       clearSelection();
-      setActiveTab('scheduled');
+      setActiveTab('Scheduled');
     } catch (error) {
       setFormMessage({ tone: 'danger', text: error instanceof Error ? error.message : 'Batch publish failed.' });
     } finally {
@@ -257,427 +319,440 @@ export function ProgramHeadSchedule() {
   };
 
   const handleDraft = () => {
-    // Just a placeholder since API only has POST for publish right now
     setFormMessage({ tone: 'success', text: 'Queue saved as Draft.' });
   };
 
+  const getTotalDurationStr = () => {
+    if (!presentationOrder.length) return '0h 0m';
+    const totalMins = 45 * presentationOrder.length;
+    const h = Math.floor(totalMins / 60);
+    const m = totalMins % 60;
+    return `${h > 0 ? `${h}h ` : ''}${m}m`;
+  };
+
+  const getCardToneClasses = (status: ScheduleStatus) => {
+    switch (status) {
+      case 'Ready First Schedule': return 'from-blue-50 to-indigo-50 border-blue-200 text-blue-700';
+      case 'Ready for Reschedule': return 'from-purple-50 to-fuchsia-50 border-purple-200 text-purple-700';
+      case 'Scheduled': return 'from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700';
+      case 'Revision Required': return 'from-orange-50 to-amber-50 border-orange-200 text-orange-700';
+      case 'Re-proposal Required': return 'from-rose-50 to-red-50 border-rose-200 text-rose-700';
+      default: return 'from-slate-50 to-slate-100 border-slate-200 text-slate-700';
+    }
+  };
+
+  const getStatusIconColor = (status: ScheduleStatus) => {
+    switch (status) {
+      case 'Ready First Schedule': return 'text-blue-500 bg-blue-100';
+      case 'Ready for Reschedule': return 'text-purple-500 bg-purple-100';
+      case 'Scheduled': return 'text-emerald-500 bg-emerald-100';
+      case 'Revision Required': return 'text-orange-500 bg-orange-100';
+      case 'Re-proposal Required': return 'text-rose-500 bg-rose-100';
+      default: return 'text-slate-500 bg-slate-100';
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <section className="overflow-hidden rounded-[2.5rem] border-0 bg-white shadow-xl shadow-[#003a8f]/5 ring-1 ring-slate-200/50">
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)]">
-          <div className="relative overflow-hidden bg-[#172554] p-8 sm:p-10 text-white">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#003a8f] via-[#0b4fb3] to-[#172554]" />
-            <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(246,190,0,0.26),transparent_45%)]" />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-white/5 blur-[80px] mix-blend-screen -translate-x-1/3 translate-y-1/3" />
-            
-            <div className="relative z-10 max-w-3xl">
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-50 backdrop-blur-md">
-                <i className="fas fa-calendar-days text-[#f6be00]" />
-                Defense Queue Builder
-              </div>
-              <h2 className="mt-6 text-3xl font-black tracking-tight sm:text-5xl text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70">
-                Orchestrate your <br className="hidden sm:block" /> panel defenses.
-              </h2>
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-blue-100/80">
-                Select multiple groups to build a presentation queue. Assign a starting time and duration to auto-generate the time slots, then assign the venue and panel.
-              </p>
-            </div>
+    <div className="space-y-8 pb-32">
+      {/* HEADER SECTION */}
+      <section className="rounded-[20px] bg-white border border-slate-200 shadow-sm p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-transparent opacity-60 pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Defense Scheduler</h1>
+            <p className="mt-1.5 text-[15px] text-slate-500">Smart queue scheduling for eligible capstone groups.</p>
           </div>
-          <div className="grid gap-4 bg-slate-50/50 p-6 sm:p-8 backdrop-blur-3xl">
-            <div className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/60 transition-shadow hover:shadow-md flex flex-col justify-center">
-              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-[#003a8f]/5 to-[#f6be00]/10 opacity-50 transition-transform group-hover:scale-150" />
-              <div className="relative">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#003a8f]/10 text-[#003a8f]">
-                    <i className="fas fa-layer-group" />
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Queue Status</p>
-                    <p className="text-lg font-black text-slate-900">{presentationOrder.length} Selected</p>
-                  </div>
-                </div>
-              </div>
+          <div className="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Scheduled Today</span>
+              <span className="text-xl font-black text-slate-800">{enrichedGroups.filter(g => g.scheduleStatus === 'Scheduled').length}</span>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60 flex flex-col justify-center">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pending</p>
-                <p className="mt-2 text-3xl font-black text-slate-900">{pendingGroups.length}</p>
-              </div>
-              <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/60 flex flex-col justify-center">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Published</p>
-                <p className="mt-2 text-3xl font-black text-emerald-600">{scheduledGroups.length}</p>
-              </div>
+            <div className="w-px h-10 bg-slate-200 mx-2" />
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Conflicts Detected</span>
+              <span className="text-xl font-black text-emerald-600 flex items-center gap-1.5"><i className="fas fa-check-circle text-[14px]"></i> 0</span>
             </div>
           </div>
         </div>
+
+        {/* KPI SUMMARY CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+          {TABS.map((tab) => {
+            const count = enrichedGroups.filter(g => g.scheduleStatus === tab.label).length;
+            return (
+              <div key={tab.label} className="group relative bg-white border border-slate-200 hover:border-slate-300 rounded-[16px] p-4 transition-all duration-300 hover:shadow-md cursor-pointer overflow-hidden">
+                <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${getCardToneClasses(tab.label).split(' ')[0]} ${getCardToneClasses(tab.label).split(' ')[1]}`} />
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getStatusIconColor(tab.label)}`}>
+                    <i className={`fas ${tab.icon} text-lg`}></i>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-slate-900">{count}</div>
+                    <div className="text-[11px] font-semibold text-slate-500 leading-tight">{tab.label}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
-      {/* Tab Header + Search */}
-      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200/60 overflow-hidden">
-        <div className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex gap-2 bg-slate-100/80 p-1.5 rounded-2xl">
-            <button
-              onClick={() => { setActiveTab('queue'); clearSelection(); }}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2.5 ${
-                activeTab === 'queue' ? 'shadow-sm bg-white text-[#003a8f] ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            >
-              <i className="fas fa-list-ol text-[#003a8f]"></i> Build Queue <span className={`ml-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black ${activeTab === 'queue' ? 'bg-[#003a8f]/10 text-[#003a8f]' : 'bg-slate-200/80 text-slate-500'}`}>{pendingGroups.length}</span>
-            </button>
-            <button
-              onClick={() => { setActiveTab('scheduled'); clearSelection(); }}
-              className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2.5 ${
-                activeTab === 'scheduled' ? 'shadow-sm bg-white text-[#003a8f] ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-              }`}
-            >
-              <i className="fas fa-check-circle text-emerald-500"></i> Scheduled <span className={`ml-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black ${activeTab === 'scheduled' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200/80 text-slate-500'}`}>{scheduledGroups.length}</span>
-            </button>
-          </div>
-          
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            {activeTab === 'queue' && (
-              <button onClick={selectAll} className="text-xs font-bold text-[#003a8f] hover:text-[#002c6b] px-4 py-2.5 bg-[#003a8f]/5 hover:bg-[#003a8f]/10 rounded-xl transition-colors whitespace-nowrap">
-                Select All
+      {/* STATUS TABS (Segmented Navigation) */}
+      <div className="border-b border-slate-200">
+        <nav className="-mb-px flex gap-6 overflow-x-auto scrollbar-hide">
+          {TABS.map((tab) => {
+            const count = enrichedGroups.filter(g => g.scheduleStatus === tab.label).length;
+            const isActive = activeTab === tab.label;
+            return (
+              <button
+                key={tab.label}
+                onClick={() => { setActiveTab(tab.label); clearSelection(); }}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[14px] transition-colors flex items-center gap-2 ${
+                  isActive ? tab.activeClass : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                {tab.label}
+                <span className={`ml-1.5 py-0.5 px-2.5 rounded-full text-[11px] font-bold ${
+                  isActive ? tab.colorClass : 'bg-slate-100 text-slate-600'
+                }`}>
+                  {count}
+                </span>
               </button>
-            )}
-            <div className="relative w-full md:w-72">
-              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* WORKSPACE AREA */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 items-start">
+        
+        {/* ELIGIBLE GROUPS PANEL */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-[15px] font-bold text-slate-800">{activeTab} Groups</h3>
+            <div className="relative w-72">
+              <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
               <input
-                className="w-full h-11 pl-11 pr-4 rounded-xl bg-slate-50 border border-slate-200/60 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 hover:bg-white focus:bg-white focus:border-[#003a8f] focus:ring-4 focus:ring-[#003a8f]/10 transition-all"
-                placeholder="Search titles or advisers..."
+                className="w-full h-9 pl-9 pr-4 rounded-lg bg-white border border-slate-200 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
+                placeholder="Search projects or advisers..."
                 type="search"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Split Layout */}
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* Left Column: Group List */}
-        <div className="w-full lg:w-7/12 space-y-4">
           {filteredList.length === 0 ? (
-            <div className="bg-white rounded-[2rem] border border-slate-200/60 p-16 text-center shadow-sm">
-              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-search text-3xl text-slate-300"></i>
+            <div className="bg-slate-50 rounded-[20px] border border-dashed border-slate-300 p-16 text-center">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-200">
+                <i className="fas fa-folder-open text-2xl text-slate-400"></i>
               </div>
-              <h3 className="text-lg font-bold text-slate-800 mb-1">No groups found</h3>
-              <p className="text-slate-500 font-medium m-0">Try adjusting your search criteria.</p>
+              <h3 className="text-[15px] font-bold text-slate-700 mb-1">No groups found</h3>
+              <p className="text-[13px] text-slate-500 font-medium">There are currently no groups in this status.</p>
             </div>
-          ) : filteredList.map(group => {
-            const assignment = assignmentsByCode[group.code];
-            const scheduleLine = formatScheduleLine(assignment);
-            const isSelected = selectedGroupCodes.includes(group.code);
-            const queueIndex = presentationOrder.indexOf(group.code);
+          ) : (
+            <div className="space-y-3">
+              {filteredList.map(group => {
+                const isSelected = selectedGroupCodes.includes(group.code);
+                const queueIndex = presentationOrder.indexOf(group.code);
+                const isActionableTab = activeTab === 'Ready First Schedule' || activeTab === 'Ready for Reschedule';
 
-            return (
-            <div
-              key={group.code}
-              className={`relative overflow-hidden bg-white rounded-[1.5rem] border transition-all duration-300 cursor-pointer group ${
-                isSelected
-                  ? 'border-[#003a8f] shadow-[0_8px_30px_rgba(0,58,143,0.12)] ring-1 ring-[#003a8f]' 
-                  : 'border-slate-200/80 hover:border-[#003a8f]/30 hover:shadow-lg hover:shadow-[#003a8f]/5'
-              }`}
-              onClick={() => activeTab === 'queue' ? toggleGroup(group.code) : null}
-            >
-              {activeTab === 'queue' && (
-                <div className="absolute top-4 right-4 z-10">
-                  <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-[#003a8f] text-white shadow-md' : 'bg-slate-100 text-transparent border border-slate-200 group-hover:border-[#003a8f]/30'
-                  }`}>
-                    <i className="fas fa-check text-xs"></i>
-                  </div>
-                </div>
-              )}
-              
-              {isSelected && (
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#003a8f]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-              )}
-              <div className="relative p-5 sm:p-6 flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0 pr-8">
-                  <div className="flex items-center gap-3 mb-3 flex-wrap">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-colors ${
-                      isSelected ? 'bg-[#003a8f]/10 text-[#003a8f]' : 'bg-slate-100 text-slate-600 group-hover:bg-[#003a8f]/10 group-hover:text-[#003a8f]'
-                    }`}>
-                      {group.code}
-                    </span>
-                    <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
-                      <i className="fas fa-chalkboard-teacher text-[10px] text-slate-400"></i>{group.adviser}
-                    </span>
-                    {isSelected && queueIndex !== -1 && (
-                      <span className="text-xs font-black text-[#f6be00] flex items-center gap-1.5 ml-auto">
-                        <i className="fas fa-list-ol text-[10px]"></i> Presenter #{queueIndex + 1}
-                      </span>
+                return (
+                  <div
+                    key={group.code}
+                    className={`group relative bg-white border rounded-[16px] p-5 transition-all duration-200 flex items-start gap-4 ${
+                      isSelected 
+                        ? 'border-blue-500 ring-1 ring-blue-500 shadow-[0_4px_20px_rgba(59,130,246,0.12)]' 
+                        : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+                    } ${!isActionableTab ? 'opacity-80 grayscale-[0.2]' : ''}`}
+                  >
+                    {isActionableTab && (
+                      <div className="pt-1 cursor-pointer" onClick={() => toggleGroup(group.code)}>
+                        <div className={`w-5 h-5 rounded-[6px] border flex items-center justify-center transition-colors ${
+                          isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white group-hover:border-blue-400 text-transparent'
+                        }`}>
+                          <i className="fas fa-check text-[10px]"></i>
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  <h3 className={`text-base font-bold leading-tight mb-4 transition-colors pr-2 ${
-                    isSelected ? 'text-[#003a8f]' : 'text-slate-800 group-hover:text-[#003a8f]'
-                  }`}>
-                    {group.title}
-                  </h3>
-                  <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-2">
-                      <div className="flex -space-x-2">
-                        {group.students.slice(0, 3).map((s, i) => (
-                          <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-bold text-slate-600" title={s}>
-                            {s.split(' ').map(n => n[0]).join('')}
-                          </div>
-                        ))}
-                        {group.students.length > 3 && (
-                          <div className="w-8 h-8 rounded-full bg-slate-50 border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-bold text-slate-500">
-                            +{group.students.length - 3}
-                          </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+                          {group.batchSection}
+                        </span>
+                        <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                          {group.eligibleStage}
+                        </span>
+                        {group.attemptCount > 1 && (
+                          <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
+                            Attempt {group.attemptCount}
+                          </span>
+                        )}
+                        {isSelected && queueIndex !== -1 && (
+                          <span className="text-[11px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-md ml-auto shadow-sm">
+                            Queue #{queueIndex + 1}
+                          </span>
                         )}
                       </div>
-                      <span className="text-xs text-slate-400 font-medium ml-2">{group.students.length} Members</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {activeTab === 'scheduled' && (
-                <div className="border-t border-slate-100 bg-slate-50/50 p-4 sm:px-6 flex flex-wrap gap-x-6 gap-y-3 text-[11px] font-semibold text-slate-600">
-                  <span className="flex items-center gap-2"><i className="fas fa-layer-group text-[#003a8f]"></i> {scheduleLine.type}</span>
-                  <span className="flex items-center gap-2"><i className="fas fa-clock text-[#003a8f]"></i> {scheduleLine.time}</span>
-                  <span className="flex items-center gap-2"><i className="fas fa-door-open text-[#003a8f]"></i> {scheduleLine.room}</span>
-                  <span className="flex items-center gap-2"><i className="fas fa-users text-[#003a8f]"></i> {scheduleLine.panel}</span>
-                </div>
-              )}
-            </div>
-          )})}
-        </div>
-
-        {/* Right Column: Queue Builder / Settings */}
-        <div className="w-full lg:w-5/12 sticky top-6">
-          <div className="bg-white rounded-[2rem] border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden flex flex-col h-[calc(100vh-2rem)] max-h-[900px]">
-          {activeTab === 'queue' ? (
-            <>
-              <div className="p-6 border-b border-slate-100 bg-white z-10 relative flex items-center justify-between">
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#003a8f] via-[#0b4fb3] to-[#f6be00]" />
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#003a8f]/10 text-[#003a8f] flex items-center justify-center shrink-0">
-                    <i className="fas fa-list-ol text-lg"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900 leading-tight">Presentation Queue</h3>
-                    <p className="mt-1 text-sm font-medium text-slate-500">{presentationOrder.length} groups selected</p>
-                  </div>
-                </div>
-                {presentationOrder.length > 0 && (
-                  <button onClick={clearSelection} className="text-xs font-bold text-slate-400 hover:text-rose-500 px-3 py-1.5 rounded-lg hover:bg-rose-50 transition-colors">
-                    Clear All
-                  </button>
-                )}
-              </div>
-
-              {presentationOrder.length > 0 ? (
-                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                  
-                  {/* Presentation Order List */}
-                  <div className="p-6 pb-0">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Order & Times</h4>
-                    <div className="space-y-2">
-                      {presentationOrder.map((code, index) => {
-                        const group = activeList.find(p => p.code === code);
-                        if (!group) return null;
-                        return (
-                          <div key={code} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 group hover:border-[#003a8f]/30 hover:bg-white transition-colors">
-                            <div className="flex flex-col gap-1 shrink-0">
-                              <button onClick={() => moveUp(index)} disabled={index === 0} className="text-slate-300 hover:text-[#003a8f] disabled:opacity-30"><i className="fas fa-caret-up"></i></button>
-                              <button onClick={() => moveDown(index)} disabled={index === presentationOrder.length - 1} className="text-slate-300 hover:text-[#003a8f] disabled:opacity-30"><i className="fas fa-caret-down"></i></button>
-                            </div>
-                            <div className="w-6 h-6 rounded-full bg-[#003a8f] text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-sm">
-                              {index + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-black text-slate-900 truncate">{group.title}</p>
-                              <p className="text-[10px] text-slate-500 truncate">{group.code} • {group.adviser}</p>
-                            </div>
-                            <div className={`shrink-0 text-xs font-bold px-2.5 py-1 rounded-md ${startTime ? 'text-[#f6be00] bg-[#f6be00]/10' : 'text-slate-400 bg-slate-200/50'}`}>
-                              {calculatedTimes[code] || '--:--'}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Batch Settings */}
-                  <div className="p-6 space-y-5">
-                    <div className="pt-6 border-t border-slate-100">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Batch Settings</h4>
                       
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="col-span-2">
-                            <label className="text-[10px] mb-2 font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Defense Stage</label>
-                            <div className="relative">
-                              <select value={scheduleType} onChange={e => setScheduleType(e.target.value)} className="w-full text-sm p-3.5 pr-10 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#003a8f] focus:bg-white focus:ring-4 focus:ring-[#003a8f]/10 font-bold outline-none cursor-pointer transition-all appearance-none">
-                                {SCHEDULE_STAGES.map(stage => <option key={stage.type} value={stage.type}>{stage.type}</option>)}
-                              </select>
-                              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-[10px] mb-2 font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Date</label>
-                            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full text-sm p-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#003a8f] focus:bg-white focus:ring-4 focus:ring-[#003a8f]/10 font-medium outline-none transition-all" />
-                          </div>
-                          <div>
-                            <label className="text-[10px] mb-2 font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Start Time</label>
-                            <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="w-full text-sm p-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#003a8f] focus:bg-white focus:ring-4 focus:ring-[#003a8f]/10 font-medium outline-none transition-all" />
-                          </div>
-                          <div>
-                            <label className="text-[10px] mb-2 font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Time per group</label>
-                            <div className="relative">
-                              <select value={durationMinutes} onChange={e => setDurationMinutes(e.target.value)} className="w-full text-sm p-3.5 pr-10 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#003a8f] focus:bg-white focus:ring-4 focus:ring-[#003a8f]/10 font-medium outline-none cursor-pointer transition-all appearance-none">
-                                <option value="30">30 mins</option>
-                                <option value="45">45 mins</option>
-                                <option value="60">1 hour</option>
-                                <option value="90">1.5 hours</option>
-                              </select>
-                              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-[10px] mb-2 font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Venue</label>
-                            <div className="relative">
-                              <select value={room} onChange={e => setRoom(e.target.value)} className="w-full text-sm p-3.5 pr-10 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#003a8f] focus:bg-white focus:ring-4 focus:ring-[#003a8f]/10 font-medium outline-none cursor-pointer transition-all appearance-none">
-                                <option value="">Select venue...</option>
-                                {ROOMS.map(r => <option key={r} value={r}>{r}</option>)}
-                              </select>
-                              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                            </div>
-                          </div>
+                      <h4 className="text-[15px] font-bold text-slate-900 leading-tight mb-2 pr-8">{group.title}</h4>
+                      
+                      <div className="flex items-center gap-4 text-[12px] font-medium text-slate-500">
+                        <div className="flex items-center gap-1.5">
+                          <i className="fas fa-user-tie text-slate-400"></i> {group.adviser}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <i className="fas fa-users text-slate-400"></i> {group.students.length} Members
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <i className="fas fa-hashtag text-slate-400"></i> {group.code}
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-100">
-                      <div className="mb-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Shared Panel Configuration</h4>
-                        <p className="mt-1 text-[11px] font-medium text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-200/50 flex items-start gap-2">
-                          <i className="fas fa-info-circle mt-0.5"></i> Faculty acting as an adviser for ANY group in this queue cannot be selected as panel members.
-                        </p>
-                      </div>
-
-                      <div className="space-y-4">
-                        {[
-                          { label: 'Panel Chair', value: chair, setter: setChair, icon: 'fa-crown', color: 'text-amber-500' },
-                          { label: 'Panel Member 1', value: member1, setter: setMember1, icon: 'fa-user', color: 'text-indigo-400' },
-                          { label: 'Panel Member 2', value: member2, setter: setMember2, icon: 'fa-user', color: 'text-indigo-400' }
-                        ].map(field => (
-                          <div key={field.label}>
-                            <label className="text-[10px] mb-2 font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                              <i className={`fas ${field.icon} ${field.color}`}></i> {field.label}
-                            </label>
-                            <div className="relative">
-                              <select value={field.value} onChange={e => field.setter(e.target.value)}
-                                className="w-full text-sm p-3.5 pr-10 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#003a8f] focus:bg-white focus:ring-4 focus:ring-[#003a8f]/10 font-medium outline-none cursor-pointer transition-all appearance-none">
-                                <option value="">Select faculty...</option>
-                                {panelFaculty.map(a => {
-                                  const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
-                                  const selectedIds = new Set([chair, member1, member2].filter(Boolean));
-                                  const isAcademicAdviser = selectedAdvisers.has(facultyNorm);
-                                  const selectedElsewhere = selectedIds.has(a.id) && a.id !== field.value;
-
-                                  return (
-                                  <option key={a.id} value={a.id} disabled={isAcademicAdviser || selectedElsewhere}>
-                                    {getFacultyName(a)}{a.department ? ` - ${a.department}` : ''} {isAcademicAdviser ? '(Queue Adviser)' : ''}
-                                  </option>
-                                )})}
-                              </select>
-                              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Preview Table */}
-                    <div className="pt-4 border-t border-slate-100 overflow-x-auto">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Schedule Preview</h4>
-                      <div className="min-w-[600px] border border-slate-200 rounded-xl overflow-hidden">
-                        <table className="w-full text-left text-[11px]">
-                          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-black">
-                            <tr>
-                              <th className="px-3 py-2 w-8">#</th>
-                              <th className="px-3 py-2 w-16">Time</th>
-                              <th className="px-3 py-2">Group</th>
-                              <th className="px-3 py-2">Adviser</th>
-                              <th className="px-3 py-2">Venue</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 bg-white font-medium text-slate-700">
-                            {presentationOrder.map((code, index) => {
-                              const group = activeList.find(p => p.code === code);
-                              return (
-                                <tr key={code} className="hover:bg-slate-50 transition-colors">
-                                  <td className="px-3 py-2 text-[#003a8f] font-black">{index + 1}</td>
-                                  <td className="px-3 py-2 text-[#f6be00] font-black">{calculatedTimes[code] || '--:--'}</td>
-                                  <td className="px-3 py-2 font-bold max-w-[200px] truncate" title={group?.title}>{group?.title}</td>
-                                  <td className="px-3 py-2 truncate max-w-[120px]">{group?.adviser}</td>
-                                  <td className="px-3 py-2 text-slate-500">{room || '-'}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {formMessage && (
-                      <div className={`rounded-xl border p-4 text-sm font-semibold flex items-start gap-3 ${formMessage.tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'}`}>
-                        <i className={`fas mt-0.5 ${formMessage.tone === 'success' ? 'fa-circle-check text-emerald-500' : 'fa-triangle-exclamation text-rose-500'}`}></i>
-                        <span className="leading-relaxed">{formMessage.text}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center flex-1 text-center p-10 bg-slate-50/50">
-                  <div className="relative mb-8 group">
-                    <div className="absolute inset-0 bg-[#003a8f]/10 rounded-full blur-xl group-hover:bg-[#003a8f]/20 transition-colors" />
-                    <div className="relative w-24 h-24 rounded-full bg-white shadow-xl flex items-center justify-center text-4xl text-slate-300 border border-slate-100">
-                      <i className="fas fa-check-square"></i>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900 mb-2">Select Groups</h3>
-                  <p className="text-sm text-slate-500 max-w-[250px] mx-auto leading-relaxed">
-                    Check the boxes on the left to add groups to the defense queue.
-                  </p>
-                </div>
-              )}
-
-              {/* Action Footer */}
-              {presentationOrder.length > 0 && (
-                <div className="p-6 sm:p-8 border-t border-slate-100 bg-slate-50/80 z-10 relative">
-                  <div className="flex gap-3">
-                    <button onClick={handleDraft} disabled={isSaving} className="w-1/3 py-3 rounded-xl font-bold text-[#003a8f] bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2">
-                      <i className="fas fa-save"></i> Save Draft
-                    </button>
-                    <button onClick={handlePublish} disabled={isSaving} className="flex-1 py-3 rounded-xl font-black text-white shadow-[0_8px_20px_rgba(0,58,143,0.3)] bg-[#003a8f] hover:bg-[#002c6b] hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
-                      <i className={`fas ${isSaving ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`}></i>
-                      {isSaving ? 'Publishing...' : `Publish ${presentationOrder.length} Schedules`}
+                    <button className="absolute top-5 right-5 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                      <i className="fas fa-ellipsis-v"></i>
                     </button>
                   </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center flex-1 text-center p-10 bg-slate-50/50">
-              <div className="relative mb-8 group">
-                <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl transition-colors" />
-                <div className="relative w-24 h-24 rounded-full bg-white shadow-xl flex items-center justify-center text-4xl text-emerald-500 border border-slate-100">
-                  <i className="fas fa-calendar-check"></i>
-                </div>
-              </div>
-              <h3 className="text-2xl font-black text-slate-900 mb-3">Scheduled Defenses</h3>
-              <p className="text-base text-slate-500 max-w-[280px] mx-auto leading-relaxed">
-                Viewing all published schedules. Switch to the Queue Builder to add new defense times.
-              </p>
+                );
+              })}
             </div>
           )}
+        </div>
+
+        {/* PRESENTATION QUEUE & SETTINGS PANEL */}
+        <div className="sticky top-6 flex flex-col gap-6">
+          
+          {/* QUEUE TIMELINE */}
+          <div className="bg-white rounded-[20px] border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
+            <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+              <div>
+                <h3 className="text-[14px] font-bold text-slate-900">Presentation Queue</h3>
+                <p className="text-[12px] text-slate-500 font-medium mt-0.5">{presentationOrder.length} groups selected • {getTotalDurationStr()}</p>
+              </div>
+              {presentationOrder.length > 0 && (
+                <button onClick={clearSelection} className="text-[12px] font-bold text-slate-500 hover:text-rose-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors">
+                  Clear
+                </button>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-slate-200">
+              {presentationOrder.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center pb-6">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-xl mb-3">
+                    <i className="fas fa-list-ol"></i>
+                  </div>
+                  <p className="text-[13px] font-bold text-slate-700">Queue is empty</p>
+                  <p className="text-[12px] text-slate-500 mt-1 max-w-[200px]">Select groups from the left panel to build the timeline.</p>
+                </div>
+              ) : (
+                <div className="relative pl-4 border-l-2 border-slate-100 space-y-6">
+                  {presentationOrder.map((code, index) => {
+                    const group = enrichedGroups.find(p => p.code === code);
+                    const isFirst = index === 0;
+                    const isLast = index === presentationOrder.length - 1;
+                    return (
+                      <div key={code} className="relative group">
+                        {/* Timeline node */}
+                        <div className="absolute -left-[25px] top-1 w-[18px] h-[18px] bg-white border-4 border-blue-500 rounded-full z-10" />
+                        
+                        <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:border-blue-300 transition-colors">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                  {getTimeSlot(code)}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400">{code}</span>
+                              </div>
+                              <p className="text-[13px] font-bold text-slate-800 leading-snug truncate">{group?.title}</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5 truncate">{group?.adviser}</p>
+                            </div>
+                            
+                            {/* Reorder Controls */}
+                            <div className="flex flex-col gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => moveUp(index)} disabled={isFirst} className="w-6 h-6 rounded bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30 flex items-center justify-center">
+                                <i className="fas fa-caret-up"></i>
+                              </button>
+                              <button onClick={() => moveDown(index)} disabled={isLast} className="w-6 h-6 rounded bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30 flex items-center justify-center">
+                                <i className="fas fa-caret-down"></i>
+                              </button>
+                            </div>
+                            <button onClick={() => removeGroup(code)} className="w-6 h-6 shrink-0 text-slate-300 hover:text-rose-500 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                <i className="fas fa-times text-sm"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* SCHEDULE SETTINGS */}
+          <div className="bg-white rounded-[20px] border border-slate-200 shadow-sm p-6">
+            <h3 className="text-[14px] font-bold text-slate-900 mb-5 flex items-center gap-2">
+              <i className="fas fa-sliders-h text-slate-400"></i> Schedule Parameters
+            </h3>
+
+            {formMessage && (
+              <div className={`mb-5 rounded-lg border p-3 text-[13px] font-medium flex items-start gap-2.5 ${formMessage.tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'}`}>
+                <i className={`fas mt-0.5 ${formMessage.tone === 'success' ? 'fa-check-circle text-emerald-500' : 'fa-exclamation-circle text-rose-500'}`}></i>
+                <span className="leading-snug">{formMessage.text}</span>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Date</label>
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full text-[13px] p-2.5 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none transition-all shadow-sm" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Start Time</label>
+                  <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="w-full text-[13px] p-2.5 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none transition-all shadow-sm" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Venue / Room</label>
+                <div className="relative">
+                  <select value={room} onChange={e => setRoom(e.target.value)} className="w-full text-[13px] p-2.5 pr-8 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none appearance-none shadow-sm cursor-pointer">
+                    <option value="">Select venue...</option>
+                    {ROOMS.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                  <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                </div>
+              </div>
+
+              <div className="h-px bg-slate-100 my-4" />
+
+              <div>
+                <label className="block text-[11px] font-bold text-amber-600 mb-1.5 flex items-center gap-1.5"><i className="fas fa-crown"></i> Panel Chair</label>
+                <div className="relative">
+                  <select value={chair} onChange={e => setChair(e.target.value)} className="w-full text-[13px] p-2.5 pr-8 rounded-lg bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 font-medium outline-none appearance-none shadow-sm cursor-pointer">
+                    <option value="">Select chair...</option>
+                    {panelFaculty.map(a => {
+                      const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
+                      const isAdviser = selectedAdvisers.has(facultyNorm);
+                      return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}{isAdviser ? ' (Conflict)' : ''}</option>;
+                    })}
+                  </select>
+                  <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Member 1</label>
+                  <div className="relative">
+                    <select value={member1} onChange={e => setMember1(e.target.value)} className="w-full text-[13px] p-2.5 pr-8 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none appearance-none shadow-sm cursor-pointer">
+                      <option value="">Select member...</option>
+                      {panelFaculty.map(a => {
+                        const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
+                        const isAdviser = selectedAdvisers.has(facultyNorm);
+                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                      })}
+                    </select>
+                    <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Member 2</label>
+                  <div className="relative">
+                    <select value={member2} onChange={e => setMember2(e.target.value)} className="w-full text-[13px] p-2.5 pr-8 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none appearance-none shadow-sm cursor-pointer">
+                      <option value="">Select member...</option>
+                      {panelFaculty.map(a => {
+                        const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
+                        const isAdviser = selectedAdvisers.has(facultyNorm);
+                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                      })}
+                    </select>
+                    <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Member 3</label>
+                  <div className="relative">
+                    <select value={member3} onChange={e => setMember3(e.target.value)} className="w-full text-[13px] p-2.5 pr-8 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none appearance-none shadow-sm cursor-pointer">
+                      <option value="">Select member...</option>
+                      {panelFaculty.map(a => {
+                        const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
+                        const isAdviser = selectedAdvisers.has(facultyNorm);
+                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                      })}
+                    </select>
+                    <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Member 4</label>
+                  <div className="relative">
+                    <select value={member4} onChange={e => setMember4(e.target.value)} className="w-full text-[13px] p-2.5 pr-8 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none appearance-none shadow-sm cursor-pointer">
+                      <option value="">Select member...</option>
+                      {panelFaculty.map(a => {
+                        const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
+                        const isAdviser = selectedAdvisers.has(facultyNorm);
+                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                      })}
+                    </select>
+                    <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1.5">Member 5</label>
+                  <div className="relative">
+                    <select value={member5} onChange={e => setMember5(e.target.value)} className="w-full text-[13px] p-2.5 pr-8 rounded-lg bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 font-medium outline-none appearance-none shadow-sm cursor-pointer">
+                      <option value="">Select member...</option>
+                      {panelFaculty.map(a => {
+                        const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
+                        const isAdviser = selectedAdvisers.has(facultyNorm);
+                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                      })}
+                    </select>
+                    <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                  </div>
+                </div>
+              </div>
+
+              {presentationOrder.length > 0 && selectedAdvisers.size > 0 && (
+                <div className="mt-4 bg-blue-50 text-blue-800 text-[11px] font-medium p-3 rounded-lg flex gap-2 items-start">
+                  <i className="fas fa-shield-alt text-blue-500 mt-0.5"></i>
+                  <span>Smart Scheduling: Faculty acting as advisers in this queue are locked from panel selection to prevent conflicts.</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* STICKY BOTTOM ACTION BAR */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] md:w-auto md:min-w-[600px] z-50">
+        <div className="bg-white/90 backdrop-blur-xl border border-slate-200/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] rounded-2xl p-3 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
+          <div className="flex items-center gap-6 px-3">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Queue</span>
+              <span className="text-[14px] font-black text-slate-900">{presentationOrder.length} Groups</span>
+            </div>
+            <div className="w-px h-8 bg-slate-200" />
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Duration</span>
+              <span className="text-[14px] font-black text-blue-600">{getTotalDurationStr()}</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <button onClick={handleDraft} disabled={isSaving || presentationOrder.length === 0} className="flex-1 md:flex-none px-5 py-2.5 rounded-xl text-[13px] font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors disabled:opacity-50">
+              Save Draft
+            </button>
+            <button onClick={handlePublish} disabled={isSaving || presentationOrder.length === 0} className="flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[13px] font-black text-white bg-gradient-to-r from-[#F6BE00] to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale-[0.5]">
+              <i className={`fas ${isSaving ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`}></i>
+              {isSaving ? 'Publishing...' : 'Publish Schedule'}
+            </button>
           </div>
         </div>
       </div>

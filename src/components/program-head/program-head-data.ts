@@ -8,7 +8,6 @@ export type ProgramHeadNavKey =
   | 'evidence'
   | 'performance'
   | 'schedule'
-  | 'users'
   | 'reports'
   | 'notifications'
   | 'profile';
@@ -76,7 +75,6 @@ export const PROGRAM_HEAD_NAV_ITEMS = [
   { key: 'evidence', href: '/program-head/evidence', label: 'Evidence / Accreditation', icon: 'fa-award' },
   { key: 'performance', href: '/program-head/performance', label: 'Adviser Performance', icon: 'fa-chalkboard-teacher' },
   { key: 'schedule', href: '/program-head/schedule', label: 'Defense Schedule', icon: 'fa-calendar-days' },
-  { key: 'users', href: '/program-head/users', label: 'Adviser Accounts', icon: 'fa-users-gear' },
   { key: 'reports', href: '/program-head/reports', label: 'Reports & Analytics', icon: 'fa-chart-bar' },
 ] as const satisfies ReadonlyArray<{
   key: ProgramHeadNavKey;

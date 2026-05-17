@@ -735,6 +735,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       icon: 'fa-file-lines',
       value: `${data.documents.length}`,
       label: 'Tracked submissions',
+      badgeLabel: 'Active',
       note: latestSubmission
         ? `Latest: ${CATEGORY_LABELS[latestSubmission.category] ?? latestSubmission.category}`
         : 'No project file is recorded yet.',
@@ -742,29 +743,32 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     },
     {
       id: 'revisions',
-      icon: 'fa-rotate-right',
+      icon: revisionCount ? 'fa-rotate-right' : 'fa-check-circle',
       value: `${revisionCount}`,
       label: 'Pending revisions',
+      badgeLabel: revisionCount ? 'Needs Action' : 'Up to date',
       note: revisionFiles[0]
         ? createExcerpt(`${revisionFiles[0].fileName} still needs updates before the next review pass.`, 72)
         : 'No file is currently waiting for revision.',
-      tone: revisionCount ? ('danger' as const) : ('success' as const)
+      tone: revisionCount ? ('danger' as const) : ('neutral' as const)
     },
     {
       id: 'overdue',
-      icon: 'fa-triangle-exclamation',
+      icon: overdueCount ? 'fa-triangle-exclamation' : 'fa-check-circle',
       value: `${overdueCount}`,
       label: 'Overdue items',
+      badgeLabel: overdueCount ? 'Action Required' : 'On schedule',
       note: overdueCount
         ? 'Resolve delayed deadlines and missed confirmations as soon as possible.'
         : 'No overdue schedules are currently recorded.',
-      tone: overdueCount ? ('danger' as const) : ('success' as const)
+      tone: overdueCount ? ('danger' as const) : ('neutral' as const)
     },
     {
       id: 'alerts',
       icon: 'fa-bell',
       value: `${unreadNotificationsCount}`,
       label: 'Unread alerts',
+      badgeLabel: highPriorityNotificationCount ? 'Check now' : 'All clear',
       note: highPriorityNotificationCount
         ? `${highPriorityNotificationCount} high-priority reminder${highPriorityNotificationCount === 1 ? '' : 's'}`
         : 'No high-priority notification is waiting.',
@@ -920,7 +924,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       label: currentWorkflowStep?.actionLabel ?? 'Continue Phase',
       meta: currentPhaseTitle,
       icon: currentPhaseToneUi.icon,
-      tone: 'primary'
+      tone: currentPhaseToneUi.tone
     },
     {
       id: 'manage-files',
@@ -1229,7 +1233,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                 <span className="stat-card-icon">
                   <i className={`fas ${item.icon}`} aria-hidden="true" />
                 </span>
-                <Badge label={item.label} tone={item.tone} />
+                <Badge label={item.badgeLabel} tone={item.tone} />
               </div>
               <strong>{item.value}</strong>
               <span>{item.label}</span>
