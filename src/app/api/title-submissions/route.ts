@@ -1,4 +1,4 @@
-import { ProjectStatus, ReviewDecision, SubmissionStatus, UserRole } from '@/generated/prisma/client';
+import { Prisma, ProjectStatus, ReviewDecision, SubmissionStatus, UserRole } from '@/generated/prisma/client';
 
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -227,7 +227,7 @@ const projectInclude = {
       }
     }
   }
-} as const;
+} satisfies Prisma.ProjectInclude;
 
 export async function GET(request: Request) {
   try {
