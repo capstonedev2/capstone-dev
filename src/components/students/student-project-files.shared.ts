@@ -45,6 +45,13 @@ export type ProjectFileRecord = {
     createdAt: string | Date;
     authorName?: string | null;
   } | null;
+  reviewComments?: Array<{
+    id: string;
+    body: string;
+    decision: string;
+    createdAt: string | Date;
+    authorName?: string | null;
+  }>;
   isFinal: boolean;
   isRepositoryCopy: boolean;
   fileType: string;
@@ -119,9 +126,9 @@ export function normalizeProjectFileStatus(value: string): ProjectFileStatus {
 export function formatProjectFileStatus(status: ProjectFileStatus) {
   switch (status) {
     case 'approved':
-      return 'Approved';
+      return 'Approved by Adviser';
     case 'under_review':
-      return 'Still Reviewing';
+      return 'Under Adviser Review';
     case 'revision':
       return 'Needs Revision';
     default:
@@ -132,9 +139,9 @@ export function formatProjectFileStatus(status: ProjectFileStatus) {
 export function formatProjectFileAdviserStatus(status: ProjectFileStatus) {
   switch (status) {
     case 'approved':
-      return 'Approved';
+      return 'Approved by Adviser';
     case 'under_review':
-      return 'Accepted by Adviser';
+      return 'Under Adviser Review';
     case 'revision':
       return 'Revision Requested';
     default:

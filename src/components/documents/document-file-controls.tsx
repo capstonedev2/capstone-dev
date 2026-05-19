@@ -20,6 +20,7 @@ export type DocumentFileSummary = {
   groupCode?: string | null;
   groupTitle?: string | null;
   groupMembers?: Array<{
+    userId?: string;
     name: string;
     role: string;
     isLeader: boolean;
@@ -37,8 +38,16 @@ export type DocumentFileSummary = {
     createdAt: string | Date;
     authorName?: string | null;
   } | null;
+  reviewComments?: Array<{
+    id: string;
+    body: string;
+    decision: string;
+    createdAt: string | Date;
+    authorName?: string | null;
+  }>;
   documentCategory: string;
   createdAt: string | Date;
+  updatedAt?: string | Date;
 };
 
 function formatDocumentFileType(file: DocumentFileSummary) {

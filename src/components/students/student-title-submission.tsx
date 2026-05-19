@@ -135,7 +135,7 @@ function createSubmissionFromRegistration(
   title: StudentDashboardData['titleRegistration']
 ): StudentTitleSubmissionRecord {
   return {
-    id: title.id,
+    id: title.registrationStatus.toLowerCase() === 'draft' ? `title-local-${title.id}` : title.id,
     proposalNumber: 1,
     proposalLabel: formatProposalLabel(1),
     isCurrent: true,
@@ -422,7 +422,15 @@ function mapApiTitleToSubmission(title: any, index: number, data: StudentDashboa
       note: 'Similarity checking can be recorded by the adviser during title review.',
       matchedTitles: []
     },
-    attachments: []
+    attachments: (title.uploadedFiles || []).map((file: any) => ({
+      id: file.id,
+      file: null,
+      fileName: file.name,
+      fileType: file.name.split('.').pop() || '',
+      sizeLabel: `${Math.round(file.size / 1024)} KB`,
+      downloadUrl: file.url,
+      uploadedAtLabel: formatDateLabel(title.submittedAt)
+    }))
   };
 }
 
@@ -547,7 +555,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         );
 
         if (!cancelled) {
-          const nextSubmissions: StudentTitleSubmissionRecord[] = realSubmissions.length ? realSubmissions : initialSubmissions;
+          const nextSubmissions: StudentTitleSubmissionRecord[] = realSubmissions;
           
           setSubmissions((currentSubmissions) => {
             const localSubmissions = currentSubmissions.filter((s) => s.id.startsWith('title-local-'));
@@ -569,11 +577,11 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               return nextSub;
             });
 
-            // Auto-create a draft if ALL real submissions are terminal (rejected/approved) and no local draft exists
-            const allTerminal = mergedReal.length > 0 && mergedReal.every((s) =>
-              ['rejected', 'approved', 'needs revision'].includes(s.registrationStatus.toLowerCase())
+            // Auto-create a draft if ALL real submissions are rejected/needs revision and no local draft exists
+            const needsNewDraft = mergedReal.length > 0 && mergedReal.every((s) =>
+              ['rejected', 'needs revision'].includes(s.registrationStatus.toLowerCase())
             );
-            if (allTerminal && localSubmissions.length === 0 && !suppressAutoDraftRef.current) {
+            if (needsNewDraft && localSubmissions.length === 0 && !suppressAutoDraftRef.current) {
               const nextNum = mergedReal.reduce((h, s) => Math.max(h, s.proposalNumber), 0) + 1;
               const autoDraft = createDraftSubmission(data, nextNum, isLeader);
               return [autoDraft, ...mergedReal.map(s => ({ ...s, isCurrent: false }))];
@@ -585,11 +593,11 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           if (!isBackground) {
             setActiveSubmissionId((currentId) => {
               if (currentId.startsWith('title-local-')) return currentId;
-              // If all real submissions are terminal, the merge created an auto-draft — switch to it
-              const allTerminal = nextSubmissions.length > 0 && nextSubmissions.every((s) =>
-                ['rejected', 'approved', 'needs revision'].includes(s.registrationStatus.toLowerCase())
+              // If all real submissions are rejected/needs revision, the merge created an auto-draft — switch to it
+              const needsNewDraft = nextSubmissions.length > 0 && nextSubmissions.every((s) =>
+                ['rejected', 'needs revision'].includes(s.registrationStatus.toLowerCase())
               );
-              if (allTerminal) {
+              if (needsNewDraft) {
                 // The auto-draft ID will be set by the next render since it's at index 0
                 return currentId; // keep current, the submissions state update will handle it
               }
@@ -1153,7 +1161,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
   const computeTimelineStep = (submission: StudentTitleSubmissionRecord) => {
     const status = submission.registrationStatus.toLowerCase();
-    if (status === 'archived') return 5;
+    if (status === 'archived') return 4;
     if (status === 'approved') return 4;
     if (status === 'under review' || status === 'needs revision' || status === 'rejected') return 3;
     if (['pending review', 'submitted', 'resubmitted'].includes(status)) return 2;
@@ -1174,8 +1182,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       icon: activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' : 
             activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' : 'fa-magnifying-glass' 
     },
-    { id: 4, label: 'Approved', icon: 'fa-check-circle' },
-    { id: 5, label: 'Archived', icon: 'fa-box-archive' },
+    { id: 4, label: 'Approved', icon: 'fa-check-circle' }
   ];
 
   return (
@@ -1311,11 +1318,16 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                   </span>
                 </h3>
                 <p className="mt-1.5 text-sm text-emerald-700/80 font-medium">
-                  <strong>&ldquo;{latestApprovedSubmission.proposedTitle}&rdquo;</strong> has been approved by your adviser.
+                  <strong>&ldquo;{latestApprovedSubmission.proposedTitle}&rdquo;</strong> has been officially approved by your adviser.
                 </p>
-                <p className="mt-3 text-sm text-emerald-600 font-semibold">
-                  <i className="fas fa-arrow-down mr-1" /> You may submit another title proposal below if needed.
-                </p>
+                <div className="mt-4 rounded-xl bg-white/60 border border-emerald-100 p-4 shadow-sm inline-block">
+                  <p className="text-sm text-emerald-800 font-extrabold flex items-center gap-2 tracking-tight">
+                    <i className="fas fa-rocket text-emerald-500 text-lg" /> Your project is now ready for the Concept Proposal phase!
+                  </p>
+                  <p className="text-xs text-emerald-600 font-medium mt-1 ml-6">
+                    You can now begin preparing and uploading your concept proposal documents.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -1333,8 +1345,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                     <i className="fas fa-file-signature text-lg"></i>
                   </div>
                   <div>
-                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Upload Proposal</h3>
-                    <p className="text-sm text-slate-500 font-medium mt-0.5">Prepare and submit your concept paper package</p>
+                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">
+                      {activeSubmission.id.startsWith('title-local-') ? 'Upload Proposal' : 'Proposal Details'}
+                    </h3>
+                    <p className="text-sm text-slate-500 font-medium mt-0.5">
+                      {activeSubmission.id.startsWith('title-local-') ? 'Prepare and submit your concept paper package' : 'View the contents of this submitted proposal'}
+                    </p>
                   </div>
                 </div>
 
@@ -1398,7 +1414,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
                       placeholder="Enter the official, finalized title of your study"
-                      className="block w-full rounded-2xl border-0 bg-slate-50 py-3.5 pl-11 pr-4 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 transition-all placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+                      className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-4 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-bold outline-none disabled:opacity-60 disabled:bg-slate-100 disabled:cursor-not-allowed"
                       disabled={!canUpload}
                     />
                   </div>
@@ -1425,7 +1441,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       }
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
                       placeholder="Add specific questions, context, or areas you want your adviser to focus on..."
-                      className="block w-full rounded-2xl border-0 bg-slate-50 py-3.5 pl-11 pr-4 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 transition-all placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 min-h-[120px] resize-y"
+                      className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-4 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-medium outline-none min-h-[140px] resize-y disabled:opacity-60 disabled:bg-slate-100 disabled:cursor-not-allowed leading-relaxed"
                       disabled={!canUpload}
                     />
                   </div>
@@ -1444,32 +1460,33 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 <div className="mb-2 ml-1 flex items-center justify-between">
                   <span className="block text-sm font-bold text-slate-700">Concept Paper Document <span className="text-rose-500">*</span></span>
                 </div>
-                <button 
-                  type="button"
-                  onClick={handleBrowseAttachments}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  disabled={!canUpload}
-                  className={`group relative flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed py-14 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
-                    isDragging 
-                      ? 'border-blue-500 bg-blue-50/50 shadow-inner scale-[1.01]' 
-                      : 'border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-sm disabled:hover:border-slate-300 disabled:hover:bg-slate-50'
-                  }`}
-                >
-                  <div className={`relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-md mb-6 transition-all duration-500 ${isDragging ? 'scale-110 shadow-blue-200' : 'group-hover:scale-110 group-hover:shadow-blue-100'}`}>
-                    <div className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping opacity-0 group-hover:opacity-100 duration-1000"></div>
-                    <i className={`fas fa-cloud-arrow-up text-3xl transition-colors duration-300 ${isDragging ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
-                  </div>
-                  <h4 className="text-lg font-extrabold text-slate-700 group-hover:text-blue-700 transition-colors">Drag and drop your file here</h4>
-                  <p className="mt-2 text-sm text-slate-500 font-medium">or click to browse from your computer</p>
-                  
-                  <div className="mt-6 flex gap-3 text-xs font-bold text-slate-500">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOCX</span>
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm"><i className="fas fa-weight-hanging text-slate-400 text-sm"></i> 10MB Max</span>
-                  </div>
-                </button>
+                  <button 
+                    type="button"
+                    onClick={handleBrowseAttachments}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    disabled={!canUpload}
+                    className={`group relative flex w-full flex-col items-center justify-center rounded-3xl border-2 border-dashed py-16 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed overflow-hidden ${
+                      isDragging 
+                        ? 'border-blue-500 bg-blue-50/80 shadow-inner scale-[1.01]' 
+                        : 'border-slate-300 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/40 hover:shadow-sm disabled:hover:border-slate-300 disabled:hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                    <div className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-md mb-6 transition-all duration-500 ${isDragging ? 'scale-110 shadow-blue-200 shadow-lg' : 'group-hover:scale-110 group-hover:shadow-blue-100 group-hover:shadow-lg rotate-3 group-hover:rotate-0'}`}>
+                      <div className="absolute inset-0 rounded-2xl bg-blue-400/20 animate-ping opacity-0 group-hover:opacity-100 duration-1000"></div>
+                      <i className={`fas fa-cloud-arrow-up text-3xl transition-colors duration-300 ${isDragging ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
+                    </div>
+                    <h4 className="text-lg font-extrabold text-slate-700 group-hover:text-blue-700 transition-colors z-10">Drag and drop your file here</h4>
+                    <p className="mt-2 text-sm text-slate-500 font-medium z-10">or click to browse from your computer</p>
+                    
+                    <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-slate-500 z-10">
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOCX</span>
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-weight-hanging text-slate-400 text-sm"></i> 10MB Max</span>
+                    </div>
+                  </button>
 
                 {/* Uploaded Files Display */}
                 <div className="mt-6">
@@ -1493,9 +1510,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                             <button onClick={() => handleOpenAttachment(att)} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm" title="Preview">
                               <i className="fas fa-expand" aria-hidden="true"></i>
                             </button>
-                            <button onClick={() => handleRemoveAttachment(att.id)} disabled={!canUpload} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" title="Remove">
-                              <i className="fas fa-trash-can" aria-hidden="true"></i>
+                            <button onClick={() => handleDownloadAttachment(att)} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all shadow-sm" title="Download">
+                              <i className="fas fa-download" aria-hidden="true"></i>
                             </button>
+                            {activeSubmission.registrationStatus === 'Draft' && (
+                              <button onClick={() => handleRemoveAttachment(att.id)} disabled={!canUpload} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" title="Remove">
+                                <i className="fas fa-trash-can" aria-hidden="true"></i>
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -1522,16 +1544,88 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                     <button 
                       type="submit"
                       disabled={!canUpload || isSubmittingTitle || activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim()}
-                      className="group flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0"
+                      className="group relative flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-blue-600/30 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
                     >
-                      <span>{isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'}</span>
-                      <i className={`fas fa-paper-plane transition-transform ${isSubmittingTitle ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} aria-hidden="true"></i>
+                      <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:translate-x-[50%] transition-transform duration-1000 ease-in-out"></div>
+                      <span className="relative z-10">{isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'}</span>
+                      <i className={`fas fa-paper-plane relative z-10 transition-transform ${isSubmittingTitle ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} aria-hidden="true"></i>
                     </button>
                   </form>
                 </div>
               </div>
             </div>
 
+            {/* Timeline Progress Card */}
+            <div className="rounded-3xl border border-slate-200/80 bg-white overflow-hidden shadow-sm flex flex-col transition-shadow duration-300 hover:shadow-md mt-6">
+              <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+                    <i className="fas fa-bars-progress text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Submission Timeline</h3>
+                    <p className="text-sm text-slate-500 font-medium mt-0.5">Track the status of your current title proposal</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-8">
+                <div className="relative">
+                  {/* Connecting Line (Desktop) */}
+                  <div className="absolute top-6 left-0 w-full h-1.5 bg-slate-100 rounded-full z-0 hidden sm:block"></div>
+                  <div 
+                    className="absolute top-6 left-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full z-0 hidden sm:block transition-all duration-1000 ease-out"
+                    style={{ width: `${(currentStepIndex / (Math.max(1, TIMELINE_STEPS.length - 1))) * 100}%` }}
+                  ></div>
+                  
+                  {/* Steps */}
+                  <div className="relative z-10 flex flex-col sm:flex-row justify-between gap-8 sm:gap-2">
+                    {TIMELINE_STEPS.map((step, index) => {
+                      const isCompleted = index <= currentStepIndex;
+                      const isCurrent = index === currentStepIndex;
+                      const isRejected = isCurrent && step.label === 'Rejected';
+                      const isNeedsRevision = isCurrent && step.label === 'Needs Revision';
+                      
+                      let circleClasses = 'bg-white border-slate-200 text-slate-300';
+                      if (isCompleted) {
+                        if (isRejected) {
+                          circleClasses = 'bg-rose-500 border-rose-500 text-white shadow-lg shadow-rose-200/50 ring-4 ring-rose-50';
+                        } else if (isNeedsRevision) {
+                          circleClasses = 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200/50 ring-4 ring-amber-50';
+                        } else if (isCurrent) {
+                          circleClasses = 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200/50 ring-4 ring-blue-50';
+                        } else {
+                          circleClasses = 'bg-blue-600 border-blue-600 text-white';
+                        }
+                      }
+                      
+                      return (
+                        <div key={step.id} className="flex flex-row sm:flex-col items-start sm:items-center gap-4 sm:gap-3 flex-1 relative">
+                          {/* Mobile Connecting Line */}
+                          {index < TIMELINE_STEPS.length - 1 && (
+                            <div className={`absolute left-6 top-12 bottom-[-2rem] w-1 sm:hidden -z-10 rounded-full ${index < currentStepIndex ? 'bg-gradient-to-b from-blue-500 to-blue-600' : 'bg-slate-100'}`}></div>
+                          )}
+                          
+                          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-500 ${circleClasses}`}>
+                            <i className={`fas ${step.icon} text-base ${isCurrent ? 'animate-pulse' : ''}`} aria-hidden="true"></i>
+                          </div>
+                          <div className="sm:text-center mt-2 sm:mt-0">
+                            <span className={`block text-sm font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>
+                              {step.label}
+                            </span>
+                            {isCurrent && (
+                              <span className={`inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${isRejected ? 'bg-rose-100 text-rose-700' : isNeedsRevision ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                                Current Stage
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
 
           </div>
 
@@ -1539,17 +1633,22 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           <div className="space-y-6">
             
             {/* Requirements Checklist Card */}
-            <div className="rounded-[1.25rem] border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-[#003A8F] to-[#1E40AF] p-6 text-white">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <i className="fas fa-list-check" aria-hidden="true"></i> Document Requirements
-                </h3>
-                <p className="text-sm text-blue-100 mt-2 font-medium opacity-90 leading-relaxed">
-                  Ensure your concept paper includes these sections before uploading.
-                </p>
+            <div className="rounded-3xl border border-slate-200/80 bg-white shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-300">
+              <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6 opacity-10">
+                  <i className="fas fa-list-check text-8xl transform rotate-12 transition-transform duration-700 hover:rotate-0"></i>
+                </div>
+                <div className="relative z-10">
+                  <h3 className="text-xl font-extrabold flex items-center gap-3 tracking-tight">
+                    <i className="fas fa-clipboard-check text-indigo-400" aria-hidden="true"></i> Document Requirements
+                  </h3>
+                  <p className="text-sm text-slate-300 mt-3 font-medium leading-relaxed max-w-[250px]">
+                    Ensure your concept paper includes these critical sections before uploading.
+                  </p>
+                </div>
               </div>
-              <div className="p-6 bg-slate-50/50">
-                <ul className="space-y-3.5">
+              <div className="p-8 bg-white flex-1">
+                <ul className="space-y-4">
                   {[
                     'Title',
                     'Background of the study',
@@ -1560,9 +1659,11 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                     'Process of Addressing the Problems',
                     'References'
                   ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3.5 text-sm font-semibold text-slate-700">
-                      <i className="fas fa-check text-emerald-500 mt-0.5 text-base" aria-hidden="true"></i>
-                      {item}
+                    <li key={i} className="flex items-center gap-4 text-sm font-semibold text-slate-700 group transition-all">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-emerald-200">
+                        <i className="fas fa-check text-[10px]" aria-hidden="true"></i>
+                      </div>
+                      <span className="group-hover:text-slate-900 transition-colors">{item}</span>
                     </li>
                   ))}
                 </ul>

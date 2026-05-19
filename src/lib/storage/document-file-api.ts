@@ -19,6 +19,8 @@ type DocumentFilePayloadInput = UploadedFile & {
       leader?: string | null;
       students?: string[];
       groupMembers?: Array<{
+        userId?: string | null;
+        isActive?: boolean | null;
         role?: string | null;
         user?: {
           id: string;
@@ -52,6 +54,17 @@ type DocumentFilePayloadInput = UploadedFile & {
   } | null;
 };
 
+type DocumentFilePayloadOptions = {
+  exposeReviewComments?: boolean;
+};
+
+type DocumentFileGroupMemberPayload = {
+  userId?: string;
+  name: string;
+  role: string;
+  isLeader: boolean;
+};
+
 function getUploaderName(file: DocumentFilePayloadInput) {
   if (!file.user) {
     return file.userId;
@@ -82,23 +95,29 @@ function getGroupMembers(file: DocumentFilePayloadInput) {
 
   const leaderName = String(group.leader || '').trim();
   const membersFromRelations = (group.groupMembers || [])
-    .map((member) => {
-      const name = getPersonName(member.user);
+    .map((member): DocumentFileGroupMemberPayload | null => {
+      if (member.isActive === false) {
+        return null;
+      }
+
+      const userId = member.userId || member.user?.id || '';
+      const name = getPersonName(member.user) || userId;
 
       if (!name) {
         return null;
       }
 
       const isLeader = String(member.role || '').toLowerCase() === 'leader'
-        || (leaderName && name.trim().toLowerCase() === leaderName.toLowerCase());
+        || (leaderName ? name.trim().toLowerCase() === leaderName.toLowerCase() : false);
 
       return {
+        ...(userId ? { userId } : {}),
         name,
         role: isLeader ? 'Leader' : 'Member',
         isLeader
       };
     })
-    .filter((member): member is { name: string; role: string; isLeader: boolean } => Boolean(member));
+    .filter((member): member is DocumentFileGroupMemberPayload => Boolean(member));
 
   if (membersFromRelations.length) {
     return membersFromRelations.sort((left, right) => Number(right.isLeader) - Number(left.isLeader));
@@ -117,8 +136,19 @@ function getGroupMembers(file: DocumentFilePayloadInput) {
   }).sort((left, right) => Number(right.isLeader) - Number(left.isLeader));
 }
 
-export function toDocumentFilePayload(file: DocumentFilePayloadInput) {
-  const latestComment = file.submission?.comments?.[0] ?? null;
+function toReviewCommentPayload(comment: NonNullable<NonNullable<DocumentFilePayloadInput['submission']>['comments']>[number]) {
+  return {
+    id: comment.id,
+    body: comment.body,
+    decision: comment.decision,
+    createdAt: comment.createdAt,
+    authorName: getPersonName(comment.author) || null
+  };
+}
+
+export function toDocumentFilePayload(file: DocumentFilePayloadInput, options: DocumentFilePayloadOptions = {}) {
+  const exposedComments = options.exposeReviewComments === false ? [] : file.submission?.comments ?? [];
+  const latestComment = exposedComments[0] ?? null;
 
   return {
     id: file.id,
@@ -140,15 +170,8 @@ export function toDocumentFilePayload(file: DocumentFilePayloadInput) {
     submissionVersion: file.submission?.version ?? null,
     submittedAt: file.submission?.submittedAt ?? null,
     reviewedAt: file.submission?.reviewedAt ?? null,
-    latestReviewComment: latestComment
-      ? {
-          id: latestComment.id,
-          body: latestComment.body,
-          decision: latestComment.decision,
-          createdAt: latestComment.createdAt,
-          authorName: getPersonName(latestComment.author) || null
-        }
-      : null,
+    latestReviewComment: latestComment ? toReviewCommentPayload(latestComment) : null,
+    reviewComments: exposedComments.map(toReviewCommentPayload),
     documentCategory: file.documentCategory,
     visibility: file.visibility,
     createdAt: file.createdAt,

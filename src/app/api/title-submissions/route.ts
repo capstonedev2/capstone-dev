@@ -159,7 +159,7 @@ function toTitlePayload(project: any) {
       : null,
     academicYear: project.academicYear?.label || 'Current Academic Year',
     submissionId: latestSubmission?.id || null,
-    uploadedFiles: latestSubmission?.files?.map((file: any) => ({
+    uploadedFiles: (latestSubmission?.files?.length ? latestSubmission.files : project.files)?.map((file: any) => ({
       id: file.id,
       name: file.fileName,
       url: `/api/document-files/${file.id}/download`,
@@ -198,6 +198,11 @@ const projectInclude = {
           }
         }
       }
+    }
+  },
+  files: {
+    where: { 
+      documentCategory: { in: ['Title Proposal', 'Proposal'] }
     }
   },
   submissions: {

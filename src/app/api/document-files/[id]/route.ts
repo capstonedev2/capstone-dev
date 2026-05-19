@@ -35,6 +35,8 @@ const reviewStatusMap: Record<string, SubmissionStatus> = {
   accepted: SubmissionStatus.UNDER_REVIEW,
   still_reviewing: SubmissionStatus.UNDER_REVIEW,
   under_review: SubmissionStatus.UNDER_REVIEW,
+  comment: SubmissionStatus.UNDER_REVIEW,
+  save_comment: SubmissionStatus.UNDER_REVIEW,
   approved: SubmissionStatus.APPROVED,
   revision: SubmissionStatus.NEEDS_REVISION,
   needs_revision: SubmissionStatus.NEEDS_REVISION
@@ -89,13 +91,14 @@ export async function PATCH(
     const body = await request.json().catch(() => ({}));
     const requestedStatus = normalizeText(body?.status).toLowerCase();
     const reviewNotes = normalizeText(body?.notes);
+    const isCommentOnly = requestedStatus === 'comment' || requestedStatus === 'save_comment';
     const nextStatus = reviewStatusMap[requestedStatus];
 
     if (!nextStatus) {
       return Response.json(
         {
           success: false,
-          message: 'Use a valid review status: accepted, still_reviewing, approved, or needs_revision.'
+          message: 'Use a valid review status: accepted, still_reviewing, comment, approved, or needs_revision.'
         },
         { status: 400 }
       );
@@ -187,7 +190,7 @@ export async function PATCH(
             where: { id: file.submissionId },
             data: {
               status: nextStatus,
-              reviewedAt: nextReviewedAt
+              reviewedAt: isCommentOnly && file.submission?.reviewedAt ? file.submission.reviewedAt : nextReviewedAt
             }
           })
         : file.projectId
@@ -231,27 +234,56 @@ export async function PATCH(
       );
     }
 
-    if (file.userId !== user.id) {
-      const statusLabel = nextStatus === SubmissionStatus.UNDER_REVIEW
-        ? 'accepted and still reviewing'
-        : nextStatus === SubmissionStatus.APPROVED
-          ? 'approved'
-          : nextStatus === SubmissionStatus.NEEDS_REVISION
-            ? 'returned for revision'
-            : 'marked pending review';
+    const reviewCommentCount = await prisma.reviewComment.count({
+      where: { submissionId: submission.id }
+    });
 
-      await prisma.notification.create({
-        data: {
-          userId: file.userId,
-          title: 'Adviser Review Updated',
-          message: reviewNotes
-            ? `${file.fileName} was ${statusLabel} by your adviser. New review notes are available.`
-            : `${file.fileName} was ${statusLabel} by your adviser.`,
-          type: nextStatus === SubmissionStatus.NEEDS_REVISION ? 'warning' : 'success',
-          entityType: 'uploaded_file',
-          entityId: file.id
+    if (!isCommentOnly) {
+      const recipientIds = new Set<string>();
+
+      if (file.userId && file.userId !== user.id) {
+        recipientIds.add(file.userId);
+      }
+
+      file.project?.group?.groupMembers?.forEach((member) => {
+        if (member.isActive === false || !member.userId || member.userId === user.id) {
+          return;
         }
+
+        recipientIds.add(member.userId);
       });
+
+      const notificationTitle = nextStatus === SubmissionStatus.UNDER_REVIEW
+        ? 'Under Adviser Review'
+        : nextStatus === SubmissionStatus.NEEDS_REVISION
+          ? 'Revision Requested'
+          : nextStatus === SubmissionStatus.APPROVED
+            ? 'Submission Approved'
+            : 'Adviser Review Updated';
+      const notificationMessage = nextStatus === SubmissionStatus.UNDER_REVIEW
+        ? `Your adviser has started reviewing ${file.fileName}. Your adviser is currently reviewing your submission.`
+        : nextStatus === SubmissionStatus.NEEDS_REVISION
+          ? `Your adviser requested revisions for ${file.fileName}. Review ${reviewCommentCount || 'the'} adviser comment${reviewCommentCount === 1 ? '' : 's'} and upload a revised version.`
+          : nextStatus === SubmissionStatus.APPROVED
+            ? `${file.fileName} was approved by your adviser. You can now view the adviser remarks and approval status.`
+            : `${file.fileName} was updated by your adviser.`;
+
+      if (recipientIds.size) {
+        await prisma.notification.createMany({
+          data: Array.from(recipientIds).map((userId) => ({
+            userId,
+            title: notificationTitle,
+            message: notificationMessage,
+            type: nextStatus === SubmissionStatus.NEEDS_REVISION
+              ? 'warning'
+              : nextStatus === SubmissionStatus.UNDER_REVIEW
+                ? 'info'
+                : 'success',
+            entityType: 'uploaded_file',
+            entityId: file.id
+          }))
+        });
+      }
     }
 
     const updatedFile = await prisma.uploadedFile.findUniqueOrThrow({
@@ -275,7 +307,7 @@ export async function PATCH(
             reviewedAt: true,
             comments: {
               orderBy: { createdAt: 'desc' },
-              take: 1,
+              take: 50,
               select: {
                 id: true,
                 body: true,
@@ -308,6 +340,8 @@ export async function PATCH(
                 students: true,
                 groupMembers: {
                   select: {
+                    userId: true,
+                    isActive: true,
                     role: true,
                     user: {
                       select: {

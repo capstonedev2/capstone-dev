@@ -5881,6 +5881,166 @@ tr:hover {
     }
 }
 
+@keyframes adviserUnderReviewPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.28), 0 18px 42px rgba(249, 115, 22, 0.12);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(249, 115, 22, 0), 0 24px 54px rgba(249, 115, 22, 0.2);
+    }
+}
+
+@keyframes adviserApprovalGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.24), 0 18px 42px rgba(16, 185, 129, 0.12);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0), 0 24px 54px rgba(16, 185, 129, 0.18);
+    }
+}
+
+.adviser-under-review-glow {
+    animation: adviserUnderReviewPulse 2.2s ease-in-out infinite;
+}
+
+.adviser-approval-success-glow {
+    animation: adviserApprovalGlow 2.8s ease-in-out infinite;
+}
+
+/* Adviser submissions: premium review queue and full review workspace surfaces. */
+.adviser-shell[data-theme="dark"] :is(.adviser-submissions-page, .adviser-review-workspace) {
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(
+    [class*="bg-white"],
+    [class*="bg-slate-50"],
+    [class*="bg-slate-100"],
+    [class*="bg-blue-50"],
+    [class*="bg-orange-50"],
+    [class*="bg-red-50"],
+    [class*="bg-emerald-50"],
+    [class*="bg-violet-50"]
+) {
+    --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(10, 28, 54, 0.94) !important;
+    color: #dbeafe !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    strong,
+    dd,
+    label,
+    [class*="text-slate-950"],
+    [class*="text-slate-900"],
+    [class*="text-slate-800"],
+    [class*="font-black"],
+    [class*="font-extrabold"],
+    [class*="font-bold"],
+    [class*="font-semibold"]
+) {
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(
+    p,
+    span,
+    dt,
+    [class*="text-slate-700"],
+    [class*="text-slate-600"],
+    [class*="text-slate-500"],
+    [class*="text-slate-400"]
+) {
+    color: #a9c3e8 !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(input, select, textarea) {
+    border-color: rgba(147, 197, 253, 0.26) !important;
+    background: rgba(8, 24, 47, 0.95) !important;
+    color: #f8fbff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.adviser-shell[data-theme="dark"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(input, textarea)::placeholder {
+    color: #8fb0d8 !important;
+    -webkit-text-fill-color: #8fb0d8 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-review-workspace iframe {
+    background: #ffffff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .adviser-shell[data-theme="system"] :is(.adviser-submissions-page, .adviser-review-workspace) {
+        color: #dbeafe !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(
+        [class*="bg-white"],
+        [class*="bg-slate-50"],
+        [class*="bg-slate-100"],
+        [class*="bg-blue-50"],
+        [class*="bg-orange-50"],
+        [class*="bg-red-50"],
+        [class*="bg-emerald-50"],
+        [class*="bg-violet-50"]
+    ) {
+        --tw-ring-color: rgba(147, 197, 253, 0.24) !important;
+        border-color: rgba(147, 197, 253, 0.22) !important;
+        background: rgba(10, 28, 54, 0.94) !important;
+        color: #dbeafe !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(
+        h1,
+        h2,
+        h3,
+        h4,
+        strong,
+        dd,
+        label,
+        [class*="text-slate-950"],
+        [class*="text-slate-900"],
+        [class*="text-slate-800"],
+        [class*="font-black"],
+        [class*="font-extrabold"],
+        [class*="font-bold"],
+        [class*="font-semibold"]
+    ) {
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(
+        p,
+        span,
+        dt,
+        [class*="text-slate-700"],
+        [class*="text-slate-600"],
+        [class*="text-slate-500"],
+        [class*="text-slate-400"]
+    ) {
+        color: #a9c3e8 !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    .adviser-shell[data-theme="system"] :is(.adviser-submissions-page, .adviser-review-workspace) :is(input, select, textarea) {
+        border-color: rgba(147, 197, 253, 0.26) !important;
+        background: rgba(8, 24, 47, 0.95) !important;
+        color: #f8fbff !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+}
+
 /* Title approvals: darken standalone title cards and the detail drawer. */
 .adviser-shell[data-theme="dark"] :is(.adviser-title-card, .adviser-title-details-modal) {
     --tw-ring-color: rgba(147, 197, 253, 0.24) !important;

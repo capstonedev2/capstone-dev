@@ -156,7 +156,7 @@ export function FileTable({
                   <th>File Name</th>
                   <th>Category</th>
                   <th>Version</th>
-                  <th>Status</th>
+                  <th>Progress</th>
                   <th>Adviser Status</th>
                   <th>Uploaded By</th>
                   <th>Date</th>

@@ -238,6 +238,9 @@ export type StudentDashboardData = {
     id: string;
     user_id: string;
     project_id: string;
+    submissionId?: string;
+    submissionTitle?: string;
+    submissionStatus?: string;
     status: string;
     created_at: string;
     updated_at: string;
@@ -436,6 +439,7 @@ export async function getStudentDashboardData() {
 
       try {
         const { prisma } = await import('@/lib/prisma');
+        const { SubmissionStatus } = await import('@/generated/prisma/client');
         const groupByMembership = await prisma.group.findFirst({
           where: {
             groupMembers: {
@@ -627,8 +631,16 @@ export async function getStudentDashboardData() {
 
             // Fetch Feedback (from Submissions)
             const submissions = await prisma.submission.findMany({
-              where: { projectId: activeProject.id },
-              include: { comments: { include: { author: true } } }
+              where: {
+                projectId: activeProject.id,
+                status: { in: [SubmissionStatus.NEEDS_REVISION, SubmissionStatus.APPROVED] }
+              },
+              include: {
+                comments: {
+                  include: { author: true },
+                  orderBy: { createdAt: 'desc' }
+                }
+              }
             });
             
             const allFeedback: any[] = [];
@@ -638,7 +650,10 @@ export async function getStudentDashboardData() {
                   id: c.id,
                   user_id: dbUser.id,
                   project_id: activeProject.id,
-                  status: c.isResolved ? 'Resolved' : 'Pending',
+                  submissionId: sub.id,
+                  submissionTitle: sub.title,
+                  submissionStatus: sub.status,
+                  status: sub.status === SubmissionStatus.APPROVED ? 'Approved' : 'Needs Revision',
                   created_at: c.createdAt.toISOString(),
                   updated_at: c.updatedAt.toISOString(),
                   title: `Feedback on ${sub.title}`,
@@ -646,7 +661,7 @@ export async function getStudentDashboardData() {
                   facultyName: c.author?.name || 'Faculty',
                   mode: c.author?.role === 'ADVISER' ? 'Adviser' : 'Panel',
                   dateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(c.createdAt),
-                  unread: !c.isResolved
+                  unread: sub.status === SubmissionStatus.NEEDS_REVISION
                 });
               });
             });

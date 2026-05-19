@@ -8,10 +8,23 @@ import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { STUDENT_NAV_ITEMS } from '@/components/students/student-navigation';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
-type FeedbackWorkflowStatus = 'Pending' | 'Revised' | 'Resolved';
-type FeedbackFilter = 'all' | 'unread' | 'pending' | 'resolved';
+type FeedbackWorkflowStatus = 'Needs Revision' | 'Approved';
+type FeedbackFilter = 'all' | 'unread' | 'needs-action' | 'approved';
 type FeedbackSortOption = 'latest' | 'oldest' | 'priority';
-type FeedbackBoardColumnKey = 'unread' | 'pending' | 'resolved';
+type FeedbackBoardColumnKey = 'unread' | 'needs-action' | 'approved';
+
+type FeedbackCommentDetail = {
+  id: string;
+  content: string;
+  area: string;
+  text: string;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  unread: boolean;
+  facultyName: string;
+  mode: string;
+};
 
 type FeedbackRecord = StudentDashboardData['feedback'][number] & {
   workflowStatus: FeedbackWorkflowStatus;
@@ -20,6 +33,9 @@ type FeedbackRecord = StudentDashboardData['feedback'][number] & {
   relatedChapter: string;
   relatedMilestone: string;
   relatedFile: string;
+  commentIds: string[];
+  comments: FeedbackCommentDetail[];
+  commentCount: number;
 };
 
 type FeedbackBoardColumn = {
@@ -33,8 +49,8 @@ type FeedbackBoardColumn = {
 const WORKFLOW_FILTER_OPTIONS: Array<{ value: FeedbackFilter; label: string; icon: string }> = [
   { value: 'all', label: 'All', icon: 'fa-layer-group' },
   { value: 'unread', label: 'Unread', icon: 'fa-envelope' },
-  { value: 'pending', label: 'Pending', icon: 'fa-clock' },
-  { value: 'resolved', label: 'Resolved', icon: 'fa-circle-check' }
+  { value: 'needs-action', label: 'Needs Action', icon: 'fa-file-arrow-up' },
+  { value: 'approved', label: 'Approved', icon: 'fa-circle-check' }
 ];
 
 const BUTTON_BASE_CLASS = 'inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition duration-150 focus:outline-none focus:ring-2 focus:ring-[#003A8F]/20';
@@ -60,23 +76,23 @@ const BOARD_COLUMN_STYLES: Record<FeedbackBoardColumnKey, {
     emptyIcon: 'fa-inbox',
     emptyCopy: 'No unread review notes in this lane.'
   },
-  pending: {
+  'needs-action': {
     shell: 'border-amber-100 bg-gradient-to-b from-amber-50/90 to-white',
     accent: 'bg-amber-500',
     badgeTone: 'warning',
     iconWrap: 'bg-amber-100 text-amber-700',
-    icon: 'fa-hourglass-half',
+    icon: 'fa-file-arrow-up',
     emptyIcon: 'fa-list-check',
-    emptyCopy: 'No pending review items at the moment.'
+    emptyCopy: 'No revision feedback needs action right now.'
   },
-  resolved: {
+  approved: {
     shell: 'border-emerald-100 bg-gradient-to-b from-emerald-50/90 to-white',
     accent: 'bg-emerald-500',
     badgeTone: 'success',
     iconWrap: 'bg-emerald-100 text-emerald-700',
     icon: 'fa-circle-check',
     emptyIcon: 'fa-check-double',
-    emptyCopy: 'No resolved items in the current filtered view.'
+    emptyCopy: 'No approved feedback threads in the current view.'
   }
 };
 
@@ -92,22 +108,18 @@ function getInitials(value: string) {
 function normalizeFeedbackStatus(status: string): FeedbackWorkflowStatus {
   const normalized = status.toLowerCase();
 
-  if (normalized.includes('resolved') || normalized.includes('approved') || normalized.includes('completed')) {
-    return 'Resolved';
+  if (normalized.includes('approved') || normalized.includes('completed')) {
+    return 'Approved';
   }
 
-  if (normalized.includes('revised') || normalized.includes('reply') || normalized.includes('progress')) {
-    return 'Revised';
-  }
-
-  return 'Pending';
+  return 'Needs Revision';
 }
 
 function getStatusTone(status: string): BadgeTone {
   const normalized = status.toLowerCase();
-  if (['approved', 'completed', 'resolved'].includes(normalized)) return 'success';
-  if (['pending review', 'pending', 'under review', 'revised'].includes(normalized)) return 'warning';
-  if (['needs revision', 'danger'].includes(normalized)) return 'danger';
+  if (['approved', 'completed'].includes(normalized)) return 'success';
+  if (normalized.includes('needs revision') || normalized.includes('revision')) return 'warning';
+  if (['danger'].includes(normalized)) return 'danger';
   return 'neutral';
 }
 
@@ -177,21 +189,112 @@ function inferFeedbackContext(item: StudentDashboardData['feedback'][number], da
   };
 }
 
+function parseFeedbackCommentBody(body: string) {
+  const trimmedBody = body.trim();
+  const match = trimmedBody.match(/^Area:\s*(.+?)\n\n([\s\S]*)$/i);
+
+  if (!match) {
+    return {
+      area: '',
+      text: trimmedBody
+    };
+  }
+
+  return {
+    area: match[1]?.trim() || '',
+    text: match[2]?.trim() || ''
+  };
+}
+
+function getFeedbackGroupKey(item: StudentDashboardData['feedback'][number]) {
+  return [
+    item.project_id,
+    item.submissionId || item.submissionTitle || item.title,
+    item.facultyName,
+    item.mode
+  ].join('::');
+}
+
+function toFeedbackCommentDetail(item: StudentDashboardData['feedback'][number]): FeedbackCommentDetail {
+  const parsedComment = parseFeedbackCommentBody(item.content);
+
+  return {
+    id: item.id,
+    content: item.content,
+    area: parsedComment.area,
+    text: parsedComment.text,
+    created_at: item.created_at,
+    updated_at: item.updated_at,
+    status: item.status,
+    unread: item.unread,
+    facultyName: item.facultyName,
+    mode: item.mode
+  };
+}
+
+function getThreadWorkflowStatus(comments: FeedbackCommentDetail[]): FeedbackWorkflowStatus {
+  if (comments.length && comments.every((comment) => normalizeFeedbackStatus(comment.status) === 'Approved')) {
+    return 'Approved';
+  }
+
+  return 'Needs Revision';
+}
+
 function buildFeedbackRecords(data: StudentDashboardData): FeedbackRecord[] {
-  return data.feedback.map((item) => ({
-    ...item,
-    workflowStatus: normalizeFeedbackStatus(item.status),
-    ...inferFeedbackContext(item, data)
-  }));
+  const groupedFeedback = new Map<string, FeedbackRecord>();
+
+  data.feedback.forEach((item) => {
+    const groupKey = getFeedbackGroupKey(item);
+    const commentDetail = toFeedbackCommentDetail(item);
+    const existingRecord = groupedFeedback.get(groupKey);
+
+    if (existingRecord) {
+      existingRecord.comments.push(commentDetail);
+      existingRecord.commentIds.push(item.id);
+      return;
+    }
+
+    groupedFeedback.set(groupKey, {
+      ...item,
+      workflowStatus: normalizeFeedbackStatus(item.status),
+      ...inferFeedbackContext(item, data),
+      commentIds: [item.id],
+      comments: [commentDetail],
+      commentCount: 1
+    });
+  });
+
+  return Array.from(groupedFeedback.values()).map((record) => {
+    const comments = [...record.comments].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
+    const latestComment = comments[0];
+    const workflowStatus = getThreadWorkflowStatus(comments);
+    const commentCount = comments.length;
+    const preview = commentCount > 1
+      ? `${commentCount} adviser comments are grouped in this thread. Latest: ${latestComment.text}`
+      : latestComment.content;
+
+    return {
+      ...record,
+      id: latestComment.id,
+      status: workflowStatus,
+      workflowStatus,
+      unread: comments.some((comment) => comment.unread),
+      created_at: latestComment.created_at,
+      updated_at: latestComment.updated_at,
+      content: preview,
+      commentIds: comments.map((comment) => comment.id),
+      comments,
+      commentCount
+    };
+  });
 }
 
 function getFeedbackPriorityScore(item: FeedbackRecord) {
   let score = 0;
 
   if (item.unread) score += 40;
-  if (item.workflowStatus === 'Pending') score += 30;
-  if (item.workflowStatus === 'Revised') score += 20;
-  if (item.workflowStatus === 'Resolved') score += 10;
+  if (item.workflowStatus === 'Needs Revision') score += 30;
+  if (item.workflowStatus === 'Approved') score += 10;
   if (item.mode === 'Adviser') score += 5;
 
   return score;
@@ -222,11 +325,11 @@ function getFeedbackLane(item: FeedbackRecord): FeedbackBoardColumnKey {
     return 'unread';
   }
 
-  if (item.workflowStatus === 'Resolved') {
-    return 'resolved';
+  if (item.workflowStatus === 'Approved') {
+    return 'approved';
   }
 
-  return 'pending';
+  return 'needs-action';
 }
 
 function matchesFeedbackFilter(item: FeedbackRecord, filter: FeedbackFilter) {
@@ -235,9 +338,8 @@ function matchesFeedbackFilter(item: FeedbackRecord, filter: FeedbackFilter) {
 }
 
 function getFeedbackCardClass(item: FeedbackRecord) {
-  if (item.workflowStatus === 'Resolved') return 'is-resolved';
-  if (item.workflowStatus === 'Revised') return 'is-revised';
-  return 'is-pending';
+  if (item.workflowStatus === 'Approved') return 'is-resolved';
+  return 'is-revised';
 }
 
 function formatFeedbackTimestamp(createdAt: string) {
@@ -263,8 +365,7 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
   const [reviewerFilter, setReviewerFilter] = useState<'all' | 'Adviser' | 'Panel'>('all');
   const [sortBy, setSortBy] = useState<FeedbackSortOption>('priority');
   const [feedbackData, setFeedbackData] = useState<FeedbackRecord[]>(() => buildFeedbackRecords(data));
-  const [replyForms, setReplyForms] = useState<Record<string, boolean>>({});
-  const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
+  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackRecord | null>(null);
 
   useEffect(() => {
     setFeedbackData(buildFeedbackRecords(data));
@@ -285,6 +386,7 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
       if (event.key === 'Escape') {
         setProfileMenuOpen(false);
         setSidebarOpen(false);
+        setSelectedFeedback(null);
       }
     };
     document.addEventListener('click', handleDocumentClick);
@@ -295,10 +397,18 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
     };
   }, []);
 
+  useEffect(() => {
+    if (!selectedFeedback) {
+      return;
+    }
+
+    setSelectedFeedback(feedbackData.find((item) => item.id === selectedFeedback.id) || null);
+  }, [feedbackData, selectedFeedback]);
+
   const unreadNotificationsCount = data.notifications.filter((item) => !item.read).length;
   const unreadFeedbackCount = feedbackData.filter((item) => getFeedbackLane(item) === 'unread').length;
-  const pendingRevisionCount = feedbackData.filter((item) => getFeedbackLane(item) === 'pending').length;
-  const resolvedCount = feedbackData.filter((item) => getFeedbackLane(item) === 'resolved').length;
+  const needsActionCount = feedbackData.filter((item) => getFeedbackLane(item) === 'needs-action').length;
+  const approvedCount = feedbackData.filter((item) => getFeedbackLane(item) === 'approved').length;
   const latestFeedback = sortFeedbackRecords(feedbackData, 'latest')[0] || null;
 
   const visibleFeedback = useMemo(() => {
@@ -320,8 +430,8 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
   const boardColumns = useMemo<FeedbackBoardColumn[]>(() => {
     const sectionMap: Record<FeedbackBoardColumnKey, FeedbackRecord[]> = {
       unread: [],
-      pending: [],
-      resolved: []
+      'needs-action': [],
+      approved: []
     };
 
     visibleFeedback.forEach((item) => {
@@ -337,18 +447,18 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
         items: sectionMap.unread
       },
       {
-        key: 'pending',
-        title: 'Pending',
-        description: 'Threads currently being revised, replied to, or tracked for follow-up.',
+        key: 'needs-action',
+        title: 'Needs Action',
+        description: 'Read adviser comments, revise the document, then upload the next version from Project Files.',
         tone: 'warning',
-        items: sectionMap.pending
+        items: sectionMap['needs-action']
       },
       {
-        key: 'resolved',
-        title: 'Resolved',
-        description: 'Completed review threads kept as part of the academic review history.',
+        key: 'approved',
+        title: 'Approved',
+        description: 'Approved adviser feedback threads kept as part of the academic review history.',
         tone: 'success',
-        items: sectionMap.resolved
+        items: sectionMap.approved
       }
     ];
   }, [visibleFeedback]);
@@ -357,73 +467,6 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
     setWorkflowFilter('all');
     setReviewerFilter('all');
     setSortBy('priority');
-  };
-
-  const markRead = async (id: string) => {
-    setFeedbackData((previous) => previous.map((item) => (
-      item.id === id ? { ...item, unread: false, workflowStatus: 'Resolved', status: 'Resolved' } : item
-    )));
-    try {
-      await fetch('/api/review-comments', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commentId: id, isResolved: true })
-      });
-      router.refresh();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const resolveFeedback = async (id: string) => {
-    setFeedbackData((previous) => previous.map((item) => (
-      item.id === id
-        ? {
-            ...item,
-            workflowStatus: 'Resolved',
-            status: 'Resolved',
-            unread: false
-          }
-        : item
-    )));
-    try {
-      await fetch('/api/review-comments', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commentId: id, isResolved: true })
-      });
-      router.refresh();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const toggleReply = (id: string) => {
-    setReplyForms((previous) => ({ ...previous, [id]: !previous[id] }));
-  };
-
-  const submitReply = (id: string) => {
-    const text = replyTexts[id];
-    if (!text?.trim()) {
-      return;
-    }
-
-    setFeedbackData((previous) => previous.map((item) => {
-      if (item.id !== id) {
-        return item;
-      }
-
-      return {
-        ...item,
-        studentReply: text.trim(),
-        studentReplyDate: 'Just now',
-        workflowStatus: item.workflowStatus === 'Resolved' ? 'Resolved' : 'Revised',
-        status: item.workflowStatus === 'Resolved' ? 'Resolved' : 'Revised'
-      };
-    }));
-
-    setReplyForms((previous) => ({ ...previous, [id]: false }));
-    setReplyTexts((previous) => ({ ...previous, [id]: '' }));
   };
 
   return (
@@ -452,7 +495,7 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
             <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#003A8F]">Academic Review Workflow</span>
             <div className="grid gap-3">
               <h2 className="max-w-[18ch] text-[clamp(1.55rem,2.7vw,2rem)] font-extrabold leading-tight text-slate-950">Track review threads in a clearer academic workflow board</h2>
-              <p className="max-w-[62ch] text-sm leading-7 text-slate-600">Unread notes, ongoing revisions, and resolved comments now sit in one Kanban-style review board so the group can scan priorities faster.</p>
+              <p className="max-w-[62ch] text-sm leading-7 text-slate-600">Review adviser comments in one thread per file, then upload the revised document from Project Files when changes are required.</p>
             </div>
 
             <div className="rounded-[22px] border border-blue-100 bg-blue-50/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
@@ -478,17 +521,17 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
             <article className="rounded-[22px] border border-blue-100 bg-blue-50/80 p-4 shadow-sm">
               <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-700">Unread</span>
               <strong className="mt-2 block text-3xl font-extrabold leading-none text-slate-950">{unreadFeedbackCount}</strong>
-              <small className="mt-2 block text-xs leading-5 text-slate-600">New review notes that still need acknowledgment.</small>
+              <small className="mt-2 block text-xs leading-5 text-slate-600">New review notes that still need to be viewed.</small>
             </article>
             <article className="rounded-[22px] border border-amber-100 bg-amber-50/80 p-4 shadow-sm">
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-700">Pending</span>
-              <strong className="mt-2 block text-3xl font-extrabold leading-none text-slate-950">{pendingRevisionCount}</strong>
-              <small className="mt-2 block text-xs leading-5 text-slate-600">Threads still being revised, replied to, or monitored.</small>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-700">Needs Action</span>
+              <strong className="mt-2 block text-3xl font-extrabold leading-none text-slate-950">{needsActionCount}</strong>
+              <small className="mt-2 block text-xs leading-5 text-slate-600">Threads requiring a revised upload.</small>
             </article>
             <article className="rounded-[22px] border border-emerald-100 bg-emerald-50/80 p-4 shadow-sm">
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">Resolved</span>
-              <strong className="mt-2 block text-3xl font-extrabold leading-none text-slate-950">{resolvedCount}</strong>
-              <small className="mt-2 block text-xs leading-5 text-slate-600">Completed review records preserved for project history.</small>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700">Approved</span>
+              <strong className="mt-2 block text-3xl font-extrabold leading-none text-slate-950">{approvedCount}</strong>
+              <small className="mt-2 block text-xs leading-5 text-slate-600">Approved review records preserved for project history.</small>
             </article>
           </div>
         </section>
@@ -601,7 +644,8 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
                           <div className="flex flex-wrap justify-end gap-2">
                             <Badge label={item.mode} tone={item.mode === 'Adviser' ? 'warning' : 'neutral'} />
                             {item.unread ? <Badge label="Unread" tone="info" icon="fa-envelope" /> : null}
-                            <Badge label={item.workflowStatus === 'Revised' ? 'Needs Revision' : item.workflowStatus} tone={getStatusTone(item.workflowStatus)} />
+                            <Badge label={`${item.commentCount} comment${item.commentCount === 1 ? '' : 's'}`} tone="info" icon="fa-comments" />
+                            <Badge label={item.workflowStatus} tone={getStatusTone(item.workflowStatus)} />
                           </div>
                         </div>
 
@@ -635,41 +679,17 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
                         ) : null}
 
                         <div className="mt-4 flex flex-wrap gap-2">
-                          {item.unread ? (
-                            <button className={`${TERTIARY_BUTTON_CLASS} border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100`} type="button" onClick={() => markRead(item.id)}>
-                              <i className="fas fa-envelope-open" aria-hidden="true" /> Mark Read
-                            </button>
-                          ) : null}
-                          {item.workflowStatus !== 'Resolved' ? (
-                            <button className={`${TERTIARY_BUTTON_CLASS} border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100`} type="button" onClick={() => resolveFeedback(item.id)}>
-                              <i className="fas fa-circle-check" aria-hidden="true" /> Resolve
-                            </button>
-                          ) : null}
-                          <button className={TERTIARY_BUTTON_CLASS} type="button" onClick={() => toggleReply(item.id)}>
-                            <i className="fas fa-reply" aria-hidden="true" />
-                            {replyForms[item.id] ? 'Hide Reply' : item.studentReply ? 'Edit Reply' : 'Reply'}
+                          <button className={`${TERTIARY_BUTTON_CLASS} border-[#003A8F]/20 bg-blue-50 text-[#003A8F] hover:bg-blue-100`} type="button" onClick={() => setSelectedFeedback(item)}>
+                            <i className="fas fa-list-check" aria-hidden="true" />
+                            View Details
                           </button>
+                          {item.workflowStatus === 'Needs Revision' ? (
+                            <Link className={`${TERTIARY_BUTTON_CLASS} border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100`} href="/students/project-files">
+                              <i className="fas fa-file-arrow-up" aria-hidden="true" />
+                              Upload Revised File
+                            </Link>
+                          ) : null}
                         </div>
-
-                        {replyForms[item.id] ? (
-                          <div className="mt-4 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <textarea
-                              className="min-h-[6.5rem] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/10"
-                              rows={4}
-                              placeholder="Write a short acknowledgment or update"
-                              value={replyTexts[item.id] || ''}
-                              onChange={(event) => setReplyTexts((previous) => ({ ...previous, [item.id]: event.target.value }))}
-                            />
-                            <div className="flex flex-wrap justify-end gap-2">
-                              <button className={SECONDARY_BUTTON_CLASS} type="button" onClick={() => toggleReply(item.id)}>
-                                <i className="fas fa-xmark" aria-hidden="true" /> Cancel
-                              </button>
-                              <button className={PRIMARY_BUTTON_CLASS} type="button" onClick={() => submitReply(item.id)}>
-                                <i className="fas fa-paper-plane" aria-hidden="true" /> Save Reply
-                              </button>
-                            </div>
-                          </div>
-                        ) : null}
                       </article>
                     ))
                   ) : (
@@ -690,6 +710,91 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
             );
           })}
         </section>
+
+        {selectedFeedback ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="feedback-detail-title">
+            <button
+              className="absolute inset-0 bg-slate-950/45 backdrop-blur-sm"
+              type="button"
+              aria-label="Close feedback details"
+              onClick={() => setSelectedFeedback(null)}
+            />
+
+            <section className="relative z-10 flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.25)]">
+              <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50 to-white p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Feedback Thread</span>
+                    <h2 id="feedback-detail-title" className="mt-2 text-xl font-extrabold leading-tight text-slate-950 sm:text-2xl">{selectedFeedback.title}</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {selectedFeedback.commentCount} adviser comment{selectedFeedback.commentCount === 1 ? '' : 's'} grouped into one review thread for this file.
+                    </p>
+                  </div>
+                  <button
+                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                    type="button"
+                    aria-label="Close feedback details"
+                    onClick={() => setSelectedFeedback(null)}
+                  >
+                    <i className="fas fa-xmark" aria-hidden="true" />
+                  </button>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Badge label={selectedFeedback.mode} tone={selectedFeedback.mode === 'Adviser' ? 'warning' : 'neutral'} />
+                  {selectedFeedback.unread ? <Badge label="Unread" tone="info" icon="fa-envelope" /> : null}
+                  <Badge label={selectedFeedback.workflowStatus} tone={getStatusTone(selectedFeedback.workflowStatus)} />
+                  <Badge label={`File: ${selectedFeedback.relatedFile}`} tone="neutral" icon="fa-file-lines" />
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+                <div className="grid gap-4">
+                  {selectedFeedback.comments.map((comment, index) => (
+                    <article key={comment.id} className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="flex items-start gap-3">
+                        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#003A8F] text-xs font-extrabold text-white">
+                          {index + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                              <span>{comment.facultyName}</span>
+                              <span aria-hidden="true">|</span>
+                              <span>{formatFeedbackTimestamp(comment.created_at)}</span>
+                            </div>
+                            <Badge label={normalizeFeedbackStatus(comment.status)} tone={getStatusTone(normalizeFeedbackStatus(comment.status))} />
+                          </div>
+
+                          {comment.area ? (
+                            <p className="mt-3 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[#003A8F] ring-1 ring-inset ring-blue-100">
+                              <i className="fas fa-location-dot mr-2 text-[10px]" aria-hidden="true" />
+                              {comment.area}
+                            </p>
+                          ) : null}
+
+                          <p className="mt-3 text-sm leading-6 text-slate-700">{comment.text}</p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-slate-50 p-4">
+                {selectedFeedback.workflowStatus === 'Needs Revision' ? (
+                  <Link className={`${TERTIARY_BUTTON_CLASS} border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100`} href="/students/project-files">
+                    <i className="fas fa-file-arrow-up" aria-hidden="true" />
+                    Upload Revised File
+                  </Link>
+                ) : null}
+                <button className={SECONDARY_BUTTON_CLASS} type="button" onClick={() => setSelectedFeedback(null)}>
+                  Close
+                </button>
+              </div>
+            </section>
+          </div>
+        ) : null}
       </div>
     </div>
   );

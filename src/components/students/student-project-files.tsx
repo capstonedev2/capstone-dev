@@ -93,6 +93,60 @@ function getFileStatusFromSubmission(file: any) {
   return normalizeProjectFileStatus(String(file.submissionStatus || 'pending'));
 }
 
+function parseReviewCommentBody(body?: string | null) {
+  const trimmedBody = String(body || '').trim();
+  const match = trimmedBody.match(/^Area:\s*(.+?)\n\n([\s\S]*)$/i);
+
+  if (!match) {
+    return {
+      area: '',
+      text: trimmedBody
+    };
+  }
+
+  return {
+    area: match[1]?.trim() || '',
+    text: match[2]?.trim() || ''
+  };
+}
+
+function getReviewCommentsFromSubmission(file: any) {
+  const comments = Array.isArray(file.reviewComments) ? file.reviewComments : [];
+
+  if (comments.length) {
+    return comments;
+  }
+
+  return file.latestReviewComment ? [file.latestReviewComment] : [];
+}
+
+function getStatusNoteFromSubmission(file: any) {
+  const reviewComments = getReviewCommentsFromSubmission(file);
+  const reviewComment = parseReviewCommentBody(reviewComments[0]?.body);
+
+  if (reviewComment.text) {
+    const prefix = reviewComments.length > 1
+      ? `${reviewComments.length} adviser comments are available for this version.\n\n`
+      : '';
+
+    return `${prefix}${reviewComment.area ? `Area: ${reviewComment.area}\n\n` : ''}${reviewComment.text}`;
+  }
+
+  if (file.submissionStatus === 'UNDER_REVIEW') {
+    return 'Under Adviser Review. Your adviser is currently reviewing your submission.';
+  }
+
+  if (file.submissionStatus === 'APPROVED') {
+    return 'Approved by Adviser. Your submission has been approved and adviser remarks are available.';
+  }
+
+  if (file.submissionStatus === 'NEEDS_REVISION') {
+    return 'Revision requested by adviser. Review the comments and upload a revised version.';
+  }
+
+  return `Secure private document stored in ${file.bucketName}.`;
+}
+
 async function getApiErrorMessage(response: Response) {
   try {
     const payload = await response.json();
@@ -113,7 +167,6 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadSectionRef = useRef<HTMLElement | null>(null);
   const trackerSectionRef = useRef<HTMLElement | null>(null);
-  const repositorySectionRef = useRef<HTMLElement | null>(null);
   const createdObjectUrlsRef = useRef(new Set<string>());
   const currentUserRole = useMemo(() => resolveUserRole(data.profile.groupRole), [data.profile.groupRole]);
   const currentUserId = data.profile.user_id;
@@ -198,7 +251,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
           const permissionNotifs = notifs.filter(
             (n: any) => n.status === 'UNREAD' && n.title === 'Upload Permission Granted' && n.entityType === 'permission' && n.entityId === data.group.id
           );
-          
+
           if (permissionNotifs.length > 0) {
             const latestPerm = permissionNotifs[0];
             // Parse duration from the notification message (format: "...Duration: X minutes.")
@@ -334,12 +387,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
           versionMinor: 0,
           status: getFileStatusFromSubmission(file),
           tag: getFileStatusFromSubmission(file) === 'approved' ? 'Final' : getFileStatusFromSubmission(file) === 'pending' ? 'Draft' : 'Revision',
-          versionNotes: `Secure private document stored in ${file.bucketName}.`,
+          versionNotes: getStatusNoteFromSubmission(file),
           uploadedBy: file.uploadedByName || (file.uploadedBy === currentUserId ? data.profile.fullName : 'Project Member'),
           uploadedAt: file.createdAt,
           reviewedAt: file.reviewedAt || undefined,
           reviewedBy: file.reviewedAt ? adviserName : undefined,
           latestReviewComment: file.latestReviewComment || null,
+          reviewComments: file.reviewComments || [],
           isFinal: file.bucketName === DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY || getFileStatusFromSubmission(file) === 'approved',
           isRepositoryCopy: file.bucketName === DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY || getFileStatusFromSubmission(file) === 'approved',
           fileType: file.fileType,
@@ -353,13 +407,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
               status: getFileStatusFromSubmission(file),
               uploadedBy: file.uploadedByName || (file.uploadedBy === currentUserId ? data.profile.fullName : 'Project Member'),
               uploadedAt: file.createdAt,
-              versionNotes: file.submissionStatus === 'UNDER_REVIEW'
-                ? 'Accepted by adviser and still under review.'
-                : file.submissionStatus === 'APPROVED'
-                  ? 'Approved by adviser.'
-                  : file.submissionStatus === 'NEEDS_REVISION'
-                    ? 'Revision requested by adviser.'
-                    : `Secure private document stored in ${file.bucketName}.`,
+              versionNotes: getStatusNoteFromSubmission(file),
               reviewedBy: file.reviewedAt ? adviserName : undefined,
               reviewedAt: file.reviewedAt || undefined
             }
@@ -529,9 +577,6 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     trackerSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const openRepositorySection = () => {
-    repositorySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
 
   const resetTrackerControls = () => {
     setCategoryFilter('all');
@@ -652,6 +697,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
         uploadedBy: data.profile.fullName,
         uploadedAt: uploadedFile.createdAt || uploadedAt,
         latestReviewComment: uploadedFile.latestReviewComment || null,
+        reviewComments: uploadedFile.reviewComments || [],
         isFinal: false,
         isRepositoryCopy: false,
         fileType: uploadedFile.fileType || selectedFile.type || selectedFile.name.split('.').pop() || 'File',
@@ -662,12 +708,12 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
       setFiles((current) => [nextRecord, ...current]);
       setCurrentPage(1);
-      
+
       // Consume ALL one-time use permission tokens if used
       if (!isGroupLeader && permissionNotificationId) {
         try {
           const tokenIds = permissionNotificationId.split(',');
-          await Promise.all(tokenIds.map(id => 
+          await Promise.all(tokenIds.map(id =>
             fetch('/api/notifications', {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
@@ -881,13 +927,17 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
           </div>
         </header>
 
-        <div className="page-body project-files-page-body p-6">
-          <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
-              <i className="fas fa-users-slash text-3xl" aria-hidden="true" />
+        <div className="page-body p-8 sm:p-12 lg:p-16">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-slate-200/40 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 -z-10"></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
+
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500 shadow-inner mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 ring-4 ring-white">
+              <i className="fas fa-users-slash text-4xl" aria-hidden="true" />
             </div>
-            <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-800">Group Assignment Required</h3>
-            <p className="mx-auto mt-4 max-w-lg text-slate-500 leading-relaxed">
+            <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Group Assignment Required</h3>
+            <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-500 leading-relaxed">
               You must be assigned to a project group before you can access the project files repository and begin uploading chapters or documents. Please contact your coordinator.
             </p>
           </div>
@@ -915,14 +965,18 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
           </div>
         </header>
 
-        <div className="page-body project-files-page-body p-6">
-          <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
-              <i className="fas fa-file-signature text-3xl" aria-hidden="true" />
+        <div className="page-body p-8 sm:p-12 lg:p-16">
+          <div className="mx-auto max-w-2xl rounded-3xl border border-indigo-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-indigo-200/40 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 -z-10"></div>
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
+
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 shadow-inner mb-8 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 ring-4 ring-white">
+              <i className="fas fa-lock text-4xl" aria-hidden="true" />
             </div>
-            <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-800">Title Approval Required</h3>
-            <p className="mx-auto mt-4 max-w-lg text-slate-500 leading-relaxed">
-              You must get your project title officially approved by your adviser in the Title Submission workspace before you can access the project files repository and begin uploading chapters or documents.
+            <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Title Approval Required</h3>
+            <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-600 leading-relaxed">
+              You must get your project title officially approved by your adviser in the <strong className="text-indigo-700">Title Submission</strong> workspace before you can access the project files repository and begin uploading chapters or documents.
             </p>
           </div>
         </div>
@@ -951,9 +1005,6 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
             <button className="btn btn-primary project-files-upload-button" type="button" onClick={openUploadSection}>
               <i className="fas fa-cloud-arrow-up" aria-hidden="true" /> Upload New Version
             </button>
-            <button className="btn btn-secondary" type="button" onClick={openRepositorySection}>
-              <i className="fas fa-box-archive" aria-hidden="true" /> Open Repository
-            </button>
           </div>
         </header>
 
@@ -975,6 +1026,115 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
             </article>
 
           </section>
+
+          {/* Revision Progress Timeline */}
+          {hasApprovedTitle && (
+            <section className="rounded-3xl border border-slate-200/80 bg-white overflow-hidden shadow-sm flex flex-col transition-shadow duration-300 hover:shadow-md">
+              <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
+                    <i className="fas fa-bars-progress text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Revision Progress</h3>
+                    <p className="text-sm text-slate-500 font-medium mt-0.5">Track the status of your uploaded revisions and manuscript workflow</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8">
+                <div className="relative">
+                  {(() => {
+                    const REVISION_STEPS = [
+                      { id: 0, label: 'Concept Approved', icon: 'fa-check-circle' },
+                      { id: 1, label: 'Upload Revision', icon: 'fa-cloud-arrow-up' },
+                      { id: 2, label: 'Under Adviser Review', icon: 'fa-magnifying-glass' },
+                      { id: 3, label: 'Revision Approved', icon: 'fa-clipboard-check' },
+                      { id: 4, label: 'Final Manuscript', icon: 'fa-file-circle-check' }
+                    ];
+
+                    // Only consider actual revision files (exclude Title Proposal)
+                    const revisionFiles = files.filter(f =>
+                      f.category !== 'proposal' &&
+                      f.category !== 'Title Proposal' &&
+                      f.category !== 'Proposal'
+                    );
+
+                    // Compute current step based on revision files only
+                    let revisionStepIndex = 0;
+                    if (hasApprovedTitle) revisionStepIndex = 0; // Concept is approved
+                    if (revisionFiles.length > 0) revisionStepIndex = 1; // Has uploaded revision files
+                    if (revisionFiles.some(f => f.status === 'under_review' || f.status === 'pending')) revisionStepIndex = 2; // Under review
+                    if (revisionFiles.some(f => f.status === 'revision')) revisionStepIndex = 3; // Needs revision
+                    if (revisionFiles.some(f => f.status === 'approved')) revisionStepIndex = 3; // Approved
+                    if (revisionFiles.some(f => f.category === 'final-manuscript')) revisionStepIndex = 4; // Final manuscript uploaded
+
+                    const isNeedsRevision = revisionFiles.some(f => f.status === 'revision') && !revisionFiles.some(f => f.status === 'approved');
+                    const progressWidth = (revisionStepIndex / Math.max(1, REVISION_STEPS.length - 1)) * 100;
+
+                    return (
+                      <>
+                        {/* Connecting Line (Desktop) */}
+                        <div className="absolute top-6 left-0 w-full h-1.5 bg-slate-100 rounded-full z-0 hidden sm:block"></div>
+                        <div
+                          className="absolute top-6 left-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full z-0 hidden sm:block transition-all duration-1000 ease-out"
+                          style={{ width: `${progressWidth}%` }}
+                        ></div>
+
+                        {/* Steps */}
+                        <div className="relative z-10 flex flex-col sm:flex-row justify-between gap-8 sm:gap-2">
+                          {REVISION_STEPS.map((step, index) => {
+                            const isCompleted = index <= revisionStepIndex;
+                            const isCurrent = index === revisionStepIndex;
+                            const isRevisionStep = isCurrent && isNeedsRevision && index === 3;
+
+                            let circleClasses = 'bg-white border-slate-200 text-slate-300';
+                            if (isCompleted) {
+                              if (isRevisionStep) {
+                                circleClasses = 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200/50 ring-4 ring-amber-50';
+                              } else if (isCurrent) {
+                                circleClasses = 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200/50 ring-4 ring-blue-50';
+                              } else {
+                                circleClasses = 'bg-blue-600 border-blue-600 text-white';
+                              }
+                            }
+
+                            return (
+                              <div key={step.id} className="flex flex-row sm:flex-col items-start sm:items-center gap-4 sm:gap-3 flex-1 relative">
+                                {/* Mobile Connecting Line */}
+                                {index < REVISION_STEPS.length - 1 && (
+                                  <div className={`absolute left-6 top-12 bottom-[-2rem] w-1 sm:hidden -z-10 rounded-full ${index < revisionStepIndex ? 'bg-gradient-to-b from-blue-500 to-blue-600' : 'bg-slate-100'}`}></div>
+                                )}
+
+                                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-500 ${circleClasses}`}>
+                                  <i className={`fas ${step.icon} text-base ${isCurrent ? 'animate-pulse' : ''}`} aria-hidden="true"></i>
+                                </div>
+                                <div className="sm:text-center mt-2 sm:mt-0">
+                                  <span className={`block text-sm font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>
+                                    {step.label}
+                                  </span>
+                                  {isCurrent && (
+                                    <span className={`inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${isRevisionStep ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                                      Current Stage
+                                    </span>
+                                  )}
+                                  {isCurrent && step.id === 2 ? (
+                                    <small className="mt-2 block max-w-[180px] text-xs font-semibold leading-5 text-blue-700 sm:mx-auto">
+                                      Your adviser is currently reviewing your submission.
+                                    </small>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            </section>
+          )}
 
           <section className="content-grid two-thirds project-files-main-grid">
             <article ref={trackerSectionRef} className="surface-card project-files-panel-card">
@@ -1105,7 +1265,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                       <div className="absolute right-0 top-full z-20 hidden w-64 flex-col pt-3 group-hover/permissions:flex animate-in fade-in slide-in-from-top-2 duration-200">
                         {/* Little triangle pointer */}
                         <div className="absolute right-6 top-1.5 h-3 w-3 rotate-45 border-l border-t border-slate-200/60 bg-white/95" />
-                        
+
                         <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/95 p-2 shadow-2xl shadow-blue-900/10 ring-1 ring-slate-900/5 backdrop-blur-xl">
                           <div className="px-3 pb-2 pt-1.5 border-b border-slate-100/50 mb-1">
                             <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Grant Timed Upload</h4>
@@ -1134,15 +1294,15 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                           {data.group.members.filter(m => !m.isLeader).length ? (
                             data.group.members.filter(m => !m.isLeader).map(member => {
                               const isAllowed = recentlyAllowed.has(member.user_id);
-                              
+
                               return (
                                 <button
                                   key={member.user_id}
                                   type="button"
                                   disabled={isAllowed}
                                   className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition group/item ${
-                                    isAllowed 
-                                      ? 'bg-emerald-50 cursor-default' 
+                                    isAllowed
+                                      ? 'bg-emerald-50 cursor-default'
                                       : 'hover:bg-slate-50 hover:text-blue-600'
                                   }`}
                                   onClick={async () => {
@@ -1171,23 +1331,23 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
                                     <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition ${
-                                      isAllowed 
-                                        ? 'bg-emerald-100 text-emerald-700' 
+                                      isAllowed
+                                        ? 'bg-emerald-100 text-emerald-700'
                                         : 'bg-slate-100 text-slate-600 group-hover/item:bg-blue-100 group-hover/item:text-blue-700'
                                     }`}>
                                       {isAllowed ? <i className="fas fa-check" aria-hidden="true" /> : member.fullName.charAt(0).toUpperCase()}
                                     </span>
                                     <span className={`text-sm font-semibold transition truncate ${
-                                      isAllowed 
-                                        ? 'text-emerald-800' 
+                                      isAllowed
+                                        ? 'text-emerald-800'
                                         : 'text-slate-700 group-hover/item:text-blue-700'
                                     }`}>
                                       {member.fullName}
                                     </span>
                                   </div>
                                   <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                                    isAllowed 
-                                      ? 'text-emerald-600' 
+                                    isAllowed
+                                      ? 'text-emerald-600'
                                       : 'text-slate-400 group-hover/item:text-blue-600'
                                   }`}>
                                     {isAllowed ? `${leaderGrantDuration}m ✓` : 'Allow'}
@@ -1240,9 +1400,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     <p className="mt-2 max-w-md text-sm text-amber-700">
                       Only the designated group leader is authorized to submit or upload files to the project workspace. If you need to upload a document, you must request permission from your group leader.
                     </p>
-                    <button 
-                      type="button" 
-                      onClick={handleRequestPermission} 
+                    <button
+                      type="button"
+                      onClick={handleRequestPermission}
                       className="mt-6 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-700 hover:shadow-md"
                     >
                       <i className="fas fa-paper-plane" aria-hidden="true" /> Request Upload Permission
@@ -1275,99 +1435,146 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                 )}
                 <form className="portal-form project-files-upload-form" onSubmit={handleUploadSubmit}>
                 <div className="project-files-upload-workflow">
-                  <section className="project-files-upload-drop-panel">
+                  <section className="project-files-upload-drop-panel mb-8">
                     <div
-                      className={`dropzone project-files-dropzone ${isDragOver ? 'is-dragover' : ''}`}
+                      onClick={!uploadDraft.file ? handleBrowseFile : undefined}
+                      className={`group relative flex w-full flex-col items-center justify-center rounded-3xl border-2 border-dashed py-14 transition-all duration-300 overflow-hidden cursor-pointer ${
+                        isDragOver
+                          ? 'border-blue-500 bg-blue-50/80 shadow-inner scale-[1.01]'
+                          : uploadDraft.file
+                            ? 'border-emerald-300 bg-emerald-50/30'
+                            : 'border-slate-300 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/40 hover:shadow-sm'
+                      }`}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                     >
-                      <i className={`fas ${uploadDraft.file ? getProjectFileTypeIcon(uploadDraft.file.name, uploadDraft.file.type) : 'fa-cloud-arrow-up'}`} aria-hidden="true" />
-                      <strong>{uploadDraft.file ? uploadDraft.file.name : 'Drop a project file here'}</strong>
-                      <span>{uploadDraft.file ? 'The selected file is ready for secure private storage and version tracking.' : 'Supports PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX.'}</span>
-                      <small>{uploadDraft.file ? `${formatFileSizeLabel(uploadDraft.file.size)} | ${uploadDraft.file.type || 'Unknown file type'}` : 'Using thesis-documents private bucket. Limit: thesis-documents 50MB, evaluation-files 40MB, final-repository 50MB.'}</small>
+                      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 
-                      <div className="row-actions">
-                        <button className="table-btn" type="button" onClick={handleBrowseFile}>
-                          <i className="fas fa-folder-open" aria-hidden="true" /> Browse File
-                        </button>
-                        {uploadDraft.file ? (
-                          <button className="table-btn is-danger" type="button" onClick={clearSelectedFile}>
-                            <i className="fas fa-trash-can" aria-hidden="true" /> Remove
-                          </button>
-                        ) : null}
+                      <div className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-md mb-6 transition-all duration-500 z-10 ${isDragOver ? 'scale-110 shadow-blue-200 shadow-lg' : uploadDraft.file ? 'scale-110 shadow-emerald-200 shadow-lg' : 'group-hover:scale-110 group-hover:shadow-blue-100 group-hover:shadow-lg rotate-3 group-hover:rotate-0'}`}>
+                        <div className={`absolute inset-0 rounded-2xl ${uploadDraft.file ? 'bg-emerald-400/20' : 'bg-blue-400/20'} animate-ping opacity-0 group-hover:opacity-100 duration-1000`}></div>
+                        <i className={`fas ${uploadDraft.file ? getProjectFileTypeIcon(uploadDraft.file.name, uploadDraft.file.type) : 'fa-cloud-arrow-up'} text-3xl transition-colors duration-300 ${uploadDraft.file ? 'text-emerald-600' : isDragOver ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
                       </div>
+
+                      <h4 className={`text-lg font-extrabold transition-colors z-10 ${uploadDraft.file ? 'text-emerald-800' : 'text-slate-700 group-hover:text-blue-700'}`}>
+                        {uploadDraft.file ? uploadDraft.file.name : 'Drag and drop your file here'}
+                      </h4>
+
+                      <p className="mt-2 text-sm text-slate-500 font-medium z-10 max-w-sm text-center">
+                        {uploadDraft.file ? 'The selected file is ready for secure private storage and version tracking.' : 'or click to browse from your computer'}
+                      </p>
+
+                      {!uploadDraft.file && (
+                        <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-slate-500 z-10">
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOC</span>
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-file-powerpoint text-amber-500 text-sm"></i> PPT</span>
+                        </div>
+                      )}
+
+                      {uploadDraft.file && (
+                        <div className="mt-8 flex items-center gap-3 z-10">
+                          <button className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-slate-50 transition-all" type="button" onClick={(e) => { e.stopPropagation(); handleBrowseFile(); }}>
+                            <i className="fas fa-folder-open text-blue-500" aria-hidden="true" /> Change File
+                          </button>
+                          <button className="flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 shadow-sm ring-1 ring-inset ring-rose-200 hover:bg-rose-100 transition-all" type="button" onClick={(e) => { e.stopPropagation(); clearSelectedFile(); }}>
+                            <i className="fas fa-trash-can text-rose-500" aria-hidden="true" /> Remove
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <input
                       ref={fileInputRef}
-                      className="project-files-hidden-input"
+                      className="hidden"
                       type="file"
                       accept={DOCUMENT_FILE_ACCEPT}
                       onChange={handleFileInputChange}
                     />
                   </section>
 
-                  <section className="project-files-upload-fields">
-                    <div className="form-field project-files-category-field">
-                      <label htmlFor="project-file-category">Category</label>
-                      <select
-                        id="project-file-category"
-                        value={uploadDraft.category}
-                        onChange={(event) => updateUploadDraft('category', event.target.value)}
-                        disabled={isUploading}
-                      >
-                        {PROJECT_FILE_CATEGORY_OPTIONS.map((option) => (
-                          <option key={option.key} value={option.key}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-field project-files-tag-field">
-                      <label htmlFor="project-file-tag">Tag / Version</label>
-                      <select
-                        id="project-file-tag"
-                        value={uploadDraft.tag}
-                        onChange={(event) => updateUploadDraft('tag', event.target.value as ProjectFileUploadState['tag'])}
-                        disabled={isUploading}
-                      >
-                        {PROJECT_FILE_TAG_OPTIONS.map((tag) => (
-                          <option key={tag} value={tag}>{tag}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-field project-files-notes-field">
-                      <label htmlFor="project-file-version-notes">Version Notes</label>
-                      <textarea
-                        id="project-file-version-notes"
-                        value={uploadDraft.versionNotes}
-                        onChange={(event) => updateUploadDraft('versionNotes', event.target.value)}
-                        placeholder="Summarize what changed in this version..."
-                        disabled={isUploading}
-                      />
-                    </div>
-
-                    {uploadError ? (
-                      <div className="project-files-state is-danger">
-                        <i className="fas fa-circle-exclamation" aria-hidden="true" />
-                        <span>{uploadError}</span>
+                  <section className="project-files-upload-fields flex flex-col gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="flex flex-col gap-2.5">
+                        <label htmlFor="project-file-category" className="text-sm font-bold text-slate-700 ml-1">Category <span className="text-rose-500">*</span></label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                            <i className="fas fa-tags"></i>
+                          </div>
+                          <select
+                            id="project-file-category"
+                            value={uploadDraft.category}
+                            onChange={(event) => updateUploadDraft('category', event.target.value)}
+                            disabled={isUploading}
+                            className="block w-full appearance-none rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-10 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            {PROJECT_FILE_CATEGORY_OPTIONS.map((option) => (
+                              <option key={option.key} value={option.key}>{option.label}</option>
+                            ))}
+                          </select>
+                          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none" aria-hidden="true" />
+                        </div>
                       </div>
-                    ) : null}
 
-                    {isUploading ? (
-                      <div className="project-files-state">
-                        <span className="project-files-spinner" aria-hidden="true" />
-                        <span>Uploading...</span>
+                      <div className="flex flex-col gap-2.5">
+                        <label htmlFor="project-file-tag" className="text-sm font-bold text-slate-700 ml-1">Tag / Version <span className="text-rose-500">*</span></label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                            <i className="fas fa-code-branch"></i>
+                          </div>
+                          <select
+                            id="project-file-tag"
+                            value={uploadDraft.tag}
+                            onChange={(event) => updateUploadDraft('tag', event.target.value as ProjectFileUploadState['tag'])}
+                            disabled={isUploading}
+                            className="block w-full appearance-none rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-10 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            {PROJECT_FILE_TAG_OPTIONS.map((tag) => (
+                              <option key={tag} value={tag}>{tag}</option>
+                            ))}
+                          </select>
+                          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none" aria-hidden="true" />
+                        </div>
                       </div>
-                    ) : null}
+                    </div>
 
-                    <div className="row-actions project-files-upload-actions">
-                      <button className="btn btn-secondary" type="button" onClick={resetUploadDraft} disabled={isUploading}>
-                        <i className="fas fa-rotate-left" aria-hidden="true" /> Reset
+                    <div className="flex flex-col gap-2.5">
+                      <label htmlFor="project-file-version-notes" className="text-sm font-bold text-slate-700 ml-1">Version Notes <span className="text-slate-400 font-medium text-[10px] uppercase tracking-wider ml-1 px-2 py-0.5 bg-slate-100 rounded-md">Optional</span></label>
+                      <div className="relative group">
+                        <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                          <i className="fas fa-comment-dots"></i>
+                        </div>
+                        <textarea
+                          id="project-file-version-notes"
+                          value={uploadDraft.versionNotes}
+                          onChange={(event) => updateUploadDraft('versionNotes', event.target.value)}
+                          placeholder="Summarize what changed in this version..."
+                          disabled={isUploading}
+                          className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-4 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-medium outline-none min-h-[120px] resize-y disabled:opacity-60 disabled:cursor-not-allowed leading-relaxed"
+                        />
+                      </div>
+                    </div>
+
+                    {uploadError && (
+                      <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 flex items-center gap-3 text-rose-800 shadow-sm">
+                        <i className="fas fa-circle-exclamation text-rose-500 text-lg" aria-hidden="true" />
+                        <span className="text-sm font-bold">{uploadError}</span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-4 pt-6 border-t border-slate-100">
+                      <button className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200/80 hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 transition-all disabled:opacity-50" type="button" onClick={resetUploadDraft} disabled={isUploading}>
+                        <i className="fas fa-rotate-left text-slate-400" aria-hidden="true" /> Reset
                       </button>
-                      <button className="btn btn-primary project-files-upload-button" type="submit" disabled={isUploading}>
-                        <i className="fas fa-paper-plane" aria-hidden="true" /> Submit to Adviser
+
+                      <button
+                        className="group relative flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 px-8 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/30 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                        type="submit"
+                        disabled={isUploading || !uploadDraft.file}
+                      >
+                        <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:translate-x-[50%] transition-transform duration-1000 ease-in-out"></div>
+                        <span className="relative z-10">{isUploading ? 'Uploading...' : 'Submit to Adviser'}</span>
+                        <i className={`fas fa-paper-plane relative z-10 transition-transform ${isUploading ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} aria-hidden="true" />
                       </button>
                     </div>
                   </section>
@@ -1378,41 +1585,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
             </article>
           </section>
 
-          <section ref={repositorySectionRef} className="surface-card project-files-panel-card project-files-repository-section">
-            <div className="card-heading">
-              <div>
-                <span className="section-kicker">Approved Repository</span>
-                <h3>Approved repository copies</h3>
-                <p>Keep final, verified documents ready for download, reference, and final archive handoff.</p>
-              </div>
-              <span className="ui-badge is-success"><i className="fas fa-lock" aria-hidden="true" /> {repositoryFiles.length} Approved</span>
-            </div>
 
-            {repositoryFiles.length ? (
-              <div className="project-files-repository-grid">
-                {repositoryFiles.map((file) => (
-                  <FileItem
-                    key={file.id}
-                    file={file}
-                    currentUserRole={currentUserRole}
-                    currentUserId={currentUserId}
-                    onView={handleViewFile}
-                    onDownload={handleDownloadFile}
-                    onDelete={handleDeleteFile}
-                    onApprove={handleApproveFile}
-                    onViewHistory={handleViewHistory}
-                    variant="repository"
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state project-files-empty-state">
-                <span className="empty-state-icon"><i className="fas fa-lock" aria-hidden="true" /></span>
-                <strong>No approved repository copies yet</strong>
-                <p>Approved files will appear here after adviser confirmation marks them as official final copies.</p>
-              </div>
-            )}
-          </section>
         </div>
 
         <div className={`modal-shell ${historyFile ? 'is-open' : ''}`}>
@@ -1452,6 +1625,50 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     <small>{historyFile.reviewedBy ? `Verified by ${historyFile.reviewedBy}` : 'Awaiting adviser confirmation'}</small>
                   </article>
                 </div>
+
+                {historyFile.reviewComments?.length ? (
+                  <section className="mt-5 rounded-[1.25rem] border border-blue-100 bg-blue-50/40 p-5">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <span className="section-kicker">Adviser Feedback</span>
+                        <h4 className="mt-1 text-lg font-extrabold text-slate-900">Revision Comments</h4>
+                      </div>
+                      <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
+                        {historyFile.reviewComments.length} comment{historyFile.reviewComments.length === 1 ? '' : 's'}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid gap-3">
+                      {historyFile.reviewComments.map((comment, index) => {
+                        const parsedComment = parseReviewCommentBody(comment.body);
+
+                        return (
+                          <article key={comment.id} className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+                            <div className="flex items-start gap-3">
+                              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#003A8F] text-xs font-black text-white">
+                                {index + 1}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
+                                  <span>{comment.authorName || adviserName}</span>
+                                  <span aria-hidden="true">|</span>
+                                  <span>{formatProjectFileDateTime(String(comment.createdAt))}</span>
+                                </div>
+                                {parsedComment.area ? (
+                                  <p className="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
+                                    <i className="fas fa-location-dot mr-2 text-[10px]" aria-hidden="true" />
+                                    {parsedComment.area}
+                                  </p>
+                                ) : null}
+                                <p className="mt-3 text-sm leading-6 text-slate-700">{parsedComment.text}</p>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ) : null}
 
                 <div className="project-files-history-list">
                   {historyEntries.map((entry) => (

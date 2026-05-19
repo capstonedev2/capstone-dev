@@ -156,7 +156,7 @@ export async function GET(request: Request) {
             reviewedAt: true,
             comments: {
               orderBy: { createdAt: 'desc' },
-              take: 1,
+              take: 50,
               select: {
                 id: true,
                 body: true,
@@ -226,7 +226,11 @@ export async function GET(request: Request) {
     return successResponse({
       files: files
         .filter((file) => canAccessDocument(user, file))
-        .map(toDocumentFilePayload)
+        .map((file) => toDocumentFilePayload(file, {
+          exposeReviewComments: user.role !== UserRole.STUDENT
+            || file.submission?.status === SubmissionStatus.NEEDS_REVISION
+            || file.submission?.status === SubmissionStatus.APPROVED
+        }))
     });
   } catch (error) {
     return handleApiError(error);
@@ -333,7 +337,7 @@ export async function POST(request: Request) {
               reviewedAt: true,
               comments: {
                 orderBy: { createdAt: 'desc' },
-                take: 1,
+                take: 50,
                 select: {
                   id: true,
                   body: true,

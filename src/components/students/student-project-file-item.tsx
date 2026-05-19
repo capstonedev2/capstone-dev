@@ -1,8 +1,7 @@
-import type { PortalRole, ProjectFileRecord } from '@/components/students/student-project-files.shared';
+import type { PortalRole, ProjectFileRecord, ProjectFileStatus } from '@/components/students/student-project-files.shared';
 import {
   formatProjectFileDate,
   formatProjectFileAdviserStatus,
-  formatProjectFileStatus,
   getProjectFileCategoryLabel,
   getProjectFileTone,
   getProjectFileTypeIcon,
@@ -22,6 +21,94 @@ type FileItemProps = {
   onViewHistory: (file: ProjectFileRecord) => void;
   variant?: 'row' | 'repository';
 };
+
+const FILE_PROGRESS_STEPS = [
+  { key: 'uploaded', label: 'Uploaded', icon: 'fa-cloud-arrow-up' },
+  { key: 'under_review', label: 'Under Adviser Review', icon: 'fa-magnifying-glass' },
+  { key: 'decision', label: 'Decision', icon: 'fa-clipboard-check' },
+  { key: 'approved', label: 'Approved by Adviser', icon: 'fa-circle-check' }
+] as const;
+
+function getFileProgressIndex(status: ProjectFileStatus): number {
+  switch (status) {
+    case 'approved': return 3;
+    case 'revision': return 2;
+    case 'under_review': return 1;
+    case 'pending':
+    default: return 0;
+  }
+}
+
+function getFileProgressLabel(status: ProjectFileStatus, stepIndex: number): string {
+  if (stepIndex === 2) {
+    if (status === 'revision') return 'Needs Revision';
+    if (status === 'approved') return 'Passed';
+    return 'Decision';
+  }
+  return FILE_PROGRESS_STEPS[stepIndex]?.label || '';
+}
+
+function getFileProgressIcon(status: ProjectFileStatus, stepIndex: number): string {
+  if (stepIndex === 2) {
+    if (status === 'revision') return 'fa-rotate-left';
+    if (status === 'approved') return 'fa-clipboard-check';
+    return 'fa-clipboard-check';
+  }
+  return FILE_PROGRESS_STEPS[stepIndex]?.icon || 'fa-circle';
+}
+
+function MiniFileProgress({ status }: { status: ProjectFileStatus }) {
+  const currentIndex = getFileProgressIndex(status);
+  const isRevision = status === 'revision';
+
+  return (
+    <div className="flex items-center gap-0.5 w-full min-w-[180px]">
+      {FILE_PROGRESS_STEPS.map((step, index) => {
+        const isCompleted = index <= currentIndex;
+        const isCurrent = index === currentIndex;
+        const isRevisionNode = isCurrent && isRevision && index === 2;
+        const label = getFileProgressLabel(status, index);
+        const icon = getFileProgressIcon(status, index);
+
+        let dotColor = 'bg-slate-200 text-slate-400 border-slate-200';
+        if (isCompleted) {
+          if (isRevisionNode) {
+            dotColor = 'bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-200/50';
+          } else if (status === 'under_review' && isCurrent) {
+            dotColor = 'bg-orange-500 text-white border-orange-500 shadow-sm shadow-orange-200/50';
+          } else if (isCurrent) {
+            dotColor = 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200/50';
+          } else {
+            dotColor = 'bg-blue-600 text-white border-blue-600';
+          }
+        }
+
+        const lineColor = index < currentIndex ? (status === 'under_review' ? 'bg-orange-500' : 'bg-blue-500') : 'bg-slate-200';
+
+        return (
+          <div key={step.key} className="flex items-center flex-1 min-w-0">
+            <div className="relative group/step flex flex-col items-center">
+              <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${dotColor}`}>
+                <i className={`fas ${icon} text-[8px] ${isCurrent ? 'animate-pulse' : ''}`} aria-hidden="true" />
+              </div>
+              {/* Tooltip */}
+              <div className="absolute bottom-full mb-2 hidden group-hover/step:flex flex-col items-center z-30 pointer-events-none">
+                <div className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap shadow-lg ${isRevisionNode ? 'bg-amber-600 text-white' : isCompleted ? 'bg-slate-800 text-white' : 'bg-slate-600 text-white'}`}>
+                  {label}
+                  {isCurrent && <span className="ml-1 opacity-75">•  Current</span>}
+                </div>
+                <div className={`w-2 h-2 rotate-45 -mt-1 ${isRevisionNode ? 'bg-amber-600' : isCompleted ? 'bg-slate-800' : 'bg-slate-600'}`} />
+              </div>
+            </div>
+            {index < FILE_PROGRESS_STEPS.length - 1 && (
+              <div className={`h-[2px] flex-1 min-w-[8px] rounded-full transition-all duration-500 ${lineColor}`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function FileItem({
   file,
@@ -91,6 +178,12 @@ export function FileItem({
           </span>
           <div className="project-files-row-title">
             <strong>{file.fileName}</strong>
+            {file.reviewComments?.length ? (
+              <small className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
+                <i className="fas fa-comment-dots" aria-hidden="true" />
+                {file.reviewComments.length} adviser comment{file.reviewComments.length === 1 ? '' : 's'}
+              </small>
+            ) : null}
           </div>
         </div>
       </td>
@@ -101,7 +194,7 @@ export function FileItem({
         <span className="project-files-version-badge">{versionLabel}</span>
       </td>
       <td>
-        <span className={`ui-badge is-${statusTone}`}>{formatProjectFileStatus(file.status)}</span>
+        <MiniFileProgress status={file.status} />
       </td>
       <td>
         <span className={`ui-badge is-${statusTone}`}>{formatProjectFileAdviserStatus(file.status)}</span>
