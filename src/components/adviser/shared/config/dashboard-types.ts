@@ -62,6 +62,9 @@ export interface WeeklyScheduleItem {
   eventType: string;
   location?: string;
   tone?: DashboardTone;
+  scheduleType?: string;
+  projectId?: string;
+  notes?: string;
 }
 
 export interface GroupProgressSnapshotItem {

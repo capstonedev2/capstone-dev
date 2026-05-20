@@ -43,6 +43,7 @@ type DocumentFilePayloadInput = UploadedFile & {
       body: string;
       decision: string;
       createdAt: Date;
+      authorId?: string | null;
       author?: {
         id: string;
         name: string;
@@ -142,6 +143,7 @@ function toReviewCommentPayload(comment: NonNullable<NonNullable<DocumentFilePay
     body: comment.body,
     decision: comment.decision,
     createdAt: comment.createdAt,
+    authorId: comment.authorId ?? comment.author?.id ?? null,
     authorName: getPersonName(comment.author) || null
   };
 }

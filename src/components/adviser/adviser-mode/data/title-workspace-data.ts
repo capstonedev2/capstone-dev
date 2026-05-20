@@ -31,7 +31,9 @@ export type AdviserTitleRecord = {
     id: string;
     name: string;
     url: string;
-    size: number;
+    previewUrl?: string;
+    fileType?: string;
+    size: number | null;
   }>;
 };
 

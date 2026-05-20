@@ -56,6 +56,23 @@ const ALERT_BAR_STYLES: Record<AlertTone, string> = {
 };
 
 const PRIMARY_SURFACE = 'rounded-xl bg-white p-6 shadow-sm';
+type ScheduleViewFilter = 'all' | 'today' | 'deadline' | 'consultation' | 'event';
+
+const TYPE_ICONS: Record<ScheduleItemType, string> = {
+  Meeting: 'fa-users',
+  Consultation: 'fa-comments',
+  Deadline: 'fa-hourglass-half',
+  Event: 'fa-calendar-day',
+  Reminder: 'fa-bell'
+};
+
+const FILTER_OPTIONS: Array<{ id: ScheduleViewFilter; label: string; icon: string }> = [
+  { id: 'all', label: 'All', icon: 'fa-layer-group' },
+  { id: 'today', label: 'Today', icon: 'fa-clock' },
+  { id: 'deadline', label: 'Deadlines', icon: 'fa-hourglass-half' },
+  { id: 'consultation', label: 'Consultations', icon: 'fa-comments' },
+  { id: 'event', label: 'Events', icon: 'fa-calendar-day' }
+];
 
 function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
@@ -66,6 +83,19 @@ function statusLabel(status: ScheduleItemStatus) {
   if (status === 'overdue') return 'Overdue';
   if (status === 'completed') return 'Completed';
   return 'Upcoming';
+}
+
+function getScheduleActionHref(item: StudentScheduleItem) {
+  if (item.type === 'Deadline') return '/students/project-files';
+  if (item.relatedPhase?.toLowerCase().includes('repository')) return '/students/repository';
+  if (item.source === 'milestone') return '/students/milestones';
+  return '/students/notifications';
+}
+
+function getScheduleSourceLabel(item: StudentScheduleItem) {
+  if (item.source === 'schedule') return 'Adviser set';
+  if (item.source === 'presentation') return 'Academic event';
+  return 'Milestone';
 }
 
 function Pill({
@@ -171,32 +201,47 @@ function EventItem({
   compact?: boolean;
 }) {
   return (
-    <article className={cx('rounded-xl bg-white p-4 shadow-sm transition-shadow duration-200 hover:shadow-md', className)}>
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Pill label={item.type} icon="fa-layer-group" className={TYPE_STYLES[item.type]} />
-              <Pill label={statusLabel(item.status)} icon="fa-signal" className={STATUS_STYLES[item.status]} />
-              {!compact ? <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{item.sourceLabel}</span> : null}
-            </div>
-
-            <div className="space-y-1">
-              <h4 className={cx('font-semibold tracking-tight text-slate-900', compact ? 'text-sm' : 'text-base')}>{item.title}</h4>
-              <p className={cx('text-sm text-slate-600', compact ? 'leading-5' : 'leading-6')}>{item.description}</p>
-            </div>
-          </div>
-
-          <div className="shrink-0 space-y-1 text-sm text-slate-500 xl:text-right">
-            <p className="font-semibold text-slate-700">{item.dateLabel}</p>
-            <p>{item.timeLabel}</p>
-          </div>
+    <article className={cx('rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md', className)}>
+      <div className="grid gap-4 sm:grid-cols-[88px_minmax(0,1fr)]">
+        <div className="rounded-xl bg-slate-50 px-3 py-3 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{item.dateLabel}</p>
+          <p className="mt-2 text-sm font-semibold text-slate-900">{item.timeLabel}</p>
+          <span className={cx('mt-3 inline-flex h-9 w-9 items-center justify-center rounded-xl', TYPE_STYLES[item.type])}>
+            <i className={`fas ${TYPE_ICONS[item.type]} text-sm`} aria-hidden="true" />
+          </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Meta icon="fa-location-dot" value={item.location} />
-          <Meta icon="fa-compass" value={item.mode} />
-          <Meta icon="fa-flag-checkered" value={item.relatedPhase || item.milestoneTitle || 'Project schedule'} />
+        <div className="min-w-0">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Pill label={item.type} icon={TYPE_ICONS[item.type]} className={TYPE_STYLES[item.type]} />
+                <Pill label={statusLabel(item.status)} icon="fa-signal" className={STATUS_STYLES[item.status]} />
+                {!compact ? <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{getScheduleSourceLabel(item)}</span> : null}
+              </div>
+
+              <div className="space-y-1">
+                <h4 className={cx('font-semibold tracking-tight text-slate-900', compact ? 'text-sm' : 'text-base')}>{item.title}</h4>
+                <p className={cx('text-sm text-slate-600', compact ? 'leading-5' : 'leading-6')}>{item.description}</p>
+              </div>
+            </div>
+
+            {!compact ? (
+              <Link
+                className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                href={getScheduleActionHref(item)}
+              >
+                <i className="fas fa-arrow-up-right-from-square text-[10px]" aria-hidden="true" />
+                Open
+              </Link>
+            ) : null}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Meta icon="fa-location-dot" value={item.location} />
+            <Meta icon="fa-compass" value={item.mode} />
+            <Meta icon="fa-flag-checkered" value={item.relatedPhase || item.milestoneTitle || 'Project schedule'} />
+          </div>
         </div>
       </div>
     </article>
@@ -278,6 +323,7 @@ function SignalItem({ alert }: { alert: StudentScheduleAlert }) {
 
 export function StudentSchedule({ data }: { data: StudentDashboardData }) {
   const [referenceDate, setReferenceDate] = useState(() => startOfDay(data.dashboard?.snapshotAt || new Date()));
+  const [activeFilter, setActiveFilter] = useState<ScheduleViewFilter>('all');
 
   useEffect(() => {
     setReferenceDate(startOfDay(new Date()));
@@ -288,6 +334,15 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
   const manualItems = model.allItems.filter((item) => item.source === 'schedule').length;
   const academicEvents = model.allItems.filter((item) => item.source === 'presentation').length;
   const weekDaysWithItems = model.weeklyPlannerCells.filter((cell) => cell.items.length).length;
+  const adviserItems = model.activeItems.filter((item) => item.source === 'schedule');
+  const filteredItems = useMemo(() => {
+    if (activeFilter === 'today') return model.todayItems;
+    if (activeFilter === 'deadline') return model.activeItems.filter((item) => item.type === 'Deadline');
+    if (activeFilter === 'consultation') return model.activeItems.filter((item) => item.type === 'Consultation' || item.type === 'Meeting');
+    if (activeFilter === 'event') return model.activeItems.filter((item) => item.type === 'Event' || item.type === 'Reminder');
+
+    return model.activeItems;
+  }, [activeFilter, model.activeItems, model.todayItems]);
 
   const summaryCards = [
     {
@@ -419,9 +474,9 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
                   </span>
                 </div>
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">Project Schedule</h1>
+                  <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2rem]">Schedule</h1>
                   <p className="max-w-3xl text-sm leading-6 text-slate-600">
-                    Monitor consultations, deadlines, milestone-driven planner items, and academic events in a cleaner academic planning workspace.
+                    Consultations, adviser deadlines, reminders, and project events in one weekly view.
                   </p>
                 </div>
               </div>
@@ -453,29 +508,37 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
             <article className={PRIMARY_SURFACE}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Academic Planner</span>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Cleaner planning, same schedule data</h2>
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Current Focus</span>
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                    {model.nextUpcomingEvent ? model.nextUpcomingEvent.title : 'No active schedule item'}
+                  </h2>
                   <p className="max-w-3xl text-sm leading-6 text-slate-600">
-                    Schedule still combines the existing planner entries, milestone-generated checkpoints, and academic events, but now reads as a single backend-ready dashboard.
+                    {model.nextUpcomingEvent
+                      ? `${model.nextUpcomingEvent.dateLabel} at ${model.nextUpcomingEvent.timeLabel}`
+                      : 'Your adviser schedule is clear right now.'}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Pill label={`${model.summary.totalItems} total items`} icon="fa-list" className="bg-slate-100 text-slate-700" />
-                  <Pill label={`${weekDaysWithItems}/7 active days`} icon="fa-calendar-week" className="bg-blue-100 text-blue-700" />
+                  <Pill label={`${model.todayItems.length} today`} icon="fa-clock" className={model.todayItems.length ? 'bg-yellow-100 text-amber-900' : 'bg-slate-100 text-slate-700'} />
+                  <Pill label={`${adviserItems.length} adviser-set`} icon="fa-user-tie" className={adviserItems.length ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'} />
                 </div>
               </div>
 
-              <div className="mt-6 rounded-xl bg-slate-50/90 p-5">
-                <p className="text-sm leading-6 text-slate-700">{model.plannerNote}</p>
-                <dl className="mt-5 grid gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+                {model.nextUpcomingEvent ? (
+                  <EventItem item={model.nextUpcomingEvent} className="bg-slate-50 shadow-none hover:shadow-sm" />
+                ) : (
+                  <EmptyState copy="No active schedule item" />
+                )}
+
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                   {plannerMetrics.map((metric) => (
-                    <div key={metric.label} className={cx('border-l-2 pl-4', metric.accentClassName)}>
-                      <dt className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{metric.label}</dt>
-                      <dd className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{metric.value}</dd>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{metric.detail}</p>
+                    <div key={metric.label} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{metric.label}</p>
+                      <p className="mt-1 text-xl font-semibold tracking-tight text-slate-900">{metric.value}</p>
                     </div>
                   ))}
-                </dl>
+                </div>
               </div>
             </article>
 
@@ -543,6 +606,52 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
             </article>
 
             <article className={PRIMARY_SURFACE}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1.5">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Schedule List</span>
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">All active items</h3>
+                  <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                    Adviser-created consultations, deadlines, reminders, and generated milestone dates stay in one list.
+                  </p>
+                </div>
+                <Pill label={`${filteredItems.length} shown`} icon="fa-list" className="bg-slate-100 text-slate-700" />
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {FILTER_OPTIONS.map((option) => {
+                  const active = activeFilter === option.id;
+
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setActiveFilter(option.id)}
+                      className={cx(
+                        'inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition',
+                        active
+                          ? 'border-brand bg-brand text-white shadow-sm'
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      )}
+                    >
+                      <i className={`fas ${option.icon} text-xs`} aria-hidden="true" />
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 space-y-3">
+                {filteredItems.length ? (
+                  filteredItems.map((item) => (
+                    <EventItem key={item.id} item={item} />
+                  ))
+                ) : (
+                  <EmptyState copy="No schedule items match this view" />
+                )}
+              </div>
+            </article>
+
+            <article className={PRIMARY_SURFACE}>
               <div className="space-y-8">
                 {timelineSections.map((section, index) => (
                   <div key={section.id} className="space-y-8">
@@ -566,19 +675,46 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
             <div className="space-y-8">
               <section className="space-y-4">
                 <div className="space-y-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Next Event</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Today</span>
                   <h3 className="text-lg font-semibold tracking-tight text-slate-900">
-                    {model.nextUpcomingEvent ? model.nextUpcomingEvent.title : 'No upcoming planner item'}
+                    {model.todayItems.length ? `${model.todayItems.length} item${model.todayItems.length === 1 ? '' : 's'} scheduled` : 'No schedule today'}
                   </h3>
                   <p className="text-sm leading-6 text-slate-600">
-                    The next active planner item stays pinned here so the team can see what comes next immediately.
+                    Items due today stay pinned for quick scanning.
                   </p>
                 </div>
 
-                {model.nextUpcomingEvent ? (
-                  <EventItem item={model.nextUpcomingEvent} compact className="bg-slate-50 shadow-none hover:shadow-sm" />
+                {model.todayItems.length ? (
+                  <div className="space-y-3">
+                    {model.todayItems.slice(0, 3).map((item) => (
+                      <EventItem key={item.id} item={item} compact className="bg-slate-50 shadow-none hover:shadow-sm" />
+                    ))}
+                  </div>
                 ) : (
-                  <EmptyState copy="No schedule items available" />
+                  <EmptyState copy="No schedule today" />
+                )}
+              </section>
+
+              <div className="h-px bg-slate-100" />
+
+              <section className="space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Adviser Updates</span>
+                    <h3 className="text-lg font-semibold tracking-tight text-slate-900">Recently scheduled</h3>
+                    <p className="text-sm leading-6 text-slate-600">Consultations, reminders, and deadlines set by the adviser.</p>
+                  </div>
+                  <Pill label={`${adviserItems.length}`} icon="fa-user-tie" className={adviserItems.length ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'} />
+                </div>
+
+                {adviserItems.length ? (
+                  <div className="space-y-3">
+                    {adviserItems.slice(0, 3).map((item) => (
+                      <EventItem key={item.id} item={item} compact className="bg-blue-50/70 shadow-none hover:shadow-sm" />
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState copy="No adviser schedule items yet" />
                 )}
               </section>
 

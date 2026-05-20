@@ -19,6 +19,7 @@ export type AdviserSubmissionComment = {
   id: string;
   category: CommentCategory;
   body: string;
+  authorId?: string | null;
   authorName: string;
   version: string;
   createdAt: string;
@@ -53,7 +54,7 @@ export type AdviserSubmissionRecord = {
   version: string;
   currentVersionNumber: number;
   submittedAt: string;
-  deadline: string;
+  deadline: string | null;
   submittedBy?: string;
   groupMembers?: Array<{
     userId?: string;
@@ -67,6 +68,7 @@ export type AdviserSubmissionRecord = {
     decision: string;
     createdAt: string | Date;
     authorName?: string | null;
+    authorId?: string | null;
   } | null;
   reviewedAt?: string | null;
   reviewFocus: string;
@@ -104,7 +106,7 @@ export const REVIEW_WORKFLOW_STEPS = [
 ] as const;
 
 export const SUBMISSION_SORT_OPTIONS: ReadonlyArray<{ value: SubmissionSortOption; label: string }> = [
-  { value: 'deadline', label: 'Deadline (Nearest)' },
+  { value: 'deadline', label: 'Review Order' },
   { value: 'submitted', label: 'Recently Submitted' },
   { value: 'status', label: 'Review Priority' },
   { value: 'version', label: 'Current Version' }
@@ -182,9 +184,13 @@ function getWorkflowStepIndex(status: SubmissionStatus, currentVersionNumber: nu
   return 0;
 }
 
-function getDeadlineProgress(submittedAt: string, deadline: string, status: SubmissionStatus) {
+function getDeadlineProgress(submittedAt: string, deadline: string | null, status: SubmissionStatus) {
   if (status === 'approved') {
     return 100;
+  }
+
+  if (!deadline) {
+    return 0;
   }
 
   const submittedTime = new Date(submittedAt).getTime();
@@ -286,6 +292,7 @@ function buildComments(
       id: comment.id,
       category,
       body: comment.body,
+      authorId: comment.authorId,
       authorName: comment.authorName || 'Adviser',
       version,
       createdAt: new Date(comment.createdAt).toISOString()
@@ -382,7 +389,7 @@ function buildTimeline({
 
 export function toAdviserSubmissionRecord(file: DocumentFileSummary, index = 0): AdviserSubmissionRecord {
   const submittedAt = asIsoString(file.submittedAt) || asIsoString(file.createdAt) || getReviewReferenceDate();
-  const deadline = addDays(submittedAt, 7);
+  const deadline = null;
   const type = categoryToType(file.documentCategory || '');
   const milestone = categoryToMilestone(file.documentCategory || '');
   const status = mapSubmissionStatus(file.submissionStatus);
@@ -478,7 +485,11 @@ export function formatSubmissionDateTime(value: string | Date) {
   }).format(new Date(value));
 }
 
-export function getDeadlineLabel(deadline: string, referenceDate = getReviewReferenceDate()) {
+export function getDeadlineLabel(deadline: string | null | undefined, referenceDate = getReviewReferenceDate()) {
+  if (!deadline) {
+    return 'No deadline set';
+  }
+
   const diffInDays = Math.round((startOfUtcDay(deadline) - startOfUtcDay(referenceDate)) / dayInMilliseconds);
 
   if (diffInDays < 0) {
@@ -497,7 +508,11 @@ export function getDeadlineLabel(deadline: string, referenceDate = getReviewRefe
   return `Due in ${diffInDays} days`;
 }
 
-export function getDeadlineToneClass(deadline: string, referenceDate = getReviewReferenceDate()) {
+export function getDeadlineToneClass(deadline: string | null | undefined, referenceDate = getReviewReferenceDate()) {
+  if (!deadline) {
+    return 'text-slate-500';
+  }
+
   const diffInDays = Math.round((startOfUtcDay(deadline) - startOfUtcDay(referenceDate)) / dayInMilliseconds);
 
   if (diffInDays < 0) {
@@ -509,6 +524,18 @@ export function getDeadlineToneClass(deadline: string, referenceDate = getReview
   }
 
   return 'text-slate-600';
+}
+
+export function compareSubmissionReviewOrder(left: AdviserSubmissionRecord, right: AdviserSubmissionRecord) {
+  if (left.deadline && right.deadline) {
+    return new Date(left.deadline).getTime() - new Date(right.deadline).getTime();
+  }
+
+  if (left.deadline || right.deadline) {
+    return left.deadline ? -1 : 1;
+  }
+
+  return new Date(left.submittedAt).getTime() - new Date(right.submittedAt).getTime();
 }
 
 export function getApprovedThisWeekCount(
@@ -531,7 +558,7 @@ export function getApprovedThisWeekCount(
 export function getPriorityQueue(submissions: AdviserSubmissionRecord[]) {
   return [...submissions]
     .filter((submission) => submission.status !== 'approved')
-    .sort((left, right) => new Date(left.deadline).getTime() - new Date(right.deadline).getTime())
+    .sort(compareSubmissionReviewOrder)
     .slice(0, 3);
 }
 

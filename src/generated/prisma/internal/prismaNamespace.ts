@@ -398,6 +398,7 @@ export const ModelName = {
   Submission: 'Submission',
   ReviewComment: 'ReviewComment',
   DefenseSchedule: 'DefenseSchedule',
+  AdviserScheduleItem: 'AdviserScheduleItem',
   Evaluation: 'Evaluation',
   Notification: 'Notification',
   AuditLog: 'AuditLog',
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "submission" | "reviewComment" | "defenseSchedule" | "evaluation" | "notification" | "auditLog" | "brandingAsset"
+    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "submission" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1457,6 +1458,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdviserScheduleItem: {
+      payload: Prisma.$AdviserScheduleItemPayload<ExtArgs>
+      fields: Prisma.AdviserScheduleItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdviserScheduleItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdviserScheduleItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>
+        }
+        findFirst: {
+          args: Prisma.AdviserScheduleItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdviserScheduleItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>
+        }
+        findMany: {
+          args: Prisma.AdviserScheduleItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>[]
+        }
+        create: {
+          args: Prisma.AdviserScheduleItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>
+        }
+        createMany: {
+          args: Prisma.AdviserScheduleItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdviserScheduleItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>[]
+        }
+        delete: {
+          args: Prisma.AdviserScheduleItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>
+        }
+        update: {
+          args: Prisma.AdviserScheduleItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdviserScheduleItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdviserScheduleItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdviserScheduleItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdviserScheduleItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdviserScheduleItemPayload>
+        }
+        aggregate: {
+          args: Prisma.AdviserScheduleItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdviserScheduleItem>
+        }
+        groupBy: {
+          args: Prisma.AdviserScheduleItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdviserScheduleItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdviserScheduleItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdviserScheduleItemCountAggregateOutputType> | number
+        }
+      }
+    }
     Evaluation: {
       payload: Prisma.$EvaluationPayload<ExtArgs>
       fields: Prisma.EvaluationFieldRefs
@@ -2048,6 +2123,24 @@ export const DefenseScheduleScalarFieldEnum = {
 export type DefenseScheduleScalarFieldEnum = (typeof DefenseScheduleScalarFieldEnum)[keyof typeof DefenseScheduleScalarFieldEnum]
 
 
+export const AdviserScheduleItemScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  scheduledById: 'scheduledById',
+  type: 'type',
+  status: 'status',
+  title: 'title',
+  scheduledAt: 'scheduledAt',
+  endsAt: 'endsAt',
+  location: 'location',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdviserScheduleItemScalarFieldEnum = (typeof AdviserScheduleItemScalarFieldEnum)[keyof typeof AdviserScheduleItemScalarFieldEnum]
+
+
 export const EvaluationScalarFieldEnum = {
   id: 'id',
   projectId: 'projectId',
@@ -2342,6 +2435,34 @@ export type ListEnumDefenseStatusFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'AdviserScheduleItemType'
+ */
+export type EnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdviserScheduleItemType'>
+    
+
+
+/**
+ * Reference to a field of type 'AdviserScheduleItemType[]'
+ */
+export type ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdviserScheduleItemType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AdviserScheduleItemStatus'
+ */
+export type EnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdviserScheduleItemStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'AdviserScheduleItemStatus[]'
+ */
+export type ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdviserScheduleItemStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'DefensePanelRole'
  */
 export type EnumDefensePanelRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DefensePanelRole'>
@@ -2534,6 +2655,7 @@ export type GlobalOmitConfig = {
   submission?: Prisma.SubmissionOmit
   reviewComment?: Prisma.ReviewCommentOmit
   defenseSchedule?: Prisma.DefenseScheduleOmit
+  adviserScheduleItem?: Prisma.AdviserScheduleItemOmit
   evaluation?: Prisma.EvaluationOmit
   notification?: Prisma.NotificationOmit
   auditLog?: Prisma.AuditLogOmit

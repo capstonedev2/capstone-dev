@@ -306,9 +306,6 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
           ) : titleRecords.length ? (
             <TitleList
               hasPendingTitles={hasPendingTitles}
-              onApprove={(record) => applyDecision(record, 'approved')}
-              onReject={(record) => applyDecision(record, 'rejected')}
-              onRequestRevision={(record) => applyDecision(record, 'needs-revision')}
               onViewApproved={() => {
                 setStatusFilter('approved');
                 setSearchValue('');

@@ -11,6 +11,7 @@ import {
 export type DocumentFileSummary = {
   id: string;
   fileName: string;
+  bucketName?: string | null;
   fileType: string;
   fileSize: number | null;
   uploadedBy?: string;
@@ -36,6 +37,7 @@ export type DocumentFileSummary = {
     body: string;
     decision: string;
     createdAt: string | Date;
+    authorId?: string | null;
     authorName?: string | null;
   } | null;
   reviewComments?: Array<{
@@ -43,6 +45,7 @@ export type DocumentFileSummary = {
     body: string;
     decision: string;
     createdAt: string | Date;
+    authorId?: string | null;
     authorName?: string | null;
   }>;
   documentCategory: string;

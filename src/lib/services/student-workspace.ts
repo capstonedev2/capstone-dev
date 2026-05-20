@@ -439,7 +439,7 @@ export async function getStudentDashboardData() {
 
       try {
         const { prisma } = await import('@/lib/prisma');
-        const { SubmissionStatus } = await import('@/generated/prisma/client');
+        const { AdviserScheduleItemStatus, SubmissionStatus } = await import('@/generated/prisma/client');
         const groupByMembership = await prisma.group.findFirst({
           where: {
             groupMembers: {
@@ -613,7 +613,36 @@ export async function getStudentDashboardData() {
               where: { projectId: activeProject.id },
               orderBy: { scheduledAt: 'asc' }
             });
-            data.schedules = schedules.map(s => ({
+            const adviserScheduleDelegate = 'adviserScheduleItem' in prisma ? prisma.adviserScheduleItem : null;
+            const adviserScheduleItems = adviserScheduleDelegate
+              ? await adviserScheduleDelegate.findMany({
+                  where: {
+                    projectId: activeProject.id,
+                    status: { not: AdviserScheduleItemStatus.CANCELLED }
+                  },
+                  orderBy: { scheduledAt: 'asc' }
+                })
+              : [];
+            const scheduleTypeLabel = (type: string) => {
+              switch (type) {
+                case 'CONSULTATION':
+                  return 'Consultation';
+                case 'DEADLINE':
+                  return 'Deadline';
+                case 'MEETING':
+                  return 'Meeting';
+                case 'REMINDER':
+                  return 'Reminder';
+                case 'EVENT':
+                  return 'Event';
+                case 'REVIEW':
+                  return 'Meeting';
+                default:
+                  return 'Event';
+              }
+            };
+            data.schedules = [
+              ...schedules.map(s => ({
               id: s.id,
               user_id: dbUser.id,
               project_id: activeProject.id,
@@ -627,7 +656,27 @@ export async function getStudentDashboardData() {
               time: new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(s.scheduledAt),
               location: s.location || 'TBA',
               description: s.notes || ''
-            }));
+              })),
+              ...adviserScheduleItems.map(s => ({
+                id: s.id,
+                user_id: dbUser.id,
+                project_id: activeProject.id,
+                status: s.status,
+                created_at: s.createdAt.toISOString(),
+                updated_at: s.updatedAt.toISOString(),
+                title: s.title,
+                type: scheduleTypeLabel(s.type),
+                startDate: s.scheduledAt.toISOString(),
+                endDate: s.endsAt?.toISOString(),
+                startDateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(s.scheduledAt),
+                time: new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(s.scheduledAt),
+                location: s.location || 'TBA',
+                description: s.notes || '',
+                mode: s.location?.toLowerCase().includes('http') ? 'Online' : 'Onsite',
+                priority: s.type === 'DEADLINE' ? 'high' as const : 'medium' as const,
+                isCompleted: s.status === AdviserScheduleItemStatus.COMPLETED
+              }))
+            ].sort((left, right) => new Date(left.startDate).getTime() - new Date(right.startDate).getTime());
 
             // Fetch Feedback (from Submissions)
             const submissions = await prisma.submission.findMany({

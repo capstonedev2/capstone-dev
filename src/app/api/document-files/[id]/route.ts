@@ -313,6 +313,7 @@ export async function PATCH(
                 body: true,
                 decision: true,
                 createdAt: true,
+                authorId: true,
                 author: {
                   select: {
                     id: true,

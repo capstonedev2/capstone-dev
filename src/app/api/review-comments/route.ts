@@ -1,15 +1,30 @@
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { handleApiError, successResponse } from '@/lib/utils';
+import { handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { UserRole } from '@/generated/prisma/client';
 
 export const runtime = 'nodejs';
 
+const REVIEW_COMMENT_MANAGER_ROLES = [
+  UserRole.ADVISER,
+  UserRole.PANEL,
+  UserRole.RESEARCH_HEAD,
+  UserRole.SYSTEM_ADMIN,
+  UserRole.ADMIN
+];
+
+function canManageComment(user: { id: string; role: UserRole }, authorId?: string | null) {
+  return authorId === user.id
+    || user.role === UserRole.SYSTEM_ADMIN
+    || user.role === UserRole.ADMIN;
+}
+
 export async function PATCH(request: Request) {
   try {
-    const user = await requireAuthenticatedUser(request, [UserRole.STUDENT, UserRole.ADVISER, UserRole.PANEL]);
+    const user = await requireAuthenticatedUser(request, [UserRole.STUDENT, ...REVIEW_COMMENT_MANAGER_ROLES]);
     const body = await request.json();
     const { commentId, isResolved } = body;
+    const nextBody = typeof body?.body === 'string' ? normalizeText(body.body) : undefined;
 
     if (!commentId) {
       return Response.json({ success: false, message: 'Missing commentId' }, { status: 400 });
@@ -37,6 +52,22 @@ export async function PATCH(request: Request) {
       return Response.json({ success: false, message: 'Comment not found' }, { status: 404 });
     }
 
+    if (nextBody !== undefined) {
+      if (!nextBody) {
+        return Response.json({ success: false, message: 'Comment cannot be empty.' }, { status: 400 });
+      }
+
+      if (!canManageComment(user, existingComment.authorId)) {
+        return Response.json({ success: false, message: 'You can only edit comments you created.' }, { status: 403 });
+      }
+
+      updateData.body = nextBody;
+    }
+
+    if (!Object.keys(updateData).length) {
+      return Response.json({ success: false, message: 'No comment changes were provided.' }, { status: 400 });
+    }
+
     const updatedComment = await prisma.reviewComment.update({
       where: { id: commentId },
       data: updateData
@@ -57,6 +88,42 @@ export async function PATCH(request: Request) {
     }
 
     return successResponse({ comment: updatedComment });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await requireAuthenticatedUser(request, REVIEW_COMMENT_MANAGER_ROLES);
+    const body = await request.json().catch(() => ({}));
+    const commentId = normalizeText(body?.commentId);
+
+    if (!commentId) {
+      return Response.json({ success: false, message: 'Missing commentId' }, { status: 400 });
+    }
+
+    const existingComment = await prisma.reviewComment.findUnique({
+      where: { id: commentId },
+      select: {
+        id: true,
+        authorId: true
+      }
+    });
+
+    if (!existingComment) {
+      return Response.json({ success: false, message: 'Comment not found' }, { status: 404 });
+    }
+
+    if (!canManageComment(user, existingComment.authorId)) {
+      return Response.json({ success: false, message: 'You can only delete comments you created.' }, { status: 403 });
+    }
+
+    await prisma.reviewComment.delete({
+      where: { id: commentId }
+    });
+
+    return successResponse({ commentId });
   } catch (error) {
     return handleApiError(error);
   }

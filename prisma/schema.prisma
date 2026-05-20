@@ -86,6 +86,21 @@ enum DefenseStatus {
   CANCELLED   @map("cancelled")
 }
 
+enum AdviserScheduleItemType {
+  CONSULTATION @map("consultation")
+  DEADLINE     @map("deadline")
+  MEETING      @map("meeting")
+  REMINDER     @map("reminder")
+  EVENT        @map("event")
+  REVIEW       @map("review")
+}
+
+enum AdviserScheduleItemStatus {
+  SCHEDULED @map("scheduled")
+  COMPLETED @map("completed")
+  CANCELLED @map("cancelled")
+}
+
 enum EvaluationRecommendation {
   PENDING      @map("pending")
   PASSED       @map("passed")
@@ -139,6 +154,7 @@ model User {
   reviewComments      ReviewComment[]      @relation("ReviewCommentAuthor")
   resolvedComments    ReviewComment[]      @relation("ReviewCommentResolver")
   scheduledDefenses   DefenseSchedule[]    @relation("DefenseScheduler")
+  adviserScheduleItems AdviserScheduleItem[] @relation("AdviserScheduleCreator")
   evaluations         Evaluation[]         @relation("EvaluationEvaluator")
   notifications       Notification[]
   auditLogs           AuditLog[]           @relation("AuditActor")
@@ -338,6 +354,7 @@ model Project {
   submissions      Submission[]
   files            UploadedFile[]
   defenseSchedules DefenseSchedule[]
+  adviserScheduleItems AdviserScheduleItem[]
   evaluations      Evaluation[]
 
   @@index([departmentId])
@@ -437,6 +454,29 @@ model DefenseSchedule {
   @@index([scheduledById])
   @@index([scheduledAt])
   @@index([status])
+}
+
+model AdviserScheduleItem {
+  id            String                    @id @default(cuid())
+  projectId     String
+  project       Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scheduledById String?
+  scheduledBy   User?                     @relation("AdviserScheduleCreator", fields: [scheduledById], references: [id], onDelete: SetNull)
+  type          AdviserScheduleItemType   @default(CONSULTATION)
+  status        AdviserScheduleItemStatus @default(SCHEDULED)
+  title         String
+  scheduledAt   DateTime
+  endsAt        DateTime?
+  location      String?
+  notes         String?
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+
+  @@index([projectId])
+  @@index([scheduledById])
+  @@index([type])
+  @@index([status])
+  @@index([scheduledAt])
 }
 
 model Evaluation {

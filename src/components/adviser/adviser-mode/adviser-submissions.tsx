@@ -12,6 +12,7 @@ import {
 } from '@/components/adviser/adviser-mode/data/submission-workspace-sections';
 import {
   SUBMISSION_STATUS_FILTER_OPTIONS,
+  compareSubmissionReviewOrder,
   getApprovedThisWeekCount,
   getSubmissionMilestoneOptions,
   getSubmissionTypeOptions,
@@ -207,7 +208,7 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
       await sendSubmissionNotification({
         submission,
         title: 'Submission Reminder',
-        message: `Reminder from your adviser: please check "${submission.submissionTitle}" and the current review deadline.`,
+        message: `Reminder from your adviser: please check "${submission.submissionTitle}" and the latest review instructions.`,
         type: 'info'
       });
       window.dispatchEvent(new Event('thesistrack:notifications-updated'));
@@ -267,14 +268,14 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
       }
 
       if (sortBy === 'status') {
-        return statusPriority[left.status] - statusPriority[right.status] || new Date(left.deadline).getTime() - new Date(right.deadline).getTime();
+        return statusPriority[left.status] - statusPriority[right.status] || compareSubmissionReviewOrder(left, right);
       }
 
       if (sortBy === 'version') {
-        return right.currentVersionNumber - left.currentVersionNumber || new Date(left.deadline).getTime() - new Date(right.deadline).getTime();
+        return right.currentVersionNumber - left.currentVersionNumber || compareSubmissionReviewOrder(left, right);
       }
 
-      return new Date(left.deadline).getTime() - new Date(right.deadline).getTime() || statusPriority[left.status] - statusPriority[right.status];
+      return compareSubmissionReviewOrder(left, right) || statusPriority[left.status] - statusPriority[right.status];
     });
   }, [milestoneFilter, searchValue, sortBy, statusFilter, submissions, typeFilter]);
 
@@ -299,8 +300,8 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
   const nextDueSubmission = useMemo(
     () =>
       [...submissions]
-        .filter((submission) => submission.status !== 'approved')
-        .sort((left, right) => new Date(left.deadline).getTime() - new Date(right.deadline).getTime())[0] ?? null,
+        .filter((submission) => submission.status !== 'approved' && submission.deadline)
+        .sort(compareSubmissionReviewOrder)[0] ?? null,
     [submissions]
   );
 

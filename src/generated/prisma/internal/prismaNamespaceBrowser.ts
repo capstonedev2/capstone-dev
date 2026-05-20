@@ -65,6 +65,7 @@ export const ModelName = {
   Submission: 'Submission',
   ReviewComment: 'ReviewComment',
   DefenseSchedule: 'DefenseSchedule',
+  AdviserScheduleItem: 'AdviserScheduleItem',
   Evaluation: 'Evaluation',
   Notification: 'Notification',
   AuditLog: 'AuditLog',
@@ -341,6 +342,24 @@ export const DefenseScheduleScalarFieldEnum = {
 } as const
 
 export type DefenseScheduleScalarFieldEnum = (typeof DefenseScheduleScalarFieldEnum)[keyof typeof DefenseScheduleScalarFieldEnum]
+
+
+export const AdviserScheduleItemScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  scheduledById: 'scheduledById',
+  type: 'type',
+  status: 'status',
+  title: 'title',
+  scheduledAt: 'scheduledAt',
+  endsAt: 'endsAt',
+  location: 'location',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdviserScheduleItemScalarFieldEnum = (typeof AdviserScheduleItemScalarFieldEnum)[keyof typeof AdviserScheduleItemScalarFieldEnum]
 
 
 export const EvaluationScalarFieldEnum = {

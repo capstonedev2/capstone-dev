@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type {
   AdviserTitleRecord,
   SimilarTitleRecord,
@@ -12,6 +12,7 @@ import {
   getTitleStatusMeta
 } from '@/components/adviser/adviser-mode/data/title-workspace-data';
 import {
+  createTitleSubmissionDocumentHtml,
   downloadTitleSubmissionDocument,
   openTitleSubmissionDocument,
   type TitleSubmissionDocumentData
@@ -42,9 +43,6 @@ type TitleFiltersProps = {
 
 type TitleListProps = {
   titles: AdviserTitleRecord[];
-  onApprove: (record: AdviserTitleRecord) => void;
-  onRequestRevision: (record: AdviserTitleRecord) => void;
-  onReject: (record: AdviserTitleRecord) => void;
   onViewDetails: (record: AdviserTitleRecord) => void;
   onViewApproved: () => void;
   hasPendingTitles: boolean;
@@ -59,6 +57,11 @@ type TitleDetailsDrawerProps = {
   onRequestRevision: (record: AdviserTitleRecord) => void;
   onReject: (record: AdviserTitleRecord) => void;
 };
+
+type TitleUploadedFile = AdviserTitleRecord['uploadedFiles'][number];
+
+const GENERATED_PREVIEW_ID = 'generated';
+const OFFICE_FILE_EXTENSIONS = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
 
 function WorkspaceSelect<TValue extends string>({
   value,
@@ -78,6 +81,135 @@ function WorkspaceSelect<TValue extends string>({
       {children}
     </select>
   );
+}
+
+function getTitleFileExtension(fileName: string, fileType?: string | null) {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+
+  if (extension && extension !== fileName.toLowerCase()) {
+    return extension;
+  }
+
+  if (fileType?.includes('pdf')) return 'pdf';
+  if (fileType?.includes('word')) return 'docx';
+  if (fileType?.includes('presentation')) return 'pptx';
+  if (fileType?.includes('spreadsheet') || fileType?.includes('excel')) return 'xlsx';
+
+  return 'file';
+}
+
+function getTitleFileIcon(file: TitleUploadedFile) {
+  const extension = getTitleFileExtension(file.name, file.fileType);
+
+  if (extension === 'pdf') return 'fa-file-pdf';
+  if (['doc', 'docx'].includes(extension)) return 'fa-file-word';
+  if (['ppt', 'pptx'].includes(extension)) return 'fa-file-powerpoint';
+  if (['xls', 'xlsx', 'csv'].includes(extension)) return 'fa-file-excel';
+
+  return 'fa-file-lines';
+}
+
+function isTitleOfficeFile(file: TitleUploadedFile) {
+  const extension = getTitleFileExtension(file.name, file.fileType);
+
+  return OFFICE_FILE_EXTENSIONS.includes(extension);
+}
+
+function getTitleFilePreviewUrl(file: TitleUploadedFile, signedUrl?: string) {
+  if (signedUrl && isTitleOfficeFile(file)) {
+    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(signedUrl)}`;
+  }
+
+  return file.previewUrl || file.url.replace('/download', '/preview');
+}
+
+function formatTitleFileSize(size?: number | null) {
+  if (!size) {
+    return 'Size unavailable';
+  }
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function getTitleReviewStage(record: AdviserTitleRecord) {
+  if (record.status === 'approved') {
+    return {
+      icon: 'fa-circle-check',
+      label: 'Approved',
+      helper: 'Title cleared for the group project record.',
+      className: 'border-emerald-200 bg-emerald-50 text-emerald-800'
+    };
+  }
+
+  if (record.status === 'needs-revision') {
+    return {
+      icon: 'fa-rotate-left',
+      label: 'Revision requested',
+      helper: 'Waiting for the group to submit a corrected proposal.',
+      className: 'border-blue-200 bg-blue-50 text-blue-800'
+    };
+  }
+
+  if (record.status === 'rejected') {
+    return {
+      icon: 'fa-ban',
+      label: 'Rejected',
+      helper: 'Proposal was declined and should be replaced.',
+      className: 'border-rose-200 bg-rose-50 text-rose-800'
+    };
+  }
+
+  if (record.status === 'draft') {
+    return {
+      icon: 'fa-file',
+      label: 'Draft',
+      helper: 'Not yet submitted to adviser review.',
+      className: 'border-slate-200 bg-slate-50 text-slate-700'
+    };
+  }
+
+  return {
+    icon: 'fa-magnifying-glass',
+    label: 'Needs adviser decision',
+    helper: 'Open preview to approve, revise, or reject.',
+    className: 'border-amber-200 bg-amber-50 text-amber-800'
+  };
+}
+
+function getTitleDecisionPanelCopy(status: TitleStatus) {
+  if (status === 'approved') {
+    return {
+      title: 'Decision Recorded',
+      description: 'The title is approved. You can still revise the decision if the record needs correction.',
+      note: 'Students see the approved state and the title becomes available in their project tracker.'
+    };
+  }
+
+  if (status === 'needs-revision') {
+    return {
+      title: 'Revision Requested',
+      description: 'The proposal has been returned. Add or adjust remarks before updating the decision.',
+      note: 'Students see the revision state and can prepare a corrected title package.'
+    };
+  }
+
+  if (status === 'rejected') {
+    return {
+      title: 'Title Rejected',
+      description: 'The proposal was declined. Use this panel if the decision needs to be changed.',
+      note: 'Students see the rejected state and should submit another proposal.'
+    };
+  }
+
+  return {
+    title: 'Ready for Decision',
+    description: 'Review the title, similarity, members, and attached proposal before recording a decision.',
+    note: 'This action updates the student timeline and sends a title review notification.'
+  };
 }
 
 function createAdviserTitleDocumentData(record: AdviserTitleRecord): TitleSubmissionDocumentData {
@@ -117,6 +249,12 @@ function createAdviserTitleDocumentData(record: AdviserTitleRecord): TitleSubmis
       title: item.title,
       similarityScore: item.similarityScore,
       label: `${item.similarityScore}% similarity`
+    })),
+    attachments: record.uploadedFiles.map((file) => ({
+      fileName: file.name,
+      fileType: getTitleFileExtension(file.name, file.fileType).toUpperCase(),
+      sizeLabel: formatTitleFileSize(file.size),
+      status: 'Attached to title proposal'
     })),
     remarks: record.adviserAction
   };
@@ -217,31 +355,39 @@ export function TitleFilters({
 
 export function TitleList({
   titles,
-  onApprove,
-  onRequestRevision,
-  onReject,
   onViewDetails,
   onViewApproved,
   hasPendingTitles
 }: TitleListProps) {
+  const pendingCount = titles.filter((record) => record.status === 'pending').length;
+  const completedCount = titles.filter((record) => ['approved', 'needs-revision', 'rejected'].includes(record.status)).length;
+
   return (
     <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)]">
+          <span className="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)] ring-1 ring-inset ring-blue-100">
             <i className="fas fa-file-signature" />
           </span>
-          <div>
-            <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">Title Review Queue</h2>
+          <div className="min-w-0">
+            <h2 className="text-xl font-black tracking-[-0.03em] text-[var(--text-dark)]">Title Review Queue</h2>
             <p className="mt-0.5 text-sm text-[var(--text-light)]">
-              Review proposed IT project titles, validate originality indicators, and record the next adviser decision.
+              Scan proposed titles here, then open preview to record approval, revision, or rejection.
             </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
             <i className="fas fa-list-check text-[10px] opacity-50" />
             {titles.length} title record{titles.length === 1 ? '' : 's'}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-amber-100">
+            <i className="fas fa-clock text-[10px]" />
+            {pendingCount} pending
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 ring-1 ring-inset ring-emerald-100">
+            <i className="fas fa-check text-[10px]" />
+            {completedCount} processed
           </span>
         </div>
       </div>
@@ -252,9 +398,6 @@ export function TitleList({
             <TitleCard
               key={record.id}
               record={record}
-              onApprove={onApprove}
-              onReject={onReject}
-              onRequestRevision={onRequestRevision}
               onViewDetails={onViewDetails}
             />
           ))}
@@ -275,19 +418,86 @@ export function TitleDetailsDrawer({
   onRequestRevision,
   onReject
 }: TitleDetailsDrawerProps) {
-  if (!record) {
+  const [selectedPreviewId, setSelectedPreviewId] = useState<string>(GENERATED_PREVIEW_ID);
+  const [signedPreviewUrls, setSignedPreviewUrls] = useState<Record<string, string>>({});
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const uploadedFiles = record?.uploadedFiles ?? [];
+  const firstUploadedFileId = uploadedFiles[0]?.id;
+  const documentData = useMemo(() => (record ? createAdviserTitleDocumentData(record) : null), [record]);
+  const generatedPreviewHtml = useMemo(
+    () => (documentData ? createTitleSubmissionDocumentHtml(documentData) : ''),
+    [documentData]
+  );
+  const selectedUploadedFile = uploadedFiles.find((file) => file.id === selectedPreviewId) || null;
+  const selectedSignedUrl = selectedUploadedFile ? signedPreviewUrls[selectedUploadedFile.id] : '';
+  const selectedFileIsOffice = selectedUploadedFile ? isTitleOfficeFile(selectedUploadedFile) : false;
+
+  useEffect(() => {
+    setSelectedPreviewId(firstUploadedFileId || GENERATED_PREVIEW_ID);
+  }, [record?.id, firstUploadedFileId]);
+
+  useEffect(() => {
+    if (!selectedUploadedFile || !selectedFileIsOffice) {
+      setPreviewError(null);
+      return;
+    }
+
+    if (selectedSignedUrl) {
+      setPreviewError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setPreviewError(null);
+
+    const loadSignedPreviewUrl = async () => {
+      try {
+        const response = await fetch(`/api/document-files/${selectedUploadedFile.id}/signed-url`, {
+          method: 'POST'
+        });
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok || !payload?.signedUrl) {
+          throw new Error(payload?.message || payload?.error || 'Unable to prepare document preview.');
+        }
+
+        if (!cancelled) {
+          setSignedPreviewUrls((current) => ({
+            ...current,
+            [selectedUploadedFile.id]: payload.signedUrl
+          }));
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setPreviewError(error instanceof Error ? error.message : 'Unable to prepare document preview.');
+        }
+      }
+    };
+
+    loadSignedPreviewUrl();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedUploadedFile?.id, selectedFileIsOffice, selectedSignedUrl]);
+
+  if (!record || !documentData) {
     return null;
   }
 
   const statusMeta = getTitleStatusMeta(record.status);
-  const documentData = createAdviserTitleDocumentData(record);
+  const decisionPanelCopy = getTitleDecisionPanelCopy(record.status);
+  const selectedPreviewTitle = selectedUploadedFile?.name || 'Generated title summary';
+  const selectedPreviewUrl = selectedUploadedFile
+    ? getTitleFilePreviewUrl(selectedUploadedFile, selectedSignedUrl)
+    : null;
 
   return (
     <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6" onClick={onClose}>
       <div
         aria-label="Title details modal"
         aria-modal="true"
-        className="adviser-title-details-modal flex flex-col max-h-full w-full max-w-[700px] overflow-hidden rounded-[2rem] bg-white/95 backdrop-blur-3xl shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-white/60 transition-all scale-100"
+        className="adviser-title-details-modal flex flex-col max-h-full w-full max-w-[1560px] overflow-hidden rounded-[2rem] bg-white/95 backdrop-blur-3xl shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-white/60 transition-all scale-100"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
@@ -313,179 +523,386 @@ export function TitleDetailsDrawer({
             <span className="inline-flex rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200/80">
               IT
             </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-200/60">
+              <i className="fas fa-users-rectangle text-[10px]" aria-hidden="true" />
+              {record.groupId}
+            </span>
             <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-bold ring-1 ring-inset ring-current/20 ${statusMeta.badgeClassName}`}>
               {statusMeta.label}
             </span>
             <span className="inline-flex rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-200/60">
               {record.academicYear}
             </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-100">
+              <i className="fas fa-percent text-[10px]" aria-hidden="true" />
+              {record.similarityScore}% similarity
+            </span>
           </div>
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-8 custom-scrollbar bg-slate-50/30">
-          
-          <div className="grid gap-4 sm:grid-cols-2">
-            <DrawerMeta icon="fa-users-rectangle" label="Group ID" value={record.groupId} />
-            <DrawerMeta icon="fa-user-group" label="Members" value={`${record.membersCount} members`} />
-            <DrawerMeta icon="fa-calendar-day" label="Submitted" value={formatTitleDate(record.submittedAt)} />
-            <DrawerMeta icon="fa-spinner" label="Current Status" value={statusMeta.label} />
-          </div>
+        <div className="flex-1 overflow-y-auto bg-slate-50/40 px-4 py-4 sm:px-6 sm:py-6 custom-scrollbar">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
+            <div className="min-w-0 space-y-5">
+              <section className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+                <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black uppercase tracking-[0.15em] text-blue-700">
+                      {selectedUploadedFile
+                        ? `${getTitleFileExtension(selectedUploadedFile.name, selectedUploadedFile.fileType).toUpperCase()} Preview`
+                        : 'Title Summary Preview'}
+                    </p>
+                    <h2 className="mt-1 truncate text-lg font-black text-slate-950">Proposal Preview</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className={`inline-flex min-h-9 items-center justify-center gap-2 rounded-xl px-3 text-xs font-black transition ${
+                        selectedPreviewId === GENERATED_PREVIEW_ID
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'bg-white text-blue-700 ring-1 ring-inset ring-blue-200 hover:bg-blue-50'
+                      }`}
+                      type="button"
+                      onClick={() => setSelectedPreviewId(GENERATED_PREVIEW_ID)}
+                    >
+                      <i className="fas fa-file-lines text-[10px]" aria-hidden="true" />
+                      Generated
+                    </button>
+                    {uploadedFiles.map((file) => (
+                      <button
+                        key={file.id}
+                        className={`inline-flex min-h-9 max-w-[220px] items-center justify-center gap-2 rounded-xl px-3 text-xs font-black transition ${
+                          selectedPreviewId === file.id
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-white text-blue-700 ring-1 ring-inset ring-blue-200 hover:bg-blue-50'
+                        }`}
+                        title={file.name}
+                        type="button"
+                        onClick={() => setSelectedPreviewId(file.id)}
+                      >
+                        <i className={`fas ${getTitleFileIcon(file)} text-[10px]`} aria-hidden="true" />
+                        <span className="truncate">{file.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-          <section className="mt-6 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
-            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400 mb-4">
-              <i className="fas fa-paperclip" /> Attached Documents
-            </p>
-            {record.uploadedFiles && record.uploadedFiles.length > 0 ? (
-              <div className="grid gap-3">
-                {record.uploadedFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition hover:border-blue-300 hover:bg-blue-50 group">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
-                        <i className="fas fa-file-pdf" aria-hidden="true" />
+                <div className="bg-slate-100 p-3 sm:p-4">
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-inner">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-100">
+                          <i
+                            className={`fas ${
+                              selectedUploadedFile ? getTitleFileIcon(selectedUploadedFile) : 'fa-file-lines'
+                            } text-sm`}
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-black text-slate-900">{selectedPreviewTitle}</p>
+                          <p className="text-xs font-bold text-slate-500">
+                            {selectedUploadedFile
+                              ? `${getTitleFileExtension(selectedUploadedFile.name, selectedUploadedFile.fileType).toUpperCase()} live preview`
+                              : 'HTML generated preview'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-bold text-slate-800 group-hover:text-blue-800">{file.name}</p>
-                        <p className="text-xs font-medium text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+
+                      <div className="flex items-center gap-2">
+                        {selectedUploadedFile ? (
+                          <>
+                            <a
+                              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                              href={selectedPreviewUrl || selectedUploadedFile.previewUrl || selectedUploadedFile.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <i className="fas fa-up-right-from-square text-[10px]" aria-hidden="true" />
+                              Open
+                            </a>
+                            <a
+                              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                              href={selectedUploadedFile.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <i className="fas fa-download text-[10px]" aria-hidden="true" />
+                              Download
+                            </a>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                              type="button"
+                              onClick={() => openTitleSubmissionDocument(documentData)}
+                            >
+                              <i className="fas fa-up-right-from-square text-[10px]" aria-hidden="true" />
+                              Open
+                            </button>
+                            <button
+                              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                              type="button"
+                              onClick={() => downloadTitleSubmissionDocument(documentData)}
+                            >
+                              <i className="fas fa-download text-[10px]" aria-hidden="true" />
+                              Download
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
-                    <a 
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex h-9 shrink-0 items-center justify-center rounded-lg bg-white px-4 text-xs font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-blue-600 hover:text-white hover:ring-blue-600 ml-2"
-                    >
-                      View File
-                    </a>
+
+                    <div className="bg-white p-3 sm:p-4">
+                      {selectedUploadedFile ? (
+                        selectedFileIsOffice && !selectedSignedUrl ? (
+                          <div className="flex h-[clamp(620px,76vh,960px)] flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-6 text-center">
+                            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-100">
+                              <i className={`fas ${previewError ? 'fa-circle-exclamation' : 'fa-spinner fa-spin'} text-sm`} aria-hidden="true" />
+                            </span>
+                            <p className="mt-4 text-sm font-black text-slate-800">
+                              {previewError ? 'Preview unavailable for this file.' : 'Preparing document preview...'}
+                            </p>
+                            <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
+                              {previewError || 'Office documents need a temporary viewer link before they can render inside the modal.'}
+                            </p>
+                            {previewError ? (
+                              <a
+                                className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
+                                href={selectedUploadedFile.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <i className="fas fa-up-right-from-square text-xs" aria-hidden="true" />
+                                Open File
+                              </a>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <iframe
+                            className="block h-[clamp(620px,76vh,960px)] w-full rounded-xl border border-slate-200 bg-white"
+                            src={selectedPreviewUrl || selectedUploadedFile.previewUrl || selectedUploadedFile.url}
+                            title={`${selectedUploadedFile.name} preview`}
+                          />
+                        )
+                      ) : (
+                        <iframe
+                          className="block h-[clamp(620px,76vh,960px)] w-full rounded-xl border border-slate-200 bg-white"
+                          srcDoc={generatedPreviewHtml}
+                          title="Generated title submission preview"
+                        />
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-[1.25rem] bg-blue-50/50 p-4 ring-1 ring-inset ring-blue-100/50">
-                <p className="text-sm font-medium leading-relaxed text-blue-900">
-                  No physical files were uploaded. You can view or download the generated title summary document instead.
-                </p>
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <button
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 hover:shadow"
-                    type="button"
-                    onClick={() => openTitleSubmissionDocument(documentData)}
-                  >
-                    <i className="fas fa-file-lines" aria-hidden="true" />
-                    View Generated Doc
-                  </button>
-                  <button
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 transition hover:bg-blue-50"
-                    type="button"
-                    onClick={() => downloadTitleSubmissionDocument(documentData)}
-                  >
-                    <i className="fas fa-download" aria-hidden="true" />
-                    Download
-                  </button>
                 </div>
-              </div>
-            )}
-          </section>
+              </section>
 
-          <section className="mt-5 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
-            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
-               <i className="fas fa-users" /> Group Information
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {record.groupMembers && record.groupMembers.length > 0 ? (
-                record.groupMembers.map((member, idx) => (
-                  <span 
-                    key={idx} 
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold ring-1 ring-inset shadow-sm ${
-                      member.isLeader 
-                        ? 'bg-amber-50 text-amber-700 ring-amber-200/80' 
-                        : 'bg-slate-50 text-slate-700 ring-slate-200/80'
-                    }`}
-                  >
-                    {member.isLeader ? (
-                      <i className="fas fa-crown text-amber-500" />
-                    ) : (
-                      <i className="fas fa-user text-slate-400" />
-                    )}
-                    {member.name}
-                  </span>
-                ))
-              ) : (
-                <p className="text-sm font-semibold text-slate-800">
-                  {formatMemberPreview(record.memberPreview, 5)}
+              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+                <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                  <i className="fas fa-circle-info" /> Title Details
                 </p>
-              )}
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <DrawerMeta icon="fa-users-rectangle" label="Group ID" value={record.groupId} />
+                  <DrawerMeta icon="fa-user-group" label="Members" value={`${record.membersCount} members`} />
+                  <DrawerMeta icon="fa-calendar-day" label="Submitted" value={formatTitleDate(record.submittedAt)} />
+                  <DrawerMeta icon="fa-spinner" label="Current Status" value={statusMeta.label} />
+                </div>
+                <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+                  <div className="rounded-[1.15rem] bg-slate-50/90 p-4">
+                    <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
+                      <i className="fas fa-align-left" aria-hidden="true" /> Project Description
+                    </p>
+                    <p className="mt-3 text-[0.95rem] leading-relaxed text-slate-700">{record.description}</p>
+                  </div>
+                  <div className="rounded-[1.15rem] bg-slate-50/90 p-4">
+                    <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">
+                      <i className="fas fa-tags" aria-hidden="true" /> Keywords
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {record.keywords.length ? (
+                        record.keywords.map((keyword) => (
+                          <span key={keyword} className="inline-flex rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200">
+                            #{keyword}
+                          </span>
+                        ))
+                      ) : (
+                        <p className="text-sm font-medium text-slate-500">No keywords recorded.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+                <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                  <i className="fas fa-paperclip" /> Attached Documents
+                </p>
+                {uploadedFiles.length > 0 ? (
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    {uploadedFiles.map((file) => (
+                      <div key={file.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition hover:border-blue-300 hover:bg-blue-50 group">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
+                            <i className={`fas ${getTitleFileIcon(file)}`} aria-hidden="true" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-800 group-hover:text-blue-800">{file.name}</p>
+                            <p className="text-xs font-medium text-slate-500">{formatTitleFileSize(file.size)}</p>
+                          </div>
+                        </div>
+                        <div className="ml-2 flex shrink-0 items-center gap-2">
+                          <button
+                            className="flex h-9 items-center justify-center rounded-lg bg-blue-600 px-3 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                            type="button"
+                            onClick={() => setSelectedPreviewId(file.id)}
+                          >
+                            Preview
+                          </button>
+                          <a 
+                            href={file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-9 items-center justify-center rounded-lg bg-white px-3 text-xs font-bold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-blue-50 hover:text-blue-700"
+                          >
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-[1.25rem] bg-blue-50/50 p-4 ring-1 ring-inset ring-blue-100/50">
+                    <p className="text-sm font-medium leading-relaxed text-blue-900">
+                      No physical files were uploaded. Use the generated title summary preview for adviser review.
+                    </p>
+                  </div>
+                )}
+              </section>
             </div>
-            <p className="mt-4 text-sm font-medium text-slate-500">
-              Assigned IT group under the {record.academicYear} academic year.
-            </p>
-          </section>
 
-          <section className="mt-5 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
-            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
-               <i className="fas fa-align-left" /> Project Description
-            </p>
-            <p className="mt-3 text-[0.95rem] leading-relaxed text-slate-700">{record.description}</p>
-          </section>
+            <aside className="space-y-5 self-start xl:sticky xl:top-0">
+              <section className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+                <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 p-5 text-white">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-blue-100">
+                        <i className="fas fa-clipboard-check" /> Title Decision
+                      </p>
+                      <h3 className="mt-1 text-lg font-black">{decisionPanelCopy.title}</h3>
+                    </div>
+                    <span className="inline-flex shrink-0 rounded-lg bg-white/10 px-3 py-1 text-xs font-bold text-white ring-1 ring-inset ring-white/20">
+                      {statusMeta.label}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm font-medium leading-6 text-blue-100">{decisionPanelCopy.description}</p>
+                </div>
 
-          <section className="mt-5 rounded-[1.5rem] bg-white p-5 ring-1 ring-slate-200/60 shadow-sm">
-            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
-               <i className="fas fa-tags" /> Keywords
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {record.keywords.map((keyword) => (
-                <span key={keyword} className="inline-flex rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200">
-                  #{keyword}
-                </span>
-              ))}
-            </div>
-          </section>
+                <div className="p-5">
+                  <div className="rounded-2xl bg-blue-50/70 p-4 text-sm font-semibold leading-6 text-blue-900 ring-1 ring-inset ring-blue-100">
+                    <i className="fas fa-circle-info mr-2 text-blue-600" aria-hidden="true" />
+                    {decisionPanelCopy.note}
+                  </div>
 
-          <section className="mt-5">
-            <SimilarityIndicator score={record.similarityScore} similarTitles={record.similarTitles} />
-          </section>
+                  <label className="mt-4 block">
+                    <span className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-blue-700">
+                      <i className="fas fa-comment-dots" /> Adviser Remarks
+                    </span>
+                    <textarea
+                      className="mt-3 min-h-[130px] w-full rounded-xl border border-blue-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      placeholder="Add notes for approval, revision, or rejection..."
+                      value={remarksDraft}
+                      onChange={(event) => onRemarksChange(event.target.value)}
+                    />
+                  </label>
 
-          <section className="mt-5 rounded-[1.5rem] bg-blue-50/30 p-5 ring-1 ring-blue-100/50 shadow-sm">
-            <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-blue-600">
-               <i className="fas fa-comment-dots" /> Adviser Remarks
-            </p>
-            <textarea
-              className="mt-4 min-h-[120px] w-full rounded-xl border border-blue-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-              placeholder="Add your backend-ready notes for approval, revision, or rejection..."
-              value={remarksDraft}
-              onChange={(event) => onRemarksChange(event.target.value)}
-            />
-          </section>
-        </div>
+                  <div className="mt-4 grid gap-3">
+                    <button
+                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-black text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 hover:shadow-lg focus:outline-none"
+                      type="button"
+                      onClick={() => onApprove(record)}
+                    >
+                      <i className="fas fa-check" /> Approve Title
+                    </button>
+                    <button
+                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-50 px-6 text-sm font-black text-amber-700 shadow-sm ring-1 ring-inset ring-amber-200 transition hover:bg-amber-100 hover:ring-amber-300 focus:outline-none"
+                      type="button"
+                      onClick={() => onRequestRevision(record)}
+                    >
+                      <i className="fas fa-rotate-left" /> Request Revision
+                    </button>
+                    <button
+                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-black text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition hover:bg-rose-50 hover:ring-rose-300 focus:outline-none"
+                      type="button"
+                      onClick={() => onReject(record)}
+                    >
+                      <i className="fas fa-ban" /> Reject
+                    </button>
+                  </div>
 
-        {/* Footer Actions - Sticky */}
-        <footer className="shrink-0 border-t border-slate-100 bg-white/90 backdrop-blur px-6 py-5 sm:px-8">
-          <div className="flex flex-col sm:flex-row gap-3 justify-end items-center">
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <button
-                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-bold text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition hover:bg-rose-50 hover:ring-rose-300 focus:outline-none"
-                type="button"
-                onClick={() => onReject(record)}
-              >
-                <i className="fas fa-ban" /> Reject
-              </button>
-              <button
-                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-bold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 transition hover:bg-blue-50 hover:ring-blue-300 focus:outline-none"
-                type="button"
-                onClick={() => onRequestRevision(record)}
-              >
-                <i className="fas fa-rotate-left" /> Request Revision
-              </button>
-            </div>
-            <button
-              className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 text-sm font-bold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-lg focus:outline-none"
-              type="button"
-              onClick={() => onApprove(record)}
-            >
-              <i className="fas fa-check" /> Approve Title
-            </button>
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-slate-500">Review Checks</p>
+                    <ul className="mt-3 space-y-2.5 text-sm font-semibold text-slate-700">
+                      {[
+                        'Title wording is clear and specific',
+                        'Scope fits the group and department',
+                        'Similarity result is acceptable',
+                        'Remarks explain the decision'
+                      ].map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[10px] text-blue-700 ring-1 ring-inset ring-blue-100">
+                            <i className="fas fa-check" aria-hidden="true" />
+                          </span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <SimilarityIndicator compact score={record.similarityScore} similarTitles={record.similarTitles} />
+
+              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                    <i className="fas fa-users" /> Group Information
+                  </p>
+                  <span className="rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-black text-slate-600 ring-1 ring-inset ring-slate-200">
+                    {record.membersCount} members
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {record.groupMembers && record.groupMembers.length > 0 ? (
+                    record.groupMembers.map((member, idx) => (
+                      <span 
+                        key={idx} 
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold ring-1 ring-inset shadow-sm ${
+                          member.isLeader 
+                            ? 'bg-amber-50 text-amber-700 ring-amber-200/80' 
+                            : 'bg-slate-50 text-slate-700 ring-slate-200/80'
+                        }`}
+                      >
+                        {member.isLeader ? (
+                          <i className="fas fa-crown text-amber-500" />
+                        ) : (
+                          <i className="fas fa-user text-slate-400" />
+                        )}
+                        {member.name}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm font-semibold text-slate-800">
+                      {formatMemberPreview(record.memberPreview, 5)}
+                    </p>
+                  )}
+                </div>
+                <p className="mt-4 text-sm font-medium text-slate-500">
+                  Assigned IT group under the {record.academicYear} academic year.
+                </p>
+              </section>
+            </aside>
           </div>
-        </footer>
+        </div>
       </div>
     </div>
   );
@@ -551,196 +968,148 @@ export function SimilarityIndicator({
 
 export function TitleCard({
   record,
-  onApprove,
-  onRequestRevision,
-  onReject,
   onViewDetails
 }: {
   record: AdviserTitleRecord;
-  onApprove: (record: AdviserTitleRecord) => void;
-  onRequestRevision: (record: AdviserTitleRecord) => void;
-  onReject: (record: AdviserTitleRecord) => void;
   onViewDetails: (record: AdviserTitleRecord) => void;
 }) {
   const statusMeta = getTitleStatusMeta(record.status);
+  const similarityMeta = getSimilarityMeta(record.similarityScore, record.similarTitles);
   const fileCount = record.uploadedFiles?.length ?? 0;
+  const previewButtonLabel = record.status === 'pending' ? 'Preview & Decide' : 'Open Preview';
+  const reviewStage = getTitleReviewStage(record);
+  const firstFile = record.uploadedFiles[0] || null;
 
   return (
-    <article className="adviser-title-card group relative rounded-[2rem] bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/60 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_48px_rgb(0,58,143,0.12)] hover:ring-[var(--primary)]/30 z-10 hover:z-20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 rounded-t-[2rem] bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400 opacity-80 transition-opacity group-hover:opacity-100" />
-      
-      <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr_1fr] xl:items-start pt-2">
-        {/* Left: Title & Group Info */}
-        <div className="min-w-0 pr-4">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-extrabold tracking-wide text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200/80">
+    <article className="group relative overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-blue-600" />
+
+      <div className="grid gap-5 p-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-700 ring-1 ring-inset ring-slate-200">
               <i className="fas fa-layer-group text-[10px] text-slate-400" /> IT
             </span>
-            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold shadow-sm ring-1 ring-inset ${statusMeta.badgeClassName} ring-current/20`}>
-              {record.status === 'pending' && (
-                <span className="relative flex h-2 w-2 mr-0.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" /></span>
-              )}
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-sm ${statusMeta.badgeClassName}`}>
+              {record.status === 'pending' ? (
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+                </span>
+              ) : null}
               {statusMeta.label}
             </span>
-            {fileCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm ring-1 ring-inset ring-emerald-200/80">
-                <i className="fas fa-paperclip opacity-70" /> {fileCount} file{fileCount > 1 ? 's' : ''}
-              </span>
-            )}
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wide ${reviewStage.className}`}>
+              <i className={`fas ${reviewStage.icon} text-[10px]`} aria-hidden="true" />
+              {reviewStage.label}
+            </span>
           </div>
 
           <h3
-            className="mt-5 text-[1.4rem] font-extrabold leading-tight tracking-tight text-slate-900 transition-colors group-hover:text-blue-700 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-4 text-[1.35rem] font-black leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-blue-700 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.title}
           >
             {record.title}
           </h3>
-          
-          <div className="mt-4 flex flex-col gap-2.5">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
-              <span className="flex items-center gap-1.5 text-blue-700 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100/50 shadow-sm">
-                <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
-              </span>
-              <span className="flex items-center gap-1.5 text-slate-500">
-                <i className="fas fa-user-group opacity-60" />
-                {record.membersCount} members
-              </span>
-            </div>
-
-            {record.groupMembers && record.groupMembers.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {record.groupMembers.map((member, idx) => (
-                  <span 
-                    key={idx} 
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold ring-1 ring-inset shadow-sm ${
-                      member.isLeader 
-                        ? 'bg-amber-50 text-amber-700 ring-amber-200/80' 
-                        : 'bg-white text-slate-600 ring-slate-200/80'
-                    }`}
-                  >
-                    {member.isLeader ? (
-                      <i className="fas fa-crown text-amber-500 text-[10px]" />
-                    ) : (
-                      <i className="fas fa-user text-slate-400 text-[10px]" />
-                    )}
-                    {member.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="flex items-center gap-1.5 text-sm text-slate-500">
-                <span className="opacity-40">|</span> <span className="font-medium">{formatMemberPreview(record.memberPreview)}</span>
-              </p>
-            )}
-          </div>
 
           <p
-            className="mt-5 text-[0.95rem] leading-relaxed text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+            className="mt-3 max-w-4xl text-sm leading-6 text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.description}
           >
             {record.description}
           </p>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            {record.keywords.map((keyword) => (
-              <span key={keyword} className="inline-flex rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 shadow-sm">
-                #{keyword}
-              </span>
-            ))}
+          <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm font-semibold">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-blue-700 ring-1 ring-inset ring-blue-100">
+              <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-user-group opacity-60" />
+              {record.membersCount} members
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-calendar-day opacity-60" />
+              {formatTitleDate(record.submittedAt)}
+            </span>
           </div>
-        </div>
 
-        {/* Center: Submission Info & Similarity */}
-        <div className="space-y-4">
-          <div className="rounded-[1.5rem] bg-gradient-to-b from-slate-50/80 to-white p-5 ring-1 ring-inset ring-slate-200/80 shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <i className="fas fa-info text-[10px]" />
-              </span>
-              <p className="text-xs font-extrabold uppercase tracking-widest text-slate-500">
-                Submission Info
-              </p>
+          {record.groupMembers && record.groupMembers.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {record.groupMembers.slice(0, 4).map((member, idx) => (
+                <span 
+                  key={idx} 
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold ring-1 ring-inset shadow-sm ${
+                    member.isLeader 
+                      ? 'bg-amber-50 text-amber-700 ring-amber-200/80' 
+                      : 'bg-white text-slate-600 ring-slate-200/80'
+                  }`}
+                >
+                  <i className={`fas ${member.isLeader ? 'fa-crown text-amber-500' : 'fa-user text-slate-400'} text-[10px]`} />
+                  {member.name}
+                </span>
+              ))}
+              {record.groupMembers.length > 4 ? (
+                <span className="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
+                  +{record.groupMembers.length - 4} more
+                </span>
+              ) : null}
             </div>
-            
-            <dl className="space-y-3.5 text-sm">
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-slate-500 font-medium">Submitted</dt>
-                <dd className="font-bold text-slate-800">{formatTitleDate(record.submittedAt)}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-slate-500 font-medium">Members</dt>
-                <dd className="font-bold text-slate-800">{record.membersCount} members</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-slate-500 font-medium">Academic Year</dt>
-                <dd className="font-bold text-slate-800">{record.academicYear}</dd>
-              </div>
-              {fileCount > 0 && (
-                <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 border-dashed">
-                  <dt className="text-slate-500 font-medium">Documents</dt>
-                  <dd className="font-bold text-emerald-600">{fileCount} attached</dd>
-                </div>
-              )}
-            </dl>
-          </div>
-
-          <SimilarityIndicator compact score={record.similarityScore} similarTitles={record.similarTitles} />
+          ) : (
+            <p className="mt-3 text-sm font-medium text-slate-500">{formatMemberPreview(record.memberPreview)}</p>
+          )}
         </div>
 
-        {/* Right: Actions Panel */}
-        <div className="rounded-[1.5rem] bg-gradient-to-br from-blue-50/50 via-white to-white p-5 ring-1 ring-inset ring-blue-100/60 shadow-[0_4px_20px_rgb(59,130,246,0.05)] h-full flex flex-col">
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-blue-100/50">
-             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
-               <i className="fas fa-clipboard-check text-[10px]" />
-             </span>
-             <p className="text-xs font-extrabold uppercase tracking-widest text-blue-800">
-               Adviser Action
-             </p>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+              <i className="fas fa-percent text-emerald-500" /> Similarity
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-3xl font-black tracking-tight text-slate-900">{record.similarityScore}%</span>
+              <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${similarityMeta.toneClass} ring-current/20`}>
+                {similarityMeta.label}
+              </span>
+            </div>
+            <p className={`mt-2 text-xs font-bold ${similarityMeta.helperClass}`}>
+              {record.similarTitles.length
+                ? `${record.similarTitles.length} related title${record.similarTitles.length === 1 ? '' : 's'} found`
+                : 'No related IT titles found'}
+            </p>
           </div>
-          
+
+          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+              <i className="fas fa-paperclip text-blue-500" /> Proposal File
+            </p>
+            <p className="mt-3 truncate text-sm font-black text-slate-900" title={firstFile?.name || undefined}>
+              {firstFile?.name || 'Generated title summary'}
+            </p>
+            <p className="mt-1 text-xs font-bold text-slate-500">
+              {fileCount ? `${fileCount} attached file${fileCount === 1 ? '' : 's'}` : 'No uploaded file'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-4">
           <div>
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-blue-700">
+              <i className="fas fa-route" /> Next Step
+            </p>
+            <p className="mt-3 text-sm font-bold leading-6 text-slate-700">{reviewStage.helper}</p>
             <p
-              className="text-[0.95rem] font-medium italic leading-relaxed text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+              className="mt-3 text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
               title={record.adviserAction}
             >
               "{record.adviserAction}"
             </p>
           </div>
-
-          <div className="mt-6 flex flex-col gap-2.5">
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-sm ring-1 ring-inset ring-blue-700 transition-all hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md"
-                type="button"
-                onClick={() => onApprove(record)}
-              >
-                <i className="fas fa-check" /> Approve
-              </button>
-              <button
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-blue-700 shadow-sm ring-1 ring-inset ring-blue-200 transition-all hover:bg-blue-50 hover:-translate-y-0.5 hover:ring-blue-300"
-                type="button"
-                onClick={() => onRequestRevision(record)}
-              >
-                <i className="fas fa-rotate-left" /> Revise
-              </button>
-            </div>
-            
-            <button
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-rose-50 px-4 text-sm font-bold text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition-all hover:bg-rose-100 hover:-translate-y-0.5 hover:ring-rose-300"
-              type="button"
-              onClick={() => onReject(record)}
-            >
-              <i className="fas fa-ban" /> Reject
-            </button>
-            
-            <button
-              className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white shadow-md shadow-slate-900/20 transition-all hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/30"
-              type="button"
-              onClick={() => onViewDetails(record)}
-            >
-              <i className="fas fa-expand text-slate-300" /> View Full Details
-            </button>
-          </div>
+          <button
+            className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-black text-white shadow-md shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg"
+            type="button"
+            onClick={() => onViewDetails(record)}
+          >
+            <i className="fas fa-up-right-from-square text-xs" /> {previewButtonLabel}
+          </button>
         </div>
       </div>
     </article>

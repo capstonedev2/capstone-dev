@@ -259,6 +259,7 @@ export type ProjectWhereInput = {
   submissions?: Prisma.SubmissionListRelationFilter
   files?: Prisma.UploadedFileListRelationFilter
   defenseSchedules?: Prisma.DefenseScheduleListRelationFilter
+  adviserScheduleItems?: Prisma.AdviserScheduleItemListRelationFilter
   evaluations?: Prisma.EvaluationListRelationFilter
 }
 
@@ -286,6 +287,7 @@ export type ProjectOrderByWithRelationInput = {
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
   files?: Prisma.UploadedFileOrderByRelationAggregateInput
   defenseSchedules?: Prisma.DefenseScheduleOrderByRelationAggregateInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemOrderByRelationAggregateInput
   evaluations?: Prisma.EvaluationOrderByRelationAggregateInput
 }
 
@@ -316,6 +318,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   submissions?: Prisma.SubmissionListRelationFilter
   files?: Prisma.UploadedFileListRelationFilter
   defenseSchedules?: Prisma.DefenseScheduleListRelationFilter
+  adviserScheduleItems?: Prisma.AdviserScheduleItemListRelationFilter
   evaluations?: Prisma.EvaluationListRelationFilter
 }, "id">
 
@@ -378,6 +381,7 @@ export type ProjectCreateInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -400,6 +404,7 @@ export type ProjectUncheckedCreateInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -422,6 +427,7 @@ export type ProjectUpdateInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -444,6 +450,7 @@ export type ProjectUncheckedUpdateInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -843,6 +850,20 @@ export type ProjectUpdateOneRequiredWithoutDefenseSchedulesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutDefenseSchedulesInput, Prisma.ProjectUpdateWithoutDefenseSchedulesInput>, Prisma.ProjectUncheckedUpdateWithoutDefenseSchedulesInput>
 }
 
+export type ProjectCreateNestedOneWithoutAdviserScheduleItemsInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutAdviserScheduleItemsInput, Prisma.ProjectUncheckedCreateWithoutAdviserScheduleItemsInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutAdviserScheduleItemsInput
+  connect?: Prisma.ProjectWhereUniqueInput
+}
+
+export type ProjectUpdateOneRequiredWithoutAdviserScheduleItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutAdviserScheduleItemsInput, Prisma.ProjectUncheckedCreateWithoutAdviserScheduleItemsInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutAdviserScheduleItemsInput
+  upsert?: Prisma.ProjectUpsertWithoutAdviserScheduleItemsInput
+  connect?: Prisma.ProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutAdviserScheduleItemsInput, Prisma.ProjectUpdateWithoutAdviserScheduleItemsInput>, Prisma.ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput>
+}
+
 export type ProjectCreateNestedOneWithoutEvaluationsInput = {
   create?: Prisma.XOR<Prisma.ProjectCreateWithoutEvaluationsInput, Prisma.ProjectUncheckedCreateWithoutEvaluationsInput>
   connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutEvaluationsInput
@@ -875,6 +896,7 @@ export type ProjectCreateWithoutOwnerInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -896,6 +918,7 @@ export type ProjectUncheckedCreateWithoutOwnerInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -927,6 +950,7 @@ export type ProjectCreateWithoutAdviserInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -948,6 +972,7 @@ export type ProjectUncheckedCreateWithoutAdviserInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1031,6 +1056,7 @@ export type ProjectCreateWithoutFilesInput = {
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -1052,6 +1078,7 @@ export type ProjectUncheckedCreateWithoutFilesInput = {
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1089,6 +1116,7 @@ export type ProjectUpdateWithoutFilesInput = {
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1110,6 +1138,7 @@ export type ProjectUncheckedUpdateWithoutFilesInput = {
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1131,6 +1160,7 @@ export type ProjectCreateWithoutGroupInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -1152,6 +1182,7 @@ export type ProjectUncheckedCreateWithoutGroupInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1199,6 +1230,7 @@ export type ProjectCreateWithoutDepartmentInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -1220,6 +1252,7 @@ export type ProjectUncheckedCreateWithoutDepartmentInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1267,6 +1300,7 @@ export type ProjectCreateWithoutAcademicYearInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -1288,6 +1322,7 @@ export type ProjectUncheckedCreateWithoutAcademicYearInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1335,6 +1370,7 @@ export type ProjectCreateWithoutMilestonesInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -1356,6 +1392,7 @@ export type ProjectUncheckedCreateWithoutMilestonesInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1393,6 +1430,7 @@ export type ProjectUpdateWithoutMilestonesInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1414,6 +1452,7 @@ export type ProjectUncheckedUpdateWithoutMilestonesInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1435,6 +1474,7 @@ export type ProjectCreateWithoutSubmissionsInput = {
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -1456,6 +1496,7 @@ export type ProjectUncheckedCreateWithoutSubmissionsInput = {
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1493,6 +1534,7 @@ export type ProjectUpdateWithoutSubmissionsInput = {
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1514,6 +1556,7 @@ export type ProjectUncheckedUpdateWithoutSubmissionsInput = {
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1535,6 +1578,7 @@ export type ProjectCreateWithoutDefenseSchedulesInput = {
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
 }
 
@@ -1556,6 +1600,7 @@ export type ProjectUncheckedCreateWithoutDefenseSchedulesInput = {
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
 }
 
@@ -1593,6 +1638,7 @@ export type ProjectUpdateWithoutDefenseSchedulesInput = {
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1614,6 +1660,111 @@ export type ProjectUncheckedUpdateWithoutDefenseSchedulesInput = {
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
+  evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectCreateWithoutAdviserScheduleItemsInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  keywords?: Prisma.ProjectCreatekeywordsInput | string[]
+  status?: $Enums.ProjectStatus
+  repositoryPublishedAt?: Date | string | null
+  transferReadyAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  department?: Prisma.DepartmentCreateNestedOneWithoutProjectsInput
+  academicYear?: Prisma.AcademicYearCreateNestedOneWithoutProjectsInput
+  group?: Prisma.GroupCreateNestedOneWithoutProjectsInput
+  owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
+  adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
+  milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
+  files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
+  defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectUncheckedCreateWithoutAdviserScheduleItemsInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  keywords?: Prisma.ProjectCreatekeywordsInput | string[]
+  status?: $Enums.ProjectStatus
+  departmentId?: string | null
+  academicYearId?: string | null
+  groupId?: string | null
+  ownerId?: string | null
+  adviserId?: string | null
+  repositoryPublishedAt?: Date | string | null
+  transferReadyAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
+  files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
+  defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectCreateOrConnectWithoutAdviserScheduleItemsInput = {
+  where: Prisma.ProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutAdviserScheduleItemsInput, Prisma.ProjectUncheckedCreateWithoutAdviserScheduleItemsInput>
+}
+
+export type ProjectUpsertWithoutAdviserScheduleItemsInput = {
+  update: Prisma.XOR<Prisma.ProjectUpdateWithoutAdviserScheduleItemsInput, Prisma.ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput>
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutAdviserScheduleItemsInput, Prisma.ProjectUncheckedCreateWithoutAdviserScheduleItemsInput>
+  where?: Prisma.ProjectWhereInput
+}
+
+export type ProjectUpdateToOneWithWhereWithoutAdviserScheduleItemsInput = {
+  where?: Prisma.ProjectWhereInput
+  data: Prisma.XOR<Prisma.ProjectUpdateWithoutAdviserScheduleItemsInput, Prisma.ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput>
+}
+
+export type ProjectUpdateWithoutAdviserScheduleItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  department?: Prisma.DepartmentUpdateOneWithoutProjectsNestedInput
+  academicYear?: Prisma.AcademicYearUpdateOneWithoutProjectsNestedInput
+  group?: Prisma.GroupUpdateOneWithoutProjectsNestedInput
+  owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
+  adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
+  milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
+  files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
+  defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
+  files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
+  defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1636,6 +1787,7 @@ export type ProjectCreateWithoutEvaluationsInput = {
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutEvaluationsInput = {
@@ -1657,6 +1809,7 @@ export type ProjectUncheckedCreateWithoutEvaluationsInput = {
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutEvaluationsInput = {
@@ -1694,6 +1847,7 @@ export type ProjectUpdateWithoutEvaluationsInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutEvaluationsInput = {
@@ -1715,6 +1869,7 @@ export type ProjectUncheckedUpdateWithoutEvaluationsInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateManyOwnerInput = {
@@ -1767,6 +1922,7 @@ export type ProjectUpdateWithoutOwnerInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1788,6 +1944,7 @@ export type ProjectUncheckedUpdateWithoutOwnerInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1825,6 +1982,7 @@ export type ProjectUpdateWithoutAdviserInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1846,6 +2004,7 @@ export type ProjectUncheckedUpdateWithoutAdviserInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1899,6 +2058,7 @@ export type ProjectUpdateWithoutGroupInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1920,6 +2080,7 @@ export type ProjectUncheckedUpdateWithoutGroupInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -1973,6 +2134,7 @@ export type ProjectUpdateWithoutDepartmentInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -1994,6 +2156,7 @@ export type ProjectUncheckedUpdateWithoutDepartmentInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -2047,6 +2210,7 @@ export type ProjectUpdateWithoutAcademicYearInput = {
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
 }
 
@@ -2068,6 +2232,7 @@ export type ProjectUncheckedUpdateWithoutAcademicYearInput = {
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
 }
 
@@ -2097,6 +2262,7 @@ export type ProjectCountOutputType = {
   submissions: number
   files: number
   defenseSchedules: number
+  adviserScheduleItems: number
   evaluations: number
 }
 
@@ -2105,6 +2271,7 @@ export type ProjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   submissions?: boolean | ProjectCountOutputTypeCountSubmissionsArgs
   files?: boolean | ProjectCountOutputTypeCountFilesArgs
   defenseSchedules?: boolean | ProjectCountOutputTypeCountDefenseSchedulesArgs
+  adviserScheduleItems?: boolean | ProjectCountOutputTypeCountAdviserScheduleItemsArgs
   evaluations?: boolean | ProjectCountOutputTypeCountEvaluationsArgs
 }
 
@@ -2149,6 +2316,13 @@ export type ProjectCountOutputTypeCountDefenseSchedulesArgs<ExtArgs extends runt
 /**
  * ProjectCountOutputType without action
  */
+export type ProjectCountOutputTypeCountAdviserScheduleItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AdviserScheduleItemWhereInput
+}
+
+/**
+ * ProjectCountOutputType without action
+ */
 export type ProjectCountOutputTypeCountEvaluationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.EvaluationWhereInput
 }
@@ -2178,6 +2352,7 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   submissions?: boolean | Prisma.Project$submissionsArgs<ExtArgs>
   files?: boolean | Prisma.Project$filesArgs<ExtArgs>
   defenseSchedules?: boolean | Prisma.Project$defenseSchedulesArgs<ExtArgs>
+  adviserScheduleItems?: boolean | Prisma.Project$adviserScheduleItemsArgs<ExtArgs>
   evaluations?: boolean | Prisma.Project$evaluationsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["project"]>
@@ -2254,6 +2429,7 @@ export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   submissions?: boolean | Prisma.Project$submissionsArgs<ExtArgs>
   files?: boolean | Prisma.Project$filesArgs<ExtArgs>
   defenseSchedules?: boolean | Prisma.Project$defenseSchedulesArgs<ExtArgs>
+  adviserScheduleItems?: boolean | Prisma.Project$adviserScheduleItemsArgs<ExtArgs>
   evaluations?: boolean | Prisma.Project$evaluationsArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -2284,6 +2460,7 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     files: Prisma.$UploadedFilePayload<ExtArgs>[]
     defenseSchedules: Prisma.$DefenseSchedulePayload<ExtArgs>[]
+    adviserScheduleItems: Prisma.$AdviserScheduleItemPayload<ExtArgs>[]
     evaluations: Prisma.$EvaluationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2704,6 +2881,7 @@ export interface Prisma__ProjectClient<T, Null = never, ExtArgs extends runtime.
   submissions<T extends Prisma.Project$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   files<T extends Prisma.Project$filesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$filesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UploadedFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   defenseSchedules<T extends Prisma.Project$defenseSchedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$defenseSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DefenseSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  adviserScheduleItems<T extends Prisma.Project$adviserScheduleItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$adviserScheduleItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdviserScheduleItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   evaluations<T extends Prisma.Project$evaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$evaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3337,6 +3515,30 @@ export type Project$defenseSchedulesArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.DefenseScheduleScalarFieldEnum | Prisma.DefenseScheduleScalarFieldEnum[]
+}
+
+/**
+ * Project.adviserScheduleItems
+ */
+export type Project$adviserScheduleItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AdviserScheduleItem
+   */
+  select?: Prisma.AdviserScheduleItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AdviserScheduleItem
+   */
+  omit?: Prisma.AdviserScheduleItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AdviserScheduleItemInclude<ExtArgs> | null
+  where?: Prisma.AdviserScheduleItemWhereInput
+  orderBy?: Prisma.AdviserScheduleItemOrderByWithRelationInput | Prisma.AdviserScheduleItemOrderByWithRelationInput[]
+  cursor?: Prisma.AdviserScheduleItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AdviserScheduleItemScalarFieldEnum | Prisma.AdviserScheduleItemScalarFieldEnum[]
 }
 
 /**

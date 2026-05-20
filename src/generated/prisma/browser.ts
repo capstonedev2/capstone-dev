@@ -88,6 +88,11 @@ export type ReviewComment = Prisma.ReviewCommentModel
  */
 export type DefenseSchedule = Prisma.DefenseScheduleModel
 /**
+ * Model AdviserScheduleItem
+ * 
+ */
+export type AdviserScheduleItem = Prisma.AdviserScheduleItemModel
+/**
  * Model Evaluation
  * 
  */

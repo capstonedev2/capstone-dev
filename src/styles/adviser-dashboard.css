@@ -2867,7 +2867,7 @@ tr:hover {
 
 
 /* ═══════════════════════════════════════════════════════════════════
-   ADVISER GLOBAL LAYOUT SHELL (mirrors student-shell)
+   ADVISER GLOBAL LAYOUT SHELL
    ═══════════════════════════════════════════════════════════════════ */
 
 .adviser-shell {
@@ -6801,8 +6801,7 @@ tr:hover {
 }
 
 /* Fix for collapsed sidebar logo positioning in adviser shell */
-.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar > .sidebar-header,
-.adviser-shell.is-sidebar-collapsed .student-global-sidebar > .sidebar-header {
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar > .sidebar-header {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -7026,7 +7025,7 @@ tr:hover {
     }
 }
 
-/* Exact adviser/student sidebar layout parity. */
+/* Exact adviser sidebar layout parity. */
 .adviser-shell .adviser-global-content {
     width: 100% !important;
     max-width: 1600px !important;
@@ -7204,166 +7203,366 @@ tr:hover {
     color: #ffffff !important;
 }
 
-/* Last-mile adviser/student parity. These selectors match the actual combined classes in AdviserLayoutShell. */
-.adviser-shell.student-shell {
+/* Adviser-only copied shell chrome. */
+.adviser-shell {
+    --adviser-shell-sidebar-width: 248px !important;
+    --adviser-shell-collapsed-width: 72px !important;
+    --adviser-shell-topbar-height: 72px !important;
     --sidebar-width: 248px !important;
-    --student-shell-topbar-height: 72px !important;
+    display: flex !important;
+    min-height: 100vh !important;
     padding-top: 96px !important;
+    background: #f8fafc !important;
 }
 
-.adviser-shell.student-shell .adviser-global-navbar.student-global-navbar {
-    left: 248px !important;
-    right: auto !important;
-    width: calc(100% - 248px) !important;
+.adviser-shell .adviser-global-navbar {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    z-index: 1100 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(0, 58, 143, 0.72) !important;
+    border-radius: 0 !important;
+    background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 48%, #1e40af 100%) !important;
+    box-shadow:
+        0 14px 34px rgba(15, 23, 42, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.adviser-shell .adviser-global-navbar::before {
+    content: "" !important;
+    position: absolute !important;
+    right: 0 !important;
+    bottom: -1px !important;
+    left: 0 !important;
+    height: 3px !important;
+    pointer-events: none !important;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 58, 143, 0.2),
+            #003a8f 18%,
+            #003a8f 46%,
+            #f6be00 72%,
+            rgba(246, 190, 0, 0.45)
+        ) !important;
+    box-shadow:
+        0 0 10px rgba(0, 58, 143, 0.28),
+        0 0 12px rgba(246, 190, 0, 0.34) !important;
+}
+
+.adviser-shell .adviser-global-navbar::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background:
+        radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.14), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 58%) !important;
+}
+
+.adviser-shell .adviser-global-navbar-main,
+.adviser-shell .adviser-global-navbar-actions {
+    position: relative !important;
+    z-index: 1 !important;
     height: 72px !important;
     min-height: 72px !important;
 }
 
-.adviser-shell.student-shell .adviser-global-navbar-main.student-global-navbar-main,
-.adviser-shell.student-shell .adviser-global-navbar-actions.student-global-navbar-actions {
-    height: 72px !important;
-    min-height: 72px !important;
+.adviser-shell .adviser-global-navbar-main {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding-left: 0 !important;
 }
 
-.adviser-shell.student-shell .adviser-shell-toggle.student-shell-toggle {
+.adviser-shell .adviser-shell-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     flex: 0 0 56px !important;
     width: 56px !important;
     min-width: 56px !important;
     height: 72px !important;
     min-height: 72px !important;
+    padding: 0 !important;
     border: 0 !important;
-    border-right: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
+    color: #ffffff !important;
     box-shadow: none !important;
+    transform: none !important;
 }
 
-.adviser-shell.student-shell .adviser-navbar-title.student-navbar-title {
+.adviser-shell .adviser-shell-toggle:hover,
+.adviser-shell .adviser-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell .adviser-shell-toggle i {
+    font-size: 1.15rem !important;
+}
+
+.adviser-shell .adviser-navbar-title {
     display: flex !important;
     align-items: center !important;
     min-width: 0 !important;
     padding-left: 1.15rem !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar {
+.adviser-shell .adviser-navbar-title::before,
+.adviser-shell .adviser-navbar-title-kicker {
+    display: none !important;
+}
+
+.adviser-shell .adviser-navbar-title strong {
+    overflow: hidden !important;
+    color: #ffffff !important;
+    font-size: 1.08rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.05 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.7rem !important;
+    margin-left: auto !important;
+    padding-right: 1.45rem !important;
+}
+
+.adviser-shell .portal-shell-action-menus {
+    flex-wrap: nowrap !important;
+    gap: 0.7rem !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger,
+.adviser-shell .portal-shell-profile-trigger {
+    height: 48px !important;
+    min-height: 48px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 8px 18px rgba(2, 6, 23, 0.12) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger:hover,
+.adviser-shell .portal-shell-profile-trigger:hover,
+.adviser-shell .portal-shell-notification-trigger.is-open,
+.adviser-shell .portal-shell-profile-menu.is-open .portal-shell-profile-trigger,
+.adviser-shell .portal-shell-profile-trigger[aria-expanded='true'] {
+    border-color: rgba(246, 190, 0, 0.36) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 10px 24px rgba(2, 6, 23, 0.16) !important;
+    transform: translateY(-1px) !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-icon,
+.adviser-shell .portal-shell-profile-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-copy strong,
+.adviser-shell .portal-shell-profile-copy strong {
+    color: #ffffff !important;
+    font-size: 0.82rem !important;
+    font-weight: 850 !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-copy small,
+.adviser-shell .portal-shell-profile-copy small,
+.adviser-shell .portal-shell-profile-chevron {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger-copy {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger-icon {
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger-count {
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 999px !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-profile-trigger {
+    min-width: 174px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0.4rem 0.75rem 0.4rem 0.42rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar {
     position: fixed !important;
-    top: 0 !important;
     bottom: 0 !important;
     left: 0 !important;
     z-index: 1050 !important;
     width: 248px !important;
     max-width: 248px !important;
-    height: 100vh !important;
     padding: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
     border-right: 1px solid #dbe3ef !important;
     border-radius: 0 !important;
     background: #ffffff !important;
     color: #0f172a !important;
     box-shadow: none !important;
     transform: translateX(0) !important;
+    transition: width 0.2s ease, transform 0.2s ease !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-header {
-    display: grid !important;
+.adviser-shell .adviser-global-sidebar::before {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-header {
+    display: flex !important;
     align-items: center !important;
+    justify-content: center !important;
     min-height: 78px !important;
-    height: auto !important;
     padding: 0.55rem 0.75rem !important;
     border-bottom: 1px solid #dbe3ef !important;
     background: #ffffff !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-header-copy {
+.adviser-shell .adviser-global-sidebar .sidebar-header-copy {
     display: grid !important;
-    gap: 0.62rem !important;
+    gap: 0 !important;
     width: 100% !important;
-    justify-items: start !important;
-    justify-content: start !important;
-    align-items: center !important;
-    place-items: center start !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-mark {
+.adviser-shell .adviser-global-sidebar .sidebar-context-kicker,
+.adviser-shell .adviser-global-sidebar .sidebar-header p,
+.adviser-shell .adviser-global-sidebar .user-badge {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-mark {
     display: grid !important;
-    grid-template-columns: 42px minmax(0, 1fr) !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
     grid-template-rows: auto auto !important;
-    column-gap: 0.38rem !important;
-    row-gap: 0 !important;
     align-items: center !important;
-    justify-content: start !important;
-    justify-items: start !important;
-    justify-self: start !important;
-    place-self: center start !important;
     width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    transform: none !important;
+    column-gap: 0.4rem !important;
+    row-gap: 0 !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-logo {
+.adviser-shell .adviser-global-sidebar .system-brand-logo {
     display: block !important;
     grid-column: 1 !important;
     grid-row: 1 / span 2 !important;
-    width: 42px !important;
-    height: 40px !important;
+    width: 44px !important;
+    height: 42px !important;
     object-fit: contain !important;
-    transform: none !important;
-    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-name {
+.adviser-shell .adviser-global-sidebar .system-brand-name {
     display: flex !important;
     grid-column: 2 !important;
     grid-row: 1 !important;
     align-items: baseline !important;
     gap: 0 !important;
     color: var(--color-primary, #003a8f) !important;
-    font-size: 1.22rem !important;
+    font-size: 1.28rem !important;
     font-weight: 900 !important;
+    letter-spacing: 0 !important;
     line-height: 0.98 !important;
-    letter-spacing: -0.045em !important;
-    margin: 0 !important;
+    text-transform: none !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-name span {
+.adviser-shell .adviser-global-sidebar .system-brand-name span {
     color: var(--color-primary, #003a8f) !important;
     font-size: inherit !important;
     font-weight: inherit !important;
-    line-height: inherit !important;
     letter-spacing: inherit !important;
+    line-height: inherit !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-name strong {
-    color: #f6be00 !important;
+.adviser-shell .adviser-global-sidebar .system-brand-name strong {
+    color: var(--color-accent, #f6be00) !important;
     font-size: inherit !important;
     font-weight: inherit !important;
-    line-height: inherit !important;
     letter-spacing: inherit !important;
+    line-height: inherit !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .system-brand-subtitle {
+.adviser-shell .adviser-global-sidebar .system-brand-subtitle {
     display: block !important;
     grid-column: 2 !important;
     grid-row: 2 !important;
     overflow: visible !important;
     max-width: none !important;
     color: #475569 !important;
-    font-size: 0.58rem !important;
+    font-size: 0.62rem !important;
     font-weight: 700 !important;
-    letter-spacing: -0.045em !important;
+    letter-spacing: 0 !important;
     line-height: 1.15 !important;
     text-overflow: clip !important;
     white-space: nowrap !important;
-    margin: 0 !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-context-kicker,
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .user-badge {
-    display: none !important;
-}
-
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-nav {
+.adviser-shell .adviser-global-sidebar .sidebar-nav {
     display: grid !important;
     align-content: start !important;
     gap: 1.15rem !important;
@@ -7371,7 +7570,12 @@ tr:hover {
     background: #ffffff !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-nav-heading {
+.adviser-shell .adviser-global-sidebar .sidebar-nav-group {
+    display: grid !important;
+    gap: 0.35rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading {
     display: flex !important;
     align-items: center !important;
     gap: 0.6rem !important;
@@ -7380,18 +7584,23 @@ tr:hover {
     color: #0f172a !important;
     font-size: 0.78rem !important;
     font-weight: 800 !important;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0 !important;
     text-transform: uppercase !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-nav-heading::after {
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading::after {
     content: "" !important;
     flex: 1 1 auto !important;
     height: 1px !important;
     background: #dbe3ef !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link {
+.adviser-shell .adviser-global-sidebar .sidebar-nav-links {
+    display: grid !important;
+    gap: 0.34rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link {
     display: flex !important;
     align-items: center !important;
     gap: 0.8rem !important;
@@ -7403,102 +7612,204 @@ tr:hover {
     background: transparent !important;
     color: #0f172a !important;
     box-shadow: none !important;
+    font-weight: 600 !important;
     transform: none !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link:hover {
+.adviser-shell .adviser-global-sidebar .sidebar-link:hover {
     background: #eef4ff !important;
     color: #0f172a !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active {
-    background: transparent !important;
-    color: #0f172a !important;
-    font-weight: 800 !important;
+.adviser-shell .adviser-global-sidebar .sidebar-link.active,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active {
+    background: rgba(37, 99, 235, 0.09) !important;
+    border-color: transparent !important;
+    border-left: 3px solid #2563eb !important;
+    color: #1e3a8a !important;
+    font-weight: 700 !important;
+    box-shadow: none !important;
 }
 
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link-icon,
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link-icon i,
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link-label,
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
-.adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar .sidebar-link.is-active .sidebar-link-label {
-    color: #0f172a !important;
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon i {
+    color: #475569 !important;
 }
 
-.adviser-shell.student-shell .adviser-global-main.student-global-main {
-    margin-left: 248px !important;
-    width: calc(100% - 248px) !important;
-    max-width: calc(100% - 248px) !important;
+.adviser-shell .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon i,
+.adviser-shell .adviser-global-sidebar .sidebar-link.active .sidebar-link-label,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #2563eb !important;
+}
+
+.adviser-shell .adviser-global-main {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    min-width: 0 !important;
     padding: 0 1rem 2.5rem !important;
+    background: #f8fafc !important;
+    transition: margin-left 0.2s ease !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar {
+.adviser-shell .adviser-global-content {
+    width: 100% !important;
+    max-width: 1600px !important;
+    min-width: 0 !important;
+}
+
+.adviser-shell .adviser-global-content > .dashboard-wrapper {
+    display: block !important;
+    min-height: 0 !important;
+    background: transparent !important;
+}
+
+.adviser-shell .adviser-global-content > .dashboard-wrapper > .sidebar {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-content > .dashboard-wrapper > .main-content {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+}
+
+.adviser-shell .adviser-global-content > .dashboard-wrapper > .main-content > .adviser-page-header {
+    display: none !important;
+}
+
+.adviser-shell.is-sidebar-collapsed {
+    --adviser-shell-sidebar-width: 72px !important;
+    --sidebar-width: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
     width: 72px !important;
     max-width: 72px !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-navbar.student-global-navbar {
-    left: 72px !important;
-    width: calc(100% - 72px) !important;
-}
-
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-main.student-global-main {
-    margin-left: 72px !important;
-    width: calc(100% - 72px) !important;
-    max-width: calc(100% - 72px) !important;
-}
-
-.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-header {
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-header {
     display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     min-height: 72px !important;
     height: 72px !important;
     padding: 0 !important;
-    justify-content: center !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-mark {
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-header-copy {
     display: flex !important;
+    align-items: center !important;
     justify-content: center !important;
+    width: 100% !important;
+    height: 72px !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-logo {
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-mark {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-logo {
     width: 38px !important;
     height: 38px !important;
+    transform: none !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-name,
-.adviser-shell.student-shell.is-sidebar-collapsed .system-brand-subtitle,
-.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-link-label,
-.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-nav-heading {
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-name,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-name span,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-name strong,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-subtitle,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-context-kicker,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .user-badge,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-link-label {
     display: none !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-nav {
-    padding: 0.65rem 0.75rem 1rem !important;
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav {
     gap: 1rem !important;
+    padding: 0.65rem 0.75rem 1rem !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .sidebar-link {
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav-heading {
+    display: block !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    margin: 0.4rem 0.25rem 0.6rem !important;
+    overflow: hidden !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-indent: -999px !important;
+    white-space: nowrap !important;
+    background: rgba(148, 163, 184, 0.28) !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav-heading::before,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav-heading::after {
+    display: none !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-link {
     justify-content: center !important;
     width: 48px !important;
-    min-width: 48px !important;
     height: 48px !important;
     min-height: 48px !important;
-    padding: 0 !important;
-    gap: 0 !important;
     margin: 0 auto !important;
+    padding: 0 !important;
     border-radius: 6px !important;
 }
 
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-link-icon {
+    margin: 0 !important;
+    font-size: 1.05rem !important;
+}
+
+@media (min-width: 1101px) {
+    .adviser-shell .adviser-global-sidebar {
+        top: 0 !important;
+        height: 100vh !important;
+    }
+
+    .adviser-shell .adviser-global-navbar {
+        left: 248px !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .adviser-shell .adviser-global-main {
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+        margin-left: 248px !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-main {
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+        margin-left: 72px !important;
+    }
+}
+
 @media (max-width: 1100px) {
-    .adviser-shell.student-shell .adviser-global-navbar.student-global-navbar {
+    .adviser-shell .adviser-global-navbar {
         left: 0 !important;
         width: 100% !important;
     }
 
-    .adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar,
-    .adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar {
+    .adviser-shell .adviser-global-sidebar,
+    .adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
         top: 72px !important;
         width: 248px !important;
         max-width: 248px !important;
@@ -7506,70 +7817,215 @@ tr:hover {
         transform: translateX(-104%) !important;
     }
 
-    .adviser-shell.student-shell .adviser-global-sidebar.student-global-sidebar.is-open {
+    .adviser-shell .adviser-global-sidebar.is-open {
         transform: translateX(0) !important;
     }
 
-    .adviser-shell.student-shell .adviser-global-main.student-global-main,
-    .adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-main.student-global-main {
-        margin-left: 0 !important;
+    .adviser-shell .adviser-global-main,
+    .adviser-shell.is-sidebar-collapsed .adviser-global-main {
         width: 100% !important;
         max-width: 100% !important;
+        margin-left: 0 !important;
     }
 }
 
-/* Adviser collapsed rail should match the student collapsed sidebar reference. */
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar > .sidebar-header {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-height: 72px !important;
-    height: 72px !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+@media (max-width: 720px) {
+    .adviser-shell .portal-shell-notification-trigger-copy,
+    .adviser-shell .portal-shell-profile-copy {
+        display: none !important;
+    }
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .sidebar-header-copy {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    height: 72px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+.adviser-shell[data-theme="dark"] .adviser-global-main {
+    background:
+        radial-gradient(circle at 18% 0%, rgba(96, 165, 250, 0.14), transparent 28%),
+        radial-gradient(circle at 92% 4%, rgba(246, 190, 0, 0.08), transparent 24%),
+        linear-gradient(180deg, #06111f 0%, #081a31 48%, #07101f 100%) !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-mark {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 38px !important;
-    max-width: 38px !important;
-    height: 38px !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+.adviser-shell[data-theme="dark"] .adviser-global-navbar {
+    border-bottom-color: rgba(96, 165, 250, 0.34) !important;
+    background:
+        radial-gradient(circle at 0% 50%, rgba(246, 190, 0, 0.08), transparent 30%),
+        linear-gradient(90deg, #081a31 0%, #071526 55%, #06111f 100%) !important;
+    box-shadow:
+        0 16px 32px rgba(2, 6, 23, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-logo {
-    display: block !important;
-    flex: 0 0 auto !important;
-    width: 38px !important;
-    max-width: 38px !important;
-    height: 38px !important;
-    max-height: 38px !important;
-    object-fit: contain !important;
-    object-position: left center !important;
-    margin: 0 !important;
-    padding: 0 !important;
+.adviser-shell[data-theme="dark"] .adviser-global-navbar::before {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(37, 99, 235, 0.12),
+            rgba(37, 99, 235, 0.72) 18%,
+            rgba(37, 99, 235, 0.62) 48%,
+            rgba(246, 190, 0, 0.74) 74%,
+            rgba(246, 190, 0, 0.22)
+        ) !important;
+    box-shadow:
+        0 0 8px rgba(37, 99, 235, 0.18),
+        0 0 10px rgba(246, 190, 0, 0.2) !important;
 }
 
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-name,
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-name span,
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-name strong,
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .system-brand-subtitle,
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .sidebar-context-kicker,
-.adviser-shell.student-shell.is-sidebar-collapsed .adviser-global-sidebar.student-global-sidebar .user-badge {
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar {
+    border-right-color: rgba(147, 197, 253, 0.2) !important;
+    background: linear-gradient(180deg, #081a31 0%, #071526 100%) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-header {
+    border-bottom-color: rgba(147, 197, 253, 0.18) !important;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(246, 190, 0, 0.1), transparent 34%),
+        linear-gradient(180deg, rgba(10, 34, 68, 0.98), rgba(8, 26, 49, 0.96)) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .system-brand-name span {
+    color: #ffffff !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .system-brand-subtitle,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-nav-heading {
+    color: #c7d7ee !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-nav-heading::after {
+    background: rgba(147, 197, 253, 0.2) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link {
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link:hover {
+    background: rgba(96, 165, 250, 0.14) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active {
+    border-color: transparent !important;
+    background: linear-gradient(135deg, var(--color-primary, #003a8f), var(--color-secondary, #1e40af)) !important;
+    color: #ffffff !important;
+    box-shadow: inset 3px 0 0 #f6be00 !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon i,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active .sidebar-link-label,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+/* Final adviser navbar color parity with the student navbar. */
+.adviser-shell .adviser-global-navbar,
+.adviser-shell[data-theme="dark"] .adviser-global-navbar,
+.adviser-shell[data-theme="system"] .adviser-global-navbar {
+    border-bottom-color: rgba(0, 58, 143, 0.72) !important;
+    background: var(--color-primary, #003a8f) !important;
+    box-shadow:
+        0 14px 34px rgba(15, 23, 42, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.adviser-shell .adviser-global-navbar::before,
+.adviser-shell[data-theme="dark"] .adviser-global-navbar::before,
+.adviser-shell[data-theme="system"] .adviser-global-navbar::before {
+    height: 3px !important;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 58, 143, 0.2),
+            #003a8f 18%,
+            #003a8f 46%,
+            #f6be00 72%,
+            rgba(246, 190, 0, 0.45)
+        ) !important;
+    box-shadow:
+        0 0 10px rgba(0, 58, 143, 0.28),
+        0 0 12px rgba(246, 190, 0, 0.34) !important;
+}
+
+.adviser-shell .adviser-global-navbar::after,
+.adviser-shell[data-theme="dark"] .adviser-global-navbar::after,
+.adviser-shell[data-theme="system"] .adviser-global-navbar::after {
     display: none !important;
+    background: none !important;
+}
+
+/* Final adviser desktop placement: keep the white logo sidebar visible and start the blue navbar beside it. */
+@media (min-width: 1101px) {
+    .adviser-shell .adviser-global-sidebar {
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        z-index: 1200 !important;
+        width: 248px !important;
+        max-width: 248px !important;
+        height: 100vh !important;
+        transform: translateX(0) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
+        width: 72px !important;
+        max-width: 72px !important;
+    }
+
+    .adviser-shell .adviser-global-navbar {
+        left: 248px !important;
+        right: auto !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .adviser-shell .adviser-global-main {
+        margin-left: 248px !important;
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-main {
+        margin-left: 72px !important;
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+    }
+}
+
+/* Final adviser burger parity: the menu button should not create a darker block. */
+.adviser-shell .adviser-shell-toggle,
+.adviser-shell[data-theme="dark"] .adviser-shell-toggle,
+.adviser-shell[data-theme="system"] .adviser-shell-toggle {
+    flex-basis: 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    border: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell .adviser-shell-toggle:hover,
+.adviser-shell .adviser-shell-toggle:focus-visible,
+.adviser-shell[data-theme="dark"] .adviser-shell-toggle:hover,
+.adviser-shell[data-theme="dark"] .adviser-shell-toggle:focus-visible,
+.adviser-shell[data-theme="system"] .adviser-shell-toggle:hover,
+.adviser-shell[data-theme="system"] .adviser-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
 }

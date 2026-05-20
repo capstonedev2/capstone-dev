@@ -162,6 +162,7 @@ export async function GET(request: Request) {
                 body: true,
                 decision: true,
                 createdAt: true,
+                authorId: true,
                 author: {
                   select: {
                     id: true,
@@ -343,6 +344,7 @@ export async function POST(request: Request) {
                   body: true,
                   decision: true,
                   createdAt: true,
+                  authorId: true,
                   author: {
                     select: {
                       id: true,

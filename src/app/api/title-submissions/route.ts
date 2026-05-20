@@ -163,6 +163,8 @@ function toTitlePayload(project: any) {
       id: file.id,
       name: file.fileName,
       url: `/api/document-files/${file.id}/download`,
+      previewUrl: `/api/document-files/${file.id}/preview`,
+      fileType: file.fileType,
       size: file.size
     })) || []
   };

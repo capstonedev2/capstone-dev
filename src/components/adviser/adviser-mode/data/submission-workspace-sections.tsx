@@ -127,17 +127,30 @@ function startOfUtcDay(value: string) {
   return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }
 
-function getDeadlineDelta(deadline: string) {
+function getDeadlineDelta(deadline: string | null) {
+  if (!deadline) {
+    return Number.POSITIVE_INFINITY;
+  }
+
   return Math.round((startOfUtcDay(deadline) - startOfUtcDay(getReviewReferenceDate())) / dayInMilliseconds);
 }
 
-function getDeadlineVisual(deadline: string, status: SubmissionStatus) {
+function getDeadlineVisual(deadline: string | null, status: SubmissionStatus) {
   if (status === 'approved') {
     return {
       label: 'Cleared',
       icon: 'fa-circle-check',
       className: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
       barClassName: 'bg-emerald-500'
+    };
+  }
+
+  if (!deadline) {
+    return {
+      label: 'No due date',
+      icon: 'fa-calendar',
+      className: 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200',
+      barClassName: 'bg-slate-300'
     };
   }
 
@@ -313,7 +326,7 @@ export function SubmissionFocusPanel({
 
         <aside className="flex flex-col justify-between gap-5 bg-slate-50 p-6">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Next Deadline</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">Next Due Date</p>
             {isLoading ? (
               <div className="mt-4 space-y-3">
                 <div className="h-6 w-28 animate-pulse rounded-full bg-slate-200" />
@@ -335,10 +348,12 @@ export function SubmissionFocusPanel({
                   {nextDueSubmission.submissionTitle}
                 </h2>
                 <p className="mt-2 text-sm font-bold text-[#003A8F]">{nextDueSubmission.groupId}</p>
-                <p className="mt-1 text-sm text-slate-500">{formatSubmissionDate(nextDueSubmission.deadline)}</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {nextDueSubmission.deadline ? formatSubmissionDate(nextDueSubmission.deadline) : 'Not set'}
+                </p>
               </>
             ) : (
-              <p className="mt-4 text-sm text-slate-500">No pending review deadlines.</p>
+              <p className="mt-4 text-sm text-slate-500">No adviser due dates have been set.</p>
             )}
           </div>
 
@@ -460,12 +475,7 @@ export function SubmissionList({
   hasActiveFilters,
   isLoading,
   onClearFilters,
-  onViewSubmission,
-  onDownloadSubmission,
-  onStartReview,
-  onRequestRevision,
-  onApproveNotify,
-  onSendReminder
+  onDownloadSubmission
 }: {
   submissions: AdviserSubmissionRecord[];
   totalSubmissions: number;
@@ -485,7 +495,7 @@ export function SubmissionList({
         <div>
           <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Assigned Document Reviews</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Real student uploads from assigned projects, sorted by review priority, deadline, and current version.
+            Real student uploads from assigned projects, sorted by review priority, upload date, and current version.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
@@ -506,12 +516,7 @@ export function SubmissionList({
             <SubmissionItem
               key={submission.id}
               submission={submission}
-              onViewSubmission={onViewSubmission}
               onDownloadSubmission={onDownloadSubmission}
-              onStartReview={onStartReview}
-              onRequestRevision={onRequestRevision}
-              onApproveNotify={onApproveNotify}
-              onSendReminder={onSendReminder}
             />
           ))}
         </div>
@@ -542,106 +547,106 @@ export function SubmissionList({
 
 function SubmissionItem({
   submission,
-  onViewSubmission,
-  onDownloadSubmission,
-  onStartReview,
-  onRequestRevision,
-  onApproveNotify,
-  onSendReminder
+  onDownloadSubmission
 }: {
   submission: AdviserSubmissionRecord;
-  onViewSubmission?: (submission: AdviserSubmissionRecord) => void;
   onDownloadSubmission?: (submission: AdviserSubmissionRecord) => void;
-  onStartReview?: (submission: AdviserSubmissionRecord) => void;
-  onRequestRevision?: (submission: AdviserSubmissionRecord) => void;
-  onApproveNotify?: (submission: AdviserSubmissionRecord) => void;
-  onSendReminder?: (submission: AdviserSubmissionRecord) => void;
 }) {
   const statusMeta = getSubmissionStatusMeta(submission.status);
   const statusVisual = submissionStatusVisuals[submission.status];
   const deadlineVisual = getDeadlineVisual(submission.deadline, submission.status);
   const deadlineDelta = getDeadlineDelta(submission.deadline);
-  const isUrgent = submission.status !== 'approved' && deadlineDelta <= 1;
+  const isUrgent = Boolean(submission.deadline) && submission.status !== 'approved' && deadlineDelta <= 1;
   const fileVisual = getFileVisual(submission);
-  const visibleMembers = submission.groupMembers?.slice(0, 3) || [];
+  const visibleMembers = submission.groupMembers?.slice(0, 2) || [];
   const remainingMembers = Math.max(0, (submission.groupMembers?.length || 0) - visibleMembers.length);
+  const currentWorkflowStep = REVIEW_WORKFLOW_STEPS[submission.workflowStepIndex] || REVIEW_WORKFLOW_STEPS[0];
+  const latestTimelineEvent = [...submission.timeline].reverse().find((event) => event.isComplete) || submission.timeline[0];
+  const latestNote = submission.latestReviewComment?.body || 'No adviser notes yet. Open the review workspace to add comments.';
+  const primaryActionLabel = submission.status === 'approved' ? 'View Summary' : 'Open Review';
 
   return (
-    <article className={`adviser-submission-card group overflow-hidden rounded-2xl border border-l-4 border-slate-100 ${statusVisual.borderClassName} bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_60px_rgba(0,58,143,0.12)]`}>
-      <div className="grid xl:grid-cols-[300px_minmax(0,1fr)_250px]">
-        <section className="border-b border-slate-100 p-5 xl:border-b-0 xl:border-r">
-          <div className="flex items-start gap-4">
-            <span className={`inline-flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-2xl ${fileVisual.className} ring-1 ring-inset ${statusVisual.fileRingClassName}`}>
-              <i className={`fas ${fileVisual.icon} text-xl`} aria-hidden="true" />
+    <article className={`adviser-submission-card group overflow-hidden rounded-2xl border border-l-4 border-slate-100 ${statusVisual.borderClassName} bg-white shadow-[0_12px_30px_rgba(15,23,42,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(0,58,143,0.10)]`}>
+      <div className="grid xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.85fr)_220px]">
+        <section className="border-b border-slate-100 p-4 xl:border-b-0 xl:border-r">
+          <div className="flex items-start gap-3">
+            <span className={`inline-flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-2xl ${fileVisual.className} ring-1 ring-inset ${statusVisual.fileRingClassName}`}>
+              <i className={`fas ${fileVisual.icon} text-lg`} aria-hidden="true" />
               <span className="mt-1 text-[9px] font-black uppercase tracking-wide">{fileVisual.label}</span>
             </span>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
                   {submission.groupId}
                 </span>
-                <span className={`rounded-full px-3 py-1 text-xs font-black ${statusMeta.badgeClassName}`}>
+                <span className={`rounded-full px-2.5 py-1 text-[11px] font-black ${statusMeta.badgeClassName}`}>
                   {statusMeta.label}
                 </span>
+                <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">{submission.version}</span>
               </div>
-              <h3 className="mt-3 overflow-hidden text-base font-black leading-6 text-slate-950 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]" title={submission.submissionTitle}>
+              <h3 className="mt-2 overflow-hidden text-base font-black leading-6 text-slate-950 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]" title={submission.submissionTitle}>
                 {submission.submissionTitle}
               </h3>
-              <p className="mt-1 text-sm font-semibold text-slate-500">{submission.projectTitle}</p>
+              <p className="mt-0.5 truncate text-sm font-semibold text-slate-500">{submission.projectTitle}</p>
             </div>
           </div>
 
-          <div className="mt-5 space-y-4">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Student / Leader</p>
-              <p className="mt-1 text-sm font-black text-slate-900">{submission.submittedBy || 'Project Member'}</p>
+          <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+            <div className="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-inset ring-slate-100">
+              <p className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-500">Student</p>
+              <p className="mt-0.5 truncate font-black text-slate-900">{submission.submittedBy || 'Project Member'}</p>
             </div>
+            <div className="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-inset ring-slate-100">
+              <p className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-500">Milestone</p>
+              <p className="mt-0.5 truncate font-black text-slate-900">{submission.milestone}</p>
+            </div>
+          </div>
 
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {visibleMembers.length ? (
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">Group Members</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {visibleMembers.map((member) => (
-                    <span
-                      key={`${submission.id}-${member.name}`}
-                      className={`rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset ${
-                        member.isLeader
-                          ? 'bg-amber-50 text-amber-800 ring-amber-200'
-                          : 'bg-slate-100 text-slate-700 ring-slate-200'
-                      }`}
-                    >
-                      {member.name}
-                    </span>
-                  ))}
-                  {remainingMembers ? (
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
-                      +{remainingMembers}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
+              visibleMembers.map((member) => (
+                <span
+                  key={`${submission.id}-${member.name}`}
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 ring-inset ${
+                    member.isLeader
+                      ? 'bg-amber-50 text-amber-800 ring-amber-200'
+                      : 'bg-slate-100 text-slate-700 ring-slate-200'
+                  }`}
+                >
+                  {member.name}
+                </span>
+              ))
             ) : null}
-
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{submission.type}</span>
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">{submission.milestone}</span>
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">{submission.version}</span>
-            </div>
+            {remainingMembers ? (
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
+                +{remainingMembers}
+              </span>
+            ) : null}
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-700">{submission.type}</span>
           </div>
         </section>
 
-        <section className="min-w-0 border-b border-slate-100 p-5 xl:border-b-0 xl:border-r">
-          <div>
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Review Progress</p>
+        <section className="min-w-0 border-b border-slate-100 p-4 xl:border-b-0 xl:border-r">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Review Stage</p>
+              <p className="mt-1 text-sm font-black text-slate-950">{currentWorkflowStep.label}</p>
+            </div>
+            <div className="flex flex-wrap justify-end gap-2">
               {isUrgent ? (
                 <span className="rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-black text-red-700 ring-1 ring-inset ring-red-200">
                   Priority
                 </span>
               ) : null}
+              <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-black ${deadlineVisual.className}`}>
+                <i className={`fas ${deadlineVisual.icon} text-[10px]`} aria-hidden="true" />
+                {deadlineVisual.label}
+              </span>
             </div>
-            <div className="mt-4 grid grid-cols-5 gap-2">
-              {REVIEW_WORKFLOW_STEPS.map((step, index) => {
+          </div>
+
+          <div className="mt-4 flex items-center gap-1.5">
+            {REVIEW_WORKFLOW_STEPS.map((step, index) => {
                 const timelineEvent = submission.timeline.find((event) => event.id === step.id);
                 const nextStep = REVIEW_WORKFLOW_STEPS[index + 1];
                 const nextTimelineEvent = nextStep
@@ -667,177 +672,101 @@ function SubmissionItem({
                       : 'bg-white text-slate-400 ring-slate-200';
 
                 return (
-                  <div key={step.id} className="relative flex flex-col items-center gap-2 text-center">
+                  <div key={step.id} className="relative flex flex-1 items-center">
                     {index < REVIEW_WORKFLOW_STEPS.length - 1 ? (
-                      <span className={`absolute left-1/2 top-4 h-0.5 w-full ${isComplete && isNextComplete ? statusVisual.progressClassName : 'bg-slate-200'}`} aria-hidden="true" />
+                      <span className={`absolute left-4 right-[-0.4rem] top-1/2 h-0.5 ${isComplete && isNextComplete ? statusVisual.progressClassName : 'bg-slate-200'}`} aria-hidden="true" />
                     ) : null}
-                    <span className={`relative z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[11px] ring-2 ring-white transition-all duration-500 ${completeClassName}`}>
+                    <span className={`relative z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-[11px] ring-2 ring-white transition-all duration-500 ${completeClassName}`} title={step.label}>
                       <i className={`fas ${isCurrent ? step.icon : isComplete ? 'fa-check' : step.icon}`} aria-hidden="true" />
-                    </span>
-                    <span className={`text-[10px] font-bold leading-3 ${isComplete ? 'text-slate-800' : 'text-slate-400'}`}>
-                      {step.label}
                     </span>
                   </div>
                 );
-              })}
-            </div>
+            })}
           </div>
 
-          <div className="mt-6 border-t border-slate-100 pt-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#003A8F]">Latest Adviser Notes</p>
-            <div className={`mt-3 rounded-2xl p-4 ${submission.status === 'approved' ? 'bg-emerald-50' : 'bg-slate-50'}`}>
-              <p className="text-sm leading-6 text-slate-700">
-                {submission.latestReviewComment?.body || 'No adviser comments have been added yet. Open the review workspace to add categorized notes for the current version.'}
+          <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+            <div className={`rounded-2xl p-3 ${submission.status === 'approved' ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#003A8F]">Latest Note</p>
+              <p className="mt-2 overflow-hidden text-sm leading-6 text-slate-700 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+                {latestNote}
               </p>
-              <p className="mt-3 text-xs font-bold text-slate-500">
+              <p className="mt-2 text-xs font-bold text-slate-500">
                 {submission.latestReviewComment
                   ? `${submission.latestReviewComment.authorName || 'Adviser'} | ${formatSubmissionDateTime(submission.latestReviewComment.createdAt)} | ${submission.version}`
                   : `Current version ${submission.version}`}
               </p>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {submission.commentCategories.map((category) => (
-                <span key={`${submission.id}-${category}`} className={`rounded-full px-3 py-1 text-[11px] font-black ${getCommentCategoryMeta(category)}`}>
-                  {category}
-                </span>
-              ))}
+
+            <div className="rounded-2xl bg-slate-50 p-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#003A8F]">Latest Activity</p>
+              <p className="mt-2 text-sm font-black text-slate-900">{latestTimelineEvent?.label || statusMeta.label}</p>
+              <p className="mt-1 text-xs font-bold text-slate-500">
+                {latestTimelineEvent ? formatSubmissionDateTime(latestTimelineEvent.occurredAt) : formatSubmissionDateTime(submission.submittedAt)}
+              </p>
             </div>
-            <Link className="mt-3 inline-flex text-xs font-black text-[#003A8F] hover:underline" href={submission.workspaceHref}>
-              View all comments
-            </Link>
           </div>
 
-          <div className="mt-5 grid gap-5 border-t border-slate-100 pt-5 lg:grid-cols-2">
-            <div>
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#003A8F]">Version History</p>
-                <Link className="text-xs font-black text-[#003A8F] hover:underline" href={submission.workspaceHref}>
-                  View all versions
-                </Link>
-              </div>
-              <div className="mt-3 space-y-2">
-                {submission.versionHistory.slice(0, 3).map((version) => (
-                  <div key={version.id} className="grid grid-cols-[34px_minmax(0,1fr)] gap-2 text-xs">
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-center font-black text-slate-700">{version.version}</span>
-                    <p className="min-w-0 text-slate-600">
-                      <span className="font-bold text-slate-800">{formatSubmissionDate(version.uploadedAt)}</span>
-                      <span> | {version.label}</span>
-                      {version.isCurrent ? <span className="font-black text-[#003A8F]"> (Current)</span> : null}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:border-l lg:border-slate-100 lg:pl-5">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#003A8F]">Review Timeline</p>
-                <Link className="text-xs font-black text-[#003A8F] hover:underline" href={submission.workspaceHref}>
-                  View full history
-                </Link>
-              </div>
-              <div className="mt-3 space-y-2">
-                {submission.timeline.slice(0, 4).map((event) => (
-                  <div key={event.id} className="grid grid-cols-[18px_minmax(0,1fr)] gap-2 text-xs">
-                    <span className={`mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full ${event.isComplete ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
-                      <i className="fas fa-check text-[8px]" aria-hidden="true" />
-                    </span>
-                    <p className="min-w-0 text-slate-600">
-                      <span className="font-bold text-slate-800">{formatSubmissionDateTime(event.occurredAt)}</span>
-                      <span> | {event.label}</span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {submission.commentCategories.slice(0, 3).map((category) => (
+              <span key={`${submission.id}-${category}`} className={`rounded-full px-2.5 py-1 text-[11px] font-black ${getCommentCategoryMeta(category)}`}>
+                {category}
+              </span>
+            ))}
+            <Link className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-black text-[#003A8F] ring-1 ring-inset ring-blue-100 hover:bg-blue-100" href={submission.workspaceHref}>
+              Full details
+            </Link>
           </div>
         </section>
 
-        <aside className="flex min-h-full flex-col justify-between gap-5 bg-slate-50 p-5">
+        <aside className="flex min-h-full flex-col justify-between gap-3 bg-slate-50 p-4">
           <div>
-            <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-black ${deadlineVisual.className}`}>
-              <i className={`fas ${deadlineVisual.icon} text-[10px]`} aria-hidden="true" />
-              {deadlineVisual.label}
-            </span>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-inset ring-slate-200">
+                <p className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-500">Submitted</p>
+                <p className="mt-0.5 font-black text-slate-900">{formatSubmissionDate(submission.submittedAt)}</p>
+              </div>
+              <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-inset ring-slate-200">
+                <p className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-500">Due Date</p>
+                <p className={`mt-0.5 font-black ${getDeadlineToneClass(submission.deadline)}`}>
+                  {submission.deadline ? formatSubmissionDate(submission.deadline) : 'Not set'}
+                </p>
+              </div>
+            </div>
 
-            <dl className="mt-5 space-y-4 text-sm">
-              <div>
-                <dt className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-500">Submitted</dt>
-                <dd className="mt-1 font-black text-slate-900">{formatSubmissionDate(submission.submittedAt)}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] font-black uppercase tracking-[0.13em] text-slate-500">Deadline</dt>
-                <dd className={`mt-1 font-black ${getDeadlineToneClass(submission.deadline)}`}>{formatSubmissionDate(submission.deadline)}</dd>
-              </div>
-            </dl>
-
-            <div className="mt-5">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                <span>Progress</span>
-                <span>{submission.deadlineProgress}%</span>
-              </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-                <div className={`h-full rounded-full ${deadlineVisual.barClassName}`} style={{ width: `${submission.deadlineProgress}%` }} />
-              </div>
+            <div className="mt-3">
+              {submission.deadline || submission.status === 'approved' ? (
+                <>
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span>{submission.deadline ? 'Due progress' : 'Review status'}</span>
+                    <span>{submission.deadlineProgress}%</span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-200">
+                    <div className={`h-full rounded-full ${deadlineVisual.barClassName}`} style={{ width: `${submission.deadlineProgress}%` }} />
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-xl bg-white px-3 py-2 text-[11px] font-bold leading-4 text-slate-500 ring-1 ring-inset ring-slate-200">
+                  No adviser due date has been set for this review.
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="grid gap-2">
+          <div className="grid gap-2 pt-1">
             <Link
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#003A8F] px-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#002C6B]"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#003A8F] px-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#002C6B]"
               href={submission.workspaceHref}
             >
               <i className="fas fa-up-right-from-square text-xs" aria-hidden="true" />
-              Open Review Workspace
+              {primaryActionLabel}
             </Link>
-            <div className="grid grid-cols-2 gap-2">
-              <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-black text-[#003A8F] transition hover:bg-blue-50" type="button" onClick={() => onDownloadSubmission?.(submission)}>
-                <i className="fas fa-download text-[10px]" aria-hidden="true" />
-                Download
-              </button>
-              <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-black text-[#003A8F] transition hover:bg-blue-50" type="button" onClick={() => onViewSubmission?.(submission)}>
-                <i className="fas fa-circle-info text-[10px]" aria-hidden="true" />
-                Details
-              </button>
-            </div>
-            <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-xs font-black text-[#003A8F] transition hover:bg-blue-50" type="button" onClick={() => onViewSubmission?.(submission)}>
-              <i className="fas fa-clock-rotate-left text-[10px]" aria-hidden="true" />
-              View Full History
+            <button className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-[#003A8F] transition hover:bg-blue-50" type="button" onClick={() => onDownloadSubmission?.(submission)}>
+              <i className="fas fa-download text-[10px]" aria-hidden="true" />
+              Download
             </button>
-
-            {submission.status === 'pending-review' ? (
-              <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-3 text-xs font-black text-blue-700 transition hover:bg-blue-100" type="button" onClick={() => onStartReview?.(submission)}>
-                <i className="fas fa-play text-[10px]" aria-hidden="true" />
-                Still Reviewing
-              </button>
-            ) : null}
-
-            {submission.status === 'under-review' ? (
-              <>
-                <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white px-3 text-xs font-black text-red-600 transition hover:bg-red-50" type="button" onClick={() => onRequestRevision?.(submission)}>
-                  <i className="fas fa-rotate-left text-[10px]" aria-hidden="true" />
-                  Request Revision
-                </button>
-                <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-3 text-xs font-black text-orange-600 transition hover:bg-orange-50" type="button" onClick={() => onSendReminder?.(submission)}>
-                  <i className="fas fa-bell text-[10px]" aria-hidden="true" />
-                  Send Reminder
-                </button>
-                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-700" type="button" onClick={() => onApproveNotify?.(submission)}>
-                  <i className="fas fa-circle-check text-xs" aria-hidden="true" />
-                  Approve & Notify Student
-                </button>
-              </>
-            ) : submission.status === 'needs-revision' ? (
-              <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-3 text-xs font-black text-orange-600 transition hover:bg-orange-50" type="button" onClick={() => onSendReminder?.(submission)}>
-                <i className="fas fa-bell text-[10px]" aria-hidden="true" />
-                Send Reminder
-              </button>
-            ) : submission.status === 'approved' ? (
-              <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-sm font-black text-emerald-700 transition hover:bg-emerald-100" href={submission.workspaceHref}>
-                <i className="fas fa-file-circle-check text-xs" aria-hidden="true" />
-                View Review Summary
-              </Link>
-            ) : null}
+            <p className="text-center text-[11px] font-bold leading-4 text-slate-500">
+              Review actions are inside the workspace.
+            </p>
           </div>
         </aside>
       </div>

@@ -6003,7 +6003,7 @@ progress::-moz-progress-bar {
     position: fixed;
     inset: 0;
     display: none;
-    z-index: 70;
+    z-index: 1300;
 }
 
 .modal-shell.is-open {

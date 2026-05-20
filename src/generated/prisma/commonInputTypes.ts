@@ -389,6 +389,40 @@ export type EnumDefenseStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel>
 }
 
+export type EnumAdviserScheduleItemTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemType | Prisma.EnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel> | $Enums.AdviserScheduleItemType
+}
+
+export type EnumAdviserScheduleItemStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemStatus | Prisma.EnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemStatusFilter<$PrismaModel> | $Enums.AdviserScheduleItemStatus
+}
+
+export type EnumAdviserScheduleItemTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemType | Prisma.EnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemTypeWithAggregatesFilter<$PrismaModel> | $Enums.AdviserScheduleItemType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel>
+}
+
+export type EnumAdviserScheduleItemStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemStatus | Prisma.EnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemStatusWithAggregatesFilter<$PrismaModel> | $Enums.AdviserScheduleItemStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAdviserScheduleItemStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAdviserScheduleItemStatusFilter<$PrismaModel>
+}
+
 export type EnumDefensePanelRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.DefensePanelRole | Prisma.EnumDefensePanelRoleFieldRefInput<$PrismaModel>
   in?: $Enums.DefensePanelRole[] | Prisma.ListEnumDefensePanelRoleFieldRefInput<$PrismaModel>
@@ -867,6 +901,40 @@ export type NestedEnumDefenseStatusWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemType | Prisma.EnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel> | $Enums.AdviserScheduleItemType
+}
+
+export type NestedEnumAdviserScheduleItemStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemStatus | Prisma.EnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemStatusFilter<$PrismaModel> | $Enums.AdviserScheduleItemStatus
+}
+
+export type NestedEnumAdviserScheduleItemTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemType | Prisma.EnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemType[] | Prisma.ListEnumAdviserScheduleItemTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemTypeWithAggregatesFilter<$PrismaModel> | $Enums.AdviserScheduleItemType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumAdviserScheduleItemStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AdviserScheduleItemStatus | Prisma.EnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AdviserScheduleItemStatus[] | Prisma.ListEnumAdviserScheduleItemStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAdviserScheduleItemStatusWithAggregatesFilter<$PrismaModel> | $Enums.AdviserScheduleItemStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAdviserScheduleItemStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAdviserScheduleItemStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumDefensePanelRoleFilter<$PrismaModel = never> = {

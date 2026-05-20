@@ -115,6 +115,27 @@ export const DefenseStatus = {
 export type DefenseStatus = (typeof DefenseStatus)[keyof typeof DefenseStatus]
 
 
+export const AdviserScheduleItemType = {
+  CONSULTATION: 'CONSULTATION',
+  DEADLINE: 'DEADLINE',
+  MEETING: 'MEETING',
+  REMINDER: 'REMINDER',
+  EVENT: 'EVENT',
+  REVIEW: 'REVIEW'
+} as const
+
+export type AdviserScheduleItemType = (typeof AdviserScheduleItemType)[keyof typeof AdviserScheduleItemType]
+
+
+export const AdviserScheduleItemStatus = {
+  SCHEDULED: 'SCHEDULED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type AdviserScheduleItemStatus = (typeof AdviserScheduleItemStatus)[keyof typeof AdviserScheduleItemStatus]
+
+
 export const EvaluationRecommendation = {
   PENDING: 'PENDING',
   PASSED: 'PASSED',

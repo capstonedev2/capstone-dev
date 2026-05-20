@@ -166,16 +166,16 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
 
   return (
     <div
-      className={`adviser-shell student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      className={`adviser-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
       data-theme={themeMode}
     >
       {/* ─── Top Navbar ─── */}
-      <header className="adviser-global-navbar student-global-navbar">
-        <div className="adviser-global-navbar-main student-global-navbar-main">
+      <header className="adviser-global-navbar">
+        <div className="adviser-global-navbar-main">
           <button
             aria-label={toggleLabel}
-            className="icon-btn adviser-shell-toggle student-shell-toggle"
+            className="icon-btn adviser-shell-toggle"
             type="button"
             onClick={toggleSidebar}
           >
@@ -185,13 +185,13 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
             />
           </button>
 
-          <div className="adviser-navbar-title student-navbar-title" aria-label="Current page">
-            <span className="adviser-navbar-title-kicker student-navbar-title-kicker">ThesisTrack</span>
+          <div className="adviser-navbar-title" aria-label="Current page">
+            <span className="adviser-navbar-title-kicker">ThesisTrack</span>
             <strong>{navbarTitle}</strong>
           </div>
         </div>
 
-        <div className="adviser-global-navbar-actions student-global-navbar-actions">
+        <div className="adviser-global-navbar-actions">
           <AdviserShellActions 
             basePath={basePath}
             fullName={data.profile.fullName}
@@ -206,7 +206,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
       </header>
 
       {/* ─── Sidebar ─── */}
-      <aside className={`adviser-global-sidebar student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`adviser-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Adviser Portal</span>
@@ -267,7 +267,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
       />
 
       {/* ─── Main content ─── */}
-      <main className="adviser-global-main student-global-main">
+      <main className="adviser-global-main">
         <div className="adviser-global-content">{children}</div>
       </main>
     </div>
