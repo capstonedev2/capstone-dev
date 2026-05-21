@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
-import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 

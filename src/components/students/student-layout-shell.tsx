@@ -1352,8 +1352,11 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     if (isLimitedWorkspace) return [];
     
     const combined: any[] = [];
+    const seenIds = new Set<string>();
     if (realNotifications.length > 0) {
       realNotifications.forEach(notif => {
+        if (seenIds.has(notif.id)) return;
+        seenIds.add(notif.id);
         combined.push({
           id: notif.id,
           title: notif.title,
@@ -1454,7 +1457,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
 
   return (
     <div
-      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      className={`student-shell student-workspace-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
       data-theme={themeMode}
     >
@@ -1704,9 +1707,9 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   <i aria-hidden="true" className="fas fa-user" /> My Profile
                 </Link>
 
-                <Link className="profile-dropdown-link" href="/students/history" onClick={() => setProfileMenuOpen(false)}>
-                  <i aria-hidden="true" className="fas fa-clock-rotate-left" /> History
-                </Link>
+
+
+
 
                 <Link className="profile-dropdown-link" href="/students/settings" onClick={() => setProfileMenuOpen(false)}>
                   <i aria-hidden="true" className="fas fa-cog" /> Settings
@@ -1783,6 +1786,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
             </div>
           ))}
         </nav>
+
       </aside>
 
       <button

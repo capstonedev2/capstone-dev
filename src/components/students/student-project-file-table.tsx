@@ -30,6 +30,8 @@ type FileTableProps = {
   onApprove: (file: ProjectFileRecord) => void;
   onViewHistory: (file: ProjectFileRecord) => void;
   onOpenUpload: () => void;
+  canOpenUpload?: boolean;
+  uploadLockedMessage?: string;
 };
 
 export function FileTable({
@@ -55,7 +57,9 @@ export function FileTable({
   onDelete,
   onApprove,
   onViewHistory,
-  onOpenUpload
+  onOpenUpload,
+  canOpenUpload = true,
+  uploadLockedMessage = 'Project file uploads are not available yet.'
 }: FileTableProps) {
   const itemStart = totalCount ? (currentPage - 1) * pageSize + 1 : 0;
   const itemEnd = totalCount ? Math.min(currentPage * pageSize, totalCount) : 0;
@@ -215,7 +219,13 @@ export function FileTable({
           <span className="empty-state-icon"><i className="fas fa-file-shield" aria-hidden="true" /></span>
           <strong>No private project files yet</strong>
           <p>Upload your first thesis or capstone document to begin secure tracking, adviser review, and version history.</p>
-          <button className="btn btn-primary project-files-empty-action" type="button" onClick={onOpenUpload}>
+          <button
+            className="btn btn-primary project-files-empty-action"
+            type="button"
+            onClick={onOpenUpload}
+            disabled={!canOpenUpload}
+            title={!canOpenUpload ? uploadLockedMessage : undefined}
+          >
             <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload Document
           </button>
         </div>

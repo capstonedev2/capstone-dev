@@ -326,8 +326,12 @@ export function getEvaluationStatusMeta(status: EvaluationStatus) {
   return evaluationStatusMeta[status];
 }
 
+const fallbackRecommendationMeta = {
+  className: 'bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-200'
+};
+
 export function getRecommendationMeta(recommendation: EvaluationRecommendation) {
-  return recommendationMeta[recommendation];
+  return recommendationMeta[recommendation] ?? fallbackRecommendationMeta;
 }
 
 export function getStudentEvaluationRecommendationMeta(recommendation: StudentEvaluationRecommendation) {

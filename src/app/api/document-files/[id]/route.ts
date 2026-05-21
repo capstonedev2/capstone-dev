@@ -9,6 +9,7 @@ import {
 import { assertDocumentBucket, deleteFile } from '@/lib/storage/supabase-storage';
 import { prisma } from '@/lib/prisma';
 import { toDocumentFilePayload } from '@/lib/storage/document-file-api';
+import { syncCheckpointReview } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -218,6 +219,16 @@ export async function PATCH(
             body: reviewNotes,
             decision: reviewDecisionMap[nextStatus]
           }
+        });
+      }
+
+      if (updatedSubmission) {
+        await syncCheckpointReview(tx, {
+          submissionId: updatedSubmission.id,
+          nextStatus,
+          reviewNotes,
+          reviewerName: user.name,
+          reviewerRole: user.role
         });
       }
 

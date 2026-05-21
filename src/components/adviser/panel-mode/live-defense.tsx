@@ -16,6 +16,9 @@ type LiveDefenseSessionSnapshot = {
   evaluationNeeds: string[];
   attendance: Record<string, boolean>;
   sessionDuration: number;
+  scores: Record<string, number>;
+  individualScores: Record<string, number>;
+  panelistVotes: Record<string, 'yes' | 'no'>;
   updatedAt: string;
 };
 
@@ -154,18 +157,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
   const [panelistVotes, setPanelistVotes] = useState<Record<string, 'yes' | 'no'>>({});
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const previousOverscrollBehavior = document.body.style.overscrollBehavior;
 
-    document.body.style.overflow = 'hidden';
-    document.body.style.overscrollBehavior = 'none';
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.overscrollBehavior = previousOverscrollBehavior;
-    };
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -298,6 +290,10 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
       setTimer(storedSnapshot.sessionDuration || DEFAULT_TOTAL_TIME);
       setSessionStarted(Boolean(storedSnapshot.sessionStarted));
       setTimerActive(Boolean(storedSnapshot.sessionStarted));
+      
+      if (storedSnapshot.scores) setScores(storedSnapshot.scores);
+      if (storedSnapshot.individualScores) setIndividualScores(storedSnapshot.individualScores);
+      if (storedSnapshot.panelistVotes) setPanelistVotes(storedSnapshot.panelistVotes);
     } else {
       setAttendance(group.attendance);
       setEvaluationNeeds(buildDefaultEvaluationNeeds(group.focusAreas));
@@ -305,6 +301,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
       setTimer(DEFAULT_TOTAL_TIME);
       setTimerActive(false);
       setSessionStarted(false);
+      resetScoringState();
     }
 
     setIsViewingDeck(true);
@@ -321,6 +318,10 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
       setSessionStarted(Boolean(snapshot.sessionStarted));
       setTimerActive(Boolean(snapshot.sessionStarted));
       setIsViewingDeck(true);
+      
+      if (snapshot.scores) setScores(snapshot.scores);
+      if (snapshot.individualScores) setIndividualScores(snapshot.individualScores);
+      if (snapshot.panelistVotes) setPanelistVotes(snapshot.panelistVotes);
     }
 
     function handleStorage(event: StorageEvent) {
@@ -346,13 +347,16 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
   }, [group.id, group.attendance, group.focusAreas]);
 
   useEffect(() => {
-    if (!isChair || loadedSessionGroupId !== group.id) return;
+    if (loadedSessionGroupId !== group.id) return;
 
     const snapshot: LiveDefenseSessionSnapshot = {
       sessionStarted,
       evaluationNeeds,
       attendance,
       sessionDuration,
+      scores,
+      individualScores,
+      panelistVotes,
       updatedAt: new Date().toISOString()
     };
 
@@ -360,7 +364,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
       window.localStorage.setItem(getLiveDefenseStorageKey(group.id), JSON.stringify(snapshot));
       window.dispatchEvent(new CustomEvent('liveDefenseSessionUpdated', { detail: { groupId: group.id, snapshot } }));
     } catch {}
-  }, [attendance, evaluationNeeds, group.id, isChair, loadedSessionGroupId, sessionDuration, sessionStarted]);
+  }, [attendance, evaluationNeeds, group.id, loadedSessionGroupId, sessionDuration, sessionStarted, scores, individualScores, panelistVotes]);
 
   useEffect(() => {
     if (!timerActive || timer <= 0) return;
@@ -503,7 +507,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex h-[100dvh] w-screen flex-col overflow-hidden font-sans text-slate-900"
+      className="relative flex min-h-[calc(100vh-4rem)] w-full flex-col overflow-hidden font-sans text-slate-900"
       style={{
         background:
           'radial-gradient(circle at top left, rgba(0, 58, 143, 0.06), transparent 28%), radial-gradient(circle at top right, rgba(246, 190, 0, 0.07), transparent 22%), linear-gradient(180deg, #f8fafc 0%, #eff4fa 100%)'
@@ -523,25 +527,11 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
         presentCount={presentCount}
         totalMembers={group.members.length}
         sessionStarted={sessionStarted}
+        adviser={group.adviser}
       />
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden xl:flex-row">
-        {!showMemberWaitingRoom && (
-          <DefenseLeftPanel
-            group={group.group}
-            adviser={group.adviser}
-            members={group.members}
-            leader={group.leader}
-            attendance={attendance}
-            panelists={panelists}
-            focusMode={focusMode}
-            room={group.room}
-            program={group.program}
-            time={group.time}
-            isChair={isChair}
-            onToggleAttendance={toggleAttendance}
-          />
-        )}
+
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-transparent">
           {showMemberWaitingRoom ? (
@@ -693,7 +683,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
             </div>
           ) : !sessionStarted ? (
             <div className="min-h-full p-4 sm:p-8 relative">
-              <div className="mx-auto flex flex-col min-h-full w-full max-w-[1600px] gap-8 relative z-10">
+              <div className="flex flex-col min-h-full w-full gap-8 relative z-10">
                 <section className="flex flex-col overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_20px_60px_rgba(15,43,89,0.08)]">
                   <div className="border-b border-white/40 bg-gradient-to-br from-[#003a8f] to-[#082a67] p-8 sm:p-10 text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(circle_at_center,rgba(246,190,0,0.15),transparent_60%)] pointer-events-none blur-2xl" />
@@ -924,100 +914,46 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
                       <h2 className="mt-0.5 truncate text-[1.1rem] font-black text-[#102033] tracking-tight">{group.title}</h2>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 rounded-[1rem] border border-white/80 bg-white/60 backdrop-blur-sm p-1.5 shadow-[0_2px_10px_rgba(15,43,89,0.04)]">
-                    <button
-                      type="button"
-                      onClick={() => setIsViewingDeck(true)}
-                      className={`flex items-center gap-2 rounded-[0.75rem] px-4 py-2 text-[0.75rem] font-black transition-all duration-300 ${isViewingDeck ? 'bg-gradient-to-br from-[#003a8f] to-blue-700 text-white shadow-[0_4px_15px_rgba(0,58,143,0.2)]' : 'text-[#536982] hover:bg-white hover:text-[#003a8f] hover:shadow-sm'}`}
-                    >
-                      <i className={`fas fa-file-powerpoint ${isViewingDeck ? 'text-blue-200' : 'text-[#f6be00]'}`} />
-                      Slides
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsViewingDeck(false)}
-                      className={`flex items-center gap-2 rounded-[0.75rem] px-4 py-2 text-[0.75rem] font-black transition-all duration-300 ${!isViewingDeck ? 'bg-gradient-to-br from-[#003a8f] to-blue-700 text-white shadow-[0_4px_15px_rgba(0,58,143,0.2)]' : 'text-[#536982] hover:bg-white hover:text-[#003a8f] hover:shadow-sm'}`}
-                    >
-                      <i className={`fas fa-list-check ${!isViewingDeck ? 'text-blue-200' : 'text-emerald-500'}`} />
-                      Brief
-                    </button>
-                  </div>
                 </div>
 
                 <div className="min-h-0 flex-1 bg-gradient-to-b from-[#f8fbff] to-white relative">
-                  {isViewingDeck ? (
-                    deckAvailable ? (
-                      <iframe src={`${group.deckUrl}#toolbar=0&navpanes=0`} className="h-full min-h-[520px] w-full border-0 bg-transparent" title="Defense slides" />
-                    ) : (
-                      <div className="flex h-full min-h-[520px] flex-col items-center justify-center gap-5 p-8 text-center">
-                        <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.5rem] border border-white bg-white/50 backdrop-blur-md text-4xl text-slate-300 shadow-[0_8px_30px_rgba(15,43,89,0.06)]">
-                          <i className="fas fa-file-circle-xmark relative z-10" />
-                          <div className="absolute inset-0 rounded-[1.5rem] bg-gradient-to-tr from-slate-100 to-transparent opacity-50" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-black text-[#102033] tracking-tight">No Presentation Uploaded</h3>
-                          <p className="mt-2 max-w-sm text-[0.95rem] font-medium leading-relaxed text-[#536982]">
-                            The panel can proceed using the defense brief and scoring workspace.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setIsViewingDeck(false)}
-                          className="mt-2 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-5 py-2.5 text-xs font-black text-[#003a8f] shadow-sm transition-all hover:bg-blue-50 hover:shadow-md"
-                        >
-                          Switch to Brief <i className="fas fa-arrow-right" />
-                        </button>
-                      </div>
-                    )
+                  {sessionStarted ? (
+                    <DefenseEvalPanel
+                      scores={scores}
+                      setScore={(id, value) => setScores((previous) => ({ ...previous, [id]: value }))}
+                      individualScores={individualScores}
+                      setIndividualScore={(name, value) => setIndividualScores((previous) => ({ ...previous, [name]: value }))}
+                      attendance={attendance}
+                      evaluationNeeds={activeEvaluationNeeds}
+                      members={group.members}
+                      notes={notes}
+                      setNote={(id, value) => setNotes((previous) => ({ ...previous, [id]: value }))}
+                      overallFeedback={feedback}
+                      setOverallFeedback={setFeedback}
+                      submitted={submitted}
+                      onSubmit={() => {
+                        setSubmitted(true);
+                        setTimerActive(false);
+                      }}
+                      isChair={isChair}
+                      isMyAdvisee={group.isMyAdvisee}
+                      focusMode={focusMode}
+                      onNextGroup={nextGroup}
+                      canGoNext={canNext}
+                      panelistVotes={panelistVotes}
+                      setPanelistVote={(name, vote) => setPanelistVotes((prev) => ({ ...prev, [name]: vote }))}
+                      panelistNames={panelists.map((p) => p.name)}
+                      currentPanelistName={panelists.find((p) => p.isMe)?.name ?? ''}
+                    />
                   ) : (
-                    <div className="h-full min-h-[520px] overflow-y-auto p-6 sm:p-8 relative">
-                      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-                        <div className="rounded-[1.5rem] border border-white/80 bg-white/70 backdrop-blur-sm p-6 shadow-[0_8px_30px_rgba(15,43,89,0.04)]">
-                          <p className="text-[0.7rem] font-black uppercase tracking-widest text-slate-400">Evaluation Questions</p>
-                          <h3 className="mt-2 text-2xl font-black text-[#102033] leading-tight tracking-tight">{group.title}</h3>
-                          <div className="mt-6 grid gap-4">
-                            {activeEvaluationNeeds.map((need, index) => (
-                              <div key={`brief-evaluation-need-${index}`} className="flex items-start gap-4 rounded-[1.25rem] border border-white bg-white/80 p-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.65rem] bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 text-xs font-black text-[#003a8f] shadow-inner">
-                                  {index + 1}
-                                </span>
-                                <p className="text-[0.95rem] font-semibold leading-relaxed text-[#102033] mt-1">{need}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-6">
-                          <div className="rounded-[1.5rem] border border-white/80 bg-white/70 backdrop-blur-sm p-6 shadow-[0_8px_30px_rgba(15,43,89,0.04)] relative overflow-hidden">
-                            <div className="absolute -right-6 -top-6 text-[8rem] text-[#003a8f]/5 pointer-events-none">
-                              <i className="fas fa-chart-pie" />
-                            </div>
-                            <p className="text-[0.7rem] font-black uppercase tracking-widest text-slate-400 relative z-10">Live Panel Score</p>
-                            <div className="mt-4 flex items-end justify-between relative z-10">
-                              <span className="text-5xl font-black tabular-nums text-[#003a8f] tracking-tighter">{totalScore}</span>
-                              <span className="text-lg font-black text-slate-400 mb-1">/{MAX_SCORE}</span>
-                            </div>
-                            <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-slate-100 shadow-inner relative z-10">
-                              <div className="h-full rounded-full bg-gradient-to-r from-[#003a8f] to-blue-400 transition-all duration-500" style={{ width: `${(scoredCriteria / RUBRIC.length) * 100}%` }} />
-                            </div>
-                            <p className="mt-3 text-[0.7rem] font-bold text-[#536982] text-right">{scoredCriteria} of {RUBRIC.length} criteria evaluated</p>
-                          </div>
-
-                          <div className="rounded-[1.5rem] border border-white/80 bg-white/70 backdrop-blur-sm p-6 shadow-[0_8px_30px_rgba(15,43,89,0.04)]">
-                            <p className="text-[0.7rem] font-black uppercase tracking-widest text-slate-400">Defense Packet</p>
-                            <div className="mt-4 space-y-3">
-                              {group.artifacts.map((artifact) => (
-                                <div key={artifact.label} className="flex items-center justify-between gap-3 rounded-[1rem] border border-slate-100 bg-white p-3.5 shadow-sm transition-colors hover:border-blue-100">
-                                  <span className="text-[0.85rem] font-bold text-[#102033]">{artifact.label}</span>
-                                  <span className={`rounded-md border px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-widest ${artifactTone(artifact.status)}`}>
-                                    {artifact.status}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
+                    <div className="flex h-full min-h-[520px] flex-col items-center justify-center text-center p-8">
+                      <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.5rem] border border-white bg-white/50 backdrop-blur-md text-4xl text-slate-300 shadow-[0_8px_30px_rgba(15,43,89,0.06)]">
+                        <i className="fas fa-hourglass-start relative z-10" />
                       </div>
+                      <h3 className="mt-5 text-xl font-black text-[#102033] tracking-tight">Session Not Started</h3>
+                      <p className="mt-2 text-[0.95rem] font-medium text-[#536982]">
+                        Waiting for the chair to begin the defense.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -1112,33 +1048,58 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
         </main>
 
         {sessionStarted && (
-          <DefenseEvalPanel
-            scores={scores}
-            setScore={(id, value) => setScores((previous) => ({ ...previous, [id]: value }))}
-            individualScores={individualScores}
-            setIndividualScore={(name, value) => setIndividualScores((previous) => ({ ...previous, [name]: value }))}
-            attendance={attendance}
-            evaluationNeeds={activeEvaluationNeeds}
-            members={group.members}
-            notes={notes}
-            setNote={(id, value) => setNotes((previous) => ({ ...previous, [id]: value }))}
-            overallFeedback={feedback}
-            setOverallFeedback={setFeedback}
-            submitted={submitted}
-            onSubmit={() => {
-              setSubmitted(true);
-              setTimerActive(false);
-            }}
-            isChair={isChair}
-            isMyAdvisee={group.isMyAdvisee}
-            focusMode={focusMode}
-            onNextGroup={nextGroup}
-            canGoNext={canNext}
-            panelistVotes={panelistVotes}
-            setPanelistVote={(name, vote) => setPanelistVotes((prev) => ({ ...prev, [name]: vote }))}
-            panelistNames={panelists.map((p) => p.name)}
-            currentPanelistName={panelists.find((p) => p.isMe)?.name ?? ''}
-          />
+          <aside className={`flex min-h-0 shrink-0 flex-col border-l border-white/60 bg-white/80 backdrop-blur-2xl shadow-[-10px_0_30px_rgba(0,58,143,0.05)] xl:h-auto ${focusMode ? 'hidden' : 'w-full xl:w-[420px]'}`}>
+            <div className="shrink-0 border-b border-slate-200/50 p-6 bg-gradient-to-b from-white/90 to-transparent">
+              <p className="text-[0.65rem] font-black uppercase tracking-widest text-[#003a8f]/60 mb-1">Defense Material</p>
+              <h3 className="flex items-center gap-2.5 text-lg font-black text-[#102033] tracking-tight">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#003a8f] to-[#082a67] shadow-md">
+                  <i className="fas fa-list-check text-white text-sm" />
+                </span>
+                Brief & Context
+              </h3>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-6">
+              <div className="rounded-[1.25rem] border border-white/80 bg-white/60 p-5 shadow-[0_2px_10px_rgba(0,58,143,0.03)]">
+                <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Live Panel Score</p>
+                <div className="mt-3 flex items-end justify-between relative z-10">
+                  <span className="text-4xl font-black tabular-nums text-[#003a8f] tracking-tighter">{totalScore}</span>
+                  <span className="text-sm font-black text-slate-400 mb-1">/{MAX_SCORE}</span>
+                </div>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 shadow-inner relative z-10">
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#003a8f] to-blue-400 transition-all duration-500" style={{ width: `${(scoredCriteria / RUBRIC.length) * 100}%` }} />
+                </div>
+              </div>
+
+              <div className="rounded-[1.25rem] border border-white/80 bg-white/60 p-5 shadow-[0_2px_10px_rgba(0,58,143,0.03)]">
+                <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Evaluation Questions</p>
+                <div className="mt-4 grid gap-3">
+                  {activeEvaluationNeeds.map((need, index) => (
+                    <div key={`brief-evaluation-need-${index}`} className="flex items-start gap-3 rounded-xl bg-white/80 p-3 shadow-sm border border-slate-100">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-blue-50 text-[0.65rem] font-black text-[#003a8f]">
+                        {index + 1}
+                      </span>
+                      <p className="text-xs font-semibold leading-relaxed text-[#102033] mt-0.5">{need}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[1.25rem] border border-white/80 bg-white/60 p-5 shadow-[0_2px_10px_rgba(0,58,143,0.03)]">
+                <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Defense Packet</p>
+                <div className="mt-4 space-y-2.5">
+                  {group.artifacts.map((artifact) => (
+                    <div key={artifact.label} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-white p-2.5 shadow-sm">
+                      <span className="text-xs font-bold text-[#102033]">{artifact.label}</span>
+                      <span className={`rounded-md border px-2 py-1 text-[0.55rem] font-black uppercase tracking-widest ${artifactTone(artifact.status)}`}>
+                        {artifact.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
         )}
       </div>
     </div>

@@ -38,6 +38,7 @@ export type SubmissionMinAggregateOutputType = {
   id: string | null
   projectId: string | null
   milestoneId: string | null
+  checkpointId: string | null
   submittedById: string | null
   title: string | null
   description: string | null
@@ -53,6 +54,7 @@ export type SubmissionMaxAggregateOutputType = {
   id: string | null
   projectId: string | null
   milestoneId: string | null
+  checkpointId: string | null
   submittedById: string | null
   title: string | null
   description: string | null
@@ -68,6 +70,7 @@ export type SubmissionCountAggregateOutputType = {
   id: number
   projectId: number
   milestoneId: number
+  checkpointId: number
   submittedById: number
   title: number
   description: number
@@ -93,6 +96,7 @@ export type SubmissionMinAggregateInputType = {
   id?: true
   projectId?: true
   milestoneId?: true
+  checkpointId?: true
   submittedById?: true
   title?: true
   description?: true
@@ -108,6 +112,7 @@ export type SubmissionMaxAggregateInputType = {
   id?: true
   projectId?: true
   milestoneId?: true
+  checkpointId?: true
   submittedById?: true
   title?: true
   description?: true
@@ -123,6 +128,7 @@ export type SubmissionCountAggregateInputType = {
   id?: true
   projectId?: true
   milestoneId?: true
+  checkpointId?: true
   submittedById?: true
   title?: true
   description?: true
@@ -225,6 +231,7 @@ export type SubmissionGroupByOutputType = {
   id: string
   projectId: string
   milestoneId: string | null
+  checkpointId: string | null
   submittedById: string | null
   title: string
   description: string | null
@@ -263,6 +270,7 @@ export type SubmissionWhereInput = {
   id?: Prisma.StringFilter<"Submission"> | string
   projectId?: Prisma.StringFilter<"Submission"> | string
   milestoneId?: Prisma.StringNullableFilter<"Submission"> | string | null
+  checkpointId?: Prisma.StringNullableFilter<"Submission"> | string | null
   submittedById?: Prisma.StringNullableFilter<"Submission"> | string | null
   title?: Prisma.StringFilter<"Submission"> | string
   description?: Prisma.StringNullableFilter<"Submission"> | string | null
@@ -274,6 +282,7 @@ export type SubmissionWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
   milestone?: Prisma.XOR<Prisma.MilestoneNullableScalarRelationFilter, Prisma.MilestoneWhereInput> | null
+  checkpoint?: Prisma.XOR<Prisma.MilestoneCheckpointNullableScalarRelationFilter, Prisma.MilestoneCheckpointWhereInput> | null
   submittedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   files?: Prisma.UploadedFileListRelationFilter
   comments?: Prisma.ReviewCommentListRelationFilter
@@ -283,6 +292,7 @@ export type SubmissionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   milestoneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  checkpointId?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedById?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -294,6 +304,7 @@ export type SubmissionOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   project?: Prisma.ProjectOrderByWithRelationInput
   milestone?: Prisma.MilestoneOrderByWithRelationInput
+  checkpoint?: Prisma.MilestoneCheckpointOrderByWithRelationInput
   submittedBy?: Prisma.UserOrderByWithRelationInput
   files?: Prisma.UploadedFileOrderByRelationAggregateInput
   comments?: Prisma.ReviewCommentOrderByRelationAggregateInput
@@ -306,6 +317,7 @@ export type SubmissionWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SubmissionWhereInput | Prisma.SubmissionWhereInput[]
   projectId?: Prisma.StringFilter<"Submission"> | string
   milestoneId?: Prisma.StringNullableFilter<"Submission"> | string | null
+  checkpointId?: Prisma.StringNullableFilter<"Submission"> | string | null
   submittedById?: Prisma.StringNullableFilter<"Submission"> | string | null
   title?: Prisma.StringFilter<"Submission"> | string
   description?: Prisma.StringNullableFilter<"Submission"> | string | null
@@ -317,6 +329,7 @@ export type SubmissionWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
   milestone?: Prisma.XOR<Prisma.MilestoneNullableScalarRelationFilter, Prisma.MilestoneWhereInput> | null
+  checkpoint?: Prisma.XOR<Prisma.MilestoneCheckpointNullableScalarRelationFilter, Prisma.MilestoneCheckpointWhereInput> | null
   submittedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   files?: Prisma.UploadedFileListRelationFilter
   comments?: Prisma.ReviewCommentListRelationFilter
@@ -326,6 +339,7 @@ export type SubmissionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   milestoneId?: Prisma.SortOrderInput | Prisma.SortOrder
+  checkpointId?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedById?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -349,6 +363,7 @@ export type SubmissionScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Submission"> | string
   projectId?: Prisma.StringWithAggregatesFilter<"Submission"> | string
   milestoneId?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
+  checkpointId?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
   submittedById?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
   title?: Prisma.StringWithAggregatesFilter<"Submission"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
@@ -372,6 +387,7 @@ export type SubmissionCreateInput = {
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutSubmissionsInput
   milestone?: Prisma.MilestoneCreateNestedOneWithoutSubmissionsInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutSubmissionsInput
   submittedBy?: Prisma.UserCreateNestedOneWithoutSubmissionsInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutSubmissionInput
   comments?: Prisma.ReviewCommentCreateNestedManyWithoutSubmissionInput
@@ -381,6 +397,7 @@ export type SubmissionUncheckedCreateInput = {
   id?: string
   projectId: string
   milestoneId?: string | null
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -406,6 +423,7 @@ export type SubmissionUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutSubmissionsNestedInput
   milestone?: Prisma.MilestoneUpdateOneWithoutSubmissionsNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutSubmissionsNestedInput
   submittedBy?: Prisma.UserUpdateOneWithoutSubmissionsNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutSubmissionNestedInput
   comments?: Prisma.ReviewCommentUpdateManyWithoutSubmissionNestedInput
@@ -415,6 +433,7 @@ export type SubmissionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -432,6 +451,7 @@ export type SubmissionCreateManyInput = {
   id?: string
   projectId: string
   milestoneId?: string | null
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -459,6 +479,7 @@ export type SubmissionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -489,6 +510,7 @@ export type SubmissionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   milestoneId?: Prisma.SortOrder
+  checkpointId?: Prisma.SortOrder
   submittedById?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -508,6 +530,7 @@ export type SubmissionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   milestoneId?: Prisma.SortOrder
+  checkpointId?: Prisma.SortOrder
   submittedById?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -523,6 +546,7 @@ export type SubmissionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   milestoneId?: Prisma.SortOrder
+  checkpointId?: Prisma.SortOrder
   submittedById?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -685,6 +709,48 @@ export type SubmissionUncheckedUpdateManyWithoutMilestoneNestedInput = {
   deleteMany?: Prisma.SubmissionScalarWhereInput | Prisma.SubmissionScalarWhereInput[]
 }
 
+export type SubmissionCreateNestedManyWithoutCheckpointInput = {
+  create?: Prisma.XOR<Prisma.SubmissionCreateWithoutCheckpointInput, Prisma.SubmissionUncheckedCreateWithoutCheckpointInput> | Prisma.SubmissionCreateWithoutCheckpointInput[] | Prisma.SubmissionUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.SubmissionCreateOrConnectWithoutCheckpointInput | Prisma.SubmissionCreateOrConnectWithoutCheckpointInput[]
+  createMany?: Prisma.SubmissionCreateManyCheckpointInputEnvelope
+  connect?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+}
+
+export type SubmissionUncheckedCreateNestedManyWithoutCheckpointInput = {
+  create?: Prisma.XOR<Prisma.SubmissionCreateWithoutCheckpointInput, Prisma.SubmissionUncheckedCreateWithoutCheckpointInput> | Prisma.SubmissionCreateWithoutCheckpointInput[] | Prisma.SubmissionUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.SubmissionCreateOrConnectWithoutCheckpointInput | Prisma.SubmissionCreateOrConnectWithoutCheckpointInput[]
+  createMany?: Prisma.SubmissionCreateManyCheckpointInputEnvelope
+  connect?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+}
+
+export type SubmissionUpdateManyWithoutCheckpointNestedInput = {
+  create?: Prisma.XOR<Prisma.SubmissionCreateWithoutCheckpointInput, Prisma.SubmissionUncheckedCreateWithoutCheckpointInput> | Prisma.SubmissionCreateWithoutCheckpointInput[] | Prisma.SubmissionUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.SubmissionCreateOrConnectWithoutCheckpointInput | Prisma.SubmissionCreateOrConnectWithoutCheckpointInput[]
+  upsert?: Prisma.SubmissionUpsertWithWhereUniqueWithoutCheckpointInput | Prisma.SubmissionUpsertWithWhereUniqueWithoutCheckpointInput[]
+  createMany?: Prisma.SubmissionCreateManyCheckpointInputEnvelope
+  set?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  disconnect?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  delete?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  connect?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  update?: Prisma.SubmissionUpdateWithWhereUniqueWithoutCheckpointInput | Prisma.SubmissionUpdateWithWhereUniqueWithoutCheckpointInput[]
+  updateMany?: Prisma.SubmissionUpdateManyWithWhereWithoutCheckpointInput | Prisma.SubmissionUpdateManyWithWhereWithoutCheckpointInput[]
+  deleteMany?: Prisma.SubmissionScalarWhereInput | Prisma.SubmissionScalarWhereInput[]
+}
+
+export type SubmissionUncheckedUpdateManyWithoutCheckpointNestedInput = {
+  create?: Prisma.XOR<Prisma.SubmissionCreateWithoutCheckpointInput, Prisma.SubmissionUncheckedCreateWithoutCheckpointInput> | Prisma.SubmissionCreateWithoutCheckpointInput[] | Prisma.SubmissionUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.SubmissionCreateOrConnectWithoutCheckpointInput | Prisma.SubmissionCreateOrConnectWithoutCheckpointInput[]
+  upsert?: Prisma.SubmissionUpsertWithWhereUniqueWithoutCheckpointInput | Prisma.SubmissionUpsertWithWhereUniqueWithoutCheckpointInput[]
+  createMany?: Prisma.SubmissionCreateManyCheckpointInputEnvelope
+  set?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  disconnect?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  delete?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  connect?: Prisma.SubmissionWhereUniqueInput | Prisma.SubmissionWhereUniqueInput[]
+  update?: Prisma.SubmissionUpdateWithWhereUniqueWithoutCheckpointInput | Prisma.SubmissionUpdateWithWhereUniqueWithoutCheckpointInput[]
+  updateMany?: Prisma.SubmissionUpdateManyWithWhereWithoutCheckpointInput | Prisma.SubmissionUpdateManyWithWhereWithoutCheckpointInput[]
+  deleteMany?: Prisma.SubmissionScalarWhereInput | Prisma.SubmissionScalarWhereInput[]
+}
+
 export type EnumSubmissionStatusFieldUpdateOperationsInput = {
   set?: $Enums.SubmissionStatus
 }
@@ -715,6 +781,7 @@ export type SubmissionCreateWithoutSubmittedByInput = {
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutSubmissionsInput
   milestone?: Prisma.MilestoneCreateNestedOneWithoutSubmissionsInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutSubmissionsInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutSubmissionInput
   comments?: Prisma.ReviewCommentCreateNestedManyWithoutSubmissionInput
 }
@@ -723,6 +790,7 @@ export type SubmissionUncheckedCreateWithoutSubmittedByInput = {
   id?: string
   projectId: string
   milestoneId?: string | null
+  checkpointId?: string | null
   title: string
   description?: string | null
   status?: $Enums.SubmissionStatus
@@ -768,6 +836,7 @@ export type SubmissionScalarWhereInput = {
   id?: Prisma.StringFilter<"Submission"> | string
   projectId?: Prisma.StringFilter<"Submission"> | string
   milestoneId?: Prisma.StringNullableFilter<"Submission"> | string | null
+  checkpointId?: Prisma.StringNullableFilter<"Submission"> | string | null
   submittedById?: Prisma.StringNullableFilter<"Submission"> | string | null
   title?: Prisma.StringFilter<"Submission"> | string
   description?: Prisma.StringNullableFilter<"Submission"> | string | null
@@ -791,6 +860,7 @@ export type SubmissionCreateWithoutFilesInput = {
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutSubmissionsInput
   milestone?: Prisma.MilestoneCreateNestedOneWithoutSubmissionsInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutSubmissionsInput
   submittedBy?: Prisma.UserCreateNestedOneWithoutSubmissionsInput
   comments?: Prisma.ReviewCommentCreateNestedManyWithoutSubmissionInput
 }
@@ -799,6 +869,7 @@ export type SubmissionUncheckedCreateWithoutFilesInput = {
   id?: string
   projectId: string
   milestoneId?: string | null
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -839,6 +910,7 @@ export type SubmissionUpdateWithoutFilesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutSubmissionsNestedInput
   milestone?: Prisma.MilestoneUpdateOneWithoutSubmissionsNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutSubmissionsNestedInput
   submittedBy?: Prisma.UserUpdateOneWithoutSubmissionsNestedInput
   comments?: Prisma.ReviewCommentUpdateManyWithoutSubmissionNestedInput
 }
@@ -847,6 +919,7 @@ export type SubmissionUncheckedUpdateWithoutFilesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -870,6 +943,7 @@ export type SubmissionCreateWithoutProjectInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestone?: Prisma.MilestoneCreateNestedOneWithoutSubmissionsInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutSubmissionsInput
   submittedBy?: Prisma.UserCreateNestedOneWithoutSubmissionsInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutSubmissionInput
   comments?: Prisma.ReviewCommentCreateNestedManyWithoutSubmissionInput
@@ -878,6 +952,7 @@ export type SubmissionCreateWithoutProjectInput = {
 export type SubmissionUncheckedCreateWithoutProjectInput = {
   id?: string
   milestoneId?: string | null
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -928,6 +1003,7 @@ export type SubmissionCreateWithoutMilestoneInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutSubmissionsInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutSubmissionsInput
   submittedBy?: Prisma.UserCreateNestedOneWithoutSubmissionsInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutSubmissionInput
   comments?: Prisma.ReviewCommentCreateNestedManyWithoutSubmissionInput
@@ -936,6 +1012,7 @@ export type SubmissionCreateWithoutMilestoneInput = {
 export type SubmissionUncheckedCreateWithoutMilestoneInput = {
   id?: string
   projectId: string
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -975,7 +1052,7 @@ export type SubmissionUpdateManyWithWhereWithoutMilestoneInput = {
   data: Prisma.XOR<Prisma.SubmissionUpdateManyMutationInput, Prisma.SubmissionUncheckedUpdateManyWithoutMilestoneInput>
 }
 
-export type SubmissionCreateWithoutCommentsInput = {
+export type SubmissionCreateWithoutCheckpointInput = {
   id?: string
   title: string
   description?: string | null
@@ -989,12 +1066,74 @@ export type SubmissionCreateWithoutCommentsInput = {
   milestone?: Prisma.MilestoneCreateNestedOneWithoutSubmissionsInput
   submittedBy?: Prisma.UserCreateNestedOneWithoutSubmissionsInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutSubmissionInput
+  comments?: Prisma.ReviewCommentCreateNestedManyWithoutSubmissionInput
+}
+
+export type SubmissionUncheckedCreateWithoutCheckpointInput = {
+  id?: string
+  projectId: string
+  milestoneId?: string | null
+  submittedById?: string | null
+  title: string
+  description?: string | null
+  status?: $Enums.SubmissionStatus
+  version?: number
+  submittedAt?: Date | string
+  reviewedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutSubmissionInput
+  comments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutSubmissionInput
+}
+
+export type SubmissionCreateOrConnectWithoutCheckpointInput = {
+  where: Prisma.SubmissionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SubmissionCreateWithoutCheckpointInput, Prisma.SubmissionUncheckedCreateWithoutCheckpointInput>
+}
+
+export type SubmissionCreateManyCheckpointInputEnvelope = {
+  data: Prisma.SubmissionCreateManyCheckpointInput | Prisma.SubmissionCreateManyCheckpointInput[]
+  skipDuplicates?: boolean
+}
+
+export type SubmissionUpsertWithWhereUniqueWithoutCheckpointInput = {
+  where: Prisma.SubmissionWhereUniqueInput
+  update: Prisma.XOR<Prisma.SubmissionUpdateWithoutCheckpointInput, Prisma.SubmissionUncheckedUpdateWithoutCheckpointInput>
+  create: Prisma.XOR<Prisma.SubmissionCreateWithoutCheckpointInput, Prisma.SubmissionUncheckedCreateWithoutCheckpointInput>
+}
+
+export type SubmissionUpdateWithWhereUniqueWithoutCheckpointInput = {
+  where: Prisma.SubmissionWhereUniqueInput
+  data: Prisma.XOR<Prisma.SubmissionUpdateWithoutCheckpointInput, Prisma.SubmissionUncheckedUpdateWithoutCheckpointInput>
+}
+
+export type SubmissionUpdateManyWithWhereWithoutCheckpointInput = {
+  where: Prisma.SubmissionScalarWhereInput
+  data: Prisma.XOR<Prisma.SubmissionUpdateManyMutationInput, Prisma.SubmissionUncheckedUpdateManyWithoutCheckpointInput>
+}
+
+export type SubmissionCreateWithoutCommentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  status?: $Enums.SubmissionStatus
+  version?: number
+  submittedAt?: Date | string
+  reviewedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  project: Prisma.ProjectCreateNestedOneWithoutSubmissionsInput
+  milestone?: Prisma.MilestoneCreateNestedOneWithoutSubmissionsInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutSubmissionsInput
+  submittedBy?: Prisma.UserCreateNestedOneWithoutSubmissionsInput
+  files?: Prisma.UploadedFileCreateNestedManyWithoutSubmissionInput
 }
 
 export type SubmissionUncheckedCreateWithoutCommentsInput = {
   id?: string
   projectId: string
   milestoneId?: string | null
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -1035,6 +1174,7 @@ export type SubmissionUpdateWithoutCommentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutSubmissionsNestedInput
   milestone?: Prisma.MilestoneUpdateOneWithoutSubmissionsNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutSubmissionsNestedInput
   submittedBy?: Prisma.UserUpdateOneWithoutSubmissionsNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutSubmissionNestedInput
 }
@@ -1043,6 +1183,7 @@ export type SubmissionUncheckedUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1059,6 +1200,7 @@ export type SubmissionCreateManySubmittedByInput = {
   id?: string
   projectId: string
   milestoneId?: string | null
+  checkpointId?: string | null
   title: string
   description?: string | null
   status?: $Enums.SubmissionStatus
@@ -1081,6 +1223,7 @@ export type SubmissionUpdateWithoutSubmittedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutSubmissionsNestedInput
   milestone?: Prisma.MilestoneUpdateOneWithoutSubmissionsNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutSubmissionsNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutSubmissionNestedInput
   comments?: Prisma.ReviewCommentUpdateManyWithoutSubmissionNestedInput
 }
@@ -1089,6 +1232,7 @@ export type SubmissionUncheckedUpdateWithoutSubmittedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
@@ -1105,6 +1249,7 @@ export type SubmissionUncheckedUpdateManyWithoutSubmittedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
@@ -1118,6 +1263,7 @@ export type SubmissionUncheckedUpdateManyWithoutSubmittedByInput = {
 export type SubmissionCreateManyProjectInput = {
   id?: string
   milestoneId?: string | null
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -1140,6 +1286,7 @@ export type SubmissionUpdateWithoutProjectInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestone?: Prisma.MilestoneUpdateOneWithoutSubmissionsNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutSubmissionsNestedInput
   submittedBy?: Prisma.UserUpdateOneWithoutSubmissionsNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutSubmissionNestedInput
   comments?: Prisma.ReviewCommentUpdateManyWithoutSubmissionNestedInput
@@ -1148,6 +1295,7 @@ export type SubmissionUpdateWithoutProjectInput = {
 export type SubmissionUncheckedUpdateWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1164,6 +1312,7 @@ export type SubmissionUncheckedUpdateWithoutProjectInput = {
 export type SubmissionUncheckedUpdateManyWithoutProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1178,6 +1327,7 @@ export type SubmissionUncheckedUpdateManyWithoutProjectInput = {
 export type SubmissionCreateManyMilestoneInput = {
   id?: string
   projectId: string
+  checkpointId?: string | null
   submittedById?: string | null
   title: string
   description?: string | null
@@ -1200,6 +1350,7 @@ export type SubmissionUpdateWithoutMilestoneInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutSubmissionsNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutSubmissionsNestedInput
   submittedBy?: Prisma.UserUpdateOneWithoutSubmissionsNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutSubmissionNestedInput
   comments?: Prisma.ReviewCommentUpdateManyWithoutSubmissionNestedInput
@@ -1208,6 +1359,7 @@ export type SubmissionUpdateWithoutMilestoneInput = {
 export type SubmissionUncheckedUpdateWithoutMilestoneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1224,6 +1376,71 @@ export type SubmissionUncheckedUpdateWithoutMilestoneInput = {
 export type SubmissionUncheckedUpdateManyWithoutMilestoneInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.StringFieldUpdateOperationsInput | string
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SubmissionCreateManyCheckpointInput = {
+  id?: string
+  projectId: string
+  milestoneId?: string | null
+  submittedById?: string | null
+  title: string
+  description?: string | null
+  status?: $Enums.SubmissionStatus
+  version?: number
+  submittedAt?: Date | string
+  reviewedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SubmissionUpdateWithoutCheckpointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneRequiredWithoutSubmissionsNestedInput
+  milestone?: Prisma.MilestoneUpdateOneWithoutSubmissionsNestedInput
+  submittedBy?: Prisma.UserUpdateOneWithoutSubmissionsNestedInput
+  files?: Prisma.UploadedFileUpdateManyWithoutSubmissionNestedInput
+  comments?: Prisma.ReviewCommentUpdateManyWithoutSubmissionNestedInput
+}
+
+export type SubmissionUncheckedUpdateWithoutCheckpointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.StringFieldUpdateOperationsInput | string
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  files?: Prisma.UploadedFileUncheckedUpdateManyWithoutSubmissionNestedInput
+  comments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutSubmissionNestedInput
+}
+
+export type SubmissionUncheckedUpdateManyWithoutCheckpointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.StringFieldUpdateOperationsInput | string
+  milestoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1279,6 +1496,7 @@ export type SubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   id?: boolean
   projectId?: boolean
   milestoneId?: boolean
+  checkpointId?: boolean
   submittedById?: boolean
   title?: boolean
   description?: boolean
@@ -1290,6 +1508,7 @@ export type SubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   milestone?: boolean | Prisma.Submission$milestoneArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.Submission$checkpointArgs<ExtArgs>
   submittedBy?: boolean | Prisma.Submission$submittedByArgs<ExtArgs>
   files?: boolean | Prisma.Submission$filesArgs<ExtArgs>
   comments?: boolean | Prisma.Submission$commentsArgs<ExtArgs>
@@ -1300,6 +1519,7 @@ export type SubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   projectId?: boolean
   milestoneId?: boolean
+  checkpointId?: boolean
   submittedById?: boolean
   title?: boolean
   description?: boolean
@@ -1311,6 +1531,7 @@ export type SubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   milestone?: boolean | Prisma.Submission$milestoneArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.Submission$checkpointArgs<ExtArgs>
   submittedBy?: boolean | Prisma.Submission$submittedByArgs<ExtArgs>
 }, ExtArgs["result"]["submission"]>
 
@@ -1318,6 +1539,7 @@ export type SubmissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   projectId?: boolean
   milestoneId?: boolean
+  checkpointId?: boolean
   submittedById?: boolean
   title?: boolean
   description?: boolean
@@ -1329,6 +1551,7 @@ export type SubmissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   milestone?: boolean | Prisma.Submission$milestoneArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.Submission$checkpointArgs<ExtArgs>
   submittedBy?: boolean | Prisma.Submission$submittedByArgs<ExtArgs>
 }, ExtArgs["result"]["submission"]>
 
@@ -1336,6 +1559,7 @@ export type SubmissionSelectScalar = {
   id?: boolean
   projectId?: boolean
   milestoneId?: boolean
+  checkpointId?: boolean
   submittedById?: boolean
   title?: boolean
   description?: boolean
@@ -1347,10 +1571,11 @@ export type SubmissionSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "milestoneId" | "submittedById" | "title" | "description" | "status" | "version" | "submittedAt" | "reviewedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["submission"]>
+export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "milestoneId" | "checkpointId" | "submittedById" | "title" | "description" | "status" | "version" | "submittedAt" | "reviewedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["submission"]>
 export type SubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   milestone?: boolean | Prisma.Submission$milestoneArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.Submission$checkpointArgs<ExtArgs>
   submittedBy?: boolean | Prisma.Submission$submittedByArgs<ExtArgs>
   files?: boolean | Prisma.Submission$filesArgs<ExtArgs>
   comments?: boolean | Prisma.Submission$commentsArgs<ExtArgs>
@@ -1359,11 +1584,13 @@ export type SubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalA
 export type SubmissionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   milestone?: boolean | Prisma.Submission$milestoneArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.Submission$checkpointArgs<ExtArgs>
   submittedBy?: boolean | Prisma.Submission$submittedByArgs<ExtArgs>
 }
 export type SubmissionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   milestone?: boolean | Prisma.Submission$milestoneArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.Submission$checkpointArgs<ExtArgs>
   submittedBy?: boolean | Prisma.Submission$submittedByArgs<ExtArgs>
 }
 
@@ -1372,6 +1599,7 @@ export type $SubmissionPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     project: Prisma.$ProjectPayload<ExtArgs>
     milestone: Prisma.$MilestonePayload<ExtArgs> | null
+    checkpoint: Prisma.$MilestoneCheckpointPayload<ExtArgs> | null
     submittedBy: Prisma.$UserPayload<ExtArgs> | null
     files: Prisma.$UploadedFilePayload<ExtArgs>[]
     comments: Prisma.$ReviewCommentPayload<ExtArgs>[]
@@ -1380,6 +1608,7 @@ export type $SubmissionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     id: string
     projectId: string
     milestoneId: string | null
+    checkpointId: string | null
     submittedById: string | null
     title: string
     description: string | null
@@ -1785,6 +2014,7 @@ export interface Prisma__SubmissionClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   project<T extends Prisma.ProjectDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProjectDefaultArgs<ExtArgs>>): Prisma.Prisma__ProjectClient<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   milestone<T extends Prisma.Submission$milestoneArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Submission$milestoneArgs<ExtArgs>>): Prisma.Prisma__MilestoneClient<runtime.Types.Result.GetResult<Prisma.$MilestonePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  checkpoint<T extends Prisma.Submission$checkpointArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Submission$checkpointArgs<ExtArgs>>): Prisma.Prisma__MilestoneCheckpointClient<runtime.Types.Result.GetResult<Prisma.$MilestoneCheckpointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   submittedBy<T extends Prisma.Submission$submittedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Submission$submittedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   files<T extends Prisma.Submission$filesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Submission$filesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UploadedFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Submission$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Submission$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1820,6 +2050,7 @@ export interface SubmissionFieldRefs {
   readonly id: Prisma.FieldRef<"Submission", 'String'>
   readonly projectId: Prisma.FieldRef<"Submission", 'String'>
   readonly milestoneId: Prisma.FieldRef<"Submission", 'String'>
+  readonly checkpointId: Prisma.FieldRef<"Submission", 'String'>
   readonly submittedById: Prisma.FieldRef<"Submission", 'String'>
   readonly title: Prisma.FieldRef<"Submission", 'String'>
   readonly description: Prisma.FieldRef<"Submission", 'String'>
@@ -2246,6 +2477,25 @@ export type Submission$milestoneArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   include?: Prisma.MilestoneInclude<ExtArgs> | null
   where?: Prisma.MilestoneWhereInput
+}
+
+/**
+ * Submission.checkpoint
+ */
+export type Submission$checkpointArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MilestoneCheckpoint
+   */
+  select?: Prisma.MilestoneCheckpointSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MilestoneCheckpoint
+   */
+  omit?: Prisma.MilestoneCheckpointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MilestoneCheckpointInclude<ExtArgs> | null
+  where?: Prisma.MilestoneCheckpointWhereInput
 }
 
 /**

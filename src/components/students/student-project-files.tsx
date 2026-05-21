@@ -163,6 +163,103 @@ const PROJECT_FILE_UPLOAD_STEPS = [
   { id: 4, title: 'Submit to Adviser', text: 'Send for review' }
 ];
 
+function GroupAssignmentRequired() {
+  return (
+    <div className="student-project-files-page">
+      <header className="top-nav">
+        <div className="top-nav-leading">
+          <div className="page-title">
+            <div className="page-title-context">
+              <span className="page-kicker">Student Workspace</span>
+              <span className="page-breadcrumb" aria-hidden="true">
+                <i className="fas fa-angle-right" />
+                <span>Project Files</span>
+              </span>
+            </div>
+            <h1>Project Files</h1>
+            <p>Keep drafts, revisions, and approved project documents organized in one workspace.</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-body p-8 sm:p-12 lg:p-16">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-slate-200/40 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 -z-10"></div>
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
+
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500 shadow-inner mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 ring-4 ring-white">
+            <i className="fas fa-users-slash text-4xl" aria-hidden="true" />
+          </div>
+          <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Group Assignment Required</h3>
+          <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-500 leading-relaxed">
+            You must be assigned to a project group before you can access the project files repository and begin uploading chapters or documents. Please contact your coordinator.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TitleApprovalRequired() {
+  return (
+    <div className="student-project-files-page">
+      <header className="top-nav">
+        <div className="top-nav-leading">
+          <div className="page-title">
+            <div className="page-title-context">
+              <span className="page-kicker">Student Workspace</span>
+              <span className="page-breadcrumb" aria-hidden="true">
+                <i className="fas fa-angle-right" />
+                <span>Project Files</span>
+              </span>
+            </div>
+            <h1>Project Files</h1>
+            <p>Keep drafts, revisions, and approved project documents organized in one workspace.</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-body p-8 sm:p-12 lg:p-16">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-indigo-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-indigo-200/40 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 -z-10"></div>
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
+
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 shadow-inner mb-8 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 ring-4 ring-white">
+            <i className="fas fa-lock text-4xl" aria-hidden="true" />
+          </div>
+          <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Title Approval Required</h3>
+          <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-600 leading-relaxed">
+            You must get your project title officially approved by your adviser in the <strong className="text-indigo-700">Title Submission</strong> workspace before you can access the project files repository and begin uploading chapters or documents.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectFilesHeroStats({ stats }: { stats: { id: string, label: string, value: string, icon: string, tone: string, note: string }[] }) {
+  return (
+    <section className="dashboard-hero project-files-hero">
+      <article className="dashboard-hero-main project-files-hero-main">
+        <div className="dashboard-callout-grid project-files-hero-stats">
+          {stats.map((item) => (
+            <article key={item.id} className={`dashboard-callout project-files-hero-stat is-${item.tone}`}>
+              <span className="project-files-stat-icon"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+              <div>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+                <small>{item.note}</small>
+              </div>
+            </article>
+          ))}
+        </div>
+      </article>
+    </section>
+  );
+}
+
 export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadSectionRef = useRef<HTMLElement | null>(null);
@@ -303,14 +400,11 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   }, [currentUserId, data.group.id, isGroupLeader, isUploadAllowed, permissionExpiresAt]);
 
   const handleRequestPermission = async () => {
-    console.log('[REQUEST PERM] Members:', JSON.stringify(data.group.members, null, 2));
     const leader = data.group.members.find((m) => m.isLeader);
-    console.log('[REQUEST PERM] Found leader:', leader);
     if (!leader?.user_id) {
       setToast({ tone: 'danger', message: 'Could not identify the group leader.' });
       return;
     }
-    console.log('[REQUEST PERM] Sending notification to leader user_id:', leader.user_id);
 
     try {
       const res = await fetch('/api/notifications', {
@@ -358,10 +452,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     };
   }, [historyFile]);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setIsLoadingFiles(false), 500);
-    return () => window.clearTimeout(timer);
-  }, []);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -373,6 +464,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
         });
 
         if (!response.ok) {
+          if (!cancelled) setIsLoadingFiles(false);
           return;
         }
 
@@ -419,8 +511,10 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
             const localPendingFiles = current.filter((file) => file.fileUrl.startsWith('blob:'));
             return sortProjectFiles([...storedFiles, ...localPendingFiles], 'newest');
           });
+          setIsLoadingFiles(false);
         }
       } catch {
+        if (!cancelled) setIsLoadingFiles(false);
         // Keep the workspace usable; real uploads will appear after the API is available.
       }
     };
@@ -909,80 +1003,10 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       : 'fa-circle-info';
 
   if (!data.group?.id) {
-    return (
-      <div className="student-project-files-page">
-        <header className="top-nav">
-          <div className="top-nav-leading">
-            <div className="page-title">
-              <div className="page-title-context">
-                <span className="page-kicker">Student Workspace</span>
-                <span className="page-breadcrumb" aria-hidden="true">
-                  <i className="fas fa-angle-right" />
-                  <span>Project Files</span>
-                </span>
-              </div>
-              <h1>Project Files</h1>
-              <p>Keep drafts, revisions, and approved project documents organized in one workspace.</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="page-body p-8 sm:p-12 lg:p-16">
-          <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-slate-200/40 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 -z-10"></div>
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
-
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500 shadow-inner mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 ring-4 ring-white">
-              <i className="fas fa-users-slash text-4xl" aria-hidden="true" />
-            </div>
-            <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Group Assignment Required</h3>
-            <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-500 leading-relaxed">
-              You must be assigned to a project group before you can access the project files repository and begin uploading chapters or documents. Please contact your coordinator.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <GroupAssignmentRequired />;
   }
 
-  if (!hasApprovedTitle) {
-    return (
-      <div className="student-project-files-page">
-        <header className="top-nav">
-          <div className="top-nav-leading">
-            <div className="page-title">
-              <div className="page-title-context">
-                <span className="page-kicker">Student Workspace</span>
-                <span className="page-breadcrumb" aria-hidden="true">
-                  <i className="fas fa-angle-right" />
-                  <span>Project Files</span>
-                </span>
-              </div>
-              <h1>Project Files</h1>
-              <p>Keep drafts, revisions, and approved project documents organized in one workspace.</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="page-body p-8 sm:p-12 lg:p-16">
-          <div className="mx-auto max-w-2xl rounded-3xl border border-indigo-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-indigo-200/40 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 -z-10"></div>
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
-            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
-
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 shadow-inner mb-8 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 ring-4 ring-white">
-              <i className="fas fa-lock text-4xl" aria-hidden="true" />
-            </div>
-            <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Title Approval Required</h3>
-            <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-600 leading-relaxed">
-              You must get your project title officially approved by your adviser in the <strong className="text-indigo-700">Title Submission</strong> workspace before you can access the project files repository and begin uploading chapters or documents.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Project Files workspace is now always open, but upload is gated by title approval
 
   return (
     <>
@@ -1002,139 +1026,21 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
             </div>
           </div>
           <div className="project-files-header-actions">
-            <button className="btn btn-primary project-files-upload-button" type="button" onClick={openUploadSection}>
-              <i className="fas fa-cloud-arrow-up" aria-hidden="true" /> Upload New Version
+            <button 
+              className={`btn btn-primary project-files-upload-button ${!hasApprovedTitle ? 'opacity-50 cursor-not-allowed' : ''}`} 
+              type="button" 
+              onClick={hasApprovedTitle ? openUploadSection : undefined}
+              disabled={!hasApprovedTitle}
+              title={!hasApprovedTitle ? "Title must be approved by the panel (Live Defense) before you can upload project files." : "Upload New Version"}
+            >
+              {!hasApprovedTitle ? <i className="fas fa-lock" aria-hidden="true" /> : <i className="fas fa-cloud-arrow-up" aria-hidden="true" />} 
+              Upload New Version
             </button>
           </div>
         </header>
 
         <div className="page-body project-files-page-body">
-          <section className="dashboard-hero project-files-hero">
-            <article className="dashboard-hero-main project-files-hero-main">
-              <div className="dashboard-callout-grid project-files-hero-stats">
-                {heroStats.map((item) => (
-                  <article key={item.id} className={`dashboard-callout project-files-hero-stat is-${item.tone}`}>
-                    <span className="project-files-stat-icon"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
-                    <div>
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                      <small>{item.note}</small>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </article>
-
-          </section>
-
-          {/* Revision Progress Timeline */}
-          {hasApprovedTitle && (
-            <section className="rounded-3xl border border-slate-200/80 bg-white overflow-hidden shadow-sm flex flex-col transition-shadow duration-300 hover:shadow-md">
-              <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
-                    <i className="fas fa-bars-progress text-lg"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Revision Progress</h3>
-                    <p className="text-sm text-slate-500 font-medium mt-0.5">Track the status of your uploaded revisions and manuscript workflow</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-8">
-                <div className="relative">
-                  {(() => {
-                    const REVISION_STEPS = [
-                      { id: 0, label: 'Concept Approved', icon: 'fa-check-circle' },
-                      { id: 1, label: 'Upload Revision', icon: 'fa-cloud-arrow-up' },
-                      { id: 2, label: 'Under Adviser Review', icon: 'fa-magnifying-glass' },
-                      { id: 3, label: 'Revision Approved', icon: 'fa-clipboard-check' },
-                      { id: 4, label: 'Final Manuscript', icon: 'fa-file-circle-check' }
-                    ];
-
-                    // Only consider actual revision files (exclude Title Proposal)
-                    const revisionFiles = files.filter(f =>
-                      f.category !== 'proposal' &&
-                      f.category !== 'Title Proposal' &&
-                      f.category !== 'Proposal'
-                    );
-
-                    // Compute current step based on revision files only
-                    let revisionStepIndex = 0;
-                    if (hasApprovedTitle) revisionStepIndex = 0; // Concept is approved
-                    if (revisionFiles.length > 0) revisionStepIndex = 1; // Has uploaded revision files
-                    if (revisionFiles.some(f => f.status === 'under_review' || f.status === 'pending')) revisionStepIndex = 2; // Under review
-                    if (revisionFiles.some(f => f.status === 'revision')) revisionStepIndex = 3; // Needs revision
-                    if (revisionFiles.some(f => f.status === 'approved')) revisionStepIndex = 3; // Approved
-                    if (revisionFiles.some(f => f.category === 'final-manuscript')) revisionStepIndex = 4; // Final manuscript uploaded
-
-                    const isNeedsRevision = revisionFiles.some(f => f.status === 'revision') && !revisionFiles.some(f => f.status === 'approved');
-                    const progressWidth = (revisionStepIndex / Math.max(1, REVISION_STEPS.length - 1)) * 100;
-
-                    return (
-                      <>
-                        {/* Connecting Line (Desktop) */}
-                        <div className="absolute top-6 left-0 w-full h-1.5 bg-slate-100 rounded-full z-0 hidden sm:block"></div>
-                        <div
-                          className="absolute top-6 left-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full z-0 hidden sm:block transition-all duration-1000 ease-out"
-                          style={{ width: `${progressWidth}%` }}
-                        ></div>
-
-                        {/* Steps */}
-                        <div className="relative z-10 flex flex-col sm:flex-row justify-between gap-8 sm:gap-2">
-                          {REVISION_STEPS.map((step, index) => {
-                            const isCompleted = index <= revisionStepIndex;
-                            const isCurrent = index === revisionStepIndex;
-                            const isRevisionStep = isCurrent && isNeedsRevision && index === 3;
-
-                            let circleClasses = 'bg-white border-slate-200 text-slate-300';
-                            if (isCompleted) {
-                              if (isRevisionStep) {
-                                circleClasses = 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200/50 ring-4 ring-amber-50';
-                              } else if (isCurrent) {
-                                circleClasses = 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200/50 ring-4 ring-blue-50';
-                              } else {
-                                circleClasses = 'bg-blue-600 border-blue-600 text-white';
-                              }
-                            }
-
-                            return (
-                              <div key={step.id} className="flex flex-row sm:flex-col items-start sm:items-center gap-4 sm:gap-3 flex-1 relative">
-                                {/* Mobile Connecting Line */}
-                                {index < REVISION_STEPS.length - 1 && (
-                                  <div className={`absolute left-6 top-12 bottom-[-2rem] w-1 sm:hidden -z-10 rounded-full ${index < revisionStepIndex ? 'bg-gradient-to-b from-blue-500 to-blue-600' : 'bg-slate-100'}`}></div>
-                                )}
-
-                                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-500 ${circleClasses}`}>
-                                  <i className={`fas ${step.icon} text-base ${isCurrent ? 'animate-pulse' : ''}`} aria-hidden="true"></i>
-                                </div>
-                                <div className="sm:text-center mt-2 sm:mt-0">
-                                  <span className={`block text-sm font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>
-                                    {step.label}
-                                  </span>
-                                  {isCurrent && (
-                                    <span className={`inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${isRevisionStep ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                                      Current Stage
-                                    </span>
-                                  )}
-                                  {isCurrent && step.id === 2 ? (
-                                    <small className="mt-2 block max-w-[180px] text-xs font-semibold leading-5 text-blue-700 sm:mx-auto">
-                                      Your adviser is currently reviewing your submission.
-                                    </small>
-                                  ) : null}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
-            </section>
-          )}
+          <ProjectFilesHeroStats stats={heroStats} />
 
           <section className="content-grid two-thirds project-files-main-grid">
             <article ref={trackerSectionRef} className="surface-card project-files-panel-card">
@@ -1145,65 +1051,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   <p>All your project documents and their versions.</p>
                 </div>
               </div>
-
-              <div className="project-files-tracker-insights">
-                <article className="project-files-tracker-insight">
-                  <span>Latest activity</span>
-                  <strong>{latestFile ? latestFile.fileName : 'No uploads yet'}</strong>
-                  <p>{latestFile ? `${getProjectFileVersionLabel(latestFile)} uploaded ${formatProjectFileDateTime(latestFile.uploadedAt)}` : 'Start by adding your first working file.'}</p>
-                </article>
-                <article className="project-files-tracker-insight">
-                  <span>Needs attention</span>
-                  <strong>{revisionCount ? `${revisionCount} file${revisionCount === 1 ? '' : 's'} need revision` : 'No revision requests'}</strong>
-                  <p>{revisionCount ? 'Review adviser comments and upload an updated version with clear notes.' : 'Current records are either pending review or already approved.'}</p>
-                </article>
-                <article className="project-files-tracker-insight">
-                  <span>Repository readiness</span>
-                  <strong>{latestApprovedFile ? latestApprovedFile.fileName : 'No approved copy yet'}</strong>
-                  <p>{latestApprovedFile ? `Latest approved by ${latestApprovedFile.reviewedBy || adviserName} on ${formatProjectFileDateTime(latestApprovedFile.reviewedAt || latestApprovedFile.uploadedAt)}.` : 'Approved files will move into the repository section once verified.'}</p>
-                </article>
-              </div>
-
-              {!hasProjectFiles ? (
-                <div className="project-files-onboarding-card">
-                  <div className="project-files-onboarding-icon">
-                    <i className="fas fa-file-shield" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <span className="section-kicker">Secure Document Workflow</span>
-                    <h4>No private project files yet</h4>
-                    <p>
-                      Your tracker is now connected to Supabase private storage. Upload a PDF, Word,
-                      PowerPoint, or Excel document to create the first record visible to authorized reviewers.
-                    </p>
-                  </div>
-                  <button className="btn btn-primary" type="button" onClick={openUploadSection}>
-                    <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload Document
-                  </button>
-                </div>
-              ) : null}
-
               <div className="project-files-filter-shell">
-                <div className="project-files-filter-pills" aria-label="Quick category filters">
-                  {quickFilterOptions.map((option) => {
-                    const isActive = option.key === categoryFilter;
-                    const count = quickFilterCounts[option.key] || 0;
-
-                    return (
-                      <button
-                        key={option.key}
-                        aria-pressed={isActive}
-                        className={`project-files-filter-pill ${isActive ? 'is-active' : ''}`}
-                        type="button"
-                        onClick={() => setCategoryFilter(option.key)}
-                      >
-                        <span>{option.label}</span>
-                        <strong>{count}</strong>
-                      </button>
-                    );
-                  })}
-                </div>
-
                 <div className="project-files-filter-meta">
                   <div>
                     <strong>{activeFilterLabel}</strong>
@@ -1381,13 +1229,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
               </div>
 
               {!hasApprovedTitle ? (
-                <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/50 p-8 text-center shadow-sm">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
+                <div className="mx-auto my-6 flex w-full max-w-2xl flex-col items-center justify-center rounded-[1.25rem] border border-slate-200 bg-slate-50/50 py-10 px-6 text-center shadow-sm">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
                     <i className="fas fa-file-shield text-2xl" aria-hidden="true" />
                   </div>
                   <h4 className="mt-4 text-xl font-bold tracking-tight text-slate-800">Upload Locked</h4>
-                  <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-                    Project file uploads are disabled until your capstone project title has been officially submitted and approved by your adviser.
+                  <p className="mt-2 max-w-md text-sm text-slate-600 text-center">
+                    Project file uploads are disabled until your capstone project title has been officially approved by the panel (Live Defense).
                   </p>
                 </div>
               ) : !isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (

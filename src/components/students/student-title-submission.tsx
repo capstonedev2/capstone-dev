@@ -496,6 +496,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const [activeSubmissionId, setActiveSubmissionId] = useState(
     initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? ''
   );
+  const [activeTab, setActiveTab] = useState('Details');
   const [notice, setNotice] = useState<NoticeState>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
@@ -585,6 +586,9 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               const nextNum = mergedReal.reduce((h, s) => Math.max(h, s.proposalNumber), 0) + 1;
               const autoDraft = createDraftSubmission(data, nextNum, isLeader);
               return [autoDraft, ...mergedReal.map(s => ({ ...s, isCurrent: false }))];
+            }
+            if (mergedReal.length === 0 && localSubmissions.length === 0) {
+              return currentSubmissions;
             }
             
             return [...localSubmissions, ...mergedReal];
@@ -1186,226 +1190,294 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   ];
 
   return (
-    <div className="student-title-submission-page">
-      <header className="top-nav">
-        <div className="top-nav-leading">
-          <div className="page-title">
-            <div className="page-title-context">
-              <span className="page-kicker">Student Workspace</span>
-              <span className="page-breadcrumb" aria-hidden="true">
-                <i className="fas fa-angle-right" />
-                <span>Title Submission</span>
+    <div className="student-title-submission-page p-4 pt-2 lg:p-6 lg:pt-2 bg-[#F8FAFC] min-h-screen relative">
+      {notice && (
+        <div className={`fixed bottom-8 right-6 z-[9999] rounded-xl p-4 shadow-xl flex items-start gap-3 w-96 animate-in slide-in-from-right-8 fade-in duration-300 border ${
+          notice.tone === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+          notice.tone === 'danger' ? 'bg-rose-50 text-rose-800 border-rose-200' :
+          notice.tone === 'warning' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+          'bg-blue-50 text-blue-800 border-blue-200'
+        }`}>
+          <div className="mt-0.5 text-lg">
+            {notice.tone === 'success' && <i className="fas fa-check-circle text-emerald-500"></i>}
+            {notice.tone === 'danger' && <i className="fas fa-exclamation-circle text-rose-500"></i>}
+            {notice.tone === 'warning' && <i className="fas fa-triangle-exclamation text-amber-500"></i>}
+            {notice.tone === 'info' && <i className="fas fa-info-circle text-blue-500"></i>}
+          </div>
+          <p className="text-sm font-bold flex-1 leading-snug">{notice.message}</p>
+          <button onClick={() => setNotice(null)} className="text-current opacity-50 hover:opacity-100 transition-opacity"><i className="fas fa-times"></i></button>
+        </div>
+      )}
+      
+      {/* Hero Banner */}
+      <div className="bg-gradient-to-br from-[#003A8F] via-[#0b2866] to-[#1E40AF] rounded-[1.5rem] p-8 text-white flex flex-col md:flex-row justify-between relative overflow-hidden shadow-2xl shadow-[#003A8F]/20 mb-8 border border-white/10 group">
+        <div className="z-10 flex flex-col justify-between w-full md:w-1/2">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-sm font-semibold tracking-wide text-blue-100">Proposal {String(activeSubmission.proposalNumber).padStart(2, '0')}</span>
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${titleStatusTone === 'success' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/20 text-white'}`}>
+                {activeSubmission.registrationStatus}
               </span>
             </div>
-            <h1>Title Submission</h1>
-            <p>Upload your title proposal document using the required concept paper format.</p>
+            <h2 className="text-3xl font-extrabold mb-8 mt-2 leading-tight">{activeSubmission.proposedTitle || 'Untitled Proposal'}</h2>
+          </div>
+          <div className="flex flex-wrap gap-x-12 gap-y-4">
+            <div>
+              <p className="text-xs text-blue-200 font-medium mb-1.5">Adviser</p>
+              <p className="text-sm font-semibold flex items-center gap-2"><i className="fas fa-user text-blue-300"></i> {activeSubmission.adviser}</p>
+            </div>
+            <div>
+              <p className="text-xs text-blue-200 font-medium mb-1.5">Department</p>
+              <p className="text-sm font-semibold flex items-center gap-2"><i className="fas fa-building text-blue-300"></i> {data.profile.department || 'Computer Science'}</p>
+            </div>
           </div>
         </div>
-      </header>
 
-      <div className="page-body p-6 lg:p-8">
+        <div className="z-10 flex flex-col md:flex-row items-center gap-10 mt-8 md:mt-0">
+          <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
+            <div>
+              <p className="text-xs text-blue-200 font-medium mb-1.5">Next Step</p>
+              <p className="text-sm font-bold flex items-center gap-2 text-white">
+                <span className="relative flex h-2 w-2 mr-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F6BE00] opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-[#F6BE00]"></span></span><i className={`fas ${currentStepIndex === 0 ? 'fa-file-arrow-up' : currentStepIndex === 1 ? 'fa-paper-plane' : currentStepIndex >= 4 ? 'fa-circle-check' : 'fa-magnifying-glass'} text-blue-200 mr-1`}></i> {currentStepIndex === 0 ? 'Upload Concept Paper' : currentStepIndex === 1 ? 'Submit for Adviser Review' : currentStepIndex === 2 ? 'Awaiting Adviser Review' : currentStepIndex === 3 ? 'Under Review' : 'Title Approved'} <i className="fas fa-arrow-right text-xs ml-1 group-hover:translate-x-1 transition-transform"></i>
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-blue-200 font-medium mb-1.5">Last Updated</p>
+              <p className="text-sm font-semibold flex items-center gap-2 text-blue-50"><i className="fas fa-calendar text-blue-300"></i> {formatDateTimeLabel(activeSubmission.updated_at)}</p>
+            </div>
+          </div>
+        </div>
         
-        {notice && (
-          <div className={`mb-6 rounded-xl border p-4 flex items-center gap-3 ${
-            notice.tone === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
-            notice.tone === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-            notice.tone === 'danger' ? 'bg-red-50 border-red-200 text-red-800' :
-            'bg-blue-50 border-blue-200 text-blue-800'
-          }`}>
-            <i className={`fas ${
-                notice.tone === 'success' ? 'fa-circle-check' :
-                notice.tone === 'warning' ? 'fa-triangle-exclamation' :
-                notice.tone === 'danger' ? 'fa-circle-exclamation' :
-                'fa-circle-info'
-              } text-lg`} aria-hidden="true" />
-            <span className="text-sm font-medium">{notice.message}</span>
-          </div>
-        )}
-
-        {/* Compact Summary Cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                <i className="fas fa-paper-plane text-xl" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Total Submitted</p>
-                <p className="text-2xl font-bold text-slate-900">{submissions.filter(s => s.registrationStatus !== 'Draft').length}</p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                <i className="fas fa-clock text-xl" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Pending Review</p>
-                <p className="text-2xl font-bold text-slate-900">{pendingReviewCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                <i className="fas fa-check-circle text-xl" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Approved</p>
-                <p className="text-2xl font-bold text-slate-900">{approvedCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className={`rounded-2xl border p-5 shadow-sm transition-shadow hover:shadow-md ${rejectedCount > 0 ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200 bg-white'}`}>
-            <div className="flex items-center gap-4">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${rejectedCount > 0 ? 'bg-rose-100 text-rose-600' : 'bg-slate-50 text-slate-400'}`}>
-                <i className="fas fa-ban text-xl" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Rejected</p>
-                <p className={`text-2xl font-bold ${rejectedCount > 0 ? 'text-rose-600' : 'text-slate-900'}`}>{rejectedCount}</p>
-              </div>
-            </div>
-          </div>
+        {/* Decorative elements */}
+        <div className="absolute right-0 bottom-0 opacity-[0.15] translate-x-1/4 translate-y-1/4">
+          <i className="fas fa-graduation-cap text-[14rem]"></i>
         </div>
+      </div>
 
-        {/* Rejection Status Banner */}
-        {showRejectionBanner && latestRejectedSubmission && (
-          <div className="mb-6 rounded-[1.25rem] border border-rose-200 bg-gradient-to-r from-rose-50 to-red-50 p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 shadow-inner">
-                <i className="fas fa-circle-exclamation text-xl" aria-hidden="true" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-rose-800 flex items-center gap-2">
-                  <span>Previous Title Rejected</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/10">
-                    <i className="fas fa-ban text-[10px]" /> Rejected
-                  </span>
-                </h3>
-                <p className="mt-1.5 text-sm text-rose-700/80 font-medium">
-                  <strong>&ldquo;{latestRejectedSubmission.proposedTitle}&rdquo;</strong> was rejected by your adviser.
-                </p>
-                {latestRejectedSubmission.statusNote && (
-                  <div className="mt-3 rounded-xl bg-white/70 border border-rose-100 p-4">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                      <i className="fas fa-comment-dots mr-1" /> Adviser Remarks
-                    </p>
-                    <p className="text-sm text-slate-700 leading-relaxed">{latestRejectedSubmission.statusNote}</p>
+            {/* Timeline Stepper */}
+      <div className="bg-white rounded-[1.25rem] border border-slate-200/80 p-8 shadow-sm mb-8 relative overflow-hidden">
+        <div className="flex items-center justify-between relative max-w-[90%] mx-auto">
+          <div className="absolute left-10 right-10 top-6 -translate-y-1/2 h-1 bg-slate-100 z-0 rounded-full"></div>
+          <div className="absolute left-10 top-6 -translate-y-1/2 h-1 bg-blue-600 z-0 rounded-full transition-all duration-1000" style={{ width: `calc(${(currentStepIndex / 5) * 100}% - ${(currentStepIndex / 5) * 80}px)` }}></div>
+          
+          {TIMELINE_STEPS.map((step, idx) => {
+             const isCompleted = idx <= currentStepIndex;
+             const isCurrent = idx === currentStepIndex;
+             
+             let circleClasses = "bg-white border-slate-200 text-slate-300";
+             if (isCompleted) circleClasses = "bg-white border-blue-600 text-blue-600";
+             if (isCurrent) circleClasses = "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200/50";
+             if (step.label === 'Approved' && isCompleted) circleClasses = "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200/50";
+             
+             return (
+               <div key={idx} className="relative z-10 flex flex-col items-center gap-3 bg-white px-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg shadow-sm border-2 transition-all ${circleClasses}`}>
+                    <i className={`fas ${step.icon}`}></i>
                   </div>
-                )}
-                <p className="mt-3 text-sm text-rose-600 font-semibold">
-                  <i className="fas fa-arrow-down mr-1" /> Use the form below to upload a new title proposal directly.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Approval Banner — prompt to upload another if viewing draft */}
-        {showApprovalBanner && latestApprovedSubmission && (
-          <div className="mb-6 rounded-[1.25rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 shadow-inner">
-                <i className="fas fa-circle-check text-xl" aria-hidden="true" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-emerald-800 flex items-center gap-2">
-                  <span>Title Approved</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/10">
-                    <i className="fas fa-check text-[10px]" /> Approved
-                  </span>
-                </h3>
-                <p className="mt-1.5 text-sm text-emerald-700/80 font-medium">
-                  <strong>&ldquo;{latestApprovedSubmission.proposedTitle}&rdquo;</strong> has been officially approved by your adviser.
-                </p>
-                <div className="mt-4 rounded-xl bg-white/60 border border-emerald-100 p-4 shadow-sm inline-block">
-                  <p className="text-sm text-emerald-800 font-extrabold flex items-center gap-2 tracking-tight">
-                    <i className="fas fa-rocket text-emerald-500 text-lg" /> Your project is now ready for the Concept Proposal phase!
-                  </p>
-                  <p className="text-xs text-emerald-600 font-medium mt-1 ml-6">
-                    You can now begin preparing and uploading your concept proposal documents.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Upload Section & Timeline */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            
-            {/* Upload Card */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white overflow-hidden shadow-sm flex flex-col h-full transition-shadow duration-300 hover:shadow-md">
-              <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shadow-sm">
-                    <i className="fas fa-file-signature text-lg"></i>
+                  <div className="text-center">
+                    <p className={`text-xs font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>{step.label}</p>
+                    {/* Removed hardcoded fake date */}
+                    {!isCompleted && step.label === 'Registered' && <p className="text-[10px] font-bold text-slate-300 mt-0.5">—</p>}
                   </div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">
-                      {activeSubmission.id.startsWith('title-local-') ? 'Upload Proposal' : 'Proposal Details'}
-                    </h3>
-                    <p className="text-sm text-slate-500 font-medium mt-0.5">
-                      {activeSubmission.id.startsWith('title-local-') ? 'Prepare and submit your concept paper package' : 'View the contents of this submitted proposal'}
-                    </p>
-                  </div>
-                </div>
+               </div>
+             )
+          })}
+        </div>
+      </div>
 
-                <div className="flex max-w-full flex-col sm:flex-row sm:flex-wrap items-center justify-end gap-3 bg-slate-50/50 p-1.5 rounded-2xl border border-slate-100/80">
-                  <div className="flex items-center gap-2">
-                     <div className="relative inline-block w-[190px] sm:w-[220px]">
-                       <select 
-                         className="appearance-none cursor-pointer w-full rounded-xl bg-white pl-9 pr-8 py-2.5 text-sm font-bold text-slate-700 ring-1 ring-inset ring-slate-200/80 hover:bg-slate-50 hover:ring-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all shadow-sm text-ellipsis overflow-hidden"
-                         value={activeSubmissionId}
-                         onChange={(e) => handleSelectSubmission(e.target.value)}
-                       >
-                         {submissions.map((sub) => (
-                           <option key={sub.id} value={sub.id}>
-                             {sub.proposalLabel} {sub.registrationStatus === 'Draft' ? '(Draft)' : ''} - {sub.registrationStatus}
-                           </option>
-                         ))}
-                       </select>
-                       <i className="fas fa-layer-group absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm" aria-hidden="true" />
-                       <i className="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400" aria-hidden="true" />
-                     </div>
-                     <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} />
-                  </div>
-                  
-                  <div className="hidden sm:block w-px h-8 bg-slate-200/60 mx-1"></div>
-                  
-                  <button 
-                    type="button" 
-                    onClick={handleCreateSubmission}
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-blue-600 ring-1 ring-inset ring-slate-200/80 shadow-sm transition hover:bg-blue-50 hover:text-blue-700 hover:ring-blue-200 active:scale-95 w-full sm:w-auto"
-                  >
-                    <i className="fas fa-plus text-blue-500" aria-hidden="true" /> Upload Another
-                  </button>
+      {/* Modern Pill Tabs */}
+      <div className="flex items-center gap-2 bg-slate-200/40 p-1.5 rounded-2xl border border-slate-200 mb-8 w-fit shadow-inner">
+        {['Details', 'Documents'].map(tab => {
+          const isDisabled = tab === 'Documents' && (!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim());
+          return (
+            <button 
+              key={tab}
+              onClick={() => {
+                if (!isDisabled) setActiveTab(tab);
+              }}
+              disabled={isDisabled}
+              className={`px-6 py-2.5 text-[13px] font-extrabold rounded-xl transition-all duration-300 ${activeTab === tab ? 'bg-white text-[#003A8F] shadow-[0_4px_12px_-4px_rgba(0,58,143,0.15)] ring-1 ring-slate-100 scale-105' : isDisabled ? 'text-slate-400 cursor-not-allowed opacity-60 bg-slate-100/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/80'}`}
+            >
+              <div className="flex items-center gap-2">
+                {isDisabled && <i className="fas fa-lock text-[10px]"></i>}
+                {tab}
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
-                  {activeSubmission.registrationStatus === 'Draft' ? (
-                    <button
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        
+        {/* Left Column (Documents View) */}
+        <div className="flex flex-col gap-6">
+          {activeTab === 'Documents' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Upload Section */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                  <div className="p-5 flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-800">Upload Concept Paper</h3>
+                  </div>
+                  <div className="p-6 pt-0 flex-1 flex flex-col">
+                    <button 
                       type="button"
-                      onClick={handleDeleteDraftSubmission}
-                      className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-4 text-sm font-bold text-rose-600 ring-1 ring-inset ring-rose-200/80 shadow-sm transition hover:bg-rose-50 hover:text-rose-700 hover:ring-rose-200 active:scale-95 sm:w-10 sm:px-0"
-                      aria-label={`Delete ${activeSubmission.proposalLabel} draft`}
-                      title="Delete Draft"
+                      onClick={handleBrowseAttachments}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      disabled={!canUpload}
+                      className={`group relative flex-1 flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all overflow-hidden ${isDragging ? 'border-[#003A8F] bg-[#003A8F]/5 shadow-inner' : 'border-slate-300 bg-slate-50/50 hover:border-[#003A8F]/50 hover:bg-[#003A8F]/5'}`}
                     >
-                      <i className="fas fa-trash-can text-rose-500" aria-hidden="true" />
-                      <span className="sm:sr-only">Delete Draft</span>
+                      <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 mb-4 group-hover:bg-[#003A8F]/10 group-hover:text-[#003A8F] transition-colors">
+                        <i className="fas fa-cloud-arrow-up text-xl"></i>
+                      </div>
+                      <h4 className="text-[15px] font-bold text-slate-800 mb-1">Drag & drop your file here</h4>
+                      <p className="text-sm font-medium text-blue-600">or click to browse</p>
+                      <p className="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-widest">Supports: PDF, DOCX • Max size: 10MB</p>
+                      <input
+                        ref={fileInputRef}
+                        hidden
+                        multiple
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleAttachmentInputChange}
+                      />
                     </button>
-                  ) : null}
+                    
+                    {/* Active File Box */}
+                    {activeSubmission.attachments.length > 0 && (
+                      <div className="mt-4 flex flex-col gap-2 max-h-[140px] overflow-y-auto pr-1">
+                        {activeSubmission.attachments.map((attachment) => (
+                          <div key={attachment.id} className="p-3 rounded-lg border border-slate-200 bg-white shadow-sm flex items-center gap-3">
+                            <div className="h-9 w-9 bg-slate-100 rounded flex items-center justify-center text-blue-600 shrink-0">
+                              <i className={`fas ${attachment.fileName.toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-word'} text-base`}></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-slate-800 truncate">{attachment.fileName}</p>
+                              <p className="text-[10px] font-bold text-slate-500">{attachment.sizeLabel} • Uploaded</p>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded text-slate-500">
+                                <i className="fas fa-check text-[9px]"></i>
+                                <span className="text-[10px] font-bold">Uploaded</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveAttachment(attachment.id);
+                                }}
+                                disabled={!canUpload}
+                                className="h-7 w-7 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Remove file"
+                              >
+                                <i className="fas fa-trash-can text-[11px]"></i>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Document Preview */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                  <div className="p-5 flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-800">Document Preview</h3>
+                  </div>
+                  <div className="p-6 pt-0 flex-1 flex flex-col relative">
+                    <div className="bg-slate-50 rounded-2xl border border-slate-100 flex-1 flex flex-col p-6 overflow-hidden relative shadow-inner">
+                       {activeSubmission.attachments.length > 0 ? (
+                         activeSubmission.attachments[0].downloadUrl && activeSubmission.attachments[0].fileName.toLowerCase().endsWith('.pdf') ? (
+                           <div className="w-full flex-1 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-white relative">
+                             <object data={activeSubmission.attachments[0].downloadUrl} type="application/pdf" className="w-full h-full absolute inset-0">
+                               <div className="flex flex-col items-center justify-center text-center h-full p-8 bg-white">
+                                 <i className="fas fa-file-pdf text-3xl text-slate-300 mb-4"></i>
+                                 <p className="text-sm font-bold text-slate-500 mb-1">PDF viewer not available</p>
+                                 <p className="text-xs text-slate-400 font-medium">Your browser does not support inline PDFs.</p>
+                               </div>
+                             </object>
+                           </div>
+                         ) : (
+                           <div className="bg-white rounded-lg shadow-sm border border-slate-200 w-full flex-1 p-8 overflow-hidden flex flex-col items-center justify-center text-center">
+                              <i className={`fas ${activeSubmission.attachments[0].fileName.toLowerCase().includes('.doc') ? 'fa-file-word text-blue-500' : 'fa-file text-slate-400'} text-4xl mb-4`}></i>
+                              <h4 className="font-extrabold text-slate-800 mb-2 max-w-[200px] truncate">{activeSubmission.attachments[0].fileName}</h4>
+                              <p className="text-xs font-medium text-slate-500">Preview is only available for PDF documents.</p>
+                           </div>
+                         )
+                       ) : (
+                         <div className="flex-1 flex flex-col items-center justify-center text-center">
+                           <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center mb-4 text-slate-400">
+                             <i className="fas fa-file-pdf text-xl"></i>
+                           </div>
+                           <p className="text-sm font-bold text-slate-500 mb-1">No document uploaded</p>
+                           <p className="text-xs text-slate-400 font-medium">Upload a concept paper to see a preview here.</p>
+                         </div>
+                       )}
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Version History Quick View */}
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-slate-800">Version History</h3>
+                </div>
+                <div className="p-2">
+                  <table className="w-full text-left">
+                    <tbody>
+                      {activeSubmission.attachments.map((att, i) => (
+                        <tr key={i} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 font-bold text-slate-700 text-[13px] flex items-center gap-3">
+                            <i className="fas fa-file-word text-blue-600 text-lg"></i> {att.fileName}
+                            {i === 0 && <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded flex items-center gap-1"><i className="fas fa-circle text-[5px]"></i> Current</span>}
+                          </td>
+                          <td className="p-4 text-[12px] font-semibold text-slate-500">{att.uploadedAtLabel}</td>
+                          <td className="p-4 text-[12px] font-semibold text-slate-500">{att.sizeLabel}</td>
+                          <td className="p-4 text-[12px] font-semibold text-slate-400">{att.uploadedBy || data.group.leaderName || 'Group Member'}</td>
+                        </tr>
+                      ))}
+                      {activeSubmission.attachments.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="p-8 text-center text-sm font-medium text-slate-400">
+                            <div className="flex flex-col items-center gap-2">
+                              <i className="fas fa-folder-open text-3xl text-slate-200 mb-2"></i>
+                              No document versions yet
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          
+          {activeTab === 'Details' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8 flex flex-col relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
               
-              <div className="p-8 flex-grow flex flex-col">
-                <div className="mb-8">
-                  <label htmlFor="proposedTitle" className="block text-sm font-bold text-slate-700 mb-2.5 ml-1">
+              <div className="mb-8 flex items-center gap-4">
+                <div className="h-12 w-12 rounded-xl bg-blue-50 text-[#003A8F] flex items-center justify-center text-xl shadow-sm border border-blue-100"><i className="fas fa-file-signature"></i></div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Proposal Details</h3>
+                  <p className="text-[13px] text-slate-500 font-medium mt-1">Provide the official title and a brief note to your adviser.</p>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <div>
+                  <label htmlFor="proposedTitle" className="block text-[13px] font-extrabold text-slate-700 uppercase tracking-wider mb-3">
                     Proposed Title <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#003A8F] transition-colors">
                       <i className="fas fa-heading"></i>
                     </div>
                     <input
@@ -1414,309 +1486,265 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
                       placeholder="Enter the official, finalized title of your study"
-                      className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-4 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-bold outline-none disabled:opacity-60 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                      className="block w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-slate-800 shadow-sm transition-all placeholder:text-slate-400 focus:bg-white focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-white hover:border-slate-300 text-sm font-bold outline-none disabled:opacity-60 disabled:bg-slate-100"
                       disabled={!canUpload}
                     />
                   </div>
-                  <p className="text-xs text-slate-500 mt-2 ml-1 font-medium">
-                    <i className="fas fa-magic text-amber-500 mr-1"></i> If left blank, the title will be automatically extracted from your filename.
+                  <p className="text-[11px] font-bold text-slate-500 mt-2.5 flex items-center gap-1.5">
+                    <i className="fas fa-exclamation-circle text-rose-400"></i> A proposed title is required before you can proceed to upload documents.
                   </p>
                 </div>
 
-                <div className="mb-8">
-                  <label htmlFor="briefDescription" className="block text-sm font-bold text-slate-700 mb-2.5 ml-1">
-                    Note to Your Adviser <span className="text-slate-400 font-medium text-xs uppercase tracking-wider ml-1 px-2 py-0.5 bg-slate-100 rounded-md">Optional</span>
+                <div>
+                  <label htmlFor="briefDescription" className="block text-[13px] font-extrabold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    Note to Adviser <span className="text-slate-400 font-bold text-[10px] px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200">OPTIONAL</span>
                   </label>
                   <div className="relative group">
-                    <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#003A8F] transition-colors">
                       <i className="fas fa-comment-dots"></i>
                     </div>
                     <textarea
                       id="briefDescription"
                       value={
                         activeSubmission.briefDescription === 'Title proposal document uploaded for adviser review. The required contents are expected inside the attached file.' || 
-                        activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.' ||
-                        activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.dsfsdfsdfs'
+                        activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.'
                         ? '' : activeSubmission.briefDescription
                       }
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
                       placeholder="Add specific questions, context, or areas you want your adviser to focus on..."
-                      className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-4 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-medium outline-none min-h-[140px] resize-y disabled:opacity-60 disabled:bg-slate-100 disabled:cursor-not-allowed leading-relaxed"
+                      className="block w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-slate-800 shadow-sm transition-all placeholder:text-slate-400 focus:bg-white focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-white hover:border-slate-300 text-sm font-medium outline-none min-h-[160px] resize-y disabled:opacity-60 disabled:bg-slate-100 leading-relaxed"
                       disabled={!canUpload}
                     />
                   </div>
                 </div>
-
-                <input
-                  ref={fileInputRef}
-                  hidden
-                  multiple
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleAttachmentInputChange}
-                />
-                
-                {/* Drag and Drop Area */}
-                <div className="mb-2 ml-1 flex items-center justify-between">
-                  <span className="block text-sm font-bold text-slate-700">Concept Paper Document <span className="text-rose-500">*</span></span>
-                </div>
-                  <button 
-                    type="button"
-                    onClick={handleBrowseAttachments}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    disabled={!canUpload}
-                    className={`group relative flex w-full flex-col items-center justify-center rounded-3xl border-2 border-dashed py-16 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed overflow-hidden ${
-                      isDragging 
-                        ? 'border-blue-500 bg-blue-50/80 shadow-inner scale-[1.01]' 
-                        : 'border-slate-300 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/40 hover:shadow-sm disabled:hover:border-slate-300 disabled:hover:bg-slate-50'
-                    }`}
-                  >
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-                    <div className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-md mb-6 transition-all duration-500 ${isDragging ? 'scale-110 shadow-blue-200 shadow-lg' : 'group-hover:scale-110 group-hover:shadow-blue-100 group-hover:shadow-lg rotate-3 group-hover:rotate-0'}`}>
-                      <div className="absolute inset-0 rounded-2xl bg-blue-400/20 animate-ping opacity-0 group-hover:opacity-100 duration-1000"></div>
-                      <i className={`fas fa-cloud-arrow-up text-3xl transition-colors duration-300 ${isDragging ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
-                    </div>
-                    <h4 className="text-lg font-extrabold text-slate-700 group-hover:text-blue-700 transition-colors z-10">Drag and drop your file here</h4>
-                    <p className="mt-2 text-sm text-slate-500 font-medium z-10">or click to browse from your computer</p>
-                    
-                    <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-slate-500 z-10">
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOCX</span>
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-weight-hanging text-slate-400 text-sm"></i> 10MB Max</span>
-                    </div>
-                  </button>
-
-                {/* Uploaded Files Display */}
-                <div className="mt-6">
-                  {activeSubmission.attachments.length > 0 ? (
-                    <div className="space-y-3">
-                      {activeSubmission.attachments.map(att => (
-                        <div key={att.id} className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/50 to-white p-4 transition-all hover:shadow-md hover:border-emerald-300">
-                          <div className="flex items-start sm:items-center gap-4">
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white border border-emerald-100 text-emerald-600 shadow-sm transition-transform group-hover:scale-105">
-                              <i className={`fas fa-file-${att.fileType.toLowerCase() === 'pdf' ? 'pdf text-rose-500' : 'word text-blue-600'} text-2xl`} aria-hidden="true"></i>
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-800 truncate" title={att.fileName}>{att.fileName}</p>
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-1.5 font-semibold">
-                                <span className="flex items-center gap-1.5"><i className="fas fa-calendar-check text-emerald-500"></i> {att.uploadedAtLabel}</span>
-                                <span className="flex items-center gap-1.5"><i className="fas fa-hard-drive text-slate-400"></i> {att.sizeLabel}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-2">
-                            <button onClick={() => handleOpenAttachment(att)} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm" title="Preview">
-                              <i className="fas fa-expand" aria-hidden="true"></i>
-                            </button>
-                            <button onClick={() => handleDownloadAttachment(att)} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-all shadow-sm" title="Download">
-                              <i className="fas fa-download" aria-hidden="true"></i>
-                            </button>
-                            {activeSubmission.registrationStatus === 'Draft' && (
-                              <button onClick={() => handleRemoveAttachment(att.id)} disabled={!canUpload} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" title="Remove">
-                                <i className="fas fa-trash-can" aria-hidden="true"></i>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-3 rounded-2xl border border-amber-200/60 bg-amber-50/50 p-6 text-amber-800 shadow-inner">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                         <i className="fas fa-asterisk text-sm" aria-hidden="true"></i>
-                      </div>
-                      <p className="text-sm font-semibold">No proposal document attached. Upload a file to proceed.</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Submit Action */}
-                <div className="mt-auto pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 mt-8">
-                  <div className="flex items-center gap-3 hidden sm:flex">
-                    <div className={`h-2.5 w-2.5 rounded-full ${activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim() ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`}></div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                      {activeSubmission.attachments.length === 0 ? 'Awaiting File' : !activeSubmission.proposedTitle.trim() ? 'Awaiting Title' : 'Ready to Submit'}
-                    </span>
-                  </div>
-                  <form onSubmit={handleSubmitProposal} className="w-full sm:w-auto">
-                    <button 
-                      type="submit"
-                      disabled={!canUpload || isSubmittingTitle || activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim()}
-                      className="group relative flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 px-8 py-4 text-sm font-extrabold text-white shadow-lg shadow-blue-600/30 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                    >
-                      <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:translate-x-[50%] transition-transform duration-1000 ease-in-out"></div>
-                      <span className="relative z-10">{isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'}</span>
-                      <i className={`fas fa-paper-plane relative z-10 transition-transform ${isSubmittingTitle ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} aria-hidden="true"></i>
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline Progress Card */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white overflow-hidden shadow-sm flex flex-col transition-shadow duration-300 hover:shadow-md mt-6">
-              <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm">
-                    <i className="fas fa-bars-progress text-lg"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Submission Timeline</h3>
-                    <p className="text-sm text-slate-500 font-medium mt-0.5">Track the status of your current title proposal</p>
-                  </div>
-                </div>
               </div>
               
-              <div className="p-8">
-                <div className="relative">
-                  {/* Connecting Line (Desktop) */}
-                  <div className="absolute top-6 left-0 w-full h-1.5 bg-slate-100 rounded-full z-0 hidden sm:block"></div>
-                  <div 
-                    className="absolute top-6 left-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full z-0 hidden sm:block transition-all duration-1000 ease-out"
-                    style={{ width: `${(currentStepIndex / (Math.max(1, TIMELINE_STEPS.length - 1))) * 100}%` }}
-                  ></div>
-                  
-                  {/* Steps */}
-                  <div className="relative z-10 flex flex-col sm:flex-row justify-between gap-8 sm:gap-2">
-                    {TIMELINE_STEPS.map((step, index) => {
-                      const isCompleted = index <= currentStepIndex;
-                      const isCurrent = index === currentStepIndex;
-                      const isRejected = isCurrent && step.label === 'Rejected';
-                      const isNeedsRevision = isCurrent && step.label === 'Needs Revision';
-                      
-                      let circleClasses = 'bg-white border-slate-200 text-slate-300';
-                      if (isCompleted) {
-                        if (isRejected) {
-                          circleClasses = 'bg-rose-500 border-rose-500 text-white shadow-lg shadow-rose-200/50 ring-4 ring-rose-50';
-                        } else if (isNeedsRevision) {
-                          circleClasses = 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-200/50 ring-4 ring-amber-50';
-                        } else if (isCurrent) {
-                          circleClasses = 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200/50 ring-4 ring-blue-50';
-                        } else {
-                          circleClasses = 'bg-blue-600 border-blue-600 text-white';
-                        }
-                      }
-                      
-                      return (
-                        <div key={step.id} className="flex flex-row sm:flex-col items-start sm:items-center gap-4 sm:gap-3 flex-1 relative">
-                          {/* Mobile Connecting Line */}
-                          {index < TIMELINE_STEPS.length - 1 && (
-                            <div className={`absolute left-6 top-12 bottom-[-2rem] w-1 sm:hidden -z-10 rounded-full ${index < currentStepIndex ? 'bg-gradient-to-b from-blue-500 to-blue-600' : 'bg-slate-100'}`}></div>
-                          )}
-                          
-                          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-500 ${circleClasses}`}>
-                            <i className={`fas ${step.icon} text-base ${isCurrent ? 'animate-pulse' : ''}`} aria-hidden="true"></i>
-                          </div>
-                          <div className="sm:text-center mt-2 sm:mt-0">
-                            <span className={`block text-sm font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>
-                              {step.label}
-                            </span>
-                            {isCurrent && (
-                              <span className={`inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${isRejected ? 'bg-rose-100 text-rose-700' : isNeedsRevision ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                                Current Stage
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+              <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+                 <div className="flex items-center gap-3">
+                   <div className={`h-2.5 w-2.5 rounded-full ${!activeSubmission.proposedTitle.trim() ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`}></div>
+                   <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                     {!activeSubmission.proposedTitle.trim() ? 'Awaiting Title' : 'Details Complete'}
+                   </span>
+                 </div>
+                 <button 
+                   onClick={() => {
+                     if (activeSubmission.proposedTitle && activeSubmission.proposedTitle.trim()) {
+                       setActiveTab('Documents');
+                     }
+                   }}
+                   disabled={!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()}
+                   className={`text-xs font-extrabold px-6 py-3 rounded-lg shadow-md transition-all flex items-center gap-2 ${(!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()) ? 'bg-slate-200 cursor-not-allowed text-slate-400 shadow-none' : 'bg-slate-800 hover:bg-slate-900 text-white hover:shadow-lg hover:-translate-y-0.5'}`}
+                 >
+                   Continue to Documents <i className="fas fa-arrow-right"></i>
+                 </button>
               </div>
             </div>
+          )}
+          
+          {!['Documents', 'Details'].includes(activeTab) && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-12 text-center text-slate-500 flex flex-col items-center justify-center h-[400px]">
+               <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-5 text-2xl text-slate-300 border border-slate-100">
+                 <i className="fas fa-laptop-code"></i>
+               </div>
+               <h3 className="text-lg font-extrabold text-slate-700 mb-2">Tab Content Pending</h3>
+               <p className="text-[13px] font-medium max-w-sm leading-relaxed">The {activeTab} view is currently being implemented. Please use Details and Documents to submit your proposal.</p>
+            </div>
+          )}
 
-          </div>
 
-          {/* Right Column: Requirements Checklist & Meta */}
-          <div className="space-y-6">
+          {/* Action Banner (Proceed to Next Stage) */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-10 -translate-y-10"></div>
+            <div className="flex items-center gap-5 z-10">
+              <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm relative">
+                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm border-2 border-white"><i className="fas fa-info text-[10px]"></i></div>
+                <i className="fas fa-clipboard-check text-2xl"></i>
+              </div>
+              <div>
+                <h4 className="text-base font-extrabold text-slate-800 mb-1">
+                   {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
+                     ? 'Your proposal has been approved!' 
+                     : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
+                     ? 'Proposal submitted successfully' 
+                     : 'Ready to submit your proposal?'}
+                </h4>
+                <p className="text-[13px] text-slate-500 font-medium">
+                   {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
+                     ? 'Please proceed to the official title registration to complete the process.' 
+                     : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
+                     ? 'Your adviser has been notified and is currently reviewing your concept paper.' 
+                     : 'Ensure your concept paper is fully uploaded before submitting.'}
+                </p>
+              </div>
+            </div>
             
-            {/* Requirements Checklist Card */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-300">
-              <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 p-8 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-6 opacity-10">
-                  <i className="fas fa-list-check text-8xl transform rotate-12 transition-transform duration-700 hover:rotate-0"></i>
+            {activeSubmission.registrationStatus.toLowerCase() === 'approved' ? (
+              <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
+                <div className="w-full sm:w-auto bg-emerald-50 text-emerald-700 text-sm font-extrabold px-6 py-3.5 rounded-xl border-2 border-emerald-200 flex items-center justify-center gap-3 whitespace-nowrap">
+                  <i className="fas fa-circle-check"></i> Title Approved
                 </div>
-                <div className="relative z-10">
-                  <h3 className="text-xl font-extrabold flex items-center gap-3 tracking-tight">
-                    <i className="fas fa-clipboard-check text-indigo-400" aria-hidden="true"></i> Document Requirements
-                  </h3>
-                  <p className="text-sm text-slate-300 mt-3 font-medium leading-relaxed max-w-[250px]">
-                    Ensure your concept paper includes these critical sections before uploading.
-                  </p>
-                </div>
+                <button 
+                  type="button"
+                  onClick={handleCreateSubmission}
+                  className="w-full sm:w-auto bg-white border-2 border-slate-200 hover:border-[#003A8F] hover:text-[#003A8F] text-slate-600 text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                >
+                  <i className="fas fa-plus"></i> Submit Another Title
+                </button>
               </div>
-              <div className="p-8 bg-white flex-1">
-                <ul className="space-y-4">
-                  {[
-                    'Title',
-                    'Background of the study',
-                    'Statement of the problem',
-                    'Objectives of the study',
-                    'Comparison of related studies',
-                    'Proposed solution',
-                    'Process of Addressing the Problems',
-                    'References'
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-4 text-sm font-semibold text-slate-700 group transition-all">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-emerald-200">
-                        <i className="fas fa-check text-[10px]" aria-hidden="true"></i>
-                      </div>
-                      <span className="group-hover:text-slate-900 transition-colors">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className="mt-6 rounded-xl border border-[#F6BE00]/40 bg-[#F6BE00]/10 p-4 flex items-start gap-3 shadow-sm">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F6BE00]/20 text-[#D97706]">
-                    <i className="fas fa-triangle-exclamation text-xs" aria-hidden="true"></i>
-                  </div>
-                  <p className="text-xs font-bold text-slate-800 leading-relaxed">
-                    Your uploaded file must follow the required concept paper format. Missing sections may delay the adviser review.
-                  </p>
-                </div>
+            ) : activeSubmission.registrationStatus.toLowerCase() !== 'draft' ? (
+              <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
+                <button 
+                  disabled
+                  className="w-full sm:w-auto bg-slate-100 text-slate-400 text-sm font-extrabold px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 whitespace-nowrap cursor-not-allowed"
+                >
+                  Proposal Under Review <i className="fas fa-clock text-xs"></i>
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleCreateSubmission}
+                  className="w-full sm:w-auto bg-white border-2 border-slate-200 hover:border-[#003A8F] hover:text-[#003A8F] text-slate-600 text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                >
+                  <i className="fas fa-plus"></i> Submit Another Title
+                </button>
               </div>
-            </div>
-
-            {/* Submission Info */}
-            <div className="rounded-[1.25rem] border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-5">Submission Details</h3>
-              <div className="space-y-5">
-                <div>
-                  <span className="block text-xs font-semibold text-slate-400 mb-1">Adviser</span>
-                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                    <i className="fas fa-user-tie text-blue-600" aria-hidden="true"></i>
-                    {activeSubmission.adviser}
-                  </div>
-                </div>
-                <div>
-                  <span className="block text-xs font-semibold text-slate-400 mb-1">Group Members</span>
-                  <div className="flex flex-col gap-1.5 mt-2">
-                    {activeSubmission.groupMembers.map((member, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm font-medium text-slate-700 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                         <i className="fas fa-user text-slate-400 text-xs" aria-hidden="true"></i> {member}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <span className="block text-xs font-semibold text-slate-400 mb-1">Latest Action</span>
-                  <div className="mt-1">
-                    <Badge label={latestAction} tone={titleStatusTone} />
-                    {activeSubmission.statusNote && (
-                      <p className="text-sm font-medium text-slate-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50 mt-2 leading-relaxed">
-                        {activeSubmission.statusNote}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            ) : (
+              <form onSubmit={handleSubmitProposal} className="w-full sm:w-auto z-10">
+                 <button 
+                   type="submit"
+                   disabled={!canUpload || isSubmittingTitle || activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim()}
+                   className="w-full sm:w-auto bg-[#003A8F] hover:bg-[#1E40AF] text-white text-sm font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-[#003A8F]/30 transition-transform active:scale-95 flex items-center justify-center gap-3 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   {isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'} <i className="fas fa-paper-plane text-xs"></i>
+                 </button>
+              </form>
+            )}
           </div>
         </div>
 
+        {/* Right Column - Made Sticky for Better UX */}
+        <div className="flex flex-col gap-6 sticky top-8 h-fit animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 ease-out fill-mode-both">
+           
+           {/* Proposal Options Selector */}
+           {submissions.length > 1 && (
+             <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
+               <h3 className="text-[13px] font-extrabold text-slate-800 mb-4 uppercase tracking-wider">Your Proposals</h3>
+               <div className="space-y-2">
+                 {submissions.map((sub) => (
+                   <button 
+                     type="button"
+                     key={sub.id} 
+                     onClick={() => handleSelectSubmission(sub.id)}
+                     className={`w-full text-left p-3 rounded-xl text-sm font-bold border transition-all flex items-center justify-between gap-2 ${
+                       activeSubmissionId === sub.id 
+                       ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' 
+                       : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                     }`}
+                   >
+                     <span className="truncate flex-1">{sub.proposalLabel}</span>
+                     <span className={`text-[9px] px-2 py-0.5 rounded uppercase tracking-widest shrink-0 ${
+                        sub.registrationStatus.toLowerCase() === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                        sub.registrationStatus.toLowerCase() === 'draft' ? 'bg-slate-200 text-slate-600' :
+                        'bg-blue-100 text-blue-700'
+                     }`}>
+                       {sub.registrationStatus}
+                     </span>
+                   </button>
+                 ))}
+               </div>
+             </div>
+           )}
+           
+           {/* Adviser Review Status */}
+           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-2xl -z-10 translate-x-4 -translate-y-4"></div>
+             <h3 className="text-[13px] font-extrabold text-slate-800 mb-6 uppercase tracking-wider">Adviser Review Status</h3>
+             <div className="flex items-center gap-4 mb-6 relative z-10">
+               <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(activeSubmission.adviser)}&background=0D8ABC&color=fff`} alt={activeSubmission.adviser} className="h-12 w-12 rounded-full shadow-sm ring-2 ring-white" />
+               <div className="flex-1 min-w-0">
+                 <p className="text-sm font-extrabold text-slate-800 flex items-center justify-between w-full">
+                    <span className="truncate">{activeSubmission.adviser}</span>
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-widest ${titleStatusTone === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                      {activeSubmission.registrationStatus}
+                    </span>
+                 </p>
+                 <p className="text-[11px] text-slate-400 font-bold mt-1.5 uppercase tracking-wide">Reviewed on {formatDateTimeLabel(activeSubmission.lastReviewedAt)}</p>
+               </div>
+             </div>
+             <div className={`p-4 rounded-xl text-[13px] font-semibold leading-relaxed border ${titleStatusTone === 'success' ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800' : 'bg-blue-50/50 border-blue-100 text-blue-800'}`}>
+               {activeSubmission.statusNote || 'Waiting for adviser review. Comments and remarks will appear here.'}
+             </div>
+           </div>
+           
+           {/* Document Checklist */}
+           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+             <div className="flex justify-between items-center mb-6">
+               <h3 className="text-[13px] font-extrabold text-slate-800 uppercase tracking-wider">Document Checklist</h3>
+               <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center shadow-sm border border-slate-100">
+                  <i className="fas fa-list-check text-slate-400 text-xs"></i>
+               </div>
+             </div>
+             <ul className="space-y-4">
+               {['Title', 'Background of the study', 'Statement of the problem', 'Objectives of the study', 'Significance of the study', 'Scope and limitations', 'Conceptual framework', 'References'].map((item, i) => (
+                 <li key={i} className="flex items-center gap-3 text-xs font-bold text-slate-600">
+                    <div className="h-4 w-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i className="fas fa-check text-[8px]"></i></div>
+                    {item}
+                 </li>
+               ))}
+               <li className="flex items-center justify-between text-xs font-bold text-slate-500 mt-4 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="h-4 w-4 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0"><i className="fas fa-asterisk text-[8px]"></i></div>
+                    Appendices (if applicable)
+                  </div>
+                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-1 rounded-md">Optional</span>
+               </li>
+             </ul>
+           </div>
+           
+           {/* Submission Analytics */}
+           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+             <h3 className="text-[13px] font-extrabold text-slate-800 mb-5 uppercase tracking-wider">Submission Analytics</h3>
+             <div className="grid grid-cols-4 gap-2">
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-file-lines text-xs"></i></div>
+                 <span className="text-sm font-extrabold text-slate-800">{submissions.filter(s => !['draft', 'pending', 'awaiting title'].includes(s.registrationStatus?.toLowerCase())).length}</span>
+                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Submits</span>
+               </div>
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-rose-100 text-rose-500 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-clock text-xs"></i></div>
+                 <span className="text-sm font-extrabold text-slate-800">—</span>
+                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Avg. Days</span>
+               </div>
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-amber-100 text-amber-500 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-shield-halved text-xs"></i></div>
+                 <span className="text-sm font-extrabold text-slate-800">—</span>
+                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Approval</span>
+               </div>
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-chart-pie text-xs"></i></div>
+                 <span className="text-sm font-extrabold text-slate-800">{Math.round((currentStepIndex / 5) * 100)}%</span>
+                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Complete</span>
+               </div>
+             </div>
+           </div>
+           
+           {/* Recent Activity */}
+           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+             <h3 className="text-[13px] font-extrabold text-slate-800 mb-6 uppercase tracking-wider">Recent Activity</h3>
+             <div className="relative border-l-2 border-slate-100 ml-2 space-y-6">
+               {activeSubmission.revisionHistory.slice(0, 4).map((hist, i) => (
+                 <div key={i} className="relative pl-5">
+                   <div className={`absolute -left-[9px] top-0.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm ${hist.status.toLowerCase().includes('approved') ? 'bg-emerald-500' : hist.status.toLowerCase().includes('submitted') ? 'bg-blue-500' : 'bg-slate-300'}`}></div>
+                   <p className="text-xs font-bold text-slate-700 leading-snug">{hist.note}</p>
+                   <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-wide">{hist.dateLabel}</p>
+                 </div>
+               ))}
+               {activeSubmission.revisionHistory.length === 0 && (
+                 <div className="pl-5 text-xs font-medium text-slate-400">No recent activity on this proposal.</div>
+               )}
+             </div>
+           </div>
+
+        </div>
       </div>
     </div>
   );

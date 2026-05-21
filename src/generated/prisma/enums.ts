@@ -83,6 +83,30 @@ export const MilestoneStatus = {
 export type MilestoneStatus = (typeof MilestoneStatus)[keyof typeof MilestoneStatus]
 
 
+export const MilestoneCheckpointStatus = {
+  LOCKED: 'LOCKED',
+  PENDING: 'PENDING',
+  SUBMITTED: 'SUBMITTED',
+  IN_REVIEW: 'IN_REVIEW',
+  NEEDS_REVISION: 'NEEDS_REVISION',
+  APPROVED: 'APPROVED',
+  COMPLETED: 'COMPLETED'
+} as const
+
+export type MilestoneCheckpointStatus = (typeof MilestoneCheckpointStatus)[keyof typeof MilestoneCheckpointStatus]
+
+
+export const MilestoneCheckpointReviewStatus = {
+  NOT_REQUIRED: 'NOT_REQUIRED',
+  PENDING: 'PENDING',
+  IN_REVIEW: 'IN_REVIEW',
+  APPROVED: 'APPROVED',
+  NEEDS_REVISION: 'NEEDS_REVISION'
+} as const
+
+export type MilestoneCheckpointReviewStatus = (typeof MilestoneCheckpointReviewStatus)[keyof typeof MilestoneCheckpointReviewStatus]
+
+
 export const SubmissionStatus = {
   SUBMITTED: 'SUBMITTED',
   UNDER_REVIEW: 'UNDER_REVIEW',

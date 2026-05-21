@@ -68,12 +68,12 @@ function SectionFrame({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[1.5rem] border border-slate-200/70 bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-slate-200/70 px-5 py-4 sm:px-6">
+    <section className="adviser-premium-section rounded-[1.5rem] border border-slate-200/70 bg-white shadow-sm">
+      <div className="adviser-premium-section-head flex flex-col gap-3 border-b border-slate-200/70 px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             {eyebrow ? (
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[rgba(0,58,143,0.68)]">
+              <span className="adviser-section-eyebrow text-[11px] font-extrabold uppercase tracking-[0.18em] text-[rgba(0,58,143,0.68)]">
                 {eyebrow}
               </span>
             ) : null}
@@ -178,13 +178,13 @@ export function DashboardHeader({
 
 export function SummaryCard({ icon, label, value, helperText, trendLabel, tone = 'primary' }: DashboardMetric) {
   return (
-    <article className="rounded-[1.4rem] border border-slate-200/70 bg-white p-5 shadow-sm">
+    <article className={cx('adviser-kpi-card group rounded-[1.4rem] border border-slate-200/70 bg-white p-5 shadow-sm', `adviser-kpi-card-${tone}`)}>
       <div className="flex items-start justify-between gap-3">
-        <span className={cx('inline-flex h-11 w-11 items-center justify-center rounded-2xl text-base', toneIconStyles[tone])}>
+        <span className={cx('adviser-kpi-icon inline-flex h-11 w-11 items-center justify-center rounded-2xl text-base', toneIconStyles[tone])}>
           <i aria-hidden="true" className={`fas ${icon}`} />
         </span>
         {trendLabel ? (
-          <span className={cx('inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold', toneBadgeStyles[tone])}>
+          <span className={cx('adviser-status-chip inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold', toneBadgeStyles[tone])}>
             {trendLabel}
           </span>
         ) : null}
@@ -194,6 +194,13 @@ export function SummaryCard({ icon, label, value, helperText, trendLabel, tone =
         <span className="block text-sm font-medium text-[var(--text-light)]">{label}</span>
         <strong className="mt-2 block text-3xl font-bold tracking-[-0.04em] text-[var(--text-dark)]">{value}</strong>
         <p className="mt-2 text-sm text-[var(--text-light)]">{helperText}</p>
+      </div>
+      <div className="adviser-kpi-sparkline" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
       </div>
     </article>
   );
@@ -221,18 +228,18 @@ export function LiveSupervisionUpdates({
       }
     >
       {loading ? (
-        <div className="flex min-h-[220px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
-          Loading supervision feed...
+        <div className="adviser-skeleton-stack flex min-h-[220px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
+          <span>Loading supervision feed...</span>
         </div>
       ) : items.length ? (
-        <div aria-live="polite" className="max-h-[30rem] space-y-3 overflow-y-auto pr-1">
+        <div aria-live="polite" className="adviser-live-timeline max-h-[30rem] space-y-3 overflow-y-auto pr-1">
           {items.map((item) => (
             <article
               key={item.id}
-              className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 transition hover:bg-white hover:shadow-sm"
+              className="adviser-timeline-item rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 transition hover:bg-white hover:shadow-sm"
             >
               <div className="flex items-start gap-4">
-                <span className={cx('mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm', toneIconStyles[item.tone])}>
+                <span className={cx('adviser-timeline-icon mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm', toneIconStyles[item.tone])}>
                   <i aria-hidden="true" className={`fas ${item.icon}`} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -249,9 +256,13 @@ export function LiveSupervisionUpdates({
                     <span className="font-semibold text-[var(--text-dark)]">{item.groupName}</span>
                     <span>•</span>
                     <span>{item.timestamp}</span>
-                    <span className={cx('inline-flex items-center rounded-full px-2.5 py-1 font-semibold', toneBadgeStyles[item.tone])}>
+                    <span className={cx('adviser-status-chip inline-flex items-center rounded-full px-2.5 py-1 font-semibold', toneBadgeStyles[item.tone])}>
                       {item.statusLabel}
                     </span>
+                  </div>
+                  <div className="adviser-inline-actions" aria-label="Quick supervision actions">
+                    <button type="button">Open</button>
+                    <button type="button">Follow up</button>
                   </div>
                 </div>
               </div>
@@ -298,85 +309,60 @@ export function RecentSubmissions({
       }
     >
       {items.length ? (
-        <>
-          <div className="hidden overflow-hidden rounded-2xl border border-slate-200/70 md:block">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200 text-left">
-                <thead className="bg-slate-50/90 text-xs uppercase tracking-[0.12em] text-[var(--text-light)]">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold">Group</th>
-                    <th className="px-4 py-3 font-semibold">File Title</th>
-                    <th className="px-4 py-3 font-semibold">Type</th>
-                    <th className="px-4 py-3 font-semibold">Submitted</th>
-                    <th className="px-4 py-3 font-semibold">Status</th>
-                    <th className="px-4 py-3 font-semibold text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200/80 bg-white">
-                  {items.map((item) => (
-                    <tr key={item.id} className="transition hover:bg-slate-50/80">
-                      <td className="px-4 py-4 align-top">
-                        <strong className="block text-sm font-semibold text-[var(--text-dark)]">{item.groupCode}</strong>
-                        <span className="mt-1 block text-sm text-[var(--text-light)]">{item.groupName}</span>
-                      </td>
-                      <td className="px-4 py-4 align-top">
-                        <strong className="block text-sm font-medium text-[var(--text-dark)]">{item.fileTitle}</strong>
-                        {item.meta ? <span className="mt-1 block text-xs text-[var(--text-light)]">{item.meta}</span> : null}
-                      </td>
-                      <td className="px-4 py-4 align-top text-sm text-[var(--text-dark)]">{item.submissionType}</td>
-                      <td className="px-4 py-4 align-top text-sm text-[var(--text-light)]">{item.submittedDate}</td>
-                      <td className="px-4 py-4 align-top">
-                        <span className={cx('inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold', toneBadgeStyles[item.tone])}>
-                          {item.statusLabel}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 align-top text-right">
-                        <button
-                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3.5 text-sm font-semibold text-[var(--primary)] transition hover:border-[rgba(0,58,143,0.18)] hover:bg-[rgba(0,58,143,0.04)]"
-                          type="button"
-                          onClick={() => onAction(item)}
-                        >
-                          <i aria-hidden="true" className="fas fa-arrow-up-right-from-square text-xs" />
-                          {actionLabel}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div className="adviser-review-card-grid">
+          {items.map((item, index) => (
+            <article key={item.id} className={cx('adviser-review-card', `adviser-review-card-${item.tone}`)}>
+              <div className="adviser-review-card-top">
+                <span className="adviser-file-icon">
+                  <i aria-hidden="true" className={item.submissionType.toLowerCase().includes('proposal') ? 'fas fa-file-signature' : 'fas fa-file-lines'} />
+                </span>
+                <div className="min-w-0">
+                  <span className="adviser-review-kicker">{item.groupCode}</span>
+                  <h3>{item.fileTitle}</h3>
+                  <p>{item.groupName}</p>
+                </div>
+                <span className={cx('adviser-status-chip inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold', toneBadgeStyles[item.tone])}>
+                  {item.statusLabel}
+                </span>
+              </div>
 
-          <div className="space-y-3 md:hidden">
-            {items.map((item) => (
-              <article key={item.id} className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <strong className="block text-sm font-semibold text-[var(--text-dark)]">{item.groupCode}</strong>
-                    <span className="block text-sm text-[var(--text-light)]">{item.groupName}</span>
-                  </div>
-                  <span className={cx('inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold', toneBadgeStyles[item.tone])}>
-                    {item.statusLabel}
-                  </span>
-                </div>
-                <div className="mt-3 space-y-1.5 text-sm text-[var(--text-light)]">
-                  <p className="font-medium text-[var(--text-dark)]">{item.fileTitle}</p>
-                  <p>{item.submissionType}</p>
-                  <p>{item.submittedDate}</p>
-                  {item.meta ? <p>{item.meta}</p> : null}
-                </div>
-                <button
-                  className="mt-4 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-[var(--primary)] transition hover:border-[rgba(0,58,143,0.18)] hover:bg-[rgba(0,58,143,0.04)]"
-                  type="button"
-                  onClick={() => onAction(item)}
-                >
-                  <i aria-hidden="true" className="fas fa-arrow-up-right-from-square text-xs" />
-                  {actionLabel}
+              <div className="adviser-review-meta-grid">
+                <span>
+                  <small>Type</small>
+                  <strong>{item.submissionType}</strong>
+                </span>
+                <span>
+                  <small>Submitted</small>
+                  <strong>{item.submittedDate}</strong>
+                </span>
+                <span>
+                  <small>Revisions</small>
+                  <strong>{index + 1}</strong>
+                </span>
+              </div>
+
+              <div className="adviser-feedback-preview">
+                <i aria-hidden="true" className="fas fa-comment-dots" />
+                <span>{item.meta ?? 'Waiting for adviser feedback preview'}</span>
+              </div>
+
+              <div className="adviser-review-actions">
+                <button type="button" onClick={() => onAction(item)}>
+                  <i aria-hidden="true" className="fas fa-eye" />
+                  Preview
                 </button>
-              </article>
-            ))}
-          </div>
-        </>
+                <button type="button" onClick={() => onAction(item)}>
+                  <i aria-hidden="true" className="fas fa-comment-medical" />
+                  Comment
+                </button>
+                <button className="is-primary" type="button" onClick={() => onAction(item)}>
+                  <i aria-hidden="true" className="fas fa-check-double" />
+                  {actionLabel === 'Review' ? 'Approve' : actionLabel}
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
       ) : (
         <div className="flex min-h-[180px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
           {emptyMessage}
@@ -400,19 +386,23 @@ export function AttentionAlerts({
       description="Overdue groups, pending approvals, and unresolved revisions surfaced by priority."
     >
       {items.length ? (
-        <div className="space-y-3">
+        <div className="adviser-alert-stack space-y-3">
           {items.map((item) => (
-            <article key={item.id} className={cx('rounded-2xl px-4 py-4', alertStyles[item.priority])}>
+            <article key={item.id} className={cx('adviser-alert-card rounded-2xl px-4 py-4', `adviser-alert-${item.priority}`, alertStyles[item.priority])}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <strong className="block text-sm font-semibold text-[var(--text-dark)]">{item.title}</strong>
                   <p className="mt-1 text-sm leading-6 text-[var(--text-light)]">{item.description}</p>
                 </div>
-                <span className={cx('inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em]', alertBadgeStyles[item.priority])}>
+                <span className={cx('adviser-status-chip inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em]', alertBadgeStyles[item.priority])}>
                   {item.priority}
                 </span>
               </div>
               <div className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-light)]">{item.meta}</div>
+              <div className="adviser-intervention-hint">
+                <i aria-hidden="true" className="fas fa-wand-magic-sparkles" />
+                <span>{item.priority === 'urgent' ? 'Schedule an intervention check-in today.' : item.priority === 'warning' ? 'Send a milestone reminder before the next consultation.' : 'Keep this item on the next review pass.'}</span>
+              </div>
             </article>
           ))}
         </div>
@@ -428,12 +418,12 @@ export function AttentionAlerts({
 export function QuickActions({ actions }: { actions: DashboardAction[] }) {
   return (
     <SectionFrame eyebrow="Quick Actions" title="Quick Actions" description="Go straight to the most common supervision tasks.">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+      <div className="adviser-quick-action-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
         {actions.map((action) =>
           action.href ? (
             <Link
               key={action.id}
-              className="group flex min-h-[84px] items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-4 transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
+              className="adviser-quick-action group flex min-h-[84px] items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-4 transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
               href={action.href}
             >
               <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
@@ -447,7 +437,7 @@ export function QuickActions({ actions }: { actions: DashboardAction[] }) {
           ) : (
             <button
               key={action.id}
-              className="group flex min-h-[84px] items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-4 text-left transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
+              className="adviser-quick-action group flex min-h-[84px] items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-4 text-left transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
               type="button"
               onClick={action.onClick}
             >
@@ -470,14 +460,14 @@ export function WeeklySchedule({ items }: { items: WeeklyScheduleItem[] }) {
   return (
     <SectionFrame eyebrow="This Week" title="This Week’s Schedule" description="Consultations and defenses arranged in a compact adviser timeline.">
       {items.length ? (
-        <div className="space-y-4">
+        <div className="adviser-schedule-timeline space-y-4">
           {items.map((item, index) => (
             <div key={item.id} className="flex gap-4">
               <div className="flex w-20 shrink-0 flex-col">
                 <span className="text-sm font-semibold text-[var(--text-dark)]">{item.dateLabel}</span>
                 <span className="text-xs text-[var(--text-light)]">{item.timeLabel}</span>
               </div>
-              <div className="relative flex-1 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4">
+              <div className="adviser-schedule-card relative flex-1 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4">
                 {index !== items.length - 1 ? <span className="absolute -bottom-4 left-[1.15rem] top-full w-px bg-slate-200" /> : null}
                 <span className={cx('absolute left-4 top-4 h-2.5 w-2.5 rounded-full', timelineDotStyles[item.tone ?? 'primary'])} />
                 <div className="pl-5">
@@ -506,9 +496,9 @@ export function GroupProgressSnapshot({ items, emptyMessage = 'No group progress
       description="Compact view of milestone status for the groups you need to watch most closely."
     >
       {items.length ? (
-        <div className="space-y-4">
+        <div className="adviser-progress-stack space-y-4">
           {items.map((item) => (
-            <article key={item.id} className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4">
+            <article key={item.id} className="adviser-progress-card rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <strong className="block text-sm font-semibold text-[var(--text-dark)]">{item.groupName}</strong>
@@ -523,9 +513,9 @@ export function GroupProgressSnapshot({ items, emptyMessage = 'No group progress
                   <span>Progress</span>
                   <span>{item.progress}%</span>
                 </div>
-                <div className="mt-2 h-2 rounded-full bg-slate-200">
+                <div className="adviser-progress-track mt-2 h-2 rounded-full bg-slate-200">
                   <div
-                    className="h-2 rounded-full bg-[linear-gradient(90deg,var(--primary),var(--secondary))]"
+                    className="adviser-progress-fill h-2 rounded-full bg-[linear-gradient(90deg,var(--primary),var(--secondary))]"
                     style={{ width: `${Math.min(100, Math.max(0, item.progress))}%` }}
                   />
                 </div>

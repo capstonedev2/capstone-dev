@@ -1,4 +1,4 @@
-import { ProjectStatus, SubmissionStatus, UserRole } from '@/generated/prisma/client';
+import { MilestoneStatus, ProjectStatus, SubmissionStatus, UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import {
@@ -25,6 +25,10 @@ import {
   uploadFile
 } from '@/lib/storage/supabase-storage';
 import { toDocumentFilePayload } from '@/lib/storage/document-file-api';
+import {
+  recordCheckpointSubmission,
+  resolveMilestoneCheckpointForSubmission
+} from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -48,6 +52,36 @@ function getBucketForCategory(value: string): DocumentStorageBucket {
   }
 
   return DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS;
+}
+
+async function assertConceptApprovedForUpload(projectId: string, hasProjectApproval: boolean) {
+  const milestones = await prisma.milestone.findMany({
+    where: { projectId },
+    orderBy: { sequence: 'asc' },
+    select: {
+      title: true,
+      status: true,
+      completedAt: true
+    },
+    take: 20
+  });
+  const conceptMilestone = milestones.find((milestone) => milestone.title.toLowerCase().includes('concept'))
+    || milestones[0]
+    || null;
+
+  if (!conceptMilestone && hasProjectApproval) {
+    return;
+  }
+
+  const completedStatuses: MilestoneStatus[] = [MilestoneStatus.APPROVED, MilestoneStatus.COMPLETED];
+
+  if (conceptMilestone && (completedStatuses.includes(conceptMilestone.status) || conceptMilestone.completedAt)) {
+    return;
+  }
+
+  throw new HttpError(`${conceptMilestone?.title || 'Concept'} must be completed and approved by the panels before project file uploads are available.`, 400, {
+    milestone: 'Complete concept approval before uploading project files.'
+  });
 }
 
 async function createUploadNotifications({
@@ -256,6 +290,7 @@ export async function POST(request: Request) {
 
     const projectId = normalizeText(formData.get('projectId'));
     const documentCategory = normalizeText(formData.get('documentCategory')) || 'Uncategorized';
+    const checkpointKey = normalizeText(formData.get('checkpointKey'));
     const project = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && user.role === UserRole.STUDENT
       ? await getStudentUploadProjectAccessRecord(user, projectId)
       : await getBestProjectAccessRecord(user, projectId);
@@ -274,11 +309,7 @@ export async function POST(request: Request) {
       }
 
       const approvedStatuses: ProjectStatus[] = [ProjectStatus.APPROVED, ProjectStatus.DEFENSE_SCHEDULED, ProjectStatus.COMPLETED];
-      if (!approvedStatuses.includes(project.status)) {
-        throw new HttpError('Your project title must be officially approved before you can upload documents.', 400, {
-          status: 'Get your title approved by your adviser first.'
-        });
-      }
+      await assertConceptApprovedForUpload(project.id, approvedStatuses.includes(project.status));
     }
 
     await assertCanUploadDocument({
@@ -301,10 +332,20 @@ export async function POST(request: Request) {
     });
 
     const uploadedFile = await prisma.$transaction(async (tx) => {
+      const checkpoint = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project?.id
+        ? await resolveMilestoneCheckpointForSubmission(tx, {
+            projectId: project.id,
+            checkpointKey,
+            documentCategory,
+            fileName: file.name
+          })
+        : null;
       const submission = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project?.id
         ? await tx.submission.create({
             data: {
               projectId: project.id,
+              milestoneId: checkpoint?.milestoneId,
+              checkpointId: checkpoint?.id,
               submittedById: user.id,
               title: file.name,
               description: `${documentCategory} document submitted for adviser review.`,
@@ -314,7 +355,7 @@ export async function POST(request: Request) {
           })
         : null;
 
-      return tx.uploadedFile.create({
+      const savedFile = await tx.uploadedFile.create({
         data: {
           fileName: file.name,
           filePath,
@@ -326,7 +367,8 @@ export async function POST(request: Request) {
           size: file.size,
           userId: user.id,
           projectId: project?.id ?? null,
-          submissionId: submission?.id ?? null
+          submissionId: submission?.id ?? null,
+          checkpointId: checkpoint?.id ?? null
         },
         include: {
           submission: {
@@ -360,6 +402,19 @@ export async function POST(request: Request) {
           }
         }
       });
+
+      if (bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project?.id && submission) {
+        await recordCheckpointSubmission(tx, {
+          projectId: project.id,
+          checkpointKey: checkpoint?.key ?? checkpointKey,
+          documentCategory,
+          fileName: file.name,
+          submissionId: submission.id,
+          fileId: savedFile.id
+        });
+      }
+
+      return savedFile;
     });
 
     await createUploadNotifications({

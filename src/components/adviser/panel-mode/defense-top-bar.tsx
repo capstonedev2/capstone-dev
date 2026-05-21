@@ -14,9 +14,9 @@ type Props = {
   totalGroups: number;
   room: string;
   time: string;
-  presentCount: number;
   totalMembers: number;
   sessionStarted: boolean;
+  adviser?: string;
 };
 
 export function DefenseTopBar({
@@ -32,7 +32,8 @@ export function DefenseTopBar({
   time,
   presentCount,
   totalMembers,
-  sessionStarted
+  sessionStarted,
+  adviser
 }: Props) {
   const pct = Math.min(100, Math.max(0, ((totalTime - timer) / totalTime) * 100));
   const statusLabel = timer === 0 ? 'Ended' : timerActive ? 'Live' : sessionStarted ? 'Paused' : 'Ready';
@@ -78,6 +79,12 @@ export function DefenseTopBar({
               <span className="inline-flex items-center gap-1.5"><i className="fas fa-clock text-[#003a8f]/60" /> {time}</span>
               <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-block" />
               <span className="inline-flex items-center gap-1.5"><i className="fas fa-location-dot text-[#003a8f]/60" /> {room}</span>
+              {adviser && (
+                <>
+                  <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-block" />
+                  <span className="inline-flex items-center gap-1.5"><i className="fas fa-user-tie text-[#003a8f]/60" /> {adviser}</span>
+                </>
+              )}
             </div>
           </div>
         </div>

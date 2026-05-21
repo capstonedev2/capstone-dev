@@ -159,10 +159,6 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
   const toggleLabel = isMobile
     ? sidebarOpen ? 'Close sidebar' : 'Open sidebar'
     : sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
-  const activeNavItem = ADVISER_NAV_ITEMS[workspaceMode].find((item) => isNavItemActive(pathname, item.href));
-  const navbarTitle = activeNavItem?.key === 'dashboard'
-    ? workspaceMode === 'adviser' ? 'Adviser Dashboard' : 'Panel Dashboard'
-    : activeNavItem?.label ?? meta.navLabel;
 
   return (
     <div
@@ -185,10 +181,6 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
             />
           </button>
 
-          <div className="adviser-navbar-title" aria-label="Current page">
-            <span className="adviser-navbar-title-kicker">ThesisTrack</span>
-            <strong>{navbarTitle}</strong>
-          </div>
         </div>
 
         <div className="adviser-global-navbar-actions">
@@ -256,6 +248,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
             </div>
           ))}
         </nav>
+
       </aside>
 
       {/* ─── Mobile backdrop ─── */}

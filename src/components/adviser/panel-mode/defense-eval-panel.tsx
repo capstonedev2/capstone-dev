@@ -65,7 +65,7 @@ export function DefenseEvalPanel({
       ? (presentMembers.reduce((sum, member) => sum + (individualScores[member] || 0), 0) / individualScored).toFixed(1)
       : '-';
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const panelWidth = focusMode ? 'w-full xl:w-[420px]' : 'w-full xl:w-[408px]';
+  const panelWidth = 'w-full flex-1';
 
   const handleScore = (id: string, val: number) => {
     if (submitted) return;
@@ -81,7 +81,7 @@ export function DefenseEvalPanel({
 
   if (isMyAdvisee) {
     return (
-      <aside className={`${panelWidth} flex min-h-0 shrink-0 flex-col border-l border-slate-200 bg-white xl:h-auto`}>
+      <aside className={`${panelWidth} flex min-h-0 shrink-0 flex-col bg-white xl:h-auto`}>
         <div className="border-b border-slate-100 p-4">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Evaluation</p>
           <h3 className="mt-1 flex items-center gap-2 text-base font-black text-slate-950">
@@ -114,7 +114,7 @@ export function DefenseEvalPanel({
   }
 
   return (
-    <aside className={`${panelWidth} flex min-h-0 shrink-0 flex-col border-l border-white/60 bg-white/80 backdrop-blur-2xl shadow-[-10px_0_30px_rgba(0,58,143,0.05)] xl:h-auto`}>
+    <aside className={`${panelWidth} flex min-h-0 shrink-0 flex-col bg-white/80 backdrop-blur-2xl shadow-[-10px_0_30px_rgba(0,58,143,0.05)] xl:h-auto`}>
       <div className="shrink-0 border-b border-slate-200/50 p-6 bg-gradient-to-b from-white/90 to-transparent">
         <div className="flex items-start justify-between gap-3">
           <div>

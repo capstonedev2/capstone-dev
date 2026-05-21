@@ -338,6 +338,40 @@ export type EnumMilestoneStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumMilestoneStatusFilter<$PrismaModel>
 }
 
+export type EnumMilestoneCheckpointStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointStatus | Prisma.EnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointStatusFilter<$PrismaModel> | $Enums.MilestoneCheckpointStatus
+}
+
+export type EnumMilestoneCheckpointReviewStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointReviewStatus | Prisma.EnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointReviewStatusFilter<$PrismaModel> | $Enums.MilestoneCheckpointReviewStatus
+}
+
+export type EnumMilestoneCheckpointStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointStatus | Prisma.EnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointStatusWithAggregatesFilter<$PrismaModel> | $Enums.MilestoneCheckpointStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMilestoneCheckpointStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMilestoneCheckpointStatusFilter<$PrismaModel>
+}
+
+export type EnumMilestoneCheckpointReviewStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointReviewStatus | Prisma.EnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointReviewStatusWithAggregatesFilter<$PrismaModel> | $Enums.MilestoneCheckpointReviewStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMilestoneCheckpointReviewStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMilestoneCheckpointReviewStatusFilter<$PrismaModel>
+}
+
 export type EnumSubmissionStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.SubmissionStatus | Prisma.EnumSubmissionStatusFieldRefInput<$PrismaModel>
   in?: $Enums.SubmissionStatus[] | Prisma.ListEnumSubmissionStatusFieldRefInput<$PrismaModel>
@@ -850,6 +884,40 @@ export type NestedEnumMilestoneStatusWithAggregatesFilter<$PrismaModel = never> 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumMilestoneStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumMilestoneStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumMilestoneCheckpointStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointStatus | Prisma.EnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointStatusFilter<$PrismaModel> | $Enums.MilestoneCheckpointStatus
+}
+
+export type NestedEnumMilestoneCheckpointReviewStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointReviewStatus | Prisma.EnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointReviewStatusFilter<$PrismaModel> | $Enums.MilestoneCheckpointReviewStatus
+}
+
+export type NestedEnumMilestoneCheckpointStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointStatus | Prisma.EnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointStatus[] | Prisma.ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointStatusWithAggregatesFilter<$PrismaModel> | $Enums.MilestoneCheckpointStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMilestoneCheckpointStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMilestoneCheckpointStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumMilestoneCheckpointReviewStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MilestoneCheckpointReviewStatus | Prisma.EnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MilestoneCheckpointReviewStatus[] | Prisma.ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMilestoneCheckpointReviewStatusWithAggregatesFilter<$PrismaModel> | $Enums.MilestoneCheckpointReviewStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMilestoneCheckpointReviewStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMilestoneCheckpointReviewStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumSubmissionStatusFilter<$PrismaModel = never> = {

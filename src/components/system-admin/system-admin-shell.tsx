@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
-import { PortalShellBrand } from '@/components/shared/portal-shell-brand';
 import { useBranding } from '@/components/branding/branding-provider';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 

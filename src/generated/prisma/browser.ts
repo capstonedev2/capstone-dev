@@ -73,6 +73,11 @@ export type Project = Prisma.ProjectModel
  */
 export type Milestone = Prisma.MilestoneModel
 /**
+ * Model MilestoneCheckpoint
+ * 
+ */
+export type MilestoneCheckpoint = Prisma.MilestoneCheckpointModel
+/**
  * Model Submission
  * 
  */

@@ -7,6 +7,8 @@ type SubmissionStatus = 'Pending' | 'Under Review' | 'Approved to Repository' | 
 
 type RepositorySubmission = {
   id: string;
+  mainProjectId?: string;
+  repositoryRecordId?: string;
   projectTitle: string;
   department: string;
   submittedBy: string;
@@ -166,11 +168,21 @@ export function AdminFinalRepositoryApproval() {
   const [departmentFilter, setDepartmentFilter] = useState('All Departments');
   const [query, setQuery] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState<RepositorySubmission | null>(null);
+  const [publishingId, setPublishingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'info' | 'warning' = 'info') => {
     setToast({ message, type });
     window.setTimeout(() => setToast(null), 4000);
+  };
+
+  const getApiErrorMessage = async (response: Response) => {
+    try {
+      const payload = await response.json();
+      return payload?.message || 'Repository publication failed.';
+    } catch {
+      return 'Repository publication failed.';
+    }
   };
 
   const filteredSubmissions = useMemo(
@@ -210,17 +222,48 @@ export function AdminFinalRepositoryApproval() {
   const approvedCount = tabCounts['Approved to Repository'];
   const archivedCount = tabCounts['Archived'];
 
-  const handleApprove = (submission: RepositorySubmission) => {
-    setSubmissions((current) =>
-      current.map((item) =>
-        item.id === submission.id ? { ...item, status: 'Approved to Repository' as SubmissionStatus } : item
-      )
-    );
-    setSelectedSubmission(null);
-    showToast(
-      `"${submission.projectTitle}" approved and moved to Official Institutional Repository.`,
-      'success'
-    );
+  const handleApprove = async (submission: RepositorySubmission) => {
+    setPublishingId(submission.id);
+
+    try {
+      let repositoryRecordId = submission.repositoryRecordId;
+
+      if (submission.mainProjectId) {
+        const response = await fetch('/api/repository/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId: submission.mainProjectId })
+        });
+
+        if (!response.ok && response.status !== 409) {
+          throw new Error(await getApiErrorMessage(response));
+        }
+
+        if (response.ok) {
+          const payload = await response.json();
+          repositoryRecordId = payload.repositoryRecord?.id || repositoryRecordId;
+        } else {
+          showToast(await getApiErrorMessage(response), 'warning');
+        }
+      }
+
+      setSubmissions((current) =>
+        current.map((item) =>
+          item.id === submission.id
+            ? { ...item, repositoryRecordId, status: 'Approved to Repository' as SubmissionStatus }
+            : item
+        )
+      );
+      setSelectedSubmission(null);
+      showToast(
+        `"${submission.projectTitle}" approved and moved to Official Institutional Repository.`,
+        'success'
+      );
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Repository publication failed.', 'warning');
+    } finally {
+      setPublishingId(null);
+    }
   };
 
   const handleReturn = (submission: RepositorySubmission) => {
@@ -447,10 +490,11 @@ export function AdminFinalRepositoryApproval() {
                               <button
                                 className="btn btn-primary small"
                                 type="button"
+                                disabled={publishingId === submission.id}
                                 onClick={() => handleApprove(submission)}
                               >
                                 <i className="fas fa-circle-check"></i>
-                                Approve
+                                {publishingId === submission.id ? 'Publishing...' : 'Approve'}
                               </button>
                             )}
                             {submission.status === 'Pending' && (
@@ -625,10 +669,11 @@ export function AdminFinalRepositoryApproval() {
                 <button
                   className="btn btn-primary"
                   type="button"
+                  disabled={publishingId === selectedSubmission.id}
                   onClick={() => handleApprove(selectedSubmission)}
                 >
                   <i className="fas fa-circle-check"></i>
-                  Approve to Repository
+                  {publishingId === selectedSubmission.id ? 'Publishing...' : 'Approve to Repository'}
                 </button>
               )}
             </div>

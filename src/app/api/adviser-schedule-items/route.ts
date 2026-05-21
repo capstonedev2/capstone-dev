@@ -12,6 +12,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -376,6 +377,12 @@ export async function POST(request: Request) {
           }
         }
       }
+    });
+
+    await recordCheckpointSchedule(prisma, {
+      projectId,
+      title,
+      scheduledAt
     });
 
     if (body.notifyStudents !== false) {

@@ -485,6 +485,7 @@ export function ScoreBadge({
   detail?: string;
 }) {
   const recommendationMeta = getRecommendationMeta(recommendation);
+  const badgeClassName = recommendationMeta?.className ?? 'bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-200';
   const circumference = 2 * Math.PI * 16;
   const offset = circumference - (score / 100) * circumference;
   const scoreColor = score >= 90 ? '#059669' : score >= 75 ? '#0369a1' : '#d97706';
@@ -499,7 +500,7 @@ export function ScoreBadge({
         <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-[var(--text-dark)]">{score}%</span>
       </div>
       <div className="flex min-w-0 flex-col gap-1">
-        <span className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${recommendationMeta.className}`}>
+        <span className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${badgeClassName}`}>
           {recommendation}
         </span>
         {detail ? <span className="text-[11px] leading-4 text-[var(--text-light)]">{detail}</span> : null}

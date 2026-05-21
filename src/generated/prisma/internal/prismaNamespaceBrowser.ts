@@ -62,6 +62,7 @@ export const ModelName = {
   GroupMember: 'GroupMember',
   Project: 'Project',
   Milestone: 'Milestone',
+  MilestoneCheckpoint: 'MilestoneCheckpoint',
   Submission: 'Submission',
   ReviewComment: 'ReviewComment',
   DefenseSchedule: 'DefenseSchedule',
@@ -162,6 +163,7 @@ export const UploadedFileScalarFieldEnum = {
   userId: 'userId',
   projectId: 'projectId',
   submissionId: 'submissionId',
+  checkpointId: 'checkpointId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -293,10 +295,36 @@ export const MilestoneScalarFieldEnum = {
 export type MilestoneScalarFieldEnum = (typeof MilestoneScalarFieldEnum)[keyof typeof MilestoneScalarFieldEnum]
 
 
+export const MilestoneCheckpointScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  milestoneId: 'milestoneId',
+  key: 'key',
+  title: 'title',
+  description: 'description',
+  sequence: 'sequence',
+  required: 'required',
+  status: 'status',
+  adviserReviewStatus: 'adviserReviewStatus',
+  panelReviewStatus: 'panelReviewStatus',
+  submittedAt: 'submittedAt',
+  reviewedAt: 'reviewedAt',
+  completedAt: 'completedAt',
+  latestFeedback: 'latestFeedback',
+  latestFeedbackBy: 'latestFeedbackBy',
+  latestFeedbackAt: 'latestFeedbackAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MilestoneCheckpointScalarFieldEnum = (typeof MilestoneCheckpointScalarFieldEnum)[keyof typeof MilestoneCheckpointScalarFieldEnum]
+
+
 export const SubmissionScalarFieldEnum = {
   id: 'id',
   projectId: 'projectId',
   milestoneId: 'milestoneId',
+  checkpointId: 'checkpointId',
   submittedById: 'submittedById',
   title: 'title',
   description: 'description',

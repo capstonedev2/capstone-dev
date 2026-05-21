@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
 import {
@@ -283,6 +283,33 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
           { id: 'panel-report', icon: 'fa-chart-bar', label: 'Generate Report', helperText: 'Export a consolidated review-cycle report', onClick: () => setActiveModal('report') }
         ];
 
+  const watchedGroups = workspaceMode === 'adviser' ? groups : panelProjects;
+  const averageProgress = workspaceMode === 'adviser'
+    ? groups.length
+      ? Math.round(groups.reduce((total, group) => total + group.progress, 0) / groups.length)
+      : 100
+    : panelProjects.length
+      ? Math.round((panelProjects.filter((project) => project.status === 'completed').length / panelProjects.length) * 100)
+      : 100;
+  const unresolvedRevisions = workspaceMode === 'adviser'
+    ? groups.filter((group) => getComputedGroupStatus(group) === 'needs-revision').length
+    : panelProjects.filter((project) => project.status === 'pending').length;
+  const atRiskCount = workspaceMode === 'adviser'
+    ? groups.filter((group) => {
+        const status = getComputedGroupStatus(group);
+        return status === 'at-risk' || status === 'needs-revision' || status === 'pending';
+      }).length
+    : panelProjects.filter((project) => project.status !== 'completed').length;
+  const activeReviewCount = workspaceMode === 'adviser' ? pendingAdviserReviews : pendingPanelReviews;
+  const supervisionHealth = Math.max(
+    12,
+    Math.min(98, averageProgress - atRiskCount * 4 - activeReviewCount * 2 + (attentionAlerts.length ? 0 : 6))
+  );
+  const healthRingStyle = { '--health-value': `${supervisionHealth}%` } as CSSProperties;
+  const healthLabel = supervisionHealth >= 82 ? 'Stable' : supervisionHealth >= 64 ? 'Watchlist' : 'Intervention';
+  const primaryActionHref = workspaceMode === 'adviser' ? meta.primaryActionHref : `${basePath}/evaluation-queue`;
+  const scheduleHref = workspaceMode === 'adviser' ? `${basePath}/schedule` : `${basePath}/defense-schedule`;
+
   return (
     <div className="dashboard-wrapper">
       <aside className="sidebar">
@@ -326,33 +353,61 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
           }
         />
 
-        <div className="mx-auto max-w-[1600px] space-y-6">
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <Link
-              href={meta.primaryActionHref}
-              className="inline-flex min-h-[42px] items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-              style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}
-            >
-              <i aria-hidden="true" className={`fas ${meta.primaryActionIcon} text-xs`} />
-              {meta.primaryActionLabel}
-            </Link>
-            <Link
-              href={workspaceMode === 'adviser' ? `${basePath}/schedule` : `${basePath}/defense-schedule`}
-              className="inline-flex min-h-[42px] items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
-            >
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-calendar' : 'fa-calendar-days'} text-xs`} />
-              {workspaceMode === 'adviser' ? 'Open Schedule' : 'Defense Schedule'}
-            </Link>
-          </div>
+        <div className="adviser-dashboard-workspace mx-auto max-w-[1600px] space-y-6">
+          <section className="adviser-command-center" aria-labelledby="adviser-command-center-title">
+            <div className="adviser-command-copy">
+              <span className="adviser-command-eyebrow">
+                <span className="adviser-live-dot" />
+                Live academic supervision command center
+              </span>
+              <h2 id="adviser-command-center-title">
+                Welcome back, {getShortName(data.profile.fullName)}
+              </h2>
+              <p>
+                Track review pressure, group health, consultations, and defense readiness from one focused adviser workspace.
+              </p>
+              <div className="adviser-command-actions">
+                <Link href={primaryActionHref}>
+                  <i aria-hidden="true" className={`fas ${meta.primaryActionIcon}`} />
+                  {meta.primaryActionLabel}
+                </Link>
+                <Link className="is-secondary" href={scheduleHref}>
+                  <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-calendar' : 'fa-calendar-days'}`} />
+                  {workspaceMode === 'adviser' ? 'Open Schedule' : 'Defense Schedule'}
+                </Link>
+              </div>
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="adviser-health-panel">
+              <div className="adviser-health-ring" style={healthRingStyle} aria-label={`Supervision health ${supervisionHealth}%`}>
+                <span>{supervisionHealth}%</span>
+                <small>{healthLabel}</small>
+              </div>
+              <div className="adviser-health-stats">
+                <span>
+                  <strong>{watchedGroups.length}</strong>
+                  Groups tracked
+                </span>
+                <span>
+                  <strong>{activeReviewCount}</strong>
+                  Pending actions
+                </span>
+                <span>
+                  <strong>{unresolvedRevisions}</strong>
+                  Revisions
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <div className="adviser-command-kpis grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {summaryMetrics.map((metric) => (
               <SummaryCard key={metric.id} {...metric} />
             ))}
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.95fr)]">
-            <div className="space-y-6">
+          <div className="adviser-premium-grid grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.95fr)]">
+            <div className="adviser-primary-stack space-y-6">
               <LiveSupervisionUpdates items={liveUpdates} />
               <RecentSubmissions
                 actionLabel={workspaceMode === 'adviser' ? 'Review' : 'Evaluate'}
@@ -370,7 +425,7 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
               <AttentionAlerts items={attentionAlerts} />
             </div>
 
-            <div className="space-y-6">
+            <div className="adviser-smart-rail space-y-6">
               <QuickActions actions={quickActions} />
               <WeeklySchedule items={weeklySchedule} />
               <GroupProgressSnapshot items={progressItems} />

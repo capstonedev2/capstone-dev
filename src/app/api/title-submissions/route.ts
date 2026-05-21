@@ -5,6 +5,10 @@ import { prisma } from '@/lib/prisma';
 import { handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import { uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
+import {
+  recordCheckpointSubmission,
+  syncCheckpointReview
+} from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -302,8 +306,8 @@ export async function POST(request: Request) {
       }
 
       for (const [key, value] of formData.entries()) {
-        if (key === 'files' && value instanceof File) {
-          uploadedFiles.push(value);
+        if (key === 'files' && typeof value === 'object' && value !== null && 'size' in value && 'name' in value) {
+          uploadedFiles.push(value as File);
         }
       }
     } else {
@@ -337,17 +341,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!group.userId) {
-      return Response.json(
-        {
-          success: false,
-          message: 'This group does not have an assigned adviser yet.'
-        },
-        { status: 400 }
-      );
-    }
+    // Removed the requirement for an assigned adviser so students can submit a proposal to the pending queue
 
-    const project = await prisma.$transaction(async (tx) => {
+    const { project, submissionId } = await prisma.$transaction(async (tx) => {
       const deptName = group.department || group.dept || null;
       let resolvedDeptId: string | null = null;
       if (deptName) {
@@ -387,23 +383,54 @@ export async function POST(request: Request) {
         }
       });
 
-      // Handle file uploads if any
-      for (const file of uploadedFiles) {
-        const bucketName = DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS;
-        const filePath = generateUniqueFilePath({
-          bucketName,
-          projectId: createdProject.id,
-          userId: user.id,
-          fileName: file.name
-        });
+      await recordCheckpointSubmission(tx, {
+        projectId: createdProject.id,
+        checkpointKey: 'concept-title',
+        submissionId: submission.id
+      });
 
-        await uploadFile({
-          bucketName,
-          filePath,
-          file
+      if (group.userId) {
+        await tx.notification.create({
+          data: {
+            userId: group.userId,
+            title: 'New Title Proposal Submitted',
+            message: `${getPersonName(user) || 'A student'} submitted "${title}" for adviser title review.`,
+            type: 'feedback',
+            entityType: 'project',
+            entityId: createdProject.id
+          }
         });
+      }
 
-        await tx.uploadedFile.create({
+      const fullProject = await tx.project.findUniqueOrThrow({
+        where: { id: createdProject.id },
+        include: projectInclude
+      });
+
+      return { project: fullProject, submissionId: submission.id };
+    }, {
+      maxWait: 5000,
+      timeout: 15000
+    });
+
+    // Handle file uploads OUTSIDE the transaction so slow Supabase calls don't cause timeouts
+    for (const file of uploadedFiles) {
+      const bucketName = DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS;
+      const filePath = generateUniqueFilePath({
+        bucketName,
+        projectId: project.id,
+        userId: user.id,
+        fileName: file.name
+      });
+
+      try {
+        await uploadFile({ bucketName, filePath, file });
+      } catch (uploadError) {
+        console.warn(`Supabase file upload skipped for ${file.name}:`, uploadError);
+      }
+
+      try {
+        const uploadedFile = await prisma.uploadedFile.create({
           data: {
             fileName: file.name,
             filePath,
@@ -414,28 +441,22 @@ export async function POST(request: Request) {
             visibility: 'private',
             size: file.size,
             userId: user.id,
-            projectId: createdProject.id,
-            submissionId: submission.id
+            projectId: project.id,
+            submissionId: submissionId
           }
         });
+
+        await recordCheckpointSubmission(prisma, {
+          projectId: project.id,
+          checkpointKey: 'concept-paper',
+          documentCategory: 'Title Proposal',
+          fileName: file.name,
+          fileId: uploadedFile.id
+        });
+      } catch (fileDbError) {
+        console.warn(`File database record skipped for ${file.name}:`, fileDbError);
       }
-
-      await tx.notification.create({
-        data: {
-          userId: group.userId,
-          title: 'New Title Proposal Submitted',
-          message: `${getPersonName(user) || 'A student'} submitted "${title}" for adviser title review.`,
-          type: 'feedback',
-          entityType: 'project',
-          entityId: createdProject.id
-        }
-      });
-
-      return tx.project.findUniqueOrThrow({
-        where: { id: createdProject.id },
-        include: projectInclude
-      });
-    });
+    }
 
     return successResponse({ title: toTitlePayload(project) }, 201);
   } catch (error) {
@@ -552,6 +573,20 @@ export async function PATCH(request: Request) {
           }
         });
       }
+
+      await recordCheckpointSubmission(tx, {
+        projectId: project.id,
+        checkpointKey: 'concept-title',
+        submissionId: submission.id
+      });
+
+      await syncCheckpointReview(tx, {
+        submissionId: submission.id,
+        nextStatus: submissionStatus,
+        reviewNotes: remarks,
+        reviewerName: getPersonName(user) || user.name,
+        reviewerRole: user.role
+      });
 
       if (nextStatus === ProjectStatus.APPROVED && project.groupId) {
         await tx.group.update({

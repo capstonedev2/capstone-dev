@@ -50,6 +50,7 @@ export type UploadedFileMinAggregateOutputType = {
   userId: string | null
   projectId: string | null
   submissionId: string | null
+  checkpointId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +71,7 @@ export type UploadedFileMaxAggregateOutputType = {
   userId: string | null
   projectId: string | null
   submissionId: string | null
+  checkpointId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -90,6 +92,7 @@ export type UploadedFileCountAggregateOutputType = {
   userId: number
   projectId: number
   submissionId: number
+  checkpointId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -120,6 +123,7 @@ export type UploadedFileMinAggregateInputType = {
   userId?: true
   projectId?: true
   submissionId?: true
+  checkpointId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -140,6 +144,7 @@ export type UploadedFileMaxAggregateInputType = {
   userId?: true
   projectId?: true
   submissionId?: true
+  checkpointId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -160,6 +165,7 @@ export type UploadedFileCountAggregateInputType = {
   userId?: true
   projectId?: true
   submissionId?: true
+  checkpointId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -267,6 +273,7 @@ export type UploadedFileGroupByOutputType = {
   userId: string
   projectId: string | null
   submissionId: string | null
+  checkpointId: string | null
   createdAt: Date
   updatedAt: Date
   _count: UploadedFileCountAggregateOutputType | null
@@ -310,11 +317,13 @@ export type UploadedFileWhereInput = {
   userId?: Prisma.StringFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   submissionId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  checkpointId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   project?: Prisma.XOR<Prisma.ProjectNullableScalarRelationFilter, Prisma.ProjectWhereInput> | null
   submission?: Prisma.XOR<Prisma.SubmissionNullableScalarRelationFilter, Prisma.SubmissionWhereInput> | null
+  checkpoint?: Prisma.XOR<Prisma.MilestoneCheckpointNullableScalarRelationFilter, Prisma.MilestoneCheckpointWhereInput> | null
 }
 
 export type UploadedFileOrderByWithRelationInput = {
@@ -333,11 +342,13 @@ export type UploadedFileOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   submissionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  checkpointId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   project?: Prisma.ProjectOrderByWithRelationInput
   submission?: Prisma.SubmissionOrderByWithRelationInput
+  checkpoint?: Prisma.MilestoneCheckpointOrderByWithRelationInput
 }
 
 export type UploadedFileWhereUniqueInput = Prisma.AtLeast<{
@@ -359,11 +370,13 @@ export type UploadedFileWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   submissionId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  checkpointId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   project?: Prisma.XOR<Prisma.ProjectNullableScalarRelationFilter, Prisma.ProjectWhereInput> | null
   submission?: Prisma.XOR<Prisma.SubmissionNullableScalarRelationFilter, Prisma.SubmissionWhereInput> | null
+  checkpoint?: Prisma.XOR<Prisma.MilestoneCheckpointNullableScalarRelationFilter, Prisma.MilestoneCheckpointWhereInput> | null
 }, "id" | "publicId">
 
 export type UploadedFileOrderByWithAggregationInput = {
@@ -382,6 +395,7 @@ export type UploadedFileOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   submissionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  checkpointId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UploadedFileCountOrderByAggregateInput
@@ -410,6 +424,7 @@ export type UploadedFileScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
   submissionId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
+  checkpointId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UploadedFile"> | Date | string
 }
@@ -432,6 +447,7 @@ export type UploadedFileCreateInput = {
   user: Prisma.UserCreateNestedOneWithoutUploadedFilesInput
   project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateInput = {
@@ -450,6 +466,7 @@ export type UploadedFileUncheckedCreateInput = {
   userId: string
   projectId?: string | null
   submissionId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -472,6 +489,7 @@ export type UploadedFileUpdateInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutUploadedFilesNestedInput
   project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateInput = {
@@ -490,6 +508,7 @@ export type UploadedFileUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -510,6 +529,7 @@ export type UploadedFileCreateManyInput = {
   userId: string
   projectId?: string | null
   submissionId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -547,6 +567,7 @@ export type UploadedFileUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -577,6 +598,7 @@ export type UploadedFileCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   submissionId?: Prisma.SortOrder
+  checkpointId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -601,6 +623,7 @@ export type UploadedFileMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   submissionId?: Prisma.SortOrder
+  checkpointId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -621,6 +644,7 @@ export type UploadedFileMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   submissionId?: Prisma.SortOrder
+  checkpointId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -721,6 +745,48 @@ export type UploadedFileUncheckedUpdateManyWithoutProjectNestedInput = {
   deleteMany?: Prisma.UploadedFileScalarWhereInput | Prisma.UploadedFileScalarWhereInput[]
 }
 
+export type UploadedFileCreateNestedManyWithoutCheckpointInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutCheckpointInput, Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput> | Prisma.UploadedFileCreateWithoutCheckpointInput[] | Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput | Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput[]
+  createMany?: Prisma.UploadedFileCreateManyCheckpointInputEnvelope
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+}
+
+export type UploadedFileUncheckedCreateNestedManyWithoutCheckpointInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutCheckpointInput, Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput> | Prisma.UploadedFileCreateWithoutCheckpointInput[] | Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput | Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput[]
+  createMany?: Prisma.UploadedFileCreateManyCheckpointInputEnvelope
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+}
+
+export type UploadedFileUpdateManyWithoutCheckpointNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutCheckpointInput, Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput> | Prisma.UploadedFileCreateWithoutCheckpointInput[] | Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput | Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput[]
+  upsert?: Prisma.UploadedFileUpsertWithWhereUniqueWithoutCheckpointInput | Prisma.UploadedFileUpsertWithWhereUniqueWithoutCheckpointInput[]
+  createMany?: Prisma.UploadedFileCreateManyCheckpointInputEnvelope
+  set?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  disconnect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  delete?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  update?: Prisma.UploadedFileUpdateWithWhereUniqueWithoutCheckpointInput | Prisma.UploadedFileUpdateWithWhereUniqueWithoutCheckpointInput[]
+  updateMany?: Prisma.UploadedFileUpdateManyWithWhereWithoutCheckpointInput | Prisma.UploadedFileUpdateManyWithWhereWithoutCheckpointInput[]
+  deleteMany?: Prisma.UploadedFileScalarWhereInput | Prisma.UploadedFileScalarWhereInput[]
+}
+
+export type UploadedFileUncheckedUpdateManyWithoutCheckpointNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutCheckpointInput, Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput> | Prisma.UploadedFileCreateWithoutCheckpointInput[] | Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput | Prisma.UploadedFileCreateOrConnectWithoutCheckpointInput[]
+  upsert?: Prisma.UploadedFileUpsertWithWhereUniqueWithoutCheckpointInput | Prisma.UploadedFileUpsertWithWhereUniqueWithoutCheckpointInput[]
+  createMany?: Prisma.UploadedFileCreateManyCheckpointInputEnvelope
+  set?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  disconnect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  delete?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  update?: Prisma.UploadedFileUpdateWithWhereUniqueWithoutCheckpointInput | Prisma.UploadedFileUpdateWithWhereUniqueWithoutCheckpointInput[]
+  updateMany?: Prisma.UploadedFileUpdateManyWithWhereWithoutCheckpointInput | Prisma.UploadedFileUpdateManyWithWhereWithoutCheckpointInput[]
+  deleteMany?: Prisma.UploadedFileScalarWhereInput | Prisma.UploadedFileScalarWhereInput[]
+}
+
 export type UploadedFileCreateNestedManyWithoutSubmissionInput = {
   create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutSubmissionInput, Prisma.UploadedFileUncheckedCreateWithoutSubmissionInput> | Prisma.UploadedFileCreateWithoutSubmissionInput[] | Prisma.UploadedFileUncheckedCreateWithoutSubmissionInput[]
   connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutSubmissionInput | Prisma.UploadedFileCreateOrConnectWithoutSubmissionInput[]
@@ -780,6 +846,7 @@ export type UploadedFileCreateWithoutUserInput = {
   updatedAt?: Date | string
   project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutUserInput = {
@@ -797,6 +864,7 @@ export type UploadedFileUncheckedCreateWithoutUserInput = {
   size?: number | null
   projectId?: string | null
   submissionId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -846,6 +914,7 @@ export type UploadedFileScalarWhereInput = {
   userId?: Prisma.StringFilter<"UploadedFile"> | string
   projectId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   submissionId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  checkpointId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
 }
@@ -867,6 +936,7 @@ export type UploadedFileCreateWithoutProjectInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutUploadedFilesInput
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutProjectInput = {
@@ -884,6 +954,7 @@ export type UploadedFileUncheckedCreateWithoutProjectInput = {
   size?: number | null
   userId: string
   submissionId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -914,6 +985,72 @@ export type UploadedFileUpdateManyWithWhereWithoutProjectInput = {
   data: Prisma.XOR<Prisma.UploadedFileUpdateManyMutationInput, Prisma.UploadedFileUncheckedUpdateManyWithoutProjectInput>
 }
 
+export type UploadedFileCreateWithoutCheckpointInput = {
+  id?: string
+  secureUrl?: string | null
+  publicId?: string | null
+  fileName: string
+  filePath?: string | null
+  bucketName?: string | null
+  fileType: string
+  resourceType?: string | null
+  documentCategory?: string
+  category?: string
+  visibility?: string
+  size?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutUploadedFilesInput
+  project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
+  submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
+}
+
+export type UploadedFileUncheckedCreateWithoutCheckpointInput = {
+  id?: string
+  secureUrl?: string | null
+  publicId?: string | null
+  fileName: string
+  filePath?: string | null
+  bucketName?: string | null
+  fileType: string
+  resourceType?: string | null
+  documentCategory?: string
+  category?: string
+  visibility?: string
+  size?: number | null
+  userId: string
+  projectId?: string | null
+  submissionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadedFileCreateOrConnectWithoutCheckpointInput = {
+  where: Prisma.UploadedFileWhereUniqueInput
+  create: Prisma.XOR<Prisma.UploadedFileCreateWithoutCheckpointInput, Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput>
+}
+
+export type UploadedFileCreateManyCheckpointInputEnvelope = {
+  data: Prisma.UploadedFileCreateManyCheckpointInput | Prisma.UploadedFileCreateManyCheckpointInput[]
+  skipDuplicates?: boolean
+}
+
+export type UploadedFileUpsertWithWhereUniqueWithoutCheckpointInput = {
+  where: Prisma.UploadedFileWhereUniqueInput
+  update: Prisma.XOR<Prisma.UploadedFileUpdateWithoutCheckpointInput, Prisma.UploadedFileUncheckedUpdateWithoutCheckpointInput>
+  create: Prisma.XOR<Prisma.UploadedFileCreateWithoutCheckpointInput, Prisma.UploadedFileUncheckedCreateWithoutCheckpointInput>
+}
+
+export type UploadedFileUpdateWithWhereUniqueWithoutCheckpointInput = {
+  where: Prisma.UploadedFileWhereUniqueInput
+  data: Prisma.XOR<Prisma.UploadedFileUpdateWithoutCheckpointInput, Prisma.UploadedFileUncheckedUpdateWithoutCheckpointInput>
+}
+
+export type UploadedFileUpdateManyWithWhereWithoutCheckpointInput = {
+  where: Prisma.UploadedFileScalarWhereInput
+  data: Prisma.XOR<Prisma.UploadedFileUpdateManyMutationInput, Prisma.UploadedFileUncheckedUpdateManyWithoutCheckpointInput>
+}
+
 export type UploadedFileCreateWithoutSubmissionInput = {
   id?: string
   secureUrl?: string | null
@@ -931,6 +1068,7 @@ export type UploadedFileCreateWithoutSubmissionInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutUploadedFilesInput
   project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutSubmissionInput = {
@@ -948,6 +1086,7 @@ export type UploadedFileUncheckedCreateWithoutSubmissionInput = {
   size?: number | null
   userId: string
   projectId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -993,6 +1132,7 @@ export type UploadedFileCreateManyUserInput = {
   size?: number | null
   projectId?: string | null
   submissionId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1014,6 +1154,7 @@ export type UploadedFileUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutUserInput = {
@@ -1031,6 +1172,7 @@ export type UploadedFileUncheckedUpdateWithoutUserInput = {
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1050,6 +1192,7 @@ export type UploadedFileUncheckedUpdateManyWithoutUserInput = {
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1069,6 +1212,7 @@ export type UploadedFileCreateManyProjectInput = {
   size?: number | null
   userId: string
   submissionId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1090,6 +1234,7 @@ export type UploadedFileUpdateWithoutProjectInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutUploadedFilesNestedInput
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutProjectInput = {
@@ -1107,6 +1252,7 @@ export type UploadedFileUncheckedUpdateWithoutProjectInput = {
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1125,6 +1271,87 @@ export type UploadedFileUncheckedUpdateManyWithoutProjectInput = {
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadedFileCreateManyCheckpointInput = {
+  id?: string
+  secureUrl?: string | null
+  publicId?: string | null
+  fileName: string
+  filePath?: string | null
+  bucketName?: string | null
+  fileType: string
+  resourceType?: string | null
+  documentCategory?: string
+  category?: string
+  visibility?: string
+  size?: number | null
+  userId: string
+  projectId?: string | null
+  submissionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadedFileUpdateWithoutCheckpointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutUploadedFilesNestedInput
+  project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
+  submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
+}
+
+export type UploadedFileUncheckedUpdateWithoutCheckpointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadedFileUncheckedUpdateManyWithoutCheckpointInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1145,6 +1372,7 @@ export type UploadedFileCreateManySubmissionInput = {
   size?: number | null
   userId: string
   projectId?: string | null
+  checkpointId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1166,6 +1394,7 @@ export type UploadedFileUpdateWithoutSubmissionInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutUploadedFilesNestedInput
   project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutSubmissionInput = {
@@ -1183,6 +1412,7 @@ export type UploadedFileUncheckedUpdateWithoutSubmissionInput = {
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1202,6 +1432,7 @@ export type UploadedFileUncheckedUpdateManyWithoutSubmissionInput = {
   size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1224,11 +1455,13 @@ export type UploadedFileSelect<ExtArgs extends runtime.Types.Extensions.Internal
   userId?: boolean
   projectId?: boolean
   submissionId?: boolean
+  checkpointId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
 }, ExtArgs["result"]["uploadedFile"]>
 
 export type UploadedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1247,11 +1480,13 @@ export type UploadedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   userId?: boolean
   projectId?: boolean
   submissionId?: boolean
+  checkpointId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
 }, ExtArgs["result"]["uploadedFile"]>
 
 export type UploadedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1270,11 +1505,13 @@ export type UploadedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   userId?: boolean
   projectId?: boolean
   submissionId?: boolean
+  checkpointId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
 }, ExtArgs["result"]["uploadedFile"]>
 
 export type UploadedFileSelectScalar = {
@@ -1293,25 +1530,29 @@ export type UploadedFileSelectScalar = {
   userId?: boolean
   projectId?: boolean
   submissionId?: boolean
+  checkpointId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UploadedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "secureUrl" | "publicId" | "fileName" | "filePath" | "bucketName" | "fileType" | "resourceType" | "documentCategory" | "category" | "visibility" | "size" | "userId" | "projectId" | "submissionId" | "createdAt" | "updatedAt", ExtArgs["result"]["uploadedFile"]>
+export type UploadedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "secureUrl" | "publicId" | "fileName" | "filePath" | "bucketName" | "fileType" | "resourceType" | "documentCategory" | "category" | "visibility" | "size" | "userId" | "projectId" | "submissionId" | "checkpointId" | "createdAt" | "updatedAt", ExtArgs["result"]["uploadedFile"]>
 export type UploadedFileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
 }
 export type UploadedFileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
 }
 export type UploadedFileIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
+  checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
 }
 
 export type $UploadedFilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1320,6 +1561,7 @@ export type $UploadedFilePayload<ExtArgs extends runtime.Types.Extensions.Intern
     user: Prisma.$UserPayload<ExtArgs>
     project: Prisma.$ProjectPayload<ExtArgs> | null
     submission: Prisma.$SubmissionPayload<ExtArgs> | null
+    checkpoint: Prisma.$MilestoneCheckpointPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1337,6 +1579,7 @@ export type $UploadedFilePayload<ExtArgs extends runtime.Types.Extensions.Intern
     userId: string
     projectId: string | null
     submissionId: string | null
+    checkpointId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["uploadedFile"]>
@@ -1736,6 +1979,7 @@ export interface Prisma__UploadedFileClient<T, Null = never, ExtArgs extends run
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   project<T extends Prisma.UploadedFile$projectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UploadedFile$projectArgs<ExtArgs>>): Prisma.Prisma__ProjectClient<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   submission<T extends Prisma.UploadedFile$submissionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UploadedFile$submissionArgs<ExtArgs>>): Prisma.Prisma__SubmissionClient<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  checkpoint<T extends Prisma.UploadedFile$checkpointArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UploadedFile$checkpointArgs<ExtArgs>>): Prisma.Prisma__MilestoneCheckpointClient<runtime.Types.Result.GetResult<Prisma.$MilestoneCheckpointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1780,6 +2024,7 @@ export interface UploadedFileFieldRefs {
   readonly userId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly projectId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly submissionId: Prisma.FieldRef<"UploadedFile", 'String'>
+  readonly checkpointId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly createdAt: Prisma.FieldRef<"UploadedFile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UploadedFile", 'DateTime'>
 }
@@ -2218,6 +2463,25 @@ export type UploadedFile$submissionArgs<ExtArgs extends runtime.Types.Extensions
    */
   include?: Prisma.SubmissionInclude<ExtArgs> | null
   where?: Prisma.SubmissionWhereInput
+}
+
+/**
+ * UploadedFile.checkpoint
+ */
+export type UploadedFile$checkpointArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MilestoneCheckpoint
+   */
+  select?: Prisma.MilestoneCheckpointSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MilestoneCheckpoint
+   */
+  omit?: Prisma.MilestoneCheckpointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MilestoneCheckpointInclude<ExtArgs> | null
+  where?: Prisma.MilestoneCheckpointWhereInput
 }
 
 /**

@@ -1,6 +1,7 @@
 import {
   DefensePanelRole,
   DefenseStatus,
+  MilestoneStatus,
   Prisma,
   ProjectStatus,
   UserRole
@@ -14,6 +15,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -37,6 +39,22 @@ const SESSION_END_ROLES: UserRole[] = [
   UserRole.PROGRAM_HEAD,
   UserRole.SYSTEM_ADMIN
 ];
+
+const SCHEDULE_TYPES = [
+  'Concept Presentation',
+  'Proposal Defense',
+  'Mock Defense',
+  'Final Defense'
+] as const;
+const APPROVED_TITLE_PROJECT_STATUSES = new Set<ProjectStatus>([
+  ProjectStatus.APPROVED,
+  ProjectStatus.DEFENSE_SCHEDULED,
+  ProjectStatus.COMPLETED
+]);
+const COMPLETED_MILESTONE_STATUSES = new Set<MilestoneStatus>([
+  MilestoneStatus.APPROVED,
+  MilestoneStatus.COMPLETED
+]);
 
 const defenseAssignmentInclude = {
   project: {
@@ -73,9 +91,75 @@ const defenseAssignmentInclude = {
   }
 } satisfies Prisma.DefenseScheduleInclude;
 
+const scheduleGroupInclude = {
+  groupMembers: {
+    where: { isActive: true },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          firstName: true,
+          lastName: true,
+          displayName: true,
+          email: true
+        }
+      }
+    }
+  },
+  projects: {
+    orderBy: { updatedAt: 'desc' },
+    include: {
+      adviser: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          firstName: true,
+          lastName: true,
+          displayName: true,
+          department: true
+        }
+      },
+      milestones: {
+        orderBy: { sequence: 'asc' },
+        select: {
+          title: true,
+          sequence: true,
+          status: true,
+          completedAt: true
+        }
+      },
+      defenseSchedules: {
+        orderBy: { scheduledAt: 'desc' },
+        select: {
+          id: true,
+          status: true,
+          title: true
+        }
+      },
+      submissions: {
+        orderBy: { submittedAt: 'desc' },
+        take: 1,
+        select: {
+          status: true,
+          submittedAt: true,
+          reviewedAt: true
+        }
+      }
+    }
+  }
+} satisfies Prisma.GroupInclude;
+
 type DefenseAssignmentRecord = Prisma.DefenseScheduleGetPayload<{
   include: typeof defenseAssignmentInclude;
 }>;
+
+type ScheduleGroupRecord = Prisma.GroupGetPayload<{
+  include: typeof scheduleGroupInclude;
+}>;
+
+type ScheduleTitleProjectRecord = ScheduleGroupRecord['projects'][number];
 
 type SaveDefenseScheduleBody = {
   groupCode?: unknown;
@@ -101,6 +185,134 @@ function normalizeFacultyIdentity(value: unknown) {
     .replace(/[^\p{L}\p{N}@.]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function normalizeScheduleType(value: unknown) {
+  const normalized = normalizeText(value).toLowerCase();
+  return SCHEDULE_TYPES.find((type) => type.toLowerCase() === normalized) || '';
+}
+
+function getPersonName(person?: {
+  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  displayName?: string | null;
+  email?: string | null;
+} | null) {
+  if (!person) return '';
+  return person.displayName || person.name || [person.firstName, person.lastName].filter(Boolean).join(' ') || person.email || '';
+}
+
+function getApprovedTitleProject(group: ScheduleGroupRecord) {
+  const preferredProject = group.projects.find((project) => (
+    project.id === group.projectId && APPROVED_TITLE_PROJECT_STATUSES.has(project.status)
+  ));
+
+  return preferredProject || group.projects.find((project) => APPROVED_TITLE_PROJECT_STATUSES.has(project.status)) || null;
+}
+
+function inferScheduleStage(project: ScheduleTitleProjectRecord | null, group?: ScheduleGroupRecord) {
+  const activeMilestone = project?.milestones.find((milestone) => (
+    !COMPLETED_MILESTONE_STATUSES.has(milestone.status) && !milestone.completedAt
+  ));
+  const reference = normalizeName(
+    activeMilestone?.title ||
+    group?.currentMilestone ||
+    group?.milestone ||
+    project?.status
+  );
+
+  if (reference.includes('final') || reference.includes('completion') || project?.status === ProjectStatus.COMPLETED) {
+    return 'Final Defense';
+  }
+
+  if (
+    reference.includes('mock') ||
+    reference.includes('development') ||
+    reference.includes('prototype') ||
+    reference.includes('testing') ||
+    reference.includes('chapter 3') ||
+    reference.includes('data analysis')
+  ) {
+    return 'Mock Defense';
+  }
+
+  if (
+    reference.includes('proposal') ||
+    reference.includes('chapter 1') ||
+    reference.includes('chapter 2') ||
+    reference.includes('chapters 1')
+  ) {
+    return 'Proposal Defense';
+  }
+
+  return 'Concept Presentation';
+}
+
+function getScheduleStatus(project: ScheduleTitleProjectRecord | null) {
+  if (!project) {
+    return 'Not Eligible';
+  }
+
+  if (project.defenseSchedules.some((schedule) => schedule.status === DefenseStatus.SCHEDULED)) {
+    return 'Scheduled';
+  }
+
+  if (
+    project.status === ProjectStatus.NEEDS_REVISION ||
+    project.milestones.some((milestone) => milestone.status === MilestoneStatus.NEEDS_REVISION)
+  ) {
+    return 'Revision Required';
+  }
+
+  if (project.defenseSchedules.length > 0) {
+    return 'Ready for Reschedule';
+  }
+
+  return 'Ready First Schedule';
+}
+
+function formatScheduleGroup(group: ScheduleGroupRecord) {
+  const approvedProject = getApprovedTitleProject(group);
+  const activeProject = approvedProject || group.projects[0] || null;
+  const students = group.groupMembers.length
+    ? group.groupMembers.map((member) => getPersonName(member.user) || member.userId)
+    : group.students || [];
+  const department = group.department || group.dept || activeProject?.departmentId || activeProject?.adviser?.department || 'Unassigned';
+  const titles = group.projects.map((project) => {
+    const latestSubmission = project.submissions[0] || null;
+
+    return {
+      id: project.id,
+      title: project.title,
+      status: project.status,
+      submittedAt: latestSubmission?.submittedAt?.toISOString() || project.createdAt.toISOString(),
+      reviewedAt: latestSubmission?.reviewedAt?.toISOString() || null,
+      isApproved: APPROVED_TITLE_PROJECT_STATUSES.has(project.status)
+    };
+  });
+
+  return {
+    id: group.id,
+    groupId: group.id,
+    projectId: approvedProject?.id || null,
+    code: group.code,
+    title: group.title || group.code,
+    approvedTitle: approvedProject?.title || null,
+    titles,
+    isEligible: Boolean(approvedProject),
+    ineligibilityReason: approvedProject ? null : 'No adviser-approved title yet.',
+    department,
+    batchSection: group.code || department,
+    adviser: getPersonName(activeProject?.adviser) || 'Unassigned adviser',
+    students,
+    currentStage: approvedProject?.milestones.find((milestone) => (
+      !COMPLETED_MILESTONE_STATUSES.has(milestone.status) && !milestone.completedAt
+    ))?.title || group.currentMilestone || group.milestone || 'Concept',
+    eligibleStage: inferScheduleStage(approvedProject, group),
+    attemptCount: Math.max(1, (approvedProject?.defenseSchedules.length || 0) + 1),
+    scheduleStatus: getScheduleStatus(approvedProject)
+  };
 }
 
 function getFacultyIdentityKeys(user: {
@@ -211,10 +423,29 @@ export async function GET(request: Request) {
     });
 
     const assignments = schedules.map(formatAssignment);
+    const groupWhere: Prisma.GroupWhereInput = {};
+
+    if ((authUser.role === UserRole.PROGRAM_HEAD || authUser.role === UserRole.RESEARCH_HEAD) && authUser.department) {
+      groupWhere.OR = [
+        { department: authUser.department },
+        { dept: authUser.department },
+        { projects: { some: { departmentId: authUser.department } } }
+      ];
+    }
+
+    const scheduleGroups = await prisma.group.findMany({
+      where: groupWhere,
+      include: scheduleGroupInclude,
+      orderBy: {
+        updatedAt: 'desc'
+      },
+      take: 200
+    });
 
     return successResponse({
       assignment: assignments[0] || null,
-      assignments
+      assignments,
+      scheduleProjects: scheduleGroups.map(formatScheduleGroup)
     });
   } catch (error) {
     return handleApiError(error);
@@ -227,9 +458,7 @@ export async function POST(request: Request) {
     const body = await parseJsonBody<SaveDefenseScheduleBody>(request);
 
     const groupCode = normalizeText(body.groupCode);
-    const projectTitle = normalizeText(body.projectTitle);
-    const scheduleType = normalizeText(body.scheduleType) || 'Concept Proposal';
-    const department = normalizeText(body.department);
+    const scheduleType = normalizeScheduleType(body.scheduleType);
     const adviserName = normalizeText(body.adviserName);
     const date = normalizeText(body.date);
     const time = normalizeText(body.time);
@@ -242,8 +471,7 @@ export async function POST(request: Request) {
     const fieldErrors: Record<string, string> = {};
 
     if (!groupCode) fieldErrors.group = 'Select a group to schedule.';
-    if (!projectTitle) fieldErrors.projectTitle = 'Project title is required.';
-    if (!scheduleType) fieldErrors.scheduleType = 'Choose the schedule type.';
+    if (!scheduleType) fieldErrors.scheduleType = 'Choose a valid presentation type.';
     if (!date) fieldErrors.date = 'Choose a defense date.';
     if (!time) fieldErrors.time = 'Choose a defense time.';
     if (!room) fieldErrors.room = 'Choose a venue.';
@@ -275,101 +503,54 @@ export async function POST(request: Request) {
       });
     }
 
+    const group = await prisma.group.findUnique({
+      where: { code: groupCode },
+      include: scheduleGroupInclude
+    });
+
+    if (!group) {
+      throw new HttpError('Group was not found.', 404, {
+        group: 'Choose an existing group from the schedule list.'
+      });
+    }
+
+    const approvedProject = getApprovedTitleProject(group);
+
+    if (!approvedProject) {
+      throw new HttpError('This group is not eligible for defense scheduling because it has no approved title yet.', 400, {
+        group: 'Approve one title proposal before scheduling a presentation.'
+      });
+    }
+
+    const actualAdviserIsPanelist = approvedProject.adviserId
+      ? uniquePanelIds.includes(approvedProject.adviserId)
+      : false;
     const adviserKey = normalizeFacultyIdentity(adviserName);
-    const adviserIsPanelist = adviserKey
-      ? panelUsers.some((user) => (
-          getFacultyIdentityKeys(user).includes(adviserKey)
-        ))
+    const adviserNameIsPanelist = adviserKey
+      ? panelUsers.some((user) => getFacultyIdentityKeys(user).includes(adviserKey))
       : false;
 
-    if (adviserIsPanelist) {
+    if (actualAdviserIsPanelist || adviserNameIsPanelist) {
       throw new HttpError('The academic adviser cannot be assigned as a scoring panelist.', 400, {
         panel: 'Choose faculty who are not the project adviser.'
       });
     }
 
-    const academicAdviser = adviserName
-      ? await prisma.user.findFirst({
-          where: {
-            OR: [
-              { name: adviserName },
-              { displayName: adviserName },
-              { email: adviserName },
-              { name: { contains: adviserName.replace(/\b(Dr|Prof|Professor|Engr|Engineer|Mr|Mrs|Ms)\.?\s+/gi, ''), mode: 'insensitive' } },
-              { displayName: { contains: adviserName.replace(/\b(Dr|Prof|Professor|Engr|Engineer|Mr|Mrs|Ms)\.?\s+/gi, ''), mode: 'insensitive' } }
-            ]
-          }
-        })
-      : null;
-    const students = Array.isArray(body.students)
-      ? body.students.map(normalizeText).filter(Boolean)
-      : [];
-    const departmentCode = department || authUser.department || 'IT';
-
-    const group = await prisma.group.upsert({
-      where: { code: groupCode },
-      update: {
-        title: groupCode,
-        projectTitle,
-        dept: departmentCode,
-        department: departmentCode,
-        students,
-        members: students.length,
-        ...(academicAdviser ? { userId: academicAdviser.id } : {})
-      },
-      create: {
-        userId: academicAdviser?.id || authUser.id,
-        code: groupCode,
-        title: groupCode,
-        projectTitle,
-        dept: departmentCode,
-        department: departmentCode,
-        students,
-        members: students.length,
-        leader: students[0] || null,
-        status: 'active',
-        statusLabel: 'Active',
-        statusClass: 'status-active'
+    const project = await prisma.project.update({
+      where: { id: approvedProject.id },
+      data: {
+        status: ProjectStatus.DEFENSE_SCHEDULED,
+        groupId: group.id
       }
     });
 
-    const existingProject = group.projectId
-      ? await prisma.project.findUnique({ where: { id: group.projectId } })
-      : await prisma.project.findFirst({
-          where: {
-            OR: [
-              { groupId: group.id },
-              { title: projectTitle }
-            ]
-          },
-          orderBy: {
-            updatedAt: 'desc'
-          }
-        });
-
-    const project = existingProject
-      ? await prisma.project.update({
-          where: { id: existingProject.id },
-          data: {
-            title: projectTitle,
-            status: ProjectStatus.DEFENSE_SCHEDULED,
-            groupId: group.id,
-            adviserId: academicAdviser?.id || existingProject.adviserId
-          }
-        })
-      : await prisma.project.create({
-          data: {
-            title: projectTitle,
-            status: ProjectStatus.DEFENSE_SCHEDULED,
-            groupId: group.id,
-            adviserId: academicAdviser?.id || null
-          }
-        });
-
-    if (group.projectId !== project.id) {
+    if (group.projectId !== project.id || group.projectTitle !== project.title) {
       await prisma.group.update({
         where: { id: group.id },
-        data: { projectId: project.id }
+        data: {
+          projectId: project.id,
+          projectTitle: project.title
+        }
       });
     }
 
@@ -437,6 +618,12 @@ export async function POST(request: Request) {
         }
       })
     )));
+
+    await recordCheckpointSchedule(prisma, {
+      projectId: project.id,
+      title: scheduleType,
+      scheduledAt
+    });
 
     const assignment = await findAssignmentById(schedule.id);
 

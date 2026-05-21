@@ -1,3 +1,6 @@
+import { cache } from 'react';
+import { ensureProjectMilestoneWorkflow } from '@/lib/milestone-checkpoint-tracking';
+
 const now = '2026-04-06T00:00:00.000Z';
 
 export type StudentTitleReviewSummary = {
@@ -62,6 +65,7 @@ export type StudentTitleAttachment = {
   uploadedBy: string;
   status: string;
   downloadUrl?: string;
+  previewUrl?: string;
   file?: File;
 };
 
@@ -273,6 +277,57 @@ export type StudentDashboardData = {
     isCompleted?: boolean;
     priority?: 'high' | 'medium' | 'low';
   }>;
+  milestoneCheckpoints: Array<{
+    id: string;
+    project_id: string;
+    milestone_id: string;
+    milestoneTitle: string;
+    milestoneSequence: number;
+    key: string;
+    title: string;
+    description?: string;
+    sequence: number;
+    required: boolean;
+    status: string;
+    adviserReviewStatus: string;
+    panelReviewStatus: string;
+    submittedAt?: string;
+    reviewedAt?: string;
+    completedAt?: string;
+    latestFeedback?: string;
+    latestFeedbackBy?: string;
+    latestFeedbackAt?: string;
+    submissions: Array<{
+      id: string;
+      title: string;
+      status: string;
+      submittedAt: string;
+      reviewedAt?: string;
+      files: Array<{
+        id: string;
+        fileName: string;
+        fileType: string;
+        sizeLabel: string;
+        uploadDateLabel: string;
+        reviewStatus: string;
+      }>;
+      comments: Array<{
+        id: string;
+        body: string;
+        decision: string;
+        createdAt: string;
+        authorName: string;
+      }>;
+    }>;
+    files: Array<{
+      id: string;
+      fileName: string;
+      fileType: string;
+      sizeLabel: string;
+      uploadDateLabel: string;
+      reviewStatus: string;
+    }>;
+  }>;
   schedules: Array<{
     id: string;
     user_id: string;
@@ -391,6 +446,7 @@ function getDefaultWorkspaceData(): StudentDashboardData {
     documents: [],
     feedback: [],
     milestones: [],
+    milestoneCheckpoints: [],
     schedules: [],
     notifications: [],
     progressReports: [],
@@ -411,7 +467,7 @@ function isNextDynamicServerUsageError(error: unknown) {
   );
 }
 
-export async function getStudentDashboardData() {
+export const getStudentDashboardData = cache(async function getStudentDashboardData() {
   const data = getDefaultWorkspaceData();
 
   try {
@@ -558,20 +614,69 @@ export async function getStudentDashboardData() {
             program: group.dept || data.project.program,
             department: group.department || data.project.department,
           };
-          data.titleRegistration.proposedTitle = approvedTitleProject?.title || data.titleRegistration.proposedTitle;
-          data.titleRegistration.registrationStatus = approvedTitleProject ? 'Approved' : 'Pending';
-          data.titleRegistration.adviser = data.project.adviser;
-
           const activeProject = approvedTitleProject || await prisma.project.findFirst({
             where: { groupId: group.id },
             orderBy: { updatedAt: 'desc' }
           });
 
+          data.titleRegistration.proposedTitle = activeProject?.title || approvedTitleProject?.title || data.titleRegistration.proposedTitle;
+          
+          if (!activeProject) {
+            data.titleRegistration.registrationStatus = 'Draft';
+          } else if (activeProject.status === 'APPROVED' || activeProject.status === 'DEFENSE_SCHEDULED') {
+            data.titleRegistration.registrationStatus = 'Approved';
+          } else if (activeProject.status === 'NEEDS_REVISION') {
+            data.titleRegistration.registrationStatus = 'Needs Revision';
+          } else if (activeProject.status === 'ARCHIVED') {
+            data.titleRegistration.registrationStatus = 'Rejected';
+          } else if (activeProject.status === 'UNDER_REVIEW') {
+            data.titleRegistration.registrationStatus = 'Under Review';
+          } else if (activeProject.status === 'SUBMITTED') {
+            data.titleRegistration.registrationStatus = 'Submitted';
+          } else {
+            data.titleRegistration.registrationStatus = 'Draft';
+          }
+          
+          data.titleRegistration.adviser = data.project.adviser;
+
           if (activeProject) {
+            await ensureProjectMilestoneWorkflow(prisma, activeProject.id);
+
+            const formatDate = (date: Date) =>
+              new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+            const getReviewStatusLabel = (status?: string | null) => {
+              if (status === SubmissionStatus.APPROVED) return 'Approved';
+              if (status === SubmissionStatus.NEEDS_REVISION) return 'Needs Revision';
+              if (status === SubmissionStatus.UNDER_REVIEW) return 'In Review';
+              return 'Pending Review';
+            };
+            const toFileSummary = (file: {
+              id: string;
+              fileName: string;
+              fileType: string;
+              size: number | null;
+              createdAt: Date;
+              submission?: { status?: string | null } | null;
+            }) => ({
+              id: file.id,
+              fileName: file.fileName,
+              fileType: file.fileType,
+              sizeLabel: file.size ? `${Math.round(file.size / 1024)} KB` : 'Unknown',
+              uploadDateLabel: formatDate(file.createdAt),
+              reviewStatus: getReviewStatusLabel(file.submission?.status)
+            });
+
             // Fetch Documents
             const files = await prisma.uploadedFile.findMany({
               where: { projectId: activeProject.id },
-              include: { user: true },
+              include: {
+                user: true,
+                submission: {
+                  select: {
+                    status: true
+                  }
+                }
+              },
               orderBy: { createdAt: 'desc' }
             });
             data.documents = files.map(f => ({
@@ -585,9 +690,9 @@ export async function getStudentDashboardData() {
               fileName: f.fileName,
               fileType: f.fileType,
               sizeLabel: f.size ? `${Math.round(f.size / 1024)} KB` : 'Unknown',
-              uploadDateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(f.createdAt),
+              uploadDateLabel: formatDate(f.createdAt),
               uploadedBy: f.user?.name || 'Unknown',
-              reviewStatus: 'Pending Review'
+              reviewStatus: getReviewStatusLabel(f.submission?.status)
             }));
 
             // Fetch Milestones
@@ -607,6 +712,98 @@ export async function getStudentDashboardData() {
               summary: m.description || '',
               route: '/students/milestones'
             }));
+
+            const checkpointRows = await prisma.milestoneCheckpoint.findMany({
+              where: { projectId: activeProject.id },
+              include: {
+                milestone: {
+                  select: {
+                    id: true,
+                    title: true,
+                    sequence: true
+                  }
+                },
+                submissions: {
+                  orderBy: { submittedAt: 'desc' },
+                  include: {
+                    files: {
+                      include: {
+                        submission: {
+                          select: {
+                            status: true
+                          }
+                        }
+                      },
+                      orderBy: { createdAt: 'desc' }
+                    },
+                    comments: {
+                      orderBy: { createdAt: 'desc' },
+                      include: {
+                        author: {
+                          select: {
+                            name: true,
+                            role: true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                files: {
+                  include: {
+                    submission: {
+                      select: {
+                        status: true
+                      }
+                    }
+                  },
+                  orderBy: { createdAt: 'desc' }
+                }
+              }
+            });
+
+            data.milestoneCheckpoints = checkpointRows
+              .sort((left, right) =>
+                left.milestone.sequence - right.milestone.sequence ||
+                left.sequence - right.sequence
+              )
+              .map((checkpoint) => ({
+                id: checkpoint.id,
+                project_id: checkpoint.projectId,
+                milestone_id: checkpoint.milestoneId,
+                milestoneTitle: checkpoint.milestone.title,
+                milestoneSequence: checkpoint.milestone.sequence,
+                key: checkpoint.key,
+                title: checkpoint.title,
+                description: checkpoint.description || undefined,
+                sequence: checkpoint.sequence,
+                required: checkpoint.required,
+                status: checkpoint.status,
+                adviserReviewStatus: checkpoint.adviserReviewStatus,
+                panelReviewStatus: checkpoint.panelReviewStatus,
+                submittedAt: checkpoint.submittedAt?.toISOString(),
+                reviewedAt: checkpoint.reviewedAt?.toISOString(),
+                completedAt: checkpoint.completedAt?.toISOString(),
+                latestFeedback: checkpoint.latestFeedback || undefined,
+                latestFeedbackBy: checkpoint.latestFeedbackBy || undefined,
+                latestFeedbackAt: checkpoint.latestFeedbackAt?.toISOString(),
+                submissions: checkpoint.submissions.map((submission) => ({
+                  id: submission.id,
+                  title: submission.title,
+                  status: submission.status,
+                  submittedAt: submission.submittedAt.toISOString(),
+                  reviewedAt: submission.reviewedAt?.toISOString(),
+                  files: submission.files.map(toFileSummary),
+                  comments: submission.comments.map((comment) => ({
+                    id: comment.id,
+                    body: comment.body,
+                    decision: comment.decision,
+                    createdAt: comment.createdAt.toISOString(),
+                    authorName: comment.author?.name || 'Faculty'
+                  }))
+                })),
+                files: checkpoint.files.map(toFileSummary)
+              }));
 
             // Fetch Schedules
             const schedules = await prisma.defenseSchedule.findMany({
@@ -730,4 +927,4 @@ export async function getStudentDashboardData() {
   }
 
   return { data };
-}
+});

@@ -256,6 +256,7 @@ export type ProjectWhereInput = {
   owner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   adviser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   milestones?: Prisma.MilestoneListRelationFilter
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   files?: Prisma.UploadedFileListRelationFilter
   defenseSchedules?: Prisma.DefenseScheduleListRelationFilter
@@ -284,6 +285,7 @@ export type ProjectOrderByWithRelationInput = {
   owner?: Prisma.UserOrderByWithRelationInput
   adviser?: Prisma.UserOrderByWithRelationInput
   milestones?: Prisma.MilestoneOrderByRelationAggregateInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
   files?: Prisma.UploadedFileOrderByRelationAggregateInput
   defenseSchedules?: Prisma.DefenseScheduleOrderByRelationAggregateInput
@@ -315,6 +317,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   owner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   adviser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   milestones?: Prisma.MilestoneListRelationFilter
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   files?: Prisma.UploadedFileListRelationFilter
   defenseSchedules?: Prisma.DefenseScheduleListRelationFilter
@@ -378,6 +381,7 @@ export type ProjectCreateInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -401,6 +405,7 @@ export type ProjectUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -424,6 +429,7 @@ export type ProjectUpdateInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -447,6 +453,7 @@ export type ProjectUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -822,6 +829,20 @@ export type ProjectUpdateOneRequiredWithoutMilestonesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutMilestonesInput, Prisma.ProjectUpdateWithoutMilestonesInput>, Prisma.ProjectUncheckedUpdateWithoutMilestonesInput>
 }
 
+export type ProjectCreateNestedOneWithoutMilestoneCheckpointsInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutMilestoneCheckpointsInput, Prisma.ProjectUncheckedCreateWithoutMilestoneCheckpointsInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutMilestoneCheckpointsInput
+  connect?: Prisma.ProjectWhereUniqueInput
+}
+
+export type ProjectUpdateOneRequiredWithoutMilestoneCheckpointsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutMilestoneCheckpointsInput, Prisma.ProjectUncheckedCreateWithoutMilestoneCheckpointsInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutMilestoneCheckpointsInput
+  upsert?: Prisma.ProjectUpsertWithoutMilestoneCheckpointsInput
+  connect?: Prisma.ProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutMilestoneCheckpointsInput, Prisma.ProjectUpdateWithoutMilestoneCheckpointsInput>, Prisma.ProjectUncheckedUpdateWithoutMilestoneCheckpointsInput>
+}
+
 export type ProjectCreateNestedOneWithoutSubmissionsInput = {
   create?: Prisma.XOR<Prisma.ProjectCreateWithoutSubmissionsInput, Prisma.ProjectUncheckedCreateWithoutSubmissionsInput>
   connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutSubmissionsInput
@@ -893,6 +914,7 @@ export type ProjectCreateWithoutOwnerInput = {
   group?: Prisma.GroupCreateNestedOneWithoutProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -915,6 +937,7 @@ export type ProjectUncheckedCreateWithoutOwnerInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -947,6 +970,7 @@ export type ProjectCreateWithoutAdviserInput = {
   group?: Prisma.GroupCreateNestedOneWithoutProjectsInput
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -969,6 +993,7 @@ export type ProjectUncheckedCreateWithoutAdviserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -1054,6 +1079,7 @@ export type ProjectCreateWithoutFilesInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
@@ -1076,6 +1102,7 @@ export type ProjectUncheckedCreateWithoutFilesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
@@ -1114,6 +1141,7 @@ export type ProjectUpdateWithoutFilesInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
@@ -1136,6 +1164,7 @@ export type ProjectUncheckedUpdateWithoutFilesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
@@ -1157,6 +1186,7 @@ export type ProjectCreateWithoutGroupInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -1179,6 +1209,7 @@ export type ProjectUncheckedCreateWithoutGroupInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -1227,6 +1258,7 @@ export type ProjectCreateWithoutDepartmentInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -1249,6 +1281,7 @@ export type ProjectUncheckedCreateWithoutDepartmentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -1297,6 +1330,7 @@ export type ProjectCreateWithoutAcademicYearInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -1319,6 +1353,7 @@ export type ProjectUncheckedCreateWithoutAcademicYearInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -1367,6 +1402,7 @@ export type ProjectCreateWithoutMilestonesInput = {
   group?: Prisma.GroupCreateNestedOneWithoutProjectsInput
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -1389,6 +1425,7 @@ export type ProjectUncheckedCreateWithoutMilestonesInput = {
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -1427,6 +1464,7 @@ export type ProjectUpdateWithoutMilestonesInput = {
   group?: Prisma.GroupUpdateOneWithoutProjectsNestedInput
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -1449,6 +1487,115 @@ export type ProjectUncheckedUpdateWithoutMilestonesInput = {
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
+  files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
+  defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
+  evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectCreateWithoutMilestoneCheckpointsInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  keywords?: Prisma.ProjectCreatekeywordsInput | string[]
+  status?: $Enums.ProjectStatus
+  repositoryPublishedAt?: Date | string | null
+  transferReadyAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  department?: Prisma.DepartmentCreateNestedOneWithoutProjectsInput
+  academicYear?: Prisma.AcademicYearCreateNestedOneWithoutProjectsInput
+  group?: Prisma.GroupCreateNestedOneWithoutProjectsInput
+  owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
+  adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
+  milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
+  files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
+  defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
+  evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectUncheckedCreateWithoutMilestoneCheckpointsInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  keywords?: Prisma.ProjectCreatekeywordsInput | string[]
+  status?: $Enums.ProjectStatus
+  departmentId?: string | null
+  academicYearId?: string | null
+  groupId?: string | null
+  ownerId?: string | null
+  adviserId?: string | null
+  repositoryPublishedAt?: Date | string | null
+  transferReadyAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
+  files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
+  defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
+  evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectCreateOrConnectWithoutMilestoneCheckpointsInput = {
+  where: Prisma.ProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutMilestoneCheckpointsInput, Prisma.ProjectUncheckedCreateWithoutMilestoneCheckpointsInput>
+}
+
+export type ProjectUpsertWithoutMilestoneCheckpointsInput = {
+  update: Prisma.XOR<Prisma.ProjectUpdateWithoutMilestoneCheckpointsInput, Prisma.ProjectUncheckedUpdateWithoutMilestoneCheckpointsInput>
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutMilestoneCheckpointsInput, Prisma.ProjectUncheckedCreateWithoutMilestoneCheckpointsInput>
+  where?: Prisma.ProjectWhereInput
+}
+
+export type ProjectUpdateToOneWithWhereWithoutMilestoneCheckpointsInput = {
+  where?: Prisma.ProjectWhereInput
+  data: Prisma.XOR<Prisma.ProjectUpdateWithoutMilestoneCheckpointsInput, Prisma.ProjectUncheckedUpdateWithoutMilestoneCheckpointsInput>
+}
+
+export type ProjectUpdateWithoutMilestoneCheckpointsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  department?: Prisma.DepartmentUpdateOneWithoutProjectsNestedInput
+  academicYear?: Prisma.AcademicYearUpdateOneWithoutProjectsNestedInput
+  group?: Prisma.GroupUpdateOneWithoutProjectsNestedInput
+  owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
+  adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
+  milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
+  files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
+  defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
+  evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectUncheckedUpdateWithoutMilestoneCheckpointsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -1472,6 +1619,7 @@ export type ProjectCreateWithoutSubmissionsInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
@@ -1494,6 +1642,7 @@ export type ProjectUncheckedCreateWithoutSubmissionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
@@ -1532,6 +1681,7 @@ export type ProjectUpdateWithoutSubmissionsInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
@@ -1554,6 +1704,7 @@ export type ProjectUncheckedUpdateWithoutSubmissionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
@@ -1576,6 +1727,7 @@ export type ProjectCreateWithoutDefenseSchedulesInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
@@ -1598,6 +1750,7 @@ export type ProjectUncheckedCreateWithoutDefenseSchedulesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
@@ -1636,6 +1789,7 @@ export type ProjectUpdateWithoutDefenseSchedulesInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
@@ -1658,6 +1812,7 @@ export type ProjectUncheckedUpdateWithoutDefenseSchedulesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
@@ -1680,6 +1835,7 @@ export type ProjectCreateWithoutAdviserScheduleItemsInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -1702,6 +1858,7 @@ export type ProjectUncheckedCreateWithoutAdviserScheduleItemsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -1740,6 +1897,7 @@ export type ProjectUpdateWithoutAdviserScheduleItemsInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -1762,6 +1920,7 @@ export type ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -1784,6 +1943,7 @@ export type ProjectCreateWithoutEvaluationsInput = {
   owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
   adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
   milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
@@ -1806,6 +1966,7 @@ export type ProjectUncheckedCreateWithoutEvaluationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
@@ -1844,6 +2005,7 @@ export type ProjectUpdateWithoutEvaluationsInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -1866,6 +2028,7 @@ export type ProjectUncheckedUpdateWithoutEvaluationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -1919,6 +2082,7 @@ export type ProjectUpdateWithoutOwnerInput = {
   group?: Prisma.GroupUpdateOneWithoutProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -1941,6 +2105,7 @@ export type ProjectUncheckedUpdateWithoutOwnerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -1979,6 +2144,7 @@ export type ProjectUpdateWithoutAdviserInput = {
   group?: Prisma.GroupUpdateOneWithoutProjectsNestedInput
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -2001,6 +2167,7 @@ export type ProjectUncheckedUpdateWithoutAdviserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -2055,6 +2222,7 @@ export type ProjectUpdateWithoutGroupInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -2077,6 +2245,7 @@ export type ProjectUncheckedUpdateWithoutGroupInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -2131,6 +2300,7 @@ export type ProjectUpdateWithoutDepartmentInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -2153,6 +2323,7 @@ export type ProjectUncheckedUpdateWithoutDepartmentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -2207,6 +2378,7 @@ export type ProjectUpdateWithoutAcademicYearInput = {
   owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
   adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
   milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
@@ -2229,6 +2401,7 @@ export type ProjectUncheckedUpdateWithoutAcademicYearInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
@@ -2259,6 +2432,7 @@ export type ProjectUncheckedUpdateManyWithoutAcademicYearInput = {
 
 export type ProjectCountOutputType = {
   milestones: number
+  milestoneCheckpoints: number
   submissions: number
   files: number
   defenseSchedules: number
@@ -2268,6 +2442,7 @@ export type ProjectCountOutputType = {
 
 export type ProjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   milestones?: boolean | ProjectCountOutputTypeCountMilestonesArgs
+  milestoneCheckpoints?: boolean | ProjectCountOutputTypeCountMilestoneCheckpointsArgs
   submissions?: boolean | ProjectCountOutputTypeCountSubmissionsArgs
   files?: boolean | ProjectCountOutputTypeCountFilesArgs
   defenseSchedules?: boolean | ProjectCountOutputTypeCountDefenseSchedulesArgs
@@ -2290,6 +2465,13 @@ export type ProjectCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exte
  */
 export type ProjectCountOutputTypeCountMilestonesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MilestoneWhereInput
+}
+
+/**
+ * ProjectCountOutputType without action
+ */
+export type ProjectCountOutputTypeCountMilestoneCheckpointsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MilestoneCheckpointWhereInput
 }
 
 /**
@@ -2349,6 +2531,7 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   owner?: boolean | Prisma.Project$ownerArgs<ExtArgs>
   adviser?: boolean | Prisma.Project$adviserArgs<ExtArgs>
   milestones?: boolean | Prisma.Project$milestonesArgs<ExtArgs>
+  milestoneCheckpoints?: boolean | Prisma.Project$milestoneCheckpointsArgs<ExtArgs>
   submissions?: boolean | Prisma.Project$submissionsArgs<ExtArgs>
   files?: boolean | Prisma.Project$filesArgs<ExtArgs>
   defenseSchedules?: boolean | Prisma.Project$defenseSchedulesArgs<ExtArgs>
@@ -2426,6 +2609,7 @@ export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   owner?: boolean | Prisma.Project$ownerArgs<ExtArgs>
   adviser?: boolean | Prisma.Project$adviserArgs<ExtArgs>
   milestones?: boolean | Prisma.Project$milestonesArgs<ExtArgs>
+  milestoneCheckpoints?: boolean | Prisma.Project$milestoneCheckpointsArgs<ExtArgs>
   submissions?: boolean | Prisma.Project$submissionsArgs<ExtArgs>
   files?: boolean | Prisma.Project$filesArgs<ExtArgs>
   defenseSchedules?: boolean | Prisma.Project$defenseSchedulesArgs<ExtArgs>
@@ -2457,6 +2641,7 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     owner: Prisma.$UserPayload<ExtArgs> | null
     adviser: Prisma.$UserPayload<ExtArgs> | null
     milestones: Prisma.$MilestonePayload<ExtArgs>[]
+    milestoneCheckpoints: Prisma.$MilestoneCheckpointPayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     files: Prisma.$UploadedFilePayload<ExtArgs>[]
     defenseSchedules: Prisma.$DefenseSchedulePayload<ExtArgs>[]
@@ -2878,6 +3063,7 @@ export interface Prisma__ProjectClient<T, Null = never, ExtArgs extends runtime.
   owner<T extends Prisma.Project$ownerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$ownerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   adviser<T extends Prisma.Project$adviserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$adviserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   milestones<T extends Prisma.Project$milestonesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$milestonesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MilestonePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  milestoneCheckpoints<T extends Prisma.Project$milestoneCheckpointsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$milestoneCheckpointsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MilestoneCheckpointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.Project$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   files<T extends Prisma.Project$filesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$filesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UploadedFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   defenseSchedules<T extends Prisma.Project$defenseSchedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$defenseSchedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DefenseSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3443,6 +3629,30 @@ export type Project$milestonesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.MilestoneScalarFieldEnum | Prisma.MilestoneScalarFieldEnum[]
+}
+
+/**
+ * Project.milestoneCheckpoints
+ */
+export type Project$milestoneCheckpointsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MilestoneCheckpoint
+   */
+  select?: Prisma.MilestoneCheckpointSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MilestoneCheckpoint
+   */
+  omit?: Prisma.MilestoneCheckpointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MilestoneCheckpointInclude<ExtArgs> | null
+  where?: Prisma.MilestoneCheckpointWhereInput
+  orderBy?: Prisma.MilestoneCheckpointOrderByWithRelationInput | Prisma.MilestoneCheckpointOrderByWithRelationInput[]
+  cursor?: Prisma.MilestoneCheckpointWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MilestoneCheckpointScalarFieldEnum | Prisma.MilestoneCheckpointScalarFieldEnum[]
 }
 
 /**

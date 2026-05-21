@@ -1066,12 +1066,49 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               </span>
             </div>
             <h1>Student Dashboard</h1>
-            <p>Keep progress, files, adviser feedback, and the next academic commitment readable from one focused workspace.</p>
           </div>
         </div>
       </header>
 
       <div className="page-body student-dashboard-page">
+        <section className="student-dashboard-welcome-strip" aria-labelledby="student-dashboard-welcome-title">
+          <div className="student-dashboard-welcome-copy">
+            <span className="student-dashboard-welcome-kicker">
+              <span className="student-dashboard-welcome-dot" aria-hidden="true" />
+              Student workspace command center
+            </span>
+            <h1 id="student-dashboard-welcome-title">Welcome back, {data.profile.fullName || 'Student'}</h1>
+            <p>
+              Track project progress, adviser feedback, milestones, and submission readiness from one focused
+              student workspace.
+            </p>
+            <div className="student-dashboard-welcome-actions" aria-label="Student dashboard quick actions">
+              <Link className="student-dashboard-welcome-action is-primary" href="/students/project-files">
+                <i aria-hidden="true" className="fas fa-file-arrow-up" />
+                Submit Files
+              </Link>
+              <Link className="student-dashboard-welcome-action" href="/students/schedule">
+                <i aria-hidden="true" className="fas fa-calendar-days" />
+                Open Schedule
+              </Link>
+            </div>
+          </div>
+          <div className="student-dashboard-welcome-insights" aria-label="Student workspace status">
+            <span>
+              <small>Overall progress</small>
+              <strong>{data.project.progressPercentage}%</strong>
+            </span>
+            <span>
+              <small>Current focus</small>
+              <strong>{currentPhaseTitle}</strong>
+            </span>
+            <span>
+              <small>Next review</small>
+              <strong>{nextSchedule?.startDateLabel ?? 'No scheduled review'}</strong>
+            </span>
+          </div>
+        </section>
+
         <section className="dashboard-hero">
           <article className="dashboard-hero-main student-dashboard-workspace-hero">
 
@@ -1159,21 +1196,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                 </article>
               ))}
             </div>
-
-            <div className="dashboard-action-grid">
-              {workspaceActions.map((item) => (
-                <Link key={item.id} className="dashboard-action-card" href={item.href}>
-                  <span className="dashboard-action-icon">
-                    <i className={`fas ${item.icon}`} aria-hidden="true" />
-                  </span>
-                  <div className="student-dashboard-action-copy">
-                    <span className="student-dashboard-action-meta">{item.metric}</span>
-                    <strong>{item.label}</strong>
-                    <small>{item.description}</small>
-                  </div>
-                </Link>
-              ))}
-            </div>
           </article>
 
           <div className="dashboard-hero-side">
@@ -1205,24 +1227,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                 ))}
               </div>
             </article>
-
-            <article className="dashboard-brief-card">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Project Snapshot</span>
-                  <h3>Workspace essentials</h3>
-                  <p>Core context stays visible without opening separate student pages.</p>
-                </div>
-              </div>
-              <div className="detail-grid student-dashboard-snapshot-grid">
-                {projectMeta.map((item) => (
-                  <article key={item.id} className="detail-item">
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                  </article>
-                ))}
-              </div>
-            </article>
           </div>
         </section>
 
@@ -1248,8 +1252,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Action Center</span>
-                  <h3>What needs attention now</h3>
-                  <p>Start with the highest-friction item first, then continue through the next milestone.</p>
+                  <h3>What needs attention</h3>
                 </div>
                 <Badge
                   label={priorityTasks.length ? 'Action Needed' : 'Clear'}
@@ -1290,21 +1293,11 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Milestone Pipeline</span>
-                  <h3>Proposal to defense workflow</h3>
-                  <p>Keep the academic sequence visible so the next deliverable is obvious.</p>
+                  <h3>Proposal to defense</h3>
                 </div>
                 <Link className="inline-link" href="/students/milestones">
                   Open milestones
                 </Link>
-              </div>
-              <div className="student-dashboard-phase-summary-grid">
-                {phaseSummaryCards.map((item) => (
-                  <article key={item.id} className={`student-dashboard-phase-summary-item is-${item.tone}`}>
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                    <small>{item.note}</small>
-                  </article>
-                ))}
               </div>
               <div className="student-phase-tracker">
                 {workflow.map((item, index) => {
@@ -1331,50 +1324,31 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Project Files</span>
-                  <h3>Latest submissions and archive readiness</h3>
-                  <p>Track the most recent uploads while keeping revision-heavy files and archive status visible.</p>
+                  <h3>Latest submissions</h3>
                 </div>
-                <div className="student-section-actions">
-                  <Link className="inline-link" href="/students/project-files">
-                    Open project files
-                  </Link>
-                  <Link className="student-dashboard-action-link is-compact" href="/students/project-files">
-                    <i className="fas fa-book-open-reader" aria-hidden="true" />
-                    Open Project Files
-                  </Link>
-                </div>
+                <Link className="inline-link" href="/students/project-files">
+                  Open project files
+                </Link>
               </div>
               {recentUploads.length ? (
-                <div className="student-dashboard-files-grid">
-                  <div className="dashboard-upload-list is-preview">
-                    {recentUploads.map((item) => (
-                      <article key={item.id} className="dashboard-upload-item">
-                        <div className="dashboard-upload-main">
-                          <span className="table-file-icon">
-                            <i className="fas fa-file-lines" aria-hidden="true" />
-                          </span>
-                          <div>
-                            <strong>{item.fileName}</strong>
-                            <small>{CATEGORY_LABELS[item.category] ?? item.category}</small>
-                          </div>
+                <div className="dashboard-upload-list is-preview">
+                  {recentUploads.map((item) => (
+                    <article key={item.id} className="dashboard-upload-item">
+                      <div className="dashboard-upload-main">
+                        <span className="table-file-icon">
+                          <i className="fas fa-file-lines" aria-hidden="true" />
+                        </span>
+                        <div>
+                          <strong>{item.fileName}</strong>
+                          <small>{CATEGORY_LABELS[item.category] ?? item.category}</small>
                         </div>
-                        <div className="dashboard-upload-meta">
-                          <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />
-                          <span>{item.uploadDateLabel}</span>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-
-                  <div className="student-dashboard-file-summary-grid">
-                    {fileSummaryCards.map((item) => (
-                      <article key={item.id} className="student-dashboard-file-summary-item">
-                        <span>{item.label}</span>
-                        <strong>{item.value}</strong>
-                        <small>{item.note}</small>
-                      </article>
-                    ))}
-                  </div>
+                      </div>
+                      <div className="dashboard-upload-meta">
+                        <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />
+                        <span>{item.uploadDateLabel}</span>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               ) : (
                 <EmptyState
@@ -1391,7 +1365,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Upcoming Activity</span>
-                  <h4>Consultations, deadlines, and key events</h4>
+                  <h4>Next events</h4>
                 </div>
                 <Link className="inline-link" href="/students/schedule">
                   Open schedule
@@ -1491,7 +1465,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Faculty Feedback</span>
-                  <h3>Latest adviser and panel recommendations</h3>
+                  <h3>Recent comments</h3>
                 </div>
                 <Link className="inline-link" href="/students/faculty-feedback">
                   Open feedback
@@ -1539,24 +1513,11 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
             <article className="surface-card student-dashboard-card student-dashboard-team-panel">
               <div className="card-heading">
                 <div>
-                  <span className="section-kicker">Shared Group Workspace</span>
-                  <h3>Team snapshot</h3>
+                  <span className="section-kicker">Team</span>
+                  <h3>{data.group.groupName}</h3>
                 </div>
                 <Badge label={data.profile.groupRole} tone="warning" />
               </div>
-              <div className="student-summary-strip">
-                <div className="student-summary-metric">
-                  <span>Group members</span>
-                  <strong>{data.group.memberCount}</strong>
-                </div>
-                <div className="student-summary-metric">
-                  <span>Leader</span>
-                  <strong>{data.group.leaderName}</strong>
-                </div>
-              </div>
-              <p className="student-dashboard-team-note">
-                Official submissions, title updates, and schedule coordination are currently handled through the group leader workspace.
-              </p>
               <div className="dashboard-roster-list is-compact">
                 {data.group.members.map((member) => (
                   <article

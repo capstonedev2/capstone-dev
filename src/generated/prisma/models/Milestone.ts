@@ -258,6 +258,7 @@ export type MilestoneWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Milestone"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
   submissions?: Prisma.SubmissionListRelationFilter
+  checkpoints?: Prisma.MilestoneCheckpointListRelationFilter
 }
 
 export type MilestoneOrderByWithRelationInput = {
@@ -273,6 +274,7 @@ export type MilestoneOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   project?: Prisma.ProjectOrderByWithRelationInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
+  checkpoints?: Prisma.MilestoneCheckpointOrderByRelationAggregateInput
 }
 
 export type MilestoneWhereUniqueInput = Prisma.AtLeast<{
@@ -292,6 +294,7 @@ export type MilestoneWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Milestone"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
   submissions?: Prisma.SubmissionListRelationFilter
+  checkpoints?: Prisma.MilestoneCheckpointListRelationFilter
 }, "id" | "projectId_sequence">
 
 export type MilestoneOrderByWithAggregationInput = {
@@ -340,6 +343,7 @@ export type MilestoneCreateInput = {
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutMilestonesInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutMilestoneInput
+  checkpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutMilestoneInput
 }
 
 export type MilestoneUncheckedCreateInput = {
@@ -354,6 +358,7 @@ export type MilestoneUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutMilestoneInput
+  checkpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutMilestoneInput
 }
 
 export type MilestoneUpdateInput = {
@@ -368,6 +373,7 @@ export type MilestoneUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutMilestonesNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutMilestoneNestedInput
+  checkpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutMilestoneNestedInput
 }
 
 export type MilestoneUncheckedUpdateInput = {
@@ -382,6 +388,7 @@ export type MilestoneUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutMilestoneNestedInput
+  checkpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutMilestoneNestedInput
 }
 
 export type MilestoneCreateManyInput = {
@@ -484,6 +491,11 @@ export type MilestoneSumOrderByAggregateInput = {
   sequence?: Prisma.SortOrder
 }
 
+export type MilestoneScalarRelationFilter = {
+  is?: Prisma.MilestoneWhereInput
+  isNot?: Prisma.MilestoneWhereInput
+}
+
 export type MilestoneNullableScalarRelationFilter = {
   is?: Prisma.MilestoneWhereInput | null
   isNot?: Prisma.MilestoneWhereInput | null
@@ -535,6 +547,20 @@ export type EnumMilestoneStatusFieldUpdateOperationsInput = {
   set?: $Enums.MilestoneStatus
 }
 
+export type MilestoneCreateNestedOneWithoutCheckpointsInput = {
+  create?: Prisma.XOR<Prisma.MilestoneCreateWithoutCheckpointsInput, Prisma.MilestoneUncheckedCreateWithoutCheckpointsInput>
+  connectOrCreate?: Prisma.MilestoneCreateOrConnectWithoutCheckpointsInput
+  connect?: Prisma.MilestoneWhereUniqueInput
+}
+
+export type MilestoneUpdateOneRequiredWithoutCheckpointsNestedInput = {
+  create?: Prisma.XOR<Prisma.MilestoneCreateWithoutCheckpointsInput, Prisma.MilestoneUncheckedCreateWithoutCheckpointsInput>
+  connectOrCreate?: Prisma.MilestoneCreateOrConnectWithoutCheckpointsInput
+  upsert?: Prisma.MilestoneUpsertWithoutCheckpointsInput
+  connect?: Prisma.MilestoneWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MilestoneUpdateToOneWithWhereWithoutCheckpointsInput, Prisma.MilestoneUpdateWithoutCheckpointsInput>, Prisma.MilestoneUncheckedUpdateWithoutCheckpointsInput>
+}
+
 export type MilestoneCreateNestedOneWithoutSubmissionsInput = {
   create?: Prisma.XOR<Prisma.MilestoneCreateWithoutSubmissionsInput, Prisma.MilestoneUncheckedCreateWithoutSubmissionsInput>
   connectOrCreate?: Prisma.MilestoneCreateOrConnectWithoutSubmissionsInput
@@ -562,6 +588,7 @@ export type MilestoneCreateWithoutProjectInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionCreateNestedManyWithoutMilestoneInput
+  checkpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutMilestoneInput
 }
 
 export type MilestoneUncheckedCreateWithoutProjectInput = {
@@ -575,6 +602,7 @@ export type MilestoneUncheckedCreateWithoutProjectInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutMilestoneInput
+  checkpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutMilestoneInput
 }
 
 export type MilestoneCreateOrConnectWithoutProjectInput = {
@@ -619,6 +647,78 @@ export type MilestoneScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Milestone"> | Date | string
 }
 
+export type MilestoneCreateWithoutCheckpointsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  sequence: number
+  status?: $Enums.MilestoneStatus
+  dueAt?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  project: Prisma.ProjectCreateNestedOneWithoutMilestonesInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutMilestoneInput
+}
+
+export type MilestoneUncheckedCreateWithoutCheckpointsInput = {
+  id?: string
+  projectId: string
+  title: string
+  description?: string | null
+  sequence: number
+  status?: $Enums.MilestoneStatus
+  dueAt?: Date | string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutMilestoneInput
+}
+
+export type MilestoneCreateOrConnectWithoutCheckpointsInput = {
+  where: Prisma.MilestoneWhereUniqueInput
+  create: Prisma.XOR<Prisma.MilestoneCreateWithoutCheckpointsInput, Prisma.MilestoneUncheckedCreateWithoutCheckpointsInput>
+}
+
+export type MilestoneUpsertWithoutCheckpointsInput = {
+  update: Prisma.XOR<Prisma.MilestoneUpdateWithoutCheckpointsInput, Prisma.MilestoneUncheckedUpdateWithoutCheckpointsInput>
+  create: Prisma.XOR<Prisma.MilestoneCreateWithoutCheckpointsInput, Prisma.MilestoneUncheckedCreateWithoutCheckpointsInput>
+  where?: Prisma.MilestoneWhereInput
+}
+
+export type MilestoneUpdateToOneWithWhereWithoutCheckpointsInput = {
+  where?: Prisma.MilestoneWhereInput
+  data: Prisma.XOR<Prisma.MilestoneUpdateWithoutCheckpointsInput, Prisma.MilestoneUncheckedUpdateWithoutCheckpointsInput>
+}
+
+export type MilestoneUpdateWithoutCheckpointsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumMilestoneStatusFieldUpdateOperationsInput | $Enums.MilestoneStatus
+  dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneRequiredWithoutMilestonesNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutMilestoneNestedInput
+}
+
+export type MilestoneUncheckedUpdateWithoutCheckpointsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sequence?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumMilestoneStatusFieldUpdateOperationsInput | $Enums.MilestoneStatus
+  dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutMilestoneNestedInput
+}
+
 export type MilestoneCreateWithoutSubmissionsInput = {
   id?: string
   title: string
@@ -630,6 +730,7 @@ export type MilestoneCreateWithoutSubmissionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutMilestonesInput
+  checkpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutMilestoneInput
 }
 
 export type MilestoneUncheckedCreateWithoutSubmissionsInput = {
@@ -643,6 +744,7 @@ export type MilestoneUncheckedCreateWithoutSubmissionsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  checkpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutMilestoneInput
 }
 
 export type MilestoneCreateOrConnectWithoutSubmissionsInput = {
@@ -672,6 +774,7 @@ export type MilestoneUpdateWithoutSubmissionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutMilestonesNestedInput
+  checkpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutMilestoneNestedInput
 }
 
 export type MilestoneUncheckedUpdateWithoutSubmissionsInput = {
@@ -685,6 +788,7 @@ export type MilestoneUncheckedUpdateWithoutSubmissionsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  checkpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutMilestoneNestedInput
 }
 
 export type MilestoneCreateManyProjectInput = {
@@ -710,6 +814,7 @@ export type MilestoneUpdateWithoutProjectInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUpdateManyWithoutMilestoneNestedInput
+  checkpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutMilestoneNestedInput
 }
 
 export type MilestoneUncheckedUpdateWithoutProjectInput = {
@@ -723,6 +828,7 @@ export type MilestoneUncheckedUpdateWithoutProjectInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutMilestoneNestedInput
+  checkpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutMilestoneNestedInput
 }
 
 export type MilestoneUncheckedUpdateManyWithoutProjectInput = {
@@ -744,10 +850,12 @@ export type MilestoneUncheckedUpdateManyWithoutProjectInput = {
 
 export type MilestoneCountOutputType = {
   submissions: number
+  checkpoints: number
 }
 
 export type MilestoneCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submissions?: boolean | MilestoneCountOutputTypeCountSubmissionsArgs
+  checkpoints?: boolean | MilestoneCountOutputTypeCountCheckpointsArgs
 }
 
 /**
@@ -767,6 +875,13 @@ export type MilestoneCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtime
   where?: Prisma.SubmissionWhereInput
 }
 
+/**
+ * MilestoneCountOutputType without action
+ */
+export type MilestoneCountOutputTypeCountCheckpointsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MilestoneCheckpointWhereInput
+}
+
 
 export type MilestoneSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -781,6 +896,7 @@ export type MilestoneSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.Milestone$submissionsArgs<ExtArgs>
+  checkpoints?: boolean | Prisma.Milestone$checkpointsArgs<ExtArgs>
   _count?: boolean | Prisma.MilestoneCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["milestone"]>
 
@@ -829,6 +945,7 @@ export type MilestoneOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type MilestoneInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.Milestone$submissionsArgs<ExtArgs>
+  checkpoints?: boolean | Prisma.Milestone$checkpointsArgs<ExtArgs>
   _count?: boolean | Prisma.MilestoneCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MilestoneIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -843,6 +960,7 @@ export type $MilestonePayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     project: Prisma.$ProjectPayload<ExtArgs>
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
+    checkpoints: Prisma.$MilestoneCheckpointPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1251,6 +1369,7 @@ export interface Prisma__MilestoneClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   project<T extends Prisma.ProjectDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProjectDefaultArgs<ExtArgs>>): Prisma.Prisma__ProjectClient<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   submissions<T extends Prisma.Milestone$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Milestone$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  checkpoints<T extends Prisma.Milestone$checkpointsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Milestone$checkpointsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MilestoneCheckpointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1712,6 +1831,30 @@ export type Milestone$submissionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.SubmissionScalarFieldEnum | Prisma.SubmissionScalarFieldEnum[]
+}
+
+/**
+ * Milestone.checkpoints
+ */
+export type Milestone$checkpointsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MilestoneCheckpoint
+   */
+  select?: Prisma.MilestoneCheckpointSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MilestoneCheckpoint
+   */
+  omit?: Prisma.MilestoneCheckpointOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MilestoneCheckpointInclude<ExtArgs> | null
+  where?: Prisma.MilestoneCheckpointWhereInput
+  orderBy?: Prisma.MilestoneCheckpointOrderByWithRelationInput | Prisma.MilestoneCheckpointOrderByWithRelationInput[]
+  cursor?: Prisma.MilestoneCheckpointWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MilestoneCheckpointScalarFieldEnum | Prisma.MilestoneCheckpointScalarFieldEnum[]
 }
 
 /**

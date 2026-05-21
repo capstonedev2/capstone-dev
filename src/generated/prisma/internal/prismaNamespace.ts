@@ -395,6 +395,7 @@ export const ModelName = {
   GroupMember: 'GroupMember',
   Project: 'Project',
   Milestone: 'Milestone',
+  MilestoneCheckpoint: 'MilestoneCheckpoint',
   Submission: 'Submission',
   ReviewComment: 'ReviewComment',
   DefenseSchedule: 'DefenseSchedule',
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "submission" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset"
+    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1236,6 +1237,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MilestoneCheckpoint: {
+      payload: Prisma.$MilestoneCheckpointPayload<ExtArgs>
+      fields: Prisma.MilestoneCheckpointFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MilestoneCheckpointFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MilestoneCheckpointFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>
+        }
+        findFirst: {
+          args: Prisma.MilestoneCheckpointFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MilestoneCheckpointFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>
+        }
+        findMany: {
+          args: Prisma.MilestoneCheckpointFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>[]
+        }
+        create: {
+          args: Prisma.MilestoneCheckpointCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>
+        }
+        createMany: {
+          args: Prisma.MilestoneCheckpointCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MilestoneCheckpointCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>[]
+        }
+        delete: {
+          args: Prisma.MilestoneCheckpointDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>
+        }
+        update: {
+          args: Prisma.MilestoneCheckpointUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>
+        }
+        deleteMany: {
+          args: Prisma.MilestoneCheckpointDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MilestoneCheckpointUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MilestoneCheckpointUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>[]
+        }
+        upsert: {
+          args: Prisma.MilestoneCheckpointUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MilestoneCheckpointPayload>
+        }
+        aggregate: {
+          args: Prisma.MilestoneCheckpointAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMilestoneCheckpoint>
+        }
+        groupBy: {
+          args: Prisma.MilestoneCheckpointGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MilestoneCheckpointGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MilestoneCheckpointCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MilestoneCheckpointCountAggregateOutputType> | number
+        }
+      }
+    }
     Submission: {
       payload: Prisma.$SubmissionPayload<ExtArgs>
       fields: Prisma.SubmissionFieldRefs
@@ -1941,6 +2016,7 @@ export const UploadedFileScalarFieldEnum = {
   userId: 'userId',
   projectId: 'projectId',
   submissionId: 'submissionId',
+  checkpointId: 'checkpointId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2072,10 +2148,36 @@ export const MilestoneScalarFieldEnum = {
 export type MilestoneScalarFieldEnum = (typeof MilestoneScalarFieldEnum)[keyof typeof MilestoneScalarFieldEnum]
 
 
+export const MilestoneCheckpointScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  milestoneId: 'milestoneId',
+  key: 'key',
+  title: 'title',
+  description: 'description',
+  sequence: 'sequence',
+  required: 'required',
+  status: 'status',
+  adviserReviewStatus: 'adviserReviewStatus',
+  panelReviewStatus: 'panelReviewStatus',
+  submittedAt: 'submittedAt',
+  reviewedAt: 'reviewedAt',
+  completedAt: 'completedAt',
+  latestFeedback: 'latestFeedback',
+  latestFeedbackBy: 'latestFeedbackBy',
+  latestFeedbackAt: 'latestFeedbackAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MilestoneCheckpointScalarFieldEnum = (typeof MilestoneCheckpointScalarFieldEnum)[keyof typeof MilestoneCheckpointScalarFieldEnum]
+
+
 export const SubmissionScalarFieldEnum = {
   id: 'id',
   projectId: 'projectId',
   milestoneId: 'milestoneId',
+  checkpointId: 'checkpointId',
   submittedById: 'submittedById',
   title: 'title',
   description: 'description',
@@ -2393,6 +2495,34 @@ export type ListEnumMilestoneStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
+ * Reference to a field of type 'MilestoneCheckpointStatus'
+ */
+export type EnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MilestoneCheckpointStatus[]'
+ */
+export type ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MilestoneCheckpointReviewStatus'
+ */
+export type EnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointReviewStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MilestoneCheckpointReviewStatus[]'
+ */
+export type ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointReviewStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'SubmissionStatus'
  */
 export type EnumSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubmissionStatus'>
@@ -2652,6 +2782,7 @@ export type GlobalOmitConfig = {
   groupMember?: Prisma.GroupMemberOmit
   project?: Prisma.ProjectOmit
   milestone?: Prisma.MilestoneOmit
+  milestoneCheckpoint?: Prisma.MilestoneCheckpointOmit
   submission?: Prisma.SubmissionOmit
   reviewComment?: Prisma.ReviewCommentOmit
   defenseSchedule?: Prisma.DefenseScheduleOmit

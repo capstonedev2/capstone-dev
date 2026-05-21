@@ -1,572 +1,1264 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { logout } from '@/lib/mock/auth';
+import { useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
-import { STUDENT_NAV_ITEMS } from '@/components/students/student-navigation';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger';
-type RoadmapStatus = 'completed' | 'ongoing' | 'pending';
+type StageKey = 'concept' | 'proposal' | 'development' | 'mock-defense' | 'final-defense' | 'completion';
+type StageStatus = 'completed' | 'in-review' | 'needs-revision' | 'pending' | 'locked';
+type CheckpointStatus = 'completed' | 'in-review' | 'needs-revision' | 'pending' | 'locked';
+type ReviewStatus = 'approved' | 'in-review' | 'needs-revision' | 'pending' | 'not-required';
 
-type RoadmapStage = {
+type CheckpointBlueprint = {
   id: string;
-  title: string;
-  summary: string;
-  dateLabel: string;
-  status: RoadmapStatus;
-  route: string;
-  actionLabel: string;
-  evidenceCount: number;
-  evidenceLabel: string;
+  label: string;
+  kind:
+    | 'title-submitted'
+    | 'concept-paper'
+    | 'adviser-approval'
+    | 'concept-presentation-scheduled'
+    | 'concept-panel-approval'
+    | 'chapters-uploaded'
+    | 'adviser-review'
+    | 'proposal-defense-scheduled'
+    | 'panel-evaluation'
+    | 'final-approval'
+    | 'prototype-uploaded'
+    | 'progress-report'
+    | 'testing-evidence'
+    | 'monitoring-approval'
+    | 'presentation-uploaded'
+    | 'mock-defense-scheduled'
+    | 'panel-comments'
+    | 'revisions-completed'
+    | 'final-manuscript'
+    | 'final-defense-scheduled'
+    | 'panel-approval'
+    | 'final-revisions'
+    | 'approved-manuscript'
+    | 'approval-sheet'
+    | 'repository-submission'
+    | 'archive-confirmation';
 };
 
-const MILESTONE_BLUEPRINT = [
+type StageBlueprint = {
+  key: StageKey;
+  title: string;
+  summary: string;
+  defaultTarget: string;
+  route: string;
+  actionLabel: string;
+  icon: string;
+  evidenceCategories: string[];
+  evidenceKeywords: string[];
+  scheduleKeywords: string[];
+  feedbackKeywords: string[];
+  checkpoints: CheckpointBlueprint[];
+};
+
+type StageEvidence = {
+  id: string;
+  fileName: string;
+  fileType: string;
+  sizeLabel: string;
+  uploadDateLabel: string;
+  reviewStatus: string;
+};
+
+type StageFeedback = {
+  id: string;
+  title: string;
+  content: string;
+  facultyName: string;
+  mode: string;
+  status: string;
+  dateLabel: string;
+};
+
+type SavedCheckpoint = StudentDashboardData['milestoneCheckpoints'][number];
+
+type BuiltCheckpoint = CheckpointBlueprint & {
+  status: CheckpointStatus;
+  note: string;
+  recordId?: string;
+};
+
+type BuiltStage = {
+  id: string;
+  key: StageKey;
+  index: number;
+  title: string;
+  summary: string;
+  targetDate: string;
+  route: string;
+  actionLabel: string;
+  icon: string;
+  status: StageStatus;
+  progress: number;
+  completedCheckpoints: number;
+  checkpoints: BuiltCheckpoint[];
+  evidence: StageEvidence[];
+  adviserReview: ReviewStatus;
+  panelReview: ReviewStatus;
+  latestFeedback: StageFeedback | null;
+};
+
+const SCHEDULE_CHECKPOINT_KINDS = new Set<CheckpointBlueprint['kind']>([
+  'concept-presentation-scheduled',
+  'proposal-defense-scheduled',
+  'mock-defense-scheduled',
+  'final-defense-scheduled'
+]);
+
+const STAGE_BLUEPRINTS: StageBlueprint[] = [
   {
+    key: 'concept',
     title: 'Concept',
-    summary: 'Define the research topic, identify the problem scope, and draft initial ideas for the capstone study.',
-    dateLabel: 'Completed during concept phase',
+    summary: 'Define the research topic, problem scope, and initial capstone direction.',
+    defaultTarget: 'Target set by adviser',
     route: '/students/title-submission',
-    actionLabel: 'Open Title Submission'
+    actionLabel: 'Open Title Submission',
+    icon: 'fa-lightbulb',
+    evidenceCategories: ['concept', 'title', 'title-submission'],
+    evidenceKeywords: ['concept', 'title'],
+    scheduleKeywords: ['concept', 'title', 'presentation', 'defense'],
+    feedbackKeywords: ['concept', 'title'],
+    checkpoints: [
+      { id: 'concept-title', label: 'Title submitted', kind: 'title-submitted' },
+      { id: 'concept-paper', label: 'Concept paper uploaded', kind: 'concept-paper' },
+      { id: 'concept-adviser-approval', label: 'Adviser idea approval', kind: 'adviser-approval' },
+      { id: 'concept-presentation-scheduled', label: 'Concept presentation scheduled', kind: 'concept-presentation-scheduled' },
+      { id: 'concept-panel-approval', label: 'Panel concept approval', kind: 'concept-panel-approval' }
+    ]
   },
   {
+    key: 'proposal',
     title: 'Proposal',
     summary: 'Submit the formal project proposal for adviser and panel evaluation and approval.',
-    dateLabel: 'Target set by adviser review',
+    defaultTarget: 'Proposal target pending',
     route: '/students/project-files',
-    actionLabel: 'Open Project Files'
+    actionLabel: 'Upload Requirement',
+    icon: 'fa-file-lines',
+    evidenceCategories: ['proposal', 'chapters-1-3', 'manuscript'],
+    evidenceKeywords: ['proposal', 'chapter 1', 'chapter 2', 'chapter 3', 'chapters 1-3'],
+    scheduleKeywords: ['proposal', 'defense'],
+    feedbackKeywords: ['proposal', 'chapter'],
+    checkpoints: [
+      { id: 'proposal-chapters', label: 'Chapters 1-3 uploaded', kind: 'chapters-uploaded' },
+      { id: 'proposal-adviser-review', label: 'Adviser initial review', kind: 'adviser-review' },
+      { id: 'proposal-defense-scheduled', label: 'Proposal defense scheduled', kind: 'proposal-defense-scheduled' },
+      { id: 'proposal-panel-evaluation', label: 'Panel evaluation', kind: 'panel-evaluation' },
+      { id: 'proposal-final-approval', label: 'Final approval', kind: 'final-approval' }
+    ]
   },
   {
+    key: 'development',
     title: 'Development',
-    summary: 'Build the system, conduct testing, and track chapter submissions and milestone progress.',
-    dateLabel: 'Current development window',
+    summary: 'Build the system, submit progress reports, and provide implementation evidence.',
+    defaultTarget: 'Development target pending',
     route: '/students/project-overview',
-    actionLabel: 'View Project'
+    actionLabel: 'View Project',
+    icon: 'fa-laptop-code',
+    evidenceCategories: ['system-files', 'prototype', 'testing', 'development', 'progress-report'],
+    evidenceKeywords: ['prototype', 'testing', 'test', 'system', 'development', 'progress report'],
+    scheduleKeywords: ['development', 'monitoring', 'consultation'],
+    feedbackKeywords: ['development', 'prototype', 'testing', 'progress'],
+    checkpoints: [
+      { id: 'development-prototype', label: 'Prototype uploaded', kind: 'prototype-uploaded' },
+      { id: 'development-progress-report', label: 'Progress report submitted', kind: 'progress-report' },
+      { id: 'development-testing-evidence', label: 'Testing evidence uploaded', kind: 'testing-evidence' },
+      { id: 'development-adviser-monitoring', label: 'Adviser monitoring approval', kind: 'monitoring-approval' }
+    ]
   },
   {
+    key: 'mock-defense',
     title: 'Mock Defense',
-    summary: 'Present a practice defense to gather early feedback, identify gaps, and refine the study.',
-    dateLabel: 'Awaiting mock defense schedule',
+    summary: 'Present a practice defense, gather early feedback, and complete revisions.',
+    defaultTarget: 'Mock defense target pending',
     route: '/students/schedule',
-    actionLabel: 'Open Schedule'
+    actionLabel: 'Open Schedule',
+    icon: 'fa-microphone-lines',
+    evidenceCategories: ['presentation-files', 'mock-defense', 'revisions'],
+    evidenceKeywords: ['presentation', 'mock', 'defense', 'revision'],
+    scheduleKeywords: ['mock', 'practice', 'dry run', 'defense'],
+    feedbackKeywords: ['mock', 'defense', 'revision', 'panel'],
+    checkpoints: [
+      { id: 'mock-presentation', label: 'Presentation uploaded', kind: 'presentation-uploaded' },
+      { id: 'mock-defense-scheduled', label: 'Mock defense scheduled', kind: 'mock-defense-scheduled' },
+      { id: 'mock-panel-comments', label: 'Panel comments received', kind: 'panel-comments' },
+      { id: 'mock-revisions-completed', label: 'Revisions completed', kind: 'revisions-completed' }
+    ]
   },
   {
+    key: 'final-defense',
     title: 'Final Defense',
     summary: 'Defend the completed project before the panel and submit final revisions.',
-    dateLabel: 'To be scheduled',
+    defaultTarget: 'Final defense target pending',
     route: '/students/faculty-feedback',
-    actionLabel: 'View Feedback'
+    actionLabel: 'View Feedback',
+    icon: 'fa-landmark',
+    evidenceCategories: ['final-manuscript', 'presentation-files', 'final-defense', 'revisions'],
+    evidenceKeywords: ['final manuscript', 'final defense', 'presentation', 'final revision'],
+    scheduleKeywords: ['final', 'defense'],
+    feedbackKeywords: ['final', 'defense', 'panel', 'revision'],
+    checkpoints: [
+      { id: 'final-manuscript', label: 'Final manuscript uploaded', kind: 'final-manuscript' },
+      { id: 'final-defense-scheduled', label: 'Final defense scheduled', kind: 'final-defense-scheduled' },
+      { id: 'final-panel-approval', label: 'Panel approval', kind: 'panel-approval' },
+      { id: 'final-revisions-submitted', label: 'Final revisions submitted', kind: 'final-revisions' }
+    ]
   },
   {
+    key: 'completion',
     title: 'Completion',
-    summary: 'Finalize deliverables, upload evidence, and publish to the repository.',
-    dateLabel: 'Final endorsement target',
-    route: '/students/project-overview',
-    actionLabel: 'Open Project Overview'
+    summary: 'Finalize approved deliverables, repository submission, and archive confirmation.',
+    defaultTarget: 'Completion target pending',
+    route: '/students/repository',
+    actionLabel: 'Open Repository',
+    icon: 'fa-graduation-cap',
+    evidenceCategories: ['approved-manuscript', 'approval-sheet', 'repository', 'archive'],
+    evidenceKeywords: ['approved manuscript', 'approval sheet', 'repository', 'archive'],
+    scheduleKeywords: ['completion', 'archive'],
+    feedbackKeywords: ['completion', 'approved', 'repository', 'archive'],
+    checkpoints: [
+      { id: 'completion-approved-manuscript', label: 'Approved manuscript uploaded', kind: 'approved-manuscript' },
+      { id: 'completion-approval-sheet', label: 'Approval sheet uploaded', kind: 'approval-sheet' },
+      { id: 'completion-repository-submission', label: 'Repository submission completed', kind: 'repository-submission' },
+      { id: 'completion-archive-confirmation', label: 'Archive confirmation', kind: 'archive-confirmation' }
+    ]
   }
-] as const;
+];
 
-const STAGE_KEYWORDS = {
-  concept: ['title', 'concept'],
-  proposal: ['proposal'],
-  development: ['chapter-1', 'chapter-2', 'chapter-3', 'system-files'],
-  mockDefense: ['mock', 'practice', 'dry-run'],
-  finalDefense: ['presentation', 'defense', 'symposium'],
-  completion: ['approved']
-} as const;
-
-function getInitials(value: string) {
-  return value
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join('');
+function normalizeText(value: unknown) {
+  return String(value ?? '').trim().toLowerCase();
 }
 
-function normalizeMilestoneStatus(status?: string): RoadmapStatus {
-  const normalized = status?.toLowerCase() || '';
-
-  if (normalized.includes('completed') || normalized.includes('approved')) {
-    return 'completed';
-  }
-
-  if (normalized.includes('ongoing') || normalized.includes('active') || normalized.includes('current')) {
-    return 'ongoing';
-  }
-
-  return 'pending';
+function includesAny(value: string, keywords: string[]) {
+  const normalized = normalizeText(value);
+  return keywords.some((keyword) => normalized.includes(keyword));
 }
 
-function getStatusTone(status: string): BadgeTone {
-  const normalized = status.toLowerCase();
-  if (['approved', 'completed', 'resolved'].includes(normalized)) return 'success';
-  if (['pending review', 'pending', 'under review', 'revised', 'ongoing'].includes(normalized)) return 'warning';
-  if (['needs revision', 'danger'].includes(normalized)) return 'danger';
+function isApprovedStatus(value?: string) {
+  const normalized = normalizeText(value);
+  return normalized.includes('approved') || normalized.includes('completed') || normalized.includes('complete') || normalized.includes('accepted');
+}
+
+function isRevisionStatus(value?: string) {
+  const normalized = normalizeText(value);
+  return normalized.includes('needs revision') || normalized.includes('revision') || normalized.includes('rejected') || normalized.includes('delayed');
+}
+
+function isReviewStatus(value?: string) {
+  const normalized = normalizeText(value);
+  return normalized.includes('review') || normalized.includes('ongoing') || normalized.includes('current') || normalized.includes('active');
+}
+
+function normalizeStageStatus(value?: string): StageStatus | null {
+  if (!value) return null;
+  const normalized = normalizeText(value);
+  if (isApprovedStatus(value)) return 'completed';
+  if (isRevisionStatus(value)) return 'needs-revision';
+  if (normalized.includes('in_progress') || normalized.includes('submitted') || normalized.includes('under_review')) return 'in-review';
+  if (isReviewStatus(value)) return 'in-review';
+  if (normalized.includes('pending')) return 'pending';
+  return null;
+}
+
+function formatStageStatus(status: StageStatus) {
+  switch (status) {
+    case 'completed':
+      return 'Completed';
+    case 'in-review':
+      return 'In Review';
+    case 'needs-revision':
+      return 'Needs Revision';
+    case 'locked':
+      return 'Locked';
+    default:
+      return 'Pending';
+  }
+}
+
+function getStatusTone(status: StageStatus | CheckpointStatus | ReviewStatus): BadgeTone {
+  if (status === 'completed' || status === 'approved') return 'success';
+  if (status === 'needs-revision') return 'danger';
+  if (status === 'in-review' || status === 'pending') return 'warning';
   return 'neutral';
 }
 
-function formatRoadmapStatus(status: RoadmapStatus) {
-  if (status === 'completed') return 'Completed';
-  if (status === 'ongoing') return 'Ongoing';
-  return 'Pending';
-}
-
-function formatEvidenceLabel(count: number, singular: string, plural = `${singular}s`) {
-  return `${count} ${count === 1 ? singular : plural}`;
-}
-
-function getStageEvidenceMeta(title: string, data: StudentDashboardData) {
-  switch (title) {
-    case 'Concept': {
-      const count = Math.max(
-        data.titleRegistration.submissions?.length
-          ? data.titleRegistration.submissions.reduce(
-              (total, submission) => total + submission.revisionHistory.length,
-              0
-            )
-          : data.titleRegistration.revisionHistory.length,
-        1
-      );
-      return {
-        evidenceCount: count,
-        evidenceLabel: formatEvidenceLabel(count, 'concept log', 'concept logs')
-      };
-    }
-    case 'Proposal': {
-      const count = data.documents.filter((item) => item.category === 'proposal').length;
-      return {
-        evidenceCount: count,
-        evidenceLabel: formatEvidenceLabel(count, 'proposal file', 'proposal files')
-      };
-    }
-    case 'Development': {
-      const devKeywords = STAGE_KEYWORDS.development;
-      const count = data.documents.filter((item) => devKeywords.includes(item.category as (typeof devKeywords)[number])).length + data.progressReports.length;
-      return {
-        evidenceCount: count,
-        evidenceLabel: formatEvidenceLabel(count, 'development record', 'development records')
-      };
-    }
-    case 'Mock Defense': {
-      const count = data.schedules.filter((item) => {
-        const haystack = [item.title, item.type, item.description].join(' ').toLowerCase();
-        return STAGE_KEYWORDS.mockDefense.some((keyword) => haystack.includes(keyword));
-      }).length;
-      return {
-        evidenceCount: count,
-        evidenceLabel: formatEvidenceLabel(count, 'mock defense activity', 'mock defense activities')
-      };
-    }
-    case 'Final Defense': {
-      const count = data.documents.filter((item) => item.category === 'presentation-files').length + data.presentations.length;
-      return {
-        evidenceCount: count,
-        evidenceLabel: formatEvidenceLabel(count, 'defense record', 'defense records')
-      };
-    }
-    case 'Completion': {
-      const count = data.documents.filter((item) => item.reviewStatus.toLowerCase() === 'approved').length;
-      return {
-        evidenceCount: count,
-        evidenceLabel: formatEvidenceLabel(count, 'approved copy', 'approved copies')
-      };
-    }
+function getReviewLabel(status: ReviewStatus) {
+  switch (status) {
+    case 'approved':
+      return 'Approved';
+    case 'in-review':
+      return 'In Review';
+    case 'needs-revision':
+      return 'Needs Revision';
+    case 'not-required':
+      return 'Not Required';
     default:
-      return {
-        evidenceCount: 0,
-        evidenceLabel: '0 linked records'
-      };
+      return 'Pending';
   }
 }
 
-function buildRoadmapStages(data: StudentDashboardData): RoadmapStage[] {
-  const milestoneMap = new Map(
-    data.milestones.map((item) => [item.title.toLowerCase(), item])
-  );
+function getCheckpointLabel(status: CheckpointStatus) {
+  switch (status) {
+    case 'completed':
+      return 'Completed';
+    case 'in-review':
+      return 'In Review';
+    case 'needs-revision':
+      return 'Needs Revision';
+    case 'locked':
+      return 'Locked';
+    default:
+      return 'Pending';
+  }
+}
 
-  return MILESTONE_BLUEPRINT.map((stage, index) => {
-    const existingStage = milestoneMap.get(stage.title.toLowerCase());
-    const evidenceMeta = getStageEvidenceMeta(stage.title, data);
+function clampPercent(value: number) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function getStageDocuments(stage: StageBlueprint, data: StudentDashboardData): StageEvidence[] {
+  const documents = data.documents.filter((document) => {
+    const category = normalizeText(document.category);
+    const haystack = `${document.fileName} ${document.fileType} ${document.category}`;
+    return stage.evidenceCategories.some((item) => category === normalizeText(item)) || includesAny(haystack, stage.evidenceKeywords);
+  });
+
+  const titleAttachments =
+    stage.key === 'concept'
+      ? data.titleRegistration.attachments.map((attachment) => ({
+          id: attachment.id,
+          fileName: attachment.fileName,
+          fileType: attachment.fileType,
+          sizeLabel: attachment.sizeLabel,
+          uploadDateLabel: attachment.uploadedAtLabel,
+          reviewStatus: attachment.status
+        }))
+      : [];
+
+  return [...titleAttachments, ...documents].map((item) => ({
+    id: item.id,
+    fileName: item.fileName,
+    fileType: item.fileType,
+    sizeLabel: item.sizeLabel,
+    uploadDateLabel: item.uploadDateLabel,
+    reviewStatus: item.reviewStatus
+  }));
+}
+
+function getStageSchedules(stage: StageBlueprint, data: StudentDashboardData) {
+  return data.schedules.filter((schedule) => {
+    const haystack = `${schedule.title} ${schedule.type} ${schedule.description}`;
+    return includesAny(haystack, stage.scheduleKeywords);
+  });
+}
+
+function getStageFeedback(stage: StageBlueprint, data: StudentDashboardData): StageFeedback[] {
+  return data.feedback.filter((feedback) => {
+    const haystack = `${feedback.title} ${feedback.content} ${feedback.submissionTitle ?? ''} ${feedback.mode}`;
+    return includesAny(haystack, stage.feedbackKeywords);
+  });
+}
+
+function hasApprovedDocument(evidence: StageEvidence[]) {
+  return evidence.some((item) => isApprovedStatus(item.reviewStatus));
+}
+
+function hasSubmittedTitle(data: StudentDashboardData) {
+  return Boolean(
+    data.titleRegistration.proposedTitle ||
+      data.titleRegistration.submissions?.length ||
+      data.titleRegistration.status?.toLowerCase() === 'submitted'
+  );
+}
+
+function hasRepositorySubmission(data: StudentDashboardData) {
+  const status = normalizeText(data.project.repositoryStatus);
+  return Boolean(status && status !== 'n/a' && status !== 'not submitted' && status !== 'draft');
+}
+
+function formatSavedDate(value?: string) {
+  if (!value) return '';
+
+  try {
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value));
+  } catch {
+    return '';
+  }
+}
+
+function mapSavedCheckpointStatus(status?: string): CheckpointStatus {
+  const normalized = normalizeText(status).replace(/_/g, '-');
+  if (normalized.includes('completed') || normalized.includes('approved')) return 'completed';
+  if (normalized.includes('needs-revision') || normalized.includes('rejected')) return 'needs-revision';
+  if (normalized.includes('in-review') || normalized.includes('submitted') || normalized.includes('under-review')) return 'in-review';
+  if (normalized.includes('locked')) return 'locked';
+  return 'pending';
+}
+
+function mapSavedReviewStatus(status?: string): ReviewStatus {
+  const normalized = normalizeText(status).replace(/_/g, '-');
+  if (normalized.includes('not-required')) return 'not-required';
+  if (normalized.includes('approved') || normalized.includes('completed')) return 'approved';
+  if (normalized.includes('needs-revision') || normalized.includes('rejected')) return 'needs-revision';
+  if (normalized.includes('in-review') || normalized.includes('submitted') || normalized.includes('under-review')) return 'in-review';
+  return 'pending';
+}
+
+function getSavedCheckpointNote(record: SavedCheckpoint, status: CheckpointStatus) {
+  if (record.latestFeedback) {
+    return record.latestFeedback;
+  }
+
+  if (status === 'completed') {
+    return record.completedAt
+      ? `Completed on ${formatSavedDate(record.completedAt)}.`
+      : 'Completed and saved in checkpoint tracking.';
+  }
+
+  if (status === 'needs-revision') {
+    return record.reviewedAt
+      ? `Revision requested on ${formatSavedDate(record.reviewedAt)}.`
+      : 'Revision requested by faculty.';
+  }
+
+  if (status === 'in-review') {
+    return record.submittedAt
+      ? `Submitted on ${formatSavedDate(record.submittedAt)} and waiting for review.`
+      : 'Submitted and waiting for review.';
+  }
+
+  return 'Waiting for requirement submission.';
+}
+
+function buildCheckpointRecordMap(data: StudentDashboardData) {
+  return new Map(data.milestoneCheckpoints.map((checkpoint) => [checkpoint.key, checkpoint]));
+}
+
+function getPersistedStageReviewStatus(records: SavedCheckpoint[], reviewKey: 'adviserReviewStatus' | 'panelReviewStatus') {
+  if (!records.length) return null;
+  const statuses = records.map((record) => mapSavedReviewStatus(record[reviewKey]));
+  if (statuses.includes('needs-revision')) return 'needs-revision';
+  if (statuses.includes('in-review')) return 'in-review';
+  const requiredStatuses = statuses.filter((status) => status !== 'not-required');
+  if (!requiredStatuses.length) return 'not-required';
+  if (requiredStatuses.every((status) => status === 'approved')) return 'approved';
+  if (requiredStatuses.some((status) => status === 'approved')) return 'in-review';
+  return 'pending';
+}
+
+function getCheckpointStatus(
+  checkpoint: CheckpointBlueprint,
+  stage: StageBlueprint,
+  data: StudentDashboardData,
+  evidence: StageEvidence[],
+  schedules: StudentDashboardData['schedules'],
+  feedback: StageFeedback[],
+  rawStageStatus: StageStatus | null,
+  record?: SavedCheckpoint
+): BuiltCheckpoint {
+  if (record) {
+    const status = mapSavedCheckpointStatus(record.status);
 
     return {
-      id: existingStage?.id || `roadmap-stage-${index + 1}`,
-      title: stage.title,
-      summary: existingStage?.summary || stage.summary,
-      dateLabel: existingStage?.dateLabel || stage.dateLabel,
-      status: normalizeMilestoneStatus(existingStage?.status),
-      route: existingStage?.route || stage.route,
-      actionLabel: existingStage?.actionLabel || stage.actionLabel,
-      evidenceCount: evidenceMeta.evidenceCount,
-      evidenceLabel: evidenceMeta.evidenceLabel
+      ...checkpoint,
+      status,
+      note: getSavedCheckpointNote(record, status),
+      recordId: record.id
+    };
+  }
+
+  if (rawStageStatus === 'completed') {
+    return { ...checkpoint, status: 'completed', note: 'Cleared for this stage.' };
+  }
+
+  const hasEvidence = evidence.length > 0;
+  const adviserFeedback = feedback.find((item) => normalizeText(item.mode).includes('adviser'));
+  const panelFeedback = feedback.find((item) => normalizeText(item.mode).includes('panel'));
+  const revisionFeedback = feedback.find((item) => isRevisionStatus(item.status) || isRevisionStatus(item.content));
+  const approvedFeedback = feedback.find((item) => isApprovedStatus(item.status));
+
+  switch (checkpoint.kind) {
+    case 'title-submitted':
+      return hasSubmittedTitle(data)
+        ? { ...checkpoint, status: 'completed', note: 'Project title has been submitted.' }
+        : { ...checkpoint, status: 'pending', note: 'Waiting for title submission.' };
+    case 'concept-paper':
+      return hasEvidence
+        ? { ...checkpoint, status: hasApprovedDocument(evidence) ? 'completed' : 'in-review', note: 'Concept evidence is attached.' }
+        : { ...checkpoint, status: 'pending', note: 'Upload the concept paper.' };
+    case 'adviser-approval':
+      if (isApprovedStatus(data.titleRegistration.registrationStatus)) {
+        return { ...checkpoint, status: 'completed', note: 'Adviser cleared the idea for concept presentation.' };
+      }
+      return hasSubmittedTitle(data)
+        ? { ...checkpoint, status: 'in-review', note: 'Adviser review is in progress.' }
+        : { ...checkpoint, status: 'pending', note: 'Requires title and concept evidence first.' };
+    case 'concept-presentation-scheduled':
+      return schedules.length
+        ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }
+        : isApprovedStatus(data.titleRegistration.registrationStatus)
+          ? { ...checkpoint, status: 'pending', note: 'Ready to request or wait for concept presentation schedule.' }
+          : { ...checkpoint, status: 'locked', note: 'Adviser idea approval is required first.' };
+    case 'concept-panel-approval':
+      if (feedback.some((item) => normalizeText(item.mode).includes('panel') && isApprovedStatus(item.status))) {
+        return { ...checkpoint, status: 'completed', note: 'Panel approved the concept after presentation.' };
+      }
+      if (feedback.some((item) => normalizeText(item.mode).includes('panel') && isRevisionStatus(item.status))) {
+        return { ...checkpoint, status: 'needs-revision', note: 'Panel requested concept revisions.' };
+      }
+      return schedules.length
+        ? { ...checkpoint, status: 'in-review', note: 'Waiting for panel concept approval.' }
+        : { ...checkpoint, status: 'pending', note: 'Requires concept presentation first.' };
+    case 'chapters-uploaded':
+      return hasEvidence
+        ? { ...checkpoint, status: 'completed', note: `${evidence.length} proposal file${evidence.length === 1 ? '' : 's'} submitted.` }
+        : { ...checkpoint, status: 'pending', note: 'Upload Chapters 1-3.' };
+    case 'adviser-review':
+      if (revisionFeedback) return { ...checkpoint, status: 'needs-revision', note: 'Adviser feedback requires revision.' };
+      if (adviserFeedback || approvedFeedback) return { ...checkpoint, status: 'completed', note: 'Adviser review has been logged.' };
+      return hasEvidence
+        ? { ...checkpoint, status: 'in-review', note: 'Waiting for adviser review.' }
+        : { ...checkpoint, status: 'pending', note: 'Submit proposal files first.' };
+    case 'proposal-defense-scheduled':
+      return schedules.length
+        ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }
+        : { ...checkpoint, status: 'pending', note: 'No proposal defense schedule yet.' };
+    case 'panel-evaluation':
+      if (panelFeedback) return { ...checkpoint, status: isRevisionStatus(panelFeedback.status) ? 'needs-revision' : 'completed', note: 'Panel evaluation is recorded.' };
+      return schedules.length
+        ? { ...checkpoint, status: 'in-review', note: 'Panel evaluation pending after schedule.' }
+        : { ...checkpoint, status: 'pending', note: 'Requires scheduled defense.' };
+    case 'final-approval':
+      if (approvedFeedback || hasApprovedDocument(evidence)) return { ...checkpoint, status: 'completed', note: 'Final proposal approval is recorded.' };
+      return panelFeedback
+        ? { ...checkpoint, status: 'in-review', note: 'Final approval is being evaluated.' }
+        : { ...checkpoint, status: 'pending', note: 'Requires panel evaluation.' };
+    case 'prototype-uploaded':
+      return hasEvidence
+        ? { ...checkpoint, status: 'completed', note: 'Prototype evidence is available.' }
+        : { ...checkpoint, status: 'pending', note: 'Upload prototype evidence.' };
+    case 'progress-report':
+      return data.progressReports.length
+        ? { ...checkpoint, status: 'completed', note: `${data.progressReports.length} progress report${data.progressReports.length === 1 ? '' : 's'} submitted.` }
+        : { ...checkpoint, status: 'pending', note: 'Submit a progress report.' };
+    case 'testing-evidence':
+      return evidence.some((item) => includesAny(item.fileName, ['test', 'testing', 'qa', 'evaluation']))
+        ? { ...checkpoint, status: 'completed', note: 'Testing evidence is attached.' }
+        : hasEvidence
+          ? { ...checkpoint, status: 'in-review', note: 'Development evidence is under review.' }
+          : { ...checkpoint, status: 'pending', note: 'Upload testing evidence.' };
+    case 'monitoring-approval':
+      if (adviserFeedback && isRevisionStatus(adviserFeedback.status)) return { ...checkpoint, status: 'needs-revision', note: 'Adviser monitoring needs revision.' };
+      return adviserFeedback || hasApprovedDocument(evidence)
+        ? { ...checkpoint, status: 'completed', note: 'Adviser monitoring is cleared.' }
+        : data.progressReports.length
+          ? { ...checkpoint, status: 'in-review', note: 'Monitoring approval is pending.' }
+          : { ...checkpoint, status: 'pending', note: 'Requires progress evidence.' };
+    case 'presentation-uploaded':
+      return hasEvidence
+        ? { ...checkpoint, status: 'completed', note: 'Presentation file is uploaded.' }
+        : { ...checkpoint, status: 'pending', note: 'Upload the presentation deck.' };
+    case 'mock-defense-scheduled':
+      return schedules.length
+        ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }
+        : { ...checkpoint, status: 'pending', note: 'Mock defense is not scheduled.' };
+    case 'panel-comments':
+      return panelFeedback
+        ? { ...checkpoint, status: 'completed', note: 'Panel comments have been received.' }
+        : schedules.length
+          ? { ...checkpoint, status: 'in-review', note: 'Waiting for panel comments.' }
+          : { ...checkpoint, status: 'pending', note: 'Requires mock defense schedule.' };
+    case 'revisions-completed':
+      if (revisionFeedback) return { ...checkpoint, status: 'needs-revision', note: 'Revisions are still open.' };
+      return approvedFeedback
+        ? { ...checkpoint, status: 'completed', note: 'Revisions are marked complete.' }
+        : panelFeedback
+          ? { ...checkpoint, status: 'in-review', note: 'Revision completion is being checked.' }
+          : { ...checkpoint, status: 'pending', note: 'Waiting for panel comments.' };
+    case 'final-manuscript':
+      return hasEvidence
+        ? { ...checkpoint, status: 'completed', note: 'Final manuscript is uploaded.' }
+        : { ...checkpoint, status: 'pending', note: 'Upload the final manuscript.' };
+    case 'final-defense-scheduled':
+      return schedules.length
+        ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }
+        : { ...checkpoint, status: 'pending', note: 'Final defense is not scheduled.' };
+    case 'panel-approval':
+      if (panelFeedback && isApprovedStatus(panelFeedback.status)) return { ...checkpoint, status: 'completed', note: 'Panel approval is recorded.' };
+      if (panelFeedback && isRevisionStatus(panelFeedback.status)) return { ...checkpoint, status: 'needs-revision', note: 'Panel requires revision.' };
+      return schedules.length
+        ? { ...checkpoint, status: 'in-review', note: 'Panel approval pending.' }
+        : { ...checkpoint, status: 'pending', note: 'Requires final defense schedule.' };
+    case 'final-revisions':
+      if (revisionFeedback) return { ...checkpoint, status: 'needs-revision', note: 'Final revisions are still open.' };
+      return approvedFeedback || hasApprovedDocument(evidence)
+        ? { ...checkpoint, status: 'completed', note: 'Final revisions are submitted.' }
+        : panelFeedback
+          ? { ...checkpoint, status: 'in-review', note: 'Final revisions are being validated.' }
+          : { ...checkpoint, status: 'pending', note: 'Requires panel decision first.' };
+    case 'approved-manuscript':
+      return evidence.some((item) => includesAny(item.fileName, ['approved', 'manuscript']) || isApprovedStatus(item.reviewStatus))
+        ? { ...checkpoint, status: 'completed', note: 'Approved manuscript is attached.' }
+        : { ...checkpoint, status: 'pending', note: 'Upload approved manuscript.' };
+    case 'approval-sheet':
+      return evidence.some((item) => includesAny(item.fileName, ['approval sheet', 'approval']))
+        ? { ...checkpoint, status: 'completed', note: 'Approval sheet is attached.' }
+        : { ...checkpoint, status: 'pending', note: 'Upload approval sheet.' };
+    case 'repository-submission':
+      return hasRepositorySubmission(data)
+        ? { ...checkpoint, status: 'completed', note: data.project.repositoryStatus }
+        : { ...checkpoint, status: 'pending', note: 'Repository submission is not complete.' };
+    case 'archive-confirmation':
+      return isApprovedStatus(data.project.repositoryStatus)
+        ? { ...checkpoint, status: 'completed', note: 'Archive confirmation is recorded.' }
+        : hasRepositorySubmission(data)
+          ? { ...checkpoint, status: 'in-review', note: 'Archive confirmation is pending.' }
+          : { ...checkpoint, status: 'pending', note: 'Requires repository submission.' };
+    default:
+      return { ...checkpoint, status: 'pending', note: 'Waiting for requirement update.' };
+  }
+}
+
+function getReviewStatus(stage: StageBlueprint, feedback: StageFeedback[], evidence: StageEvidence[], kind: 'adviser' | 'panel'): ReviewStatus {
+  const reviewerFeedback = feedback.find((item) => normalizeText(item.mode).includes(kind));
+  if (reviewerFeedback) {
+    if (isRevisionStatus(reviewerFeedback.status) || isRevisionStatus(reviewerFeedback.content)) return 'needs-revision';
+    if (isApprovedStatus(reviewerFeedback.status)) return 'approved';
+    return 'in-review';
+  }
+
+  if (hasApprovedDocument(evidence)) return 'approved';
+  if (evidence.length) return 'in-review';
+  return 'pending';
+}
+
+function buildStages(data: StudentDashboardData): BuiltStage[] {
+  const milestoneMap = new Map(data.milestones.map((item) => [normalizeText(item.title), item]));
+  const workflowMap = new Map(data.dashboard?.workflow.map((item) => [normalizeText(item.title), item]) ?? []);
+  const checkpointRecordMap = buildCheckpointRecordMap(data);
+  const activeMilestone = normalizeText(data.project.currentMilestone);
+
+  const rawStages = STAGE_BLUEPRINTS.map((stage, index) => {
+    const milestone = milestoneMap.get(normalizeText(stage.title));
+    const workflowStep = workflowMap.get(normalizeText(stage.title));
+    const rawStatus =
+      normalizeStageStatus(milestone?.status) ||
+      normalizeStageStatus(workflowStep?.status) ||
+      (activeMilestone && activeMilestone === normalizeText(stage.title) ? 'in-review' : null);
+    const evidence = getStageDocuments(stage, data);
+    const schedules = getStageSchedules(stage, data);
+    const feedback = getStageFeedback(stage, data);
+    const checkpointRecords = stage.checkpoints
+      .map((checkpoint) => checkpointRecordMap.get(checkpoint.id))
+      .filter((checkpoint): checkpoint is SavedCheckpoint => Boolean(checkpoint));
+    const checkpoints = stage.checkpoints.map((checkpoint) =>
+      getCheckpointStatus(checkpoint, stage, data, evidence, schedules, feedback, rawStatus, checkpointRecordMap.get(checkpoint.id))
+    );
+    const completedCheckpoints = checkpoints.filter((checkpoint) => checkpoint.status === 'completed').length;
+
+    return {
+      blueprint: stage,
+      index,
+      milestone,
+      workflowStep,
+      rawStatus,
+      evidence,
+      schedules,
+      feedback,
+      checkpointRecords,
+      checkpoints,
+      completedCheckpoints
+    };
+  });
+
+  const explicitActiveIndex = rawStages.findIndex((stage) => stage.rawStatus === 'in-review' || stage.rawStatus === 'needs-revision');
+  const currentIndex =
+    explicitActiveIndex >= 0
+      ? explicitActiveIndex
+      : Math.max(
+          0,
+          rawStages.findIndex((stage) => stage.completedCheckpoints < stage.checkpoints.length && stage.rawStatus !== 'completed')
+        );
+
+  return rawStages.map((stage) => {
+    const allCheckpointsComplete = stage.completedCheckpoints === stage.checkpoints.length;
+    const hasRevision = stage.checkpoints.some((checkpoint) => checkpoint.status === 'needs-revision');
+    const hasReview = stage.checkpoints.some((checkpoint) => checkpoint.status === 'in-review');
+    let status: StageStatus;
+
+    if (stage.rawStatus === 'completed' || (stage.index < currentIndex && !hasRevision)) {
+      status = 'completed';
+    } else if (stage.index > currentIndex) {
+      status = 'locked';
+    } else if (stage.rawStatus === 'needs-revision' || hasRevision) {
+      status = 'needs-revision';
+    } else if (allCheckpointsComplete) {
+      status = 'completed';
+    } else if (stage.rawStatus === 'in-review' || hasReview || stage.completedCheckpoints > 0) {
+      status = 'in-review';
+    } else {
+      status = 'pending';
+    }
+
+    const progress = allCheckpointsComplete
+      ? 100
+      : clampPercent((stage.completedCheckpoints / Math.max(stage.checkpoints.length, 1)) * 100);
+    const latestCheckpointFeedback = [...stage.checkpointRecords]
+      .filter((checkpoint) => checkpoint.latestFeedback)
+      .sort((left, right) => new Date(right.latestFeedbackAt || right.reviewedAt || right.submittedAt || 0).getTime() - new Date(left.latestFeedbackAt || left.reviewedAt || left.submittedAt || 0).getTime())[0];
+
+    return {
+      id: stage.milestone?.id || stage.workflowStep?.id || `stage-${stage.blueprint.key}`,
+      key: stage.blueprint.key,
+      index: stage.index,
+      title: stage.blueprint.title,
+      summary: stage.milestone?.summary || stage.workflowStep?.summary || stage.blueprint.summary,
+      targetDate: stage.milestone?.dateLabel || stage.workflowStep?.dateLabel || stage.blueprint.defaultTarget,
+      route: stage.milestone?.route || stage.workflowStep?.route || stage.blueprint.route,
+      actionLabel: stage.milestone?.actionLabel || stage.workflowStep?.actionLabel || stage.blueprint.actionLabel,
+      icon: stage.blueprint.icon,
+      status,
+      progress,
+      completedCheckpoints: stage.completedCheckpoints,
+      checkpoints: status === 'locked'
+        ? stage.checkpoints.map((checkpoint) => ({ ...checkpoint, status: 'locked' as const, note: 'Complete the previous stage to unlock this requirement.' }))
+        : stage.checkpoints,
+      evidence: stage.evidence,
+      adviserReview: status === 'completed'
+        ? 'approved'
+        : getPersistedStageReviewStatus(stage.checkpointRecords, 'adviserReviewStatus') || getReviewStatus(stage.blueprint, stage.feedback, stage.evidence, 'adviser'),
+      panelReview: status === 'completed'
+        ? 'approved'
+        : getPersistedStageReviewStatus(stage.checkpointRecords, 'panelReviewStatus') || getReviewStatus(stage.blueprint, stage.feedback, stage.evidence, 'panel'),
+      latestFeedback: latestCheckpointFeedback
+        ? {
+            id: latestCheckpointFeedback.id,
+            title: `Feedback on ${latestCheckpointFeedback.title}`,
+            content: latestCheckpointFeedback.latestFeedback || '',
+            facultyName: latestCheckpointFeedback.latestFeedbackBy || 'Faculty',
+            mode: 'Checkpoint Review',
+            status: latestCheckpointFeedback.status,
+            dateLabel: formatSavedDate(latestCheckpointFeedback.latestFeedbackAt || latestCheckpointFeedback.reviewedAt)
+          }
+        : stage.feedback[0] || null
     };
   });
 }
 
+function buildRecentActivities(data: StudentDashboardData, stages: BuiltStage[]) {
+  const documentActivities = data.documents.slice(0, 5).map((item) => ({
+    id: `document-${item.id}`,
+    date: item.created_at,
+    label: `${item.fileName} uploaded`,
+    meta: item.uploadDateLabel,
+    icon: 'fa-file-arrow-up',
+    tone: 'info'
+  }));
+
+  const feedbackActivities = data.feedback.slice(0, 5).map((item) => ({
+    id: `feedback-${item.id}`,
+    date: item.created_at,
+    label: `${item.facultyName} added feedback`,
+    meta: item.dateLabel,
+    icon: item.status === 'Needs Revision' ? 'fa-triangle-exclamation' : 'fa-comments',
+    tone: item.status === 'Needs Revision' ? 'danger' : 'warning'
+  }));
+
+  const milestoneActivities = stages
+    .filter((stage) => stage.status === 'completed' || stage.status === 'in-review' || stage.status === 'needs-revision')
+    .map((stage) => ({
+      id: `stage-${stage.id}`,
+      date: '',
+      label: `${stage.title} is ${formatStageStatus(stage.status).toLowerCase()}`,
+      meta: stage.targetDate,
+      icon: stage.status === 'completed' ? 'fa-circle-check' : 'fa-timeline',
+      tone: stage.status === 'completed' ? 'success' : 'warning'
+    }));
+
+  return [...documentActivities, ...feedbackActivities, ...milestoneActivities]
+    .sort((left, right) => {
+      const leftTime = left.date ? new Date(left.date).getTime() : 0;
+      const rightTime = right.date ? new Date(right.date).getTime() : 0;
+      return rightTime - leftTime;
+    })
+    .slice(0, 4);
+}
+
+function buildUpcomingDeadlines(data: StudentDashboardData, stages: BuiltStage[]) {
+  const scheduleDeadlines = data.schedules
+    .filter((schedule) => !schedule.isCompleted)
+    .slice(0, 4)
+    .map((schedule) => ({
+      id: `schedule-${schedule.id}`,
+      title: schedule.title,
+      date: schedule.startDateLabel,
+      meta: schedule.type,
+      icon: 'fa-calendar-day',
+      tone: schedule.priority === 'high' ? 'danger' : 'warning'
+    }));
+
+  const stageDeadlines = stages
+    .filter((stage) => stage.status !== 'completed')
+    .slice(0, 4)
+    .map((stage) => ({
+      id: `stage-deadline-${stage.id}`,
+      title: `${stage.title} target`,
+      date: stage.targetDate,
+      meta: formatStageStatus(stage.status),
+      icon: stage.status === 'locked' ? 'fa-lock' : 'fa-flag',
+      tone: stage.status === 'needs-revision' ? 'danger' : 'warning'
+    }));
+
+  return [...scheduleDeadlines, ...stageDeadlines].slice(0, 4);
+}
+
 function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: BadgeTone; icon?: string }) {
   return (
-    <span className={`ui-badge is-${tone}`}>
+    <span className={`milestone-status-badge is-${tone}`}>
       {icon ? <i className={`fas ${icon}`} aria-hidden="true" /> : null}
       {label}
     </span>
   );
 }
 
+function CheckpointIcon({ status }: { status: CheckpointStatus }) {
+  const iconByStatus: Record<CheckpointStatus, string> = {
+    completed: 'fa-check',
+    'in-review': 'fa-clock',
+    'needs-revision': 'fa-exclamation',
+    pending: 'fa-circle',
+    locked: 'fa-lock'
+  };
+
+  return (
+    <span className={`milestone-check-icon is-${status}`} aria-hidden="true">
+      <i className={`fas ${iconByStatus[status]}`} />
+    </span>
+  );
+}
+
+function ReviewPill({ label, status }: { label: string; status: ReviewStatus }) {
+  return (
+    <div className="milestone-review-row">
+      <span>{label}</span>
+      <Badge label={getReviewLabel(status)} tone={getStatusTone(status)} />
+    </div>
+  );
+}
+
+function StageAction({ stage }: { stage: BuiltStage }) {
+  if (stage.status === 'locked') {
+    return (
+      <button className="milestone-action-button is-disabled" type="button" disabled>
+        <i className="fas fa-lock" aria-hidden="true" />
+        Locked
+      </button>
+    );
+  }
+
+  const label = stage.status === 'completed' ? 'View Completed Stage' : stage.actionLabel;
+
+  return (
+    <Link className="milestone-action-button" href={stage.route}>
+      <i className={`fas ${stage.status === 'completed' ? 'fa-circle-check' : 'fa-arrow-up-right-from-square'}`} aria-hidden="true" />
+      {label}
+    </Link>
+  );
+}
+
+function StageDetails({ stage }: { stage: BuiltStage }) {
+  return (
+    <div className="milestone-stage-details">
+      <div className="milestone-stage-column">
+        <div className="milestone-stage-column-head">
+          <span>Stage Checkpoints</span>
+          <strong>{stage.completedCheckpoints}/{stage.checkpoints.length} complete</strong>
+        </div>
+        <div className="milestone-checklist">
+          {stage.checkpoints.map((checkpoint) => (
+            <div key={checkpoint.id} className={`milestone-checkpoint-row is-${checkpoint.status}`}>
+              <CheckpointIcon status={checkpoint.status} />
+              <div>
+                <strong>{checkpoint.label}</strong>
+                <span>{checkpoint.note}</span>
+              </div>
+              <small>{getCheckpointLabel(checkpoint.status)}</small>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="milestone-stage-column">
+        <div className="milestone-stage-column-head">
+          <span>Requirements & Evidence</span>
+          <strong>{stage.evidence.length} submitted</strong>
+        </div>
+        {stage.evidence.length ? (
+          <div className="milestone-evidence-list">
+            {stage.evidence.slice(0, 3).map((item) => (
+              <div key={item.id} className="milestone-evidence-item">
+                <span className="milestone-evidence-icon" aria-hidden="true">
+                  <i className="fas fa-file-lines" />
+                </span>
+                <div>
+                  <strong>{item.fileName}</strong>
+                  <small>{item.uploadDateLabel} · {item.sizeLabel}</small>
+                </div>
+                <Badge label={item.reviewStatus || 'Submitted'} tone={getStatusTone(isApprovedStatus(item.reviewStatus) ? 'completed' : isRevisionStatus(item.reviewStatus) ? 'needs-revision' : 'in-review')} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="milestone-empty-state">
+            <i className="fas fa-file-circle-plus" aria-hidden="true" />
+            <span>No file or evidence submitted for this stage yet.</span>
+          </div>
+        )}
+      </div>
+
+      <div className="milestone-stage-column">
+        <div className="milestone-stage-column-head">
+          <span>Review & Feedback</span>
+          <strong>{stage.targetDate}</strong>
+        </div>
+        <div className="milestone-review-panel">
+          <ReviewPill label="Adviser review" status={stage.adviserReview} />
+          <ReviewPill label="Panel review" status={stage.panelReview} />
+
+          <div className="milestone-latest-feedback">
+            <span>Latest feedback</span>
+            {stage.latestFeedback ? (
+              <>
+                <strong>{stage.latestFeedback.title}</strong>
+                <p>{stage.latestFeedback.content}</p>
+                <small>{stage.latestFeedback.facultyName} · {stage.latestFeedback.dateLabel}</small>
+              </>
+            ) : (
+              <p>No feedback recorded for this stage yet.</p>
+            )}
+          </div>
+
+          <div className="milestone-stage-gate">
+            <div>
+              <span>Stage gate</span>
+              <strong>{stage.completedCheckpoints}/{stage.checkpoints.length} requirements cleared</strong>
+            </div>
+            <StageAction stage={stage} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getActiveScheduleAction(stage?: BuiltStage) {
+  if (!stage || stage.status === 'locked') {
+    return null;
+  }
+
+  const scheduleCheckpoint = stage.checkpoints.find((checkpoint) =>
+    SCHEDULE_CHECKPOINT_KINDS.has(checkpoint.kind)
+  );
+
+  if (!scheduleCheckpoint || scheduleCheckpoint.status === 'locked') {
+    return null;
+  }
+
+  return {
+    label: scheduleCheckpoint.status === 'completed' ? 'Open Schedule' : `Open ${stage.title} Schedule`
+  };
+}
+
 export function StudentTimeline({ data }: { data: StudentDashboardData }) {
-  const router = useRouter();
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const stages = useMemo(() => buildStages(data), [data]);
+  const activeStage =
+    stages.find((stage) => stage.status === 'in-review' || stage.status === 'needs-revision' || stage.status === 'pending') ||
+    [...stages].reverse().find((stage) => stage.status === 'completed') ||
+    stages[0];
+  const activeIndex = activeStage?.index ?? 0;
+  const nextStage = stages.find((stage) => stage.index > activeIndex && stage.status !== 'completed') || null;
+  const completedStages = stages.filter((stage) => stage.status === 'completed').length;
+  const lockedStages = stages.filter((stage) => stage.status === 'locked').length;
+  const inReviewStages = stages.filter((stage) => stage.status === 'in-review' || stage.status === 'needs-revision' || stage.status === 'pending').length;
+  const overallProgress = data.project.progressPercentage || clampPercent((completedStages / Math.max(stages.length, 1)) * 100);
+  const recentActivities = useMemo(() => buildRecentActivities(data, stages), [data, stages]);
+  const upcomingDeadlines = useMemo(() => buildUpcomingDeadlines(data, stages), [data, stages]);
+  const [expandedStages, setExpandedStages] = useState<Set<string>>(() => new Set(activeStage ? [activeStage.key] : ['concept']));
+  const progressStyle = { '--progress': `${activeStage?.progress ?? 0}%` } as CSSProperties;
+  const scheduleAction = getActiveScheduleAction(activeStage);
 
-  useEffect(() => {
-    const handleDocumentClick = (event: MouseEvent) => {
-      if (!profileMenuRef.current?.contains(event.target as Node)) {
-        setProfileMenuOpen(false);
+  const toggleStage = (stageKey: string) => {
+    setExpandedStages((current) => {
+      const next = new Set(current);
+      if (next.has(stageKey)) {
+        next.delete(stageKey);
+      } else {
+        next.add(stageKey);
       }
-    };
+      return next;
+    });
+  };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setProfileMenuOpen(false);
-        setSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener('click', handleDocumentClick);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('click', handleDocumentClick);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
-  const unreadNotificationsCount = data.notifications.filter((item) => !item.read).length;
-  const unreadFeedbackCount = data.feedback.filter((item) => item.unread).length;
-
-  const roadmapStages = useMemo(() => buildRoadmapStages(data), [data]);
-  const completedMilestones = roadmapStages.filter((item) => item.status === 'completed');
-  const ongoingMilestone = roadmapStages.find((item) => item.status === 'ongoing') || null;
-  const pendingMilestones = roadmapStages.filter((item) => item.status === 'pending');
-  const currentStage = ongoingMilestone || completedMilestones[completedMilestones.length - 1] || roadmapStages[0] || null;
-  const nextMilestone = pendingMilestones[0] || null;
-  const spotlightStage = ongoingMilestone || currentStage || nextMilestone;
-
-  const relatedPages = [
-    {
-      href: '/students/project-overview',
-      label: 'Project Overview',
-      copy: 'Review the full project scope, summary, and current implementation status.',
-      icon: 'fa-folder-open'
-    },
-    {
-      href: '/students/project-files',
-      label: 'Project Files',
-      copy: 'Open manuscript, prototype, and supporting document submissions.',
-      icon: 'fa-file-lines'
-    },
-    {
-      href: '/students/schedule',
-      label: 'Schedule',
-      copy: 'Check defense windows, consultations, and milestone-related deadlines.',
-      icon: 'fa-calendar-check'
-    },
-    {
-      href: '/students/faculty-feedback',
-      label: 'Faculty Feedback',
-      copy: 'Review adviser and panel comments tied to the current academic stage.',
-      icon: 'fa-comments'
-    }
-  ];
-
-  const summaryCards = [
-    {
-      label: 'Current Stage',
-      value: currentStage ? currentStage.title : 'Not set',
-      helper: currentStage ? formatRoadmapStatus(currentStage.status) : 'No milestone status yet'
-    },
-    {
-      label: 'Progress',
-      value: `${data.project.progressPercentage}%`,
-      helper: `${completedMilestones.length} of ${roadmapStages.length} stages completed`
-    },
-    {
-      label: 'Completed',
-      value: `${completedMilestones.length}`,
-      helper: 'Milestones finished and logged'
-    },
-    {
-      label: 'Pending',
-      value: `${pendingMilestones.length}`,
-      helper: ongoingMilestone ? 'Stages still queued after the active phase' : 'Stages waiting to start'
-    },
-    {
-      label: 'Next Milestone',
-      value: nextMilestone ? nextMilestone.title : 'Final stage reached',
-      helper: nextMilestone ? nextMilestone.evidenceLabel : 'No pending milestone remaining'
-    },
-    {
-      label: 'Target Date',
-      value: nextMilestone ? nextMilestone.dateLabel : data.project.upcomingDeadline,
-      helper: nextMilestone ? 'Upcoming academic target' : 'Current project deadline reference'
-    }
-  ];
+  const expandAll = () => {
+    setExpandedStages((current) =>
+      current.size === stages.length ? new Set([activeStage?.key ?? 'concept']) : new Set(stages.map((stage) => stage.key))
+    );
+  };
 
   return (
     <div className="student-milestones-page">
-      <button className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`} type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />
+      <div className="milestones-workflow-shell">
+        <section className="milestones-overview-grid" aria-label="Milestone progress overview">
+          <div className="milestones-academic-panel">
+            <span className="milestone-section-kicker">Academic Progression</span>
+            <h2>Track every stage before the next gate unlocks</h2>
+            <p>
+              Milestones now work as a monitored thesis workflow: each stage has required checkpoints,
+              submitted evidence, adviser review, panel review, and a clear target before progression.
+            </p>
 
-      <header className="top-nav student-milestones-header">
-          <div className="top-nav-leading">
-            <div className="page-title student-milestones-header-copy">
-              <div className="page-title-context student-milestones-header-context">
-                <span className="page-kicker">Student Workspace</span>
-                <span className="page-breadcrumb" aria-hidden="true">
-                  <i className="fas fa-angle-right" />
-                  <span>Milestones</span>
-                </span>
+            <div className="milestones-system-note">
+              <i className="fas fa-circle-info" aria-hidden="true" />
+              <div>
+                <strong>Milestones track academic readiness, not just dates.</strong>
+                <span>Students move forward after the current stage requirements and reviews are cleared.</span>
               </div>
-              <h1>Project Milestones</h1>
-              <p className="student-milestones-header-description">Track milestone progress, active academic stages, and upcoming capstone targets in one clearer roadmap view.</p>
+            </div>
+
+            <div className="milestones-metric-grid">
+              <article className="milestones-metric-card">
+                <span>Current Stage</span>
+                <strong>{activeStage?.title ?? 'Not set'}</strong>
+                <small>{activeStage ? formatStageStatus(activeStage.status) : 'No active stage'}</small>
+              </article>
+              <article className="milestones-metric-card">
+                <span>Overall Progress</span>
+                <strong>{overallProgress}%</strong>
+                <small>{completedStages} of {stages.length} stages completed</small>
+              </article>
+              <article className="milestones-metric-card">
+                <span>Completed</span>
+                <strong>{completedStages}</strong>
+                <small>Stages cleared</small>
+              </article>
+              <article className="milestones-metric-card">
+                <span>In Workflow</span>
+                <strong>{inReviewStages}</strong>
+                <small>Pending or under review</small>
+              </article>
+              <article className="milestones-metric-card">
+                <span>Next Stage</span>
+                <strong>{nextStage?.title ?? 'Completion'}</strong>
+                <small>{nextStage?.status === 'locked' ? 'Locked until gate clears' : 'Ready after current stage'}</small>
+              </article>
+              <article className="milestones-metric-card">
+                <span>Locked</span>
+                <strong>{lockedStages}</strong>
+                <small>Future stages waiting</small>
+              </article>
             </div>
           </div>
-        </header><div className="page-body">
-          <section className="page-strip student-milestones-hero">
-            <div className="page-strip-main student-milestones-hero-main">
-              <span className="section-kicker">Academic Progression</span>
-              <h2>Clear visibility into every capstone milestone</h2>
-              <p>This page focuses on academic stage progression, milestone readiness, and where the project stands in the formal capstone journey.</p>
-              <div className="workspace-note is-member">
-                <strong>Milestones track project stages, not file inventory.</strong>
-                <p>{currentStage ? `The project is currently centered on ${currentStage.title}. Use Schedule for exact dates and Project Files for submission records.` : 'Milestone stages will appear here as the project roadmap advances.'}</p>
-              </div>
 
-              <div className="student-milestones-summary-grid">
-                {summaryCards.map((item, index) => (
-                  <article key={item.label} className={`student-milestones-summary-card ${index < 2 ? 'is-highlighted' : ''}`}>
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                    <small>{item.helper}</small>
-                  </article>
-                ))}
-              </div>
-            </div>
-
-            <article className="student-milestones-spotlight">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Current Stage Spotlight</span>
-                  <h3>{spotlightStage ? spotlightStage.title : 'No active stage yet'}</h3>
-                </div>
-                <Badge
-                  label={spotlightStage ? formatRoadmapStatus(spotlightStage.status) : 'Not Available'}
-                  tone={spotlightStage ? getStatusTone(spotlightStage.status) : 'neutral'}
-                  icon="fa-flag-checkered"
-                />
-              </div>
-
-              <p>{spotlightStage ? spotlightStage.summary : 'The current milestone will appear once the project roadmap is initialized.'}</p>
-
-              <div className="detail-grid student-milestones-spotlight-grid">
-                <div className="detail-item">
-                  <span>Status</span>
-                  <strong>{spotlightStage ? formatRoadmapStatus(spotlightStage.status) : 'Not Available'}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Progress</span>
-                  <strong>{data.project.progressPercentage}%</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Next Stage</span>
-                  <strong>{nextMilestone ? nextMilestone.title : 'Final stage reached'}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Target Date</span>
-                  <strong>{spotlightStage ? spotlightStage.dateLabel : 'No date available'}</strong>
-                </div>
-              </div>
-
-              <div className="student-milestones-progress">
-                <div className="student-milestones-progress-head">
-                  <span>Overall project progress</span>
-                  <strong>{data.project.progressPercentage}%</strong>
-                </div>
-                <div className="student-milestones-progress-bar">
-                  <span style={{ width: `${data.project.progressPercentage}%` }} />
-                </div>
-              </div>
-
-              <div className="row-actions student-milestones-spotlight-actions">
-                <Link className="btn btn-primary" href="/students/schedule"><i className="fas fa-calendar-check" aria-hidden="true" /> Open Schedule</Link>
-                <Link className="btn btn-secondary" href="/students/project-overview"><i className="fas fa-folder-open" aria-hidden="true" /> View Project</Link>
-                <Link className="btn btn-ghost" href="/students/faculty-feedback"><i className="fas fa-comments" aria-hidden="true" /> View Feedback</Link>
-              </div>
-            </article>
-          </section>
-
-          <section className="surface-card student-milestones-roadmap-card">
-            <div className="card-heading">
+          <article className="milestones-spotlight-card">
+            <div className="milestones-card-head">
               <div>
-                <span className="section-kicker">Milestone Roadmap</span>
-                <h3>Academic stages from concept to completion</h3>
-                <p>Each stage shows the academic focus, target date, current status, and related evidence or activity count where available.</p>
+                <span className="milestone-section-kicker">Current Stage Spotlight</span>
+                <h3>{activeStage?.title ?? 'No active stage yet'}</h3>
               </div>
-              <Badge label={`${completedMilestones.length} of ${roadmapStages.length} completed`} tone="warning" icon="fa-chart-line" />
+              {activeStage ? (
+                <Badge label={formatStageStatus(activeStage.status)} tone={getStatusTone(activeStage.status)} icon="fa-flag" />
+              ) : null}
             </div>
 
-            <div className="timeline-list student-milestones-roadmap-list">
-              {roadmapStages.map((item, index) => (
-                <article key={item.id} className={`timeline-item is-${item.status}`}>
-                  <div className="timeline-point" />
-                  <div className="timeline-content">
-                    <div className="timeline-step-meta">
-                      <span className="timeline-step-label">{`Stage ${index + 1}`}</span>
-                      <span className="timeline-date">{item.dateLabel}</span>
-                    </div>
+            <p>{activeStage?.summary ?? 'The active milestone will appear once the thesis workflow starts.'}</p>
 
-                    <div className="timeline-head">
-                      <div className="student-milestones-roadmap-copy">
-                        <strong>{item.title}</strong>
-                        <p>{item.summary}</p>
-                      </div>
-                      <div className="chip-row student-milestones-roadmap-badges">
-                        <Badge label={formatRoadmapStatus(item.status)} tone={getStatusTone(item.status)} />
-                        <span className="ui-badge is-neutral">{item.evidenceLabel}</span>
-                      </div>
-                    </div>
+            <div className="milestones-spotlight-grid">
+              <div className="milestone-progress-ring" style={progressStyle}>
+                <strong>{activeStage?.progress ?? 0}%</strong>
+                <span>Stage progress</span>
+              </div>
+              <div className="milestones-spotlight-facts">
+                <div>
+                  <span>Status</span>
+                  <strong>{activeStage ? formatStageStatus(activeStage.status) : 'Pending'}</strong>
+                </div>
+                <div>
+                  <span>Target Date</span>
+                  <strong>{activeStage?.targetDate ?? 'To be scheduled'}</strong>
+                </div>
+                <div>
+                  <span>Next Stage</span>
+                  <strong>{nextStage?.title ?? 'Final requirements'}</strong>
+                </div>
+              </div>
+            </div>
 
-                    <div className="student-milestones-roadmap-foot">
-                      <span>{item.evidenceCount > 0 ? `${item.evidenceLabel} connected to this stage.` : 'Evidence and related activity counts will appear here as this milestone develops.'}</span>
-                      <Link className="timeline-link" href={item.route}>{item.actionLabel}</Link>
-                    </div>
+            <div className="milestones-overall-progress">
+              <div>
+                <span>Overall project progress</span>
+                <strong>{overallProgress}%</strong>
+              </div>
+              <div className="milestones-linear-progress" aria-hidden="true">
+                <span style={{ width: `${overallProgress}%` }} />
+              </div>
+            </div>
+
+            <div className="milestones-quick-button-row">
+              <Link className="milestones-quick-button is-primary" href="/students/schedule">
+                <i className="fas fa-calendar-check" aria-hidden="true" />
+                Open Schedule
+              </Link>
+              <Link className="milestones-quick-button" href="/students/project-overview">
+                <i className="fas fa-folder-open" aria-hidden="true" />
+                View Project
+              </Link>
+              <Link className="milestones-quick-button" href="/students/faculty-feedback">
+                <i className="fas fa-comments" aria-hidden="true" />
+                View Feedback
+              </Link>
+            </div>
+          </article>
+        </section>
+
+        <section className="milestones-roadmap-card" aria-label="Milestone roadmap">
+          <div className="milestones-card-head">
+            <div>
+              <span className="milestone-section-kicker">Milestone Roadmap</span>
+              <h3>Academic stages from concept to completion</h3>
+              <p>Each stage expands into requirements, submitted evidence, reviews, feedback, and the stage gate.</p>
+            </div>
+            <button className="milestones-expand-all" type="button" onClick={expandAll}>
+              {expandedStages.size === stages.length ? 'Collapse All' : 'Expand All'}
+              <i className={`fas ${expandedStages.size === stages.length ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="milestones-roadmap-list">
+            {stages.map((stage) => {
+              const expanded = expandedStages.has(stage.key);
+              const isActive = stage.index === activeIndex && stage.status !== 'completed';
+              return (
+                <article key={stage.key} className={`milestone-roadmap-item is-${stage.status}${isActive ? ' is-active' : ''}`}>
+                  <div className="milestone-roadmap-line" aria-hidden="true">
+                    <span className="milestone-roadmap-node">
+                      <i className={`fas ${stage.status === 'completed' ? 'fa-check' : stage.status === 'locked' ? 'fa-lock' : stage.icon}`} />
+                    </span>
+                  </div>
+
+                  <div className="milestone-roadmap-panel">
+                    <button
+                      className="milestone-stage-summary"
+                      type="button"
+                      aria-expanded={expanded}
+                      onClick={() => toggleStage(stage.key)}
+                    >
+                      <span className="milestone-stage-copy">
+                        <span className="milestone-stage-number">Stage {stage.index + 1}</span>
+                        <strong>{stage.title}</strong>
+                        <small>{stage.summary}</small>
+                      </span>
+                      <span className="milestone-stage-meta">
+                        <Badge
+                          label={formatStageStatus(stage.status)}
+                          tone={getStatusTone(stage.status)}
+                          icon={stage.status === 'locked' ? 'fa-lock' : undefined}
+                        />
+                        <span className="milestone-stage-target">
+                          <span>Target date</span>
+                          <strong>{stage.targetDate}</strong>
+                        </span>
+                        <i className={`fas ${expanded ? 'fa-chevron-up' : 'fa-chevron-down'} milestone-stage-chevron`} aria-hidden="true" />
+                      </span>
+                    </button>
+
+                    {expanded ? <StageDetails stage={stage} /> : null}
                   </div>
                 </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="milestones-bottom-grid" aria-label="Milestone actions and updates">
+          <article className="milestones-bottom-panel">
+            <div className="milestones-card-head">
+              <div>
+                <span className="milestone-section-kicker">Recent Activities</span>
+                <h3>Latest workflow movement</h3>
+              </div>
+            </div>
+            <div className="milestone-activity-list">
+              {recentActivities.length ? (
+                recentActivities.map((activity) => (
+                  <div key={activity.id} className={`milestone-activity-item is-${activity.tone}`}>
+                    <span aria-hidden="true"><i className={`fas ${activity.icon}`} /></span>
+                    <div>
+                      <strong>{activity.label}</strong>
+                      <small>{activity.meta}</small>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="milestone-empty-state">
+                  <i className="fas fa-clock-rotate-left" aria-hidden="true" />
+                  <span>No milestone activity recorded yet.</span>
+                </div>
+              )}
+            </div>
+          </article>
+
+          <article className="milestones-bottom-panel">
+            <div className="milestones-card-head">
+              <div>
+                <span className="milestone-section-kicker">Upcoming Deadlines</span>
+                <h3>Targets that need attention</h3>
+              </div>
+            </div>
+            <div className="milestone-deadline-list">
+              {upcomingDeadlines.map((deadline) => (
+                <div key={deadline.id} className={`milestone-deadline-item is-${deadline.tone}`}>
+                  <span aria-hidden="true"><i className={`fas ${deadline.icon}`} /></span>
+                  <div>
+                    <strong>{deadline.title}</strong>
+                    <small>{deadline.date} · {deadline.meta}</small>
+                  </div>
+                </div>
               ))}
             </div>
-          </section>
+          </article>
 
-          <section className="content-grid two-thirds student-milestones-group-grid">
-            <div className="stack-section">
-              <article className="surface-card">
-                <div className="card-heading">
-                  <div>
-                    <span className="section-kicker">Completed Milestones</span>
-                    <h3>Finished academic stages</h3>
-                  </div>
-                  <Badge label={`${completedMilestones.length}`} tone="success" icon="fa-circle-check" />
-                </div>
-
-                <div className="stack-list student-milestones-cluster-list">
-                  {completedMilestones.map((item) => (
-                    <article key={item.id} className="stack-card student-milestones-cluster-item is-completed">
-                      <div className="stack-card-head">
-                        <div>
-                          <strong>{item.title}</strong>
-                          <small>{item.dateLabel}</small>
-                        </div>
-                        <div className="chip-row">
-                          <Badge label="Completed" tone="success" />
-                          <span className="ui-badge is-neutral">{item.evidenceLabel}</span>
-                        </div>
-                      </div>
-                      <p>{item.summary}</p>
-                    </article>
-                  ))}
-                </div>
-              </article>
-
-              <article className="surface-card">
-                <div className="card-heading">
-                  <div>
-                    <span className="section-kicker">Pending Milestones</span>
-                    <h3>Upcoming academic stages</h3>
-                  </div>
-                  <Badge label={`${pendingMilestones.length}`} tone="warning" icon="fa-hourglass-half" />
-                </div>
-
-                <div className="stack-list student-milestones-cluster-list">
-                  {pendingMilestones.map((item) => (
-                    <article key={item.id} className="stack-card student-milestones-cluster-item is-pending">
-                      <div className="stack-card-head">
-                        <div>
-                          <strong>{item.title}</strong>
-                          <small>{item.dateLabel}</small>
-                        </div>
-                        <div className="chip-row">
-                          <Badge label="Pending" tone="warning" />
-                          <span className="ui-badge is-neutral">{item.evidenceLabel}</span>
-                        </div>
-                      </div>
-                      <p>{item.summary}</p>
-                    </article>
-                  ))}
-                </div>
-              </article>
+          <article className="milestones-bottom-panel">
+            <div className="milestones-card-head">
+              <div>
+                <span className="milestone-section-kicker">Quick Actions</span>
+                <h3>Move the current stage forward</h3>
+              </div>
             </div>
-
-            <div className="stack-section">
-              <article className="surface-card student-milestones-ongoing-card">
-                <div className="card-heading">
-                  <div>
-                    <span className="section-kicker">Ongoing Milestone</span>
-                    <h3>{ongoingMilestone ? ongoingMilestone.title : 'No ongoing stage at the moment'}</h3>
-                  </div>
-                  <Badge label={ongoingMilestone ? 'Active Stage' : 'Waiting'} tone={ongoingMilestone ? 'warning' : 'neutral'} icon="fa-spinner" />
-                </div>
-
-                <p>{ongoingMilestone ? ongoingMilestone.summary : 'Once a stage becomes active, it will appear here with a clearer project focus and linked actions.'}</p>
-
-                <div className="detail-grid student-milestones-ongoing-details">
-                  <div className="detail-item">
-                    <span>Status</span>
-                    <strong>{ongoingMilestone ? formatRoadmapStatus(ongoingMilestone.status) : 'Pending activation'}</strong>
-                  </div>
-                  <div className="detail-item">
-                    <span>Target date</span>
-                    <strong>{ongoingMilestone ? ongoingMilestone.dateLabel : (nextMilestone ? nextMilestone.dateLabel : 'To be scheduled')}</strong>
-                  </div>
-                  <div className="detail-item">
-                    <span>Evidence / activity</span>
-                    <strong>{ongoingMilestone ? ongoingMilestone.evidenceLabel : 'No linked record yet'}</strong>
-                  </div>
-                  <div className="detail-item">
-                    <span>Related page</span>
-                    <strong>{ongoingMilestone ? ongoingMilestone.actionLabel : 'Open Schedule'}</strong>
-                  </div>
-                </div>
-
-                {ongoingMilestone ? (
-                  <Link className="timeline-link" href={ongoingMilestone.route}>{ongoingMilestone.actionLabel}</Link>
-                ) : null}
-              </article>
-
-              <article className="surface-card">
-                <div className="card-heading">
-                  <div>
-                    <span className="section-kicker">Linked Actions</span>
-                    <h3>Related student pages</h3>
-                  </div>
-                </div>
-
-                <div className="stack-list student-milestones-link-list">
-                  {relatedPages.map((item) => (
-                    <Link key={item.href} href={item.href} className="stack-card student-milestones-link-card">
-                      <div className="student-milestones-link-icon">
-                        <i className={`fas ${item.icon}`} aria-hidden="true" />
-                      </div>
-                      <div className="student-milestones-link-copy">
-                        <strong>{item.label}</strong>
-                        <small>{item.copy}</small>
-                      </div>
-                      <span className="student-milestones-link-arrow">Open</span>
-                    </Link>
-                  ))}
-                </div>
-              </article>
+            <div className="milestone-action-list">
+              <Link className="milestones-quick-button is-primary" href="/students/project-files">
+                <i className="fas fa-upload" aria-hidden="true" />
+                Upload Requirement
+              </Link>
+              {scheduleAction ? (
+                <Link className="milestones-quick-button" href="/students/schedule">
+                  <i className="fas fa-calendar-days" aria-hidden="true" />
+                  {scheduleAction.label}
+                </Link>
+              ) : null}
+              <Link className="milestones-quick-button" href="/students/faculty-feedback">
+                <i className="fas fa-comment-dots" aria-hidden="true" />
+                View Feedback
+              </Link>
             </div>
-          </section>
-        </div>
+          </article>
+        </section>
       </div>
+    </div>
   );
 }

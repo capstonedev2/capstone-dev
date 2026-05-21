@@ -10,10 +10,7 @@ export async function POST(request: Request) {
     const data = await request.json();
     const { userId, title, message, type, entityType, entityId } = data;
 
-    console.log('[NOTIF POST] Received request:', { userId, title, type, entityType, entityId });
-
     if (!userId || !title || !message) {
-      console.log('[NOTIF POST] Missing required fields');
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -22,7 +19,6 @@ export async function POST(request: Request) {
     });
 
     if (!targetUser) {
-      console.log(`[NOTIF POST] User ${userId} not found. Auto-creating mock user.`);
       targetUser = await prisma.user.create({
         data: {
           id: userId,
@@ -32,8 +28,6 @@ export async function POST(request: Request) {
         }
       });
     }
-
-    console.log(`[NOTIF POST] Creating notification for user: ${targetUser.id} (${targetUser.name})`);
 
     const notification = await prisma.notification.create({
       data: {
@@ -46,8 +40,6 @@ export async function POST(request: Request) {
         entityId: entityId || null,
       }
     });
-
-    console.log(`[NOTIF POST] ✅ Notification created with id: ${notification.id}`);
 
     return NextResponse.json(notification);
   } catch (error: any) {
@@ -128,12 +120,10 @@ export async function PATCH(request: Request) {
           entityId: groupId,
         }
       });
-      console.log(`[NOTIF PATCH] ✅ Accepted permission request — granted to member ${memberId} for group ${groupId}`);
     }
 
     // If action is "reject", we can optionally notify them or just silently reject
     if (action === 'reject' && notification.entityType === 'group' && memberId) {
-      console.log(`[NOTIF PATCH] ❌ Rejected permission request for member ${memberId}`);
     }
 
     // Mark the notification as read

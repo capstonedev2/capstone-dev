@@ -12,7 +12,8 @@ export const STUDENT_NAV_ITEMS = [
   { key: 'project-files', label: 'Project Files', href: '/students/project-files', icon: 'fa-book-open-reader', section: 'submissions' },
   { key: 'repository', label: 'Repository', href: '/students/repository', icon: 'fa-book', section: 'submissions' },
   { key: 'progress-reports', label: 'Progress Reports', href: '/students/progress-reports', icon: 'fa-clipboard-list', section: 'submissions' },
-  { key: 'faculty-feedback', label: 'Faculty Feedback', href: '/students/faculty-feedback', icon: 'fa-comments', section: 'submissions' }
+  { key: 'faculty-feedback', label: 'Faculty Feedback', href: '/students/faculty-feedback', icon: 'fa-comments', section: 'submissions' },
+  { key: 'history', label: 'History', href: '/students/history', icon: 'fa-clock-rotate-left', section: 'submissions' }
 ] as const;
 
 export type StudentNavKey = (typeof STUDENT_NAV_ITEMS)[number]['key'];

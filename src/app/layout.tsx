@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Playfair_Display, Poppins } from 'next/font/google';
+import { Inter, Playfair_Display, Plus_Jakarta_Sans, Poppins } from 'next/font/google';
 import { SessionSuspensionWatcher } from '@/components/auth/session-suspension-watcher';
 import { BrandingProvider } from '@/components/branding/branding-provider';
 import { SYSTEM_LOGO_SRC } from '@/lib/branding';
@@ -25,6 +25,12 @@ const poppins = Poppins({
   variable: '--font-student'
 });
 
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-adviser'
+});
+
 export const metadata: Metadata = {
   title: 'ThesisTrack',
   description: 'Higher Education Institutions',
@@ -39,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={`${inter.variable} ${playfairDisplay.variable} ${poppins.variable}`} lang="en" data-scroll-behavior="smooth">
+    <html className={`${inter.variable} ${playfairDisplay.variable} ${poppins.variable} ${plusJakartaSans.variable}`} lang="en" data-scroll-behavior="smooth">
       <head>
         <link
           rel="stylesheet"

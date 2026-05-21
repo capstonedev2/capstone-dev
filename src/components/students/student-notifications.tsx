@@ -330,8 +330,11 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
   useEffect(() => {
     const combined: any[] = [];
+    const seenIds = new Set<string>();
     if (realNotifications.length > 0) {
       realNotifications.forEach(notif => {
+        if (seenIds.has(notif.id)) return;
+        seenIds.add(notif.id);
         combined.push({
           id: notif.id,
           title: notif.title,

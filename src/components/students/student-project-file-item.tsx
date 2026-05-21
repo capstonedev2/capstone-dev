@@ -158,6 +158,9 @@ export function FileItem({
         <p className="project-files-repository-note">{file.versionNotes}</p>
 
         <div className="project-files-repository-actions">
+          <button className="table-btn" type="button" onClick={() => onView(file)}>
+            <i className="fas fa-eye" aria-hidden="true" /> View
+          </button>
           <button className="table-btn" type="button" onClick={() => onViewHistory(file)}>
             <i className="fas fa-clock-rotate-left" aria-hidden="true" /> View History
           </button>

@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/repository-prisma"
+}
+
+datasource repositoryDb {
+  provider = "postgresql"
+}
+
+model RepositoryProject {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @repositoryDb.Uuid
+  mainProjectId String    @unique @map("main_project_id")
+  title         String
+  abstract      String?
+  adviser       String?
+  program       String?
+  department    String?
+  schoolYear    String?   @map("school_year")
+  keywords      String[]
+  manuscriptUrl String?   @map("manuscript_url")
+  status        String?   @default("ARCHIVED")
+  publishedAt   DateTime? @default(now()) @map("published_at") @repositoryDb.Timestamptz(6)
+  createdAt     DateTime? @default(now()) @map("created_at") @repositoryDb.Timestamptz(6)
+
+  authors            RepositoryAuthor[]
+  files              RepositoryFile[]
+  technologyTransfer TechnologyTransferRecord[]
+
+  @@map("repository_projects")
+}
+
+model RepositoryAuthor {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @repositoryDb.Uuid
+  repositoryProjectId String?            @map("repository_project_id") @repositoryDb.Uuid
+  repositoryProject   RepositoryProject? @relation(fields: [repositoryProjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  name                String
+  email               String?
+  studentId           String?            @map("student_id")
+  createdAt           DateTime?          @default(now()) @map("created_at") @repositoryDb.Timestamptz(6)
+
+  @@map("repository_authors")
+}
+
+model RepositoryFile {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @repositoryDb.Uuid
+  repositoryProjectId String?            @map("repository_project_id") @repositoryDb.Uuid
+  repositoryProject   RepositoryProject? @relation(fields: [repositoryProjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  fileName            String             @map("file_name")
+  fileUrl             String             @map("file_url")
+  fileType            String?            @map("file_type")
+  uploadedAt          DateTime?          @default(now()) @map("uploaded_at") @repositoryDb.Timestamptz(6)
+
+  @@map("repository_files")
+}
+
+model TechnologyTransferRecord {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @repositoryDb.Uuid
+  repositoryProjectId String?            @map("repository_project_id") @repositoryDb.Uuid
+  repositoryProject   RepositoryProject? @relation(fields: [repositoryProjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  partnerName         String?            @map("partner_name")
+  transferStatus      String?            @default("PENDING") @map("transfer_status")
+  remarks             String?
+  dateRecorded        DateTime?          @default(now()) @map("date_recorded") @repositoryDb.Timestamptz(6)
+
+  @@map("technology_transfer_records")
+}
