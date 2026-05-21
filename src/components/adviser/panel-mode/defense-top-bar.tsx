@@ -14,6 +14,7 @@ type Props = {
   totalGroups: number;
   room: string;
   time: string;
+  presentCount: number;
   totalMembers: number;
   sessionStarted: boolean;
   adviser?: string;
