@@ -50,7 +50,7 @@ export function AdminShell({
     toggleLabel,
     toggleSidebar
   } = useShellSidebar({
-    mobileBreakpoint: 900,
+    mobileBreakpoint: 1100,
     storageKey: 'admin-sidebar-collapsed'
   });
 
@@ -151,7 +151,7 @@ export function AdminShell({
         </div>
       </header>
 
-      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Research Head</span>

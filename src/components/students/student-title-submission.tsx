@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type ChangeEvent, type FormEvent, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { formatFileSizeLabel } from '@/components/students/student-project-files.shared';
 import type {
   StudentDashboardData,
@@ -46,6 +46,33 @@ function formatDateTimeLabel(value: string) {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  }).format(parsedDate);
+}
+
+function formatShortDateLabel(value: string) {
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(parsedDate);
+}
+
+function formatTimeLabel(value: string) {
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
     hour: 'numeric',
     minute: '2-digit'
   }).format(parsedDate);
@@ -165,13 +192,10 @@ function createSubmissionFromRegistration(
   };
 }
 
-function buildInitialSubmissions(
-  data: StudentDashboardData,
-  isLeader: boolean
-): StudentTitleSubmissionRecord[] {
+function buildInitialSubmissions(data: StudentDashboardData): StudentTitleSubmissionRecord[] {
   const seed = data.titleRegistration.submissions?.length ? data.titleRegistration.submissions : [createSubmissionFromRegistration(data.titleRegistration)];
 
-  const sorted = [...seed].sort((left, right) => {
+  return [...seed].sort((left, right) => {
     if (left.isCurrent && !right.isCurrent) {
       return -1;
     }
@@ -182,15 +206,6 @@ function buildInitialSubmissions(
 
     return new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime();
   });
-
-  const active = sorted.find(s => s.isCurrent) || sorted[0];
-  if (active && ['rejected', 'needs-revision', 'needs revision'].includes(active.registrationStatus.toLowerCase())) {
-    const nextProposalNumber = sorted.reduce((highest, submission) => Math.max(highest, submission.proposalNumber), 0) + 1;
-    const autoDraft = createDraftSubmission(data, nextProposalNumber, isLeader);
-    return [autoDraft, ...sorted.map(s => ({ ...s, isCurrent: false }))];
-  }
-
-  return sorted;
 }
 
 function buildFallbackWorkflow(title: StudentTitleSubmissionRecord): StudentTitleWorkflowStep[] {
@@ -314,6 +329,25 @@ function createDraftSubmission(
     },
     attachments: []
   };
+}
+
+function isEmptyLocalDraftSubmission(submission: StudentTitleSubmissionRecord) {
+  return canDeleteDraftSubmission(submission) &&
+    submission.attachments.length === 0 &&
+    !submission.proposedTitle.trim() &&
+    !submission.briefDescription.trim();
+}
+
+function isDraftSubmission(submission: StudentTitleSubmissionRecord) {
+  return submission.registrationStatus.trim().toLowerCase() === 'draft';
+}
+
+function canDeleteDraftSubmission(submission: StudentTitleSubmissionRecord) {
+  return submission.id.startsWith('title-local-') && isDraftSubmission(submission);
+}
+
+function shouldShowProposalSubmission(submission: StudentTitleSubmissionRecord) {
+  return !isDraftSubmission(submission) || canDeleteDraftSubmission(submission);
 }
 
 function createAttachmentFromFile(file: File, uploadedBy: string, downloadUrl?: string): StudentTitleAttachment {
@@ -489,8 +523,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const isLeader = Boolean(data.profile.groupRole && data.profile.groupRole.toLowerCase().includes('leader'));
   const canUpload = true;
   const initialSubmissions = useMemo(
-    () => buildInitialSubmissions(data, isLeader),
-    [data, isLeader]
+    () => buildInitialSubmissions(data),
+    [data]
   );
   const [submissions, setSubmissions] = useState<StudentTitleSubmissionRecord[]>(initialSubmissions);
   const [activeSubmissionId, setActiveSubmissionId] = useState(
@@ -501,9 +535,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
   const [isSubmittingTitle, setIsSubmittingTitle] = useState(false);
+  const [isFeedbackHighlighted, setIsFeedbackHighlighted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const detailsPanelRef = useRef<HTMLDivElement | null>(null);
+  const adviserFeedbackRef = useRef<HTMLDivElement | null>(null);
+  const feedbackHighlightTimerRef = useRef<number | null>(null);
   const createdObjectUrlsRef = useRef(new Set<string>());
-  const suppressAutoDraftRef = useRef(false);
 
   const handleRequestPermission = async () => {
     const leader = data.group.members.find((m) => m.isLeader);
@@ -559,7 +596,9 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           const nextSubmissions: StudentTitleSubmissionRecord[] = realSubmissions;
           
           setSubmissions((currentSubmissions) => {
-            const localSubmissions = currentSubmissions.filter((s) => s.id.startsWith('title-local-'));
+            const localSubmissions = currentSubmissions.filter((s) =>
+              s.id.startsWith('title-local-') && !isEmptyLocalDraftSubmission(s)
+            );
             
             const mergedReal = nextSubmissions.map((nextSub) => {
               const currentSub = currentSubmissions.find((s) => s.id === nextSub.id);
@@ -578,15 +617,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               return nextSub;
             });
 
-            // Auto-create a draft if ALL real submissions are rejected/needs revision and no local draft exists
-            const needsNewDraft = mergedReal.length > 0 && mergedReal.every((s) =>
-              ['rejected', 'needs revision'].includes(s.registrationStatus.toLowerCase())
-            );
-            if (needsNewDraft && localSubmissions.length === 0 && !suppressAutoDraftRef.current) {
-              const nextNum = mergedReal.reduce((h, s) => Math.max(h, s.proposalNumber), 0) + 1;
-              const autoDraft = createDraftSubmission(data, nextNum, isLeader);
-              return [autoDraft, ...mergedReal.map(s => ({ ...s, isCurrent: false }))];
-            }
             if (mergedReal.length === 0 && localSubmissions.length === 0) {
               return currentSubmissions;
             }
@@ -597,14 +627,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           if (!isBackground) {
             setActiveSubmissionId((currentId) => {
               if (currentId.startsWith('title-local-')) return currentId;
-              // If all real submissions are rejected/needs revision, the merge created an auto-draft — switch to it
-              const needsNewDraft = nextSubmissions.length > 0 && nextSubmissions.every((s) =>
-                ['rejected', 'needs revision'].includes(s.registrationStatus.toLowerCase())
-              );
-              if (needsNewDraft) {
-                // The auto-draft ID will be set by the next render since it's at index 0
-                return currentId; // keep current, the submissions state update will handle it
-              }
               const stillExists = nextSubmissions.some(s => s.id === currentId);
               return stillExists ? currentId : (nextSubmissions.find(item => item.isCurrent)?.id ?? nextSubmissions[0]?.id ?? '');
             });
@@ -628,14 +650,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
     loadRealTitleSubmissions();
     
-    // Poll for real-time updates every 5 seconds
-    pollInterval = setInterval(() => {
-      loadRealTitleSubmissions(true);
-    }, 5000);
-
     return () => {
       cancelled = true;
-      clearInterval(pollInterval);
     };
   }, [data, initialSubmissions]);
 
@@ -656,10 +672,24 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     []
   );
 
-  const activeSubmission =
-    submissions.find((submission) => submission.id === activeSubmissionId) ?? submissions[0] ?? null;
+  useEffect(
+    () => () => {
+      if (feedbackHighlightTimerRef.current !== null) {
+        window.clearTimeout(feedbackHighlightTimerRef.current);
+      }
+    },
+    []
+  );
 
-  // Auto-sync activeSubmissionId to the auto-created draft when the current ID is stale
+  const visibleSubmissions = submissions.filter(shouldShowProposalSubmission);
+  const activeSubmission =
+    visibleSubmissions.find((submission) => submission.id === activeSubmissionId) ??
+    visibleSubmissions[0] ??
+    submissions.find((submission) => submission.id === activeSubmissionId) ??
+    submissions[0] ??
+    null;
+
+  // Keep activeSubmissionId aligned when refreshes remove local-only drafts.
   useEffect(() => {
     if (activeSubmission && activeSubmission.id !== activeSubmissionId) {
       setActiveSubmissionId(activeSubmission.id);
@@ -696,10 +726,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const rejectedCount = submissions.filter(
     (submission) => submission.registrationStatus.toLowerCase() === 'rejected'
   ).length;
-  const latestUpdatedSubmission = [...submissions].sort(
-    (left, right) => new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime()
-  )[0];
-
   // Find the most recent rejected/needs-revision submission for the status banner
   const latestRejectedSubmission = submissions.find(
     (s) => ['rejected', 'needs revision'].includes(s.registrationStatus.toLowerCase())
@@ -707,13 +733,18 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const latestApprovedSubmission = submissions.find(
     (s) => s.registrationStatus.toLowerCase() === 'approved'
   );
-  const isViewingDraft = activeSubmission?.registrationStatus === 'Draft';
+  const isViewingDraft = activeSubmission ? isDraftSubmission(activeSubmission) : false;
   const showRejectionBanner = !!latestRejectedSubmission && isViewingDraft;
   const showApprovalBanner = !!latestApprovedSubmission && isViewingDraft && !latestRejectedSubmission;
 
   if (!activeSubmission) {
     return null;
   }
+
+  const trackedSubmissions = visibleSubmissions.length ? visibleSubmissions : submissions;
+  const latestVisibleUpdatedSubmission = [...trackedSubmissions].sort(
+    (left, right) => new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime()
+  )[0];
 
   const titleStatusTone = getStatusTone(activeSubmission.registrationStatus);
   const validation = activeSubmission.validation ?? null;
@@ -748,9 +779,9 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     {
       id: 'proposals',
       label: 'Tracked title proposals',
-      value: `${submissions.length}`,
+      value: `${trackedSubmissions.length}`,
       note:
-        submissions.length > 1
+        trackedSubmissions.length > 1
           ? 'Students can prepare and compare multiple title proposals in one workspace.'
           : 'Add another proposal to compare alternative title directions before adviser review.'
     },
@@ -774,8 +805,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       id: 'attachments',
       label: 'Proposal files',
       value: `${totalAttachments}`,
-      note: latestUpdatedSubmission
-        ? `${latestUpdatedSubmission.proposalLabel} was last updated ${formatDateTimeLabel(latestUpdatedSubmission.updated_at)}.`
+      note: latestVisibleUpdatedSubmission
+        ? `${latestVisibleUpdatedSubmission.proposalLabel} was last updated ${formatDateTimeLabel(latestVisibleUpdatedSubmission.updated_at)}.`
         : 'Upload the title package so each proposal has a supporting file record.'
     }
   ];
@@ -881,9 +912,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       return;
     }
 
-    const hasEmptyDraft = submissions.some(
-      (s) => s.registrationStatus === 'Draft' && s.attachments.length === 0 && (!s.proposedTitle || !s.proposedTitle.trim())
-    );
+    const hasEmptyDraft = submissions.some(isEmptyLocalDraftSubmission);
 
     if (hasEmptyDraft) {
       setNotice({
@@ -897,7 +926,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       submissions.reduce((highest, submission) => Math.max(highest, submission.proposalNumber), 0) + 1;
     const draftSubmission = createDraftSubmission(data, nextProposalNumber, isLeader);
 
-    suppressAutoDraftRef.current = false;
     setSubmissions((current) => [
       draftSubmission,
       ...current.map((submission) => ({
@@ -912,53 +940,59 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     });
   };
 
-  const handleDeleteDraftSubmission = () => {
-    if (!activeSubmission || activeSubmission.registrationStatus !== 'Draft') {
+  const handleDeleteDraftSubmission = (submissionIdToDelete?: string) => {
+    const targetId = typeof submissionIdToDelete === 'string' ? submissionIdToDelete : activeSubmissionId;
+    const targetSubmission = submissions.find(s => s.id === targetId);
+
+    if (!targetSubmission || !canDeleteDraftSubmission(targetSubmission)) {
       setNotice({
         tone: 'warning',
-        message: 'Only draft title proposals can be deleted.'
+        message: 'Only unsent draft title proposals can be deleted.'
       });
       return;
     }
 
-    const shouldDelete = window.confirm(`Delete ${activeSubmission.proposalLabel}? Attached files in this draft will be removed from this session.`);
+    const shouldDelete = window.confirm(`Delete ${targetSubmission.proposalLabel}? Attached files in this draft will be removed from this session.`);
     if (!shouldDelete) {
       return;
     }
 
-    activeSubmission.attachments.forEach((attachment) => {
+    targetSubmission.attachments.forEach((attachment) => {
       if (attachment.downloadUrl) {
         URL.revokeObjectURL(attachment.downloadUrl);
         createdObjectUrlsRef.current.delete(attachment.downloadUrl);
       }
     });
 
-    const remainingSubmissions = submissions.filter((submission) => submission.id !== activeSubmission.id);
+    const remainingSubmissions = submissions.filter((submission) => submission.id !== targetSubmission.id);
 
     if (!remainingSubmissions.length) {
       const draftSubmission = createDraftSubmission(data, 1, isLeader);
-      suppressAutoDraftRef.current = false;
       setSubmissions([draftSubmission]);
       setActiveSubmissionId(draftSubmission.id);
       setNotice({
         tone: 'info',
-        message: `${activeSubmission.proposalLabel} was deleted. A new draft is ready.`
+        message: `${targetSubmission.proposalLabel} was deleted. A new draft is ready.`
       });
       return;
     }
 
-    suppressAutoDraftRef.current = true;
-    const nextActiveSubmission = remainingSubmissions[0];
-    setSubmissions(
-      remainingSubmissions.map((submission) => ({
-        ...submission,
-        isCurrent: submission.id === nextActiveSubmission.id
-      }))
-    );
-    setActiveSubmissionId(nextActiveSubmission.id);
+    if (targetId === activeSubmissionId) {
+      const nextActiveSubmission = remainingSubmissions[0];
+      setSubmissions(
+        remainingSubmissions.map((submission) => ({
+          ...submission,
+          isCurrent: submission.id === nextActiveSubmission.id
+        }))
+      );
+      setActiveSubmissionId(nextActiveSubmission.id);
+    } else {
+      setSubmissions(remainingSubmissions);
+    }
+
     setNotice({
       tone: 'success',
-      message: `${activeSubmission.proposalLabel} draft was deleted.`
+      message: `${targetSubmission.proposalLabel} draft was deleted.`
     });
   };
 
@@ -1188,7 +1222,124 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     },
     { id: 4, label: 'Approved', icon: 'fa-check-circle' }
   ];
+  const submissionProgressPercent = Math.min(
+    100,
+    Math.max(0, Math.round((currentStepIndex / Math.max(1, TIMELINE_STEPS.length - 1)) * 100))
+  );
+  const normalizedRegistrationStatus = activeSubmission.registrationStatus.toLowerCase();
+  const hasFeedbackAction = normalizedRegistrationStatus === 'rejected' || normalizedRegistrationStatus === 'needs revision';
+  const primaryProgressPercent = hasFeedbackAction ? Math.min(submissionProgressPercent, 52) : submissionProgressPercent;
+  const titleProgressStyle = {
+    '--title-progress': `${submissionProgressPercent}%`,
+    '--title-primary-progress': `${primaryProgressPercent}%`,
+    '--title-accent-start': hasFeedbackAction ? `${primaryProgressPercent}%` : `${submissionProgressPercent}%`,
+    '--title-progress-value': submissionProgressPercent
+  } as CSSProperties;
+  const isApprovedTimeline = normalizedRegistrationStatus === 'approved';
+  const getTimelineStateLabel = (stepId: number, isCompleted: boolean, isCurrent: boolean) => {
+    if (isCompleted) {
+      return 'Complete';
+    }
 
+    if (isCurrent) {
+      if (normalizedRegistrationStatus === 'needs revision') return 'Needs revision';
+      if (normalizedRegistrationStatus === 'rejected') return 'Rejected';
+      if (stepId === 0) return 'Preparing';
+      if (stepId === 1) return 'File attached';
+      if (stepId === 2) return 'Submitted';
+      if (stepId === 3) return 'Adviser reviewing';
+      return 'Approved';
+    }
+
+    if (stepId === 1) return 'Needs file';
+    if (stepId === 2) return 'Not submitted';
+    if (stepId === 3) return 'Awaiting adviser';
+    if (stepId === 4) return 'Decision pending';
+    return 'Pending';
+  };
+  const hasTitle = Boolean(activeSubmission.proposedTitle.trim());
+  const hasDocuments = activeSubmission.attachments.length > 0;
+  const canSubmitProposal = canUpload && !isSubmittingTitle && hasDocuments && hasTitle;
+  const nextActionLabel =
+    currentStepIndex === 0
+      ? 'Upload concept paper'
+      : currentStepIndex === 1
+        ? 'Submit for adviser review'
+        : currentStepIndex >= 4
+          ? 'Title approved'
+          : normalizedRegistrationStatus === 'needs revision'
+            ? 'Revise and resubmit'
+            : normalizedRegistrationStatus === 'rejected'
+              ? 'Prepare new title'
+              : 'Wait for adviser review';
+  const readinessItems = [
+    {
+      id: 'title',
+      label: 'Proposed title',
+      detail: hasTitle ? 'Ready for the proposal package' : 'Enter the official title before upload',
+      complete: hasTitle
+    },
+    {
+      id: 'documents',
+      label: 'Concept paper',
+      detail: hasDocuments
+        ? `${activeSubmission.attachments.length} file${activeSubmission.attachments.length === 1 ? '' : 's'} attached`
+        : 'Attach a PDF or DOCX concept paper',
+      complete: hasDocuments
+    },
+    {
+      id: 'submission',
+      label: 'Review request',
+      detail: normalizedRegistrationStatus === 'draft' ? 'Not yet sent to adviser' : activeSubmission.registrationStatus,
+      complete: normalizedRegistrationStatus !== 'draft'
+    }
+  ];
+  const documentChecklistItems = [
+    { id: 'title', label: 'Title', complete: hasTitle },
+    { id: 'background', label: 'Background of the study', complete: hasDocuments },
+    { id: 'problem', label: 'Statement of the problem', complete: hasDocuments },
+    { id: 'objectives', label: 'Objectives of the study', complete: hasDocuments },
+    { id: 'significance', label: 'Significance of the study', complete: hasDocuments },
+    { id: 'scope', label: 'Scope and limitations', complete: hasDocuments },
+    { id: 'framework', label: 'Conceptual framework', complete: hasDocuments },
+    { id: 'references', label: 'References', complete: hasDocuments }
+  ];
+  const titleSubmissionTabs = [
+    { id: 'Details', icon: 'fa-pen-to-square' },
+    { id: 'Documents', icon: 'fa-file-arrow-up' }
+  ];
+  const timelineDateSource = activeSubmission.lastReviewedAt || activeSubmission.updated_at;
+  const timelineDateLabel = formatShortDateLabel(timelineDateSource);
+  const timelineTimeLabel = formatTimeLabel(timelineDateSource);
+  const reviewProgressLabel = isApprovedTimeline ? 'Completed' : hasFeedbackAction ? 'Action Required' : 'In Progress';
+  const reviewProgressTone = isApprovedTimeline ? 'is-complete' : hasFeedbackAction ? 'is-warning' : '';
+  const feedbackNote =
+    activeSubmission.statusNote?.trim() ||
+    'Please review the rejection feedback and update your title proposal accordingly.';
+  const scrollIntoView = (targetRef: RefObject<HTMLElement | null>) => {
+    window.setTimeout(() => {
+      targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  };
+  const handleViewOverview = () => {
+    setActiveTab('Details');
+    scrollIntoView(detailsPanelRef);
+  };
+  const handleViewFeedback = () => {
+    setActiveTab('Details');
+    scrollIntoView(adviserFeedbackRef);
+    window.setTimeout(() => adviserFeedbackRef.current?.focus({ preventScroll: true }), 180);
+
+    if (feedbackHighlightTimerRef.current !== null) {
+      window.clearTimeout(feedbackHighlightTimerRef.current);
+    }
+
+    setIsFeedbackHighlighted(true);
+    feedbackHighlightTimerRef.current = window.setTimeout(() => {
+      setIsFeedbackHighlighted(false);
+      feedbackHighlightTimerRef.current = null;
+    }, 2200);
+  };
   return (
     <div className="student-title-submission-page p-4 pt-2 lg:p-6 lg:pt-2 bg-[#F8FAFC] min-h-screen relative">
       {notice && (
@@ -1209,8 +1360,113 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         </div>
       )}
       
+      <section className="title-review-progress-card" style={titleProgressStyle}>
+        <header className="title-review-progress-header">
+          <div className="title-review-progress-heading">
+            <span className="title-review-progress-icon" aria-hidden="true">
+              <i className="fas fa-file-shield" />
+            </span>
+            <div>
+              <div className="title-review-progress-kicker">
+                <span>{activeSubmission.proposalLabel}</span>
+                <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} />
+              </div>
+              <h2>Title Review Progress</h2>
+              <p>Track your thesis title proposal through upload, adviser validation, and final approval.</p>
+            </div>
+          </div>
+
+          <div className="title-review-progress-actions">
+            <span className={`title-review-progress-pill ${reviewProgressTone}`}>
+              <i className="fas fa-circle" aria-hidden="true" />
+              {reviewProgressLabel}
+            </span>
+            <button type="button" className="title-review-overview-button" onClick={handleViewOverview}>
+              <i className="fas fa-list-ul" aria-hidden="true" />
+              View Overview
+            </button>
+          </div>
+        </header>
+
+        <section className="title-submission-workflow-strip" aria-label="Title submission workflow">
+          {TIMELINE_STEPS.map((step, idx) => {
+            const isCompleted = idx < currentStepIndex || (isApprovedTimeline && idx <= currentStepIndex);
+            const isCurrent = idx === currentStepIndex && !isApprovedTimeline;
+            const needsAttention = isCurrent && (normalizedRegistrationStatus === 'needs revision' || normalizedRegistrationStatus === 'rejected');
+            const stateLabel = getTimelineStateLabel(step.id, isCompleted, isCurrent);
+            const isPending = !isCompleted && !isCurrent;
+            const showTimelineMeta = isCompleted || isCurrent;
+
+            return (
+              <div
+                key={step.id}
+                className={`${isCompleted ? 'is-complete' : ''} ${isCurrent ? 'is-current' : ''} ${needsAttention ? 'is-attention' : ''} ${isPending ? 'is-pending' : ''}`}
+                aria-current={isCurrent ? 'step' : undefined}
+              >
+                <span className="title-submission-workflow-icon">
+                  <i className={`fas ${step.icon}`} aria-hidden="true" />
+                  {isCompleted ? (
+                    <span className="title-submission-workflow-check" aria-hidden="true">
+                      <i className="fas fa-check" />
+                    </span>
+                  ) : null}
+                </span>
+                <div className="title-submission-workflow-copy">
+                  <em>{String(idx + 1).padStart(2, '0')}</em>
+                  <strong>{step.label}</strong>
+                  <small className="title-submission-workflow-pill">
+                    <i className={`fas ${isCompleted ? 'fa-check' : needsAttention ? 'fa-circle-exclamation' : 'fa-clock'}`} aria-hidden="true" />
+                    {stateLabel}
+                  </small>
+                  {needsAttention ? (
+                    <p>Review adviser feedback and submit a revised title proposal.</p>
+                  ) : isPending && step.id === 4 ? (
+                    <p>Pending final review and approval.</p>
+                  ) : showTimelineMeta ? (
+                    <span className="title-submission-workflow-meta">
+                      <span><i className="fas fa-calendar-days" aria-hidden="true" /> {timelineDateLabel}</span>
+                      {timelineTimeLabel ? <span><i className="fas fa-clock" aria-hidden="true" /> {timelineTimeLabel}</span> : null}
+                    </span>
+                  ) : null}
+                  {needsAttention ? (
+                    <button
+                      type="button"
+                      className="title-submission-workflow-action"
+                      onClick={handleViewFeedback}
+                    >
+                      <i className="fas fa-message" aria-hidden="true" />
+                      View Feedback
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        {hasFeedbackAction ? (
+          <div className="title-review-feedback-panel">
+            <div className="title-review-feedback-copy">
+              <span className="title-review-feedback-icon" aria-hidden="true">
+                <i className="fas fa-message" />
+              </span>
+              <div>
+                <strong>Feedback Available</strong>
+                <p>{feedbackNote}</p>
+              </div>
+            </div>
+
+          </div>
+        ) : null}
+
+        <p className="title-review-progress-tip">
+          <i className="fas fa-shield-halved" aria-hidden="true" />
+          Tip: Address adviser feedback early to move your title to the next stage faster.
+        </p>
+      </section>
+
       {/* Hero Banner */}
-      <div className="bg-gradient-to-br from-[#003A8F] via-[#0b2866] to-[#1E40AF] rounded-[1.5rem] p-8 text-white flex flex-col md:flex-row justify-between relative overflow-hidden shadow-2xl shadow-[#003A8F]/20 mb-8 border border-white/10 group">
+      <div className="legacy-title-hero hidden bg-gradient-to-br from-[#003A8F] via-[#0b2866] to-[#1E40AF] rounded-[1.5rem] p-8 text-white flex flex-col md:flex-row justify-between relative overflow-hidden shadow-2xl shadow-[#003A8F]/20 mb-8 border border-white/10 group">
         <div className="z-10 flex flex-col justify-between w-full md:w-1/2">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -1255,7 +1511,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       </div>
 
             {/* Timeline Stepper */}
-      <div className="bg-white rounded-[1.25rem] border border-slate-200/80 p-8 shadow-sm mb-8 relative overflow-hidden">
+      <div className="legacy-title-timeline hidden bg-white rounded-[1.25rem] border border-slate-200/80 p-8 shadow-sm mb-8 relative overflow-hidden">
         <div className="flex items-center justify-between relative max-w-[90%] mx-auto">
           <div className="absolute left-10 right-10 top-6 -translate-y-1/2 h-1 bg-slate-100 z-0 rounded-full"></div>
           <div className="absolute left-10 top-6 -translate-y-1/2 h-1 bg-blue-600 z-0 rounded-full transition-all duration-1000" style={{ width: `calc(${(currentStepIndex / 5) * 100}% - ${(currentStepIndex / 5) * 80}px)` }}></div>
@@ -1277,7 +1533,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                   <div className="text-center">
                     <p className={`text-xs font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>{step.label}</p>
                     {/* Removed hardcoded fake date */}
-                    {!isCompleted && step.label === 'Registered' && <p className="text-[10px] font-bold text-slate-300 mt-0.5">—</p>}
+                    {!isCompleted && step.label === 'Registered' && <p className="text-[10px] font-bold text-slate-300 mt-0.5">-</p>}
                   </div>
                </div>
              )
@@ -1286,21 +1542,23 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       </div>
 
       {/* Modern Pill Tabs */}
-      <div className="flex items-center gap-2 bg-slate-200/40 p-1.5 rounded-2xl border border-slate-200 mb-8 w-fit shadow-inner">
-        {['Details', 'Documents'].map(tab => {
-          const isDisabled = tab === 'Documents' && (!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim());
+      <div className="title-submission-tabs flex items-center gap-2 bg-slate-200/40 p-1.5 rounded-2xl border border-slate-200 mb-8 w-fit shadow-inner">
+        {titleSubmissionTabs.map((tab) => {
+          const isDisabled = tab.id === 'Documents' && (!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim());
+          const isActive = activeTab === tab.id;
           return (
             <button 
-              key={tab}
+              key={tab.id}
               onClick={() => {
-                if (!isDisabled) setActiveTab(tab);
+                if (!isDisabled) setActiveTab(tab.id);
               }}
               disabled={isDisabled}
-              className={`px-6 py-2.5 text-[13px] font-extrabold rounded-xl transition-all duration-300 ${activeTab === tab ? 'bg-white text-[#003A8F] shadow-[0_4px_12px_-4px_rgba(0,58,143,0.15)] ring-1 ring-slate-100 scale-105' : isDisabled ? 'text-slate-400 cursor-not-allowed opacity-60 bg-slate-100/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/80'}`}
+              aria-pressed={isActive}
+              className={`px-6 py-2.5 text-[13px] font-extrabold rounded-xl transition-all duration-300 ${isActive ? 'bg-white text-[#003A8F] shadow-[0_4px_12px_-4px_rgba(0,58,143,0.15)] ring-1 ring-slate-100 scale-105' : isDisabled ? 'text-slate-400 cursor-not-allowed opacity-60 bg-slate-100/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/80'}`}
             >
               <div className="flex items-center gap-2">
-                {isDisabled && <i className="fas fa-lock text-[10px]"></i>}
-                {tab}
+                <i className={`fas ${isDisabled ? 'fa-lock' : tab.icon} text-[11px]`} aria-hidden="true"></i>
+                {tab.id}
               </div>
             </button>
           );
@@ -1308,10 +1566,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+      <div className="title-submission-main-grid grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         
         {/* Left Column (Documents View) */}
-        <div className="flex flex-col gap-6">
+        <div className="title-submission-main-stack flex flex-col gap-6">
           {activeTab === 'Documents' && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1335,7 +1593,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       </div>
                       <h4 className="text-[15px] font-bold text-slate-800 mb-1">Drag & drop your file here</h4>
                       <p className="text-sm font-medium text-blue-600">or click to browse</p>
-                      <p className="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-widest">Supports: PDF, DOCX • Max size: 10MB</p>
+                      <p className="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-widest">Supports: PDF, DOCX - Max size: 10MB</p>
                       <input
                         ref={fileInputRef}
                         hidden
@@ -1356,7 +1614,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-bold text-slate-800 truncate">{attachment.fileName}</p>
-                              <p className="text-[10px] font-bold text-slate-500">{attachment.sizeLabel} • Uploaded</p>
+                              <p className="text-[10px] font-bold text-slate-500">{attachment.sizeLabel} - Uploaded</p>
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
                               <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded text-slate-500">
@@ -1434,7 +1692,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                         <tr key={i} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 font-bold text-slate-700 text-[13px] flex items-center gap-3">
                             <i className="fas fa-file-word text-blue-600 text-lg"></i> {att.fileName}
-                            {i === 0 && <span className="bg-emerald-100 text-emerald-700 text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded flex items-center gap-1"><i className="fas fa-circle text-[5px]"></i> Current</span>}
+                            {i === 0 && <span className="bg-[#EFF6FF] text-[#003A8F] text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded flex items-center gap-1"><i className="fas fa-circle text-[5px]"></i> Current</span>}
                           </td>
                           <td className="p-4 text-[12px] font-semibold text-slate-500">{att.uploadedAtLabel}</td>
                           <td className="p-4 text-[12px] font-semibold text-slate-500">{att.sizeLabel}</td>
@@ -1460,7 +1718,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
           
           {activeTab === 'Details' && (
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8 flex flex-col relative overflow-hidden">
+            <div ref={detailsPanelRef} className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8 flex flex-col relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
               
               <div className="mb-8 flex items-center gap-4">
@@ -1521,7 +1779,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               
               <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
                  <div className="flex items-center gap-3">
-                   <div className={`h-2.5 w-2.5 rounded-full ${!activeSubmission.proposedTitle.trim() ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`}></div>
+                   <div className={`h-2.5 w-2.5 rounded-full ${!activeSubmission.proposedTitle.trim() ? 'bg-[#F6BE00] animate-pulse' : 'bg-[#003A8F]'}`}></div>
                    <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
                      {!activeSubmission.proposedTitle.trim() ? 'Awaiting Title' : 'Details Complete'}
                    </span>
@@ -1553,7 +1811,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
 
           {/* Action Banner (Proceed to Next Stage) */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
+          <div className="title-submission-cta-panel bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-10 -translate-y-10"></div>
             <div className="flex items-center gap-5 z-10">
               <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm relative">
@@ -1580,7 +1838,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             
             {activeSubmission.registrationStatus.toLowerCase() === 'approved' ? (
               <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
-                <div className="w-full sm:w-auto bg-emerald-50 text-emerald-700 text-sm font-extrabold px-6 py-3.5 rounded-xl border-2 border-emerald-200 flex items-center justify-center gap-3 whitespace-nowrap">
+                <div className="w-full sm:w-auto bg-[#EFF6FF] text-[#003A8F] text-sm font-extrabold px-6 py-3.5 rounded-xl border-2 border-[#BFDBFE] flex items-center justify-center gap-3 whitespace-nowrap">
                   <i className="fas fa-circle-check"></i> Title Approved
                 </div>
                 <button 
@@ -1611,7 +1869,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               <form onSubmit={handleSubmitProposal} className="w-full sm:w-auto z-10">
                  <button 
                    type="submit"
-                   disabled={!canUpload || isSubmittingTitle || activeSubmission.attachments.length === 0 || !activeSubmission.proposedTitle.trim()}
+                   disabled={!canSubmitProposal}
                    className="w-full sm:w-auto bg-[#003A8F] hover:bg-[#1E40AF] text-white text-sm font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-[#003A8F]/30 transition-transform active:scale-95 flex items-center justify-center gap-3 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                  >
                    {isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'} <i className="fas fa-paper-plane text-xs"></i>
@@ -1622,40 +1880,92 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         </div>
 
         {/* Right Column - Made Sticky for Better UX */}
-        <div className="flex flex-col gap-6 sticky top-8 h-fit animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 ease-out fill-mode-both">
+        <div className="title-submission-side-rail flex flex-col gap-6 sticky top-8 h-fit animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 ease-out fill-mode-both">
+           <div className="title-submission-side-card title-submission-progress-card bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6" style={titleProgressStyle}>
+             <div className="flex items-start justify-between gap-4 mb-5">
+               <div>
+                 <h3 className="text-[13px] font-extrabold text-slate-800 uppercase tracking-wider">Workflow Progress</h3>
+                 <p className="mt-1 text-xs font-semibold text-slate-500">{nextActionLabel}</p>
+               </div>
+               <div className="title-submission-progress-orb" aria-label={`Workflow progress ${submissionProgressPercent}%`}>
+                 <span>{submissionProgressPercent}%</span>
+               </div>
+             </div>
+             <div className="title-submission-progress-track" aria-hidden="true">
+               <span style={{ width: `${submissionProgressPercent}%` }} />
+             </div>
+             <div className="title-submission-side-readiness mt-5">
+               {readinessItems.map((item) => (
+                 <div key={item.id} className={item.complete ? 'is-complete' : ''}>
+                   <i className={`fas ${item.complete ? 'fa-circle-check' : 'fa-circle'}`} aria-hidden="true" />
+                   <span>
+                     <strong>{item.label}</strong>
+                     <small>{item.detail}</small>
+                   </span>
+                 </div>
+               ))}
+             </div>
+           </div>
            
            {/* Proposal Options Selector */}
-           {submissions.length > 1 && (
-             <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
+           {visibleSubmissions.length > 1 && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
                <h3 className="text-[13px] font-extrabold text-slate-800 mb-4 uppercase tracking-wider">Your Proposals</h3>
                <div className="space-y-2">
-                 {submissions.map((sub) => (
-                   <button 
-                     type="button"
-                     key={sub.id} 
-                     onClick={() => handleSelectSubmission(sub.id)}
-                     className={`w-full text-left p-3 rounded-xl text-sm font-bold border transition-all flex items-center justify-between gap-2 ${
-                       activeSubmissionId === sub.id 
-                       ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' 
-                       : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                     }`}
-                   >
-                     <span className="truncate flex-1">{sub.proposalLabel}</span>
-                     <span className={`text-[9px] px-2 py-0.5 rounded uppercase tracking-widest shrink-0 ${
-                        sub.registrationStatus.toLowerCase() === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                        sub.registrationStatus.toLowerCase() === 'draft' ? 'bg-slate-200 text-slate-600' :
-                        'bg-blue-100 text-blue-700'
-                     }`}>
-                       {sub.registrationStatus}
-                     </span>
-                   </button>
-                 ))}
+                 {visibleSubmissions.map((sub) => (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      key={sub.id}
+                      onClick={() => handleSelectSubmission(sub.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelectSubmission(sub.id);
+                        }
+                      }}
+                      className={`w-full text-left p-3 rounded-xl text-sm font-bold border transition-all flex items-center justify-between gap-2 cursor-pointer ${
+                        activeSubmissionId === sub.id
+                        ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm'
+                        : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="truncate flex-1">{sub.proposalLabel}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`text-[9px] px-2 py-0.5 rounded uppercase tracking-widest ${
+                           sub.registrationStatus.toLowerCase() === 'approved' ? 'bg-[#EFF6FF] text-[#003A8F]' :
+                           sub.registrationStatus.toLowerCase() === 'draft' ? 'bg-slate-200 text-slate-600' :
+                           'bg-[#FFF8E1] text-[#9A6700]'
+                        }`}>
+                          {sub.registrationStatus}
+                        </span>
+                        {canDeleteDraftSubmission(sub) && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteDraftSubmission(sub.id);
+                            }}
+                            className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 ml-1"
+                            aria-label={`Delete ${sub.proposalLabel} draft`}
+                            title="Delete Draft"
+                          >
+                            <i className="fas fa-trash-alt text-xs"></i>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                </div>
              </div>
            )}
            
            {/* Adviser Review Status */}
-           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
+           <div
+             ref={adviserFeedbackRef}
+             tabIndex={-1}
+             className={`title-submission-adviser-feedback-card bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden ${isFeedbackHighlighted ? 'is-feedback-focused' : ''}`}
+           >
              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-2xl -z-10 translate-x-4 -translate-y-4"></div>
              <h3 className="text-[13px] font-extrabold text-slate-800 mb-6 uppercase tracking-wider">Adviser Review Status</h3>
              <div className="flex items-center gap-4 mb-6 relative z-10">
@@ -1663,14 +1973,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                <div className="flex-1 min-w-0">
                  <p className="text-sm font-extrabold text-slate-800 flex items-center justify-between w-full">
                     <span className="truncate">{activeSubmission.adviser}</span>
-                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-widest ${titleStatusTone === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-widest ${titleStatusTone === 'success' ? 'bg-[#EFF6FF] text-[#003A8F]' : 'bg-[#FFF8E1] text-[#9A6700]'}`}>
                       {activeSubmission.registrationStatus}
                     </span>
                  </p>
                  <p className="text-[11px] text-slate-400 font-bold mt-1.5 uppercase tracking-wide">Reviewed on {formatDateTimeLabel(activeSubmission.lastReviewedAt)}</p>
                </div>
              </div>
-             <div className={`p-4 rounded-xl text-[13px] font-semibold leading-relaxed border ${titleStatusTone === 'success' ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800' : 'bg-blue-50/50 border-blue-100 text-blue-800'}`}>
+             <div className={`p-4 rounded-xl text-[13px] font-semibold leading-relaxed border ${titleStatusTone === 'success' ? 'bg-[#EFF6FF] border-[#BFDBFE] text-[#003A8F]' : 'bg-[#FFF8E1] border-[#FDE68A] text-[#9A6700]'}`}>
                {activeSubmission.statusNote || 'Waiting for adviser review. Comments and remarks will appear here.'}
              </div>
            </div>
@@ -1684,10 +1994,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                </div>
              </div>
              <ul className="space-y-4">
-               {['Title', 'Background of the study', 'Statement of the problem', 'Objectives of the study', 'Significance of the study', 'Scope and limitations', 'Conceptual framework', 'References'].map((item, i) => (
-                 <li key={i} className="flex items-center gap-3 text-xs font-bold text-slate-600">
-                    <div className="h-4 w-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i className="fas fa-check text-[8px]"></i></div>
-                    {item}
+               {documentChecklistItems.map((item) => (
+                 <li key={item.id} className="flex items-center gap-3 text-xs font-bold text-slate-600">
+                    <div className={`h-4 w-4 rounded-full flex items-center justify-center shrink-0 ${item.complete ? 'bg-[#EFF6FF] text-[#003A8F]' : 'bg-slate-100 text-slate-400'}`}>
+                      <i className={`fas ${item.complete ? 'fa-check' : 'fa-circle'} text-[8px]`}></i>
+                    </div>
+                    {item.label}
                  </li>
                ))}
                <li className="flex items-center justify-between text-xs font-bold text-slate-500 mt-4 pt-4 border-t border-slate-100">
@@ -1705,23 +2017,23 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
              <h3 className="text-[13px] font-extrabold text-slate-800 mb-5 uppercase tracking-wider">Submission Analytics</h3>
              <div className="grid grid-cols-4 gap-2">
                <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-file-lines text-xs"></i></div>
+                 <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] text-[#003A8F] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-file-lines text-xs"></i></div>
                  <span className="text-sm font-extrabold text-slate-800">{submissions.filter(s => !['draft', 'pending', 'awaiting title'].includes(s.registrationStatus?.toLowerCase())).length}</span>
                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Submits</span>
                </div>
                <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-rose-100 text-rose-500 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-clock text-xs"></i></div>
-                 <span className="text-sm font-extrabold text-slate-800">—</span>
+                 <div className="h-7 w-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-clock text-xs"></i></div>
+                  <span className="text-sm font-extrabold text-slate-800">N/A</span>
                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Avg. Days</span>
                </div>
                <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-amber-100 text-amber-500 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-shield-halved text-xs"></i></div>
-                 <span className="text-sm font-extrabold text-slate-800">—</span>
+                 <div className="h-7 w-7 rounded-lg bg-[#FFF8E1] text-[#9A6700] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-shield-halved text-xs"></i></div>
+                  <span className="text-sm font-extrabold text-slate-800">N/A</span>
                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Approval</span>
                </div>
                <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-chart-pie text-xs"></i></div>
-                 <span className="text-sm font-extrabold text-slate-800">{Math.round((currentStepIndex / 5) * 100)}%</span>
+                 <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] text-[#003A8F] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-chart-pie text-xs"></i></div>
+                  <span className="text-sm font-extrabold text-slate-800">{submissionProgressPercent}%</span>
                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Complete</span>
                </div>
              </div>
@@ -1733,7 +2045,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
              <div className="relative border-l-2 border-slate-100 ml-2 space-y-6">
                {activeSubmission.revisionHistory.slice(0, 4).map((hist, i) => (
                  <div key={i} className="relative pl-5">
-                   <div className={`absolute -left-[9px] top-0.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm ${hist.status.toLowerCase().includes('approved') ? 'bg-emerald-500' : hist.status.toLowerCase().includes('submitted') ? 'bg-blue-500' : 'bg-slate-300'}`}></div>
+                   <div className={`absolute -left-[9px] top-0.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm ${hist.status.toLowerCase().includes('approved') ? 'bg-[#003A8F]' : hist.status.toLowerCase().includes('submitted') ? 'bg-[#F6BE00]' : 'bg-slate-300'}`}></div>
                    <p className="text-xs font-bold text-slate-700 leading-snug">{hist.note}</p>
                    <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-wide">{hist.dateLabel}</p>
                  </div>

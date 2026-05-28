@@ -8,6 +8,7 @@ import {
   REVIEW_WORKFLOW_STEPS,
   formatSubmissionDate,
   formatSubmissionDateTime,
+  getAdviserReviewQueueFiles,
   getDeadlineLabel,
   getSubmissionStatusMeta,
   toAdviserSubmissionRecord,
@@ -212,7 +213,7 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
           throw new Error(payload?.message || 'Unable to load review workspace.');
         }
 
-        const nextFiles: DocumentFileSummary[] = payload?.files || [];
+        const nextFiles = getAdviserReviewQueueFiles(payload?.files || []);
         const selectedFile = nextFiles.find((item) => item.id === fileId) || null;
 
         if (!selectedFile) {

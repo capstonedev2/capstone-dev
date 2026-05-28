@@ -7918,6 +7918,235 @@ tr:hover {
     color: #ffffff !important;
 }
 
+/* Adviser CSS loads after the shared student shell stylesheet, so repeat the lighter shell typography here. */
+.adviser-shell .adviser-navbar-title strong,
+.adviser-shell .adviser-global-sidebar .sidebar-link,
+.adviser-shell .adviser-global-sidebar .sidebar-link-label,
+.adviser-shell .portal-shell-notification-trigger-copy strong,
+.adviser-shell .portal-shell-profile-copy strong,
+.adviser-shell .notification-trigger-copy strong,
+.adviser-shell .profile-nav-btn-copy strong {
+    font-weight: 500 !important;
+}
+
+/* Adviser stylesheet loads last, so keep its shell on the shared student geometry. */
+.adviser-shell .adviser-global-content {
+    width: 100% !important;
+    max-width: 1600px !important;
+    min-width: 0 !important;
+}
+
+.adviser-shell .adviser-navbar-title strong {
+    font-size: 1.08rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.05 !important;
+}
+
+.adviser-shell :is(.portal-shell-profile-avatar, .profile-nav-btn-avatar) {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell :is(.portal-shell-notification-trigger-copy small, .portal-shell-profile-copy small, .notification-trigger-copy small, .profile-nav-btn-copy small, .portal-shell-profile-chevron, .profile-nav-btn-chevron) {
+    font-weight: 500 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions :is(.portal-shell-notification-trigger-count, .notification-trigger-count) {
+    font-weight: 700 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name {
+    font-size: 1.28rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 0.98 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-subtitle {
+    font-size: 0.62rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.15 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link {
+    gap: 0.72rem !important;
+    padding: 0 0.75rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-label {
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+}
+
+/* Final adviser navigation parity with the student sidebar. */
+.adviser-shell .adviser-global-sidebar .sidebar-nav {
+    display: grid !important;
+    grid-auto-rows: max-content !important;
+    flex: 1 1 auto !important;
+    align-content: start !important;
+    gap: 1.15rem !important;
+    margin: 0 !important;
+    padding: 1rem 1rem 1.25rem !important;
+    overflow-y: auto !important;
+}
+
+.adviser-shell .adviser-global-sidebar :is(.sidebar-nav-group, .sidebar-nav-links, .sidebar-nav-dropdown) {
+    display: grid !important;
+    gap: 0.35rem !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    min-height: auto !important;
+    margin: 0 0 0.55rem !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.35 !important;
+    text-transform: uppercase !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: rgba(148, 163, 184, 0.26) !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    gap: 0.72rem !important;
+    margin: 0 !important;
+    padding: 0 0.75rem !important;
+    border: 1px solid transparent !important;
+    border-left: 1px solid transparent !important;
+    border-radius: 16px !important;
+    background: transparent !important;
+    color: #334155 !important;
+    box-shadow: none !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.35 !important;
+    transform: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link:hover {
+    border-color: rgba(0, 58, 143, 0.08) !important;
+    border-left-color: rgba(0, 58, 143, 0.08) !important;
+    background: rgba(0, 58, 143, 0.07) !important;
+    color: #334155 !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+    transform: translateX(3px) !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link.active,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active {
+    border-color: rgba(0, 58, 143, 0.12) !important;
+    border-left-color: rgba(0, 58, 143, 0.12) !important;
+    background: linear-gradient(135deg, rgba(0, 58, 143, 0.13), rgba(30, 64, 175, 0.08)) !important;
+    color: #003a8f !important;
+    box-shadow:
+        0 14px 30px rgba(0, 58, 143, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon {
+    display: inline-flex !important;
+    width: 30px !important;
+    height: 30px !important;
+    flex: 0 0 30px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    border-radius: 10px !important;
+    background: rgba(0, 58, 143, 0.07) !important;
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon i {
+    color: inherit !important;
+    font-size: 0.92rem !important;
+    line-height: 1 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-label {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    color: inherit !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.35 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav {
+    gap: 1rem !important;
+    padding: 0.65rem 0.75rem 1rem !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
+}
+
+/* Keep adviser nav labels consistent with the student sidebar and prevent old ellipsis rules from clipping them. */
+.adviser-shell .adviser-global-sidebar .sidebar-link-label {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    color: inherit !important;
+    font-size: 0.93rem !important;
+    line-height: 1.35 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-label {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    color: inherit !important;
+    font-size: 0.93rem !important;
+    line-height: 1.35 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
 .adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-nav {
     background: transparent !important;
 }
@@ -8832,4 +9061,1908 @@ tr:hover {
 
 .adviser-shell .adviser-page-header + * {
     margin-top: 0 !important;
+}
+
+/* Professional adviser dashboard refinements. */
+.adviser-dashboard-workspace {
+    max-width: 1480px !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-center,
+.adviser-dashboard-workspace .adviser-premium-section,
+.adviser-dashboard-workspace .adviser-kpi-card,
+.adviser-dashboard-workspace .adviser-review-card,
+.adviser-dashboard-workspace .adviser-quick-action,
+.adviser-dashboard-workspace .adviser-schedule-card,
+.adviser-dashboard-workspace .adviser-progress-card {
+    border-radius: 8px !important;
+    border-color: #dbe3ef !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+    backdrop-filter: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-center {
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
+    gap: 1rem;
+    padding: 1.2rem;
+}
+
+.adviser-dashboard-workspace .adviser-command-center::before {
+    display: none;
+}
+
+.adviser-dashboard-workspace .adviser-command-copy {
+    gap: 0.75rem;
+}
+
+.adviser-dashboard-workspace .adviser-command-eyebrow,
+.adviser-dashboard-workspace .adviser-section-eyebrow {
+    color: #1d4ed8 !important;
+    font-weight: 800;
+    letter-spacing: 0.08em !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-copy h2 {
+    max-width: 28ch;
+    font-size: clamp(1.45rem, 2vw, 1.9rem) !important;
+    font-weight: 800 !important;
+    line-height: 1.12;
+}
+
+.adviser-dashboard-workspace .adviser-command-copy p {
+    max-width: 68ch;
+    color: #526174 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.65;
+}
+
+.adviser-dashboard-workspace .adviser-command-actions a {
+    min-height: 40px;
+    border-radius: 8px;
+    padding: 0 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    box-shadow: none;
+}
+
+.adviser-dashboard-workspace .adviser-command-actions a.is-secondary {
+    background: #ffffff;
+    box-shadow: none;
+}
+
+.adviser-focus-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.35rem;
+}
+
+.adviser-focus-card {
+    display: flex;
+    min-width: 0;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.82rem;
+    border: 1px solid #e2e8f0;
+    border-left-width: 3px;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.adviser-focus-card.is-warning { border-left-color: #f59e0b; }
+.adviser-focus-card.is-danger { border-left-color: #ef4444; }
+.adviser-focus-card.is-success { border-left-color: #10b981; }
+.adviser-focus-card.is-info { border-left-color: #3b82f6; }
+.adviser-focus-card.is-neutral { border-left-color: #94a3b8; }
+
+.adviser-focus-card-icon {
+    display: inline-flex;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(0, 58, 143, 0.08);
+    color: #003a8f;
+}
+
+.adviser-focus-card-copy {
+    display: grid;
+    min-width: 0;
+    gap: 0.12rem;
+}
+
+.adviser-focus-card-copy small,
+.adviser-next-action-head span,
+.adviser-health-header span {
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.adviser-focus-card-copy strong {
+    color: #0f172a;
+    font-size: 1.25rem;
+    font-weight: 850;
+    line-height: 1.12;
+}
+
+.adviser-focus-card-copy span {
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 650;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.adviser-dashboard-workspace .adviser-health-panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    align-content: start;
+    padding: 1rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    background: #f8fafc;
+    box-shadow: none;
+}
+
+.adviser-health-header,
+.adviser-next-action-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.adviser-health-header strong {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    background: #eef6ff;
+    color: #1d4ed8;
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.adviser-health-meter {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.adviser-health-meter span {
+    display: block;
+    width: var(--health-value);
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #003a8f, #10b981);
+}
+
+.adviser-health-score {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.adviser-health-score strong {
+    color: #0f172a;
+    font-size: 1.75rem;
+    font-weight: 850;
+    line-height: 1;
+}
+
+.adviser-health-score span {
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.adviser-dashboard-workspace .adviser-health-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.adviser-dashboard-workspace .adviser-health-stats span {
+    min-width: 0;
+    padding: 0.65rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.adviser-dashboard-workspace .adviser-health-stats strong {
+    font-size: 1.15rem;
+}
+
+.adviser-next-action-list {
+    display: grid;
+    gap: 0.55rem;
+    padding-top: 0.2rem;
+}
+
+.adviser-next-action-head small {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.adviser-next-action-list a {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.7rem;
+    align-items: center;
+    padding: 0.72rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.adviser-next-action-list a:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+.adviser-next-action-list a > i:first-child {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(0, 58, 143, 0.08);
+    color: #003a8f;
+}
+
+.adviser-next-action-list a > i:last-child {
+    color: #94a3b8;
+    font-size: 0.7rem;
+}
+
+.adviser-next-action-list strong,
+.adviser-next-action-list small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.adviser-next-action-list strong {
+    color: #0f172a;
+    font-size: 0.84rem;
+    font-weight: 800;
+}
+
+.adviser-next-action-list small,
+.adviser-next-action-list p {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.adviser-dashboard-workspace .adviser-kpi-card {
+    min-height: 150px;
+}
+
+.adviser-dashboard-workspace .adviser-kpi-card::after,
+.adviser-dashboard-workspace .adviser-kpi-sparkline {
+    display: none;
+}
+
+.adviser-dashboard-workspace .adviser-kpi-card:hover,
+.adviser-dashboard-workspace .adviser-premium-section:hover,
+.adviser-dashboard-workspace .adviser-review-card:hover,
+.adviser-dashboard-workspace .adviser-quick-action:hover,
+.adviser-dashboard-workspace .adviser-schedule-card:hover,
+.adviser-dashboard-workspace .adviser-progress-card:hover,
+.adviser-dashboard-workspace .adviser-command-actions a:hover {
+    transform: none;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.07) !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section-head {
+    background: #ffffff;
+}
+
+.adviser-dashboard-workspace .adviser-timeline-item,
+.adviser-dashboard-workspace .adviser-review-card,
+.adviser-dashboard-workspace .adviser-alert-card {
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-meta-grid span,
+.adviser-dashboard-workspace .adviser-feedback-preview,
+.adviser-dashboard-workspace .adviser-intervention-hint {
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.adviser-dashboard-workspace .adviser-review-actions {
+    justify-content: flex-end;
+}
+
+.adviser-dashboard-workspace .adviser-review-actions button {
+    border-radius: 8px;
+}
+
+.adviser-dashboard-workspace .adviser-alert-card::after {
+    width: 3px;
+}
+
+.adviser-dashboard-workspace .adviser-alert-urgent::after {
+    animation: none;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-command-center,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-premium-section,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-kpi-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-review-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-quick-action,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-schedule-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-progress-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-health-panel,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-next-action-list a,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-health-stats span {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(8, 26, 49, 0.86) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-focus-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-review-meta-grid span,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-feedback-preview,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-intervention-hint {
+    border-color: rgba(147, 197, 253, 0.16);
+    background: rgba(15, 35, 64, 0.72);
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace :is(.adviser-focus-card-copy strong, .adviser-next-action-list strong, .adviser-health-score strong) {
+    color: #f8fafc;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace :is(.adviser-focus-card-copy span, .adviser-next-action-list small, .adviser-next-action-list p, .adviser-health-score span) {
+    color: #b7c7dd;
+}
+
+@media (max-width: 1280px) {
+    .adviser-dashboard-workspace .adviser-command-center {
+        grid-template-columns: 1fr;
+    }
+
+    .adviser-focus-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .adviser-focus-grid,
+    .adviser-dashboard-workspace .adviser-health-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .adviser-dashboard-workspace .adviser-command-center {
+        padding: 1rem;
+    }
+}
+
+/* Reduced adviser dashboard chrome: fewer nested cards and lighter dividers. */
+.adviser-dashboard-workspace {
+    gap: 1.1rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-center {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 0 1.1rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-center::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: #dbe3ef;
+}
+
+.adviser-dashboard-workspace .adviser-command-copy h2 {
+    max-width: 34ch;
+}
+
+.adviser-dashboard-workspace .adviser-command-actions a {
+    border-radius: 6px;
+}
+
+.adviser-focus-grid {
+    gap: 0.4rem;
+    padding-top: 0.2rem;
+}
+
+.adviser-focus-card {
+    border: 0 !important;
+    border-left: 3px solid #94a3b8 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0.35rem 0.85rem;
+}
+
+.adviser-focus-card-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: #eef4ff;
+}
+
+.adviser-dashboard-workspace .adviser-health-panel {
+    border: 0 !important;
+    border-left: 1px solid #dbe3ef !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 0 0 1rem;
+}
+
+.adviser-dashboard-workspace .adviser-health-stats span,
+.adviser-next-action-list a {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.adviser-dashboard-workspace .adviser-health-stats span {
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+.adviser-next-action-list a {
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+.adviser-next-action-list a:hover {
+    background: transparent !important;
+    color: #003a8f;
+}
+
+.adviser-next-action-list a > i:first-child {
+    border-radius: 6px;
+    background: #eef4ff;
+}
+
+.adviser-dashboard-workspace .adviser-command-kpis {
+    gap: 0.75rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-kpi-card {
+    min-height: 132px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-top: 3px solid #003a8f !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    padding: 1rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-kpi-card-warning { border-top-color: #f59e0b !important; }
+.adviser-dashboard-workspace .adviser-kpi-card-danger { border-top-color: #ef4444 !important; }
+.adviser-dashboard-workspace .adviser-kpi-card-success { border-top-color: #10b981 !important; }
+.adviser-dashboard-workspace .adviser-kpi-card-info { border-top-color: #3b82f6 !important; }
+.adviser-dashboard-workspace .adviser-kpi-card-neutral { border-top-color: #94a3b8 !important; }
+
+.adviser-dashboard-workspace .adviser-kpi-icon {
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-grid {
+    gap: 1.2rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section-head {
+    border-bottom: 1px solid #dbe3ef !important;
+    background: transparent !important;
+    padding: 0 0 0.85rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section > div:last-child {
+    padding: 1rem 0 0 !important;
+}
+
+.adviser-dashboard-workspace .adviser-timeline-item,
+.adviser-dashboard-workspace .adviser-review-card,
+.adviser-dashboard-workspace .adviser-alert-card,
+.adviser-dashboard-workspace .adviser-quick-action,
+.adviser-dashboard-workspace .adviser-schedule-card,
+.adviser-dashboard-workspace .adviser-progress-card {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-timeline-item,
+.adviser-dashboard-workspace .adviser-review-card,
+.adviser-dashboard-workspace .adviser-alert-card,
+.adviser-dashboard-workspace .adviser-quick-action,
+.adviser-dashboard-workspace .adviser-progress-card {
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-card {
+    padding: 0 0 1rem 0.85rem;
+}
+
+.adviser-dashboard-workspace .adviser-review-card::before,
+.adviser-dashboard-workspace .adviser-alert-card::after {
+    width: 3px;
+}
+
+.adviser-dashboard-workspace .adviser-file-icon,
+.adviser-dashboard-workspace .adviser-timeline-icon,
+.adviser-dashboard-workspace .adviser-quick-action > span:first-child {
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-meta-grid span,
+.adviser-dashboard-workspace .adviser-feedback-preview,
+.adviser-dashboard-workspace .adviser-intervention-hint {
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0.25rem 0;
+}
+
+.adviser-dashboard-workspace .adviser-review-meta-grid {
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.55rem 0;
+}
+
+.adviser-dashboard-workspace .adviser-feedback-preview,
+.adviser-dashboard-workspace .adviser-intervention-hint {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 0.65rem;
+}
+
+.adviser-dashboard-workspace .adviser-review-actions button {
+    border-radius: 6px;
+}
+
+.adviser-dashboard-workspace .adviser-schedule-card {
+    padding: 0 0 1rem 1.4rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-progress-card {
+    padding: 0 0 1rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-kpi-card:hover,
+.adviser-dashboard-workspace .adviser-premium-section:hover,
+.adviser-dashboard-workspace .adviser-review-card:hover,
+.adviser-dashboard-workspace .adviser-quick-action:hover,
+.adviser-dashboard-workspace .adviser-schedule-card:hover,
+.adviser-dashboard-workspace .adviser-progress-card:hover,
+.adviser-dashboard-workspace .adviser-command-actions a:hover {
+    box-shadow: none !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-command-center,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-premium-section,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-kpi-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-review-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-quick-action,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-schedule-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-progress-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-health-panel,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-next-action-list a,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-health-stats span,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-focus-card {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-command-center::after {
+    background: rgba(147, 197, 253, 0.18) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace :is(.adviser-premium-section-head, .adviser-timeline-item, .adviser-review-card, .adviser-alert-card, .adviser-quick-action, .adviser-progress-card, .adviser-review-meta-grid, .adviser-feedback-preview, .adviser-intervention-hint, .adviser-next-action-list a, .adviser-health-stats span) {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+}
+
+/* Reference-led adviser dashboard upgrade. Main content only. */
+.adviser-dashboard-workspace {
+    --adviser-card-border: #dbe3ef;
+    --adviser-card-border-soft: #e7edf5;
+    --adviser-card-bg: #ffffff;
+    --adviser-card-muted: #f8fafc;
+    --adviser-card-shadow: 0 16px 36px rgba(15, 23, 42, 0.07);
+    --adviser-card-shadow-soft: 0 8px 22px rgba(15, 23, 42, 0.055);
+    width: 100%;
+    max-width: 1600px !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    padding-bottom: 2rem;
+}
+
+.adviser-dashboard-workspace .adviser-command-center {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(340px, 0.82fr);
+    gap: 1.25rem !important;
+    align-items: stretch;
+    padding: 1.45rem !important;
+    border: 1px solid var(--adviser-card-border) !important;
+    border-radius: 8px !important;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)),
+        linear-gradient(135deg, rgba(0, 58, 143, 0.07), rgba(246, 190, 0, 0.05)) !important;
+    box-shadow: var(--adviser-card-shadow) !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-center::before,
+.adviser-dashboard-workspace .adviser-command-center::after {
+    display: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-copy {
+    gap: 0.9rem;
+}
+
+.adviser-dashboard-workspace .adviser-command-copy h2 {
+    max-width: 34ch;
+    color: #081736 !important;
+    font-size: clamp(1.7rem, 2.35vw, 2.35rem) !important;
+    font-weight: 850 !important;
+    line-height: 1.08;
+}
+
+.adviser-dashboard-workspace .adviser-command-copy p {
+    max-width: 70ch;
+    color: #58677c !important;
+    font-size: 0.94rem !important;
+    line-height: 1.65;
+}
+
+.adviser-dashboard-workspace .adviser-command-eyebrow,
+.adviser-dashboard-workspace .adviser-section-eyebrow {
+    color: #003a8f !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.08em !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-actions {
+    gap: 0.7rem;
+}
+
+.adviser-dashboard-workspace .adviser-command-actions a {
+    min-height: 42px;
+    border-radius: 8px !important;
+    padding: 0 1rem;
+    background: #003a8f;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 850;
+    box-shadow: 0 12px 22px rgba(0, 58, 143, 0.18) !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-actions a.is-secondary {
+    border: 1px solid var(--adviser-card-border) !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.055) !important;
+}
+
+.adviser-focus-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem !important;
+    padding-top: 0.35rem;
+}
+
+.adviser-focus-card {
+    min-width: 0;
+    padding: 0.92rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-left: 3px solid #003a8f !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.adviser-focus-card.is-warning { border-left-color: #f6be00 !important; }
+.adviser-focus-card.is-danger { border-left-color: #ef4444 !important; }
+.adviser-focus-card.is-success { border-left-color: #10b981 !important; }
+.adviser-focus-card.is-info { border-left-color: #1e40af !important; }
+.adviser-focus-card.is-neutral { border-left-color: #94a3b8 !important; }
+
+.adviser-focus-card-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    background: rgba(0, 58, 143, 0.08) !important;
+    color: #003a8f !important;
+}
+
+.adviser-focus-card-copy strong {
+    color: #0f172a;
+    font-size: 1.28rem;
+}
+
+.adviser-focus-card-copy span {
+    white-space: normal;
+}
+
+.adviser-dashboard-workspace .adviser-health-panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    align-content: start;
+    padding: 1rem !important;
+    border: 1px solid var(--adviser-card-border) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: var(--adviser-card-shadow-soft) !important;
+}
+
+.adviser-health-header strong {
+    background: rgba(0, 58, 143, 0.08);
+    color: #003a8f;
+}
+
+.adviser-health-meter {
+    height: 9px;
+    background: #e5edf6;
+}
+
+.adviser-health-meter span {
+    background: linear-gradient(90deg, #003a8f, #1e40af 58%, #10b981);
+}
+
+.adviser-dashboard-workspace .adviser-health-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.adviser-dashboard-workspace .adviser-health-stats span {
+    padding: 0.7rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: var(--adviser-card-muted) !important;
+}
+
+.adviser-next-action-list a {
+    padding: 0.76rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.adviser-next-action-list a:hover {
+    border-color: rgba(0, 58, 143, 0.24) !important;
+    background: #f7fbff !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-grid {
+    grid-template-columns: minmax(0, 1.62fr) minmax(340px, 0.88fr) !important;
+    gap: 1.35rem !important;
+    align-items: start;
+}
+
+.adviser-primary-stack,
+.adviser-smart-rail {
+    gap: 1.35rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section {
+    overflow: hidden;
+    border: 1px solid var(--adviser-card-border) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: var(--adviser-card-shadow-soft) !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section-head {
+    padding: 1rem 1.1rem 0.9rem !important;
+    border-bottom: 1px solid var(--adviser-card-border-soft) !important;
+    background: #ffffff !important;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section-head h2 {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 850;
+    letter-spacing: 0;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section-head p {
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.adviser-dashboard-workspace .adviser-premium-section > div:last-child {
+    padding: 1rem 1.1rem 1.1rem !important;
+}
+
+.adviser-review-card-grid {
+    gap: 0.95rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-card {
+    padding: 1rem 1rem 1rem 1.15rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055) !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-card::before {
+    width: 4px !important;
+    background: #003a8f;
+}
+
+.adviser-dashboard-workspace .adviser-review-card-primary::before { background: #003a8f !important; }
+.adviser-dashboard-workspace .adviser-review-card-warning::before { background: #f6be00 !important; }
+.adviser-dashboard-workspace .adviser-review-card-danger::before { background: #ef4444 !important; }
+.adviser-dashboard-workspace .adviser-review-card-success::before { background: #10b981 !important; }
+.adviser-dashboard-workspace .adviser-review-card-info::before { background: #1e40af !important; }
+.adviser-dashboard-workspace .adviser-review-card-neutral::before { background: #94a3b8 !important; }
+
+.adviser-dashboard-workspace .adviser-file-icon,
+.adviser-dashboard-workspace .adviser-timeline-icon,
+.adviser-dashboard-workspace .adviser-quick-action > span:first-child {
+    border-radius: 8px !important;
+    background: rgba(0, 58, 143, 0.08) !important;
+    color: #003a8f !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-meta-grid {
+    gap: 0.6rem;
+    border: 0 !important;
+    padding: 0 !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-meta-grid span,
+.adviser-dashboard-workspace .adviser-feedback-preview,
+.adviser-dashboard-workspace .adviser-intervention-hint {
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: var(--adviser-card-muted) !important;
+    padding: 0.66rem 0.72rem !important;
+}
+
+.adviser-dashboard-workspace .adviser-feedback-preview,
+.adviser-dashboard-workspace .adviser-intervention-hint {
+    border-top: 1px solid var(--adviser-card-border-soft) !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-actions button {
+    min-height: 38px;
+    border-radius: 8px !important;
+    padding: 0 0.9rem;
+}
+
+.adviser-dashboard-workspace .adviser-review-actions button.is-primary {
+    background: #003a8f !important;
+    box-shadow: 0 10px 18px rgba(0, 58, 143, 0.16) !important;
+}
+
+.adviser-dashboard-workspace .adviser-review-actions button.is-primary:hover,
+.adviser-dashboard-workspace .adviser-command-actions a:not(.is-secondary):hover {
+    background: #1e40af !important;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(0, 58, 143, 0.2) !important;
+}
+
+.adviser-dashboard-workspace .adviser-command-actions a.is-secondary:hover {
+    border-color: rgba(0, 58, 143, 0.24) !important;
+    background: #f7fbff !important;
+    color: #003a8f !important;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(15, 23, 42, 0.075) !important;
+}
+
+.adviser-dashboard-workspace .adviser-alert-card {
+    padding: 1rem 1rem 1rem 1.15rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-alert-warning {
+    border-color: #f7dfaa !important;
+    background: #fffbeb !important;
+}
+
+.adviser-dashboard-workspace .adviser-alert-urgent {
+    border-color: #fecdd3 !important;
+    background: #fff7f8 !important;
+}
+
+.adviser-dashboard-workspace .adviser-alert-card::after {
+    width: 4px !important;
+}
+
+.adviser-dashboard-workspace .adviser-alert-warning::after {
+    background: #f6be00 !important;
+}
+
+.adviser-dashboard-workspace .adviser-alert-urgent::after {
+    background: #ef4444 !important;
+}
+
+.adviser-dashboard-workspace .adviser-alert-normal::after {
+    background: #003a8f !important;
+}
+
+.adviser-dashboard-workspace .adviser-quick-action {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 78px;
+    padding: 0.9rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-quick-action:hover {
+    border-color: rgba(0, 58, 143, 0.24) !important;
+    background: #f7fbff !important;
+    transform: translateY(-1px);
+}
+
+.adviser-quick-action-arrow {
+    color: #94a3b8;
+    font-size: 0.72rem;
+    transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.adviser-quick-action:hover .adviser-quick-action-arrow {
+    color: #003a8f;
+    transform: translateX(2px);
+}
+
+.adviser-schedule-timeline {
+    position: relative;
+}
+
+.adviser-schedule-row {
+    align-items: stretch;
+}
+
+.adviser-schedule-date {
+    width: 74px !important;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0.65rem 0.5rem;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.adviser-dashboard-workspace .adviser-schedule-card {
+    min-height: 76px;
+    padding: 0.88rem 1rem 0.88rem 1.65rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-schedule-card > span[class*="w-px"] {
+    background: #dbe3ef !important;
+}
+
+.adviser-dashboard-workspace .adviser-schedule-card > span[class*="rounded-full"] {
+    top: 1rem;
+}
+
+.adviser-progress-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.adviser-progress-summary-grid span {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--adviser-card-border-soft);
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.adviser-progress-summary-grid strong {
+    color: #0f172a;
+    font-size: 1.1rem;
+    font-weight: 850;
+}
+
+.adviser-progress-summary-grid small {
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.adviser-dashboard-workspace .adviser-progress-card {
+    padding: 0.95rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-progress-track {
+    height: 8px !important;
+    background: #e5edf6 !important;
+}
+
+.adviser-dashboard-workspace .adviser-progress-fill {
+    background: linear-gradient(90deg, #003a8f, #1e40af) !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-timeline-item {
+    padding: 0.95rem !important;
+    border: 1px solid var(--adviser-card-border-soft) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.adviser-dashboard-workspace .adviser-timeline-item:hover,
+.adviser-dashboard-workspace .adviser-review-card:hover,
+.adviser-dashboard-workspace .adviser-progress-card:hover,
+.adviser-dashboard-workspace .adviser-schedule-card:hover {
+    border-color: rgba(0, 58, 143, 0.18) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07) !important;
+}
+
+@media (max-width: 1280px) {
+    .adviser-dashboard-workspace .adviser-command-center,
+    .adviser-dashboard-workspace .adviser-premium-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .adviser-smart-rail {
+        position: static;
+    }
+
+    .adviser-focus-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .adviser-dashboard-workspace {
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+
+    .adviser-dashboard-workspace .adviser-command-center,
+    .adviser-dashboard-workspace .adviser-premium-section {
+        border-radius: 8px !important;
+    }
+
+    .adviser-focus-grid,
+    .adviser-dashboard-workspace .adviser-health-stats,
+    .adviser-progress-summary-grid,
+    .adviser-dashboard-workspace .adviser-review-meta-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .adviser-dashboard-workspace .adviser-command-center {
+        padding: 1rem !important;
+    }
+
+    .adviser-dashboard-workspace .adviser-review-card-top {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .adviser-dashboard-workspace .adviser-review-card-top .adviser-status-chip {
+        grid-column: 1 / -1;
+        width: fit-content;
+    }
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace {
+    --adviser-card-border: rgba(147, 197, 253, 0.18);
+    --adviser-card-border-soft: rgba(147, 197, 253, 0.14);
+    --adviser-card-bg: rgba(8, 26, 49, 0.9);
+    --adviser-card-muted: rgba(15, 35, 64, 0.74);
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-command-center,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-premium-section,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-health-panel,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-review-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-alert-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-quick-action,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-schedule-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-progress-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-timeline-item,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-next-action-list a,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-health-stats span {
+    border-color: var(--adviser-card-border) !important;
+    background: var(--adviser-card-bg) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-focus-card,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-review-meta-grid span,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-feedback-preview,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-intervention-hint,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-progress-summary-grid span,
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace .adviser-schedule-date {
+    border-color: var(--adviser-card-border-soft) !important;
+    background: var(--adviser-card-muted) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace :is(.adviser-command-copy h2, .adviser-focus-card-copy strong, .adviser-health-score strong, .adviser-next-action-list strong, .adviser-progress-summary-grid strong) {
+    color: #f8fafc !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-dashboard-workspace :is(.adviser-command-copy p, .adviser-focus-card-copy span, .adviser-health-score span, .adviser-next-action-list small, .adviser-next-action-list p, .adviser-progress-summary-grid small) {
+    color: #b7c7dd !important;
+}
+
+/* Final adviser shell parity with the student navbar and sidebar. */
+.adviser-shell {
+    --adviser-shell-sidebar-width: 248px !important;
+    --adviser-shell-collapsed-width: 72px !important;
+    --adviser-shell-topbar-height: 72px !important;
+    padding-top: 72px !important;
+}
+
+.adviser-shell .adviser-global-navbar {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    display: flex !important;
+    align-items: stretch !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(246, 190, 0, 0.9) !important;
+    background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 50%, #1e40af 100%) !important;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+}
+
+.adviser-shell .adviser-global-navbar::before {
+    content: "" !important;
+    position: absolute !important;
+    right: 0 !important;
+    bottom: -2px !important;
+    left: 0 !important;
+    height: 3px !important;
+    pointer-events: none !important;
+    background: linear-gradient(90deg, rgba(246, 190, 0, 0.55), #f6be00 22%, #f6be00 78%, rgba(246, 190, 0, 0.55)) !important;
+    box-shadow: 0 0 12px rgba(246, 190, 0, 0.42) !important;
+}
+
+.adviser-shell .adviser-global-navbar::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    pointer-events: none !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 60%) !important;
+}
+
+.adviser-shell .adviser-global-navbar-main,
+.adviser-shell .adviser-global-navbar-actions {
+    position: relative !important;
+    z-index: 1 !important;
+    height: 72px !important;
+    min-height: 72px !important;
+}
+
+.adviser-shell .adviser-global-navbar-main {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.adviser-shell .adviser-shell-toggle {
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    border: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell .adviser-shell-toggle:hover,
+.adviser-shell .adviser-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adviser-shell .adviser-shell-toggle i {
+    font-size: 1.15rem !important;
+}
+
+.adviser-navbar-title {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding-left: 1.15rem !important;
+}
+
+.adviser-navbar-title::before,
+.adviser-navbar-title-kicker {
+    display: none !important;
+}
+
+.adviser-navbar-title strong {
+    overflow: hidden !important;
+    color: #ffffff !important;
+    font-size: 1.08rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.05 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.7rem !important;
+    margin-left: auto !important;
+    padding-right: 1.45rem !important;
+}
+
+.adviser-shell .portal-shell-action-menus {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 0.7rem !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger,
+.adviser-shell .portal-shell-profile-trigger {
+    height: 48px !important;
+    min-height: 48px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 8px 18px rgba(2, 6, 23, 0.12) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger:hover,
+.adviser-shell .portal-shell-profile-trigger:hover,
+.adviser-shell .portal-shell-notification-trigger.is-open,
+.adviser-shell .portal-shell-profile-menu.is-open .portal-shell-profile-trigger,
+.adviser-shell .portal-shell-profile-trigger[aria-expanded='true'] {
+    border-color: rgba(246, 190, 0, 0.36) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 10px 24px rgba(2, 6, 23, 0.16) !important;
+    transform: translateY(-1px) !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-icon,
+.adviser-shell .portal-shell-profile-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+.adviser-shell .portal-shell-profile-avatar {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(0, 58, 143, 0.95)) !important;
+    font-weight: 850 !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-copy strong,
+.adviser-shell .portal-shell-profile-copy strong {
+    color: #ffffff !important;
+    font-size: 0.82rem !important;
+    font-weight: 850 !important;
+}
+
+.adviser-shell .portal-shell-notification-trigger-copy small,
+.adviser-shell .portal-shell-profile-copy small,
+.adviser-shell .portal-shell-profile-chevron {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger-copy {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger-icon {
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-notification-trigger-count {
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 999px !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions .portal-shell-profile-trigger {
+    min-width: 174px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0.4rem 0.75rem 0.4rem 0.42rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    box-shadow: 18px 0 48px rgba(15, 23, 42, 0.06) !important;
+    backdrop-filter: blur(22px) saturate(155%) !important;
+}
+
+.adviser-shell .adviser-global-sidebar::before {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-header,
+.adviser-shell .adviser-global-sidebar .sidebar-nav {
+    background: transparent !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-header {
+    min-height: 78px !important;
+    padding: 0.55rem 0.75rem !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-context-kicker,
+.adviser-shell .adviser-global-sidebar .user-badge {
+    display: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: center !important;
+    width: 100% !important;
+    column-gap: 0.4rem !important;
+    row-gap: 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 44px !important;
+    height: 42px !important;
+    object-fit: contain !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name {
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-items: baseline !important;
+    gap: 0 !important;
+    color: #003a8f !important;
+    font-size: 1.28rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0 !important;
+    line-height: 0.98 !important;
+    text-transform: none !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name span {
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-subtitle {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    color: #475569 !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav {
+    flex: 1 1 auto !important;
+    align-content: start !important;
+    gap: 1.15rem !important;
+    padding: 1rem 1rem 1.25rem !important;
+    overflow-y: auto !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-group,
+.adviser-shell .adviser-global-sidebar .sidebar-nav-links {
+    display: grid !important;
+    gap: 0.35rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    margin: 0 0 0.55rem !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    text-transform: uppercase !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: rgba(148, 163, 184, 0.26) !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 0.8rem !important;
+    border: 1px solid transparent !important;
+    border-radius: 16px !important;
+    background: transparent !important;
+    color: #334155 !important;
+    box-shadow: none !important;
+    font-weight: 700 !important;
+    transform: none !important;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link:hover {
+    border-color: rgba(0, 58, 143, 0.08) !important;
+    background: rgba(0, 58, 143, 0.07) !important;
+    color: #334155 !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+    transform: translateX(3px) !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link.active,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active {
+    border-color: rgba(0, 58, 143, 0.12) !important;
+    border-left: 1px solid rgba(0, 58, 143, 0.12) !important;
+    background: linear-gradient(135deg, rgba(0, 58, 143, 0.13), rgba(30, 64, 175, 0.08)) !important;
+    color: #003a8f !important;
+    box-shadow:
+        0 14px 30px rgba(0, 58, 143, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon {
+    display: inline-flex !important;
+    width: 30px !important;
+    height: 30px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    background: rgba(0, 58, 143, 0.07) !important;
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-icon i {
+    color: inherit !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon i,
+.adviser-shell .adviser-global-sidebar .sidebar-link.active .sidebar-link-label,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #003a8f !important;
+}
+
+.adviser-shell .adviser-global-main {
+    margin-top: 0 !important;
+    padding-top: 1rem !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-label {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    color: inherit !important;
+    font-size: 0.93rem !important;
+    line-height: 1.35 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-header {
+    min-height: 72px !important;
+    height: 72px !important;
+    padding: 0 !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-header-copy,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-mark {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 72px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-logo {
+    width: 38px !important;
+    height: 38px !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-name,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-name span,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-name strong,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .system-brand-subtitle,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-context-kicker,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .user-badge,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-link-label {
+    display: none !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav {
+    gap: 1rem !important;
+    padding: 0.65rem 0.75rem 1rem !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav-heading {
+    display: block !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    margin: 0.4rem 0.25rem 0.6rem !important;
+    overflow: hidden !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-indent: -999px !important;
+    white-space: nowrap !important;
+    background: rgba(148, 163, 184, 0.28) !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav-heading::before,
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-nav-heading::after {
+    display: none !important;
+}
+
+.adviser-shell.is-sidebar-collapsed .adviser-global-sidebar .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
+}
+
+@media (min-width: 1101px) {
+    .adviser-shell .adviser-global-sidebar {
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 248px !important;
+        max-width: 248px !important;
+        height: 100vh !important;
+        transform: translateX(0) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
+        width: 72px !important;
+        max-width: 72px !important;
+    }
+
+    .adviser-shell .adviser-global-navbar {
+        left: 248px !important;
+        right: auto !important;
+        width: calc(100% - 248px) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-navbar {
+        left: 72px !important;
+        width: calc(100% - 72px) !important;
+    }
+
+    .adviser-shell .adviser-global-main {
+        margin-left: 248px !important;
+        width: calc(100% - 248px) !important;
+        max-width: calc(100% - 248px) !important;
+    }
+
+    .adviser-shell.is-sidebar-collapsed .adviser-global-main {
+        margin-left: 72px !important;
+        width: calc(100% - 72px) !important;
+        max-width: calc(100% - 72px) !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .adviser-shell .adviser-global-navbar {
+        left: 0 !important;
+        width: 100% !important;
+    }
+
+    .adviser-shell .adviser-global-sidebar,
+    .adviser-shell.is-sidebar-collapsed .adviser-global-sidebar {
+        top: 72px !important;
+        width: 248px !important;
+        max-width: 248px !important;
+        height: calc(100vh - 72px) !important;
+        transform: translateX(-104%) !important;
+    }
+
+    .adviser-shell .adviser-global-sidebar.is-open {
+        transform: translateX(0) !important;
+    }
+
+    .adviser-shell .adviser-global-main,
+    .adviser-shell.is-sidebar-collapsed .adviser-global-main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .adviser-navbar-title {
+        padding-left: 0.85rem !important;
+    }
+
+    .adviser-navbar-title strong {
+        font-size: 0.95rem !important;
+    }
+
+    .adviser-shell .adviser-global-navbar-actions {
+        gap: 0.35rem !important;
+        padding-right: 0.55rem !important;
+    }
+
+    .adviser-shell .portal-shell-notification-trigger-copy,
+    .adviser-shell .portal-shell-profile-copy {
+        display: none !important;
+    }
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar {
+    border-right-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(8, 26, 49, 0.78) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-nav-heading {
+    color: #f8fafc !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link {
+    color: #dbeafe !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link:hover {
+    background: rgba(96, 165, 250, 0.14) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active {
+    border-color: rgba(246, 190, 0, 0.22) !important;
+    background: linear-gradient(135deg, #003a8f, #1e40af) !important;
+    color: #ffffff !important;
+    box-shadow: inset 3px 0 0 #f6be00, 0 14px 30px rgba(2, 6, 23, 0.24) !important;
+}
+
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active .sidebar-link-icon i,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.active .sidebar-link-label,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-icon i,
+.adviser-shell[data-theme="dark"] .adviser-global-sidebar .sidebar-link.is-active .sidebar-link-label {
+    color: #ffffff !important;
+}
+
+/* Final adviser shell typography override. */
+.adviser-shell .adviser-navbar-title strong,
+.adviser-shell .adviser-global-sidebar .sidebar-link,
+.adviser-shell .adviser-global-sidebar .sidebar-link-label,
+.adviser-shell .portal-shell-notification-trigger-copy strong,
+.adviser-shell .portal-shell-profile-copy strong,
+.adviser-shell .notification-trigger-copy strong,
+.adviser-shell .profile-nav-btn-copy strong {
+    font-weight: 500 !important;
+}
+
+/* Final adviser shell geometry override. */
+.adviser-shell .adviser-global-content {
+    width: 100% !important;
+    max-width: 1600px !important;
+    min-width: 0 !important;
+}
+
+.adviser-shell :is(
+    .adviser-global-navbar,
+    .adviser-global-navbar-main,
+    .adviser-global-navbar-actions,
+    .adviser-shell-toggle,
+    .adviser-navbar-title,
+    .adviser-navbar-title strong,
+    .adviser-global-sidebar,
+    .sidebar-header,
+    .system-brand-name,
+    .system-brand-name span,
+    .system-brand-name strong,
+    .system-brand-subtitle,
+    .sidebar-nav,
+    .student-role-sidebar-nav,
+    .sidebar-nav-heading,
+    .sidebar-link,
+    .sidebar-link-label,
+    .portal-shell-action-menus,
+    .notification-trigger,
+    .notification-trigger-copy,
+    .notification-trigger-copy strong,
+    .notification-trigger-copy small,
+    .notification-trigger-count,
+    .profile-pill,
+    .profile-nav-btn-avatar,
+    .profile-nav-btn-copy,
+    .profile-nav-btn-copy strong,
+    .profile-nav-btn-copy small,
+    .portal-shell-notification-trigger,
+    .portal-shell-notification-trigger-copy,
+    .portal-shell-notification-trigger-copy strong,
+    .portal-shell-notification-trigger-copy small,
+    .portal-shell-notification-trigger-count,
+    .portal-shell-profile-trigger,
+    .portal-shell-profile-avatar,
+    .portal-shell-profile-copy,
+    .portal-shell-profile-copy strong,
+    .portal-shell-profile-copy small
+) {
+    font-family: var(--font-student), "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    letter-spacing: 0 !important;
+}
+
+.adviser-shell .adviser-navbar-title strong {
+    font-size: 1.08rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.05 !important;
+}
+
+.adviser-shell :is(.portal-shell-profile-avatar, .profile-nav-btn-avatar) {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+}
+
+.adviser-shell :is(.portal-shell-notification-trigger-copy small, .portal-shell-profile-copy small, .notification-trigger-copy small, .profile-nav-btn-copy small, .portal-shell-profile-chevron, .profile-nav-btn-chevron) {
+    font-weight: 500 !important;
+}
+
+.adviser-shell .adviser-global-navbar-actions :is(.portal-shell-notification-trigger-count, .notification-trigger-count) {
+    font-weight: 700 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-name {
+    font-size: 1.28rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 0.98 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .system-brand-subtitle {
+    font-size: 0.62rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.15 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-nav-heading {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link {
+    gap: 0.72rem !important;
+    padding: 0 0.75rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+}
+
+.adviser-shell .adviser-global-sidebar .sidebar-link-label {
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
 }

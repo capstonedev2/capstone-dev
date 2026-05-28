@@ -486,12 +486,9 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
   const [selectedFilter, setSelectedFilter] = useState<HistoryFilterKey>('all');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
-  // Auto-refresh data every 5 seconds for real-time history tracking
+  // Auto-refresh data logic removed
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      router.refresh();
-    }, 5000);
-    return () => clearInterval(intervalId);
+    return () => {};
   }, [router]);
 
   useEffect(() => {

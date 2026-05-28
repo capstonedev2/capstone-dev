@@ -39,7 +39,7 @@ export function ProgramHeadShell({
     toggleLabel,
     toggleSidebar
   } = useShellSidebar({
-    mobileBreakpoint: 900,
+    mobileBreakpoint: 1100,
     storageKey: 'program-head-sidebar-collapsed'
   });
 
@@ -147,7 +147,7 @@ export function ProgramHeadShell({
         </div>
       </header>
 
-      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Program Head Portal</span>

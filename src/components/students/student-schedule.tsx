@@ -10,6 +10,7 @@ import {
   formatWeekdayLabel,
   startOfDay,
   type AlertTone,
+  type ScheduleItemPriority,
   type ScheduleItemStatus,
   type ScheduleItemType,
   type StudentScheduleAlert,
@@ -55,7 +56,13 @@ const ALERT_BAR_STYLES: Record<AlertTone, string> = {
   danger: 'bg-rose-500'
 };
 
-const PRIMARY_SURFACE = 'rounded-xl bg-white p-6 shadow-sm';
+const PRIORITY_STYLES: Record<ScheduleItemPriority, string> = {
+  high: 'bg-rose-50 text-rose-700 ring-rose-200',
+  medium: 'bg-amber-50 text-amber-700 ring-amber-200',
+  low: 'bg-slate-50 text-slate-600 ring-slate-200'
+};
+
+const PRIMARY_SURFACE = 'rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6';
 type ScheduleViewFilter = 'all' | 'today' | 'deadline' | 'consultation' | 'event';
 
 const TYPE_ICONS: Record<ScheduleItemType, string> = {
@@ -83,6 +90,12 @@ function statusLabel(status: ScheduleItemStatus) {
   if (status === 'overdue') return 'Overdue';
   if (status === 'completed') return 'Completed';
   return 'Upcoming';
+}
+
+function priorityLabel(priority: ScheduleItemPriority) {
+  if (priority === 'high') return 'High priority';
+  if (priority === 'low') return 'Low priority';
+  return 'Medium priority';
 }
 
 function getScheduleActionHref(item: StudentScheduleItem) {
@@ -176,17 +189,17 @@ function SummaryCard({
   iconClassName: string;
 }) {
   return (
-    <article className={cx('rounded-xl p-5 shadow-sm', className)}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <span className={cx('text-xs font-semibold uppercase tracking-[0.16em]', labelClassName)}>{label}</span>
-          <strong className="block text-3xl font-semibold tracking-tight text-slate-900">{value}</strong>
+    <article className={cx('group relative overflow-hidden rounded-lg border border-slate-200/60 p-4 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md sm:p-5', className)}>
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <span className={cx('text-[11px] font-bold uppercase tracking-[0.18em]', labelClassName)}>{label}</span>
+          <strong className="block text-3xl font-extrabold tracking-tight text-slate-900">{value}</strong>
         </div>
-        <span className={cx('inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/80 shadow-sm', iconClassName)}>
-          <i className={`fas ${icon}`} aria-hidden="true" />
+        <span className={cx('inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br shadow-inner ring-1 ring-white/50 transition-transform duration-200 group-hover:scale-105', iconClassName)}>
+          <i className={`fas ${icon} text-base drop-shadow-sm`} aria-hidden="true" />
         </span>
       </div>
-      <p className="mt-4 text-sm leading-6 text-slate-600">{description}</p>
+      <p className="relative mt-3 text-[13px] font-medium leading-relaxed text-slate-600">{description}</p>
     </article>
   );
 }
@@ -200,44 +213,50 @@ function EventItem({
   className?: string;
   compact?: boolean;
 }) {
+  const tone = eventTone(item);
+
   return (
-    <article className={cx('rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md', className)}>
-      <div className="grid gap-4 sm:grid-cols-[88px_minmax(0,1fr)]">
-        <div className="rounded-xl bg-slate-50 px-3 py-3 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{item.dateLabel}</p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">{item.timeLabel}</p>
-          <span className={cx('mt-3 inline-flex h-9 w-9 items-center justify-center rounded-xl', TYPE_STYLES[item.type])}>
-            <i className={`fas ${TYPE_ICONS[item.type]} text-sm`} aria-hidden="true" />
-          </span>
+    <article className={cx('group relative overflow-hidden rounded-lg border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md', className)}>
+      <div className={cx('absolute inset-y-0 left-0 w-1', tone.dot)} aria-hidden="true" />
+      <div className="grid gap-4 p-4 sm:grid-cols-[116px_minmax(0,1fr)] sm:p-5">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-left">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">{item.dateLabel}</p>
+          <p className="mt-1 text-sm font-extrabold tracking-tight text-slate-950">{item.timeLabel}</p>
+          <div className="mt-3 flex items-center gap-2">
+            <span className={cx('flex h-8 w-8 items-center justify-center rounded-lg ring-1 ring-white/70', TYPE_STYLES[item.type])}>
+              <i className={`fas ${TYPE_ICONS[item.type]} text-[13px]`} aria-hidden="true" />
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{getScheduleSourceLabel(item)}</span>
+          </div>
         </div>
 
         <div className="min-w-0">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-            <div className="min-w-0 space-y-2">
+            <div className="min-w-0 space-y-2.5">
               <div className="flex flex-wrap items-center gap-2">
                 <Pill label={item.type} icon={TYPE_ICONS[item.type]} className={TYPE_STYLES[item.type]} />
                 <Pill label={statusLabel(item.status)} icon="fa-signal" className={STATUS_STYLES[item.status]} />
-                {!compact ? <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{getScheduleSourceLabel(item)}</span> : null}
+                <Pill label={priorityLabel(item.priority)} icon="fa-flag" className={cx('ring-1', PRIORITY_STYLES[item.priority])} />
               </div>
 
-              <div className="space-y-1">
-                <h4 className={cx('font-semibold tracking-tight text-slate-900', compact ? 'text-sm' : 'text-base')}>{item.title}</h4>
-                <p className={cx('text-sm text-slate-600', compact ? 'leading-5' : 'leading-6')}>{item.description}</p>
+              <div className="space-y-1.5">
+                <h4 className={cx('font-bold tracking-tight text-slate-950 transition-colors group-hover:text-blue-900', compact ? 'text-sm' : 'text-base')}>{item.title}</h4>
+                <p className={cx('text-[13px] font-medium text-slate-600', compact ? 'leading-relaxed line-clamp-2' : 'leading-relaxed')}>{item.description}</p>
               </div>
             </div>
 
             {!compact ? (
               <Link
-                className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                 href={getScheduleActionHref(item)}
               >
                 <i className="fas fa-arrow-up-right-from-square text-[10px]" aria-hidden="true" />
-                Open
+                Open Action
               </Link>
             ) : null}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-100 pt-3">
             <Meta icon="fa-location-dot" value={item.location} />
             <Meta icon="fa-compass" value={item.mode} />
             <Meta icon="fa-flag-checkered" value={item.relatedPhase || item.milestoneTitle || 'Project schedule'} />
@@ -258,9 +277,11 @@ function TimelineItem({
   const tone = eventTone(item);
 
   return (
-    <div className="relative pl-6">
-      {!isLast ? <span className="absolute left-[11px] top-10 bottom-[-1.5rem] w-px bg-slate-200" aria-hidden="true" /> : null}
-      <span className={cx('absolute left-[4px] top-7 h-3.5 w-3.5 rounded-full border-4 border-white shadow-sm', tone.dot)} aria-hidden="true" />
+    <div className="relative pl-7">
+      {!isLast ? <span className="absolute left-[13px] top-12 bottom-[-1.5rem] w-[2px] bg-gradient-to-b from-slate-200 to-slate-100" aria-hidden="true" /> : null}
+      <span className={cx('absolute left-[5px] top-8 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200')} aria-hidden="true">
+        <span className={cx('h-2.5 w-2.5 rounded-full', tone.dot)} />
+      </span>
       <EventItem item={item} className={cx('border-l-4', tone.border)} />
     </div>
   );
@@ -309,7 +330,7 @@ function TimelineSection({
 
 function SignalItem({ alert }: { alert: StudentScheduleAlert }) {
   return (
-    <article className={cx('rounded-xl px-4 py-4', ALERT_CARD_STYLES[alert.tone])}>
+    <article className={cx('rounded-lg px-4 py-4 ring-1 ring-inset ring-white/60', ALERT_CARD_STYLES[alert.tone])}>
       <div className="flex items-start gap-3">
         <span className={cx('mt-1.5 h-2.5 w-2.5 rounded-full', ALERT_BAR_STYLES[alert.tone])} aria-hidden="true" />
         <div className="min-w-0 space-y-2">
@@ -350,9 +371,9 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
       value: model.summary.activeItems,
       description: 'Open schedule items across milestones, meetings, and events.',
       icon: 'fa-calendar-day',
-      className: 'bg-blue-50',
-      labelClassName: 'text-blue-700/70',
-      iconClassName: 'text-blue-700'
+      className: 'bg-gradient-to-br from-blue-50/80 to-white border-blue-100/50',
+      labelClassName: 'text-blue-600',
+      iconClassName: 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-200'
     },
     {
       label: 'Deadlines',
@@ -361,9 +382,9 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
         ? 'Milestone deadlines and submission windows approaching next.'
         : 'No active deadline is queued right now.',
       icon: 'fa-hourglass-half',
-      className: 'bg-rose-50',
-      labelClassName: 'text-rose-700/70',
-      iconClassName: 'text-rose-700'
+      className: 'bg-gradient-to-br from-rose-50/80 to-white border-rose-100/50',
+      labelClassName: 'text-rose-600',
+      iconClassName: 'bg-gradient-to-br from-rose-500 to-rose-600 text-white shadow-rose-200'
     },
     {
       label: 'Consultations',
@@ -372,18 +393,18 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
         ? 'Adviser sessions and review meetings already organized in the planner.'
         : 'No active consultation session is currently scheduled.',
       icon: 'fa-users',
-      className: 'bg-amber-50',
-      labelClassName: 'text-amber-700/80',
-      iconClassName: 'text-amber-700'
+      className: 'bg-gradient-to-br from-amber-50/80 to-white border-amber-100/50',
+      labelClassName: 'text-amber-600',
+      iconClassName: 'bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-amber-200'
     },
     {
       label: 'Completed',
       value: model.completedItems.length,
       description: 'Closed consultations, checkpoints, and academic event records.',
       icon: 'fa-circle-check',
-      className: 'bg-emerald-50',
-      labelClassName: 'text-emerald-700/70',
-      iconClassName: 'text-emerald-700'
+      className: 'bg-gradient-to-br from-emerald-50/80 to-white border-emerald-100/50',
+      labelClassName: 'text-emerald-600',
+      iconClassName: 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-emerald-200'
     }
   ] as const;
 
@@ -426,27 +447,21 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
     }
   ] as const;
 
+  const filterCounts: Record<ScheduleViewFilter, number> = {
+    all: model.activeItems.length,
+    today: model.todayItems.length,
+    deadline: model.activeItems.filter((item) => item.type === 'Deadline').length,
+    consultation: model.activeItems.filter((item) => item.type === 'Consultation' || item.type === 'Meeting').length,
+    event: model.activeItems.filter((item) => item.type === 'Event' || item.type === 'Reminder').length
+  };
+
+  const completedPercent = model.summary.totalMilestones
+    ? Math.round((model.summary.completedMilestones / model.summary.totalMilestones) * 100)
+    : 0;
+  const topSignals = model.alerts.slice(0, 4);
+  const priorityQueue = model.priorityUpcoming.slice(0, 5);
+
   const timelineSections = [
-    {
-      id: 'priority',
-      eyebrow: 'Priority Events',
-      title: 'Priority events',
-      description: 'Overdue work appears first, followed by the nearest active deadlines and meetings.',
-      items: model.priorityUpcoming,
-      badgeLabel: `${model.priorityUpcoming.length} item${model.priorityUpcoming.length === 1 ? '' : 's'}`,
-      badgeClassName: model.priorityUpcoming.length ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700',
-      icon: 'fa-bolt'
-    },
-    {
-      id: 'week',
-      eyebrow: 'This Week',
-      title: 'This week',
-      description: 'Review the current academic week in one readable schedule list.',
-      items: model.thisWeekItems,
-      badgeLabel: `${model.thisWeekItems.length} item${model.thisWeekItems.length === 1 ? '' : 's'}`,
-      badgeClassName: model.thisWeekItems.length ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700',
-      icon: 'fa-calendar-week'
-    },
     {
       id: 'completed',
       eyebrow: 'Completed',
@@ -482,11 +497,11 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Link className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-md" href="/students/milestones">
+                <Link className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-md" href="/students/milestones">
                   <i className="fas fa-timeline" aria-hidden="true" />
                   Open Milestones
                 </Link>
-                <Link className="inline-flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-200 hover:bg-amber-100 hover:shadow-md" href="/students/notifications">
+                <Link className="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-200 hover:bg-amber-100 hover:shadow-md" href="/students/notifications">
                   <i className="fas fa-bell" aria-hidden="true" />
                   Review Alerts
                 </Link>
@@ -503,42 +518,99 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
       </header>
 
       <div className="page-body w-full space-y-6">
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_360px]">
+        <section className="flex flex-col gap-6">
           <div className="space-y-6">
-            <article className={PRIMARY_SURFACE}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Current Focus</span>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-                    {model.nextUpcomingEvent ? model.nextUpcomingEvent.title : 'No active schedule item'}
-                  </h2>
-                  <p className="max-w-3xl text-sm leading-6 text-slate-600">
-                    {model.nextUpcomingEvent
-                      ? `${model.nextUpcomingEvent.dateLabel} at ${model.nextUpcomingEvent.timeLabel}`
-                      : 'Your adviser schedule is clear right now.'}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Pill label={`${model.todayItems.length} today`} icon="fa-clock" className={model.todayItems.length ? 'bg-yellow-100 text-amber-900' : 'bg-slate-100 text-slate-700'} />
-                  <Pill label={`${adviserItems.length} adviser-set`} icon="fa-user-tie" className={adviserItems.length ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'} />
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-                {model.nextUpcomingEvent ? (
-                  <EventItem item={model.nextUpcomingEvent} className="bg-slate-50 shadow-none hover:shadow-sm" />
-                ) : (
-                  <EmptyState copy="No active schedule item" />
-                )}
-
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  {plannerMetrics.map((metric) => (
-                    <div key={metric.label} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{metric.label}</p>
-                      <p className="mt-1 text-xl font-semibold tracking-tight text-slate-900">{metric.value}</p>
+            <article className={cx(PRIMARY_SURFACE, 'overflow-hidden')}>
+              <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
+                <div className="min-w-0 space-y-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="space-y-1.5">
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Command Center</span>
+                      <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+                        {model.nextUpcomingEvent ? model.nextUpcomingEvent.title : 'No active schedule item'}
+                      </h2>
+                      <p className="max-w-3xl text-sm leading-6 text-slate-600">{model.plannerNote}</p>
                     </div>
-                  ))}
+                    <div className="flex flex-wrap gap-2">
+                      <Pill label={`${model.todayItems.length} today`} icon="fa-clock" className={model.todayItems.length ? 'bg-yellow-100 text-amber-900' : 'bg-slate-100 text-slate-700'} />
+                      <Pill label={`${model.summary.overdueMilestones} overdue`} icon="fa-triangle-exclamation" className={model.summary.overdueMilestones ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'} />
+                      <Pill label={`${adviserItems.length} adviser-set`} icon="fa-user-tie" className={adviserItems.length ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'} />
+                    </div>
+                  </div>
+
+                  {model.nextUpcomingEvent ? (
+                    <EventItem item={model.nextUpcomingEvent} className="bg-slate-50 shadow-none hover:shadow-sm" />
+                  ) : (
+                    <EmptyState copy="No active schedule item" />
+                  )}
+
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {plannerMetrics.map((metric) => (
+                      <div key={metric.label} className={cx('rounded-lg border bg-white px-4 py-3', metric.accentClassName)}>
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{metric.label}</p>
+                          <strong className="text-xl font-semibold tracking-tight text-slate-950">{metric.value}</strong>
+                        </div>
+                        <p className="mt-2 text-xs font-medium leading-5 text-slate-500">{metric.detail}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                <aside className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Attention</span>
+                      <h3 className="text-base font-semibold tracking-tight text-slate-950">Signals and priority queue</h3>
+                    </div>
+                    <Pill label={`${completedPercent}% complete`} icon="fa-chart-simple" className="bg-white text-slate-700 ring-1 ring-slate-200" />
+                  </div>
+
+                  <div className="mt-4 rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Milestone completion</span>
+                      <span className="text-xs font-bold text-slate-700">{model.summary.completedMilestones}/{model.summary.totalMilestones}</span>
+                    </div>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <span className="block h-full rounded-full bg-brand" style={{ width: `${completedPercent}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {topSignals.map((alert) => (
+                      <SignalItem key={alert.id} alert={alert} />
+                    ))}
+                  </div>
+
+                  <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Priority queue</span>
+                      <span className="text-xs font-semibold text-slate-500">{priorityQueue.length} active</span>
+                    </div>
+                    {priorityQueue.length ? (
+                      <div className="space-y-2">
+                        {priorityQueue.map((item) => (
+                          <Link
+                            key={item.id}
+                            href={getScheduleActionHref(item)}
+                            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition hover:border-blue-200 hover:bg-blue-50"
+                          >
+                            <span className={cx('flex h-8 w-8 items-center justify-center rounded-lg', TYPE_STYLES[item.type])}>
+                              <i className={`fas ${TYPE_ICONS[item.type]} text-[12px]`} aria-hidden="true" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-semibold text-slate-900">{item.title}</span>
+                              <span className="mt-0.5 block truncate text-xs font-medium text-slate-500">{item.dateLabel} - {item.timeLabel}</span>
+                            </span>
+                            <i className="fas fa-chevron-right text-[10px] text-slate-400" aria-hidden="true" />
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <EmptyState copy="No active priority items" />
+                    )}
+                  </div>
+                </aside>
               </div>
             </article>
 
@@ -557,46 +629,72 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
                 {model.weeklyPlannerCells.map((cell) => (
                   <article
                     key={cell.dayKey}
                     className={cx(
-                      'flex min-h-[220px] flex-col rounded-xl p-4',
-                      cell.isToday ? 'bg-blue-50/90 shadow-sm' : 'bg-slate-50/80'
+                      'group relative flex min-h-[188px] flex-col overflow-hidden rounded-lg border p-3 transition-all duration-200',
+                      cell.isToday
+                        ? 'border-blue-200 bg-white shadow-[0_4px_18px_rgb(59,130,246,0.10)] ring-1 ring-blue-100'
+                        : 'border-slate-200 bg-slate-50/60 hover:border-slate-300 hover:bg-white hover:shadow-sm'
                     )}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{formatWeekdayLabel(cell.day)}</span>
-                        <strong className="block text-base font-semibold text-slate-900">{formatMonthDayLabel(cell.day)}</strong>
+                    {cell.isToday && (
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-brand" />
+                    )}
+
+                    <div className="relative flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+                      <div className="flex flex-col">
+                        <span className={cx('text-[9px] font-bold uppercase tracking-[0.2em]', cell.isToday ? 'text-blue-600' : 'text-slate-400')}>{formatWeekdayLabel(cell.day)}</span>
+                        <strong className={cx('block text-base font-extrabold tracking-tight', cell.isToday ? 'text-blue-950' : 'text-slate-800')}>{formatMonthDayLabel(cell.day)}</strong>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        {cell.isToday ? <Pill label="Today" icon="fa-clock" className="bg-yellow-100 text-amber-900" /> : null}
-                        {cell.items.length ? <span className="text-xs font-semibold text-slate-500">{cell.items.length} item{cell.items.length === 1 ? '' : 's'}</span> : null}
+                      <div className="flex flex-col items-end gap-1.5">
+                        {cell.isToday ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-white shadow-sm shadow-blue-500/20">
+                            <i className="fas fa-clock text-[7px]" /> Today
+                          </span>
+                        ) : null}
+                        {cell.hasUrgent ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-rose-700 ring-1 ring-rose-100">
+                            <i className="fas fa-flag text-[7px]" /> Priority
+                          </span>
+                        ) : null}
+                        {cell.items.length ? (
+                          <span className={cx('inline-flex h-5 items-center justify-center rounded px-2 text-[10px] font-bold', cell.isToday ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500')}>
+                            {cell.items.length} item{cell.items.length === 1 ? '' : 's'}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
 
-                    <div className="mt-4 flex-1 space-y-3">
+                    <div className="relative mt-3 flex-1 space-y-2">
                       {cell.items.length ? (
                         cell.items.map((item) => {
                           const tone = eventTone(item);
 
                           return (
-                            <div key={item.id} className="flex gap-3 rounded-lg bg-white/90 px-3 py-3 shadow-sm">
-                              <span className={cx('mt-1.5 h-2.5 w-2.5 rounded-full', tone.dot)} aria-hidden="true" />
+                            <Link
+                              key={item.id}
+                              href={getScheduleActionHref(item)}
+                              className="group/cell relative flex gap-2.5 rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:shadow-md hover:ring-1 hover:ring-blue-100"
+                            >
+                              <span className={cx('mt-1 flex h-2 w-2 shrink-0 rounded-full', tone.dot)} aria-hidden="true" />
                               <div className="min-w-0">
-                                <p className="text-sm font-semibold leading-5 text-slate-900">{item.title}</p>
-                                <p className="mt-1 text-xs text-slate-500">
-                                  {item.timeLabel} &middot; {item.type}
+                                <p className="text-[12px] font-bold leading-tight text-slate-800 transition-colors group-hover/cell:text-blue-700">{item.title}</p>
+                                <p className="mt-1 flex items-center gap-1 text-[10px] font-medium text-slate-500">
+                                  <i className="fas fa-clock text-[8px] text-slate-400" /> {item.timeLabel}
                                 </p>
                               </div>
-                            </div>
+                            </Link>
                           );
                         })
                       ) : (
-                        <div className="flex h-full items-center justify-center rounded-lg bg-white/70 px-3 text-center text-sm text-slate-400">
-                          No schedule items available
+                        <div className="flex h-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 p-3 text-center transition-colors group-hover:bg-slate-50/80">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-100 text-slate-300">
+                            <i className="fas fa-calendar-minus text-xs" />
+                          </div>
+                          <span className="block text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Open Day</span>
                         </div>
                       )}
                     </div>
@@ -608,8 +706,8 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
             <article className={PRIMARY_SURFACE}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Schedule List</span>
-                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">All active items</h3>
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Active Agenda</span>
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">Filtered schedule items</h3>
                   <p className="max-w-2xl text-sm leading-6 text-slate-600">
                     Adviser-created consultations, deadlines, reminders, and generated milestone dates stay in one list.
                   </p>
@@ -627,7 +725,7 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
                       type="button"
                       onClick={() => setActiveFilter(option.id)}
                       className={cx(
-                        'inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition',
+                        'inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition',
                         active
                           ? 'border-brand bg-brand text-white shadow-sm'
                           : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -635,6 +733,9 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
                     >
                       <i className={`fas ${option.icon} text-xs`} aria-hidden="true" />
                       {option.label}
+                      <span className={cx('ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded px-1.5 text-[11px] font-bold', active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500')}>
+                        {filterCounts[option.id]}
+                      </span>
                     </button>
                   );
                 })}
@@ -671,106 +772,6 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
             </article>
           </div>
 
-          <aside className={PRIMARY_SURFACE}>
-            <div className="space-y-8">
-              <section className="space-y-4">
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Today</span>
-                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">
-                    {model.todayItems.length ? `${model.todayItems.length} item${model.todayItems.length === 1 ? '' : 's'} scheduled` : 'No schedule today'}
-                  </h3>
-                  <p className="text-sm leading-6 text-slate-600">
-                    Items due today stay pinned for quick scanning.
-                  </p>
-                </div>
-
-                {model.todayItems.length ? (
-                  <div className="space-y-3">
-                    {model.todayItems.slice(0, 3).map((item) => (
-                      <EventItem key={item.id} item={item} compact className="bg-slate-50 shadow-none hover:shadow-sm" />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState copy="No schedule today" />
-                )}
-              </section>
-
-              <div className="h-px bg-slate-100" />
-
-              <section className="space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Adviser Updates</span>
-                    <h3 className="text-lg font-semibold tracking-tight text-slate-900">Recently scheduled</h3>
-                    <p className="text-sm leading-6 text-slate-600">Consultations, reminders, and deadlines set by the adviser.</p>
-                  </div>
-                  <Pill label={`${adviserItems.length}`} icon="fa-user-tie" className={adviserItems.length ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'} />
-                </div>
-
-                {adviserItems.length ? (
-                  <div className="space-y-3">
-                    {adviserItems.slice(0, 3).map((item) => (
-                      <EventItem key={item.id} item={item} compact className="bg-blue-50/70 shadow-none hover:shadow-sm" />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState copy="No adviser schedule items yet" />
-                )}
-              </section>
-
-              <div className="h-px bg-slate-100" />
-
-              <section className="space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Alerts</span>
-                    <h3 className="text-lg font-semibold tracking-tight text-slate-900">Urgent deadlines</h3>
-                    <p className="text-sm leading-6 text-slate-600">Time-sensitive planner items are grouped here with softer alert backgrounds instead of separate cards.</p>
-                  </div>
-                  <Pill
-                    label={`${model.urgentDeadlines.length} queued`}
-                    icon="fa-bell"
-                    className={model.urgentDeadlines.length ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}
-                  />
-                </div>
-
-                {model.urgentDeadlines.length ? (
-                  <div className="space-y-3">
-                    {model.urgentDeadlines.map((item) => {
-                      const tone = eventTone(item);
-
-                      return <EventItem key={item.id} item={item} compact className={cx(tone.panel, 'shadow-none hover:shadow-sm')} />;
-                    })}
-                  </div>
-                ) : (
-                  <EmptyState copy="No schedule items available" />
-                )}
-              </section>
-
-              <div className="h-px bg-slate-100" />
-
-              <section className="space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Planner Signals</span>
-                    <h3 className="text-lg font-semibold tracking-tight text-slate-900">Generated schedule signals</h3>
-                    <p className="text-sm leading-6 text-slate-600">Today&apos;s pressure, milestone risk, and follow-up reminders stay organized in one readable signal list.</p>
-                  </div>
-                  <Pill label={`${model.alerts.length} signals`} icon="fa-wave-square" className="bg-slate-100 text-slate-700" />
-                </div>
-
-                {model.alerts.length ? (
-                  <div className="space-y-3">
-                    {model.alerts.map((alert) => (
-                      <SignalItem key={alert.id} alert={alert} />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState copy="No planner signals available" />
-                )}
-              </section>
-            </div>
-          </aside>
         </section>
       </div>
     </div>

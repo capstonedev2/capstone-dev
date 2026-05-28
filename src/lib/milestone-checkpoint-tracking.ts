@@ -261,8 +261,119 @@ function getMilestoneRollupStatus(statuses: MilestoneCheckpointStatus[]) {
   return hasActivity ? MilestoneStatus.IN_PROGRESS : MilestoneStatus.PENDING;
 }
 
+type ExistingCheckpointSummary = {
+  id: string;
+  key: string;
+  milestoneId: string;
+  status: MilestoneCheckpointStatus;
+  adviserReviewStatus: MilestoneCheckpointReviewStatus;
+  panelReviewStatus: MilestoneCheckpointReviewStatus;
+  submittedAt: Date | null;
+  reviewedAt: Date | null;
+  completedAt: Date | null;
+  latestFeedback: string | null;
+  latestFeedbackBy: string | null;
+  latestFeedbackAt: Date | null;
+};
+
+const TITLE_REVIEW_APPROVED_CHECKPOINT_KEYS = [
+  'concept-title',
+  'concept-paper',
+  'concept-adviser-approval'
+];
+
+function hasCheckpointActivity(checkpoint?: ExistingCheckpointSummary) {
+  if (!checkpoint) {
+    return false;
+  }
+
+  return checkpoint.status !== MilestoneCheckpointStatus.PENDING ||
+    Boolean(checkpoint.submittedAt || checkpoint.reviewedAt || checkpoint.completedAt);
+}
+
+function hasPendingReviewFeedback(value?: string | null) {
+  const normalized = normalize(value);
+
+  return normalized.includes('pending adviser review') ||
+    normalized.includes('waiting for review') ||
+    normalized.includes('review is in progress');
+}
+
+async function repairApprovedConceptTitleReview(
+  db: DbClient,
+  projectStatus: ProjectStatus | null | undefined,
+  existingCheckpoints: ExistingCheckpointSummary[]
+) {
+  if (!projectStatus || !APPROVED_PROJECT_STATUSES.has(projectStatus)) {
+    return;
+  }
+
+  const checkpointsByKey = new Map(existingCheckpoints.map((checkpoint) => [checkpoint.key, checkpoint]));
+  const hasTitleReviewActivity = TITLE_REVIEW_APPROVED_CHECKPOINT_KEYS.some((key) =>
+    hasCheckpointActivity(checkpointsByKey.get(key))
+  );
+
+  if (!hasTitleReviewActivity) {
+    return;
+  }
+
+  const now = new Date();
+  const updatedMilestoneIds = new Set<string>();
+
+  for (const key of TITLE_REVIEW_APPROVED_CHECKPOINT_KEYS) {
+    const checkpoint = checkpointsByKey.get(key);
+
+    if (!checkpoint) {
+      continue;
+    }
+
+    if (key === 'concept-paper' && !hasCheckpointActivity(checkpoint)) {
+      continue;
+    }
+
+    const shouldClearFeedback = hasPendingReviewFeedback(checkpoint.latestFeedback);
+    const shouldUpdate =
+      checkpoint.status !== MilestoneCheckpointStatus.COMPLETED ||
+      checkpoint.adviserReviewStatus !== MilestoneCheckpointReviewStatus.APPROVED ||
+      checkpoint.panelReviewStatus !== MilestoneCheckpointReviewStatus.NOT_REQUIRED ||
+      !checkpoint.submittedAt ||
+      !checkpoint.reviewedAt ||
+      !checkpoint.completedAt ||
+      shouldClearFeedback;
+
+    if (!shouldUpdate) {
+      continue;
+    }
+
+    await db.milestoneCheckpoint.update({
+      where: { id: checkpoint.id },
+      data: {
+        status: MilestoneCheckpointStatus.COMPLETED,
+        adviserReviewStatus: MilestoneCheckpointReviewStatus.APPROVED,
+        panelReviewStatus: MilestoneCheckpointReviewStatus.NOT_REQUIRED,
+        submittedAt: checkpoint.submittedAt ?? now,
+        reviewedAt: checkpoint.reviewedAt ?? now,
+        completedAt: checkpoint.completedAt ?? now,
+        ...(shouldClearFeedback
+          ? {
+              latestFeedback: null,
+              latestFeedbackBy: null,
+              latestFeedbackAt: null
+            }
+          : {})
+      }
+    });
+
+    updatedMilestoneIds.add(checkpoint.milestoneId);
+  }
+
+  await Promise.all(Array.from(updatedMilestoneIds).map((milestoneId) =>
+    updateMilestoneRollup(db, milestoneId)
+  ));
+}
+
 export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: string) {
-  const [existingMilestones, existingCheckpoints] = await Promise.all([
+  const [existingMilestones, existingCheckpoints, project] = await Promise.all([
     db.milestone.findMany({
       where: { projectId },
       select: {
@@ -279,8 +390,19 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
         key: true,
         status: true,
         milestoneId: true,
-        panelReviewStatus: true
+        adviserReviewStatus: true,
+        panelReviewStatus: true,
+        submittedAt: true,
+        reviewedAt: true,
+        completedAt: true,
+        latestFeedback: true,
+        latestFeedbackBy: true,
+        latestFeedbackAt: true
       }
+    }),
+    db.project.findUnique({
+      where: { id: projectId },
+      select: { status: true }
     })
   ]);
 
@@ -346,13 +468,14 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
       await Promise.all(rollupUpdates);
     }
 
+    await repairApprovedConceptTitleReview(
+      db,
+      project?.status,
+      existingCheckpoints as ExistingCheckpointSummary[]
+    );
+
     return existingCheckpoints;
   }
-
-  const project = await db.project.findUnique({
-    where: { id: projectId },
-    select: { status: true }
-  });
 
   const checkpoints = [];
 
@@ -664,6 +787,13 @@ function mapSubmissionStatusToReviewStatus(status: SubmissionStatus) {
 function getCompanionReviewCheckpointKeys(sourceKey: string | null | undefined, role: UserRole, nextStatus: SubmissionStatus) {
   const source = sourceKey || '';
   const isApproval = nextStatus === SubmissionStatus.APPROVED;
+  const isReviewedConceptTitle =
+    source === 'concept-title' &&
+    (
+      nextStatus === SubmissionStatus.APPROVED ||
+      nextStatus === SubmissionStatus.NEEDS_REVISION ||
+      nextStatus === SubmissionStatus.REJECTED
+    );
 
   if (role === UserRole.PANEL) {
     if (source.startsWith('concept-')) {
@@ -689,6 +819,10 @@ function getCompanionReviewCheckpointKeys(sourceKey: string | null | undefined, 
     }
 
     return [];
+  }
+
+  if (isReviewedConceptTitle) {
+    return ['concept-paper', 'concept-adviser-approval'];
   }
 
   if (source.startsWith('concept-')) {
@@ -748,6 +882,10 @@ async function syncCompanionReviewCheckpoints(
     });
 
     if (!checkpoint) {
+      continue;
+    }
+
+    if (sourceKey === 'concept-title' && key === 'concept-paper' && !hasCheckpointActivity(checkpoint)) {
       continue;
     }
 

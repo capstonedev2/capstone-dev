@@ -230,6 +230,26 @@ function getActivityStatusLabel(status: string) {
   return formatSentenceCase(status);
 }
 
+function getReviewStatusLabel(status: string) {
+  if (status === 'pending' || status === 'pending-review') {
+    return 'Pending';
+  }
+
+  if (status === 'under-review') {
+    return 'Needs Review';
+  }
+
+  if (status === 'approved' || status === 'completed') {
+    return 'Approved';
+  }
+
+  if (status === 'at-risk' || status === 'needs-revision') {
+    return 'Warning';
+  }
+
+  return formatSentenceCase(status);
+}
+
 export function buildAdviserMetrics(
   groups: AdviserDashboardData['groups'],
   submissions: AdviserDashboardData['adviserSubmissions'],
@@ -295,9 +315,10 @@ export function buildPanelLiveUpdates(activity: AdviserDashboardData['panelActiv
 export function buildAdviserRecentSubmissionItems(recentSubmissions: AdviserDashboardData['recentSubmissions'], adviserSubmissions: AdviserDashboardData['adviserSubmissions'], groups: AdviserDashboardData['groups']): RecentSubmissionItem[] {
   const groupsById = new Map(groups.map((group) => [group.id, group]));
   const adviserSubmissionsByCode = new Map(adviserSubmissions.map((item) => [item.groupCode, item]));
-  return recentSubmissions.map((item) => {
+  return recentSubmissions.map((item, index) => {
     const group = groupsById.get(item.action);
     const detailedSubmission = group ? adviserSubmissionsByCode.get(group.code) : undefined;
+    const reviewStatus = detailedSubmission?.status ?? item.status;
     return {
       id: item.id,
       groupCode: group?.code ?? item.group,
@@ -305,16 +326,17 @@ export function buildAdviserRecentSubmissionItems(recentSubmissions: AdviserDash
       fileTitle: detailedSubmission?.title ?? `${item.type} Submission`,
       submissionType: detailedSubmission?.type ?? item.type,
       submittedDate: detailedSubmission?.submitted ?? 'Submitted today',
-      statusLabel: group ? getComputedGroupStatusLabel(group) : 'Pending',
-      tone: getToneFromStatus(group ? getComputedGroupStatus(group) : item.status),
+      statusLabel: getReviewStatusLabel(reviewStatus),
+      tone: getToneFromStatus(reviewStatus),
       actionId: item.action,
-      meta: detailedSubmission?.dueLabel ?? 'Waiting for initial review'
+      meta: detailedSubmission?.dueLabel ?? 'Waiting for initial review',
+      revisionCount: Math.max(0, detailedSubmission?.reviewDays ?? index + 1)
     };
   });
 }
 
 export function buildPanelRecentSubmissionItems(panelProjects: AdviserDashboardData['panelProjects']): RecentSubmissionItem[] {
-  return panelProjects.map((item) => ({ id: item.id, groupCode: item.dept, groupName: item.title, fileTitle: 'Defense Evaluation Packet', submissionType: 'Panel Evaluation', submittedDate: item.defenseDate, statusLabel: item.statusLabel, tone: getToneFromStatus(item.status), actionId: item.id, meta: item.students }));
+  return panelProjects.map((item, index) => ({ id: item.id, groupCode: item.dept, groupName: item.title, fileTitle: 'Defense Evaluation Packet', submissionType: 'Panel Evaluation', submittedDate: item.defenseDate, statusLabel: getReviewStatusLabel(item.status), tone: getToneFromStatus(item.status), actionId: item.id, meta: item.students, revisionCount: index }));
 }
 
 export function buildAdviserAlerts(groups: AdviserDashboardData['groups'], adviserSubmissions: AdviserDashboardData['adviserSubmissions']): AttentionAlertItem[] {
@@ -327,7 +349,7 @@ export function buildAdviserAlerts(groups: AdviserDashboardData['groups'], advis
         title: `${group.code} is still under revision`,
         description: `${getGroupProjectTitle(group)} needs follow-up on ${milestone.toLowerCase()}.`,
         priority: 'urgent' as const,
-        meta: `Unresolved revision · ${milestone}`
+        meta: `Unresolved revision - ${milestone}`
       };
     });
   const warningAlerts = groups
@@ -340,7 +362,7 @@ export function buildAdviserAlerts(groups: AdviserDashboardData['groups'], advis
       title: `${group.code} needs your milestone decision`,
       description: `${getGroupProjectTitle(group)} is not yet cleared for the next milestone.`,
       priority: 'warning' as const,
-      meta: `Pending approval · ${group.progress}% progress`
+      meta: `Pending approval - ${group.progress}% progress`
     }));
   const normalAlerts = adviserSubmissions
     .filter((item) => item.status === 'under-review')
@@ -349,15 +371,15 @@ export function buildAdviserAlerts(groups: AdviserDashboardData['groups'], advis
       title: `${item.groupCode} is waiting on a second review pass`,
       description: item.latestNote,
       priority: 'normal' as const,
-      meta: `${item.type} · ${item.dueLabel}`
+      meta: `${item.type} - ${item.dueLabel}`
     }));
   return [...urgentAlerts, ...warningAlerts, ...normalAlerts].slice(0, 4);
 }
 
 export function buildPanelAlerts(panelProjects: AdviserDashboardData['panelProjects']): AttentionAlertItem[] {
-  const pending = panelProjects.filter((project) => project.status === 'pending').map((project) => ({ id: `panel-pending-${project.id}`, title: `${project.title} is waiting for panel scoring`, description: `${project.students} still need a completed rubric and recommendation.`, priority: 'urgent' as const, meta: `Pending evaluation · ${project.defenseDate}` }));
-  const scheduled = panelProjects.filter((project) => project.status === 'scheduled').map((project) => ({ id: `panel-scheduled-${project.id}`, title: `${project.title} defense is approaching`, description: 'Finalize scoring notes and defense coverage before the scheduled session.', priority: 'warning' as const, meta: `Scheduled defense · ${project.defenseDate}` }));
-  const completed = panelProjects.filter((project) => project.status === 'completed').slice(0, 1).map((project) => ({ id: `panel-completed-${project.id}`, title: `${project.title} is ready for consolidation`, description: 'Completed review is already in the archive and ready for records confirmation.', priority: 'normal' as const, meta: `Completed review · ${project.defenseDate}` }));
+  const pending = panelProjects.filter((project) => project.status === 'pending').map((project) => ({ id: `panel-pending-${project.id}`, title: `${project.title} is waiting for panel scoring`, description: `${project.students} still need a completed rubric and recommendation.`, priority: 'urgent' as const, meta: `Pending evaluation - ${project.defenseDate}` }));
+  const scheduled = panelProjects.filter((project) => project.status === 'scheduled').map((project) => ({ id: `panel-scheduled-${project.id}`, title: `${project.title} defense is approaching`, description: 'Finalize scoring notes and defense coverage before the scheduled session.', priority: 'warning' as const, meta: `Scheduled defense - ${project.defenseDate}` }));
+  const completed = panelProjects.filter((project) => project.status === 'completed').slice(0, 1).map((project) => ({ id: `panel-completed-${project.id}`, title: `${project.title} is ready for consolidation`, description: 'Completed review is already in the archive and ready for records confirmation.', priority: 'normal' as const, meta: `Completed review - ${project.defenseDate}` }));
   return [...pending, ...scheduled, ...completed].slice(0, 4);
 }
 

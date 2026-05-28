@@ -159,19 +159,23 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
   const toggleLabel = isMobile
     ? sidebarOpen ? 'Close sidebar' : 'Open sidebar'
     : sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  const activeNavItem = ADVISER_NAV_ITEMS[workspaceMode].find((item) => isNavItemActive(pathname, item.href));
+  const navbarTitle = activeNavItem?.key === 'dashboard'
+    ? meta.pageTitle
+    : activeNavItem?.label ?? meta.pageTitle;
 
   return (
     <div
-      className={`adviser-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      className={`student-shell adviser-shell adviser-workspace-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
       data-theme={themeMode}
     >
       {/* ─── Top Navbar ─── */}
-      <header className="adviser-global-navbar">
-        <div className="adviser-global-navbar-main">
+      <header className="student-global-navbar adviser-global-navbar">
+        <div className="student-global-navbar-main adviser-global-navbar-main">
           <button
             aria-label={toggleLabel}
-            className="icon-btn adviser-shell-toggle"
+            className="icon-btn student-shell-toggle adviser-shell-toggle"
             type="button"
             onClick={toggleSidebar}
           >
@@ -181,9 +185,13 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
             />
           </button>
 
+          <div className="student-navbar-title adviser-navbar-title" aria-label="Current page">
+            <span className="student-navbar-title-kicker adviser-navbar-title-kicker">ThesisTrack</span>
+            <strong>{navbarTitle}</strong>
+          </div>
         </div>
 
-        <div className="adviser-global-navbar-actions">
+        <div className="student-global-navbar-actions adviser-global-navbar-actions">
           <AdviserShellActions 
             basePath={basePath}
             fullName={data.profile.fullName}
@@ -198,7 +206,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
       </header>
 
       {/* ─── Sidebar ─── */}
-      <aside className={`adviser-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar adviser-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Adviser Portal</span>
@@ -254,14 +262,14 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
       {/* ─── Mobile backdrop ─── */}
       <button
         aria-label="Close sidebar"
-        className={`adviser-global-backdrop sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
+        className={`student-global-backdrop adviser-global-backdrop sidebar-backdrop${sidebarOpen ? ' is-open' : ''}`}
         type="button"
         onClick={() => setSidebarOpen(false)}
       />
 
       {/* ─── Main content ─── */}
-      <main className="adviser-global-main">
-        <div className="adviser-global-content">{children}</div>
+      <main className="student-global-main adviser-global-main">
+        <div className="student-global-content adviser-global-content">{children}</div>
       </main>
     </div>
   );

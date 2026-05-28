@@ -35,6 +35,7 @@ export interface RecentSubmissionItem {
   tone: DashboardTone;
   actionId: string;
   meta?: string;
+  revisionCount?: number;
 }
 
 export interface AttentionAlertItem {

@@ -37,7 +37,7 @@ export function LibraryShell({
     toggleLabel,
     toggleSidebar
   } = useShellSidebar({
-    mobileBreakpoint: 960,
+    mobileBreakpoint: 1100,
     storageKey: 'library-sidebar-collapsed'
   });
 
@@ -148,7 +148,7 @@ export function LibraryShell({
         </div>
       </header>
 
-      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Repository</span>

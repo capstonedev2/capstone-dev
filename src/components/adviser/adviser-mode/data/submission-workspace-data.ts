@@ -112,6 +112,13 @@ export const SUBMISSION_SORT_OPTIONS: ReadonlyArray<{ value: SubmissionSortOptio
   { value: 'version', label: 'Current Version' }
 ];
 
+const TITLE_SUBMISSION_CATEGORY_PATTERNS = [
+  'title proposal',
+  'title submission',
+  'title approval',
+  'proposed title'
+];
+
 const submissionStatusMeta: Record<
   SubmissionStatus,
   {
@@ -174,6 +181,18 @@ function asIsoString(value: string | Date | null | undefined) {
 
 function getFileExtension(fileName: string) {
   return fileName.split('.').pop()?.toLowerCase() || 'doc';
+}
+
+export function isTitleSubmissionFile(file: Pick<DocumentFileSummary, 'documentCategory' | 'fileName'>) {
+  const category = String(file.documentCategory || '').trim().toLowerCase();
+  const fileName = String(file.fileName || '').trim().toLowerCase();
+
+  return TITLE_SUBMISSION_CATEGORY_PATTERNS.some((pattern) => category.includes(pattern))
+    || (category === 'proposal' && fileName.includes('title'));
+}
+
+export function getAdviserReviewQueueFiles(files: DocumentFileSummary[]) {
+  return files.filter((file) => !isTitleSubmissionFile(file));
 }
 
 function getWorkflowStepIndex(status: SubmissionStatus, currentVersionNumber: number) {

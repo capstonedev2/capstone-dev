@@ -320,11 +320,9 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
     };
 
     pollNotifications();
-    const intervalId = setInterval(pollNotifications, 5000);
     return () => {
       cancelled = true;
       inFlightController?.abort();
-      clearInterval(intervalId);
     };
   }, [data.profile.user_id]);
 

@@ -13,6 +13,7 @@ import {
 import {
   SUBMISSION_STATUS_FILTER_OPTIONS,
   compareSubmissionReviewOrder,
+  getAdviserReviewQueueFiles,
   getApprovedThisWeekCount,
   getSubmissionMilestoneOptions,
   getSubmissionTypeOptions,
@@ -74,7 +75,7 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
         }
 
         if (!cancelled) {
-          setStudentDocuments(payload?.files || []);
+          setStudentDocuments(getAdviserReviewQueueFiles(payload?.files || []));
         }
       } catch (error) {
         if (!cancelled) {

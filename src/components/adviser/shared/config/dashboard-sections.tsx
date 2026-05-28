@@ -68,7 +68,7 @@ function SectionFrame({
   children: ReactNode;
 }) {
   return (
-    <section className="adviser-premium-section rounded-[1.5rem] border border-slate-200/70 bg-white shadow-sm">
+    <section className="adviser-premium-section rounded-lg border border-slate-200/70 bg-white shadow-sm">
       <div className="adviser-premium-section-head flex flex-col gap-3 border-b border-slate-200/70 px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -166,7 +166,7 @@ export function DashboardHeader({
               <strong className="block truncate text-sm font-semibold text-[var(--text-dark)]">{profile.name}</strong>
               <span className="block truncate text-xs text-[var(--text-light)]">{profile.role}</span>
               <small className="mt-1 block truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-[rgba(0,58,143,0.68)]">
-                {profile.department} · {profile.helperText}
+                {profile.department} - {profile.helperText}
               </small>
             </div>
           </div> : null}
@@ -178,9 +178,9 @@ export function DashboardHeader({
 
 export function SummaryCard({ icon, label, value, helperText, trendLabel, tone = 'primary' }: DashboardMetric) {
   return (
-    <article className={cx('adviser-kpi-card group rounded-[1.4rem] border border-slate-200/70 bg-white p-5 shadow-sm', `adviser-kpi-card-${tone}`)}>
+    <article className={cx('adviser-kpi-card group rounded-lg border border-slate-200/70 bg-white p-5 shadow-sm', `adviser-kpi-card-${tone}`)}>
       <div className="flex items-start justify-between gap-3">
-        <span className={cx('adviser-kpi-icon inline-flex h-11 w-11 items-center justify-center rounded-2xl text-base', toneIconStyles[tone])}>
+        <span className={cx('adviser-kpi-icon inline-flex h-11 w-11 items-center justify-center rounded-lg text-base', toneIconStyles[tone])}>
           <i aria-hidden="true" className={`fas ${icon}`} />
         </span>
         {trendLabel ? (
@@ -218,17 +218,17 @@ export function LiveSupervisionUpdates({
   return (
     <SectionFrame
       eyebrow="Live Feed"
-      title="Live Supervision Updates"
-      description="Latest submission, consultation, and milestone events ready for real-time delivery later."
+      title="Activity Feed"
+      description="Recent submission, consultation, and milestone updates that may need adviser follow-up."
       action={
-        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+        <span className="inline-flex items-center gap-2 rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           Real-time ready
         </span>
       }
     >
       {loading ? (
-        <div className="adviser-skeleton-stack flex min-h-[220px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
+        <div className="adviser-skeleton-stack flex min-h-[220px] items-center justify-center rounded-lg bg-slate-50 text-sm text-[var(--text-light)]">
           <span>Loading supervision feed...</span>
         </div>
       ) : items.length ? (
@@ -236,10 +236,10 @@ export function LiveSupervisionUpdates({
           {items.map((item) => (
             <article
               key={item.id}
-              className="adviser-timeline-item rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 transition hover:bg-white hover:shadow-sm"
+              className="adviser-timeline-item rounded-lg border border-slate-200/70 bg-slate-50/80 p-4 transition hover:bg-white hover:shadow-sm"
             >
               <div className="flex items-start gap-4">
-                <span className={cx('adviser-timeline-icon mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm', toneIconStyles[item.tone])}>
+                <span className={cx('adviser-timeline-icon mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm', toneIconStyles[item.tone])}>
                   <i aria-hidden="true" className={`fas ${item.icon}`} />
                 </span>
                 <div className="min-w-0 flex-1">
@@ -254,15 +254,11 @@ export function LiveSupervisionUpdates({
                   <p className="mt-1 text-sm leading-6 text-[var(--text-light)]">{item.description}</p>
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[var(--text-light)]">
                     <span className="font-semibold text-[var(--text-dark)]">{item.groupName}</span>
-                    <span>•</span>
+                    <span>-</span>
                     <span>{item.timestamp}</span>
                     <span className={cx('adviser-status-chip inline-flex items-center rounded-full px-2.5 py-1 font-semibold', toneBadgeStyles[item.tone])}>
                       {item.statusLabel}
                     </span>
-                  </div>
-                  <div className="adviser-inline-actions" aria-label="Quick supervision actions">
-                    <button type="button">Open</button>
-                    <button type="button">Follow up</button>
                   </div>
                 </div>
               </div>
@@ -270,7 +266,7 @@ export function LiveSupervisionUpdates({
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[220px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
+        <div className="flex min-h-[220px] items-center justify-center rounded-lg bg-slate-50 text-sm text-[var(--text-light)]">
           {emptyMessage}
         </div>
       )}
@@ -303,7 +299,7 @@ export function RecentSubmissions({
       title={title}
       description={description}
       action={
-        <Link className="text-sm font-semibold text-[var(--primary)] transition hover:text-[var(--primary-dark)]" href={actionHref}>
+        <Link className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-[var(--primary)] transition hover:border-blue-200 hover:bg-blue-50 hover:text-[var(--primary-dark)]" href={actionHref}>
           {actionLinkLabel}
         </Link>
       }
@@ -337,7 +333,7 @@ export function RecentSubmissions({
                 </span>
                 <span>
                   <small>Revisions</small>
-                  <strong>{index + 1}</strong>
+                  <strong>{item.revisionCount ?? index + 1}</strong>
                 </span>
               </div>
 
@@ -347,24 +343,16 @@ export function RecentSubmissions({
               </div>
 
               <div className="adviser-review-actions">
-                <button type="button" onClick={() => onAction(item)}>
-                  <i aria-hidden="true" className="fas fa-eye" />
-                  Preview
-                </button>
-                <button type="button" onClick={() => onAction(item)}>
-                  <i aria-hidden="true" className="fas fa-comment-medical" />
-                  Comment
-                </button>
                 <button className="is-primary" type="button" onClick={() => onAction(item)}>
                   <i aria-hidden="true" className="fas fa-check-double" />
-                  {actionLabel === 'Review' ? 'Approve' : actionLabel}
+                  {actionLabel === 'Review' ? 'Open Review' : actionLabel}
                 </button>
               </div>
             </article>
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[180px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
+        <div className="flex min-h-[180px] items-center justify-center rounded-lg bg-slate-50 text-sm text-[var(--text-light)]">
           {emptyMessage}
         </div>
       )}
@@ -382,13 +370,13 @@ export function AttentionAlerts({
   return (
     <SectionFrame
       eyebrow="Attention Needed"
-      title="Alerts / Attention Needed"
-      description="Overdue groups, pending approvals, and unresolved revisions surfaced by priority."
+      title="Priority Attention"
+      description="Groups and submissions that should be handled before routine monitoring."
     >
       {items.length ? (
         <div className="adviser-alert-stack space-y-3">
           {items.map((item) => (
-            <article key={item.id} className={cx('adviser-alert-card rounded-2xl px-4 py-4', `adviser-alert-${item.priority}`, alertStyles[item.priority])}>
+            <article key={item.id} className={cx('adviser-alert-card rounded-lg px-4 py-4', `adviser-alert-${item.priority}`, alertStyles[item.priority])}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <strong className="block text-sm font-semibold text-[var(--text-dark)]">{item.title}</strong>
@@ -400,14 +388,14 @@ export function AttentionAlerts({
               </div>
               <div className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-light)]">{item.meta}</div>
               <div className="adviser-intervention-hint">
-                <i aria-hidden="true" className="fas fa-wand-magic-sparkles" />
+                <i aria-hidden="true" className="fas fa-route" />
                 <span>{item.priority === 'urgent' ? 'Schedule an intervention check-in today.' : item.priority === 'warning' ? 'Send a milestone reminder before the next consultation.' : 'Keep this item on the next review pass.'}</span>
               </div>
             </article>
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[180px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
+        <div className="flex min-h-[180px] items-center justify-center rounded-lg bg-slate-50 text-sm text-[var(--text-light)]">
           {emptyMessage}
         </div>
       )}
@@ -417,37 +405,39 @@ export function AttentionAlerts({
 
 export function QuickActions({ actions }: { actions: DashboardAction[] }) {
   return (
-    <SectionFrame eyebrow="Quick Actions" title="Quick Actions" description="Go straight to the most common supervision tasks.">
+    <SectionFrame eyebrow="Quick Actions" title="Quick Actions" description="Open the main adviser workflows from one compact list.">
       <div className="adviser-quick-action-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
         {actions.map((action) =>
           action.href ? (
             <Link
               key={action.id}
-              className="adviser-quick-action group flex min-h-[84px] items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-4 transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
+              className="adviser-quick-action group flex min-h-[84px] items-center gap-3 rounded-lg border border-slate-200/80 bg-slate-50/70 px-4 py-4 transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
               href={action.href}
             >
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
                 <i aria-hidden="true" className={`fas ${action.icon}`} />
               </span>
               <span className="min-w-0">
                 <strong className="block text-sm font-semibold text-[var(--text-dark)]">{action.label}</strong>
                 <small className="mt-1 block text-xs leading-5 text-[var(--text-light)]">{action.helperText}</small>
               </span>
+              <i aria-hidden="true" className="adviser-quick-action-arrow fas fa-chevron-right" />
             </Link>
           ) : (
             <button
               key={action.id}
-              className="adviser-quick-action group flex min-h-[84px] items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 px-4 py-4 text-left transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
+              className="adviser-quick-action group flex min-h-[84px] items-center gap-3 rounded-lg border border-slate-200/80 bg-slate-50/70 px-4 py-4 text-left transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
               type="button"
               onClick={action.onClick}
             >
-              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
                 <i aria-hidden="true" className={`fas ${action.icon}`} />
               </span>
               <span className="min-w-0">
                 <strong className="block text-sm font-semibold text-[var(--text-dark)]">{action.label}</strong>
                 <small className="mt-1 block text-xs leading-5 text-[var(--text-light)]">{action.helperText}</small>
               </span>
+              <i aria-hidden="true" className="adviser-quick-action-arrow fas fa-chevron-right" />
             </button>
           )
         )}
@@ -458,16 +448,16 @@ export function QuickActions({ actions }: { actions: DashboardAction[] }) {
 
 export function WeeklySchedule({ items }: { items: WeeklyScheduleItem[] }) {
   return (
-    <SectionFrame eyebrow="This Week" title="This Week’s Schedule" description="Consultations and defenses arranged in a compact adviser timeline.">
+    <SectionFrame eyebrow="This Week" title="This Week's Schedule" description="Consultations and defenses arranged in a compact adviser timeline.">
       {items.length ? (
         <div className="adviser-schedule-timeline space-y-4">
           {items.map((item, index) => (
-            <div key={item.id} className="flex gap-4">
-              <div className="flex w-20 shrink-0 flex-col">
+            <div key={item.id} className="adviser-schedule-row flex gap-4">
+              <div className="adviser-schedule-date flex w-20 shrink-0 flex-col">
                 <span className="text-sm font-semibold text-[var(--text-dark)]">{item.dateLabel}</span>
                 <span className="text-xs text-[var(--text-light)]">{item.timeLabel}</span>
               </div>
-              <div className="adviser-schedule-card relative flex-1 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4">
+              <div className="adviser-schedule-card relative flex-1 rounded-lg border border-slate-200/70 bg-slate-50/80 p-4">
                 {index !== items.length - 1 ? <span className="absolute -bottom-4 left-[1.15rem] top-full w-px bg-slate-200" /> : null}
                 <span className={cx('absolute left-4 top-4 h-2.5 w-2.5 rounded-full', timelineDotStyles[item.tone ?? 'primary'])} />
                 <div className="pl-5">
@@ -480,7 +470,7 @@ export function WeeklySchedule({ items }: { items: WeeklyScheduleItem[] }) {
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[180px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
+        <div className="flex min-h-[180px] items-center justify-center rounded-lg bg-slate-50 text-sm text-[var(--text-light)]">
           No schedule items this week.
         </div>
       )}
@@ -489,6 +479,12 @@ export function WeeklySchedule({ items }: { items: WeeklyScheduleItem[] }) {
 }
 
 export function GroupProgressSnapshot({ items, emptyMessage = 'No group progress records available.' }: { items: GroupProgressSnapshotItem[]; emptyMessage?: string }) {
+  const averageProgress = items.length
+    ? Math.round(items.reduce((total, item) => total + item.progress, 0) / items.length)
+    : 0;
+  const watchCount = items.filter((item) => item.progress < 60).length;
+  const readyCount = items.filter((item) => item.progress >= 80).length;
+
   return (
     <SectionFrame
       eyebrow="Progress Snapshot"
@@ -497,8 +493,22 @@ export function GroupProgressSnapshot({ items, emptyMessage = 'No group progress
     >
       {items.length ? (
         <div className="adviser-progress-stack space-y-4">
+          <div className="adviser-progress-summary-grid" aria-label="Progress milestone summary">
+            <span>
+              <strong>{averageProgress}%</strong>
+              <small>Average</small>
+            </span>
+            <span>
+              <strong>{watchCount}</strong>
+              <small>Watchlist</small>
+            </span>
+            <span>
+              <strong>{readyCount}</strong>
+              <small>Ready</small>
+            </span>
+          </div>
           {items.map((item) => (
-            <article key={item.id} className="adviser-progress-card rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4">
+            <article key={item.id} className="adviser-progress-card rounded-lg border border-slate-200/70 bg-slate-50/80 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <strong className="block text-sm font-semibold text-[var(--text-dark)]">{item.groupName}</strong>
@@ -527,7 +537,7 @@ export function GroupProgressSnapshot({ items, emptyMessage = 'No group progress
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[180px] items-center justify-center rounded-2xl bg-slate-50 text-sm text-[var(--text-light)]">
+        <div className="flex min-h-[180px] items-center justify-center rounded-lg bg-slate-50 text-sm text-[var(--text-light)]">
           {emptyMessage}
         </div>
       )}

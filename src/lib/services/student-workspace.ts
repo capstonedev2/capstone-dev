@@ -526,6 +526,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             data.group.id = group.id;
             data.group.allowMemberSubmission = group.allowMemberSubmission ?? false;
             data.group.groupName = group.title || data.group.groupName;
+            data.group.groupCode = group.code || data.group.groupCode;
             data.group.leaderName = group.leader || data.group.leaderName;
           }
 

@@ -37,7 +37,7 @@ export function TechTransferShell({
     toggleLabel,
     toggleSidebar
   } = useShellSidebar({
-    mobileBreakpoint: 1080,
+    mobileBreakpoint: 1100,
     storageKey: 'tech-transfer-sidebar-collapsed'
   });
 
@@ -149,7 +149,7 @@ export function TechTransferShell({
         </div>
       </header>
 
-      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Transfer Office</span>

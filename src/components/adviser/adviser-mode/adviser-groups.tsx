@@ -1002,9 +1002,7 @@ function CreateGroupModal({
       groupCodeInputRef.current?.focus();
     }, 40);
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+      if (event.key === 'Escape') onClose();
     };
 
     document.body.style.overflow = 'hidden';
@@ -1046,480 +1044,247 @@ function CreateGroupModal({
     onDraftChange({ ...draft, leader: student });
   };
 
-  const readinessChecks = [
-    { label: 'Group code added', done: draft.code.trim().length > 0 },
-    { label: 'At least one member selected', done: draft.students.length > 0 },
-    { label: 'Leader assigned', done: Boolean(draft.leader) }
-  ];
-
-  const completedChecks = readinessChecks.filter((item) => item.done).length;
-  const missingChecks = readinessChecks.filter((item) => !item.done);
-  const isReadyToCreate = readinessChecks.every((item) => item.done);
-  const readinessPercent = Math.round((completedChecks / readinessChecks.length) * 100);
-  const hasSearchQuery = studentSearch.trim().length > 0;
+  const isReadyToCreate = draft.code.trim().length > 0 && draft.students.length > 0 && Boolean(draft.leader);
 
   if (!open) return null;
 
   return (
     <div
-      className="modal show"
+      className="modal show z-[100]"
       aria-hidden="false"
       aria-modal="true"
       role="dialog"
-      aria-labelledby="create-group-modal-title"
-      aria-describedby="create-group-modal-description"
-      style={{ display: 'flex', background: 'rgba(15, 23, 42, 0.62)' }}
+      style={{ display: 'flex', background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)' }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="modal-content !max-w-5xl flex max-h-[92vh] flex-col overflow-hidden border-0 shadow-[0_32px_120px_rgba(15,23,42,0.28)]">
-        <div className="modal-header !items-start gap-4 border-b border-slate-200/80 bg-[linear-gradient(135deg,rgba(0,58,143,0.06),rgba(255,255,255,0.96))]">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start gap-4">
-              <div
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm"
-                style={{ background: 'rgba(0, 58, 143, 0.1)', color: 'var(--primary)' }}
-              >
-                <i className="fas fa-users-medical"></i>
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Adviser Workspace</p>
-                <h3 id="create-group-modal-title">Create Group</h3>
-                <p id="create-group-modal-description" className="mt-1 max-w-2xl text-sm text-slate-500">
-                  Set the group identity, build the roster, and assign the student leader before the new supervision record goes live.
-                </p>
-              </div>
+      <div className="modal-content !max-w-[1000px] flex max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-white/20 shadow-[0_32px_120px_rgba(0,0,0,0.3)] bg-white animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Premium Header */}
+        <div className="relative flex items-start justify-between border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-400" />
+          <div className="flex items-center gap-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-[var(--student-primary,#0f4c81)] shadow-inner ring-1 ring-inset ring-sky-100/50">
+              <i className="fas fa-users-medical text-2xl"></i>
             </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              <div className="rounded-[1.15rem] border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Department</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">{department}</p>
-                <p className="mt-1 text-xs text-slate-500">Locked to your current adviser workspace.</p>
+            <div>
+              <div className="flex items-center gap-3">
+                <h3 className="text-2xl font-bold tracking-tight text-slate-900">Create New Group</h3>
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 ring-1 ring-inset ring-slate-200">
+                  {department}
+                </span>
               </div>
-              <div className="rounded-[1.15rem] border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Roster</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
-                  {draft.students.length} {draft.students.length === 1 ? 'member' : 'members'}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {draft.leader ? `${draft.leader} is the current leader.` : 'Select a leader after adding the roster.'}
-                </p>
-              </div>
-              <div className="rounded-[1.15rem] border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Setup Progress</p>
-                  <span className="text-sm font-semibold text-slate-900">{readinessPercent}%</span>
-                </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      isReadyToCreate ? 'bg-emerald-500' : 'bg-[var(--primary)]'
-                    }`}
-                    style={{ width: `${readinessPercent}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-slate-500">
-                  {missingChecks.length ? `${missingChecks.length} required item${missingChecks.length === 1 ? '' : 's'} left.` : 'Everything required is in place.'}
-                </p>
-              </div>
+              <p className="mt-1.5 text-sm text-slate-500 font-medium">Configure group identity and assign student members to start tracking progress.</p>
             </div>
           </div>
-
-          <button type="button" className="close-modal shrink-0" onClick={onClose} aria-label="Close create group modal">
-            &times;
+          <button type="button" onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-600 active:scale-95">
+            <i className="fas fa-times text-lg"></i>
           </button>
         </div>
 
-        <div className="modal-body flex-1 overflow-y-auto bg-slate-50/70">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.95fr)]">
-            <div className="space-y-5">
-              <section className="relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
-                <div className="absolute right-0 top-0 h-32 w-32 -translate-y-8 translate-x-8 rounded-full bg-indigo-50/80 blur-3xl"></div>
-                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 shadow-inner">
-                      <span className="text-sm font-bold">1</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold tracking-tight text-slate-900">Group Basics</h4>
-                      <p className="mt-1 text-sm text-slate-500">Establish the group identity and configuration.</p>
-                    </div>
+        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-8">
+          <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
+            
+            {/* Left Column: Config & Search */}
+            <div className="flex flex-col space-y-8">
+              
+              {/* Group Code */}
+              <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+                <label htmlFor="group-code" className="mb-3 flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">Group Code</span>
+                  <span className="text-[10px] font-medium text-slate-400">Required</span>
+                </label>
+                <div className="relative group">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-[var(--student-primary,#0f4c81)] transition-colors">
+                    <i className="fas fa-hashtag"></i>
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 shadow-sm">
-                    <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-xs font-semibold text-slate-700">{completedChecks}/3 Ready</span>
-                  </div>
+                  <input
+                    id="group-code"
+                    ref={groupCodeInputRef}
+                    type="text"
+                    placeholder="e.g. IT-2024-05"
+                    value={draft.code}
+                    onChange={(event) => onDraftChange({ ...draft, code: event.target.value })}
+                    className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-[var(--student-primary,#0f4c81)] focus:bg-white focus:ring-4 focus:ring-[var(--student-primary,#0f4c81)]/10"
+                  />
                 </div>
+              </div>
 
-                <div className="relative mt-6 grid gap-5 md:grid-cols-2">
-                  <div className="flex flex-col">
-                    <label htmlFor="group-code" className="mb-2 text-sm font-semibold text-slate-700">Group Code</label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                        <i className="fas fa-hashtag"></i>
-                      </div>
-                      <input
-                        id="group-code"
-                        ref={groupCodeInputRef}
-                        type="text"
-                        placeholder="e.g. IT-2024-05"
-                        value={draft.code}
-                        onChange={(event) => onDraftChange({ ...draft, code: event.target.value })}
-                        className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 p-3 pl-10 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
-                      />
-                    </div>
-                    <p className="mt-2 text-xs text-slate-500"><i className="fas fa-info-circle mr-1"></i> A short, recognizable identifier.</p>
-                  </div>
-
-                  <div className="flex flex-col justify-center rounded-xl border border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100/50 p-4 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm">
-                        <i className="fas fa-building text-xs"></i>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Department Context</p>
-                        <p className="text-sm font-bold text-slate-800">{department}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
-                    <div className="mt-0.5 text-amber-500">
-                      <i className="fas fa-lightbulb"></i>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-amber-700/70">Project Title</p>
-                      <p className="mt-1 text-sm font-medium text-amber-900">Pending Student Submission</p>
-                      <p className="mt-1.5 text-xs text-amber-700/70">Students will set the working title upon invitation acceptance.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
-                    <div className="mt-0.5 text-blue-500">
-                      <i className="fas fa-chart-line"></i>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-blue-700/70">Tracking & Progress</p>
-                      <p className="mt-1 text-sm font-medium text-blue-900">Automated after creation</p>
-                      <p className="mt-1.5 text-xs text-blue-700/70">Milestones and status shift based on supervision activity.</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
-                <div className="absolute left-0 top-0 h-32 w-32 -translate-x-8 -translate-y-8 rounded-full bg-emerald-50/80 blur-3xl"></div>
-                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-inner">
-                      <span className="text-sm font-bold">2</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold tracking-tight text-slate-900">Build the Roster</h4>
-                      <p className="mt-1 text-sm text-slate-500">Select students and designate a group leader.</p>
-                    </div>
-                  </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 shadow-sm">
-                    <div className="flex items-center justify-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
-                      {draft.students.length}
-                    </div>
-                    <span className="text-xs font-semibold text-slate-600">Members Selected</span>
-                  </div>
-                </div>
-
-                <div className="relative mt-6 rounded-[1.25rem] bg-slate-50 p-2 shadow-inner border border-slate-200/60">
-                  <div className="relative flex flex-col gap-3 md:flex-row md:items-center">
-                    <div className="relative min-w-0 flex-1">
-                      <i className="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                      <input
-                        id="group-student-search"
-                        type="text"
-                        placeholder="Search students by name..."
-                        value={studentSearch}
-                        onChange={(event) => setStudentSearch(event.target.value)}
-                        className="block w-full rounded-xl border-0 bg-white py-3 pl-11 pr-4 text-sm font-medium text-slate-900 shadow-sm ring-1 ring-inset ring-slate-200 transition-all placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-emerald-500"
-                      />
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 px-2 md:px-0">
-                      {hasSearchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => setStudentSearch('')}
-                          className="inline-flex items-center gap-2 rounded-lg bg-slate-200/50 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-200"
-                        >
-                          <i className="fas fa-times"></i>
-                          Clear
-                        </button>
-                      )}
-                      <span className="inline-flex items-center rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200">
-                        {hasSearchQuery ? `${filteredStudents.length} Found` : `${filteredStudents.length} Available`}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative mt-5 grid gap-6 lg:grid-cols-2">
-                  <div className="flex flex-col overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-users text-slate-400"></i>
-                          <h5 className="text-sm font-bold text-slate-800">Selected Team</h5>
-                        </div>
-                        {draft.leader && (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                            <i className="fas fa-crown"></i> {draft.leader}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1 overflow-y-auto bg-slate-50/30 p-3 max-h-[300px] min-h-[250px]">
-                      {draft.students.length > 0 ? (
-                        <div className="space-y-2.5">
-                          {draft.students.map((student) => {
-                            const isLeader = draft.leader === student;
-                            const initials = student.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-
-                            return (
-                              <div
-                                key={student}
-                                className={`group relative flex items-center justify-between gap-3 rounded-xl border p-3 transition-all hover:shadow-md ${
-                                  isLeader ? 'border-amber-200 bg-amber-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-sm ${
-                                    isLeader ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
-                                  }`}>
-                                    {initials}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <p className="truncate text-sm font-bold text-slate-900">{student}</p>
-                                      {isLeader && (
-                                        <span className="shrink-0 rounded bg-amber-500 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
-                                          Leader
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="truncate text-xs text-slate-500">
-                                      {isLeader ? 'Primary group contact' : 'Group member'}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="flex shrink-0 items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                                  {!isLeader && (
-                                    <button
-                                      type="button"
-                                      onClick={() => assignLeader(student)}
-                                      title="Make Leader"
-                                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition-colors"
-                                    >
-                                      <i className="fas fa-crown"></i>
-                                    </button>
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={() => removeStudentFromDraft(student)}
-                                    title="Remove Student"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                  >
-                                    <i className="fas fa-user-minus"></i>
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="flex h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                            <i className="fas fa-user-friends text-lg"></i>
-                          </div>
-                          <p className="mt-3 text-sm font-bold text-slate-700">Empty Roster</p>
-                          <p className="mt-1 text-xs text-slate-500 max-w-[200px]">Add students from the available list to build this group.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-user-plus text-slate-400"></i>
-                          <h5 className="text-sm font-bold text-slate-800">Available Roster</h5>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1 overflow-y-auto p-2 max-h-[300px] min-h-[250px]">
-                      {filteredStudents.length > 0 ? (
-                        <div className="space-y-1">
-                          {filteredStudents.map((student) => {
-                            const initials = student.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                            return (
-                              <div key={student} className="group flex items-center justify-between gap-3 rounded-lg p-2 transition-colors hover:bg-slate-50">
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[10px] font-bold text-indigo-600">
-                                    {initials}
-                                  </div>
-                                  <span className="truncate text-sm font-medium text-slate-700">{student}</span>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => addStudentToDraft(student)}
-                                  className="shrink-0 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-indigo-600 shadow-sm ring-1 ring-inset ring-slate-200 transition-all hover:bg-indigo-50 hover:ring-indigo-200"
-                                >
-                                  Add
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                          <p className="text-sm font-bold text-slate-500">
-                            {studentSearch.trim() ? 'No matching students found' : 'All students added'}
-                          </p>
-                          <p className="mt-1 text-xs text-slate-400">
-                            {studentSearch.trim() ? 'Try modifying your search query.' : 'There are no more available students.'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </div>
-
-            <aside className="space-y-5 xl:sticky xl:top-0 xl:self-start">
-              <section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Readiness</p>
-                <h4 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">Before You Create</h4>
-                <p className="mt-1 text-sm text-slate-500">The group can be created once each required item is in place.</p>
-
-                <div className="mt-5 rounded-[1.15rem] border border-slate-200 bg-slate-50/80 px-4 py-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-900">Completion</p>
-                    <span className="text-sm font-semibold text-slate-900">{completedChecks}/3</span>
-                  </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${
-                        isReadyToCreate ? 'bg-emerald-500' : 'bg-[var(--primary)]'
-                      }`}
-                      style={{ width: `${readinessPercent}%` }}
+              {/* Available Students */}
+              <div className="flex flex-col flex-1 rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden flex-shrink-0 min-h-[360px]">
+                <div className="border-b border-slate-100 p-5 bg-slate-50/30">
+                  <label className="mb-3 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">Available Roster</span>
+                    <span className="text-[10px] font-medium text-slate-400">{filteredStudents.length} Students</span>
+                  </label>
+                  <div className="relative group">
+                    <i className="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--student-primary,#0f4c81)] transition-colors text-sm"></i>
+                    <input
+                      type="text"
+                      placeholder="Search students by name..."
+                      value={studentSearch}
+                      onChange={(event) => setStudentSearch(event.target.value)}
+                      className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:border-[var(--student-primary,#0f4c81)] focus:bg-white focus:ring-4 focus:ring-[var(--student-primary,#0f4c81)]/10"
                     />
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">
-                    {missingChecks.length
-                      ? `Still needed: ${missingChecks.map((item) => item.label.replace(' added', '').replace(' selected', '')).join(', ')}.`
-                      : 'All required setup items are complete.'}
-                  </p>
                 </div>
-
-                <div className="mt-5 space-y-3">
-                  {readinessChecks.map((item) => (
-                    <div
-                      key={item.label}
-                      className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${
-                        item.done ? 'border-emerald-200 bg-emerald-50/80' : 'border-slate-200 bg-slate-50/80'
-                      }`}
-                    >
-                      <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs ${
-                          item.done ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400'
-                        }`}
-                      >
-                        <i className={`fas ${item.done ? 'fa-check' : 'fa-circle'}`}></i>
-                      </div>
-                      <div className="min-w-0">
-                        <p className={`text-sm font-semibold ${item.done ? 'text-emerald-800' : 'text-slate-700'}`}>{item.label}</p>
-                        <p className="text-xs text-slate-500">{item.done ? 'Complete' : 'Required before saving'}</p>
-                      </div>
+                
+                <div className="flex-1 overflow-y-auto p-3 bg-slate-50/50">
+                  {filteredStudents.length > 0 ? (
+                    <div className="space-y-2">
+                      {filteredStudents.map((student) => {
+                        const initials = student.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                        return (
+                          <div key={student} className="group flex items-center justify-between rounded-xl p-2.5 bg-white border border-slate-100 hover:border-sky-200 hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-50 text-[11px] font-bold text-[var(--student-primary,#0f4c81)] ring-1 ring-inset ring-sky-100/50 transition-colors group-hover:bg-[var(--student-primary,#0f4c81)] group-hover:text-white">
+                                {initials}
+                              </div>
+                              <span className="truncate text-sm font-semibold text-slate-700 group-hover:text-slate-900 transition-colors">{student}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => addStudentToDraft(student)}
+                              className="shrink-0 rounded-lg bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200 transition-all hover:bg-[var(--student-primary,#0f4c81)] hover:text-white hover:ring-[var(--student-primary,#0f4c81)] opacity-0 sm:opacity-100 md:opacity-0 group-hover:opacity-100"
+                            >
+                              Add
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
+                  ) : (
+                    <div className="flex h-full flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 rounded-xl bg-white m-2">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-300 mb-4">
+                        <i className="fas fa-user-slash text-xl"></i>
+                      </div>
+                      <p className="text-sm font-bold text-slate-700">No students found</p>
+                      <p className="mt-1.5 text-xs text-slate-500 max-w-[200px] leading-relaxed">Check your spelling or confirm if all matching students are already in the group.</p>
+                    </div>
+                  )}
                 </div>
-              </section>
+              </div>
 
-              <section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Preview</p>
-                <h4 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">Group Snapshot</h4>
-                <dl className="mt-5 space-y-4 text-sm">
-                  <div className="flex items-start justify-between gap-4">
-                    <dt className="text-slate-500">Code</dt>
-                    <dd className="text-right font-semibold text-slate-900">{draft.code.trim() || 'Not set'}</dd>
-                  </div>
-                  <div className="flex items-start justify-between gap-4">
-                    <dt className="text-slate-500">Title</dt>
-                    <dd className="max-w-[14rem] text-right font-semibold text-slate-900">Pending Submission</dd>
-                  </div>
-                  <div className="flex items-start justify-between gap-4">
-                    <dt className="text-slate-500">Department</dt>
-                    <dd className="text-right font-semibold text-slate-900">{department}</dd>
-                  </div>
-                  <div className="flex items-start justify-between gap-4">
-                    <dt className="text-slate-500">Members</dt>
-                    <dd className="text-right font-semibold text-slate-900">{draft.students.length}</dd>
-                  </div>
-                  <div className="flex items-start justify-between gap-4">
-                    <dt className="text-slate-500">Leader</dt>
-                    <dd className="text-right font-semibold text-slate-900">{draft.leader || 'Not assigned'}</dd>
-                  </div>
-                </dl>
+            </div>
 
-                <div
-                  className={`mt-5 rounded-[1.15rem] border px-4 py-4 ${
-                    isReadyToCreate ? 'border-emerald-200 bg-emerald-50/80' : 'border-amber-200 bg-amber-50/70'
-                  }`}
-                >
-                  <p className={`text-sm font-semibold ${isReadyToCreate ? 'text-emerald-900' : 'text-amber-900'}`}>
-                    {isReadyToCreate ? 'Ready to create' : 'Waiting for required details'}
-                  </p>
-                  <p className={`mt-1 text-xs ${isReadyToCreate ? 'text-emerald-700' : 'text-amber-800'}`}>
-                    {isReadyToCreate
-                      ? 'The group record has enough information to be saved now.'
-                      : 'Finish the checklist to create a complete group record.'}
-                  </p>
+            {/* Right Column: Selected Roster */}
+            <div className="flex flex-col h-full rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden min-h-[460px]">
+              <div className="border-b border-slate-100 p-5 bg-gradient-to-b from-slate-50 to-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-1">Selected Team</h4>
+                    <p className="text-sm font-bold text-slate-900">Review & Assign Leader</p>
+                  </div>
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[var(--student-primary,#0f4c81)] text-white shadow-sm font-bold text-sm">
+                    {draft.students.length}
+                  </div>
                 </div>
-              </section>
-            </aside>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 bg-slate-50/30">
+                {draft.students.length > 0 ? (
+                  <div className="space-y-3">
+                    {draft.students.map((student) => {
+                      const isLeader = draft.leader === student;
+                      const initials = student.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+                      return (
+                        <div
+                          key={student}
+                          className={`group flex items-center justify-between gap-3 rounded-xl border p-3.5 transition-all duration-300 ${
+                            isLeader 
+                              ? 'border-[var(--student-primary,#0f4c81)]/30 bg-[var(--student-primary,#0f4c81)]/5 shadow-md shadow-[var(--student-primary,#0f4c81)]/10 ring-1 ring-[var(--student-primary,#0f4c81)]/20' 
+                              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+                          }`}
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-sm transition-colors ${
+                              isLeader ? 'bg-gradient-to-br from-[var(--student-primary,#0f4c81)] to-sky-600 text-white' : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {initials}
+                            </div>
+                            <div className="min-w-0">
+                              <p className={`truncate text-sm font-bold ${isLeader ? 'text-slate-900' : 'text-slate-700'}`}>{student}</p>
+                              {isLeader ? (
+                                <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--student-primary,#0f4c81)] flex items-center gap-1.5">
+                                  <i className="fas fa-crown text-amber-500"></i> Group Leader
+                                </p>
+                              ) : (
+                                <p className="mt-0.5 text-xs text-slate-400 font-medium">Group Member</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex shrink-0 items-center gap-2">
+                            {!isLeader && (
+                              <button
+                                type="button"
+                                onClick={() => assignLeader(student)}
+                                className="flex h-8 items-center rounded-lg px-3 text-xs font-bold text-slate-500 bg-slate-50 ring-1 ring-inset ring-slate-200 hover:bg-[var(--student-primary,#0f4c81)] hover:text-white hover:ring-[var(--student-primary,#0f4c81)] transition-all opacity-0 sm:opacity-100 md:opacity-0 group-hover:opacity-100"
+                              >
+                                Make Leader
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => removeStudentFromDraft(student)}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 bg-white ring-1 ring-inset ring-slate-200 hover:bg-red-500 hover:text-white hover:ring-red-500 transition-all shadow-sm"
+                              title="Remove"
+                            >
+                              <i className="fas fa-trash-alt text-[11px]"></i>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-xl bg-white m-1 relative overflow-hidden">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-sky-50 rounded-full blur-3xl opacity-50"></div>
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 text-slate-300 shadow-sm border border-slate-100 mb-5 relative z-10">
+                      <i className="fas fa-user-plus text-2xl"></i>
+                    </div>
+                    <p className="text-base font-bold text-slate-800 relative z-10">Your roster is empty</p>
+                    <p className="mt-2 text-sm text-slate-500 max-w-[220px] leading-relaxed relative z-10">Select students from the available roster to start building this group.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <div className="modal-footer flex-col gap-3 border-t border-slate-200/80 bg-white sm:flex-row sm:items-center">
-          <div
-            className={`w-full rounded-[1.15rem] border px-4 py-3 text-left sm:mr-auto sm:max-w-md ${
-              isReadyToCreate ? 'border-emerald-200 bg-emerald-50/80' : 'border-amber-200 bg-amber-50/70'
-            }`}
-          >
-            <p className={`text-sm font-semibold ${isReadyToCreate ? 'text-emerald-900' : 'text-amber-900'}`}>
-              {isReadyToCreate ? 'Ready to create this group' : 'Finish the required setup first'}
-            </p>
-            <p className={`mt-1 text-xs ${isReadyToCreate ? 'text-emerald-700' : 'text-amber-800'}`}>
-              {isReadyToCreate
-                ? 'The current draft is complete and can be saved now.'
-                : 'Create becomes available once the code, members, and leader are all set.'}
-            </p>
+        {/* Premium Footer */}
+        <div className="flex items-center justify-between border-t border-slate-200/60 bg-white px-8 py-5">
+          <div className="flex items-center">
+            {isReadyToCreate ? (
+              <div className="flex items-center gap-3 rounded-full bg-emerald-50 px-4 py-2 ring-1 ring-inset ring-emerald-200 animate-in slide-in-from-left-4 fade-in">
+                <i className="fas fa-check-circle text-emerald-500 text-lg"></i>
+                <span className="text-sm font-bold text-emerald-700">Ready to create group</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 rounded-full bg-amber-50 px-4 py-2 ring-1 ring-inset ring-amber-200">
+                <i className="fas fa-circle-exclamation text-amber-500 text-lg"></i>
+                <span className="text-sm font-bold text-amber-700">
+                  {!draft.code.trim() ? "Missing group code" : draft.students.length === 0 ? "Add at least one member" : "Leader not assigned"}
+                </span>
+              </div>
+            )}
           </div>
-
-          <div className="flex w-full flex-col-reverse gap-3 sm:w-auto sm:flex-row">
-            <button type="button" className="btn btn-outline w-full sm:w-auto" onClick={onClose}>
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors">
               Cancel
             </button>
             <button
               type="button"
-              className="btn btn-primary w-full sm:w-auto"
               onClick={onSubmit}
               disabled={!isReadyToCreate}
-              style={!isReadyToCreate ? { opacity: 0.65, cursor: 'not-allowed' } : undefined}
+              className={`flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-bold text-white shadow-lg transition-all duration-300 ${
+                isReadyToCreate 
+                  ? 'bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-600 hover:shadow-xl hover:scale-105 active:scale-95' 
+                  : 'bg-slate-300 shadow-none cursor-not-allowed'
+              }`}
             >
               <i className="fas fa-folder-plus"></i>
               Create Group

@@ -10,20 +10,17 @@ import {
   LiveSupervisionUpdates,
   QuickActions,
   RecentSubmissions,
-  SummaryCard,
   WeeklySchedule
 } from '@/components/adviser/shared/config/dashboard-sections';
 import type { DashboardAction } from '@/components/adviser/shared/config/dashboard-types';
 import {
   buildAdviserAlerts,
   buildAdviserLiveUpdates,
-  buildAdviserMetrics,
   buildAdviserProgressSnapshot,
   buildAdviserRecentSubmissionItems,
   buildAdviserScheduleItems,
   buildPanelAlerts,
   buildPanelLiveUpdates,
-  buildPanelMetrics,
   buildPanelProgressSnapshot,
   buildPanelRecentSubmissionItems,
   buildPanelScheduleItems,
@@ -91,14 +88,6 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
   );
   const selectedReviewGroup = groups.find((group) => group.id === reviewGroupId) ?? groups[0] ?? null;
   const selectedPanelProject = panelProjects.find((project) => project.id === evaluationProjectId) ?? panelProjects[0] ?? null;
-
-  const summaryMetrics = useMemo(
-    () =>
-      workspaceMode === 'adviser'
-        ? buildAdviserMetrics(groups, data.adviserSubmissions, panelProjects)
-        : buildPanelMetrics(panelProjects),
-    [workspaceMode, groups, data.adviserSubmissions, panelProjects]
-  );
 
   const liveUpdates = useMemo(
     () =>
@@ -219,7 +208,7 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
 
     closeModal();
     showToast(
-      `Review submitted for ${selectedReviewGroup.code}${notifyStudentReview ? ' · Students notified' : ''}`,
+      `Review submitted for ${selectedReviewGroup.code}${notifyStudentReview ? ' - Students notified' : ''}`,
       'success'
     );
   }
@@ -309,6 +298,72 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
   const healthLabel = supervisionHealth >= 82 ? 'Stable' : supervisionHealth >= 64 ? 'Watchlist' : 'Intervention';
   const primaryActionHref = workspaceMode === 'adviser' ? meta.primaryActionHref : `${basePath}/evaluation-queue`;
   const scheduleHref = workspaceMode === 'adviser' ? `${basePath}/schedule` : `${basePath}/defense-schedule`;
+  const nextScheduleItem = weeklySchedule[0] ?? null;
+  const topQueueItem = recentSubmissionItems[0] ?? null;
+  const topAttentionItem = attentionAlerts[0] ?? null;
+  const focusMetrics = [
+    {
+      id: 'review-load',
+      icon: workspaceMode === 'adviser' ? 'fa-inbox' : 'fa-clipboard-check',
+      label: workspaceMode === 'adviser' ? 'Review load' : 'Evaluation load',
+      value: String(activeReviewCount),
+      detail: workspaceMode === 'adviser' ? 'Items waiting for adviser action' : 'Packets waiting for scoring',
+      tone: activeReviewCount ? 'warning' : 'success'
+    },
+    {
+      id: 'watchlist',
+      icon: 'fa-triangle-exclamation',
+      label: 'Watchlist',
+      value: String(atRiskCount),
+      detail: workspaceMode === 'adviser' ? 'Groups with revision or progress risk' : 'Panel assignments not yet completed',
+      tone: atRiskCount ? 'danger' : 'success'
+    },
+    {
+      id: 'schedule',
+      icon: workspaceMode === 'adviser' ? 'fa-calendar-check' : 'fa-calendar-days',
+      label: 'This week',
+      value: String(weeklySchedule.length),
+      detail: nextScheduleItem ? `${nextScheduleItem.dateLabel}, ${nextScheduleItem.timeLabel}` : 'No scheduled sessions',
+      tone: weeklySchedule.length ? 'info' : 'neutral'
+    },
+    {
+      id: 'progress',
+      icon: 'fa-chart-simple',
+      label: workspaceMode === 'adviser' ? 'Average progress' : 'Completion rate',
+      value: `${averageProgress}%`,
+      detail: `${watchedGroups.length} ${workspaceMode === 'adviser' ? 'groups' : 'assignments'} tracked`,
+      tone: averageProgress >= 80 ? 'success' : averageProgress >= 60 ? 'warning' : 'danger'
+    }
+  ] as const;
+  const nextActions = [
+    topAttentionItem
+      ? {
+          id: 'attention',
+          icon: topAttentionItem.priority === 'urgent' ? 'fa-circle-exclamation' : 'fa-flag',
+          label: topAttentionItem.title,
+          detail: topAttentionItem.meta,
+          href: workspaceMode === 'adviser' ? `${basePath}/progress` : `${basePath}/evaluation-queue`
+        }
+      : null,
+    topQueueItem
+      ? {
+          id: 'queue',
+          icon: workspaceMode === 'adviser' ? 'fa-file-circle-check' : 'fa-star-half-stroke',
+          label: topQueueItem.fileTitle,
+          detail: `${topQueueItem.groupCode} - ${topQueueItem.statusLabel}`,
+          href: workspaceMode === 'adviser' ? `${basePath}/submissions` : `${basePath}/evaluation-queue`
+        }
+      : null,
+    nextScheduleItem
+      ? {
+          id: 'schedule',
+          icon: workspaceMode === 'adviser' ? 'fa-calendar-check' : 'fa-calendar-days',
+          label: nextScheduleItem.groupName,
+          detail: `${nextScheduleItem.eventType} - ${nextScheduleItem.dateLabel} ${nextScheduleItem.timeLabel}`,
+          href: scheduleHref
+        }
+      : null
+  ].filter((item): item is { id: string; icon: string; label: string; detail: string; href: string } => Boolean(item));
 
   return (
     <div className="dashboard-wrapper">
@@ -353,18 +408,18 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
           }
         />
 
-        <div className="adviser-dashboard-workspace mx-auto max-w-[1600px] space-y-6">
+        <div className="adviser-dashboard-workspace max-w-[1600px] space-y-6">
           <section className="adviser-command-center" aria-labelledby="adviser-command-center-title">
             <div className="adviser-command-copy">
               <span className="adviser-command-eyebrow">
                 <span className="adviser-live-dot" />
-                Live academic supervision command center
+                Adviser workbench
               </span>
               <h2 id="adviser-command-center-title">
                 Welcome back, {getShortName(data.profile.fullName)}
               </h2>
               <p>
-                Track review pressure, group health, consultations, and defense readiness from one focused adviser workspace.
+                Review the queue, check group risk, and move the next supervision task without leaving the dashboard.
               </p>
               <div className="adviser-command-actions">
                 <Link href={primaryActionHref}>
@@ -376,39 +431,76 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
                   {workspaceMode === 'adviser' ? 'Open Schedule' : 'Defense Schedule'}
                 </Link>
               </div>
+
+              <div className="adviser-focus-grid" aria-label="Dashboard focus metrics">
+                {focusMetrics.map((item) => (
+                  <article key={item.id} className={`adviser-focus-card is-${item.tone}`}>
+                    <span className="adviser-focus-card-icon">
+                      <i aria-hidden="true" className={`fas ${item.icon}`} />
+                    </span>
+                    <span className="adviser-focus-card-copy">
+                      <small>{item.label}</small>
+                      <strong>{item.value}</strong>
+                      <span>{item.detail}</span>
+                    </span>
+                  </article>
+                ))}
+              </div>
             </div>
 
             <div className="adviser-health-panel">
-              <div className="adviser-health-ring" style={healthRingStyle} aria-label={`Supervision health ${supervisionHealth}%`}>
-                <span>{supervisionHealth}%</span>
-                <small>{healthLabel}</small>
+              <div className="adviser-health-header">
+                <span>Risk Overview</span>
+                <strong>{healthLabel}</strong>
+              </div>
+              <div className="adviser-health-meter" style={healthRingStyle} aria-label={`Risk overview ${supervisionHealth}%`}>
+                <span />
+              </div>
+              <div className="adviser-health-score">
+                <strong>{supervisionHealth}%</strong>
+                <span>
+                  Based on progress, unresolved reviews, and active risk items.
+                </span>
               </div>
               <div className="adviser-health-stats">
                 <span>
                   <strong>{watchedGroups.length}</strong>
-                  Groups tracked
+                  Tracked
                 </span>
                 <span>
                   <strong>{activeReviewCount}</strong>
-                  Pending actions
+                  Pending
                 </span>
                 <span>
                   <strong>{unresolvedRevisions}</strong>
                   Revisions
                 </span>
               </div>
+              <div className="adviser-next-action-list">
+                <div className="adviser-next-action-head">
+                  <span>Next best actions</span>
+                  <small>{nextActions.length || 0} queued</small>
+                </div>
+                {nextActions.length ? (
+                  nextActions.map((item) => (
+                    <Link key={item.id} href={item.href}>
+                      <i aria-hidden="true" className={`fas ${item.icon}`} />
+                      <span>
+                        <strong>{item.label}</strong>
+                        <small>{item.detail}</small>
+                      </span>
+                      <i aria-hidden="true" className="fas fa-chevron-right" />
+                    </Link>
+                  ))
+                ) : (
+                  <p>No urgent action is queued right now.</p>
+                )}
+              </div>
             </div>
           </section>
 
-          <div className="adviser-command-kpis grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {summaryMetrics.map((metric) => (
-              <SummaryCard key={metric.id} {...metric} />
-            ))}
-          </div>
-
           <div className="adviser-premium-grid grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.95fr)]">
             <div className="adviser-primary-stack space-y-6">
-              <LiveSupervisionUpdates items={liveUpdates} />
               <RecentSubmissions
                 actionLabel={workspaceMode === 'adviser' ? 'Review' : 'Evaluate'}
                 actionHref={workspaceMode === 'adviser' ? `${basePath}/submissions` : `${basePath}/evaluation-queue`}
@@ -423,6 +515,7 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
                 }
               />
               <AttentionAlerts items={attentionAlerts} />
+              <LiveSupervisionUpdates items={liveUpdates} />
             </div>
 
             <div className="adviser-smart-rail space-y-6">

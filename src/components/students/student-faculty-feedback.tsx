@@ -361,22 +361,15 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
+
   const [workflowFilter, setWorkflowFilter] = useState<FeedbackFilter>('all');
   const [reviewerFilter, setReviewerFilter] = useState<'all' | 'Adviser' | 'Panel'>('all');
   const [sortBy, setSortBy] = useState<FeedbackSortOption>('priority');
   const [feedbackData, setFeedbackData] = useState<FeedbackRecord[]>(() => buildFeedbackRecords(data));
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackRecord | null>(null);
-
   useEffect(() => {
     setFeedbackData(buildFeedbackRecords(data));
   }, [data]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      router.refresh();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [router]);
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {

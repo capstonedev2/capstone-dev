@@ -163,7 +163,7 @@ export function PortalShellActionMenus({
         <button
           aria-expanded={notificationMenuOpen ? 'true' : 'false'}
           aria-haspopup="menu"
-          className={`portal-shell-notification-trigger${notificationMenuOpen ? ' is-open' : ''}`}
+          className={`portal-shell-notification-trigger notification-trigger${notificationMenuOpen ? ' is-open is-active' : ''}`}
           type="button"
           onClick={(event) => {
             event.stopPropagation();
@@ -171,14 +171,14 @@ export function PortalShellActionMenus({
             setNotificationMenuOpen((current) => !current);
           }}
         >
-          <span className="portal-shell-notification-trigger-icon">
+          <span className="portal-shell-notification-trigger-icon notification-trigger-icon">
             <i aria-hidden="true" className="fas fa-bell" />
           </span>
-          <span className="portal-shell-notification-trigger-copy">
+          <span className="portal-shell-notification-trigger-copy notification-trigger-copy">
             <strong>{notificationButtonLabel}</strong>
             <small>{visibleNotificationCount ? `${visibleNotificationCount} unread` : 'All caught up'}</small>
           </span>
-          {visibleNotificationCount ? <span className="portal-shell-notification-trigger-count">{visibleNotificationCount}</span> : null}
+          {visibleNotificationCount ? <span className="portal-shell-notification-trigger-count notification-trigger-count">{visibleNotificationCount}</span> : null}
         </button>
 
         <div className={`portal-shell-notification-menu${notificationMenuOpen ? ' is-open' : ''}`}>
@@ -282,7 +282,7 @@ export function PortalShellActionMenus({
           <button
             aria-expanded={profileMenuOpen ? 'true' : 'false'}
             aria-haspopup="menu"
-            className="portal-shell-profile-trigger"
+            className={`portal-shell-profile-trigger profile-pill profile-nav-btn${profileMenuOpen ? ' is-active' : ''}`}
             type="button"
             onClick={(event) => {
               event.stopPropagation();
@@ -290,12 +290,12 @@ export function PortalShellActionMenus({
               setProfileMenuOpen((current) => !current);
             }}
           >
-            <span className="portal-shell-profile-avatar">{getInitials(profileName)}</span>
-            <span className="portal-shell-profile-copy">
+            <span className="portal-shell-profile-avatar profile-nav-btn-avatar">{getInitials(profileName)}</span>
+            <span className="portal-shell-profile-copy profile-nav-btn-copy">
               <strong>{getShortName(profileName)}</strong>
               <small>{profileSubtitle}</small>
             </span>
-            <i aria-hidden="true" className="fas fa-chevron-down portal-shell-profile-chevron" />
+            <i aria-hidden="true" className="fas fa-chevron-down portal-shell-profile-chevron profile-nav-btn-chevron" />
           </button>
 
           <div className="portal-shell-profile-dropdown" role="menu" aria-label="User menu">

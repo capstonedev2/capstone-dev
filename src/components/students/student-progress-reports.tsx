@@ -46,27 +46,28 @@ export function StudentProgressReports({ data }: { data: StudentDashboardData })
   const reviewedReports = reports.filter(r => r.statusDisplay?.includes('Reviewed')).length;
 
   return (
-    <>
-      
+    <div className="student-progress-reports-page">
       <button className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`} type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />
 
       <header className="top-nav">
-          <div className="top-nav-leading">
-            <div className="page-title">
-              <div className="page-title-context">
-                <span className="page-kicker">Student Workspace</span>
-                <span className="page-breadcrumb" aria-hidden="true">
-                  <i className="fas fa-angle-right" />
-                  <span>Progress Reports</span>
-                </span>
-              </div>
-              <h1>Progress Reports</h1>
-              <p>Submit and review weekly project updates, evidence records, and adviser-facing progress notes.</p>
+        <div className="top-nav-leading">
+          <div className="page-title">
+            <div className="page-title-context">
+              <span className="page-kicker">Student Workspace</span>
+              <span className="page-breadcrumb" aria-hidden="true">
+                <i className="fas fa-angle-right" />
+                <span>Progress Reports</span>
+              </span>
             </div>
+            <h1>Progress Reports</h1>
+            <p>Submit and review weekly project updates, evidence records, and adviser-facing progress notes.</p>
           </div>
-        </header><div className="page-body">
-          <section className="page-strip">
-            <div className="page-strip-main">
+        </div>
+      </header>
+
+      <div className="page-body">
+        <section className="page-strip">
+          <div className="page-strip-main">
               <span className="section-kicker">Weekly Accountability</span>
               <h2>Submit and review weekly project updates</h2>
               <p>Keep your adviser informed about current work, project blockers, evidence updates, and accomplishment metrics.</p>
@@ -97,15 +98,15 @@ export function StudentProgressReports({ data }: { data: StudentDashboardData })
             </div>
           </section>
 
-          <section className="content-grid two-thirds">
-            <article className="surface-card">
+          <section className="content-grid two-thirds progress-reports-layout">
+            <article className="surface-card progress-reports-form-card">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">New Report</span>
                   <h3>Submit a new progress update</h3>
                 </div>
               </div>
-              <form className="portal-form" onSubmit={(e) => e.preventDefault()}>
+              <form className="portal-form progress-reports-form" onSubmit={(e) => e.preventDefault()}>
                 <div className="form-field full">
                   <label>Overall Progress Note</label>
                   <textarea rows={3} placeholder="Brief summary of the work done during this reporting period..." />
@@ -124,55 +125,55 @@ export function StudentProgressReports({ data }: { data: StudentDashboardData })
                     <textarea rows={2} placeholder="What the group will work on next..." />
                   </div>
                 </div>
-                <div className="form-field" style={{ width: '40%' }}>
+                <div className="form-field progress-reports-percent-field">
                   <label>Estimated Project Completion</label>
-                  <div className="input-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <input type="number" min="0" max="100" defaultValue="50" style={{ maxWidth: '100px' }} />
-                    <span style={{ color: 'var(--text-meta)', fontWeight: 600 }}>%</span>
+                  <div className="progress-reports-percent-input">
+                    <input type="number" min="0" max="100" defaultValue="50" />
+                    <span>%</span>
                   </div>
                 </div>
-                <div className="form-actions" style={{ marginTop: '1.5rem' }}>
+                <div className="form-actions progress-reports-form-actions">
                   <button className="btn btn-primary" type="button"><i className="fas fa-paper-plane" aria-hidden="true" /> Submit Report</button>
-                  <span className="form-helper" style={{ marginLeft: '1rem' }}>Saves standard report view for adviser access.</span>
+                  <span className="form-helper">Saves a standard report view for adviser access.</span>
                 </div>
               </form>
             </article>
 
-            <article className="surface-card">
+            <article className="surface-card progress-reports-history-card">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Historical Reports</span>
                   <h3>Past progress logs</h3>
                 </div>
               </div>
-              <div className="stack-list">
+              <div className="stack-list progress-reports-history-list">
                 {reports.length ? reports.map((report) => (
-                  <article key={report.id} className="stack-card">
+                  <article key={report.id} className="stack-card progress-reports-history-item">
                     <div className="stack-card-head">
                       <strong>{report.title}</strong>
                       <Badge label={report.statusDisplay || 'Submitted'} tone={report.statusDisplay === 'Reviewed' ? 'success' : 'warning'} />
                     </div>
-                    <p style={{ marginTop: '0.25rem', marginBottom: '1rem' }}>{report.progressDescription}</p>
+                    <p className="progress-reports-history-summary">{report.progressDescription}</p>
                     
-                    <div className="detail-grid" style={{ gap: '1rem', background: 'var(--surface-sunken)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
+                    <div className="detail-grid progress-reports-detail-grid">
                       <div>
-                        <span style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-meta)', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Accomplishments</span>
-                        <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.875rem' }}>
+                        <span>Accomplishments</span>
+                        <ul>
                           {report.accomplishments.map((act, i) => <li key={i}>{act}</li>)}
                         </ul>
                       </div>
                       <div>
-                        <span style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-meta)', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Problems / Blockers</span>
-                        <p style={{ margin: 0, fontSize: '0.875rem' }}>{report.problemsEncountered || 'None reported.'}</p>
+                        <span>Problems / Blockers</span>
+                        <p>{report.problemsEncountered || 'None reported.'}</p>
                       </div>
                       <div>
-                        <span style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-meta)', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Next Targets</span>
-                        <p style={{ margin: 0, fontSize: '0.875rem' }}>{report.nextSteps}</p>
+                        <span>Next Targets</span>
+                        <p>{report.nextSteps}</p>
                       </div>
                     </div>
                     
-                    <div className="stack-card-footer" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <small style={{ color: 'var(--text-meta)' }}>Submitted on: {report.dateLabel}</small>
+                    <div className="stack-card-footer progress-reports-history-footer">
+                      <small>Submitted on: {report.dateLabel}</small>
                       <Badge label={`Est. Progress: ${report.percentageCompleted}%`} tone="neutral" />
                     </div>
                   </article>
@@ -186,7 +187,7 @@ export function StudentProgressReports({ data }: { data: StudentDashboardData })
               </div>
             </article>
           </section>
-        </div>
-      </>
+      </div>
+    </div>
   );
 }

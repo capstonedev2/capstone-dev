@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { type ChangeEvent, type DragEvent, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import {
@@ -163,6 +164,35 @@ const PROJECT_FILE_UPLOAD_STEPS = [
   { id: 4, title: 'Submit to Adviser', text: 'Send for review' }
 ];
 
+const COMPLETED_STAGE_STATUSES = new Set(['approved', 'completed']);
+
+function normalizeStatus(value: unknown) {
+  return String(value || '').trim().replace(/[_-]+/g, ' ').toLowerCase();
+}
+
+function isCompletedStageStatus(value: unknown) {
+  return COMPLETED_STAGE_STATUSES.has(normalizeStatus(value));
+}
+
+function hasCompletedConceptStage(data: StudentDashboardData) {
+  const conceptMilestone = data.milestones.find((milestone) =>
+    milestone.title.trim().toLowerCase().includes('concept')
+  );
+
+  const conceptCheckpoints = data.milestoneCheckpoints.filter((checkpoint) =>
+    checkpoint.milestoneSequence === 1 ||
+    checkpoint.milestoneTitle.trim().toLowerCase().includes('concept') ||
+    checkpoint.key.startsWith('concept-')
+  );
+  const requiredConceptCheckpoints = conceptCheckpoints.filter((checkpoint) => checkpoint.required);
+
+  if (requiredConceptCheckpoints.length > 0) {
+    return requiredConceptCheckpoints.every((checkpoint) => isCompletedStageStatus(checkpoint.status));
+  }
+
+  return Boolean(conceptMilestone && isCompletedStageStatus(conceptMilestone.status));
+}
+
 function GroupAssignmentRequired() {
   return (
     <div className="student-project-files-page">
@@ -229,9 +259,9 @@ function TitleApprovalRequired() {
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 shadow-inner mb-8 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 ring-4 ring-white">
             <i className="fas fa-lock text-4xl" aria-hidden="true" />
           </div>
-          <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Title Approval Required</h3>
+          <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Stage 1 Required</h3>
           <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-600 leading-relaxed">
-            You must get your project title officially approved by your adviser in the <strong className="text-indigo-700">Title Submission</strong> workspace before you can access the project files repository and begin uploading chapters or documents.
+            Complete Stage 1: Concept Proposal in the <strong className="text-indigo-700">Title Submission</strong> workspace before accessing the project files repository. Once Stage 1 is marked complete, your group can begin uploading chapters, revisions, and project documents.
           </p>
         </div>
       </div>
@@ -300,13 +330,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     { value: 10, label: '10 minutes' },
   ];
 
-  const hasApprovedTitle = useMemo(() => {
-    const isMainApproved = data.titleRegistration.registrationStatus.toLowerCase() === 'approved';
-    const hasSubmissionApproved = (data.titleRegistration.submissions || []).some(
-      (sub) => sub.registrationStatus.toLowerCase() === 'approved'
-    );
-    return isMainApproved || hasSubmissionApproved;
-  }, [data.titleRegistration]);
+  const isConceptStageComplete = useMemo(() => hasCompletedConceptStage(data), [data]);
 
   // Countdown timer for member permission expiry
   useEffect(() => {
@@ -394,9 +418,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
     // Initial check
     pollPersonalPermission();
-    // Poll every 5 seconds
-    const intervalId = setInterval(pollPersonalPermission, 5000);
-    return () => clearInterval(intervalId);
+    return () => {};
   }, [currentUserId, data.group.id, isGroupLeader, isUploadAllowed, permissionExpiresAt]);
 
   const handleRequestPermission = async () => {
@@ -1006,7 +1028,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     return <GroupAssignmentRequired />;
   }
 
-  // Project Files workspace is now always open, but upload is gated by title approval
+  // Project Files workspace stays visible, but uploads open only after Stage 1: Concept is complete.
 
   return (
     <>
@@ -1027,13 +1049,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
           </div>
           <div className="project-files-header-actions">
             <button 
-              className={`btn btn-primary project-files-upload-button ${!hasApprovedTitle ? 'opacity-50 cursor-not-allowed' : ''}`} 
+              className={`btn btn-primary project-files-upload-button ${!isConceptStageComplete ? 'opacity-50 cursor-not-allowed' : ''}`} 
               type="button" 
-              onClick={hasApprovedTitle ? openUploadSection : undefined}
-              disabled={!hasApprovedTitle}
-              title={!hasApprovedTitle ? "Title must be approved by the panel (Live Defense) before you can upload project files." : "Upload New Version"}
+              onClick={isConceptStageComplete ? openUploadSection : undefined}
+              disabled={!isConceptStageComplete}
+              title={!isConceptStageComplete ? "You can upload project files once Stage 1: Concept Proposal is completed." : "Upload New Version"}
             >
-              {!hasApprovedTitle ? <i className="fas fa-lock" aria-hidden="true" /> : <i className="fas fa-cloud-arrow-up" aria-hidden="true" />} 
+              {!isConceptStageComplete ? <i className="fas fa-lock" aria-hidden="true" /> : <i className="fas fa-cloud-arrow-up" aria-hidden="true" />} 
               Upload New Version
             </button>
           </div>
@@ -1216,27 +1238,39 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                 </div>
               </div>
 
-              <div className="project-files-upload-stepper" aria-label="Upload submission steps">
-                {PROJECT_FILE_UPLOAD_STEPS.map((step) => (
-                  <div key={step.id} className="project-files-upload-step">
-                    <span>{step.id}</span>
-                    <div>
-                      <strong>{step.title}</strong>
-                      <small>{step.text}</small>
+              {isConceptStageComplete ? (
+                <div className="project-files-upload-stepper" aria-label="Upload submission steps">
+                  {PROJECT_FILE_UPLOAD_STEPS.map((step) => (
+                    <div key={step.id} className="project-files-upload-step">
+                      <span>{step.id}</span>
+                      <div>
+                        <strong>{step.title}</strong>
+                        <small>{step.text}</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {!isConceptStageComplete ? (
+                <div className="project-files-locked-panel" aria-labelledby="project-files-upload-locked-title">
+                  <div className="project-files-locked-icon" aria-hidden="true">
+                    <i className="fas fa-file-shield" />
+                  </div>
+
+                  <div className="project-files-locked-copy">
+                    <h4 id="project-files-upload-locked-title">Uploads open after Stage 1</h4>
+                    <p className="project-files-locked-description">
+                      Complete your Concept Proposal in Title Submission. When Stage 1 is marked complete, you can upload chapters, revisions, and project documents.
+                    </p>
+
+                    <div className="project-files-locked-actions">
+                      <Link href="/students/title-submission">
+                        <i className="fas fa-pen-to-square" aria-hidden="true" />
+                        Continue Title Submission
+                      </Link>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {!hasApprovedTitle ? (
-                <div className="mx-auto my-6 flex w-full max-w-2xl flex-col items-center justify-center rounded-[1.25rem] border border-slate-200 bg-slate-50/50 py-10 px-6 text-center shadow-sm">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
-                    <i className="fas fa-file-shield text-2xl" aria-hidden="true" />
-                  </div>
-                  <h4 className="mt-4 text-xl font-bold tracking-tight text-slate-800">Upload Locked</h4>
-                  <p className="mt-2 max-w-md text-sm text-slate-600 text-center">
-                    Project file uploads are disabled until your capstone project title has been officially approved by the panel (Live Defense).
-                  </p>
                 </div>
               ) : !isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (
                 <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/50 p-8 shadow-sm">

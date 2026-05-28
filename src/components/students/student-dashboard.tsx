@@ -51,21 +51,7 @@ const DEFAULT_QUICK_LINKS = [
   }
 ] as const;
 
-function canPollApi() {
-  return (
-    typeof window !== 'undefined' &&
-    (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
-    window.navigator.onLine
-  );
-}
 
-function isExpectedPollError(error: unknown) {
-  return (
-    error instanceof DOMException && error.name === 'AbortError'
-  ) || (
-    error instanceof TypeError && (!canPollApi() || error.message === 'Failed to fetch')
-  );
-}
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type ShellTone =
@@ -319,23 +305,46 @@ function getNotificationRoute(item: StudentNotification) {
 function buildFallbackWorkflow(
   milestones: StudentDashboardData['milestones']
 ): DashboardWorkflowStep[] {
-  return milestones.map((item, index) => ({
-    id: item.id,
-    key: `phase-${index + 1}`,
-    title: item.title,
-    summary: item.summary,
-    status:
-      item.status === 'completed'
-        ? 'completed'
-        : item.status === 'ongoing'
-          ? 'current'
-          : item.status === 'delayed'
-            ? 'delayed'
-            : 'pending',
-    dateLabel: item.dateLabel,
-    route: item.route,
-    actionLabel: item.actionLabel
-  }));
+  const steps = milestones.map((item, index) => {
+    const normalizedStatus = item.status.toLowerCase();
+    
+    let uiStatus: WorkflowStatus = 'pending';
+    if (normalizedStatus === 'completed' || normalizedStatus === 'approved') {
+      uiStatus = 'completed';
+    } else if (
+      normalizedStatus === 'ongoing' ||
+      normalizedStatus === 'in_progress' ||
+      normalizedStatus === 'needs_revision' ||
+      normalizedStatus === 'under_review' ||
+      normalizedStatus === 'current'
+    ) {
+      uiStatus = 'current';
+    } else if (normalizedStatus === 'delayed' || normalizedStatus === 'overdue') {
+      uiStatus = 'delayed';
+    }
+
+    return {
+      id: item.id,
+      key: `phase-${index + 1}`,
+      title: item.title,
+      summary: item.summary,
+      status: uiStatus,
+      dateLabel: item.dateLabel,
+      route: item.route,
+      actionLabel: item.actionLabel
+    };
+  });
+
+  // Ensure there is at least one "current" step if the workflow isn't fully completed
+  const hasCurrentStep = steps.some(step => step.status === 'current' || step.status === 'delayed');
+  if (!hasCurrentStep) {
+    const firstPendingIndex = steps.findIndex(step => step.status === 'pending');
+    if (firstPendingIndex !== -1) {
+      steps[firstPendingIndex].status = 'current';
+    }
+  }
+
+  return steps;
 }
 
 function Badge({
@@ -455,58 +464,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     fetchRealGroup();
   }, [data.profile.user_id, data.profile.fullName]);
 
-  // Real-time polling for notifications
-  useEffect(() => {
-    if (!data.profile.user_id) return;
 
-    let cancelled = false;
-    let inFlightController: AbortController | null = null;
-
-    const fetchNotifications = async () => {
-      if (cancelled || inFlightController || !canPollApi()) {
-        return;
-      }
-
-      const controller = new AbortController();
-      inFlightController = controller;
-
-      try {
-        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, {
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        if (notifRes.ok) {
-          const notifs = await notifRes.json();
-          if (!cancelled) {
-            setRealNotifications(notifs);
-          }
-        }
-      } catch (e) {
-        if (!isExpectedPollError(e)) {
-          console.warn('Failed to poll dashboard notifications', e);
-        }
-      } finally {
-        if (inFlightController === controller) {
-          inFlightController = null;
-        }
-      }
-    };
-
-    const pollNotifications = () => {
-      void fetchNotifications().catch((error) => {
-        if (!isExpectedPollError(error)) {
-          console.warn('Failed to poll dashboard notifications', error);
-        }
-      });
-    };
-
-    const intervalId = setInterval(pollNotifications, 5000);
-    return () => {
-      cancelled = true;
-      inFlightController?.abort();
-      clearInterval(intervalId);
-    };
-  }, [data.profile.user_id]);
 
   const handleSubmitTitle = async () => {
     if (!realGroup || !titleDraft.trim()) return;
@@ -1071,312 +1029,246 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       </header>
 
       <div className="page-body student-dashboard-page">
-        <section className="student-dashboard-welcome-strip" aria-labelledby="student-dashboard-welcome-title">
-          <div className="student-dashboard-welcome-copy">
-            <span className="student-dashboard-welcome-kicker">
-              <span className="student-dashboard-welcome-dot" aria-hidden="true" />
-              Student workspace command center
-            </span>
-            <h1 id="student-dashboard-welcome-title">Welcome back, {data.profile.fullName || 'Student'}</h1>
-            <p>
-              Track project progress, adviser feedback, milestones, and submission readiness from one focused
-              student workspace.
-            </p>
-            <div className="student-dashboard-welcome-actions" aria-label="Student dashboard quick actions">
-              <Link className="student-dashboard-welcome-action is-primary" href="/students/project-files">
-                <i aria-hidden="true" className="fas fa-file-arrow-up" />
-                Submit Files
-              </Link>
-              <Link className="student-dashboard-welcome-action" href="/students/schedule">
-                <i aria-hidden="true" className="fas fa-calendar-days" />
-                Open Schedule
-              </Link>
-            </div>
+        <div className="mb-5 flex flex-col gap-1 pt-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Student workspace command center</span>
           </div>
-          <div className="student-dashboard-welcome-insights" aria-label="Student workspace status">
-            <span>
-              <small>Overall progress</small>
-              <strong>{data.project.progressPercentage}%</strong>
-            </span>
-            <span>
-              <small>Current focus</small>
-              <strong>{currentPhaseTitle}</strong>
-            </span>
-            <span>
-              <small>Next review</small>
-              <strong>{nextSchedule?.startDateLabel ?? 'No scheduled review'}</strong>
-            </span>
-          </div>
-        </section>
+          <h1 className="text-3xl font-extrabold text-[#003A8F] tracking-tight flex items-center gap-2">
+            Welcome back, {data.profile.fullName || 'Student'} <span className="text-2xl hover:animate-pulse cursor-default">👋</span>
+          </h1>
+          <p className="text-sm text-slate-500 font-medium max-w-2xl mt-0.5">
+            Track project progress, adviser feedback, milestones, and submission readiness from one focused student workspace.
+          </p>
+        </div>
 
-        <section className="dashboard-hero">
-          <article className="dashboard-hero-main student-dashboard-workspace-hero">
 
-            <div className="student-dashboard-overview-top">
-              <span className="section-kicker">Project Workspace</span>
-              <div className="chip-row">
-                <span className={`student-project-status-badge is-${projectStatusTone}`}>{data.project.status}</span>
-                <Badge label={attentionLabel} tone={attentionToneUi.tone} icon={attentionToneUi.icon} />
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          {/* Main Hero Card */}
+          <article className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-slate-200/80 transition-all duration-300 hover:shadow-md">
+
+            <div className="relative z-10 flex flex-col gap-5">
+              {/* Header: Status and Badges */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <span className="text-[11px] font-bold tracking-widest text-slate-400 uppercase">Project Workspace</span>
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full ${projectStatusTone === 'success' ? 'bg-emerald-100 text-emerald-700' : projectStatusTone === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                    {data.project.status}
+                  </span>
+                  <Badge label={attentionLabel} tone={attentionToneUi.tone} icon={attentionToneUi.icon} />
+                </div>
               </div>
-            </div>
 
-            <div className="student-dashboard-title-block">
-              {projectStatusTone !== 'success' || (realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation')) ? (
-                <>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h2 className="student-dashboard-pending-title">
-                      <i className="fas fa-lock" aria-hidden="true"></i>
-                      Project title pending approval
-                    </h2>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[0.65em] font-semibold text-amber-700 shadow-sm align-middle">
-                      <i className="fas fa-clock"></i>
-                      {realGroup?.title === 'Pending Student Submission'
-                        ? 'Awaiting Title Submission'
-                        : realGroup?.title === 'Pending Concept Presentation'
-                          ? 'Pending Concept Presentation'
-                          : 'Awaiting Adviser Approval'}
-                    </span>
+              {/* Title Block */}
+              <div>
+                {projectStatusTone !== 'success' || (realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation')) ? (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h2 className="text-2xl font-bold tracking-tight text-slate-800 flex items-center gap-3">
+                        <i className="fas fa-lock text-slate-400" aria-hidden="true"></i>
+                        Project title pending approval
+                      </h2>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700 align-middle">
+                        <i className="fas fa-clock"></i>
+                        {realGroup?.title === 'Pending Student Submission'
+                          ? 'Awaiting Title Submission'
+                          : realGroup?.title === 'Pending Concept Presentation'
+                            ? 'Pending Concept Presentation'
+                            : 'Awaiting Adviser Approval'}
+                      </span>
+                    </div>
+                    <p className="text-base text-slate-500 max-w-2xl leading-relaxed">
+                      Your project title will appear here once the concept proposal has been submitted and approved by your adviser.
+                    </p>
                   </div>
-                  <p className="student-dashboard-intro">
-                    Your project title will appear here once the concept proposal has been submitted and approved by your adviser.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h2>
-                    {realGroup ? realGroup.projectTitle || realGroup.title : data.project.title}
-                  </h2>
-                  <p className="student-dashboard-intro">
-                    {data.project.description ||
-                      'Track academic progress, active deliverables, faculty guidance, and the next capstone commitments from one focused workspace.'}
-                  </p>
-                </>
-              )}
-            </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+                      {realGroup ? realGroup.projectTitle || realGroup.title : data.project.title}
+                    </h2>
+                    <p className="text-base text-slate-600 max-w-3xl leading-relaxed">
+                      {data.project.description ||
+                        'Track academic progress, active deliverables, faculty guidance, and the next capstone commitments from one focused workspace.'}
+                    </p>
+                  </div>
+                )}
+              </div>
 
-            <div className="student-workspace-hero-meta" aria-label="Project workspace essentials">
-              <span>
-                <i className="fas fa-hashtag" aria-hidden="true" />
-                {data.project.projectCode}
-              </span>
-              <span>
-                <i className="fas fa-user-tie" aria-hidden="true" />
-                {data.project.adviser}
-              </span>
-              <span>
-                <i className="fas fa-users" aria-hidden="true" />
-                {data.group.groupName}
-              </span>
-              <span>
-                <i className="fas fa-calendar-check" aria-hidden="true" />
-                {nextSchedule?.startDateLabel ?? 'No scheduled review'}
-              </span>
-            </div>
+              {/* Meta Info */}
+              <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600">
+                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                  <i className="fas fa-hashtag text-slate-400" aria-hidden="true" />
+                  {data.project.projectCode}
+                </span>
+                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                  <i className="fas fa-user-tie text-slate-400" aria-hidden="true" />
+                  {data.project.adviser}
+                </span>
+                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                  <i className="fas fa-users text-slate-400" aria-hidden="true" />
+                  {data.group.groupCode !== 'N/A' ? data.group.groupCode : data.group.groupName}
+                </span>
+                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                  <i className="fas fa-calendar-check text-slate-400" aria-hidden="true" />
+                  {nextSchedule?.startDateLabel ?? 'No scheduled review'}
+                </span>
+              </div>
 
-            <div className="student-workspace-hero-actions" aria-label="Primary workspace actions">
-              {workspaceHeroActions.map((item) => (
-                <Link key={item.id} className={`student-workspace-hero-action is-${item.tone}`} href={item.href}>
-                  <span className="student-workspace-action-icon">
-                    <i className={`fas ${item.icon}`} aria-hidden="true" />
-                  </span>
-                  <span>
-                    <small>{item.meta}</small>
-                    <strong>{item.label}</strong>
-                  </span>
-                </Link>
-              ))}
-            </div>
+              {/* Primary Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+                {workspaceHeroActions.map((item) => {
+                  let toneClasses = '';
+                  let iconBgClass = '';
+                  
+                  if (item.tone === 'danger') {
+                    toneClasses = 'border-red-200 bg-white hover:border-red-300 hover:shadow-md hover:shadow-red-50 text-slate-800';
+                    iconBgClass = 'bg-red-50 text-red-600';
+                  } else if (item.tone === 'warning') {
+                    toneClasses = 'border-amber-200 bg-white hover:border-amber-300 hover:shadow-md hover:shadow-amber-50 text-slate-800';
+                    iconBgClass = 'bg-amber-50 text-amber-600';
+                  } else if (item.tone === 'success') {
+                    toneClasses = 'border-emerald-200 bg-white hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-50 text-slate-800';
+                    iconBgClass = 'bg-emerald-50 text-emerald-600';
+                  } else {
+                    toneClasses = 'border-blue-200 bg-white hover:border-blue-300 hover:shadow-md hover:shadow-blue-50 text-slate-800';
+                    iconBgClass = 'bg-blue-50 text-blue-600';
+                  }
 
-            <div className="student-project-metrics">
-              {summaryCards.map((item) => (
-                <article key={item.id} className="student-project-metric">
-                  <span>{item.label}</span>
-                  <strong>{item.value}</strong>
-                  <small>{item.note}</small>
-                </article>
-              ))}
+                  return (
+                    <Link key={item.id} href={item.href} className={`group relative flex items-center gap-3 overflow-hidden rounded-xl border p-3.5 transition-all ${toneClasses}`}>
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBgClass}`}>
+                        <i className={`fas ${item.icon} text-[13px]`} aria-hidden="true" />
+                      </div>
+                      <div className="flex flex-col flex-grow">
+                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">{item.meta}</span>
+                        <span className="text-sm font-bold text-slate-900 leading-tight">{item.label}</span>
+                      </div>
+                      <i className="fas fa-chevron-right text-slate-400 group-hover:text-blue-600 transition-colors text-xs" aria-hidden="true" />
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Project Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5 mt-1 border-t border-slate-200/60">
+                {summaryCards.map((item) => (
+                  <div key={item.id} className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.label}</span>
+                    <strong className="text-base font-bold text-slate-900 leading-tight">{item.value}</strong>
+                    <span className="text-[11px] text-slate-500 line-clamp-1">{item.note}</span>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </article>
 
-          <div className="dashboard-hero-side">
-            <article className="dashboard-pulse-card">
-              <div className="dashboard-pulse-head">
-                <div className="progress-orb" style={{ '--progress': data.project.progressPercentage } as CSSProperties}>
-                  <strong>{data.project.progressPercentage}%</strong>
-                  <span>Completed</span>
-                </div>
-                <div className="dashboard-pulse-summary">
-                  <span className="section-kicker">Current Focus</span>
-                  <h3>{currentPhaseTitle}</h3>
-                  <p>{currentPhaseSummary}</p>
-                </div>
-              </div>
-
-              <div className="dashboard-pulse-list">
-                {pulseItems.map((item) => (
-                  <article key={item.id} className={`dashboard-pulse-item ${item.tone.panelClassName}`}>
-                    <span className="dashboard-pulse-icon">
-                      <i className={`fas ${item.tone.icon}`} aria-hidden="true" />
-                    </span>
-                    <div className="dashboard-pulse-copy">
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                      <small>{item.note}</small>
-                    </div>
-                  </article>
-                ))}
-              </div>
+          {/* Side Progress Card */}
+          <div className="lg:col-span-1 h-full">
+            <article className="h-full relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-slate-200/80 flex flex-col transition-all duration-300 hover:shadow-md">
+               <div className="flex items-center justify-between w-full mb-2">
+                 <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Progress Monitoring</h3>
+                 <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+               </div>
+               
+               {/* Center content wrapper */}
+               <div className="flex flex-col items-center justify-center flex-grow py-4">
+                 {/* Premium Progress Orb */}
+                 <div className="relative flex items-center justify-center h-36 w-36">
+                   <div className="absolute inset-0 bg-blue-50 rounded-full scale-110 opacity-50 pointer-events-none" />
+                   <svg className="relative z-10 w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
+                     <path
+                       className="text-slate-100"
+                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                       fill="none"
+                       stroke="currentColor"
+                       strokeWidth="2.5"
+                     />
+                     <path
+                       className="text-[#003A8F] transition-all duration-1000 ease-out drop-shadow-sm"
+                       strokeDasharray={`${data.project.progressPercentage}, 100`}
+                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                       fill="none"
+                       stroke="currentColor"
+                       strokeWidth="2.5"
+                       strokeLinecap="round"
+                     />
+                   </svg>
+                   <div className="absolute flex flex-col items-center justify-center z-20">
+                     <span className="text-3xl font-extrabold text-[#003A8F]">{data.project.progressPercentage}%</span>
+                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Completed</span>
+                   </div>
+                 </div>
+               </div>
+               
+               {/* Upgraded Current Focus Block */}
+               <div className="flex flex-col gap-2 w-full bg-blue-50/40 p-4 rounded-xl border border-blue-100/80 mt-auto">
+                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                   <i className="fas fa-crosshairs" aria-hidden="true"></i> Current Focus
+                 </span>
+                 <p className="text-sm font-bold text-slate-900 leading-tight">{currentPhaseTitle}</p>
+                 <span className="text-[11px] text-slate-600 font-medium leading-relaxed line-clamp-2">{currentPhaseSummary}</span>
+                 <button className="bg-[#003A8F] hover:bg-blue-800 transition-colors text-white text-[13px] font-semibold py-2 px-4 rounded-lg mt-2 w-full flex items-center justify-center gap-2 shadow-sm">
+                   <i className="fas fa-file-alt"></i> View guidelines
+                 </button>
+               </div>
             </article>
           </div>
         </section>
 
-        <section className="stats-grid student-dashboard-kpi-grid">
-          {analyticsCards.map((item) => (
-            <article key={item.id} className={`stat-card student-dashboard-stat is-${item.tone}`}>
-              <div className="stat-card-head">
-                <span className="stat-card-icon">
-                  <i className={`fas ${item.icon}`} aria-hidden="true" />
-                </span>
-                <Badge label={item.badgeLabel} tone={item.tone} />
-              </div>
-              <strong>{item.value}</strong>
-              <span>{item.label}</span>
-              <small>{item.note}</small>
-            </article>
-          ))}
-        </section>
-
-        <section className="dashboard-layout">
-          <div className="dashboard-main-column">
-            <article className="surface-card student-dashboard-card student-dashboard-action-center">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Action Center</span>
-                  <h3>What needs attention</h3>
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+          {/* Column 1: Milestone Pipeline */}
+          <div className="flex flex-col gap-5">
+            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Milestone Pipeline</span>
+                  <h3 className="text-lg font-bold text-slate-800">Proposal to defense</h3>
                 </div>
-                <Badge
-                  label={priorityTasks.length ? 'Action Needed' : 'Clear'}
-                  tone={priorityTasks.length ? 'danger' : 'success'}
-                />
-              </div>
-              {priorityTasks.length ? (
-                <div className="stack-list">
-                  {priorityTasks.map((item) => (
-                    <article key={item.id} className={`stack-card student-priority-card is-${item.tone}`}>
-                      <span className="student-priority-icon" aria-hidden="true">
-                        <i className={`fas ${item.icon ?? 'fa-circle-exclamation'}`} />
-                      </span>
-                      <div className="stack-card-head">
-                        <div>
-                          <strong>{item.title}</strong>
-                          {item.meta ? <small>{item.meta}</small> : null}
-                        </div>
-                        <Badge label={item.label} tone={item.tone} icon={item.icon} />
-                      </div>
-                      <p>{item.description}</p>
-                      <Link className="inline-link" href={item.href}>
-                        {item.actionLabel}
-                      </Link>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  title="No immediate blocker"
-                  description="Your active dashboard queue is clear. Continue preparing the next milestone and scheduled review."
-                  icon="fa-circle-check"
-                />
-              )}
-            </article>
-
-            <article className="surface-card student-dashboard-card student-dashboard-milestone-card">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Milestone Pipeline</span>
-                  <h3>Proposal to defense</h3>
-                </div>
-                <Link className="inline-link" href="/students/milestones">
+                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/milestones">
                   Open milestones
                 </Link>
               </div>
-              <div className="student-phase-tracker">
+              <div className="flex flex-col gap-2.5">
                 {workflow.map((item, index) => {
                   const workflowStatus = getWorkflowStatusConfig(item.status);
 
                   return (
-                    <article key={item.id} className={`student-phase-tracker-item is-${item.status}`}>
-                      <span className="student-phase-step">{index + 1}</span>
-                      <div className="student-phase-copy">
-                        <strong>{item.title}</strong>
-                        <small>{item.summary}</small>
+                    <article key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border border-slate-100 ${item.status === 'completed' ? 'bg-slate-50' : item.status === 'current' ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-white'}`}>
+                      <span className={`flex items-center justify-center h-7 w-7 rounded-full font-bold text-xs shrink-0 ${item.status === 'current' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-slate-600'}`}>{index + 1}</span>
+                      <div className="flex flex-col flex-grow">
+                        <strong className="text-[13px] font-bold text-slate-800 leading-tight">{item.title}</strong>
+                        <small className="text-[11px] text-slate-500 font-medium">{item.summary}</small>
                       </div>
-                      <div className="student-phase-meta">
+                      <div className="flex flex-col items-end gap-1 shrink-0">
                         <Badge label={workflowStatus.label} tone={workflowStatus.tone} />
-                        <small>{item.dateLabel}</small>
+                        <small className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{item.dateLabel}</small>
                       </div>
                     </article>
                   );
                 })}
               </div>
             </article>
-
-            <section className="surface-card student-dashboard-card student-upload-preview-card student-dashboard-files-card">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Project Files</span>
-                  <h3>Latest submissions</h3>
-                </div>
-                <Link className="inline-link" href="/students/project-files">
-                  Open project files
-                </Link>
-              </div>
-              {recentUploads.length ? (
-                <div className="dashboard-upload-list is-preview">
-                  {recentUploads.map((item) => (
-                    <article key={item.id} className="dashboard-upload-item">
-                      <div className="dashboard-upload-main">
-                        <span className="table-file-icon">
-                          <i className="fas fa-file-lines" aria-hidden="true" />
-                        </span>
-                        <div>
-                          <strong>{item.fileName}</strong>
-                          <small>{CATEGORY_LABELS[item.category] ?? item.category}</small>
-                        </div>
-                      </div>
-                      <div className="dashboard-upload-meta">
-                        <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />
-                        <span>{item.uploadDateLabel}</span>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  title="No recent uploads"
-                  description="Latest file activity will appear here once your group records project submissions."
-                  icon="fa-file-circle-plus"
-                />
-              )}
-            </section>
           </div>
 
-          <div className="dashboard-side-column">
-            <article className="student-insight-panel student-dashboard-side-panel student-dashboard-upcoming-panel">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Upcoming Activity</span>
-                  <h4>Next events</h4>
+          {/* Column 2: Upcoming Activity & Submission Health */}
+          <div className="flex flex-col gap-5">
+            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Upcoming Activity</span>
+                  <h4 className="text-lg font-bold text-slate-800">Next events</h4>
                 </div>
-                <Link className="inline-link" href="/students/schedule">
+                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/schedule">
                   Open schedule
                 </Link>
               </div>
               {schedulePreview.length ? (
-                <div className="stack-list student-dashboard-schedule-list">
+                <div className="flex flex-col gap-2.5">
                   {schedulePreview.map((item) => (
-                    <article key={item.id} className="stack-card student-dashboard-schedule-card">
-                      <div className="stack-card-head">
-                        <strong>{item.title}</strong>
+                    <article key={item.id} className="flex flex-col gap-2 p-3.5 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-slate-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <strong className="text-[13px] font-bold text-slate-800 leading-tight">{item.title}</strong>
                         <Badge
                           label={item.type}
                           tone={
@@ -1387,18 +1279,12 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                           }
                         />
                       </div>
-                      <div className="student-dashboard-schedule-meta">
-                        <span>
-                          <i className="fas fa-calendar-day" aria-hidden="true" /> {item.startDateLabel}
-                        </span>
-                        <span>
-                          <i className="fas fa-clock" aria-hidden="true" /> {item.time}
-                        </span>
-                        <span>
-                          <i className="fas fa-location-dot" aria-hidden="true" /> {item.location}
-                        </span>
+                      <div className="flex flex-col gap-1 text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                        <span className="flex items-center gap-1.5"><i className="fas fa-calendar-day w-3.5 text-center text-slate-400" /> {item.startDateLabel}</span>
+                        <span className="flex items-center gap-1.5"><i className="fas fa-clock w-3.5 text-center text-slate-400" /> {item.time}</span>
+                        <span className="flex items-center gap-1.5"><i className="fas fa-location-dot w-3.5 text-center text-slate-400" /> {item.location}</span>
                       </div>
-                      <p>{createExcerpt(item.description, 116)}</p>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5 line-clamp-2">{createExcerpt(item.description, 116)}</p>
                     </article>
                   ))}
                 </div>
@@ -1411,92 +1297,140 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="student-insight-panel student-dashboard-side-panel student-dashboard-health-panel">
-              <div>
-                <span className="section-kicker">Submission Health</span>
-                <h4>Approved, pending, and revision status</h4>
+            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div className="flex flex-col gap-1 mb-5">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Submission Health</span>
+                <h4 className="text-lg font-bold text-slate-800">Review status overview</h4>
               </div>
-              <div className="student-health-list">
-                <div className="student-health-item">
-                  <div>
-                    <span>Approved</span>
-                    <strong>{approvedCount}</strong>
+              
+              <div className="flex flex-col gap-3.5 mb-5">
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-sm font-bold">
+                    <span className="text-emerald-700">Approved</span>
+                    <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 text-xs rounded-full border border-emerald-100">{approvedCount}</span>
                   </div>
-                  <div className="student-health-bar" aria-hidden="true">
-                    <span style={{ width: `${(approvedCount / Math.max(data.documents.length, 1)) * 100}%` }} />
-                  </div>
-                </div>
-                <div className="student-health-item">
-                  <div>
-                    <span>Pending Review</span>
-                    <strong>{pendingCount}</strong>
-                  </div>
-                  <div className="student-health-bar is-warning" aria-hidden="true">
-                    <span style={{ width: `${(pendingCount / Math.max(data.documents.length, 1)) * 100}%` }} />
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                    <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(approvedCount / Math.max(data.documents.length, 1)) * 100}%` }} />
                   </div>
                 </div>
-                <div className="student-health-item">
-                  <div>
-                    <span>Needs Revision</span>
-                    <strong>{revisionCount}</strong>
+                
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-sm font-bold">
+                    <span className="text-amber-700">Pending Review</span>
+                    <span className="text-amber-700 bg-amber-50 px-2 py-0.5 text-xs rounded-full border border-amber-100">{pendingCount}</span>
                   </div>
-                  <div className="student-health-bar is-danger" aria-hidden="true">
-                    <span style={{ width: `${(revisionCount / Math.max(data.documents.length, 1)) * 100}%` }} />
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                    <div className="h-full bg-amber-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(pendingCount / Math.max(data.documents.length, 1)) * 100}%` }} />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-sm font-bold">
+                    <span className="text-red-700">Needs Revision</span>
+                    <span className="text-red-700 bg-red-50 px-2 py-0.5 text-xs rounded-full border border-red-100">{revisionCount}</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                    <div className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(revisionCount / Math.max(data.documents.length, 1)) * 100}%` }} />
                   </div>
                 </div>
               </div>
-              <div className="student-deadline-grid">
-                <div className="student-deadline-item is-warning">
-                  <strong>{dueSoonCount}</strong>
-                  <span>Due soon</span>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="flex flex-col items-center justify-center gap-1 bg-amber-50/80 hover:bg-amber-50 transition-colors rounded-xl p-3 border border-amber-100">
+                  <strong className="text-xl font-black text-amber-700">{dueSoonCount}</strong>
+                  <span className="text-[9px] font-bold text-amber-600 uppercase tracking-widest text-center leading-tight">Due<br/>soon</span>
                 </div>
-                <div className={`student-deadline-item ${overdueCount ? 'is-danger' : 'is-neutral'}`}>
-                  <strong>{overdueCount}</strong>
-                  <span>Overdue</span>
+                <div className={`flex flex-col items-center justify-center gap-1 transition-colors rounded-xl p-3 border ${overdueCount ? 'bg-red-50/80 hover:bg-red-50 border-red-200' : 'bg-slate-50 border-slate-100'}`}>
+                  <strong className={`text-xl font-black ${overdueCount ? 'text-red-700' : 'text-slate-700'}`}>{overdueCount}</strong>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest text-center leading-tight ${overdueCount ? 'text-red-600' : 'text-slate-500'}`}>Overdue</span>
                 </div>
-                <div className="student-deadline-item is-neutral">
-                  <strong>{unreadFeedbackCount}</strong>
-                  <span>New feedback</span>
+                <div className="flex flex-col items-center justify-center gap-1 bg-blue-50/80 hover:bg-blue-50 transition-colors rounded-xl p-3 border border-blue-100">
+                  <strong className="text-xl font-black text-blue-700">{unreadFeedbackCount}</strong>
+                  <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest text-center leading-tight">New<br/>feedback</span>
                 </div>
               </div>
             </article>
+          </div>
 
-            <article className="surface-card student-dashboard-card student-dashboard-feedback-panel">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Faculty Feedback</span>
-                  <h3>Recent comments</h3>
+          {/* Column 3: Project Files, Feedback, Team */}
+          <div className="flex flex-col gap-5">
+            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Project Files</span>
+                  <h3 className="text-lg font-bold text-slate-800">Latest submissions</h3>
                 </div>
-                <Link className="inline-link" href="/students/faculty-feedback">
+                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/project-files">
+                  Open project files
+                </Link>
+              </div>
+              {recentUploads.length ? (
+                <div className="flex flex-col gap-2.5">
+                  {recentUploads.map((item) => (
+                    <article key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer group">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center justify-center h-10 w-10 rounded-lg bg-blue-100 text-blue-600 shrink-0 transition-transform group-hover:scale-105">
+                          <i className="fas fa-file-lines text-lg" aria-hidden="true" />
+                        </span>
+                        <div className="flex flex-col">
+                          <strong className="text-[13px] font-bold text-slate-800 group-hover:text-[#003A8F] transition-colors leading-tight">{item.fileName}</strong>
+                          <small className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{CATEGORY_LABELS[item.category] ?? item.category}</small>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">{item.uploadDateLabel}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No recent uploads"
+                  description="Latest file activity will appear here once your group records project submissions."
+                  icon="fa-file-circle-plus"
+                />
+              )}
+            </section>
+
+            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Faculty Feedback</span>
+                  <h3 className="text-lg font-bold text-slate-800">Recent comments</h3>
+                </div>
+                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/faculty-feedback">
                   Open feedback
                 </Link>
               </div>
               {recentFeedback.length ? (
-                <div className="stack-list">
+                <div className="flex flex-col gap-3">
                   {recentFeedback.map((item) => {
                     const statusConfig = getFeedbackStatusConfig(item.status);
 
                     return (
                       <article
                         key={item.id}
-                        className={`stack-card student-feedback-card ${item.unread ? 'is-highlighted' : ''}`}
+                        className={`flex flex-col gap-3 p-4 rounded-xl border ${item.unread ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-white border-slate-100 shadow-sm'} transition-colors group cursor-pointer`}
                       >
-                        <div className="stack-card-head">
-                          <div>
-                            <strong>{item.title}</strong>
-                            <small>
-                              {item.facultyName} | {item.dateLabel}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex flex-col">
+                            <strong className="text-[13px] font-bold text-slate-800 group-hover:text-[#003A8F] transition-colors leading-tight">{item.title}</strong>
+                            <small className="text-[11px] text-slate-500 font-medium mt-0.5">
+                              {item.facultyName} <span className="mx-1 text-slate-300">•</span> {item.dateLabel}
                             </small>
                           </div>
-                          <div className="chip-row">
+                          <div className="flex flex-col gap-1 items-end shrink-0">
                             <Badge label={item.mode} tone={item.mode === 'Adviser' ? 'warning' : 'neutral'} />
                             <Badge label={statusConfig.label} tone={statusConfig.tone} />
                           </div>
                         </div>
-                        <p>{createExcerpt(item.content, 156)}</p>
-                        <Link className="inline-link" href="/students/faculty-feedback">
-                          Open feedback
-                        </Link>
+                        <div className="relative bg-slate-50 p-3 rounded-lg border border-slate-100">
+                           <i className="fas fa-quote-left absolute top-2.5 left-2.5 text-slate-200 text-lg" aria-hidden="true" />
+                           <p className="text-[11px] text-slate-600 font-medium italic relative z-10 pl-6 leading-relaxed line-clamp-3">
+                             {createExcerpt(item.content, 156)}
+                           </p>
+                        </div>
                       </article>
                     );
                   })}
@@ -1510,32 +1444,60 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="surface-card student-dashboard-card student-dashboard-team-panel">
-              <div className="card-heading">
-                <div>
-                  <span className="section-kicker">Team</span>
-                  <h3>{data.group.groupName}</h3>
+            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-5 pb-4 border-b border-slate-100">
+                <div className="flex flex-col gap-1.5">
+                  <span className="flex items-center gap-2 text-[11px] font-bold text-[#003A8F] uppercase tracking-widest">
+                    <i className="fas fa-users" aria-hidden="true" /> {data.group.groupCode !== 'N/A' ? data.group.groupCode : 'Project Team'}
+                  </span>
+                  <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">{data.group.groupName}</h3>
                 </div>
-                <Badge label={data.profile.groupRole} tone="warning" />
               </div>
-              <div className="dashboard-roster-list is-compact">
+              <div className="flex flex-col gap-3">
                 {data.group.members.map((member) => (
                   <article
                     key={member.id}
-                    className={`dashboard-roster-item ${member.isLeader ? 'is-leader' : ''} ${member.isCurrent ? 'is-current' : ''}`}
+                    className={`group flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 ${
+                      member.isCurrent 
+                        ? 'bg-blue-50/30 border-blue-200/60 shadow-sm hover:shadow-md hover:bg-blue-50/50' 
+                        : 'bg-white border-slate-200/60 hover:bg-slate-50 hover:border-slate-300 shadow-sm hover:shadow-md'
+                    }`}
                   >
-                    <span className="member-avatar">{getInitials(member.fullName)}</span>
-                    <div className="dashboard-roster-copy">
-                      <strong>{member.fullName}</strong>
-                      <small>{member.studentId}</small>
+                    <div className="relative shrink-0 transition-transform duration-300 group-hover:scale-105">
+                      <span className={`flex items-center justify-center h-11 w-11 rounded-full font-bold text-sm uppercase tracking-wider shadow-inner ring-4 ${
+                        member.isCurrent 
+                          ? 'bg-gradient-to-br from-blue-600 to-blue-800 text-white ring-blue-100/50' 
+                          : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 ring-slate-50'
+                      }`}>
+                        {getInitials(member.fullName)}
+                      </span>
+                      {member.isLeader && (
+                        <div className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-white shadow-md z-10 transition-transform duration-300 group-hover:rotate-12">
+                          <i className="fas fa-crown text-[10px] text-white drop-shadow-sm" aria-hidden="true" />
+                        </div>
+                      )}
                     </div>
-                    <div className="chip-row">
+                    <div className="flex flex-col flex-grow justify-center">
+                      <strong className={`text-[15px] font-extrabold leading-tight tracking-tight ${member.isCurrent ? 'text-blue-900' : 'text-slate-800'}`}>
+                        {member.fullName}
+                      </strong>
+                      <div className="flex items-center gap-2 mt-1">
+                        <small className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
+                          {member.studentId}
+                        </small>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
                       <Badge
                         label={member.isLeader ? 'Leader' : 'Member'}
                         tone={member.isLeader ? 'warning' : 'neutral'}
                         icon={member.isLeader ? 'fa-crown' : 'fa-user'}
                       />
-                      {member.isCurrent ? <Badge label="You" tone="success" icon="fa-user-check" /> : null}
+                      {member.isCurrent && (
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 uppercase tracking-widest bg-emerald-100/80 px-2 py-1 rounded-md border border-emerald-200/50 shadow-sm">
+                          <i className="fas fa-check-circle" /> You
+                        </span>
+                      )}
                     </div>
                   </article>
                 ))}

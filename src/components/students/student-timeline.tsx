@@ -121,7 +121,7 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
     route: '/students/title-submission',
     actionLabel: 'Open Title Submission',
     icon: 'fa-lightbulb',
-    evidenceCategories: ['concept', 'title', 'title-submission'],
+    evidenceCategories: ['concept', 'title', 'title-submission', 'title-proposal', 'title proposal', 'concept-paper', 'concept paper', 'concept proposal'],
     evidenceKeywords: ['concept', 'title'],
     scheduleKeywords: ['concept', 'title', 'presentation', 'defense'],
     feedbackKeywords: ['concept', 'title'],
@@ -141,7 +141,7 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
     route: '/students/project-files',
     actionLabel: 'Upload Requirement',
     icon: 'fa-file-lines',
-    evidenceCategories: ['proposal', 'chapters-1-3', 'manuscript'],
+    evidenceCategories: ['proposal', 'chapters-1-3', 'manuscript', 'chapter-1', 'chapter-2', 'chapter-3', 'chapter-4', 'chapter-5'],
     evidenceKeywords: ['proposal', 'chapter 1', 'chapter 2', 'chapter 3', 'chapters 1-3'],
     scheduleKeywords: ['proposal', 'defense'],
     feedbackKeywords: ['proposal', 'chapter'],
@@ -240,6 +240,34 @@ function includesAny(value: string, keywords: string[]) {
   return keywords.some((keyword) => normalized.includes(keyword));
 }
 
+function normalizeEvidenceText(value: unknown) {
+  return normalizeText(value).replace(/[-_]+/g, ' ');
+}
+
+function isConceptStageEvidenceDocument(document: StudentDashboardData['documents'][number]) {
+  const category = normalizeEvidenceText(document.category);
+  const fileName = normalizeEvidenceText(document.fileName);
+
+  return category === 'title' ||
+    category.includes('title proposal') ||
+    category.includes('title submission') ||
+    category.includes('concept paper') ||
+    category.includes('concept proposal') ||
+    fileName.includes('title proposal') ||
+    fileName.includes('title submission') ||
+    fileName.includes('concept paper') ||
+    fileName.includes('concept proposal');
+}
+
+function isConceptStageFeedback(feedback: StageFeedback) {
+  const haystack = normalizeEvidenceText(`${feedback.title} ${feedback.content} ${feedback.mode}`);
+
+  return haystack.includes('title proposal') ||
+    haystack.includes('title submission') ||
+    haystack.includes('concept paper') ||
+    haystack.includes('concept proposal');
+}
+
 function isApprovedStatus(value?: string) {
   const normalized = normalizeText(value);
   return normalized.includes('approved') || normalized.includes('completed') || normalized.includes('complete') || normalized.includes('accepted');
@@ -324,9 +352,27 @@ function clampPercent(value: number) {
 
 function getStageDocuments(stage: StageBlueprint, data: StudentDashboardData): StageEvidence[] {
   const documents = data.documents.filter((document) => {
-    const category = normalizeText(document.category);
+    if (isConceptStageEvidenceDocument(document)) {
+      return stage.key === 'concept';
+    }
+
+    const category = normalizeEvidenceText(document.category);
+    
+    // Exact category match
+    if (stage.evidenceCategories.some((item) => category === normalizeEvidenceText(item))) {
+      return true;
+    }
+
+    // Prevent fuzzy matching if it strictly belongs to another stage
+    const matchesOtherStageCategory = STAGE_BLUEPRINTS.some(otherStage => 
+      otherStage.key !== stage.key && otherStage.evidenceCategories.some(item => category === normalizeEvidenceText(item))
+    );
+    if (matchesOtherStageCategory) {
+      return false;
+    }
+
     const haystack = `${document.fileName} ${document.fileType} ${document.category}`;
-    return stage.evidenceCategories.some((item) => category === normalizeText(item)) || includesAny(haystack, stage.evidenceKeywords);
+    return includesAny(haystack, stage.evidenceKeywords);
   });
 
   const titleAttachments =
@@ -360,6 +406,10 @@ function getStageSchedules(stage: StageBlueprint, data: StudentDashboardData) {
 
 function getStageFeedback(stage: StageBlueprint, data: StudentDashboardData): StageFeedback[] {
   return data.feedback.filter((feedback) => {
+    if (isConceptStageFeedback(feedback)) {
+      return stage.key === 'concept';
+    }
+
     const haystack = `${feedback.title} ${feedback.content} ${feedback.submissionTitle ?? ''} ${feedback.mode}`;
     return includesAny(haystack, stage.feedbackKeywords);
   });
@@ -410,8 +460,16 @@ function mapSavedReviewStatus(status?: string): ReviewStatus {
   return 'pending';
 }
 
+function isPendingCheckpointFeedback(value?: string) {
+  const normalized = normalizeText(value);
+
+  return normalized.includes('pending adviser review') ||
+    normalized.includes('waiting for review') ||
+    normalized.includes('review is in progress');
+}
+
 function getSavedCheckpointNote(record: SavedCheckpoint, status: CheckpointStatus) {
-  if (record.latestFeedback) {
+  if (record.latestFeedback && !(status === 'completed' && isPendingCheckpointFeedback(record.latestFeedback))) {
     return record.latestFeedback;
   }
 
@@ -463,7 +521,10 @@ function getCheckpointStatus(
   record?: SavedCheckpoint
 ): BuiltCheckpoint {
   if (record) {
-    const status = mapSavedCheckpointStatus(record.status);
+    const savedStatus = mapSavedCheckpointStatus(record.status);
+    const status = checkpoint.kind === 'concept-paper' && hasApprovedDocument(evidence)
+      ? 'completed'
+      : savedStatus;
 
     return {
       ...checkpoint,

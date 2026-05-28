@@ -27,7 +27,7 @@ function createRepositoryPrismaClient() {
     max: getRepositoryPoolMax(),
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5_000,
-    ssl: {
+    ssl: connectionString.includes('localhost') || connectionString.includes('127.0.0.1') ? false : {
       rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === 'true'
     }
   });

@@ -120,9 +120,10 @@ async function main() {
 
   const name = `${firstName} ${lastName}`.trim();
   const passwordHash = await bcrypt.hash(password, 12);
+  const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
   const pool = new Pool({
     connectionString,
-    ssl: {
+    ssl: isLocal ? false : {
       rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === 'true',
     },
   });

@@ -70,7 +70,7 @@ export function SystemAdminShell({
     toggleLabel,
     toggleSidebar
   } = useShellSidebar({
-    mobileBreakpoint: 900,
+    mobileBreakpoint: 1100,
     storageKey: 'system-admin-sidebar-collapsed'
   });
 
@@ -126,11 +126,11 @@ export function SystemAdminShell({
             <i aria-hidden="true" className={`fas ${toggleIconClass}`} />
           </button>
           <div className="student-navbar-title" aria-label="Current page">
-            <span className="student-navbar-title-kicker">System Admin</span>
+            <span className="student-navbar-title-kicker">ThesisTrack</span>
             <strong>{currentNavItem?.label ?? title}</strong>
           </div>
         </div>
-        <div className="student-global-navbar-actions" style={{ display: 'flex', alignItems: 'center', height: '100%', gap: '1rem', paddingRight: '1rem' }}>
+        <div className="student-global-navbar-actions">
           <PortalShellActionMenus
             notificationHref="/system-admin/logs"
             notificationCount={notificationCount}
@@ -175,7 +175,7 @@ export function SystemAdminShell({
         </div>
       </header>
 
-      <aside className={`student-global-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">System Admin Portal</span>
@@ -212,17 +212,7 @@ export function SystemAdminShell({
                       <button
                         aria-controls="system-admin-branding-submenu"
                         aria-expanded={brandingMenuOpen}
-                        className="sidebar-link"
-                        style={
-                          activeNav === 'branding' || brandingMenuOpen
-                            ? {
-                                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                                color: '#ffffff',
-                                border: '1px solid transparent',
-                                boxShadow: 'none'
-                              }
-                            : undefined
-                        }
+                        className={`sidebar-link${activeNav === 'branding' || brandingMenuOpen ? ' is-active' : ''}`}
                         title={sidebarCollapsed ? item.label : undefined}
                         type="button"
                         onClick={() => {

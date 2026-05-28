@@ -71,6 +71,8 @@ export type ProjectFileUploadState = {
 };
 
 export const PROJECT_FILE_CATEGORY_OPTIONS: ProjectFileCategoryOption[] = [
+  { key: 'title-proposal', label: 'Title Proposal' },
+  { key: 'concept-paper', label: 'Concept Paper' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'chapter-1', label: 'Chapter 1' },
   { key: 'chapter-2', label: 'Chapter 2' },
@@ -87,6 +89,7 @@ export const PROJECT_FILE_CATEGORY_OPTIONS: ProjectFileCategoryOption[] = [
 
 export const PROJECT_FILE_FILTER_OPTIONS = [
   { key: 'all', label: 'All Project Files' },
+  { key: 'concept-paper', label: 'Concept Paper' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'chapters', label: 'Chapter 1-5' },
   { key: 'system-files', label: 'System Files' },

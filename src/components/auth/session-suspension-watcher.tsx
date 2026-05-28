@@ -141,18 +141,10 @@ export function SessionSuspensionWatcher() {
         console.warn('Failed to check session status during polling', error);
       }
     });
-    const intervalId = window.setInterval(() => {
-      void checkSessionStatus().catch((error) => {
-        if (!isExpectedPollError(error)) {
-          console.warn('Failed to check session status during polling', error);
-        }
-      });
-    }, 10000);
 
     return () => {
       cancelled = true;
       inFlightController?.abort();
-      window.clearInterval(intervalId);
     };
   }, [isAuthPage]);
 

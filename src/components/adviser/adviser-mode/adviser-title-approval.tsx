@@ -194,7 +194,11 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
     nextStatus: TitleStatus,
     customRemarks?: string
   ) => {
-    const nextRemarks = customRemarks?.trim() || getDefaultActionForStatus(nextStatus);
+    const trimmedRemarks = customRemarks?.trim() || '';
+    const isPlaceholderRemark = trimmedRemarks.toLowerCase() === getDefaultActionForStatus('pending').toLowerCase();
+    const nextRemarks = trimmedRemarks && !isPlaceholderRemark
+      ? trimmedRemarks
+      : getDefaultActionForStatus(nextStatus);
 
     try {
       const response = await fetch('/api/title-submissions', {

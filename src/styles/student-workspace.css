@@ -2636,6 +2636,200 @@ button {
     line-height: 1.55;
 }
 
+.student-progress-reports-page .progress-reports-layout {
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.student-progress-reports-page .progress-reports-form-card,
+.student-progress-reports-page .progress-reports-history-card {
+    padding: 1.35rem;
+    border-radius: 1rem;
+    border-color: #dbe5f1;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.student-progress-reports-page .progress-reports-form-card .card-heading,
+.student-progress-reports-page .progress-reports-history-card .card-heading {
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid #eef2f7;
+    margin-bottom: 0.2rem;
+}
+
+.student-progress-reports-page .progress-reports-form {
+    gap: 1rem;
+}
+
+.student-progress-reports-page .progress-reports-form .form-grid {
+    gap: 0.85rem;
+}
+
+.student-progress-reports-page .progress-reports-form .form-field {
+    gap: 0.45rem;
+}
+
+.student-progress-reports-page .progress-reports-form .form-field label {
+    color: #475569;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.student-progress-reports-page .progress-reports-form .form-field input,
+.student-progress-reports-page .progress-reports-form .form-field textarea {
+    border-color: #cbd5e1;
+    border-radius: 0.85rem;
+    background: #ffffff;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.035);
+}
+
+.student-progress-reports-page .progress-reports-form textarea {
+    resize: vertical;
+}
+
+.student-progress-reports-page .progress-reports-percent-field {
+    width: min(100%, 14rem);
+}
+
+.student-progress-reports-page .progress-reports-percent-input {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.student-progress-reports-page .progress-reports-percent-input input {
+    max-width: 7rem;
+    text-align: center;
+}
+
+.student-progress-reports-page .progress-reports-percent-input span {
+    color: #64748b;
+    font-weight: 900;
+}
+
+.student-progress-reports-page .progress-reports-form-actions {
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 0.35rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eef2f7;
+}
+
+.student-progress-reports-page .progress-reports-form-actions .btn {
+    min-height: 2.8rem;
+    border-radius: 0.85rem;
+}
+
+.student-progress-reports-page .progress-reports-form-actions .form-helper {
+    max-width: 28ch;
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.student-progress-reports-page .progress-reports-history-list {
+    gap: 0.85rem;
+}
+
+.student-progress-reports-page .progress-reports-history-item {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+    border-radius: 0.95rem;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+.student-progress-reports-page .progress-reports-history-summary {
+    margin: 0;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.student-progress-reports-page .progress-reports-detail-grid {
+    gap: 0.75rem;
+    padding: 0.85rem;
+    border-radius: 0.85rem;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.student-progress-reports-page .progress-reports-detail-grid > div {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.student-progress-reports-page .progress-reports-detail-grid span {
+    display: block;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.student-progress-reports-page .progress-reports-detail-grid ul,
+.student-progress-reports-page .progress-reports-detail-grid p {
+    margin: 0;
+    color: #334155;
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.student-progress-reports-page .progress-reports-detail-grid ul {
+    padding-left: 1.1rem;
+}
+
+.student-progress-reports-page .progress-reports-history-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding-top: 0.1rem;
+}
+
+.student-progress-reports-page .progress-reports-history-footer small {
+    color: #64748b;
+}
+
+@media (max-width: 720px) {
+    .student-progress-reports-page .progress-reports-form-card,
+    .student-progress-reports-page .progress-reports-history-card,
+    .student-progress-reports-page .progress-reports-history-item {
+        padding: 0.95rem;
+        border-radius: 0.85rem;
+    }
+
+    .student-progress-reports-page .progress-reports-form .form-grid,
+    .student-progress-reports-page .progress-reports-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .student-progress-reports-page .progress-reports-percent-field {
+        width: 100%;
+    }
+
+    .student-progress-reports-page .progress-reports-percent-input input {
+        max-width: none;
+    }
+
+    .student-progress-reports-page .progress-reports-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .student-progress-reports-page .progress-reports-form-actions .btn {
+        width: 100%;
+    }
+}
+
 .student-dashboard-kpi-grid {
     gap: 1.5rem;
 }
@@ -6867,14 +7061,13 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-toolbar {
     display: grid;
-    grid-template-columns: minmax(22rem, 2.2fr) repeat(3, minmax(11rem, 1fr)) auto;
-    gap: 0.9rem;
+    grid-template-columns: minmax(18rem, 1.8fr) repeat(3, minmax(9.5rem, 0.78fr)) auto;
+    gap: 0.8rem;
     align-items: end;
-    padding: 1.1rem;
-    border-radius: 1.2rem;
+    padding: 0.9rem;
+    border-radius: 1rem;
     border: 1px solid #dbe5f1;
-    background:
-        linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(239, 246, 255, 0.84));
+    background: linear-gradient(180deg, #f8fbff, #f3f7fc);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
@@ -6884,30 +7077,41 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-toolbar .form-field {
     display: grid;
-    gap: 0.55rem;
-    min-height: 7.2rem;
-    padding: 1rem 1rem 1.05rem;
-    border-radius: 1rem;
-    border: 1px solid #d7e1ee;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    gap: 0.45rem;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .student-repository-page .student-repository-toolbar .form-field label {
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+    padding-left: 0.15rem;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #475569;
 }
 
 .student-repository-page .student-repository-toolbar .form-field input,
 .student-repository-page .student-repository-toolbar .form-field select {
-    min-height: 3.2rem;
-    border-radius: 0.95rem;
-    border-color: #cbd5e1;
-    padding: 0.9rem 1rem;
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    width: 100%;
+    min-height: 3rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.85rem;
+    padding: 0.75rem 0.9rem;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 18px rgba(15, 23, 42, 0.035);
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.student-repository-page .student-repository-toolbar .form-field input:focus,
+.student-repository-page .student-repository-toolbar .form-field select:focus {
+    border-color: #60a5fa;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.28), 0 10px 20px rgba(15, 23, 42, 0.05);
 }
 
 .student-repository-page .student-repository-toolbar .form-field input::placeholder {
@@ -6922,14 +7126,14 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-search-input-wrap i {
     position: absolute;
-    left: 1.05rem;
-    color: #64748b;
+    left: 0.95rem;
+    color: #003A8F;
     font-size: 0.92rem;
     pointer-events: none;
 }
 
 .student-repository-page .student-repository-search-input-wrap input {
-    padding-left: 3rem;
+    padding-left: 2.75rem;
 }
 
 .student-repository-page .student-repository-search-field {
@@ -6940,24 +7144,24 @@ progress::-moz-progress-bar {
     grid-column: auto;
     display: flex;
     flex-wrap: nowrap;
-    align-items: flex-end;
+    align-items: center;
     justify-content: flex-end;
-    gap: 0.75rem;
-    padding: 0 0.2rem 0.35rem 0;
+    gap: 0.55rem;
+    padding: 0;
 }
 
 .student-repository-page .student-repository-toolbar-actions .btn {
-    border-radius: 1rem;
+    min-height: 3rem;
+    border-radius: 0.9rem;
     white-space: nowrap;
 }
 
 .student-repository-page .student-repository-saved-toggle {
-    min-height: 2.7rem;
-    padding: 0.55rem 0.9rem;
+    padding: 0.7rem 0.95rem;
     border-color: rgba(0, 58, 143, 0.14);
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
-    box-shadow: none;
-    color: #475569;
+    background: #ffffff;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
+    color: #003A8F;
 }
 
 .student-repository-page .student-repository-saved-toggle:hover {
@@ -6967,18 +7171,18 @@ progress::-moz-progress-bar {
 }
 
 .student-repository-page .student-repository-saved-toggle.is-active {
-    border-color: rgba(0, 58, 143, 0.22);
-    background: rgba(0, 58, 143, 0.1);
-    color: #003A8F;
+    border-color: #003A8F;
+    background: #003A8F;
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(0, 58, 143, 0.18);
 }
 
 .student-repository-page .student-repository-reset-btn {
-    min-height: 2.7rem;
-    padding: 0.55rem 0.8rem;
+    padding: 0.7rem 0.95rem;
     border: 0;
-    background: transparent;
+    background: #ffffff;
     box-shadow: none;
-    color: #64748b;
+    color: #003A8F;
 }
 
 .student-repository-page .student-repository-reset-btn:hover {
@@ -14300,6 +14504,108 @@ progress::-moz-progress-bar {
     color: #ffffff;
 }
 
+.student-project-files-page .project-files-locked-panel {
+    position: relative;
+    width: 100%;
+    min-height: 16rem;
+    margin: 0.75rem auto 0;
+    padding: 2rem 1.5rem;
+    display: grid;
+    place-items: center;
+    gap: 0.7rem;
+    text-align: center;
+    border: 1px dashed #b7d3f7;
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.9));
+}
+
+.student-project-files-page .project-files-locked-icon {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #eef6ff;
+    color: #003A8F;
+    font-size: 1.05rem;
+    flex: 0 0 auto;
+}
+
+.student-project-files-page .project-files-locked-copy {
+    display: grid;
+    justify-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    max-width: 29rem;
+}
+
+.student-project-files-page .project-files-locked-panel h4 {
+    margin: 0;
+    color: #111827;
+    font-size: 1.02rem;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: 0;
+}
+
+.student-project-files-page .project-files-locked-description {
+    margin: 0;
+    color: #475569;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+.student-project-files-page .project-files-locked-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-top: 0.2rem;
+}
+
+.student-project-files-page .project-files-locked-actions a {
+    min-height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.75rem 1.05rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(0, 58, 143, 0.18);
+    background: #003A8F;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 900;
+    text-decoration: none;
+    box-shadow: 0 12px 22px rgba(0, 58, 143, 0.18);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.student-project-files-page .project-files-locked-actions a:hover {
+    transform: translateY(-1px);
+    background: #1E40AF;
+    box-shadow: 0 16px 30px rgba(0, 58, 143, 0.22);
+}
+
+@media (max-width: 540px) {
+    .student-project-files-page .project-files-locked-panel {
+        min-height: 14rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .student-project-files-page .project-files-locked-icon {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+
+    .student-project-files-page .project-files-locked-actions,
+    .student-project-files-page .project-files-locked-actions a {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 @media (max-width: 1100px) {
     .student-project-files-page .top-nav,
     .student-project-files-page .project-files-upload-stepper,
@@ -14931,25 +15237,13 @@ progress::-moz-progress-bar {
     overflow: hidden;
     margin-bottom: 1rem;
     padding: clamp(0.95rem, 1.6vw, 1.15rem);
-    border: 1px solid rgba(0, 58, 143, 0.14);
-    border-radius: 24px;
-    background:
-        radial-gradient(circle at 9% 0%, rgba(0, 58, 143, 0.1), transparent 30%),
-        radial-gradient(circle at 92% 14%, rgba(246, 190, 0, 0.14), transparent 24%),
-        rgba(255, 255, 255, 0.86);
-    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.06);
-    backdrop-filter: blur(18px) saturate(150%);
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
 }
 
-.student-dashboard-welcome-strip::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-        linear-gradient(120deg, rgba(255, 255, 255, 0.84), transparent 46%),
-        linear-gradient(90deg, rgba(0, 58, 143, 0.07), transparent 35%);
-}
+
 
 .student-dashboard-welcome-copy,
 .student-dashboard-welcome-insights {
@@ -17324,6 +17618,81 @@ html[data-student-theme="dark"] .student-shell .student-project-files-page .grou
     background: rgba(8, 26, 49, 0.72) !important;
 }
 
+html[data-student-theme="dark"] .student-shell .student-project-files-page .project-files-locked-panel,
+.student-shell[data-theme="dark"] .student-project-files-page .project-files-locked-panel {
+    border-color: rgba(147, 197, 253, 0.22) !important;
+    background: rgba(8, 26, 49, 0.74) !important;
+    box-shadow: none !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-project-files-page .project-files-locked-panel h4,
+.student-shell[data-theme="dark"] .student-project-files-page .project-files-locked-panel h4 {
+    color: #ffffff !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-project-files-page .project-files-locked-description,
+.student-shell[data-theme="dark"] .student-project-files-page .project-files-locked-description {
+    color: #b9d2f2 !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-project-files-page .project-files-locked-icon,
+.student-shell[data-theme="dark"] .student-project-files-page .project-files-locked-icon {
+    border-color: rgba(147, 197, 253, 0.2) !important;
+    background: rgba(96, 165, 250, 0.16) !important;
+    color: #bfdbfe !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-form-card,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-history-card,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-history-item,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-form-card,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-history-card,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-history-item {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(8, 26, 49, 0.76) !important;
+    color: #dbeafe !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-form-card .card-heading,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-history-card .card-heading,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-form-actions,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-form-card .card-heading,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-history-card .card-heading,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-form-actions {
+    border-color: rgba(147, 197, 253, 0.16) !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-form .form-field label,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-detail-grid span,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-form .form-field label,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-detail-grid span {
+    color: #b9d2f2 !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-form .form-field input,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-form .form-field textarea,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-detail-grid,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-form .form-field input,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-form .form-field textarea,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-detail-grid {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(15, 35, 64, 0.76) !important;
+    color: #e5eefb !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-history-summary,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-detail-grid ul,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-detail-grid p,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-history-footer small,
+html[data-student-theme="dark"] .student-shell .student-progress-reports-page .progress-reports-form-actions .form-helper,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-history-summary,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-detail-grid ul,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-detail-grid p,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-history-footer small,
+.student-shell[data-theme="dark"] .student-progress-reports-page .progress-reports-form-actions .form-helper {
+    color: #b9d2f2 !important;
+}
+
 html[data-student-theme="dark"] .student-shell .student-repository-page .student-repository-view-toggle,
 html[data-student-theme="dark"] .student-shell .student-repository-page .student-repository-toolbar,
 html[data-student-theme="dark"] .student-shell .student-repository-page .student-repository-search-input-wrap,
@@ -17578,6 +17947,20 @@ html[data-student-theme="dark"] .student-shell .student-schedule-day-event.is-co
     border-color: rgba(147, 197, 253, 0.16) !important;
     background: rgba(8, 26, 49, 0.76) !important;
     color: #dbeafe !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-repository-page .student-repository-toolbar .form-field,
+html[data-student-theme="dark"] .student-shell .student-repository-page .student-repository-search-input-wrap,
+.student-shell[data-theme="dark"] .student-repository-page .student-repository-toolbar .form-field,
+.student-shell[data-theme="dark"] .student-repository-page .student-repository-search-input-wrap {
+    border-color: transparent !important;
+    background: transparent !important;
+    color: inherit !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-repository-page .student-repository-toolbar .form-field label,
+.student-shell[data-theme="dark"] .student-repository-page .student-repository-toolbar .form-field label {
+    color: #b9d2f2 !important;
 }
 
 html[data-student-theme="dark"] .student-shell .workspace-note,
@@ -22558,5 +22941,3972 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     .milestone-action-button,
     .milestones-expand-all {
         width: 100%;
+    }
+}
+/* PREMIUM DASHBOARD REDESIGN */
+.student-dashboard-page {
+  padding-top: 0 !important;
+}
+
+.premium-dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.premium-top-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.premium-bottom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 3fr) minmax(0, 3fr);
+  gap: 1.5rem;
+}
+
+.premium-hero-section {
+  display: flex;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 3rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 20px 40px -10px rgba(0, 58, 143, 0.08), 0 1px 3px rgba(0,0,0,0.05);
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  overflow: hidden;
+  position: relative;
+}
+.premium-hero-section::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(29,78,216,0.04) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-premium-left {
+  flex: 1;
+  max-width: 650px;
+  z-index: 2;
+}
+
+.hero-premium-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.hero-premium-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+}
+
+.hero-premium-badges {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #F1F5F9;
+  color: #475569;
+}
+.hero-chip.is-blue {
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+
+.hero-premium-desc {
+  font-size: 0.95rem;
+  color: #4B5563;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 550px;
+}
+
+.hero-premium-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.hero-premium-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #111827;
+  font-weight: 600;
+}
+.hero-premium-meta i {
+  color: #64748B;
+}
+
+.hero-premium-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.btn-premium-primary,
+.btn-premium-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-premium-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px -6px rgba(0, 58, 143, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+.btn-premium-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.5s ease;
+}
+.btn-premium-primary:hover::after {
+  left: 100%;
+}
+.btn-premium-primary:hover {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -8px rgba(0, 58, 143, 0.5);
+  color: white;
+}
+
+.btn-premium-secondary {
+  background: white;
+  color: #111827;
+  border: 1px solid #E5E7EB;
+}
+.btn-premium-secondary:hover {
+  background: #F8FAFC;
+  transform: translateY(-2px);
+}
+
+.btn-premium-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #E5E7EB;
+  color: #4B5563;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.btn-premium-icon:hover {
+  background: #F8FAFC;
+}
+
+.hero-premium-right {
+  position: relative;
+  width: 380px;
+  height: 260px;
+  flex-shrink: 0;
+}
+
+.hero-illustration-css {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.illus-bg {
+  position: absolute;
+  right: 0;
+  top: 10%;
+  width: 80%;
+  height: 80%;
+  background: #EFF6FF;
+  border-radius: 24px;
+}
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes floatDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+.illus-doc1 {
+  position: absolute;
+  right: 40%;
+  top: 15%;
+  width: 140px;
+  height: 180px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  border: 1px solid #E2E8F0;
+  padding: 15px;
+  animation: floatUp 5s ease-in-out infinite;
+}
+.illus-doc1::before {
+  content: "";
+  display: block;
+  width: 60%;
+  height: 8px;
+  background: #E2E8F0;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.illus-doc1::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 8px;
+  background: #F1F5F9;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  box-shadow: 0 16px 0 #F1F5F9, 0 32px 0 #F1F5F9, 0 48px 0 #F1F5F9;
+}
+.illus-chart {
+  position: absolute;
+  right: 10%;
+  top: 30%;
+  width: 120px;
+  height: 120px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: floatDown 6s ease-in-out infinite;
+}
+.illus-chart-pie {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: conic-gradient(#1D4ED8 0% 65%, #93C5FD 65% 100%);
+}
+.illus-cap {
+  position: absolute;
+  right: 30%;
+  bottom: 10%;
+  width: 80px;
+  height: auto;
+  font-size: 50px;
+  color: #003A8F;
+  filter: drop-shadow(0 10px 15px rgba(0,58,143,0.2));
+}
+
+.premium-progress-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.is-progress-head {
+  margin-bottom: 2rem;
+}
+
+.progress-number-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.progress-number-row h2 {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+  line-height: 1;
+}
+
+.progress-bar-premium {
+  flex: 1;
+  height: 8px;
+  background: #F1F5F9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, #3B82F6 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+.progress-note {
+  font-size: 0.75rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.progress-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-list-item span {
+  font-size: 0.85rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.progress-list-item strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.text-blue { color: var(--primary); }
+.text-green { color: #10B981; display: flex; align-items: center; gap: 0.5rem; }
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #10B981;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.premium-surface-card {
+  background: white;
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.04);
+  transition: all 0.3s ease;
+}
+.premium-surface-card:hover {
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
+  border-color: rgba(229, 231, 235, 1);
+  transform: translateY(-2px);
+}
+
+.premium-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.premium-card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #111827;
+  text-transform: uppercase;
+}
+.premium-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.premium-link:hover {
+  text-decoration: underline;
+}
+
+.premium-horizontal-timeline {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding-top: 1rem;
+}
+.premium-horizontal-timeline::before {
+  content: "";
+  position: absolute;
+  top: 32px;
+  left: 40px;
+  right: 40px;
+  height: 2px;
+  background: #E5E7EB;
+  z-index: 1;
+}
+.timeline-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  width: 120px;
+}
+.timeline-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #94A3B8;
+  transition: all 0.3s ease;
+}
+.timeline-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.timeline-copy strong {
+  font-size: 0.85rem;
+  color: #111827;
+  font-weight: 700;
+}
+.timeline-status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+}
+.timeline-date {
+  font-size: 0.7rem;
+  color: #94A3B8;
+}
+
+.timeline-node.is-completed .timeline-icon {
+  background: #10B981;
+  border-color: #10B981;
+  color: white;
+}
+.timeline-node.is-completed .timeline-status-text {
+  color: #10B981;
+}
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(0, 58, 143, 0.2); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 58, 143, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 58, 143, 0); }
+}
+
+.timeline-node.is-current .timeline-icon {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+  border-color: transparent;
+  color: white;
+  animation: pulseGlow 2s infinite;
+}
+.timeline-node.is-current .timeline-status-text {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.premium-workspace-card {
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.premium-workspace-card .premium-card-head {
+  padding: 1.5rem 1.5rem 0;
+  margin-bottom: 1rem;
+}
+.workspace-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid #E5E7EB;
+  background: #F8FAFC;
+}
+.workspace-tab {
+  padding: 0.8rem 1.25rem;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.workspace-tab:hover {
+  color: #111827;
+}
+.workspace-tab.is-active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.5) 100%);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border: 1px solid #E5E7EB;
+  border-bottom: 2px solid var(--primary);
+  margin-bottom: -1px;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+}
+
+.workspace-table-container {
+  padding: 0;
+}
+.premium-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.premium-table th {
+  text-align: left;
+  padding: 1rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+  border-bottom: 1px solid #E5E7EB;
+  background: white;
+}
+.premium-table td {
+  padding: 1rem 1.5rem;
+  font-size: 0.85rem;
+  color: #111827;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: middle;
+}
+.premium-table tr:hover td {
+  background: #F8FAFC;
+}
+.table-file-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.file-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+.file-icon-box.is-pdf { background: #FEF2F2; color: #EF4444; }
+.file-icon-box.is-docx { background: #EFF6FF; color: #3B82F6; }
+.file-icon-box.is-pptx { background: #FFF7ED; color: #F97316; }
+.file-icon-box.is-zip { background: #F3E8FF; color: #A855F7; }
+
+.table-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748B;
+}
+.table-date {
+  color: #4B5563;
+}
+.table-action-btn {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.table-action-btn:hover {
+  background: #F1F5F9;
+  color: #111827;
+}
+
+.premium-card-footer {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-top: 1px solid #E5E7EB;
+}
+.premium-link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.premium-link-arrow:hover {
+  gap: 0.75rem;
+}
+
+.premium-activity-card {
+  margin-bottom: 1.5rem;
+}
+.premium-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.premium-activity-item {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #F1F5F9;
+}
+.premium-activity-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.activity-icon.is-success { background: #ECFDF5; color: #10B981; }
+.activity-icon.is-info { background: #EFF6FF; color: #3B82F6; }
+.activity-icon.is-warning { background: #FFFBEB; color: #F59E0B; }
+.activity-icon.is-primary { background: #F3E8FF; color: #A855F7; }
+.activity-icon.is-danger { background: #FEF2F2; color: #EF4444; }
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.activity-content strong {
+  font-size: 0.85rem;
+  color: #111827;
+}
+.activity-content p {
+  font-size: 0.8rem;
+  color: #4B5563;
+  margin: 0;
+}
+.activity-time {
+  font-size: 0.75rem;
+  color: #94A3B8;
+  margin-top: 0.2rem;
+}
+
+.premium-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.premium-team-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #F1F5F9;
+  background: #FAFAFA;
+}
+.team-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.team-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.team-info strong {
+  font-size: 0.85rem;
+  color: #111827;
+}
+.team-info span {
+  font-size: 0.75rem;
+  color: #64748B;
+}
+
+.premium-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.premium-schedule-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  background: white;
+}
+.schedule-date-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  background: #F8FAFC;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+.s-month {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+}
+.s-day {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+}
+.schedule-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.schedule-info strong {
+  font-size: 0.85rem;
+  color: #111827;
+}
+.schedule-info span {
+  font-size: 0.75rem;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.premium-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.premium-quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem;
+  background: #F8FAFC;
+  border-radius: 12px;
+  border: 1px solid #F1F5F9;
+  color: #4B5563;
+  transition: all 0.2s;
+  text-align: center;
+}
+.quick-action-btn i {
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+.quick-action-btn span {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.quick-action-btn:hover {
+  background: white;
+  border-color: #E5E7EB;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.premium-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+.premium-empty-state .empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+.premium-empty-state h4 {
+  font-size: 1rem;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+.premium-empty-state p {
+  font-size: 0.85rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.premium-empty-state.is-small {
+  padding: 2rem 1rem;
+}
+.premium-empty-state.is-small .empty-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 1200px) {
+  .premium-top-row {
+    grid-template-columns: 1fr;
+  }
+  .premium-bottom-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .premium-side-column {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .premium-bottom-row {
+    grid-template-columns: 1fr;
+  }
+  .premium-side-column {
+    grid-template-columns: 1fr;
+  }
+  .premium-hero-section {
+    flex-direction: column;
+  }
+  .hero-premium-right {
+    display: none;
+  }
+  .premium-horizontal-timeline {
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+}
+
+/* Professional title submission workbench refinement. */
+.student-title-submission-page {
+    background: #f8fafc !important;
+}
+
+.student-title-submission-page .legacy-title-hero,
+.student-title-submission-page .legacy-title-timeline,
+.student-title-submission-page .absolute[class*="blur"] {
+    display: none !important;
+}
+
+.student-title-submission-page .title-submission-command-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
+    gap: 1.25rem;
+    align-items: stretch;
+    margin-bottom: 1rem;
+    padding: 1.25rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.student-title-submission-page .title-submission-command-copy {
+    display: grid;
+    align-content: center;
+    gap: 0.8rem;
+    min-width: 0;
+}
+
+.student-title-submission-page .title-submission-command-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.student-title-submission-page .title-submission-command-context > span:first-child,
+.student-title-submission-page .title-submission-progress-head span {
+    color: #1d4ed8;
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.student-title-submission-page .title-submission-command-copy h2 {
+    margin: 0;
+    max-width: 34ch;
+    color: #0f172a;
+    font-size: clamp(1.5rem, 2.25vw, 2.1rem);
+    font-weight: 850;
+    line-height: 1.12;
+    letter-spacing: 0;
+}
+
+.student-title-submission-page .title-submission-command-copy p {
+    margin: 0;
+    max-width: 74ch;
+    color: #526174;
+    font-size: 0.92rem;
+    font-weight: 550;
+    line-height: 1.65;
+}
+
+.student-title-submission-page .title-submission-command-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    padding-top: 0.2rem;
+}
+
+.student-title-submission-page .title-submission-command-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.student-title-submission-page .title-submission-command-meta i {
+    color: #003a8f;
+}
+
+.student-title-submission-page .title-submission-command-side {
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+    padding-left: 1.1rem;
+    border-left: 1px solid #e2e8f0;
+}
+
+.student-title-submission-page .title-submission-progress-summary {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.student-title-submission-page .title-submission-progress-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.student-title-submission-page .title-submission-progress-head strong {
+    color: #0f172a;
+    font-size: 1.35rem;
+    font-weight: 850;
+}
+
+.student-title-submission-page .title-submission-progress-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.student-title-submission-page .title-submission-progress-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #003a8f, #10b981);
+}
+
+.student-title-submission-page .title-submission-progress-summary p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+.student-title-submission-page .title-submission-readiness-list {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.student-title-submission-page .title-submission-readiness-list div {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.65rem;
+    align-items: start;
+    padding: 0.58rem 0;
+    border-top: 1px solid #edf2f7;
+}
+
+.student-title-submission-page .title-submission-readiness-list i {
+    margin-top: 0.16rem;
+    color: #94a3b8;
+    font-size: 0.82rem;
+}
+
+.student-title-submission-page .title-submission-readiness-list .is-complete i {
+    color: #10b981;
+}
+
+.student-title-submission-page .title-submission-readiness-list strong,
+.student-title-submission-page .title-submission-readiness-list small {
+    display: block;
+}
+
+.student-title-submission-page .title-submission-readiness-list strong {
+    color: #0f172a;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.student-title-submission-page .title-submission-readiness-list small {
+    margin-top: 0.12rem;
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 650;
+    line-height: 1.35;
+}
+
+.student-title-submission-page .title-submission-workflow-strip {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0;
+    margin-bottom: 1rem;
+    border-top: 1px solid #dbe3ef;
+    border-bottom: 1px solid #dbe3ef;
+    background: #ffffff;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 0.9rem;
+    border-right: 1px solid #e2e8f0;
+    color: #94a3b8;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div:last-child {
+    border-right: 0;
+}
+
+.student-title-submission-page .title-submission-workflow-strip span {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #f1f5f9;
+    font-size: 0.78rem;
+}
+
+.student-title-submission-page .title-submission-workflow-strip strong {
+    overflow: hidden;
+    color: currentColor;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-complete {
+    color: #003a8f;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-complete span {
+    background: #eef4ff;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current {
+    color: #047857;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current span {
+    background: #ecfdf5;
+}
+
+.student-title-submission-page .title-submission-tabs {
+    margin-bottom: 1rem !important;
+    border-radius: 8px !important;
+    background: #eef2f7 !important;
+    box-shadow: none !important;
+}
+
+.student-title-submission-page .title-submission-tabs button {
+    border-radius: 6px !important;
+}
+
+.student-title-submission-page .grid.grid-cols-1.lg\:grid-cols-\[1fr_320px\] {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+    gap: 1.2rem;
+}
+
+.student-title-submission-page .bg-white.rounded-2xl,
+.student-title-submission-page .bg-white.rounded-\[1\.25rem\] {
+    border-color: #dbe3ef !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+}
+
+.student-title-submission-page .shadow-lg,
+.student-title-submission-page .shadow-md,
+.student-title-submission-page .shadow-xl,
+.student-title-submission-page .shadow-2xl {
+    box-shadow: none !important;
+}
+
+.student-title-submission-page input,
+.student-title-submission-page textarea,
+.student-title-submission-page button,
+.student-title-submission-page .rounded-xl,
+.student-title-submission-page .rounded-2xl,
+.student-title-submission-page .rounded-\[1rem\] {
+    border-radius: 8px !important;
+}
+
+.student-title-submission-page .sticky.top-8 {
+    top: 5rem;
+}
+
+.student-title-submission-page .grid.grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-command-panel,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-command-panel,
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(8, 26, 49, 0.86) !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page :is(.title-submission-command-copy h2, .title-submission-progress-head strong, .title-submission-readiness-list strong),
+.student-shell[data-theme="dark"] .student-title-submission-page :is(.title-submission-command-copy h2, .title-submission-progress-head strong, .title-submission-readiness-list strong) {
+    color: #f8fafc !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page :is(.title-submission-command-copy p, .title-submission-command-meta span, .title-submission-progress-summary p, .title-submission-readiness-list small),
+.student-shell[data-theme="dark"] .student-title-submission-page :is(.title-submission-command-copy p, .title-submission-command-meta span, .title-submission-progress-summary p, .title-submission-readiness-list small) {
+    color: #b7c7dd !important;
+}
+
+@media (max-width: 1100px) {
+    .student-title-submission-page .title-submission-command-panel,
+    .student-title-submission-page .grid.grid-cols-1.lg\:grid-cols-\[1fr_320px\] {
+        grid-template-columns: 1fr;
+    }
+
+    .student-title-submission-page .title-submission-command-side {
+        padding-top: 1rem;
+        padding-left: 0;
+        border-top: 1px solid #e2e8f0;
+        border-left: 0;
+    }
+
+    .student-title-submission-page .sticky.top-8 {
+        position: static;
+    }
+}
+
+@media (max-width: 760px) {
+    .student-title-submission-page {
+        padding: 0.85rem !important;
+    }
+
+    .student-title-submission-page .title-submission-command-panel {
+        padding: 1rem;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip > div {
+        border-right: 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip > div:last-child {
+        border-bottom: 0;
+    }
+}
+
+/* Reduced title submission borders: keep structure, remove heavy boxing. */
+.student-title-submission-page .title-submission-command-panel {
+    padding: 0 0 1rem !important;
+    border: 0 !important;
+    border-bottom: 1px solid #e6edf5 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.student-title-submission-page .title-submission-command-side {
+    border-left: 0 !important;
+    box-shadow: inset 1px 0 0 #edf2f7;
+}
+
+.student-title-submission-page .title-submission-workflow-strip {
+    gap: 0.45rem !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div {
+    border-right: 0 !important;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.045);
+}
+
+.student-title-submission-page .title-submission-tabs {
+    border: 0 !important;
+    background: #eaf0f7 !important;
+}
+
+.student-title-submission-page :is(.bg-white.rounded-2xl, .bg-white.rounded-\[1\.25rem\], .bg-white.rounded-lg, .bg-slate-50.rounded-2xl) {
+    border-color: transparent !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.055) !important;
+}
+
+.student-title-submission-page :is(.bg-white.rounded-2xl, .bg-white.rounded-\[1\.25rem\]) > [class*="border-b"] {
+    border-bottom-color: #eef3f8 !important;
+}
+
+.student-title-submission-page :is(.title-submission-readiness-list div, .title-submission-review-step, .title-submission-package-item) {
+    border-color: #eef3f8 !important;
+}
+
+.student-title-submission-page .title-submission-readiness-list div:first-child {
+    border-top: 0 !important;
+}
+
+.student-title-submission-page .grid.grid-cols-4 > div {
+    border-color: transparent !important;
+    background: #f8fafc !important;
+}
+
+.student-title-submission-page [class*="border-2"]:not([class*="border-dashed"]) {
+    border-width: 1px !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-command-panel,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-command-panel {
+    border-bottom-color: rgba(147, 197, 253, 0.18) !important;
+    background: transparent !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-command-side,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-command-side {
+    box-shadow: inset 1px 0 0 rgba(147, 197, 253, 0.14);
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip > div,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip > div {
+    background: rgba(8, 26, 49, 0.74) !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 1100px) {
+    .student-title-submission-page .title-submission-command-side {
+        padding-top: 1rem;
+        padding-left: 0;
+        box-shadow: inset 0 1px 0 #edf2f7;
+    }
+
+    html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-command-side,
+    .student-shell[data-theme="dark"] .student-title-submission-page .title-submission-command-side {
+        box-shadow: inset 0 1px 0 rgba(147, 197, 253, 0.14);
+    }
+}
+
+/* Reference-led premium title submission workspace. */
+.student-title-submission-page {
+    --title-card-border: #dbe3ef;
+    --title-card-border-soft: #e8eef6;
+    --title-card-bg: #ffffff;
+    --title-card-muted: #f8fafc;
+    --title-shadow: 0 14px 34px rgba(15, 23, 42, 0.065);
+    --title-shadow-soft: 0 8px 22px rgba(15, 23, 42, 0.05);
+    gap: 1rem;
+}
+
+.student-title-submission-page .title-submission-command-panel {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    margin-bottom: 0 !important;
+    padding: 1.25rem !important;
+    border: 1px solid var(--title-card-border) !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #ffffff, #fbfdff) !important;
+    box-shadow: var(--title-shadow) !important;
+}
+
+.student-title-submission-page .title-submission-command-side {
+    display: none !important;
+}
+
+.student-title-submission-page .title-submission-command-copy h2 {
+    max-width: 32ch;
+    color: #081736;
+    font-size: clamp(1.65rem, 2.2vw, 2.35rem);
+    line-height: 1.08;
+}
+
+.student-title-submission-page .title-submission-command-context {
+    gap: 0.55rem;
+}
+
+.student-title-submission-page .title-submission-command-meta {
+    gap: 0.7rem 1.3rem;
+    padding-top: 0.55rem;
+}
+
+.student-title-submission-page .title-submission-command-meta span {
+    min-height: 34px;
+    padding: 0.15rem 0;
+}
+
+.student-title-submission-page .title-submission-command-meta i {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(0, 58, 143, 0.08);
+}
+
+.student-title-submission-page .title-submission-workflow-strip {
+    position: relative;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 1.25rem 1rem;
+    border: 1px solid var(--title-card-border) !important;
+    border-radius: 8px;
+    background: #ffffff !important;
+    box-shadow: var(--title-shadow-soft);
+}
+
+.student-title-submission-page .title-submission-workflow-strip::before {
+    content: "";
+    position: absolute;
+    top: 2.42rem;
+    right: calc(10% + 1rem);
+    left: calc(10% + 1rem);
+    height: 2px;
+    background: linear-gradient(90deg, #003a8f var(--title-progress, 0%), #dbe3ef 0);
+    pointer-events: none;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: 0.36rem;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: center;
+}
+
+.student-title-submission-page .title-submission-workflow-strip span {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #dbe3ef;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #64748b;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-complete span {
+    border-color: #003a8f;
+    background: #003a8f;
+    color: #ffffff;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current span {
+    border-color: #f6be00;
+    background: #ffffff8f;
+    color: #003a8f;
+    box-shadow: 0 0 0 5px rgba(246, 190, 0, 0.16);
+}
+
+.student-title-submission-page .title-submission-workflow-strip strong {
+    margin-top: 0.2rem;
+    color: #0f172a;
+    font-size: 0.78rem;
+}
+
+.student-title-submission-page .title-submission-workflow-strip small {
+    display: block;
+    max-width: 14ch;
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.student-title-submission-page .title-submission-tabs {
+    width: fit-content;
+    margin-bottom: 0 !important;
+    padding: 0.35rem !important;
+    border-radius: 8px !important;
+    background: #eaf0f7 !important;
+}
+
+.student-title-submission-page .title-submission-tabs button {
+    min-height: 36px;
+    padding-inline: 1rem !important;
+    border-radius: 7px !important;
+}
+
+.student-title-submission-page .title-submission-main-stack,
+.student-title-submission-page .title-submission-side-rail {
+    gap: 1rem !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .bg-white,
+.student-title-submission-page .title-submission-side-rail > .bg-white {
+    border: 1px solid var(--title-card-border) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: var(--title-shadow-soft) !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .bg-white {
+    padding: 1.35rem !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .grid {
+    gap: 1rem !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .grid > .bg-white {
+    min-height: 360px;
+    height: auto !important;
+    border: 1px solid var(--title-card-border) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--title-shadow-soft) !important;
+}
+
+.student-title-submission-page .title-submission-main-stack input,
+.student-title-submission-page .title-submission-main-stack textarea {
+    border-color: #dbe3ef !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.student-title-submission-page .title-submission-main-stack input:focus,
+.student-title-submission-page .title-submission-main-stack textarea:focus {
+    border-color: #003a8f !important;
+    box-shadow: 0 0 0 4px rgba(0, 58, 143, 0.11) !important;
+}
+
+.student-title-submission-page .title-submission-cta-panel {
+    border-color: #bfdbfe !important;
+    background:
+        linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.98)),
+        linear-gradient(135deg, rgba(0, 58, 143, 0.08), transparent) !important;
+    box-shadow: 0 16px 36px rgba(0, 58, 143, 0.08) !important;
+}
+
+.student-title-submission-page .title-submission-cta-panel > .flex:first-of-type > div:first-child {
+    border: 0 !important;
+    background: rgba(0, 58, 143, 0.1) !important;
+    color: #003a8f !important;
+}
+
+.student-title-submission-page .title-submission-cta-panel button[type="submit"] {
+    min-height: 44px;
+    border: 0 !important;
+    background: linear-gradient(135deg, #003a8f, #1e40af) !important;
+    box-shadow: 0 12px 24px rgba(0, 58, 143, 0.22) !important;
+}
+
+.student-title-submission-page .title-submission-side-rail > .bg-white {
+    padding: 1rem !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+
+.student-title-submission-page .title-submission-side-rail h3 {
+    letter-spacing: 0.08em !important;
+}
+
+.student-title-submission-page .title-submission-progress-card {
+    overflow: visible !important;
+}
+
+.student-title-submission-page .title-submission-progress-orb {
+    display: inline-flex;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at center, #ffffff 0 58%, transparent 59%),
+        conic-gradient(#003a8f calc(var(--title-progress-value, 0) * 1%), #e5edf6 0);
+    box-shadow: inset 0 0 0 1px #e5edf6;
+}
+
+.student-title-submission-page .title-submission-progress-orb span {
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 850;
+}
+
+.student-title-submission-page .title-submission-side-readiness {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.student-title-submission-page .title-submission-side-readiness div {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.65rem;
+    align-items: start;
+}
+
+.student-title-submission-page .title-submission-side-readiness i {
+    margin-top: 0.18rem;
+    color: #94a3b8;
+    font-size: 0.76rem;
+}
+
+.student-title-submission-page .title-submission-side-readiness .is-complete i {
+    color: #10b981;
+}
+
+.student-title-submission-page .title-submission-side-readiness strong,
+.student-title-submission-page .title-submission-side-readiness small {
+    display: block;
+}
+
+.student-title-submission-page .title-submission-side-readiness strong {
+    color: #0f172a;
+    font-size: 0.78rem;
+    font-weight: 850;
+}
+
+.student-title-submission-page .title-submission-side-readiness small {
+    margin-top: 0.1rem;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 650;
+    line-height: 1.32;
+}
+
+.student-title-submission-page .title-submission-side-rail [role="button"] {
+    border-color: #e8eef6 !important;
+    border-radius: 8px !important;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.student-title-submission-page .title-submission-side-rail [role="button"]:hover {
+    transform: translateY(-1px);
+}
+
+.student-title-submission-page .title-submission-side-rail .grid.grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.student-title-submission-page .title-submission-side-rail .grid.grid-cols-4 > div {
+    border: 1px solid #e8eef6 !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+}
+
+.student-title-submission-page .title-submission-side-rail ul li {
+    line-height: 1.35;
+}
+
+@media (min-width: 1180px) {
+    .student-title-submission-page {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(330px, 380px);
+        gap: 1rem 1.25rem;
+        align-items: start;
+    }
+
+    .student-title-submission-page > .title-submission-command-panel,
+    .student-title-submission-page > .title-submission-workflow-strip,
+    .student-title-submission-page > .title-submission-tabs {
+        grid-column: 1;
+    }
+
+    .student-title-submission-page > .title-submission-main-grid {
+        display: contents !important;
+    }
+
+    .student-title-submission-page .title-submission-main-stack {
+        grid-column: 1;
+    }
+
+    .student-title-submission-page .title-submission-side-rail {
+        grid-column: 2;
+        grid-row: 1 / span 5;
+        position: sticky !important;
+        top: 5rem !important;
+    }
+}
+
+@media (max-width: 1179px) {
+    .student-title-submission-page .title-submission-main-grid {
+        gap: 1rem !important;
+    }
+
+    .student-title-submission-page .title-submission-side-rail {
+        position: static !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .student-title-submission-page .title-submission-command-panel,
+    .student-title-submission-page .title-submission-workflow-strip,
+    .student-title-submission-page .title-submission-main-stack > .bg-white,
+    .student-title-submission-page .title-submission-side-rail > .bg-white {
+        padding: 1rem !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip {
+        grid-template-columns: 1fr !important;
+        gap: 0.7rem !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip::before {
+        top: 2rem;
+        bottom: 2rem;
+        left: 2rem;
+        width: 2px;
+        height: auto;
+        background: #dbe3ef;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip > div {
+        grid-template-columns: auto minmax(0, 1fr);
+        justify-items: start;
+        text-align: left;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip strong,
+    .student-title-submission-page .title-submission-workflow-strip small {
+        max-width: none;
+        white-space: normal;
+    }
+
+    .student-title-submission-page .title-submission-tabs {
+        width: 100%;
+    }
+
+    .student-title-submission-page .title-submission-tabs button {
+        flex: 1;
+    }
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page,
+.student-shell[data-theme="dark"] .student-title-submission-page {
+    --title-card-border: rgba(147, 197, 253, 0.18);
+    --title-card-border-soft: rgba(147, 197, 253, 0.14);
+    --title-card-bg: rgba(8, 26, 49, 0.86);
+    --title-card-muted: rgba(15, 35, 64, 0.72);
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page :is(.title-submission-command-panel, .title-submission-workflow-strip, .title-submission-main-stack > .bg-white, .title-submission-side-rail > .bg-white),
+.student-shell[data-theme="dark"] .student-title-submission-page :is(.title-submission-command-panel, .title-submission-workflow-strip, .title-submission-main-stack > .bg-white, .title-submission-side-rail > .bg-white) {
+    border-color: var(--title-card-border) !important;
+    background: var(--title-card-bg) !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page :is(.title-submission-command-copy h2, .title-submission-workflow-strip strong, .title-submission-side-readiness strong, .title-submission-progress-orb span),
+.student-shell[data-theme="dark"] .student-title-submission-page :is(.title-submission-command-copy h2, .title-submission-workflow-strip strong, .title-submission-side-readiness strong, .title-submission-progress-orb span) {
+    color: #f8fafc !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page :is(.title-submission-workflow-strip span, .title-submission-progress-orb),
+.student-shell[data-theme="dark"] .student-title-submission-page :is(.title-submission-workflow-strip span, .title-submission-progress-orb) {
+    background-color: rgba(15, 35, 64, 0.8) !important;
+}
+
+/* Title submission workflow stepper upgrade. */
+.student-title-submission-page .title-submission-workflow-strip {
+    --workflow-primary: var(--primary, #003A8F);
+    --workflow-primary-deep: var(--primary-bright, #002C6B);
+    --workflow-gold: var(--secondary, #F6BE00);
+    --workflow-gold-soft: var(--secondary-soft, #FFF8E1);
+    position: relative;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0.55rem !important;
+    margin-bottom: 1rem !important;
+    padding: 0.75rem !important;
+    border: 1px solid #dbe5f2 !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip::before {
+    top: 2.45rem !important;
+    right: calc(10% + 1.8rem) !important;
+    left: calc(10% + 1.8rem) !important;
+    height: 2px !important;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--workflow-primary) var(--title-progress, 0%), #dbe5f2 0) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div {
+    position: relative;
+    z-index: 1;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.58rem !important;
+    align-items: center;
+    justify-items: start !important;
+    min-height: 70px;
+    padding: 0.68rem !important;
+    border: 1px solid #edf2f7 !important;
+    border-radius: 8px;
+    background: #ffffff !important;
+    color: #64748b;
+    text-align: left !important;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div.is-complete {
+    border-color: rgba(0, 58, 143, 0.16) !important;
+    background: #f8fbff !important;
+    color: var(--workflow-primary-deep);
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div.is-current {
+    border-color: rgba(246, 190, 0, 0.62) !important;
+    background: linear-gradient(180deg, #fffdf4, #ffffff) !important;
+    box-shadow: inset 0 0 0 1px rgba(246, 190, 0, 0.18);
+    color: var(--workflow-primary-deep);
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div.is-attention {
+    border-color: rgba(246, 190, 0, 0.62) !important;
+    background: var(--workflow-gold-soft) !important;
+    color: #7a4b00;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+    display: inline-flex !important;
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dbe5f2;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    color: #64748b;
+    font-size: 0.78rem;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-complete .title-submission-workflow-icon {
+    border-color: var(--workflow-primary);
+    background: var(--workflow-primary) !important;
+    color: #ffffff;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current .title-submission-workflow-icon {
+    border-color: var(--workflow-gold);
+    background: var(--workflow-gold) !important;
+    color: #08214a;
+    box-shadow: 0 0 0 4px rgba(246, 190, 0, 0.2) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-attention .title-submission-workflow-icon {
+    border-color: var(--workflow-gold);
+    background: var(--workflow-gold) !important;
+    color: #08214a;
+    box-shadow: 0 0 0 4px rgba(246, 190, 0, 0.2) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-copy {
+    display: grid;
+    min-width: 0;
+    gap: 0.08rem;
+}
+
+.student-title-submission-page .title-submission-workflow-copy em {
+    color: #64748b;
+    font-size: 0.6rem;
+    font-style: normal;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.student-title-submission-page .title-submission-workflow-strip strong {
+    margin-top: 0 !important;
+    max-width: none !important;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.8rem !important;
+    font-weight: 850;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.student-title-submission-page .title-submission-workflow-strip small {
+    display: block;
+    max-width: none !important;
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.68rem !important;
+    font-weight: 750;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-complete :is(em, small) {
+    color: var(--workflow-primary);
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current :is(em, small) {
+    color: #9a6700;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-attention :is(em, small) {
+    color: #9a6700;
+}
+
+@media (max-width: 980px) {
+    .student-title-submission-page .title-submission-workflow-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip::before {
+        display: none;
+    }
+}
+
+@media (max-width: 620px) {
+    .student-title-submission-page .title-submission-workflow-strip {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem !important;
+        padding: 0.75rem !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip > div {
+        min-height: 64px;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip strong,
+    .student-title-submission-page .title-submission-workflow-strip small {
+        white-space: normal;
+    }
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(8, 26, 49, 0.86) !important;
+    box-shadow: none !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip > div,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip > div {
+    background: rgba(15, 35, 64, 0.62) !important;
+    border-color: rgba(147, 197, 253, 0.12) !important;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+    border-color: rgba(147, 197, 253, 0.2);
+    background: rgba(8, 26, 49, 0.94) !important;
+    color: #bfdbfe;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip .is-complete .title-submission-workflow-icon,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip .is-complete .title-submission-workflow-icon {
+    border-color: #93c5fd;
+    background: #003a8f !important;
+    color: #ffffff;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip .is-current .title-submission-workflow-icon,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip .is-current .title-submission-workflow-icon {
+    border-color: #f6be00;
+    background: #f6be00 !important;
+    color: #08214a;
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip .is-attention .title-submission-workflow-icon,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip .is-attention .title-submission-workflow-icon {
+    border-color: #f6be00;
+    background: #f6be00 !important;
+    color: #08214a;
+}
+
+/* Title submission layout upgrade. */
+.student-title-submission-page {
+    --title-shell-border: #dbe5f2;
+    --title-shell-soft: #f8fafc;
+    --title-shell-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.student-title-submission-page .title-submission-command-panel {
+    margin-bottom: 0 !important;
+    padding: 1rem !important;
+    border: 1px solid var(--title-shell-border) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: var(--title-shell-shadow) !important;
+}
+
+.student-title-submission-page .title-submission-command-copy {
+    gap: 0.7rem !important;
+}
+
+.student-title-submission-page .title-submission-command-side {
+    align-content: center;
+    padding: 1rem !important;
+    border: 1px solid #e8eef6 !important;
+    border-radius: 8px;
+    background: var(--title-shell-soft);
+    box-shadow: none !important;
+}
+
+.student-title-submission-page .title-submission-command-meta span {
+    min-height: 30px;
+}
+
+.student-title-submission-page .title-submission-tabs {
+    width: min(100%, 430px) !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem !important;
+    margin: 0 !important;
+    padding: 0.35rem !important;
+    border: 1px solid var(--title-shell-border) !important;
+    border-radius: 8px !important;
+    background: #eef4fb !important;
+    box-shadow: none !important;
+}
+
+.student-title-submission-page .title-submission-tabs button {
+    width: 100%;
+    min-height: 40px !important;
+    justify-content: center;
+    border-radius: 7px !important;
+}
+
+.student-title-submission-page .title-submission-tabs button[aria-pressed="true"] {
+    box-shadow: 0 6px 16px rgba(0, 58, 143, 0.1) !important;
+}
+
+.student-title-submission-page .title-submission-main-stack,
+.student-title-submission-page .title-submission-side-rail {
+    gap: 0.9rem !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .bg-white,
+.student-title-submission-page .title-submission-main-stack > .grid > .bg-white,
+.student-title-submission-page .title-submission-side-rail > .bg-white {
+    border: 1px solid var(--title-shell-border) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: var(--title-shell-shadow) !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .bg-white {
+    padding: 1.25rem !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .grid {
+    gap: 0.9rem !important;
+}
+
+.student-title-submission-page .title-submission-main-stack > .grid > .bg-white {
+    min-height: 380px;
+    height: auto !important;
+}
+
+.student-title-submission-page .title-submission-main-stack input,
+.student-title-submission-page .title-submission-main-stack textarea {
+    border-color: var(--title-shell-border) !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+}
+
+.student-title-submission-page .title-submission-main-stack input:focus,
+.student-title-submission-page .title-submission-main-stack textarea:focus {
+    border-color: var(--primary, #003A8F) !important;
+    box-shadow: 0 0 0 4px rgba(0, 58, 143, 0.1) !important;
+}
+
+.student-title-submission-page .title-submission-cta-panel {
+    border-color: #bfdbfe !important;
+    border-left: 4px solid var(--primary, #003A8F) !important;
+    background: #ffffff !important;
+    box-shadow: var(--title-shell-shadow) !important;
+}
+
+.student-title-submission-page .title-submission-cta-panel > .flex:first-of-type > div:first-child {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 8px !important;
+    background: var(--primary-soft, #EFF6FF) !important;
+    color: var(--primary, #003A8F) !important;
+}
+
+.student-title-submission-page .title-submission-cta-panel button {
+    border-radius: 8px !important;
+}
+
+.student-title-submission-page .title-submission-side-rail {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.student-title-submission-page .title-submission-side-rail > .bg-white {
+    padding: 1rem !important;
+}
+
+.student-title-submission-page .title-submission-side-rail h3 {
+    color: #172033 !important;
+    letter-spacing: 0.08em !important;
+}
+
+.student-title-submission-page .title-submission-side-readiness .is-complete i {
+    color: var(--primary, #003A8F) !important;
+}
+
+.student-title-submission-page .title-submission-side-rail [role="button"] {
+    border-color: #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+.student-title-submission-page .title-submission-side-rail [role="button"]:hover {
+    border-color: rgba(0, 58, 143, 0.28) !important;
+    background: #f8fbff !important;
+}
+
+.student-title-submission-page .title-submission-side-rail .grid.grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+}
+
+.student-title-submission-page .title-submission-side-rail .grid.grid-cols-4 > div {
+    border: 1px solid #e8eef6 !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+}
+
+@media (min-width: 1180px) {
+    .student-title-submission-page {
+        grid-template-columns: minmax(0, 1fr) minmax(380px, 420px) !important;
+        gap: 0.95rem 1rem !important;
+        align-items: start;
+    }
+
+    .student-title-submission-page > .title-submission-command-panel,
+    .student-title-submission-page > .title-submission-workflow-strip,
+    .student-title-submission-page > .title-review-progress-card {
+        grid-column: 1 / -1 !important;
+    }
+
+    .student-title-submission-page > .title-submission-tabs {
+        grid-column: 1 !important;
+    }
+
+    .student-title-submission-page > .title-submission-main-grid {
+        display: contents !important;
+    }
+
+    .student-title-submission-page .title-submission-main-stack {
+        grid-column: 1 !important;
+        grid-row: 4 !important;
+    }
+
+    .student-title-submission-page .title-submission-side-rail {
+        grid-column: 2 !important;
+        grid-row: 4 !important;
+        position: static !important;
+        max-height: none !important;
+        overflow: visible !important;
+        padding-right: 0 !important;
+    }
+}
+
+@media (max-width: 920px) {
+    .student-title-submission-page .title-submission-main-stack > .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .student-title-submission-page .title-submission-main-stack > .grid > .bg-white {
+        min-height: 320px;
+    }
+}
+
+@media (max-width: 620px) {
+    .student-title-submission-page .title-submission-command-panel {
+        padding: 0.9rem !important;
+    }
+
+    .student-title-submission-page .title-submission-command-side {
+        padding: 0.85rem !important;
+    }
+
+    .student-title-submission-page .title-submission-tabs {
+        width: 100% !important;
+    }
+}
+
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-command-panel,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-command-panel,
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-command-side,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-command-side,
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-main-stack > .bg-white,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-main-stack > .bg-white,
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-main-stack > .grid > .bg-white,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-main-stack > .grid > .bg-white,
+html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-side-rail > .bg-white,
+.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-side-rail > .bg-white {
+    border-color: rgba(147, 197, 253, 0.18) !important;
+    background: rgba(8, 26, 49, 0.86) !important;
+    box-shadow: none !important;
+}
+
+/* Premium single-rail workflow: less card-heavy, clearer scan path. */
+.student-title-submission-page .title-submission-workflow-strip {
+    isolation: isolate;
+    gap: 0 !important;
+    padding: 0.95rem 1rem 0.9rem !important;
+    border-color: rgba(0, 58, 143, 0.14) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92)),
+        #ffffff !important;
+    box-shadow: 0 18px 38px rgba(15, 23, 42, 0.07) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip::before {
+    top: 2.36rem !important;
+    right: calc(10% + 2.25rem) !important;
+    left: calc(10% + 2.25rem) !important;
+    height: 3px !important;
+    background:
+        linear-gradient(90deg, var(--primary, #003A8F), #2563eb 45%, var(--secondary, #F6BE00)) 0 / var(--title-progress, 0%) 100% no-repeat,
+        #dbe5f2 !important;
+    transition: background-size 0.55s ease;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div {
+    min-height: 68px;
+    grid-template-columns: 1fr !important;
+    gap: 0.36rem !important;
+    justify-items: center !important;
+    padding: 0.35rem 0.25rem !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: center !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+    position: relative;
+    width: 38px !important;
+    height: 38px !important;
+    flex-basis: 38px;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08) !important;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-complete .title-submission-workflow-icon {
+    border-color: var(--primary, #003A8F);
+    background: var(--primary, #003A8F) !important;
+    color: #ffffff;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current .title-submission-workflow-icon,
+.student-title-submission-page .title-submission-workflow-strip .is-attention .title-submission-workflow-icon {
+    border-color: var(--secondary, #F6BE00);
+    background: var(--secondary, #F6BE00) !important;
+    color: #08214a;
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 6px rgba(246, 190, 0, 0.16), 0 14px 26px rgba(154, 103, 0, 0.16) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current .title-submission-workflow-icon::after,
+.student-title-submission-page .title-submission-workflow-strip .is-attention .title-submission-workflow-icon::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    z-index: -1;
+    border-radius: 16px;
+    border: 1px solid rgba(246, 190, 0, 0.42);
+    animation: title-workflow-pulse 1.8s ease-out infinite;
+}
+
+.student-title-submission-page .title-submission-workflow-copy {
+    justify-items: center;
+    gap: 0.04rem;
+}
+
+.student-title-submission-page .title-submission-workflow-copy em {
+    color: #64748b;
+    font-size: 0.58rem;
+}
+
+.student-title-submission-page .title-submission-workflow-strip strong {
+    max-width: 16ch !important;
+    font-size: 0.78rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip small {
+    max-width: 16ch !important;
+    font-size: 0.66rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current strong,
+.student-title-submission-page .title-submission-workflow-strip .is-attention strong {
+    color: #08214a;
+}
+
+@keyframes title-workflow-pulse {
+    0% {
+        opacity: 0.72;
+        transform: scale(0.92);
+    }
+    70% {
+        opacity: 0;
+        transform: scale(1.18);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.18);
+    }
+}
+
+@media (max-width: 980px) {
+    .student-title-submission-page .title-submission-workflow-strip {
+        gap: 0.45rem !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip > div {
+        grid-template-columns: auto minmax(0, 1fr) !important;
+        justify-items: start !important;
+        text-align: left !important;
+        padding: 0.55rem !important;
+        border: 1px solid #e8eef6 !important;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.72) !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-copy {
+        justify-items: start;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .student-title-submission-page .title-submission-workflow-strip::before,
+    .student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon,
+    .student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Reference-style premium timeline. */
+.student-title-submission-page .title-submission-workflow-strip {
+    min-height: 330px;
+    align-items: stretch;
+    padding: 2.4rem 2.1rem 2rem !important;
+    border: 1px solid rgba(0, 58, 143, 0.12) !important;
+    border-radius: 8px !important;
+    background:
+        radial-gradient(circle at 20% 12%, rgba(239, 246, 255, 0.9), transparent 30%),
+        radial-gradient(circle at 72% 16%, rgba(255, 248, 225, 0.74), transparent 28%),
+        #ffffff !important;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip::before {
+    top: 4.55rem !important;
+    right: calc(10% + 3.9rem) !important;
+    left: calc(10% + 3.9rem) !important;
+    height: 4px !important;
+    z-index: 0;
+    background:
+        linear-gradient(
+            90deg,
+            var(--primary, #003A8F) 0 52%,
+            #f28c00 52% var(--title-progress, 0%),
+            transparent var(--title-progress, 0%) 100%
+        ),
+        repeating-linear-gradient(90deg, #94a3b8 0 8px, transparent 8px 18px) !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.72);
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div {
+    position: relative;
+    z-index: 1;
+    min-height: 260px;
+    align-content: start;
+    padding: 0.15rem 0.5rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div.is-current,
+.student-title-submission-page .title-submission-workflow-strip > div.is-attention {
+    margin-top: -1.05rem;
+    padding: 1.05rem 0.85rem 1.15rem !important;
+    border: 1px solid rgba(246, 190, 0, 0.32) !important;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255, 248, 225, 0.68), rgba(255, 255, 255, 0.92)) !important;
+    box-shadow: 0 20px 42px rgba(154, 103, 0, 0.1) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+    width: 96px !important;
+    height: 96px !important;
+    flex-basis: 96px;
+    border: 2px solid #e4ecf7;
+    border-radius: 999px !important;
+    background:
+        radial-gradient(circle at center, #dce9ff 0 50%, #eff6ff 51% 100%) !important;
+    color: var(--primary, #003A8F);
+    font-size: 2rem;
+    box-shadow:
+        0 18px 34px rgba(15, 23, 42, 0.12),
+        inset 0 0 0 16px rgba(255, 255, 255, 0.74) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-complete .title-submission-workflow-icon {
+    border-color: #d8e6fb;
+    background:
+        radial-gradient(circle at center, #dce9ff 0 50%, #eff6ff 51% 100%) !important;
+    color: var(--primary, #003A8F);
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current .title-submission-workflow-icon,
+.student-title-submission-page .title-submission-workflow-strip .is-attention .title-submission-workflow-icon {
+    border-color: #fed7aa;
+    background:
+        radial-gradient(circle at center, #fb8500 0 48%, #fff7ed 49% 100%) !important;
+    color: #ffffff;
+    transform: translateY(0);
+    box-shadow:
+        0 0 0 9px rgba(251, 146, 60, 0.14),
+        0 20px 38px rgba(154, 103, 0, 0.2),
+        inset 0 0 0 16px rgba(255, 255, 255, 0.46) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-pending .title-submission-workflow-icon {
+    border-color: #e5eaf2;
+    background:
+        radial-gradient(circle at center, #64748b 0 37%, #f1f5f9 38% 100%) !important;
+    color: #ffffff;
+    box-shadow:
+        0 12px 28px rgba(15, 23, 42, 0.08),
+        inset 0 0 0 16px rgba(255, 255, 255, 0.72) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-check {
+    position: absolute;
+    top: 7px;
+    right: 2px;
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #ffffff;
+    border-radius: 999px;
+    background: #16a34a;
+    color: #ffffff;
+    font-size: 0.7rem;
+    box-shadow: 0 8px 16px rgba(22, 163, 74, 0.24);
+}
+
+.student-title-submission-page .title-submission-workflow-copy {
+    margin-top: 0.95rem;
+    justify-items: center;
+    gap: 0.65rem;
+}
+
+.student-title-submission-page .title-submission-workflow-copy em {
+    color: #0b5cff;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-attention em,
+.student-title-submission-page .title-submission-workflow-strip .is-current em {
+    color: #f28c00;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-pending em {
+    color: #475569;
+}
+
+.student-title-submission-page .title-submission-workflow-strip strong {
+    max-width: 18ch !important;
+    color: #081736;
+    font-size: 1rem !important;
+    font-weight: 900;
+    line-height: 1.05;
+}
+
+.student-title-submission-page .title-submission-workflow-strip small.title-submission-workflow-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.38rem;
+    min-height: 30px;
+    max-width: none !important;
+    padding: 0.24rem 0.75rem;
+    border: 1px solid #bbf7d0;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: 0.8rem !important;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current small.title-submission-workflow-pill,
+.student-title-submission-page .title-submission-workflow-strip .is-attention small.title-submission-workflow-pill {
+    border-color: #fed7aa;
+    background: #fff7ed;
+    color: #f28c00;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-pending small.title-submission-workflow-pill {
+    border-color: #cbd5e1;
+    background: #eef2f7;
+    color: #475569;
+}
+
+.student-title-submission-page .title-submission-workflow-copy p {
+    margin: 0;
+    max-width: 20ch;
+    color: #52637d;
+    font-size: 0.82rem;
+    font-weight: 650;
+    line-height: 1.45;
+}
+
+.student-title-submission-page .title-submission-workflow-meta {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.25rem;
+    color: #52637d;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.student-title-submission-page .title-submission-workflow-meta span {
+    display: inline-flex;
+    gap: 0.45rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.student-title-submission-page .title-submission-workflow-action {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 0.2rem;
+    padding: 0.55rem 1.05rem;
+    border: 1px solid #fb923c;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #f28c00;
+    font-size: 0.82rem;
+    font-weight: 900;
+    box-shadow: 0 10px 22px rgba(154, 103, 0, 0.08);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.student-title-submission-page .title-submission-workflow-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(154, 103, 0, 0.14);
+}
+
+@media (max-width: 1180px) {
+    .student-title-submission-page .title-submission-workflow-strip {
+        min-height: auto;
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+        padding: 1rem !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip::before {
+        display: none;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip > div,
+    .student-title-submission-page .title-submission-workflow-strip > div.is-current,
+    .student-title-submission-page .title-submission-workflow-strip > div.is-attention {
+        min-height: 0;
+        grid-template-columns: auto minmax(0, 1fr) !important;
+        justify-items: start !important;
+        margin-top: 0;
+        padding: 0.8rem !important;
+        border: 1px solid #e8eef6 !important;
+        text-align: left !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+        width: 54px !important;
+        height: 54px !important;
+        flex-basis: 54px;
+        font-size: 1.15rem;
+        box-shadow: inset 0 0 0 9px rgba(255, 255, 255, 0.72) !important;
+    }
+
+    .student-title-submission-page .title-submission-workflow-copy {
+        margin-top: 0;
+        justify-items: start;
+        gap: 0.25rem;
+    }
+
+    .student-title-submission-page .title-submission-workflow-meta {
+        display: flex;
+        flex-wrap: wrap;
+    }
+}
+
+/* Normal-size version of the reference timeline. */
+.student-title-submission-page .title-submission-workflow-strip {
+    min-height: 190px;
+    padding: 1.35rem 1.4rem 1.1rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip::before {
+    top: 3.32rem !important;
+    right: calc(10% + 2.6rem) !important;
+    left: calc(10% + 2.6rem) !important;
+    height: 3px !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div {
+    min-height: 150px;
+    padding: 0.1rem 0.45rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip > div.is-current,
+.student-title-submission-page .title-submission-workflow-strip > div.is-attention {
+    margin-top: -0.55rem;
+    padding: 0.72rem 0.75rem 0.82rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+    width: 62px !important;
+    height: 62px !important;
+    flex-basis: 62px;
+    font-size: 1.35rem;
+    box-shadow:
+        0 12px 24px rgba(15, 23, 42, 0.1),
+        inset 0 0 0 10px rgba(255, 255, 255, 0.74) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .is-current .title-submission-workflow-icon,
+.student-title-submission-page .title-submission-workflow-strip .is-attention .title-submission-workflow-icon {
+    box-shadow:
+        0 0 0 6px rgba(251, 146, 60, 0.14),
+        0 14px 24px rgba(154, 103, 0, 0.18),
+        inset 0 0 0 10px rgba(255, 255, 255, 0.46) !important;
+}
+
+.student-title-submission-page .title-submission-workflow-check {
+    top: 2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+    font-size: 0.6rem;
+}
+
+.student-title-submission-page .title-submission-workflow-copy {
+    margin-top: 0.58rem;
+    gap: 0.34rem;
+}
+
+.student-title-submission-page .title-submission-workflow-copy em {
+    font-size: 0.74rem;
+}
+
+.student-title-submission-page .title-submission-workflow-strip strong {
+    font-size: 0.9rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip small.title-submission-workflow-pill {
+    min-height: 24px;
+    padding: 0.18rem 0.58rem;
+    font-size: 0.68rem !important;
+}
+
+.student-title-submission-page .title-submission-workflow-copy p {
+    max-width: 18ch;
+    font-size: 0.74rem;
+    line-height: 1.35;
+}
+
+.student-title-submission-page .title-submission-workflow-meta {
+    gap: 0.28rem;
+    margin-top: 0;
+    font-size: 0.68rem;
+}
+
+.student-title-submission-page .title-submission-workflow-action {
+    min-height: 34px;
+    padding: 0.42rem 0.78rem;
+    font-size: 0.72rem;
+}
+
+@media (max-width: 1180px) {
+    .student-title-submission-page .title-submission-workflow-strip > div,
+    .student-title-submission-page .title-submission-workflow-strip > div.is-current,
+    .student-title-submission-page .title-submission-workflow-strip > div.is-attention {
+        min-height: 0;
+    }
+}
+
+/* Reset broad workflow span styling for metadata; only the node icon should be circular. */
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-meta,
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-meta span {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #52637d !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-meta {
+    display: grid !important;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-meta span {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-meta i {
+    color: #52637d !important;
+    font-size: 0.74rem;
+}
+
+/* Premium title review progress tracker. Scoped here so older workflow rules cannot leak into text/meta. */
+.student-title-submission-page .title-review-progress-card {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    padding: 1.2rem;
+    border: 1px solid rgba(0, 58, 143, 0.12);
+    border-radius: 8px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 255, 0.92) 62%, rgba(255, 250, 232, 0.58) 100%),
+        #ffffff;
+    box-shadow:
+        0 18px 46px rgba(15, 23, 42, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    color: #081736;
+}
+
+.student-title-submission-page .title-review-progress-header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.student-title-submission-page .title-review-progress-heading {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.student-title-submission-page .title-review-progress-icon {
+    display: inline-flex;
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 58, 143, 0.1);
+    border-radius: 8px;
+    background: linear-gradient(135deg, #eef5ff 0%, #ffffff 100%);
+    color: #003A8F;
+    font-size: 1.25rem;
+    box-shadow: 0 12px 24px rgba(0, 58, 143, 0.08);
+}
+
+.student-title-submission-page .title-review-progress-kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.28rem;
+}
+
+.student-title-submission-page .title-review-progress-kicker > span {
+    color: #003A8F;
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.student-title-submission-page .title-review-progress-heading h2 {
+    margin: 0;
+    color: #081736;
+    font-size: clamp(1.25rem, 1.6vw, 1.55rem);
+    font-weight: 900;
+    line-height: 1.08;
+}
+
+.student-title-submission-page .title-review-progress-heading p {
+    margin: 0.35rem 0 0;
+    max-width: 46rem;
+    color: #52637d;
+    font-size: 0.92rem;
+    font-weight: 650;
+    line-height: 1.45;
+}
+
+.student-title-submission-page .title-review-progress-actions {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.65rem;
+}
+
+.student-title-submission-page .title-review-progress-pill,
+.student-title-submission-page .title-review-overview-button {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.83rem;
+    font-weight: 850;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: auto;
+}
+
+.student-title-submission-page .title-review-progress-pill {
+    padding: 0 0.95rem;
+    border: 1px solid rgba(22, 163, 74, 0.12);
+    background: #ecfdf3;
+    color: #16a34a;
+}
+
+.student-title-submission-page .title-review-progress-pill i {
+    font-size: 0.5rem;
+}
+
+.student-title-submission-page .title-review-progress-pill.is-warning {
+    border-color: rgba(246, 190, 0, 0.32);
+    background: #fff7df;
+    color: #f28c00;
+}
+
+.student-title-submission-page .title-review-progress-pill.is-complete {
+    border-color: rgba(22, 163, 74, 0.18);
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.student-title-submission-page .title-review-overview-button {
+    padding: 0 1rem;
+    border: 1px solid rgba(0, 58, 143, 0.14);
+    background: rgba(255, 255, 255, 0.86);
+    color: #003A8F;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.student-title-submission-page .title-review-overview-button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(0, 58, 143, 0.24);
+    box-shadow: 0 12px 24px rgba(0, 58, 143, 0.09);
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: start;
+    gap: 0;
+    min-height: 212px;
+    margin: 1.15rem 0 0 !important;
+    padding: 1.25rem 1rem 0.95rem !important;
+    border: 1px solid rgba(0, 58, 143, 0.1) !important;
+    border-radius: 8px !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 251, 255, 0.82) 100%),
+        #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+    isolation: isolate;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip::before {
+    content: "";
+    position: absolute;
+    top: 3.25rem !important;
+    right: calc(10% + 2.15rem) !important;
+    left: calc(10% + 2.15rem) !important;
+    z-index: 0;
+    display: block !important;
+    height: 3px !important;
+    border-radius: 999px;
+    background:
+        linear-gradient(
+            90deg,
+            #003A8F 0 var(--title-primary-progress, 0%),
+            #F6BE00 var(--title-accent-start, var(--title-primary-progress, 0%)) var(--title-progress, 0%),
+            transparent var(--title-progress, 0%) 100%
+        ),
+        repeating-linear-gradient(90deg, #cbd5e1 0 8px, transparent 8px 18px) !important;
+    box-shadow: none;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div {
+    position: relative;
+    z-index: 1;
+    display: grid !important;
+    min-height: 166px;
+    align-content: start;
+    justify-items: center;
+    padding: 0.2rem 0.45rem !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: center;
+    animation: titleReviewStepEnter 0.42s ease both;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div:nth-child(2) {
+    animation-delay: 0.04s;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div:nth-child(3) {
+    animation-delay: 0.08s;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div:nth-child(4) {
+    animation-delay: 0.12s;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div:nth-child(5) {
+    animation-delay: 0.16s;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div.is-current,
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div.is-attention {
+    min-height: 186px;
+    margin-top: -0.35rem;
+    padding: 0.75rem 0.72rem 0.82rem !important;
+    border-color: rgba(246, 190, 0, 0.38) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 248, 225, 0.88) 0%, rgba(255, 255, 255, 0.96) 100%) !important;
+    box-shadow:
+        0 16px 34px rgba(154, 103, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div.is-pending {
+    opacity: 0.82;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-icon {
+    position: relative;
+    display: inline-flex !important;
+    width: 62px !important;
+    height: 62px !important;
+    flex: 0 0 62px;
+    flex-basis: 62px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 58, 143, 0.16) !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #1769e0 0%, #003A8F 100%) !important;
+    color: #ffffff !important;
+    font-size: 1.26rem !important;
+    box-shadow:
+        0 14px 26px rgba(0, 58, 143, 0.18),
+        0 0 0 8px rgba(239, 246, 255, 0.9) !important;
+    transform: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-icon::after {
+    content: none !important;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip .is-complete .title-submission-workflow-icon {
+    border-color: rgba(0, 58, 143, 0.2) !important;
+    background: linear-gradient(135deg, #1769e0 0%, #003A8F 100%) !important;
+    background-color: #003A8F !important;
+    color: #ffffff !important;
+    box-shadow:
+        0 14px 26px rgba(0, 58, 143, 0.2),
+        0 0 0 8px rgba(239, 246, 255, 0.92) !important;
+    opacity: 1 !important;
+}
+
+.student-title-submission-page .title-review-progress-card .is-current .title-submission-workflow-icon,
+.student-title-submission-page .title-review-progress-card .is-attention .title-submission-workflow-icon {
+    border-color: rgba(246, 190, 0, 0.34) !important;
+    background: linear-gradient(135deg, #F6BE00 0%, #fb8500 100%) !important;
+    color: #ffffff !important;
+    box-shadow:
+        0 0 0 9px rgba(246, 190, 0, 0.16),
+        0 16px 30px rgba(154, 103, 0, 0.2) !important;
+    animation: titleReviewActivePulse 2.8s ease-in-out infinite;
+}
+
+.student-title-submission-page .title-review-progress-card .is-pending .title-submission-workflow-icon {
+    border-color: #dbe4ef !important;
+    background: #ffffff !important;
+    color: #64748b !important;
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, 0.08),
+        0 0 0 8px rgba(241, 245, 249, 0.9) !important;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-check {
+    position: absolute;
+    top: -3px;
+    right: -4px;
+    display: inline-flex !important;
+    width: 21px !important;
+    height: 21px !important;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff !important;
+    border-radius: 999px !important;
+    background: #16a34a !important;
+    color: #ffffff !important;
+    font-size: 0.62rem !important;
+    box-shadow: 0 8px 16px rgba(22, 163, 74, 0.25) !important;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-copy {
+    display: grid;
+    justify-items: center;
+    gap: 0.34rem;
+    margin-top: 0.74rem;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-copy em {
+    color: #0b5cff;
+    font-size: 0.74rem;
+    font-style: normal;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0;
+}
+
+.student-title-submission-page .title-review-progress-card .is-current .title-submission-workflow-copy em,
+.student-title-submission-page .title-review-progress-card .is-attention .title-submission-workflow-copy em {
+    color: #f28c00;
+}
+
+.student-title-submission-page .title-review-progress-card .is-pending .title-submission-workflow-copy em {
+    color: #64748b;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-strip strong {
+    max-width: 18ch !important;
+    color: #081736 !important;
+    font-size: 0.9rem !important;
+    font-weight: 900 !important;
+    line-height: 1.12 !important;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-pill {
+    display: inline-flex !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 24px !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.32rem;
+    padding: 0.18rem 0.58rem !important;
+    border: 1px solid #bbf7d0 !important;
+    border-radius: 999px !important;
+    background: #dcfce7 !important;
+    color: #16a34a !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    white-space: nowrap;
+    box-shadow: none !important;
+}
+
+.student-title-submission-page .title-review-progress-card .is-current .title-submission-workflow-pill,
+.student-title-submission-page .title-review-progress-card .is-attention .title-submission-workflow-pill {
+    border-color: #fed7aa !important;
+    background: #fff7ed !important;
+    color: #f28c00 !important;
+}
+
+.student-title-submission-page .title-review-progress-card .is-pending .title-submission-workflow-pill {
+    border-color: #dbe4ef !important;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-copy p {
+    margin: 0;
+    max-width: 19ch;
+    color: #52637d;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-meta,
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-meta span {
+    display: inline-flex !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.34rem;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #52637d !important;
+    font-size: 0.68rem !important;
+    font-weight: 720 !important;
+    line-height: 1.25 !important;
+    white-space: nowrap;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-meta {
+    display: grid !important;
+    gap: 0.25rem;
+    margin-top: 0;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-meta i {
+    color: #52637d !important;
+    font-size: 0.72rem !important;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-action {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.46rem;
+    margin-top: 0.06rem;
+    padding: 0.42rem 0.78rem;
+    border: 1px solid #fb923c;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #f28c00;
+    font-size: 0.72rem;
+    font-weight: 900;
+    box-shadow: 0 10px 22px rgba(154, 103, 0, 0.08);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    pointer-events: auto;
+}
+
+.student-title-submission-page .title-review-progress-card .title-submission-workflow-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(154, 103, 0, 0.14);
+}
+
+.student-title-submission-page .title-review-feedback-panel {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(246, 190, 0, 0.28);
+    border-left: 4px solid #F6BE00;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgba(255, 248, 225, 0.82) 0%, rgba(255, 255, 255, 0.96) 62%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+.student-title-submission-page .title-review-feedback-copy {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.82rem;
+}
+
+.student-title-submission-page .title-review-feedback-icon {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(246, 190, 0, 0.28);
+    border-radius: 8px;
+    background: #fff7df;
+    color: #f28c00;
+    font-size: 1.05rem;
+}
+
+.student-title-submission-page .title-review-feedback-copy strong {
+    display: block;
+    color: #081736;
+    font-size: 0.95rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.student-title-submission-page .title-review-feedback-copy p {
+    margin: 0.22rem 0 0;
+    max-width: 58rem;
+    color: #52637d;
+    font-size: 0.86rem;
+    font-weight: 650;
+    line-height: 1.42;
+}
+
+.student-title-submission-page .title-submission-adviser-feedback-card {
+    scroll-margin-top: 1.25rem;
+    outline: none;
+}
+
+.student-title-submission-page .title-submission-adviser-feedback-card.is-feedback-focused {
+    border-color: rgba(246, 190, 0, 0.72) !important;
+    box-shadow:
+        0 0 0 4px rgba(246, 190, 0, 0.2),
+        0 16px 36px rgba(154, 103, 0, 0.14) !important;
+    animation: titleSubmissionFeedbackFocus 1.8s ease;
+}
+
+@keyframes titleSubmissionFeedbackFocus {
+    0% {
+        transform: translateY(0);
+    }
+    28% {
+        transform: translateY(-2px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.student-title-submission-page .title-review-progress-tip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.82rem 0 0;
+    color: #697994;
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+.student-title-submission-page .title-review-progress-tip i {
+    color: #0b5cff;
+}
+
+@keyframes titleReviewStepEnter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes titleReviewActivePulse {
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 9px rgba(246, 190, 0, 0.14),
+            0 16px 30px rgba(154, 103, 0, 0.2);
+    }
+    50% {
+        box-shadow:
+            0 0 0 13px rgba(246, 190, 0, 0.08),
+            0 18px 34px rgba(154, 103, 0, 0.24);
+    }
+}
+
+@media (max-width: 1180px) {
+    .student-title-submission-page .title-review-progress-header,
+    .student-title-submission-page .title-review-feedback-panel {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .student-title-submission-page .title-review-progress-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 900px) {
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        min-height: 0;
+        padding: 0.9rem !important;
+    }
+
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip::before {
+        display: none !important;
+    }
+
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div,
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div.is-current,
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div.is-attention {
+        min-height: 0;
+        grid-template-columns: auto minmax(0, 1fr) !important;
+        align-items: center;
+        justify-items: start;
+        margin-top: 0;
+        padding: 0.72rem !important;
+        border: 1px solid #e8eef6 !important;
+        text-align: left;
+    }
+
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-icon {
+        width: 50px !important;
+        height: 50px !important;
+        flex-basis: 50px;
+        font-size: 1rem !important;
+        box-shadow:
+            0 10px 20px rgba(0, 58, 143, 0.14),
+            0 0 0 6px rgba(239, 246, 255, 0.9) !important;
+    }
+
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-copy {
+        justify-items: start;
+        margin-top: 0;
+    }
+
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-copy p {
+        max-width: none;
+    }
+
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-meta {
+        display: flex !important;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 640px) {
+    .student-title-submission-page .title-review-progress-card {
+        padding: 0.85rem;
+    }
+
+    .student-title-submission-page .title-review-progress-heading {
+        align-items: flex-start;
+    }
+
+    .student-title-submission-page .title-review-progress-icon {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+    }
+
+    .student-title-submission-page .title-review-progress-actions {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div,
+    .student-title-submission-page .title-review-progress-card .title-submission-workflow-icon {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Shared shell typography: keep navbar and sidebar text from reading too bold across role portals. */
+.student-shell .student-navbar-title strong,
+.student-shell .student-global-sidebar .sidebar-link,
+.student-shell .student-global-sidebar .sidebar-link-label,
+.student-shell .notification-trigger-copy strong,
+.student-shell .profile-nav-btn-copy strong,
+.student-shell .portal-shell-notification-trigger-copy strong,
+.student-shell .portal-shell-profile-copy strong {
+    font-weight: 500 !important;
+}
+
+/* Universal role shell parity: every authenticated portal uses the student shell layout. */
+.student-shell {
+    --role-shell-sidebar-width: 248px;
+    --role-shell-sidebar-collapsed-width: 72px;
+    --role-shell-navbar-height: 72px;
+    min-height: 100vh !important;
+    padding-top: var(--role-shell-navbar-height) !important;
+    background: #f8fafc !important;
+}
+
+.student-shell :is(
+    .student-global-navbar,
+    .student-global-navbar-main,
+    .student-global-navbar-actions,
+    .student-shell-toggle,
+    .student-navbar-title,
+    .student-navbar-title strong,
+    .student-global-sidebar,
+    .sidebar-header,
+    .system-brand-name,
+    .system-brand-name span,
+    .system-brand-name strong,
+    .system-brand-subtitle,
+    .sidebar-nav,
+    .student-role-sidebar-nav,
+    .sidebar-nav-heading,
+    .sidebar-link,
+    .sidebar-link-label,
+    .portal-shell-action-menus,
+    .notification-trigger,
+    .notification-trigger-copy,
+    .notification-trigger-copy strong,
+    .notification-trigger-copy small,
+    .notification-trigger-count,
+    .profile-pill,
+    .profile-nav-btn-avatar,
+    .profile-nav-btn-copy,
+    .profile-nav-btn-copy strong,
+    .profile-nav-btn-copy small,
+    .portal-shell-notification-trigger,
+    .portal-shell-notification-trigger-copy,
+    .portal-shell-notification-trigger-copy strong,
+    .portal-shell-notification-trigger-copy small,
+    .portal-shell-notification-trigger-count,
+    .portal-shell-profile-trigger,
+    .portal-shell-profile-avatar,
+    .portal-shell-profile-copy,
+    .portal-shell-profile-copy strong,
+    .portal-shell-profile-copy small
+) {
+    font-family: var(--font-student), "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    letter-spacing: 0 !important;
+}
+
+.student-shell .student-global-navbar {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    z-index: 1100 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    height: var(--role-shell-navbar-height) !important;
+    min-height: var(--role-shell-navbar-height) !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(246, 190, 0, 0.9) !important;
+    border-radius: 0 !important;
+    background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 50%, #1e40af 100%) !important;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+}
+
+.student-shell .student-global-navbar::before {
+    content: "" !important;
+    position: absolute !important;
+    right: 0 !important;
+    bottom: -2px !important;
+    left: 0 !important;
+    height: 3px !important;
+    pointer-events: none !important;
+    background: linear-gradient(90deg, rgba(246, 190, 0, 0.55), #f6be00 22%, #f6be00 78%, rgba(246, 190, 0, 0.55)) !important;
+    box-shadow: 0 0 12px rgba(246, 190, 0, 0.42) !important;
+}
+
+.student-shell .student-global-navbar::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 60%) !important;
+}
+
+.student-shell .student-global-navbar-main,
+.student-shell .student-global-navbar-actions {
+    position: relative !important;
+    z-index: 1 !important;
+    height: var(--role-shell-navbar-height) !important;
+    min-height: var(--role-shell-navbar-height) !important;
+}
+
+.student-shell .student-global-navbar-main {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.student-shell .student-shell-toggle {
+    display: inline-flex !important;
+    flex: 0 0 56px !important;
+    width: 56px !important;
+    min-width: 56px !important;
+    height: var(--role-shell-navbar-height) !important;
+    min-height: var(--role-shell-navbar-height) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.student-shell .student-shell-toggle:hover,
+.student-shell .student-shell-toggle:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.student-shell .student-navbar-title {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    padding-left: 1.15rem !important;
+}
+
+.student-shell .student-navbar-title::before,
+.student-shell .student-navbar-title-kicker {
+    display: none !important;
+}
+
+.student-shell .student-navbar-title strong {
+    overflow: hidden !important;
+    color: #ffffff !important;
+    font-size: 1.08rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.05 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+.student-shell .student-global-navbar-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.7rem !important;
+    margin-left: auto !important;
+    padding-right: 1.45rem !important;
+}
+
+.student-shell .portal-shell-action-menus {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 0.7rem !important;
+}
+
+.student-shell :is(.notification-trigger, .profile-pill, .portal-shell-notification-trigger, .portal-shell-profile-trigger) {
+    height: 48px !important;
+    min-height: 48px !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 8px 18px rgba(2, 6, 23, 0.12) !important;
+    backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+.student-shell :is(.notification-trigger, .profile-pill, .portal-shell-notification-trigger, .portal-shell-profile-trigger):hover,
+.student-shell :is(.notification-trigger.is-active, .profile-pill.is-active, .portal-shell-notification-trigger.is-open),
+.student-shell .portal-shell-profile-menu.is-open .portal-shell-profile-trigger,
+.student-shell .portal-shell-profile-trigger[aria-expanded='true'] {
+    border-color: rgba(246, 190, 0, 0.36) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 10px 24px rgba(2, 6, 23, 0.16) !important;
+    transform: translateY(-1px) !important;
+}
+
+.student-shell :is(.notification-trigger-icon, .profile-nav-btn-avatar, .portal-shell-notification-trigger-icon, .portal-shell-profile-avatar) {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+.student-shell :is(.notification-trigger-copy strong, .profile-nav-btn-copy strong, .portal-shell-notification-trigger-copy strong, .portal-shell-profile-copy strong) {
+    color: #ffffff !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+}
+
+.student-shell :is(.notification-trigger-copy small, .profile-nav-btn-copy small, .portal-shell-notification-trigger-copy small, .portal-shell-profile-copy small, .profile-nav-btn-chevron, .portal-shell-profile-chevron) {
+    color: rgba(255, 255, 255, 0.82) !important;
+    font-size: 0.68rem !important;
+    font-weight: 500 !important;
+}
+
+.student-shell .student-global-navbar-actions :is(.notification-trigger, .portal-shell-notification-trigger) {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+.student-shell .student-global-navbar-actions :is(.notification-trigger-copy, .portal-shell-notification-trigger-copy) {
+    display: none !important;
+}
+
+.student-shell .student-global-navbar-actions :is(.notification-trigger-count, .portal-shell-notification-trigger-count) {
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    padding: 0 5px !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 999px !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+}
+
+.student-shell .student-global-navbar-actions :is(.profile-pill, .portal-shell-profile-trigger) {
+    min-width: 174px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0.4rem 0.75rem 0.4rem 0.42rem !important;
+}
+
+.student-shell .student-global-sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: var(--role-shell-sidebar-width) !important;
+    max-width: var(--role-shell-sidebar-width) !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
+    border-radius: 0 !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    color: #0f172a !important;
+    box-shadow: 18px 0 48px rgba(15, 23, 42, 0.06) !important;
+    backdrop-filter: blur(22px) saturate(155%) !important;
+    transition: width 0.2s ease, transform 0.2s ease !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-header,
+.student-shell .student-global-sidebar .sidebar-nav,
+.student-shell .student-global-sidebar .student-role-sidebar-nav {
+    background: transparent !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-header {
+    min-height: 78px !important;
+    padding: 0.55rem 0.75rem !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-context-kicker,
+.student-shell .student-global-sidebar .user-badge {
+    display: none !important;
+}
+
+.student-shell .student-global-sidebar .system-brand-mark {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: center !important;
+    width: 100% !important;
+    column-gap: 0.4rem !important;
+    row-gap: 0 !important;
+}
+
+.student-shell .student-global-sidebar .system-brand-logo {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 44px !important;
+    height: 42px !important;
+    object-fit: contain !important;
+}
+
+.student-shell .student-global-sidebar .system-brand-name {
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-items: baseline !important;
+    gap: 0 !important;
+    color: #003a8f !important;
+    font-size: 1.28rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 0.98 !important;
+}
+
+.student-shell .student-global-sidebar .system-brand-name span {
+    color: #003a8f !important;
+}
+
+.student-shell .student-global-sidebar .system-brand-name strong {
+    color: #f6be00 !important;
+}
+
+.student-shell .student-global-sidebar .system-brand-subtitle {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    color: #475569 !important;
+    font-size: 0.62rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+}
+
+.student-shell .student-global-sidebar :is(.sidebar-nav, .student-role-sidebar-nav) {
+    flex: 1 1 auto !important;
+    align-content: start !important;
+    gap: 1.15rem !important;
+    padding: 1rem 1rem 1.25rem !important;
+    overflow-y: auto !important;
+}
+
+.student-shell .student-global-sidebar :is(.sidebar-nav-group, .sidebar-nav-links, .sidebar-nav-dropdown) {
+    display: grid !important;
+    gap: 0.35rem !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-nav-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    margin: 0 0 0.55rem !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: uppercase !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-nav-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    height: 1px !important;
+    background: rgba(148, 163, 184, 0.26) !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.72rem !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 0.75rem !important;
+    border: 1px solid transparent !important;
+    border-radius: 16px !important;
+    background: transparent !important;
+    color: #334155 !important;
+    box-shadow: none !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    transform: none !important;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-link:hover {
+    border-color: rgba(0, 58, 143, 0.08) !important;
+    background: rgba(0, 58, 143, 0.07) !important;
+    color: #334155 !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06) !important;
+    transform: translateX(3px) !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-link.active,
+.student-shell .student-global-sidebar .sidebar-link.is-active {
+    border-color: rgba(0, 58, 143, 0.12) !important;
+    background: linear-gradient(135deg, rgba(0, 58, 143, 0.13), rgba(30, 64, 175, 0.08)) !important;
+    color: #003a8f !important;
+    box-shadow:
+        0 14px 30px rgba(0, 58, 143, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78) !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-link-icon {
+    display: inline-flex !important;
+    width: 30px !important;
+    height: 30px !important;
+    flex: 0 0 30px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    background: rgba(0, 58, 143, 0.07) !important;
+    color: #003a8f !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-link-label {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    color: inherit !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.35 !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar {
+    width: var(--role-shell-sidebar-collapsed-width) !important;
+    max-width: var(--role-shell-sidebar-collapsed-width) !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar .sidebar-header {
+    min-height: var(--role-shell-navbar-height) !important;
+    height: var(--role-shell-navbar-height) !important;
+    padding: 0 !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar .sidebar-header-copy,
+.student-shell.is-sidebar-collapsed .student-global-sidebar .system-brand-mark {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: var(--role-shell-navbar-height) !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar .system-brand-logo {
+    width: 38px !important;
+    height: 38px !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar :is(.system-brand-name, .system-brand-name span, .system-brand-name strong, .system-brand-subtitle, .sidebar-context-kicker, .user-badge, .sidebar-link-label, .nav-count) {
+    display: none !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar :is(.sidebar-nav, .student-role-sidebar-nav) {
+    gap: 1rem !important;
+    padding: 0.65rem 0.75rem 1rem !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar .sidebar-nav-heading {
+    display: block !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    margin: 0.4rem 0.25rem 0.6rem !important;
+    overflow: hidden !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-indent: -999px !important;
+    white-space: nowrap !important;
+    background: rgba(148, 163, 184, 0.28) !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar .sidebar-nav-heading::before,
+.student-shell.is-sidebar-collapsed .student-global-sidebar .sidebar-nav-heading::after {
+    display: none !important;
+}
+
+.student-shell.is-sidebar-collapsed .student-global-sidebar .sidebar-link {
+    justify-content: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
+}
+
+.student-shell .student-global-main {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    padding: 1rem 1rem 2.5rem !important;
+    background: #f8fafc !important;
+    transition: margin-left 0.2s ease !important;
+}
+
+.student-shell .student-global-content {
+    width: 100% !important;
+    max-width: 1600px !important;
+    min-width: 0 !important;
+}
+
+@media (min-width: 1101px) {
+    .student-shell .student-global-sidebar {
+        top: 0 !important;
+        bottom: 0 !important;
+        height: 100vh !important;
+        transform: translateX(0) !important;
+    }
+
+    .student-shell .student-global-navbar {
+        left: var(--role-shell-sidebar-width) !important;
+        right: auto !important;
+        width: calc(100% - var(--role-shell-sidebar-width)) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-navbar {
+        left: var(--role-shell-sidebar-collapsed-width) !important;
+        width: calc(100% - var(--role-shell-sidebar-collapsed-width)) !important;
+    }
+
+    .student-shell .student-global-main {
+        margin-left: var(--role-shell-sidebar-width) !important;
+        width: calc(100% - var(--role-shell-sidebar-width)) !important;
+        max-width: calc(100% - var(--role-shell-sidebar-width)) !important;
+    }
+
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        margin-left: var(--role-shell-sidebar-collapsed-width) !important;
+        width: calc(100% - var(--role-shell-sidebar-collapsed-width)) !important;
+        max-width: calc(100% - var(--role-shell-sidebar-collapsed-width)) !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .student-shell .student-global-navbar {
+        left: 0 !important;
+        width: 100% !important;
+    }
+
+    .student-shell .student-global-sidebar,
+    .student-shell.is-sidebar-collapsed .student-global-sidebar {
+        top: var(--role-shell-navbar-height) !important;
+        width: var(--role-shell-sidebar-width) !important;
+        max-width: var(--role-shell-sidebar-width) !important;
+        height: calc(100vh - var(--role-shell-navbar-height)) !important;
+        transform: translateX(-104%) !important;
+    }
+
+    .student-shell .student-global-sidebar.is-open {
+        transform: translateX(0) !important;
+    }
+
+    .student-shell .student-global-main,
+    .student-shell.is-sidebar-collapsed .student-global-main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .student-shell .student-navbar-title {
+        padding-left: 0.85rem !important;
+    }
+
+    .student-shell .student-navbar-title strong {
+        font-size: 0.95rem !important;
+    }
+
+    .student-shell .student-global-navbar-actions {
+        gap: 0.35rem !important;
+        padding-right: 0.55rem !important;
+    }
+
+    .student-shell .student-global-navbar-actions :is(.profile-nav-btn-copy, .portal-shell-profile-copy) {
+        display: none !important;
     }
 }
