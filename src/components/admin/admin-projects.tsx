@@ -22,7 +22,7 @@ const INVENTORY_RECORDS = [
     transferStatusClass: 'status-review',
     similarity: '12% match',
     documents: [
-      { name: 'CAP-IT-2025-014-Manuscript.pdf', type: 'Manuscript', uploadedBy: 'Maria Santos', uploadedAt: 'Jan 15, 2025' },
+      { name: 'CAP-IT-2025-014-Manuscript.pdf', type: 'Manuscript', uploadedBy: 'Uploader pending', uploadedAt: 'Jan 15, 2025' },
       { name: 'Predictive-Analytics-Dataset.xlsx', type: 'Dataset', uploadedBy: 'Dr. Ricardo Cruz', uploadedAt: 'Jan 18, 2025' },
       { name: 'Final-Defense-Presentation.pptx', type: 'Presentation', uploadedBy: 'Research Group', uploadedAt: 'Jan 22, 2025' }
     ]
@@ -46,7 +46,7 @@ const INVENTORY_RECORDS = [
     similarity: '8% match',
     documents: [
       { name: 'Pilot-Test-Checklist.pdf', type: 'Evidence', uploadedBy: 'Prof. Maria Ramos', uploadedAt: 'Jan 28, 2025' },
-      { name: 'Solar-Monitoring-Chapter4.docx', type: 'Manuscript', uploadedBy: 'John Reyes', uploadedAt: 'Feb 2, 2025' }
+      { name: 'Solar-Monitoring-Chapter4.docx', type: 'Manuscript', uploadedBy: 'Uploader pending', uploadedAt: 'Feb 2, 2025' }
     ]
   },
   {

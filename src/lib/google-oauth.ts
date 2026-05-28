@@ -46,12 +46,43 @@ type GoogleRegistrationJwtPayload = JwtPayload & GoogleRegistrationContext & {
   provider: 'google';
 };
 
+export class GoogleOAuthConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'GoogleOAuthConfigError';
+  }
+}
+
+export function isGoogleOAuthConfigError(error: unknown): error is GoogleOAuthConfigError {
+  return error instanceof GoogleOAuthConfigError;
+}
+
+function getRequiredGoogleEnv(name: string) {
+  try {
+    return getRequiredEnv(name);
+  } catch {
+    throw new GoogleOAuthConfigError(`${name} is not configured.`);
+  }
+}
+
+function parseAbsoluteUrl(value: string, envName: string) {
+  try {
+    return new URL(value);
+  } catch {
+    throw new GoogleOAuthConfigError(`${envName} must be a valid absolute URL.`);
+  }
+}
+
+function isLocalhostUrl(url: URL) {
+  return url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+}
+
 function getGoogleClientId() {
-  return getRequiredEnv('GOOGLE_CLIENT_ID');
+  return getRequiredGoogleEnv('GOOGLE_CLIENT_ID');
 }
 
 function getGoogleClientSecret() {
-  return getRequiredEnv('GOOGLE_CLIENT_SECRET');
+  return getRequiredGoogleEnv('GOOGLE_CLIENT_SECRET');
 }
 
 function getJwtSecret() {
@@ -63,17 +94,23 @@ function getSecureCookieSetting() {
 }
 
 function getConfiguredGoogleRedirectUri() {
-  const redirectUri = normalizeText(process.env.GOOGLE_REDIRECT_URI);
+  const redirectUri = getRequiredGoogleEnv('GOOGLE_REDIRECT_URI');
+  const url = parseAbsoluteUrl(redirectUri, 'GOOGLE_REDIRECT_URI');
 
-  if (!redirectUri) {
-    return null;
+  if (process.env.NODE_ENV === 'production' && isLocalhostUrl(url)) {
+    throw new GoogleOAuthConfigError('GOOGLE_REDIRECT_URI cannot use localhost in production.');
   }
 
-  try {
-    return new URL(redirectUri).toString();
-  } catch {
-    throw new Error('GOOGLE_REDIRECT_URI must be a valid absolute URL.');
+  if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
+    throw new GoogleOAuthConfigError('GOOGLE_REDIRECT_URI must use HTTPS in production.');
   }
+
+  return url.toString();
+}
+
+function getGoogleAuthUri() {
+  const authUri = normalizeText(process.env.GOOGLE_AUTH_URI) || GOOGLE_AUTH_URL;
+  return parseAbsoluteUrl(authUri, 'GOOGLE_AUTH_URI').toString();
 }
 
 function getHeaderFirstValue(value: string | null) {
@@ -99,15 +136,11 @@ export function createGoogleOAuthState() {
 }
 
 export function getGoogleRedirectUri(request: NextRequest | Request) {
-  return getConfiguredGoogleRedirectUri() || new URL('/api/auth/google/callback', getRequestOrigin(request)).toString();
+  return getConfiguredGoogleRedirectUri();
 }
 
 export function getCanonicalGoogleOAuthStartUrl(request: NextRequest) {
   const configuredRedirectUri = getConfiguredGoogleRedirectUri();
-
-  if (!configuredRedirectUri) {
-    return null;
-  }
 
   const configuredOrigin = new URL(configuredRedirectUri).origin;
 
@@ -119,7 +152,7 @@ export function getCanonicalGoogleOAuthStartUrl(request: NextRequest) {
 }
 
 export function buildGoogleAuthorizationUrl(request: NextRequest, state: string) {
-  const url = new URL(GOOGLE_AUTH_URL);
+  const url = new URL(getGoogleAuthUri());
 
   url.searchParams.set('client_id', getGoogleClientId());
   url.searchParams.set('redirect_uri', getGoogleRedirectUri(request));

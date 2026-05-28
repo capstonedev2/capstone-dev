@@ -38,7 +38,7 @@ export const DEPARTMENTS = [
     inProgress: 24,
     pendingReview: 6,
     delayed: 3,
-    students: 245,
+    students: 0,
     advisers: 8,
     successRate: 86,
     deployed: 8
@@ -52,7 +52,7 @@ export const DEPARTMENTS = [
     inProgress: 12,
     pendingReview: 3,
     delayed: 1,
-    students: 98,
+    students: 0,
     advisers: 4,
     successRate: 82,
     deployed: 4
@@ -66,7 +66,7 @@ export const DEPARTMENTS = [
     inProgress: 18,
     pendingReview: 4,
     delayed: 2,
-    students: 156,
+    students: 0,
     advisers: 6,
     successRate: 78,
     deployed: 5
@@ -80,7 +80,7 @@ export const DEPARTMENTS = [
     inProgress: 23,
     pendingReview: 3,
     delayed: 4,
-    students: 187,
+    students: 0,
     advisers: 7,
     successRate: 74,
     deployed: 3
@@ -94,7 +94,7 @@ export const DEPARTMENTS = [
     inProgress: 21,
     pendingReview: 2,
     delayed: 3,
-    students: 142,
+    students: 0,
     advisers: 5,
     successRate: 79,
     deployed: 3

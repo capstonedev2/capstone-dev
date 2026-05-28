@@ -39,7 +39,7 @@ const APPROVED_DOCUMENTS: RepositoryDocument[] = [
     department: 'IT',
     project: 'AI-Powered Learning System',
     status: 'Approved',
-    uploadedBy: 'Maria Santos',
+    uploadedBy: 'Uploader pending',
     date: 'May 8, 2026',
     size: '4.2 MB'
   },
@@ -50,7 +50,7 @@ const APPROVED_DOCUMENTS: RepositoryDocument[] = [
     department: 'MET',
     project: 'Smart Energy Monitor',
     status: 'Approved',
-    uploadedBy: 'John Reyes',
+    uploadedBy: 'Uploader pending',
     date: 'May 7, 2026',
     size: '2.1 MB'
   },
@@ -83,7 +83,7 @@ const APPROVED_DOCUMENTS: RepositoryDocument[] = [
     department: 'IT',
     project: 'AI-Powered Learning System',
     status: 'Approved',
-    uploadedBy: 'Maria Santos',
+    uploadedBy: 'Uploader pending',
     date: 'Apr 22, 2026',
     size: '0.8 MB'
   },

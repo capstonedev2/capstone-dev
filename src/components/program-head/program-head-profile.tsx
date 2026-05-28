@@ -11,7 +11,7 @@ import { ProgramHeadShell } from '@/components/program-head/program-head-shell';
 
 const DEPT_STATS = [
   { label: 'Faculty Members', value: '12', icon: 'fa-chalkboard-teacher', color: '#003a8f' },
-  { label: 'Students', value: '245', icon: 'fa-user-graduate', color: '#7c3aed' },
+  { label: 'Students', value: '0', icon: 'fa-user-graduate', color: '#7c3aed' },
   { label: 'Active Projects', value: '24', icon: 'fa-project-diagram', color: '#16a34a' },
   { label: 'Research Labs', value: '3', icon: 'fa-flask', color: '#f59e0b' }
 ];

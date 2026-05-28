@@ -96,22 +96,6 @@ const DEFAULT_USERS: User[] = [
     updated_at: '2026-01-01T08:00:00.000Z'
   },
   {
-    id: 2,
-    name: 'Maria Concepcion Santos',
-    email: 'maria.santos@university.edu.ph',
-    password: 'student123',
-    role: 'student',
-    first_name: 'Maria',
-    last_name: 'Concepcion Santos',
-    student_id: '2024-0001',
-    department: 'BSIT',
-    year_level: '4',
-    memberId: 'member-001',
-    auth_provider: 'credentials',
-    created_at: '2026-01-01T08:00:00.000Z',
-    updated_at: '2026-01-01T08:00:00.000Z'
-  },
-  {
     id: 3,
     name: 'Dr. Ricardo Cruz',
     email: 'ricardo.cruz@university.edu.ph',
@@ -157,70 +141,6 @@ const DEFAULT_USERS: User[] = [
     email: 'mark.rivera@university.edu.ph',
     password: 'techtransfer123',
     role: 'tech_transfer',
-    auth_provider: 'credentials',
-    created_at: '2026-01-01T08:00:00.000Z',
-    updated_at: '2026-01-01T08:00:00.000Z'
-  },
-  {
-    id: 8,
-    name: 'Rafael Dizon',
-    email: 'rafael.dizon@university.edu.ph',
-    password: 'student123',
-    role: 'student',
-    first_name: 'Rafael',
-    last_name: 'Dizon',
-    student_id: '2024-MET-0101',
-    department: 'BSMET',
-    year_level: '4',
-    memberId: 'member-met-001',
-    auth_provider: 'credentials',
-    created_at: '2026-01-01T08:00:00.000Z',
-    updated_at: '2026-01-01T08:00:00.000Z'
-  },
-  {
-    id: 9,
-    name: 'Bianca Navarro',
-    email: 'bianca.navarro@university.edu.ph',
-    password: 'student123',
-    role: 'student',
-    first_name: 'Bianca',
-    last_name: 'Navarro',
-    student_id: '2024-TCM-0101',
-    department: 'BSTCM',
-    year_level: '4',
-    memberId: 'member-tcm-001',
-    auth_provider: 'credentials',
-    created_at: '2026-01-01T08:00:00.000Z',
-    updated_at: '2026-01-01T08:00:00.000Z'
-  },
-  {
-    id: 10,
-    name: 'Cedric Alvarez',
-    email: 'cedric.alvarez@university.edu.ph',
-    password: 'student123',
-    role: 'student',
-    first_name: 'Cedric',
-    last_name: 'Alvarez',
-    student_id: '2024-ESM-0101',
-    department: 'BSESM',
-    year_level: '4',
-    memberId: 'member-esm-001',
-    auth_provider: 'credentials',
-    created_at: '2026-01-01T08:00:00.000Z',
-    updated_at: '2026-01-01T08:00:00.000Z'
-  },
-  {
-    id: 11,
-    name: 'Isabela Cortez',
-    email: 'isabela.cortez@university.edu.ph',
-    password: 'student123',
-    role: 'student',
-    first_name: 'Isabela',
-    last_name: 'Cortez',
-    student_id: '2024-NAME-0101',
-    department: 'BSNAME',
-    year_level: '4',
-    memberId: 'member-name-001',
     auth_provider: 'credentials',
     created_at: '2026-01-01T08:00:00.000Z',
     updated_at: '2026-01-01T08:00:00.000Z'
@@ -403,6 +323,10 @@ function readUsersFromStorage() {
       continue;
     }
 
+    if (user.role === 'student') {
+      continue;
+    }
+
     const authProvider = normalizeText(
       (user as User & { auth_provider?: unknown }).auth_provider
     ).toLowerCase();
@@ -477,6 +401,10 @@ function persistAuthenticatedUser(user: User) {
 
 function getNextUserId(users: User[]) {
   return users.reduce((maxId, user) => Math.max(maxId, user.id), 0) + 1;
+}
+
+function isLegacyMockStoredUser(user: AuthResponse['data'] | null | undefined) {
+  return Boolean(user && typeof user.id === 'number');
 }
 
 function buildDisplayName(payload: RegisterPayload) {
@@ -749,6 +677,11 @@ export function getStoredUser() {
   const storedUser = parseStoredValue<AuthResponse['data'] | null>(SESSION_STORAGE_KEY, null);
 
   if (storedUser) {
+    if (isLegacyMockStoredUser(storedUser)) {
+      logout();
+      return null;
+    }
+
     memoryStoredUser = storedUser;
     return { ...storedUser };
   }
@@ -782,6 +715,7 @@ export function logout() {
   memoryStoredUser = null;
   removeStoredValue(SESSION_STORAGE_KEY);
   removeStoredValue(LEGACY_SESSION_STORAGE_KEY);
+  removeStoredValue(PROFILE_DRAFT_STORAGE_KEY);
   removeSessionValue(LEGACY_SESSION_STORAGE_KEY);
   removeSessionValue('capstoneAuthRememberMe');
   removeCookieValue(SERVER_SESSION_COOKIE_KEY);

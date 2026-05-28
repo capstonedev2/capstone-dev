@@ -25,7 +25,7 @@ const TOTAL_DEPT_PROJECTS = DEPT_DATA.reduce((sum, dept) => sum + dept.projects,
 const DEPARTMENTS_AT_TARGET = DEPT_DATA.filter((dept) => dept.pct >= PERFORMANCE_TARGET).length;
 
 const STATS_TABLE = [
-  { metric: 'Total Enrolled Students', y1: 856, y2: 912, y3: 987, change: '+8.2%', up: true },
+  { metric: 'Total Enrolled Students', y1: 0, y2: 0, y3: 0, change: '0%', up: false },
   { metric: 'Active Projects', y1: 112, y2: 134, y3: 156, change: '+16.4%', up: true },
   { metric: 'Completed Projects', y1: 78, y2: 95, y3: 124, change: '+30.5%', up: true },
   { metric: 'Technology Transfers', y1: 3, y2: 5, y3: 8, change: '+60%', up: true },
@@ -35,7 +35,7 @@ const STATS_TABLE = [
 const INSIGHTS = [
   { text: 'IT Department leads in project completion (86%).', icon: 'fa-trophy', color: '#f59e0b' },
   { text: 'Technology transfer increased by 60% this year.', icon: 'fa-rocket', color: '#16a34a' },
-  { text: 'Student satisfaction rating is at 4.5 out of 5.', icon: 'fa-star', color: '#7c3aed' },
+  { text: 'Student satisfaction data is pending.', icon: 'fa-star', color: '#7c3aed' },
   { text: '78% of graduates are employed within six months.', icon: 'fa-briefcase', color: '#003a8f' }
 ];
 

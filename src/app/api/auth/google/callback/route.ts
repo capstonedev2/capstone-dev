@@ -11,6 +11,7 @@ import {
   clearGoogleOAuthStateCookie,
   exchangeGoogleCodeForTokens,
   getVerifiedGoogleProfile,
+  isGoogleOAuthConfigError,
   setGoogleRegistrationCookie,
   validateGoogleOAuthState
 } from '@/lib/google-oauth';
@@ -162,6 +163,19 @@ export async function GET(request: NextRequest) {
 
     return response;
   } catch (callbackError) {
+    if (isGoogleOAuthConfigError(callbackError)) {
+      console.error('Google OAuth is not configured.', callbackError);
+      const response = NextResponse.json(
+        {
+          success: false,
+          message: callbackError.message
+        },
+        { status: 500 }
+      );
+      clearGoogleOAuthStateCookie(response);
+      return response;
+    }
+
     console.error('Google OAuth callback failed.', callbackError);
     const response = NextResponse.redirect(getLoginRedirect(request, 'error'));
     clearGoogleOAuthStateCookie(response);

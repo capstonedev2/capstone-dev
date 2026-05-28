@@ -95,8 +95,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
     id: 1,
     title: 'AI-Powered Learning Management System',
     detailTitle: 'AI-Powered Learning Management System with Predictive Analytics',
-    authors: ['Maria Santos', 'John Reyes', 'Anna Cruz'],
-    authorsShort: 'Santos, M. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'IT',
     year: 2024,
     adviser: 'Dr. Ricardo Cruz',
@@ -123,8 +123,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
   {
     id: 2,
     title: 'Smart Solar Energy Monitoring System',
-    authors: ['Ramon Carlos', 'Lisa Tan'],
-    authorsShort: 'Carlos, R. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'MET',
     year: 2024,
     adviser: 'Prof. Maria Ramos',
@@ -138,8 +138,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
   {
     id: 3,
     title: 'Herbal Medicine Database System',
-    authors: ['Anna Cruz', 'Maria Santos'],
-    authorsShort: 'Cruz, A. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'TCM',
     year: 2023,
     adviser: 'Dr. Anna Reyes',
@@ -151,8 +151,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
   {
     id: 4,
     title: 'Sustainable Agriculture IoT System',
-    authors: ['Mark Tan', 'Sarah Lim'],
-    authorsShort: 'Tan, M. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'ESM',
     year: 2024,
     adviser: 'Prof. Jose Lopez',
@@ -164,8 +164,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
   {
     id: 5,
     title: 'Marine Pollution Detection Drone',
-    authors: ['Sarah Lim', 'Mark Rivera'],
-    authorsShort: 'Lim, S. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'NAME',
     year: 2023,
     adviser: 'Dr. Elena Aquino',
@@ -178,8 +178,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
   {
     id: 6,
     title: 'Blockchain-Based Grade Management',
-    authors: ['John Reyes', 'Maria Santos'],
-    authorsShort: 'Reyes, J. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'IT',
     year: 2023,
     adviser: 'Dr. Ricardo Cruz',
@@ -191,8 +191,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
   {
     id: 7,
     title: 'Electric Vehicle Charging Station',
-    authors: ['Ramon Carlos', 'Mark Tan'],
-    authorsShort: 'Carlos, R. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'MET',
     year: 2024,
     adviser: 'Prof. Maria Ramos',
@@ -204,8 +204,8 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
   {
     id: 8,
     title: 'Digital Marketing Analytics Platform',
-    authors: ['Anna Cruz', 'Sarah Lim'],
-    authorsShort: 'Cruz, A. et al.',
+    authors: ['Authors pending'],
+    authorsShort: 'Pending',
     department: 'TCM',
     year: 2023,
     adviser: 'Dr. Anna Reyes',
@@ -217,10 +217,10 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
 ] as const;
 
 export const LIBRARY_RECENT_STUDIES = [
-  { title: 'AI-Powered Learning Management System', department: 'IT', authors: 'Santos, M. et al.', year: 2024, projectId: 1 },
-  { title: 'Smart Solar Energy Monitor', department: 'MET', authors: 'Carlos, R. et al.', year: 2024, projectId: 2 },
-  { title: 'Herbal Medicine Database System', department: 'TCM', authors: 'Cruz, A. et al.', year: 2023, projectId: 3 },
-  { title: 'Sustainable Agriculture IoT System', department: 'ESM', authors: 'Tan, M. et al.', year: 2024, projectId: 4 }
+  { title: 'AI-Powered Learning Management System', department: 'IT', authors: 'Pending', year: 2024, projectId: 1 },
+  { title: 'Smart Solar Energy Monitor', department: 'MET', authors: 'Pending', year: 2024, projectId: 2 },
+  { title: 'Herbal Medicine Database System', department: 'TCM', authors: 'Pending', year: 2023, projectId: 3 },
+  { title: 'Sustainable Agriculture IoT System', department: 'ESM', authors: 'Pending', year: 2024, projectId: 4 }
 ] as const;
 
 export const LIBRARY_DOCUMENTS: readonly LibraryDocument[] = [

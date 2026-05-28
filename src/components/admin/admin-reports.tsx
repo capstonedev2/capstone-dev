@@ -184,7 +184,7 @@ export function AdminReports() {
             <article className="admin-kpi-card">
               <span className="admin-kpi-label">Adviser Coverage</span>
               <strong className="admin-kpi-value">48</strong>
-              <span className="admin-note">Active advisers supporting 987 students across five departments.</span>
+              <span className="admin-note">Active advisers supporting 0 students across five departments.</span>
               <span className="status-badge status-review">7 near capacity</span>
             </article>
 

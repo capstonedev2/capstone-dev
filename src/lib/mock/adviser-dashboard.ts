@@ -251,8 +251,8 @@ const adviserDashboardData: AdviserDashboardData = {
       projectTitle: 'AI-Powered Learning System',
       dept: 'IT',
       department: 'IT',
-      members: 3,
-      students: ['Maria Santos', 'John Dela Cruz', 'Allen Reyes'],
+      members: 0,
+      students: [],
       progress: 75,
       statusLabel: 'Active',
       statusClass: 'status-active',
@@ -277,8 +277,8 @@ const adviserDashboardData: AdviserDashboardData = {
       projectTitle: 'Capstone Submission Platform',
       dept: 'IT',
       department: 'IT',
-      members: 4,
-      students: ['Ramon Cruz', 'Lisa Tan', 'Kevin Dela Pena', 'Joan Lim'],
+      members: 0,
+      students: [],
       progress: 45,
       statusLabel: 'Pending',
       statusClass: 'status-pending',
@@ -303,8 +303,8 @@ const adviserDashboardData: AdviserDashboardData = {
       projectTitle: 'Campus Safety Tracker',
       dept: 'IT',
       department: 'IT',
-      members: 2,
-      students: ['Anna Reyes', 'Marco Flores'],
+      members: 0,
+      students: [],
       progress: 60,
       statusLabel: 'Needs Revision',
       statusClass: 'status-revise',
@@ -329,8 +329,8 @@ const adviserDashboardData: AdviserDashboardData = {
       projectTitle: 'Smart Inventory Assistant',
       dept: 'IT',
       department: 'IT',
-      members: 3,
-      students: ['Claire Mendoza', 'Leo Ramos', 'Neil Aquino'],
+      members: 0,
+      students: [],
       progress: 100,
       statusLabel: 'Active',
       statusClass: 'status-active',
@@ -355,8 +355,8 @@ const adviserDashboardData: AdviserDashboardData = {
       projectTitle: 'Smart Barangay Response Hub',
       dept: 'IT',
       department: 'IT',
-      members: 3,
-      students: ['Paolo Gutierrez', 'Nina Velasco', 'June Bautista'],
+      members: 0,
+      students: [],
       progress: 32,
       statusLabel: 'At Risk',
       statusClass: 'status-warning',
@@ -380,7 +380,7 @@ const adviserDashboardData: AdviserDashboardData = {
       updated_at: now,
       title: 'Blockchain for Supply Chain',
       dept: 'IT',
-      students: 'Maria S., John D.',
+      students: 'No students assigned',
       defenseDate: 'Apr 3, 2026',
       statusLabel: 'Pending',
       statusClass: 'status-pending'
@@ -394,7 +394,7 @@ const adviserDashboardData: AdviserDashboardData = {
       updated_at: now,
       title: 'Campus Safety Tracker',
       dept: 'IT',
-      students: 'Ramon C., Lisa T.',
+      students: 'No students assigned',
       defenseDate: 'Apr 5, 2026',
       statusLabel: 'Scheduled',
       statusClass: 'status-warning'
@@ -408,7 +408,7 @@ const adviserDashboardData: AdviserDashboardData = {
       updated_at: now,
       title: 'Smart Inventory Assistant',
       dept: 'IT',
-      students: 'Allen R., Joan L.',
+      students: 'No students assigned',
       defenseDate: 'Mar 18, 2026',
       statusLabel: 'Completed',
       statusClass: 'status-approved'
@@ -543,6 +543,13 @@ function cloneAdviserDashboardData() {
   return JSON.parse(JSON.stringify(adviserDashboardData)) as AdviserDashboardData;
 }
 
+function clearMockStudentData(data: AdviserDashboardData) {
+  data.groups = [];
+  data.panelProjects = [];
+  data.recentSubmissions = [];
+  data.upcomingSchedule = [];
+}
+
 function toIsoString(value: Date | string | null | undefined, fallback = now) {
   if (value instanceof Date) return value.toISOString();
   return value || fallback;
@@ -605,6 +612,7 @@ function formatDefenseDate(value: Date | string | null | undefined) {
 
 export async function getAdviserDashboardData() {
   const data = cloneAdviserDashboardData();
+  clearMockStudentData(data);
 
   try {
     const { getAuthenticatedUser } = await import('@/lib/auth');

@@ -667,7 +667,7 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                   <div className="form-grid student-profile-modal-grid !gap-y-5 !gap-x-6">
                     <div className="form-field full">
                       <label htmlFor="student-profile-display-name" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Display Name</label>
-                      <input id="student-profile-display-name" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.displayName || ''} onChange={(event) => updateDraftField('displayName', event.target.value)} placeholder="e.g. Maria Santos" />
+                      <input id="student-profile-display-name" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.displayName || ''} onChange={(event) => updateDraftField('displayName', event.target.value)} placeholder="e.g. Full Name" />
                       <p className="text-xs text-slate-400 mt-1.5">This name will be displayed on your profile card.</p>
                     </div>
                     <div className="form-field full">
