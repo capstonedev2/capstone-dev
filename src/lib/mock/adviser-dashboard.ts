@@ -323,7 +323,8 @@ const adviserDashboardData: AdviserDashboardData = {
       allRequiredMilestonesCompleted: false,
       completedAt: null,
       finalScore: null,
-      finalRecommendation: 'Resubmit the security validation report before final scheduling.'
+      finalRecommendation: 'Resubmit the security validation report before final scheduling.',
+      leader: null
     },
     {
       id: 'D4',
@@ -349,7 +350,8 @@ const adviserDashboardData: AdviserDashboardData = {
       allRequiredMilestonesCompleted: true,
       completedAt: '2026-04-04T00:00:00.000Z',
       finalScore: 96,
-      finalRecommendation: 'Ready for archiving and alumni showcase endorsement.'
+      finalRecommendation: 'Ready for archiving and alumni showcase endorsement.',
+      leader: null
     },
     {
       id: 'E5',
@@ -375,7 +377,8 @@ const adviserDashboardData: AdviserDashboardData = {
       allRequiredMilestonesCompleted: false,
       completedAt: null,
       finalScore: null,
-      finalRecommendation: 'Prioritize system stabilization and document the recovery plan.'
+      finalRecommendation: 'Prioritize system stabilization and document the recovery plan.',
+      leader: null
     }
   ],
   panelProjects: [
