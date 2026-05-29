@@ -9,7 +9,10 @@ import {
   type TechTransferNavKey
 } from '@/components/tech-transfer/tech-transfer-data';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
+
+const TECH_TRANSFER_PREFETCH_ROUTES = TECH_TRANSFER_NAV_ITEMS.map((item) => item.href);
 
 export function TechTransferShell({
   activeNav,
@@ -27,6 +30,7 @@ export function TechTransferShell({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const prefetchRoute = useRoutePrefetch(TECH_TRANSFER_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('Mark Rivera');
   const [displayEmail, setDisplayEmail] = useState('mark.rivera@university.edu.ph');
   const {
@@ -183,6 +187,8 @@ export function TechTransferShell({
                   className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
                   href={item.href}
                   title={sidebarCollapsed ? item.label : undefined}
+                  onFocus={() => prefetchRoute(item.href)}
+                  onMouseEnter={() => prefetchRoute(item.href)}
                 >
                   <span className="sidebar-link-icon">
                     <i aria-hidden="true" className={`fas ${item.icon}`} />

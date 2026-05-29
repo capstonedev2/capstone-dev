@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { type NextResponse } from 'next/server';
+import { cache } from 'react';
 import { UserRole, type User } from '@/generated/prisma/client';
 import { sendAccountRestoreEmail } from '@/lib/mailer';
 import { prisma } from '@/lib/prisma';
@@ -347,6 +348,8 @@ export async function getAuthenticatedUser(request?: Request) {
 
   return isAccountSuspended(restoredUser) ? null : restoredUser;
 }
+
+export const getServerAuthenticatedUser = cache(async () => getAuthenticatedUser());
 
 export async function requireAuthenticatedUser(request: Request, allowedRoles?: UserRole[]) {
   const user = await getAuthenticatedUser(request);

@@ -14,7 +14,7 @@ export default async function Layout({
 }>) {
   const [{ data }, notifications] = await Promise.all([
     getAdviserDashboardData(),
-    getAdviserNotificationRecords('/adviser/adviser-mode')
+    getAdviserNotificationRecords('/adviser/adviser-mode', 5)
   ]);
 
   return (

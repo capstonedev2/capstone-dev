@@ -1,3 +1,8 @@
+import { cache } from 'react';
+import { getServerAuthenticatedUser } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { NotificationStatus } from '@/generated/prisma/client';
+
 const now = '2026-04-06T00:00:00.000Z';
 
 export type AdviserDashboardData = {
@@ -74,6 +79,7 @@ export type AdviserDashboardData = {
     completedAt: string | null;
     finalScore: number | null;
     finalRecommendation: string | null;
+    leader: string | null;
   }>;
   panelProjects: Array<{
     id: string;
@@ -263,7 +269,8 @@ const adviserDashboardData: AdviserDashboardData = {
       allRequiredMilestonesCompleted: false,
       completedAt: null,
       finalScore: null,
-      finalRecommendation: null
+      finalRecommendation: null,
+      leader: null
     },
     {
       id: 'B2',
@@ -289,7 +296,8 @@ const adviserDashboardData: AdviserDashboardData = {
       allRequiredMilestonesCompleted: false,
       completedAt: null,
       finalScore: null,
-      finalRecommendation: null
+      finalRecommendation: null,
+      leader: null
     },
     {
       id: 'C3',
@@ -610,13 +618,71 @@ function formatDefenseDate(value: Date | string | null | undefined) {
   });
 }
 
-export async function getAdviserDashboardData() {
+const ADVISER_DASHBOARD_GROUP_LIMIT = 40;
+const ADVISER_DASHBOARD_PANEL_LIMIT = 40;
+
+const adviserDashboardGroupSelect = {
+  id: true,
+  userId: true,
+  projectId: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  code: true,
+  title: true,
+  projectTitle: true,
+  dept: true,
+  department: true,
+  members: true,
+  students: true,
+  progress: true,
+  statusLabel: true,
+  statusClass: true,
+  milestone: true,
+  currentMilestone: true,
+  finalDefenseResult: true,
+  finalManuscriptApproved: true,
+  allRequiredMilestonesCompleted: true,
+  completedAt: true,
+  finalScore: true,
+  finalRecommendation: true,
+  leader: true
+} as const;
+
+const adviserDashboardEvaluationSelect = {
+  id: true,
+  projectId: true,
+  recommendation: true,
+  createdAt: true,
+  updatedAt: true,
+  defenseSchedule: {
+    select: {
+      status: true,
+      scheduledAt: true
+    }
+  },
+  project: {
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      group: {
+        select: {
+          dept: true,
+          department: true,
+          students: true
+        }
+      }
+    }
+  }
+} as const;
+
+export const getAdviserDashboardData = cache(async function getAdviserDashboardData() {
   const data = cloneAdviserDashboardData();
   clearMockStudentData(data);
 
   try {
-    const { getAuthenticatedUser } = await import('@/lib/auth');
-    const dbUser = await getAuthenticatedUser();
+    const dbUser = await getServerAuthenticatedUser();
 
     if (!dbUser) {
       return { data };
@@ -646,26 +712,18 @@ export async function getAdviserDashboardData() {
     };
 
     try {
-      const [{ prisma }, { NotificationStatus }] = await Promise.all([
-        import('@/lib/prisma'),
-        import('@/generated/prisma/client')
-      ]);
       const [groups, panelEvaluations, unreadNotificationCount] = await Promise.all([
         prisma.group.findMany({
           where: { userId: dbUser.id },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
+          take: ADVISER_DASHBOARD_GROUP_LIMIT,
+          select: adviserDashboardGroupSelect
         }),
         prisma.evaluation.findMany({
           where: { evaluatorId: dbUser.id },
-          include: {
-            defenseSchedule: true,
-            project: {
-              include: {
-                group: true
-              }
-            }
-          },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' },
+          take: ADVISER_DASHBOARD_PANEL_LIMIT,
+          select: adviserDashboardEvaluationSelect
         }),
         prisma.notification.count({
           where: {
@@ -700,7 +758,8 @@ export async function getAdviserDashboardData() {
         allRequiredMilestonesCompleted: group.allRequiredMilestonesCompleted,
         completedAt: group.completedAt ? toIsoString(group.completedAt) : null,
         finalScore: group.finalScore,
-        finalRecommendation: group.finalRecommendation
+        finalRecommendation: group.finalRecommendation,
+        leader: group.leader
       }));
 
       data.panelProjects = panelEvaluations.map((evaluation) => {
@@ -732,4 +791,5 @@ export async function getAdviserDashboardData() {
   }
 
   return { data };
-}
+});
+

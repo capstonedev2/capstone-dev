@@ -76,7 +76,7 @@ export function AdviserNotifications({
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
+            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
               <i className={`fas ${item.icon}`}></i> {item.label}
             </Link>
           ))}
@@ -162,7 +162,7 @@ export function AdviserNotifications({
                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
                           <h4 className={`text-[1.05rem] font-bold leading-tight transition-colors ${isUnread ? 'text-slate-900 group-hover:text-blue-700' : 'text-slate-700 group-hover:text-slate-900'}`}>
                             {'href' in item && item.href ? (
-                               <Link href={item.href} onClick={() => markNotificationRead(item.id)} className="focus:outline-none before:absolute before:inset-0 before:z-10 before:rounded-[24px]">
+                               <Link href={item.href} prefetch={false} onClick={() => markNotificationRead(item.id)} className="focus:outline-none before:absolute before:inset-0 before:z-10 before:rounded-[24px]">
                                  {item.title}
                                </Link>
                             ) : (
@@ -190,6 +190,7 @@ export function AdviserNotifications({
                             {'href' in item && item.href && (
                                <Link 
                                  href={item.href} 
+                                 prefetch={false}
                                  onClick={() => markNotificationRead(item.id)}
                                  className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[var(--primary)] shadow-sm ring-1 ring-slate-200 hover:bg-blue-50 hover:ring-blue-200 hover:text-blue-700 transition-all"
                                >

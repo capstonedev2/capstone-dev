@@ -471,8 +471,8 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
   const data = getDefaultWorkspaceData();
 
   try {
-    const { getAuthenticatedUser } = await import('@/lib/auth');
-    const dbUser = await getAuthenticatedUser();
+    const { getServerAuthenticatedUser } = await import('@/lib/auth');
+    const dbUser = await getServerAuthenticatedUser();
 
     if (dbUser) {
       const userName = dbUser.name || data.profile.fullName;
@@ -496,6 +496,39 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
       try {
         const { prisma } = await import('@/lib/prisma');
         const { AdviserScheduleItemStatus, SubmissionStatus } = await import('@/generated/prisma/client');
+        const notificationRowsPromise = prisma.notification.findMany({
+          where: { userId: dbUser.id },
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+          select: {
+            id: true,
+            userId: true,
+            title: true,
+            message: true,
+            type: true,
+            status: true,
+            readAt: true,
+            createdAt: true
+          }
+        }).catch((error) => {
+          console.error('Failed to fetch student notifications:', error);
+          return [];
+        });
+        const studentGroupSelect = {
+          id: true,
+          userId: true,
+          projectId: true,
+          createdAt: true,
+          updatedAt: true,
+          code: true,
+          title: true,
+          projectTitle: true,
+          dept: true,
+          department: true,
+          students: true,
+          leader: true,
+          allowMemberSubmission: true
+        } as const;
         const groupByMembership = await prisma.group.findFirst({
           where: {
             groupMembers: {
@@ -505,14 +538,35 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               }
             }
           },
-          orderBy: { updatedAt: 'desc' }
+          orderBy: { updatedAt: 'desc' },
+          select: studentGroupSelect
         });
         const groups = groupByMembership
           ? [groupByMembership]
           : await prisma.group.findMany({
               where: { students: { has: userName } },
-              orderBy: { createdAt: 'desc' }
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: studentGroupSelect
             });
+
+        const notificationRows = await notificationRowsPromise;
+        data.notifications = notificationRows.map((notification) => ({
+          id: notification.id,
+          user_id: notification.userId,
+          project_id: data.profile.project_id,
+          status: String(notification.status),
+          created_at: notification.createdAt.toISOString(),
+          updated_at: (notification.readAt || notification.createdAt).toISOString(),
+          type: notification.type === 'info' ? 'general' : notification.type,
+          title: notification.title,
+          message: notification.message,
+          dateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(notification.createdAt),
+          priority: notification.type === 'warning' || notification.type === 'danger' ? 'high' : 'normal',
+          read: notification.status === 'READ',
+          route: '/students/notifications',
+          actionLabel: 'Open center'
+        }));
 
         if (groups.length > 0) {
           const group = groups[0];
@@ -530,12 +584,57 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             data.group.leaderName = group.leader || data.group.leaderName;
           }
 
-          try {
-            const groupMembers = await prisma.groupMember.findMany({
-              where: { groupId: group.id, isActive: true },
-              include: { user: true }
-            });
+          const projectSummarySelect = {
+            id: true,
+            title: true,
+            abstract: true,
+            status: true,
+            updatedAt: true
+          } as const;
 
+          const [
+            groupMembers,
+            approvedTitleProject,
+            adviserUser,
+            activeProjectResult
+          ] = await Promise.all([
+            // 1. Group Members
+            prisma.groupMember.findMany({
+              where: { groupId: group.id, isActive: true },
+              select: {
+                id: true, userId: true, role: true, createdAt: true, updatedAt: true,
+                user: { select: { id: true, name: true, studentId: true, email: true } }
+              },
+              take: 50
+            }).catch(err => {
+              console.error('Failed to fetch group members:', err);
+              return [];
+            }),
+            // 2. Approved Title Project
+            prisma.project.findFirst({
+              where: { groupId: group.id, status: 'APPROVED', submissions: { some: {} } },
+              orderBy: { updatedAt: 'desc' },
+              select: projectSummarySelect
+            }),
+            // 3. Adviser User
+            group.userId
+              ? prisma.user.findUnique({
+                  where: { id: group.userId },
+                  select: { id: true, name: true }
+                }).catch((error) => {
+                  console.error('Failed to fetch adviser name:', error);
+                  return null;
+                })
+              : Promise.resolve(null),
+            // 4. Fallback Active Project
+            prisma.project.findFirst({
+              where: { groupId: group.id },
+              orderBy: { updatedAt: 'desc' },
+              select: projectSummarySelect
+            })
+          ]);
+
+          try {
             if (groupMembers.length > 0 && data.group) {
               data.group.members = groupMembers.map(gm => ({
                 id: gm.id,
@@ -553,7 +652,13 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               data.group.memberCount = groupMembers.length;
             } else if (group.students && group.students.length > 0 && data.group) {
               const studentUsers = await prisma.user.findMany({
-                where: { name: { in: group.students } }
+                where: { name: { in: group.students } },
+                select: {
+                  id: true,
+                  name: true,
+                  studentId: true,
+                  email: true
+                }
               });
 
               const studentMap = new Map(studentUsers.map(u => [u.name, u]));
@@ -577,33 +682,11 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               data.group.memberCount = group.students.length;
             }
           } catch (memberErr) {
-            console.error('Failed to fetch group members:', memberErr);
+            console.error('Failed to fetch fallback group members:', memberErr);
           }
 
-          const approvedTitleProject = await prisma.project.findFirst({
-            where: {
-              groupId: group.id,
-              status: 'APPROVED',
-              submissions: {
-                some: {}
-              }
-            },
-            orderBy: { updatedAt: 'desc' }
-          });
-
-          let adviserName = 'Not assigned';
-          if (group.userId) {
-            try {
-              const adviserUser = await prisma.user.findUnique({
-                where: { id: group.userId }
-              });
-              if (adviserUser && adviserUser.name) {
-                adviserName = adviserUser.name;
-              }
-            } catch (e) {
-              console.error('Failed to fetch adviser name:', e);
-            }
-          }
+          const adviserName = adviserUser?.name || 'Not assigned';
+          const activeProject = approvedTitleProject || activeProjectResult;
 
           data.project = {
             ...data.project,
@@ -615,13 +698,9 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             program: group.dept || data.project.program,
             department: group.department || data.project.department,
           };
-          const activeProject = approvedTitleProject || await prisma.project.findFirst({
-            where: { groupId: group.id },
-            orderBy: { updatedAt: 'desc' }
-          });
 
           data.titleRegistration.proposedTitle = activeProject?.title || approvedTitleProject?.title || data.titleRegistration.proposedTitle;
-          
+
           if (!activeProject) {
             data.titleRegistration.registrationStatus = 'Draft';
           } else if (activeProject.status === 'APPROVED' || activeProject.status === 'DEFENSE_SCHEDULED') {
@@ -641,7 +720,93 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
           data.titleRegistration.adviser = data.project.adviser;
 
           if (activeProject) {
-            await ensureProjectMilestoneWorkflow(prisma, activeProject.id);
+            // 1. Start fetching independent data immediately (does not depend on workflow repair)
+            const adviserScheduleDelegate = 'adviserScheduleItem' in prisma ? prisma.adviserScheduleItem : null;
+            
+            const filesPromise = prisma.uploadedFile.findMany({
+              where: { projectId: activeProject.id },
+              select: {
+                id: true, userId: true, visibility: true, createdAt: true, updatedAt: true,
+                documentCategory: true, category: true, fileName: true, fileType: true, size: true,
+                user: { select: { name: true } }, submission: { select: { status: true } }
+              },
+              orderBy: { createdAt: 'desc' },
+              take: 50
+            });
+
+            const schedulesPromise = prisma.defenseSchedule.findMany({
+              where: { projectId: activeProject.id },
+              orderBy: { scheduledAt: 'asc' },
+              take: 20,
+              select: {
+                id: true, status: true, createdAt: true, updatedAt: true,
+                title: true, scheduledAt: true, location: true, notes: true
+              }
+            });
+
+            const adviserSchedulePromise = adviserScheduleDelegate
+              ? adviserScheduleDelegate.findMany({
+                  where: { projectId: activeProject.id, status: { not: AdviserScheduleItemStatus.CANCELLED } },
+                  orderBy: { scheduledAt: 'asc' },
+                  take: 20,
+                  select: {
+                    id: true, status: true, createdAt: true, updatedAt: true, title: true,
+                    type: true, scheduledAt: true, endsAt: true, location: true, notes: true
+                  }
+                })
+              : Promise.resolve([]);
+
+            const submissionsPromise = prisma.submission.findMany({
+              where: {
+                projectId: activeProject.id,
+                status: { in: [SubmissionStatus.NEEDS_REVISION, SubmissionStatus.APPROVED] }
+              },
+              orderBy: { reviewedAt: 'desc' },
+              take: 20,
+              select: {
+                id: true, title: true, status: true,
+                comments: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 5,
+                  select: { id: true, body: true, createdAt: true, updatedAt: true, author: { select: { name: true, role: true } } }
+                }
+              }
+            });
+
+            // 2. Ensure workflow exists, then fetch milestones & checkpoints
+            const milestoneWorkflowPromise = ensureProjectMilestoneWorkflow(prisma, activeProject.id).then(() => {
+              return Promise.all([
+                prisma.milestone.findMany({
+                  where: { projectId: activeProject.id },
+                  orderBy: { sequence: 'asc' },
+                  take: 20,
+                  select: {
+                    id: true, status: true, createdAt: true, updatedAt: true,
+                    title: true, dueAt: true, description: true
+                  }
+                }),
+                prisma.milestoneCheckpoint.findMany({
+                  where: { projectId: activeProject.id },
+                  include: {
+                    milestone: { select: { id: true, title: true, sequence: true } },
+                    submissions: {
+                      orderBy: { submittedAt: 'desc' },
+                      take: 10,
+                      include: {
+                        files: { take: 5, include: { submission: { select: { status: true } } }, orderBy: { createdAt: 'desc' } },
+                        comments: { orderBy: { createdAt: 'desc' }, take: 5, include: { author: { select: { name: true, role: true } } } }
+                      }
+                    },
+                    files: {
+                      take: 10,
+                      include: { submission: { select: { status: true } } },
+                      orderBy: { createdAt: 'desc' }
+                    }
+                  },
+                  take: 50
+                })
+              ]);
+            });
 
             const formatDate = (date: Date) =>
               new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
@@ -667,19 +832,21 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               reviewStatus: getReviewStatusLabel(file.submission?.status)
             });
 
-            // Fetch Documents
-            const files = await prisma.uploadedFile.findMany({
-              where: { projectId: activeProject.id },
-              include: {
-                user: true,
-                submission: {
-                  select: {
-                    status: true
-                  }
-                }
-              },
-              orderBy: { createdAt: 'desc' }
-            });
+            // 3. Await all streams
+            const [
+              files,
+              schedules,
+              adviserScheduleItems,
+              submissions,
+              [milestones, checkpointRows]
+            ] = await Promise.all([
+              filesPromise,
+              schedulesPromise,
+              adviserSchedulePromise,
+              submissionsPromise,
+              milestoneWorkflowPromise
+            ]);
+
             data.documents = files.map(f => ({
               id: f.id,
               user_id: f.userId,
@@ -696,11 +863,6 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               reviewStatus: getReviewStatusLabel(f.submission?.status)
             }));
 
-            // Fetch Milestones
-            const milestones = await prisma.milestone.findMany({
-              where: { projectId: activeProject.id },
-              orderBy: { sequence: 'asc' }
-            });
             data.milestones = milestones.map(m => ({
               id: m.id,
               user_id: dbUser.id,
@@ -713,55 +875,6 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               summary: m.description || '',
               route: '/students/milestones'
             }));
-
-            const checkpointRows = await prisma.milestoneCheckpoint.findMany({
-              where: { projectId: activeProject.id },
-              include: {
-                milestone: {
-                  select: {
-                    id: true,
-                    title: true,
-                    sequence: true
-                  }
-                },
-                submissions: {
-                  orderBy: { submittedAt: 'desc' },
-                  include: {
-                    files: {
-                      include: {
-                        submission: {
-                          select: {
-                            status: true
-                          }
-                        }
-                      },
-                      orderBy: { createdAt: 'desc' }
-                    },
-                    comments: {
-                      orderBy: { createdAt: 'desc' },
-                      include: {
-                        author: {
-                          select: {
-                            name: true,
-                            role: true
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                files: {
-                  include: {
-                    submission: {
-                      select: {
-                        status: true
-                      }
-                    }
-                  },
-                  orderBy: { createdAt: 'desc' }
-                }
-              }
-            });
 
             data.milestoneCheckpoints = checkpointRows
               .sort((left, right) =>
@@ -806,21 +919,6 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                 files: checkpoint.files.map(toFileSummary)
               }));
 
-            // Fetch Schedules
-            const schedules = await prisma.defenseSchedule.findMany({
-              where: { projectId: activeProject.id },
-              orderBy: { scheduledAt: 'asc' }
-            });
-            const adviserScheduleDelegate = 'adviserScheduleItem' in prisma ? prisma.adviserScheduleItem : null;
-            const adviserScheduleItems = adviserScheduleDelegate
-              ? await adviserScheduleDelegate.findMany({
-                  where: {
-                    projectId: activeProject.id,
-                    status: { not: AdviserScheduleItemStatus.CANCELLED }
-                  },
-                  orderBy: { scheduledAt: 'asc' }
-                })
-              : [];
             const scheduleTypeLabel = (type: string) => {
               switch (type) {
                 case 'CONSULTATION':
@@ -839,6 +937,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                   return 'Event';
               }
             };
+
             data.schedules = [
               ...schedules.map(s => ({
               id: s.id,
@@ -876,20 +975,6 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               }))
             ].sort((left, right) => new Date(left.startDate).getTime() - new Date(right.startDate).getTime());
 
-            // Fetch Feedback (from Submissions)
-            const submissions = await prisma.submission.findMany({
-              where: {
-                projectId: activeProject.id,
-                status: { in: [SubmissionStatus.NEEDS_REVISION, SubmissionStatus.APPROVED] }
-              },
-              include: {
-                comments: {
-                  include: { author: true },
-                  orderBy: { createdAt: 'desc' }
-                }
-              }
-            });
-            
             const allFeedback: any[] = [];
             submissions.forEach(sub => {
               sub.comments.forEach(c => {

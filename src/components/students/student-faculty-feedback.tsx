@@ -501,10 +501,10 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Link className={PRIMARY_BUTTON_CLASS} href="/students/project-files">
+              <Link prefetch={false} className={PRIMARY_BUTTON_CLASS} href="/students/project-files">
                 <i className="fas fa-file-arrow-up" aria-hidden="true" /> Open Project Files
               </Link>
-              <Link className={SECONDARY_BUTTON_CLASS} href="/students/project-overview">
+              <Link prefetch={false} className={SECONDARY_BUTTON_CLASS} href="/students/project-overview">
                 <i className="fas fa-folder-open" aria-hidden="true" /> View Project
               </Link>
             </div>
@@ -677,7 +677,7 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
                             View Details
                           </button>
                           {item.workflowStatus === 'Needs Revision' ? (
-                            <Link className={`${TERTIARY_BUTTON_CLASS} border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100`} href="/students/project-files">
+                            <Link prefetch={false} className={`${TERTIARY_BUTTON_CLASS} border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100`} href="/students/project-files">
                               <i className="fas fa-file-arrow-up" aria-hidden="true" />
                               Upload Revised File
                             </Link>
@@ -776,7 +776,7 @@ export function StudentFacultyFeedback({ data }: { data: StudentDashboardData })
 
               <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 bg-slate-50 p-4">
                 {selectedFeedback.workflowStatus === 'Needs Revision' ? (
-                  <Link className={`${TERTIARY_BUTTON_CLASS} border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100`} href="/students/project-files">
+                  <Link prefetch={false} className={`${TERTIARY_BUTTON_CLASS} border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100`} href="/students/project-files">
                     <i className="fas fa-file-arrow-up" aria-hidden="true" />
                     Upload Revised File
                   </Link>

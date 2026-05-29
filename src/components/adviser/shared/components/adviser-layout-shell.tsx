@@ -1,10 +1,12 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
 import { ADVISER_NAV_ITEMS, ADVISER_NAV_SECTIONS } from '@/components/adviser/shared/config/adviser-navigation';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import {
   WORKSPACE_META,
   WORKSPACE_MODE_STORAGE_KEY,
@@ -68,13 +70,16 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
   const workspaceMode: WorkspaceMode = getWorkspaceModeFromPathname(pathname);
   const basePath = getWorkspaceBasePath(workspaceMode);
   const meta = WORKSPACE_META[workspaceMode];
-  const notificationPreviewItems = toNotificationPreviewItems(notifications, basePath);
+  const notificationPreviewItems = useMemo(
+    () => toNotificationPreviewItems(notifications, basePath),
+    [basePath, notifications]
+  );
 
-  function switchWorkspace(mode: WorkspaceMode) {
+  const switchWorkspace = useCallback((mode: WorkspaceMode) => {
     if (mode === workspaceMode) return;
     try { window.localStorage.setItem(WORKSPACE_MODE_STORAGE_KEY, mode); } catch {}
     router.push(getWorkspaceDashboardPath(mode));
-  }
+  }, [router, workspaceMode]);
 
   // Sidebar collapse persistence
   useEffect(() => {
@@ -130,7 +135,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
     };
   }, []);
 
-  const updateAdviserTheme = (nextTheme: ShellThemeMode) => {
+  const updateAdviserTheme = useCallback((nextTheme: ShellThemeMode) => {
     setThemeMode(nextTheme);
 
     if (typeof window === 'undefined') {
@@ -140,7 +145,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
     document.documentElement.dataset.studentTheme = nextTheme;
     window.localStorage.setItem(STUDENT_THEME_STORAGE_KEY, nextTheme);
     window.dispatchEvent(new Event('thesistrack:student-theme-changed'));
-  };
+  }, []);
 
   const navigationSections = useMemo(() => {
     const sections = ADVISER_NAV_SECTIONS[workspaceMode];
@@ -150,11 +155,16 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
       items: items.filter((item) => item.section === section.key)
     })).filter((section) => section.items.length);
   }, [workspaceMode]);
+  const sidebarRoutes = useMemo(
+    () => navigationSections.flatMap((section) => section.items.map((item) => item.href)),
+    [navigationSections]
+  );
+  const prefetchRoute = useRoutePrefetch(sidebarRoutes);
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     if (isMobile) { setSidebarOpen((c) => !c); return; }
     setSidebarCollapsed((c) => !c);
-  };
+  }, [isMobile]);
 
   const toggleLabel = isMobile
     ? sidebarOpen ? 'Close sidebar' : 'Open sidebar'
@@ -211,11 +221,14 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Adviser Portal</span>
             <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
-              <img
+              <Image
                 alt="ThesisTrack logo"
                 className="system-brand-logo"
+                height={56}
+                priority
                 src={themeMode === 'dark' ? '/System%20Logo/image.png' : '/System%20Logo/logo-transparent.png'}
                 style={{ transform: themeMode === 'dark' ? 'scale(1.15)' : 'none' }}
+                width={72}
               />
               <span className="system-brand-name">
                 <span>Thesis</span>
@@ -243,7 +256,10 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
                       aria-current={isActive ? 'page' : undefined}
                       className={`sidebar-link ${isActive ? 'is-active' : ''}`}
                       href={item.href}
+                      prefetch={false}
                       title={sidebarCollapsed ? item.label : undefined}
+                      onFocus={() => prefetchRoute(item.href)}
+                      onMouseEnter={() => prefetchRoute(item.href)}
                     >
                       <span className="sidebar-link-icon">
                         <i aria-hidden="true" className={`fas ${item.icon}`} />

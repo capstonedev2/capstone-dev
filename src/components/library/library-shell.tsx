@@ -9,7 +9,10 @@ import {
   type LibraryNavKey
 } from '@/components/library/library-data';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
+
+const LIBRARY_PREFETCH_ROUTES = LIBRARY_NAV_ITEMS.map((item) => item.href);
 
 type LibraryShellProps = {
   activeNav: LibraryNavKey;
@@ -27,6 +30,7 @@ export function LibraryShell({
   children
 }: LibraryShellProps) {
   const router = useRouter();
+  const prefetchRoute = useRoutePrefetch(LIBRARY_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('Sarah Rivera');
   const [displayEmail, setDisplayEmail] = useState('library@university.edu.ph');
   const {
@@ -182,6 +186,8 @@ export function LibraryShell({
                   className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
                   href={item.href}
                   title={sidebarCollapsed ? item.label : undefined}
+                  onFocus={() => prefetchRoute(item.href)}
+                  onMouseEnter={() => prefetchRoute(item.href)}
                 >
                   <span className="sidebar-link-icon">
                     <i className={`fas ${item.icon}`} aria-hidden="true" />

@@ -9,7 +9,10 @@ import {
   type ProgramHeadNavKey
 } from '@/components/program-head/program-head-data';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
+
+const PROGRAM_HEAD_PREFETCH_ROUTES = PROGRAM_HEAD_NAV_ITEMS.map((item) => item.href);
 
 type ProgramHeadShellProps = {
   activeNav: ProgramHeadNavKey;
@@ -29,6 +32,7 @@ export function ProgramHeadShell({
   children
 }: ProgramHeadShellProps) {
   const router = useRouter();
+  const prefetchRoute = useRoutePrefetch(PROGRAM_HEAD_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('Dr. Anna Dimagiba');
   const [displayEmail, setDisplayEmail] = useState('program.head@university.edu.ph');
   const {
@@ -181,6 +185,8 @@ export function ProgramHeadShell({
                   className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
                   href={item.href}
                   title={sidebarCollapsed ? item.label : undefined}
+                  onFocus={() => prefetchRoute(item.href)}
+                  onMouseEnter={() => prefetchRoute(item.href)}
                 >
                   <span className="sidebar-link-icon">
                     <i aria-hidden="true" className={`fas ${item.icon}`} />

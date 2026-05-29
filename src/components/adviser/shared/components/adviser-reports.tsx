@@ -102,7 +102,7 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
+            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
               <i className={`fas ${item.icon}`}></i> {item.label}
             </Link>
           ))}

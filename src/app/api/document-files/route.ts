@@ -42,6 +42,19 @@ const DOCUMENT_VIEWER_ROLES = [
   UserRole.ADMIN
 ];
 
+const DEFAULT_DOCUMENT_FILE_LIMIT = 50;
+const MAX_DOCUMENT_FILE_LIMIT = 100;
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 function getBucketForCategory(value: string): DocumentStorageBucket {
   if (value === DOCUMENT_STORAGE_BUCKETS.EVALUATION_FILES) {
     return DOCUMENT_STORAGE_BUCKETS.EVALUATION_FILES;
@@ -150,15 +163,28 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const bucketName = normalizeText(url.searchParams.get('bucketName'));
     const projectId = normalizeText(url.searchParams.get('projectId'));
+    const limit = parsePositiveInteger(url.searchParams.get('limit'), DEFAULT_DOCUMENT_FILE_LIMIT, MAX_DOCUMENT_FILE_LIMIT);
+    const page = parsePositiveInteger(url.searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
 
     if (bucketName) {
       assertDocumentBucket(bucketName);
     }
 
+    const adviserPanelProjectWhere = user.role === UserRole.ADVISER || user.role === UserRole.PANEL
+      ? {
+          OR: [
+            { adviserId: user.id },
+            { group: { groupMembers: { some: { userId: user.id, isActive: true } } } },
+            { evaluations: { some: { evaluatorId: user.id } } }
+          ]
+        }
+      : null;
+
     const where = {
       ...(bucketName ? { bucketName } : { bucketName: { not: null } }),
       ...(projectId ? { projectId } : {}),
       ...(user.role === UserRole.STUDENT ? { userId: user.id } : {}),
+      ...(adviserPanelProjectWhere ? { project: adviserPanelProjectWhere } : {}),
       ...(user.role === UserRole.PROGRAM_HEAD && user.department
         ? {
             OR: [
@@ -190,7 +216,7 @@ export async function GET(request: Request) {
             reviewedAt: true,
             comments: {
               orderBy: { createdAt: 'desc' },
-              take: 50,
+              take: 10,
               select: {
                 id: true,
                 body: true,
@@ -229,6 +255,7 @@ export async function GET(request: Request) {
                 students: true,
                 department: true,
                 groupMembers: {
+                  where: { isActive: true },
                   select: {
                     userId: true,
                     isActive: true,
@@ -255,7 +282,8 @@ export async function GET(request: Request) {
         }
       },
       orderBy: { createdAt: 'desc' },
-      take: 100
+      skip: (page - 1) * limit,
+      take: limit
     });
 
     return successResponse({

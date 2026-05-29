@@ -222,10 +222,10 @@ export function StudentRepository({ data: _data }: { data: StudentDashboardData 
             </div>
 
             <div className="row-actions student-repository-overview-actions">
-              <Link className="btn btn-primary" href="/library/browse">
+              <Link prefetch={false} className="btn btn-primary" href="/library/browse">
                 <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" /> Open Full Library Portal
               </Link>
-              <Link className="btn btn-secondary" href="/students/project-overview">
+              <Link prefetch={false} className="btn btn-secondary" href="/students/project-overview">
                 <i className="fas fa-folder-open" aria-hidden="true" /> Back to Project Overview
               </Link>
             </div>

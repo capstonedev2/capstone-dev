@@ -22,6 +22,19 @@ const TITLE_ROLES = [
   UserRole.ADMIN
 ];
 
+const DEFAULT_TITLE_LIMIT = 50;
+const MAX_TITLE_LIMIT = 100;
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 const projectStatusToTitleStatus: Record<ProjectStatus, 'pending' | 'approved' | 'needs-revision' | 'rejected'> = {
   [ProjectStatus.DRAFT]: 'pending',
   [ProjectStatus.SUBMITTED]: 'pending',
@@ -209,17 +222,37 @@ const projectInclude = {
   files: {
     where: { 
       documentCategory: { in: ['Title Proposal', 'Proposal'] }
+    },
+    select: {
+      id: true,
+      fileName: true,
+      fileType: true,
+      size: true
     }
   },
   submissions: {
     orderBy: { submittedAt: 'desc' },
     take: 1,
-    include: {
-      files: true,
+    select: {
+      id: true,
+      submittedAt: true,
+      reviewedAt: true,
+      files: {
+        select: {
+          id: true,
+          fileName: true,
+          fileType: true,
+          size: true
+        }
+      },
       comments: {
         orderBy: { createdAt: 'desc' },
         take: 1,
-        include: {
+        select: {
+          id: true,
+          body: true,
+          decision: true,
+          createdAt: true,
           author: {
             select: {
               id: true,
@@ -238,6 +271,9 @@ const projectInclude = {
 export async function GET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, TITLE_ROLES);
+    const { searchParams } = new URL(request.url);
+    const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_TITLE_LIMIT, MAX_TITLE_LIMIT);
+    const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
 
     let where: any = {};
 
@@ -267,7 +303,8 @@ export async function GET(request: Request) {
       where,
       include: projectInclude,
       orderBy: { updatedAt: 'desc' },
-      take: 100
+      skip: (page - 1) * limit,
+      take: limit
     });
 
     const titles = projects.map(toTitlePayload);
@@ -409,8 +446,8 @@ export async function POST(request: Request) {
 
       return { project: fullProject, submissionId: submission.id };
     }, {
-      maxWait: 5000,
-      timeout: 15000
+      maxWait: 15000,
+      timeout: 60000
     });
 
     // Handle file uploads OUTSIDE the transaction so slow Supabase calls don't cause timeouts
@@ -616,6 +653,9 @@ export async function PATCH(request: Request) {
         where: { id: updated.id },
         include: projectInclude
       });
+    }, {
+      maxWait: 15000,
+      timeout: 60000
     });
 
     return successResponse({ title: toTitlePayload(updatedProject) });

@@ -1,6 +1,49 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+const DEFAULT_GROUP_LIMIT = 100;
+const MAX_GROUP_LIMIT = 200;
+
+const groupListSelect = {
+  id: true,
+  userId: true,
+  projectId: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  code: true,
+  title: true,
+  projectTitle: true,
+  dept: true,
+  department: true,
+  members: true,
+  students: true,
+  progress: true,
+  statusLabel: true,
+  statusClass: true,
+  lifecycleStatus: true,
+  milestone: true,
+  currentMilestone: true,
+  leader: true,
+  finalDefenseResult: true,
+  finalManuscriptApproved: true,
+  allRequiredMilestonesCompleted: true,
+  completedAt: true,
+  finalScore: true,
+  finalRecommendation: true,
+  allowMemberSubmission: true
+} as const;
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 function normalizeStudentName(value: unknown) {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').toLowerCase() : '';
 }
@@ -61,12 +104,21 @@ export async function GET(request: Request) {
     const userId = searchParams.get('userId');
     const studentName = searchParams.get('studentName');
     const department = searchParams.get('department');
+    const fields = searchParams.get('fields');
+    const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_GROUP_LIMIT, MAX_GROUP_LIMIT);
+    const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
+    const skip = (page - 1) * limit;
+
+    const select = fields === 'students' ? { students: true } : groupListSelect;
     
     let groups;
     if (userId) {
       groups = await prisma.group.findMany({
         where: { userId },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select
       });
     } else if (studentName) {
       groups = await prisma.group.findMany({
@@ -75,16 +127,25 @@ export async function GET(request: Request) {
             has: studentName
           }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select
       });
     } else if (department) {
       groups = await prisma.group.findMany({
         where: { department },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select
       });
     } else {
       groups = await prisma.group.findMany({
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select
       });
     }
     return NextResponse.json(groups);

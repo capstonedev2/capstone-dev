@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
 const ADMIN_NAV_ITEMS = [
@@ -17,6 +18,7 @@ const ADMIN_NAV_ITEMS = [
   { key: 'repository', href: '/admin/repository', label: 'Documents Repository', icon: 'fa-folder' },
   { key: 'announcements', href: '/admin/announcements', label: 'Announcements', icon: 'fa-bullhorn' }
 ] as const;
+const ADMIN_PREFETCH_ROUTES = ADMIN_NAV_ITEMS.map((item) => item.href);
 
 export type AdminNavKey = (typeof ADMIN_NAV_ITEMS)[number]['key'];
 type AdminShellActiveNav = AdminNavKey | 'notifications' | 'settings';
@@ -39,6 +41,7 @@ export function AdminShell({
   actions
 }: AdminShellProps) {
   const router = useRouter();
+  const prefetchRoute = useRoutePrefetch(ADMIN_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('School Research Head');
   const [displayEmail, setDisplayEmail] = useState('research.head@university.edu.ph');
   const currentNavItem = ADMIN_NAV_ITEMS.find((item) => item.key === activeNav);
@@ -186,6 +189,8 @@ export function AdminShell({
                   href={item.href}
                   title={sidebarCollapsed ? item.label : undefined}
                   onClick={closeSidebar}
+                  onFocus={() => prefetchRoute(item.href)}
+                  onMouseEnter={() => prefetchRoute(item.href)}
                 >
                   <span className="sidebar-link-icon">
                     <i aria-hidden="true" className={`fas ${item.icon}`} />

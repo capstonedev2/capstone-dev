@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { FileItem } from '@/components/students/student-project-file-item';
 import type { PortalRole, ProjectFileRecord, ProjectFileSortOption } from '@/components/students/student-project-files.shared';
 import {
@@ -34,7 +35,7 @@ type FileTableProps = {
   uploadLockedMessage?: string;
 };
 
-export function FileTable({
+export const FileTable = memo(function FileTable({
   files,
   totalCount,
   currentUserRole,
@@ -232,4 +233,4 @@ export function FileTable({
       )}
     </div>
   );
-}
+});

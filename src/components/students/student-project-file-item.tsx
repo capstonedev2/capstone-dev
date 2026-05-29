@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { PortalRole, ProjectFileRecord, ProjectFileStatus } from '@/components/students/student-project-files.shared';
 import {
   formatProjectFileDate,
@@ -110,7 +111,7 @@ function MiniFileProgress({ status }: { status: ProjectFileStatus }) {
   );
 }
 
-export function FileItem({
+export const FileItem = memo(function FileItem({
   file,
   currentUserRole,
   currentUserId,
@@ -238,4 +239,4 @@ export function FileItem({
       </td>
     </tr>
   );
-}
+});

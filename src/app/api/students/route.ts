@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+const DEFAULT_STUDENT_LIMIT = 100;
+const MAX_STUDENT_LIMIT = 200;
+
 const departmentAliases: Record<string, string[]> = {
   ict: ['ICT', 'IT', 'BSIT', 'Information Technology'],
   it: ['ICT', 'IT', 'BSIT', 'Information Technology'],
@@ -27,11 +30,23 @@ function getDepartmentSearchTerms(value: string | null) {
   return Array.from(new Set([normalized, ...(departmentAliases[key] || [])]));
 }
 
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const department = searchParams.get('department');
     const departmentTerms = getDepartmentSearchTerms(department);
+    const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_STUDENT_LIMIT, MAX_STUDENT_LIMIT);
+    const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
 
     const whereClause: any = { role: 'STUDENT' };
     if (departmentTerms.length) {
@@ -53,7 +68,9 @@ export async function GET(request: Request) {
         studentId: true,
         department: true
       },
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
     });
     
     return NextResponse.json(students);

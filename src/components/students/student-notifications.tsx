@@ -25,6 +25,18 @@ function sortByCreatedAtDesc<T extends { created_at: string }>(items: T[]) {
   return [...items].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
 }
 
+function toClientNotification(notification: StudentNotification) {
+  return {
+    id: notification.id,
+    title: notification.title,
+    message: notification.message,
+    type: notification.type,
+    status: notification.read ? 'READ' : 'UNREAD',
+    createdAt: notification.created_at,
+    readAt: notification.read ? notification.updated_at : null
+  };
+}
+
 function canPollApi() {
   return (
     typeof window !== 'undefined' &&
@@ -200,7 +212,7 @@ function NotificationCard({
               </>
             ) : (
               <>
-                <Link className={PRIMARY_ACTION_CLASS} href={action.href} onClick={() => !item.read && onMarkRead(item.id)}>
+                <Link prefetch={false} className={PRIMARY_ACTION_CLASS} href={action.href} onClick={() => !item.read && onMarkRead(item.id)}>
                   <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" /> {action.label}
                 </Link>
                 {!item.read ? (
@@ -273,7 +285,9 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
   const [completedOpen, setCompletedOpen] = useState(false);
   const [notificationsData, setNotificationsData] = useState(() => sortByCreatedAtDesc(data.notifications || []));
 
-  const [realNotifications, setRealNotifications] = useState<any[]>([]);
+  const [realNotifications, setRealNotifications] = useState<any[]>(() =>
+    (data.notifications || []).map(toClientNotification)
+  );
 
   useEffect(() => {
     if (!data.profile.user_id) return;
@@ -290,7 +304,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
       inFlightController = controller;
 
       try {
-        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, {
+        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}&limit=50`, {
           cache: 'no-store',
           signal: controller.signal
         });
@@ -416,8 +430,10 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
         body: JSON.stringify({ notificationId: id, action })
       });
       if (res.ok) {
-        // Optimistically update the UI to mark it read
-        markRead(id);
+        const readAt = new Date().toISOString();
+        setNotificationsData((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
+        setRealNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'READ', readAt } : item)));
+        window.dispatchEvent(new Event('thesistrack:notifications-updated'));
       }
     } catch (e) {
       console.error('Failed to process notification action', e);
@@ -425,16 +441,18 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
   };
 
   const markAllRead = () => {
-    setNotificationsData((prev) => prev.map((item) => ({ ...item, read: true })));
     const unreadIds = notificationsData.filter((item) => !item.read).map((item) => item.id);
+    if (!unreadIds.length) {
+      return;
+    }
+
+    setNotificationsData((prev) => prev.map((item) => ({ ...item, read: true })));
     setRealNotifications((prev) => prev.map((item) => (unreadIds.includes(item.id) ? { ...item, status: 'READ', readAt: new Date().toISOString() } : item)));
-    unreadIds.forEach((notificationId) => {
-      void fetch('/api/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notificationId, action: 'read' }),
-        keepalive: true
-      });
+    void fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationIds: unreadIds, action: 'read' }),
+      keepalive: true
     });
     window.dispatchEvent(new Event('thesistrack:notifications-updated'));
   };
@@ -521,10 +539,10 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Link className={PRIMARY_ACTION_CLASS} href="/students/faculty-feedback">
+                <Link prefetch={false} className={PRIMARY_ACTION_CLASS} href="/students/faculty-feedback">
                   <i className="fas fa-comments" aria-hidden="true" /> Open Feedback
                 </Link>
-                <Link className={SECONDARY_ACTION_CLASS} href="/students/schedule">
+                <Link prefetch={false} className={SECONDARY_ACTION_CLASS} href="/students/schedule">
                   <i className="fas fa-calendar-check" aria-hidden="true" /> Check Schedule
                 </Link>
               </div>
@@ -588,7 +606,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
                   <div className="mt-5 flex flex-wrap gap-2">
                     {focusNotificationAction ? (
-                      <Link className={PRIMARY_ACTION_CLASS} href={focusNotificationAction.href}>
+                      <Link prefetch={false} className={PRIMARY_ACTION_CLASS} href={focusNotificationAction.href}>
                         <i className="fas fa-arrow-right" aria-hidden="true" /> {focusNotificationAction.label}
                       </Link>
                     ) : null}
@@ -754,7 +772,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                     const typeMeta = getNotificationTypeMeta(item.type);
 
                     return (
-                      <Link
+                      <Link prefetch={false}
                         key={item.id}
                         className="flex items-start gap-3 rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-white hover:shadow-sm"
                         href={action.href}
@@ -786,7 +804,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
               <div className="mt-4 space-y-2.5">
                 {notificationBreakdown.map((item) => (
-                  <Link
+                  <Link prefetch={false}
                     key={item.key}
                     className="flex items-center gap-3 rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-white hover:shadow-sm"
                     href={item.href}
@@ -814,7 +832,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                   { href: '/students/project-files', label: 'Project Files', copy: 'Review uploads tied to deadlines and approvals.', icon: 'fa-folder-open' },
                   { href: '/students/schedule', label: 'Schedule', copy: 'Check consultation sessions and updated events.', icon: 'fa-calendar-days' }
                 ].map((item) => (
-                  <Link
+                  <Link prefetch={false}
                     key={item.href}
                     className="flex items-start gap-3 rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-white hover:shadow-sm"
                     href={item.href}

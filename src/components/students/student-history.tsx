@@ -720,10 +720,10 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Link className={PRIMARY_LINK_CLASS} href="/students/project-files">
+              <Link prefetch={false} className={PRIMARY_LINK_CLASS} href="/students/project-files">
                 <i className="fas fa-file-lines" aria-hidden="true" /> Open Project Files
               </Link>
-              <Link className={SECONDARY_LINK_CLASS} href="/students/faculty-feedback">
+              <Link prefetch={false} className={SECONDARY_LINK_CLASS} href="/students/faculty-feedback">
                 <i className="fas fa-comments" aria-hidden="true" /> Review Feedback
               </Link>
             </div>
@@ -901,7 +901,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                                   </div>
 
                                   {entry.route ? (
-                                    <Link
+                                    <Link prefetch={false}
                                       className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#003A8F] transition hover:text-[#002c6b]"
                                       href={entry.route}
                                     >
@@ -1016,7 +1016,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
               <h3 className="mt-2 text-lg font-bold text-slate-950">Jump to the source modules</h3>
               <div className="mt-4 space-y-2.5">
                 {quickLinks.map((item) => (
-                  <Link
+                  <Link prefetch={false}
                     key={item.href}
                     className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 transition hover:-translate-y-px hover:border-slate-300 hover:bg-white"
                     href={item.href}

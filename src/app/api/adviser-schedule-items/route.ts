@@ -22,6 +22,20 @@ const ADVISER_SCHEDULE_ROLES = [
   UserRole.SYSTEM_ADMIN
 ];
 
+const DEFAULT_SCHEDULE_LIMIT = 50;
+const DEFAULT_SCHEDULE_PROJECT_LIMIT = 100;
+const MAX_SCHEDULE_LIMIT = 100;
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 const scheduleTypeLabels: Record<AdviserScheduleItemType, string> = {
   [AdviserScheduleItemType.CONSULTATION]: 'Consultation',
   [AdviserScheduleItemType.DEADLINE]: 'Deadline',
@@ -263,6 +277,9 @@ export async function GET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, ADVISER_SCHEDULE_ROLES);
     const accessWhere = getProjectAccessWhere(user);
+    const url = new URL(request.url);
+    const itemLimit = parsePositiveInteger(url.searchParams.get('limit'), DEFAULT_SCHEDULE_LIMIT, MAX_SCHEDULE_LIMIT);
+    const projectLimit = parsePositiveInteger(url.searchParams.get('projectLimit'), DEFAULT_SCHEDULE_PROJECT_LIMIT, MAX_SCHEDULE_LIMIT);
 
     const [items, projects] = await Promise.all([
       prisma.adviserScheduleItem.findMany({
@@ -283,15 +300,25 @@ export async function GET(request: Request) {
           }
         },
         orderBy: { scheduledAt: 'asc' },
-        take: 100
+        take: itemLimit
       }),
       prisma.project.findMany({
         where: accessWhere,
-        include: {
+        select: {
+          id: true,
+          title: true,
           group: {
-            include: {
+            select: {
+              code: true,
+              title: true,
+              students: true,
+              leader: true,
               groupMembers: {
-                include: {
+                where: { isActive: true },
+                select: {
+                  userId: true,
+                  isActive: true,
+                  role: true,
                   user: {
                     select: {
                       id: true,
@@ -308,7 +335,7 @@ export async function GET(request: Request) {
           }
         },
         orderBy: { updatedAt: 'desc' },
-        take: 100
+        take: projectLimit
       })
     ]);
 

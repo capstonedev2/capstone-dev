@@ -139,16 +139,12 @@ export function PortalShellActionMenus({
       return next;
     });
 
-    void Promise.allSettled(
-      unreadItems.map((item) =>
-        fetch('/api/notifications', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notificationId: item.id, action: 'read' }),
-          keepalive: true
-        })
-      )
-    ).finally(() => {
+    void fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notificationIds: unreadItems.map((item) => item.id), action: 'read' }),
+      keepalive: true
+    }).finally(() => {
       window.dispatchEvent(new Event('thesistrack:notifications-updated'));
     });
   };
@@ -205,6 +201,7 @@ export function PortalShellActionMenus({
               <Link
                 className="portal-shell-notification-menu-view-all is-primary"
                 href={notificationHref}
+                prefetch={false}
                 onClick={() => setNotificationMenuOpen(false)}
               >
                 Open center
@@ -230,6 +227,7 @@ export function PortalShellActionMenus({
                   key={item.id}
                   className={`portal-shell-notification-menu-item${item.unread === false || readNotificationIds.has(item.id) ? '' : ' is-unread'}`}
                   href={item.href}
+                  prefetch={false}
                   onClick={() => {
                     if (item.unread !== false && !readNotificationIds.has(item.id)) {
                       markNotificationRead(item.id);
@@ -268,6 +266,7 @@ export function PortalShellActionMenus({
             <Link
               className="portal-shell-notification-menu-footer-link"
               href={notificationHref}
+              prefetch={false}
               onClick={() => setNotificationMenuOpen(false)}
             >
               {notificationFooterLabel}
@@ -337,6 +336,7 @@ export function PortalShellActionMenus({
                     key={`${action.label}-${action.href}`}
                     className={`portal-shell-profile-link${action.danger ? ' is-danger' : ''}`}
                     href={action.href}
+                    prefetch={false}
                     onClick={() => setProfileMenuOpen(false)}
                   >
                     <i aria-hidden="true" className={`fas ${action.icon}`} />

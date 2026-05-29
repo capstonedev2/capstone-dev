@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
 import {
@@ -12,7 +12,7 @@ import {
   RecentSubmissions,
   WeeklySchedule
 } from '@/components/adviser/shared/config/dashboard-sections';
-import type { DashboardAction } from '@/components/adviser/shared/config/dashboard-types';
+import type { DashboardAction, RecentSubmissionItem } from '@/components/adviser/shared/config/dashboard-types';
 import {
   buildAdviserAlerts,
   buildAdviserLiveUpdates,
@@ -38,7 +38,7 @@ type WorkspaceMode = keyof typeof WORKSPACE_META;
 type ModalKey = 'review' | 'evaluation' | 'report' | null;
 type ToastType = 'success' | 'error' | 'info';
 
-export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
+export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
   const { workspaceMode, switchWorkspace, pathname, basePath } = useWorkspaceMode();
   const [groups, setGroups] = useState(data.groups);
   const [panelProjects, setPanelProjects] = useState(data.panelProjects);
@@ -133,33 +133,33 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
     [groups]
   );
 
-  function showToast(message: string, type: ToastType = 'info') {
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = Date.now();
     setToast({ id, message, type });
 
     window.setTimeout(() => {
-      setToast((current) => (current?.id === id ? null : current));
+        setToast((current) => (current?.id === id ? null : current));
     }, 3200);
-  }
+  }, []);
 
-  function openReviewModal(groupId: string) {
+  const openReviewModal = useCallback((groupId: string) => {
     setReviewGroupId(groupId);
     setReviewDecision('approve');
     setReviewComments('');
     setNotifyStudentReview(true);
     setActiveModal('review');
-  }
+  }, []);
 
-  function openEvaluationModal(projectId: string) {
+  const openEvaluationModal = useCallback((projectId: string) => {
     setEvaluationProjectId(projectId);
     setEvaluationScores([8, 12, 8, 4]);
     setEvaluationRecommendation('Pass - Proceed to Development');
     setActiveModal('evaluation');
-  }
+  }, []);
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setActiveModal(null);
-  }
+  }, []);
 
   function submitReview() {
     if (!reviewComments.trim() || !selectedReviewGroup) {
@@ -257,20 +257,23 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
     }, 1200);
   }
 
-  const quickActions: DashboardAction[] =
-    workspaceMode === 'adviser'
-      ? [
-          { id: 'review-submissions', icon: 'fa-check-double', label: 'Review Submissions', helperText: `${pendingAdviserReviews} items are waiting in your queue`, href: `${basePath}/submissions` },
-          { id: 'schedule-consultation', icon: 'fa-calendar-plus', label: 'Schedule Consultation', helperText: 'Adjust meetings and consultation slots quickly', href: `${basePath}/schedule` },
-          { id: 'view-groups', icon: 'fa-users', label: 'View My Groups', helperText: `${activeAdviserGroupCount} active groups under your supervision`, href: `${basePath}/groups` },
-          { id: 'generate-report', icon: 'fa-chart-line', label: 'Generate Report', helperText: 'Prepare a progress summary for the current cycle', onClick: () => setActiveModal('report') }
-        ]
-      : [
-          { id: 'evaluation-queue', icon: 'fa-clipboard-check', label: 'Review Evaluations', helperText: `${pendingPanelReviews} scoring packets still need your recommendation`, href: `${basePath}/evaluation-queue` },
-          { id: 'view-defense-schedule', icon: 'fa-calendar-days', label: 'Defense Schedule', helperText: 'Check upcoming defense sessions and panel assignments', href: `${basePath}/defense-schedule` },
-          { id: 'view-panel-profile', icon: 'fa-user', label: 'View My Groups', helperText: 'Open panel profile and current assignment overview', href: `${basePath}/profile` },
-          { id: 'panel-report', icon: 'fa-chart-bar', label: 'Generate Report', helperText: 'Export a consolidated review-cycle report', onClick: () => setActiveModal('report') }
-        ];
+  const quickActions = useMemo<DashboardAction[]>(
+    () =>
+      workspaceMode === 'adviser'
+        ? [
+            { id: 'review-submissions', icon: 'fa-check-double', label: 'Review Submissions', helperText: `${pendingAdviserReviews} items are waiting in your queue`, href: `${basePath}/submissions` },
+            { id: 'schedule-consultation', icon: 'fa-calendar-plus', label: 'Schedule Consultation', helperText: 'Adjust meetings and consultation slots quickly', href: `${basePath}/schedule` },
+            { id: 'view-groups', icon: 'fa-users', label: 'View My Groups', helperText: `${activeAdviserGroupCount} active groups under your supervision`, href: `${basePath}/groups` },
+            { id: 'generate-report', icon: 'fa-chart-line', label: 'Generate Report', helperText: 'Prepare a progress summary for the current cycle', onClick: () => setActiveModal('report') }
+          ]
+        : [
+            { id: 'evaluation-queue', icon: 'fa-clipboard-check', label: 'Review Evaluations', helperText: `${pendingPanelReviews} scoring packets still need your recommendation`, href: `${basePath}/evaluation-queue` },
+            { id: 'view-defense-schedule', icon: 'fa-calendar-days', label: 'Defense Schedule', helperText: 'Check upcoming defense sessions and panel assignments', href: `${basePath}/defense-schedule` },
+            { id: 'view-panel-profile', icon: 'fa-user', label: 'View My Groups', helperText: 'Open panel profile and current assignment overview', href: `${basePath}/profile` },
+            { id: 'panel-report', icon: 'fa-chart-bar', label: 'Generate Report', helperText: 'Export a consolidated review-cycle report', onClick: () => setActiveModal('report') }
+          ],
+    [activeAdviserGroupCount, basePath, pendingAdviserReviews, pendingPanelReviews, workspaceMode]
+  );
 
   const watchedGroups = workspaceMode === 'adviser' ? groups : panelProjects;
   const averageProgress = workspaceMode === 'adviser'
@@ -301,69 +304,86 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
   const nextScheduleItem = weeklySchedule[0] ?? null;
   const topQueueItem = recentSubmissionItems[0] ?? null;
   const topAttentionItem = attentionAlerts[0] ?? null;
-  const focusMetrics = [
-    {
-      id: 'review-load',
-      icon: workspaceMode === 'adviser' ? 'fa-inbox' : 'fa-clipboard-check',
-      label: workspaceMode === 'adviser' ? 'Review load' : 'Evaluation load',
-      value: String(activeReviewCount),
-      detail: workspaceMode === 'adviser' ? 'Items waiting for adviser action' : 'Packets waiting for scoring',
-      tone: activeReviewCount ? 'warning' : 'success'
+  const focusMetrics = useMemo(
+    () => [
+      {
+        id: 'review-load',
+        icon: workspaceMode === 'adviser' ? 'fa-inbox' : 'fa-clipboard-check',
+        label: workspaceMode === 'adviser' ? 'Review load' : 'Evaluation load',
+        value: String(activeReviewCount),
+        detail: workspaceMode === 'adviser' ? 'Items waiting for adviser action' : 'Packets waiting for scoring',
+        tone: activeReviewCount ? 'warning' : 'success'
+      },
+      {
+        id: 'watchlist',
+        icon: 'fa-triangle-exclamation',
+        label: 'Watchlist',
+        value: String(atRiskCount),
+        detail: workspaceMode === 'adviser' ? 'Groups with revision or progress risk' : 'Panel assignments not yet completed',
+        tone: atRiskCount ? 'danger' : 'success'
+      },
+      {
+        id: 'schedule',
+        icon: workspaceMode === 'adviser' ? 'fa-calendar-check' : 'fa-calendar-days',
+        label: 'This week',
+        value: String(weeklySchedule.length),
+        detail: nextScheduleItem ? `${nextScheduleItem.dateLabel}, ${nextScheduleItem.timeLabel}` : 'No scheduled sessions',
+        tone: weeklySchedule.length ? 'info' : 'neutral'
+      },
+      {
+        id: 'progress',
+        icon: 'fa-chart-simple',
+        label: workspaceMode === 'adviser' ? 'Average progress' : 'Completion rate',
+        value: `${averageProgress}%`,
+        detail: `${watchedGroups.length} ${workspaceMode === 'adviser' ? 'groups' : 'assignments'} tracked`,
+        tone: averageProgress >= 80 ? 'success' : averageProgress >= 60 ? 'warning' : 'danger'
+      }
+    ] as const,
+    [activeReviewCount, atRiskCount, averageProgress, nextScheduleItem, watchedGroups.length, weeklySchedule.length, workspaceMode]
+  );
+  const nextActions = useMemo(
+    () => [
+      topAttentionItem
+        ? {
+            id: 'attention',
+            icon: topAttentionItem.priority === 'urgent' ? 'fa-circle-exclamation' : 'fa-flag',
+            label: topAttentionItem.title,
+            detail: topAttentionItem.meta,
+            href: workspaceMode === 'adviser' ? `${basePath}/progress` : `${basePath}/evaluation-queue`
+          }
+        : null,
+      topQueueItem
+        ? {
+            id: 'queue',
+            icon: workspaceMode === 'adviser' ? 'fa-file-circle-check' : 'fa-star-half-stroke',
+            label: topQueueItem.fileTitle,
+            detail: `${topQueueItem.groupCode} - ${topQueueItem.statusLabel}`,
+            href: workspaceMode === 'adviser' ? `${basePath}/submissions` : `${basePath}/evaluation-queue`
+          }
+        : null,
+      nextScheduleItem
+        ? {
+            id: 'schedule',
+            icon: workspaceMode === 'adviser' ? 'fa-calendar-check' : 'fa-calendar-days',
+            label: nextScheduleItem.groupName,
+            detail: `${nextScheduleItem.eventType} - ${nextScheduleItem.dateLabel} ${nextScheduleItem.timeLabel}`,
+            href: scheduleHref
+          }
+        : null
+    ].filter((item): item is { id: string; icon: string; label: string; detail: string; href: string } => Boolean(item)),
+    [basePath, nextScheduleItem, scheduleHref, topAttentionItem, topQueueItem, workspaceMode]
+  );
+  const handleRecentSubmissionAction = useCallback(
+    (item: RecentSubmissionItem) => {
+      if (workspaceMode === 'adviser') {
+        openReviewModal(item.actionId);
+        return;
+      }
+
+      openEvaluationModal(item.actionId);
     },
-    {
-      id: 'watchlist',
-      icon: 'fa-triangle-exclamation',
-      label: 'Watchlist',
-      value: String(atRiskCount),
-      detail: workspaceMode === 'adviser' ? 'Groups with revision or progress risk' : 'Panel assignments not yet completed',
-      tone: atRiskCount ? 'danger' : 'success'
-    },
-    {
-      id: 'schedule',
-      icon: workspaceMode === 'adviser' ? 'fa-calendar-check' : 'fa-calendar-days',
-      label: 'This week',
-      value: String(weeklySchedule.length),
-      detail: nextScheduleItem ? `${nextScheduleItem.dateLabel}, ${nextScheduleItem.timeLabel}` : 'No scheduled sessions',
-      tone: weeklySchedule.length ? 'info' : 'neutral'
-    },
-    {
-      id: 'progress',
-      icon: 'fa-chart-simple',
-      label: workspaceMode === 'adviser' ? 'Average progress' : 'Completion rate',
-      value: `${averageProgress}%`,
-      detail: `${watchedGroups.length} ${workspaceMode === 'adviser' ? 'groups' : 'assignments'} tracked`,
-      tone: averageProgress >= 80 ? 'success' : averageProgress >= 60 ? 'warning' : 'danger'
-    }
-  ] as const;
-  const nextActions = [
-    topAttentionItem
-      ? {
-          id: 'attention',
-          icon: topAttentionItem.priority === 'urgent' ? 'fa-circle-exclamation' : 'fa-flag',
-          label: topAttentionItem.title,
-          detail: topAttentionItem.meta,
-          href: workspaceMode === 'adviser' ? `${basePath}/progress` : `${basePath}/evaluation-queue`
-        }
-      : null,
-    topQueueItem
-      ? {
-          id: 'queue',
-          icon: workspaceMode === 'adviser' ? 'fa-file-circle-check' : 'fa-star-half-stroke',
-          label: topQueueItem.fileTitle,
-          detail: `${topQueueItem.groupCode} - ${topQueueItem.statusLabel}`,
-          href: workspaceMode === 'adviser' ? `${basePath}/submissions` : `${basePath}/evaluation-queue`
-        }
-      : null,
-    nextScheduleItem
-      ? {
-          id: 'schedule',
-          icon: workspaceMode === 'adviser' ? 'fa-calendar-check' : 'fa-calendar-days',
-          label: nextScheduleItem.groupName,
-          detail: `${nextScheduleItem.eventType} - ${nextScheduleItem.dateLabel} ${nextScheduleItem.timeLabel}`,
-          href: scheduleHref
-        }
-      : null
-  ].filter((item): item is { id: string; icon: string; label: string; detail: string; href: string } => Boolean(item));
+    [openEvaluationModal, openReviewModal, workspaceMode]
+  );
 
   return (
     <div className="dashboard-wrapper">
@@ -385,7 +405,7 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS[workspaceMode].map((item, index) => (
-            <Link key={`${item.href}-${item.label}`} className={isNavItemActive(pathname, item.href) ? 'active' : ''} href={item.href}>
+            <Link key={`${item.href}-${item.label}`} className={isNavItemActive(pathname, item.href) ? 'active' : ''} href={item.href} prefetch={false}>
               <i className={`fas ${item.icon}`} />
               {workspaceMode === 'adviser' && index === 0 ? <span id="dashboardNavLabel">{meta.navLabel}</span> : item.label}
             </Link>
@@ -422,11 +442,11 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
                 Review the queue, check group risk, and move the next supervision task without leaving the dashboard.
               </p>
               <div className="adviser-command-actions">
-                <Link href={primaryActionHref}>
+                <Link href={primaryActionHref} prefetch={false}>
                   <i aria-hidden="true" className={`fas ${meta.primaryActionIcon}`} />
                   {meta.primaryActionLabel}
                 </Link>
-                <Link className="is-secondary" href={scheduleHref}>
+                <Link className="is-secondary" href={scheduleHref} prefetch={false}>
                   <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-calendar' : 'fa-calendar-days'}`} />
                   {workspaceMode === 'adviser' ? 'Open Schedule' : 'Defense Schedule'}
                 </Link>
@@ -483,7 +503,7 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
                 </div>
                 {nextActions.length ? (
                   nextActions.map((item) => (
-                    <Link key={item.id} href={item.href}>
+                    <Link key={item.id} href={item.href} prefetch={false}>
                       <i aria-hidden="true" className={`fas ${item.icon}`} />
                       <span>
                         <strong>{item.label}</strong>
@@ -506,7 +526,7 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
                 actionHref={workspaceMode === 'adviser' ? `${basePath}/submissions` : `${basePath}/evaluation-queue`}
                 actionLinkLabel={workspaceMode === 'adviser' ? 'Open full queue' : 'Open evaluation queue'}
                 items={recentSubmissionItems}
-                onAction={(item) => (workspaceMode === 'adviser' ? openReviewModal(item.actionId) : openEvaluationModal(item.actionId))}
+                onAction={handleRecentSubmissionAction}
                 title={workspaceMode === 'adviser' ? 'Recent Submissions' : 'Pending Evaluations'}
                 description={
                   workspaceMode === 'adviser'
@@ -669,4 +689,4 @@ export function AdviserDashboard({ data }: { data: AdviserDashboardData }) {
       </main>
     </div>
   );
-}
+});

@@ -4,30 +4,73 @@ import { prisma } from '@/lib/prisma';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { UserRole } from '@/generated/prisma/client';
 
+const DEFAULT_EVALUATION_LIMIT = 50;
+const MAX_EVALUATION_LIMIT = 100;
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.ADVISER, UserRole.PANEL]);
     const userId = user.id;
+    const limit = parsePositiveInteger(request.nextUrl.searchParams.get('limit'), DEFAULT_EVALUATION_LIMIT, MAX_EVALUATION_LIMIT);
+    const page = parsePositiveInteger(request.nextUrl.searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
 
     const evaluations = await prisma.evaluation.findMany({
       where: {
         evaluatorId: userId,
       },
-      include: {
+      select: {
+        id: true,
+        score: true,
+        recommendation: true,
+        evaluatorId: true,
+        remarks: true,
+        rubricData: true,
+        studentEvaluations: true,
+        submittedAt: true,
         project: {
-          include: {
+          select: {
+            title: true,
             group: {
-              include: {
+              select: {
+                code: true,
                 groupMembers: {
-                  include: { user: true }
+                  where: { isActive: true },
+                  select: {
+                    user: {
+                      select: {
+                        name: true
+                      }
+                    }
+                  }
                 }
               }
             },
-            department: true
+            department: {
+              select: {
+                name: true
+              }
+            }
           }
         },
-        defenseSchedule: true
-      }
+        defenseSchedule: {
+          select: {
+            scheduledAt: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit
     });
 
     const formattedEvaluations = evaluations.map(ev => {

@@ -5,6 +5,19 @@ import { handleApiError, successResponse } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 
+const DEFAULT_ADVISER_LIMIT = 100;
+const MAX_ADVISER_LIMIT = 200;
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 /**
  * GET /api/advisers
  * Returns the faculty accounts that can sit on a defense panel.
@@ -12,6 +25,9 @@ export const runtime = 'nodejs';
  */
 export async function GET(request: Request) {
   try {
+    const url = new URL(request.url);
+    const limit = parsePositiveInteger(url.searchParams.get('limit'), DEFAULT_ADVISER_LIMIT, MAX_ADVISER_LIMIT);
+
     await requireAuthenticatedUser(request, [
       UserRole.ADVISER,
       UserRole.PANEL,
@@ -39,6 +55,7 @@ export async function GET(request: Request) {
         { role: 'desc' },
         { name: 'asc' },
       ],
+      take: limit
     });
 
     return successResponse({ advisers: panelists, panelists });

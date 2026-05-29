@@ -65,7 +65,7 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
       setStudentDocumentError(null);
 
       try {
-        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}`, {
+        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}&limit=50`, {
           cache: 'no-store'
         });
         const payload = await response.json().catch(() => null);
@@ -130,20 +130,20 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
       return;
     }
 
-    await Promise.all(recipientIds.map((userId) =>
-      fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+    await fetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notifications: recipientIds.map((userId) => ({
           userId,
           title,
           message,
           type,
           entityType,
           entityId: submission.id
-        })
+        }))
       })
-    ));
+    });
   }
 
   async function openSignedStudentDocument(submission: AdviserSubmissionRecord) {

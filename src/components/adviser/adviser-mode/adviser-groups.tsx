@@ -24,7 +24,7 @@ type WorkspaceMode = keyof typeof WORKSPACE_META;
 type GroupViewMode = 'table' | 'card';
 type GroupLifecycleTab = 'active' | 'completed';
 type AdviserGroup = AdviserDashboardData['groups'][number];
-type ManagedAdviserGroup = AdviserGroup & { leader?: string };
+type ManagedAdviserGroup = AdviserGroup;
 type LifecycleGroup = ManagedAdviserGroup & { status: AdviserGroupLifecycleStatus };
 type GroupFilterStatus = 'all' | 'attention' | AdviserGroupLifecycleStatus;
 type GroupDraft = {
@@ -150,10 +150,9 @@ function SummaryCard({
   return (
     <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
+        <div className="space-y-1">
           <p className="text-sm font-semibold text-slate-500">{label}</p>
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">{value}</h2>
-          <p className="text-sm text-slate-500">{helper}</p>
         </div>
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg shadow-sm" style={toneStyles}>
           <i className={`fas ${icon}`}></i>
@@ -166,20 +165,17 @@ function SummaryCard({
 function SectionHeader({
   eyebrow,
   title,
-  description,
   actions
 }: {
   eyebrow: string;
   title: string;
-  description: string;
   actions?: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-4 border-b border-slate-200/80 px-6 py-5 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-        <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-900">{title}</h2>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
+        <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900">{title}</h2>
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
     </div>
@@ -231,7 +227,6 @@ function EmptyState({ message }: { message: string }) {
           <i className="fas fa-users text-xl"></i>
         </div>
         <p className="text-base font-semibold text-slate-700">{message}</p>
-        <p className="mt-1 text-sm text-slate-500">Try adjusting the filters or add a group to get started.</p>
       </div>
     </div>
   );
@@ -1299,37 +1294,12 @@ function CreateGroupModal({
 export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
   const adviserDepartment = data.profile.department?.replace(' Department', '') || 'IT';
   const { workspaceMode, switchWorkspace, pathname, basePath } = useWorkspaceMode();
-  const [groups, setGroups] = useState<ManagedAdviserGroup[]>(
-    () => data.groups.filter((group) => group.user_id === data.profile.user_id)
+  const initialAdviserGroups = useMemo(
+    () => data.groups.filter((group) => group.user_id === data.profile.user_id),
+    [data.groups, data.profile.user_id]
   );
+  const [groups, setGroups] = useState<ManagedAdviserGroup[]>(() => initialAdviserGroups);
   
-  useEffect(() => {
-    async function fetchGroups() {
-      try {
-        const response = await fetch(`/api/groups?userId=${data.profile.user_id}`);
-        if (response.ok) {
-          const realGroups = await response.json();
-          setGroups(current => {
-             const mockGroups = data.groups.filter(g => g.user_id === data.profile.user_id);
-             // Format real groups to match ManagedAdviserGroup
-             const formattedRealGroups = realGroups.map((g: any) => ({
-               ...g,
-               user_id: g.userId,
-               project_id: g.projectId,
-               created_at: g.createdAt,
-               updated_at: g.updatedAt
-             }));
-             const realGroupIds = new Set(formattedRealGroups.map((g: any) => g.id));
-             const uniqueMockGroups = mockGroups.filter(g => !realGroupIds.has(g.id));
-             return [...formattedRealGroups, ...uniqueMockGroups];
-          });
-        }
-      } catch (e) {
-         console.error('Failed to fetch groups', e);
-      }
-    }
-    fetchGroups();
-  }, [data.profile.user_id, adviserDepartment, data.groups]);
   const [activeTab, setActiveTab] = useState<GroupLifecycleTab>('active');
   const [viewMode, setViewMode] = useState<GroupViewMode>('table');
   const [statusFilter, setStatusFilter] = useState<GroupFilterStatus>('all');
@@ -1347,8 +1317,8 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     async function fetchStudents() {
       try {
         const [studentsResponse, groupsResponse] = await Promise.all([
-          fetch(`/api/students?department=${encodeURIComponent(adviserDepartment)}`),
-          fetch(`/api/groups?department=${encodeURIComponent(adviserDepartment)}`)
+          fetch(`/api/students?department=${encodeURIComponent(adviserDepartment)}&limit=200`),
+          fetch(`/api/groups?department=${encodeURIComponent(adviserDepartment)}&fields=students&limit=200`)
         ]);
 
         if (studentsResponse.ok) {
@@ -1601,7 +1571,8 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
           allRequiredMilestonesCompleted: newDbGroup.allRequiredMilestonesCompleted,
           completedAt: newDbGroup.completedAt,
           finalScore: newDbGroup.finalScore,
-          finalRecommendation: newDbGroup.finalRecommendation
+          finalRecommendation: newDbGroup.finalRecommendation,
+          leader: newDbGroup.leader ?? null
         };
 
         setGroups((currentGroups) => [nextGroup, ...currentGroups]);
@@ -1639,7 +1610,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
+            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
               <i className={`fas ${item.icon}`}></i> {item.label}
             </Link>
           ))}
@@ -1674,7 +1645,6 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
             <SectionHeader
               eyebrow="Group Management"
               title="Supervision workspace"
-              description="Track active supervision work, then move into the completed archive automatically when final requirements are satisfied."
               actions={
                 <>
                   <ViewToggle viewMode={viewMode} onChange={setViewMode} />
@@ -1752,15 +1722,6 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
             <SectionHeader
               eyebrow="Directory"
               title={`${filteredGroups.length} ${filteredGroups.length === 1 ? (activeTab === 'completed' ? 'record' : 'group') : activeTab === 'completed' ? 'records' : 'groups'} in view`}
-              description={
-                activeTab === 'completed'
-                  ? viewMode === 'table'
-                    ? 'Completed groups stay in a read-only archive with final outcomes and closure details.'
-                    : 'Card mode gives each completed record enough space for final recommendation and archive context.'
-                  : viewMode === 'table'
-                    ? 'Table mode prioritizes milestones, progress, and next actions for active IT groups.'
-                    : 'Card mode gives each active group more room for milestone review and adviser actions.'
-              }
             />
             {activeTab === 'active' ? (
               viewMode === 'table' ? (

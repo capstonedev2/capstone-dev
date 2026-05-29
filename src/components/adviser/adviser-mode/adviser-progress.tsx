@@ -146,6 +146,7 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
               key={item.href}
               className={isNavItemActive(pathname, item.href) ? 'active' : ''}
               href={item.href}
+              prefetch={false}
             >
               <i className={`fas ${item.icon}`} />
               {item.label}

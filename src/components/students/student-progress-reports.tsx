@@ -76,8 +76,8 @@ export function StudentProgressReports({ data }: { data: StudentDashboardData })
                 <p>Only the group leader is required to submit progress reports on behalf of the whole group.</p>
               </div>
               <div className="strip-actions">
-                <Link className="btn btn-primary" href="/students/project-overview"><i className="fas fa-folder-open" aria-hidden="true" /> Open Project Data</Link>
-                <Link className="btn btn-secondary" href="/students/project-files"><i className="fas fa-file-arrow-up" aria-hidden="true" /> Add Project Evidence</Link>
+                <Link prefetch={false} className="btn btn-primary" href="/students/project-overview"><i className="fas fa-folder-open" aria-hidden="true" /> Open Project Data</Link>
+                <Link prefetch={false} className="btn btn-secondary" href="/students/project-files"><i className="fas fa-file-arrow-up" aria-hidden="true" /> Add Project Evidence</Link>
               </div>
             </div>
             <div className="page-strip-side">

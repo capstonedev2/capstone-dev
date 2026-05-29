@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { logout } from '@/lib/mock/auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { STUDENT_NAV_ITEMS, STUDENT_NAV_SECTIONS } from '@/components/students/student-navigation';
 
 const SIDEBAR_STORAGE_KEY = 'studentShellSidebarCollapsed';
@@ -180,6 +182,18 @@ function getResolvedStudentTheme(value: string | null): StudentThemeMode {
 
 function sortNotifications(items: StudentNotification[]) {
   return [...items].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
+}
+
+function toClientNotification(notification: StudentNotification) {
+  return {
+    id: notification.id,
+    title: notification.title,
+    message: notification.message,
+    type: notification.type,
+    status: notification.read ? 'READ' : 'UNREAD',
+    createdAt: notification.created_at,
+    readAt: notification.read ? notification.updated_at : null
+  };
 }
 
 function getNotificationAction(notification: StudentNotification) {
@@ -477,10 +491,10 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
           </div>
 
           <div className="hero-actions !mt-2 flex flex-wrap gap-4 relative z-10">
-            <Link className="inline-flex items-center gap-2 rounded-xl bg-[var(--student-primary,#0f4c81)] px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 hover:bg-sky-800" href="/students/repository">
+            <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl bg-[var(--student-primary,#0f4c81)] px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 hover:bg-sky-800" href="/students/repository">
               <i className="fas fa-book" aria-hidden="true" /> Browse Repository
             </Link>
-            <Link className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:scale-105 active:scale-95" href="/students/profile">
+            <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:scale-105 active:scale-95" href="/students/profile">
               <i className="fas fa-user text-slate-400" aria-hidden="true" /> Review Profile
             </Link>
           </div>
@@ -609,7 +623,7 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
                       <p className="text-sm font-bold text-slate-900">{item.title}</p>
                       <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">{item.description}</p>
                       {item.href ? (
-                        <Link className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--student-primary,#0f4c81)] hover:text-sky-700 transition-colors" href={item.href}>
+                        <Link prefetch={false} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--student-primary,#0f4c81)] hover:text-sky-700 transition-colors" href={item.href}>
                           {item.action}
                           <i className="fas fa-arrow-right text-xs transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
                         </Link>
@@ -801,10 +815,10 @@ function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile
           </div>
 
           <div className="hero-actions !mt-0 flex flex-wrap gap-3">
-            <Link className="btn btn-primary" href="/students/dashboard">
+            <Link prefetch={false} className="btn btn-primary" href="/students/dashboard">
               <i className="fas fa-gauge-high" aria-hidden="true" /> Back to Dashboard
             </Link>
-            <Link className="btn btn-secondary" href="/students/repository">
+            <Link prefetch={false} className="btn btn-secondary" href="/students/repository">
               <i className="fas fa-book" aria-hidden="true" /> Browse Repository
             </Link>
           </div>
@@ -1033,10 +1047,10 @@ function LimitedStudentLockedFeature({
             {profile.fullName} can use the available student features while the project workspace is being prepared.
           </p>
           <div className="hero-actions">
-            <Link className="btn btn-primary" href="/students/dashboard">
+            <Link prefetch={false} className="btn btn-primary" href="/students/dashboard">
               <i className="fas fa-gauge-high" aria-hidden="true" /> Back to dashboard
             </Link>
-            <Link className="btn btn-secondary" href="/students/repository">
+            <Link prefetch={false} className="btn btn-secondary" href="/students/repository">
               <i className="fas fa-book" aria-hidden="true" /> Browse repository
             </Link>
           </div>
@@ -1193,60 +1207,97 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
   }, [pathname]);
 
   useEffect(() => {
+    if (data.group.id) {
+      setWorkspaceAccess((prev) => (prev.isLimited ? { ...prev, isLimited: false } : prev));
+      setLayoutDebug('Server group assignment loaded.');
+      setIsCheckingAccess(false);
+      return;
+    }
+
+    if (!workspaceAccess.isLimited) {
+      setLayoutDebug('Workspace access loaded from server.');
+      setIsCheckingAccess(false);
+      return;
+    }
+
+    let cancelled = false;
+    const controller = new AbortController();
+
     async function checkRealGroupAccess() {
       try {
-        let realStudentName = '';
-        
-        // 1. Try real API auth
-        const authRes = await fetch('/api/auth/me', { cache: 'no-store' });
-        if (authRes.ok) {
-          const authData = await authRes.json();
-          const user = authData.data?.user;
-          if (user) {
-            realStudentName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim();
-          }
-        }
-        
-        // 2. Fallback to mock local storage
+        const storedUser = readStoredJson<StoredAuthUser>(AUTH_USER_STORAGE_KEY);
+        const realStudentName = normalizeText(storedUser?.name) || data.profile.fullName;
+
         if (!realStudentName) {
-          const storedUser = readStoredJson<StoredAuthUser>(AUTH_USER_STORAGE_KEY);
-          if (storedUser && storedUser.name) {
-            realStudentName = storedUser.name;
-          } else {
+          if (!cancelled) {
             setLayoutDebug('Auth failed: No real or mock session found.');
-            return;
           }
+          return;
         }
 
-        const res = await fetch(`/api/groups?studentName=${encodeURIComponent(realStudentName)}`, { cache: 'no-store' });
+        const res = await fetch(`/api/groups?studentName=${encodeURIComponent(realStudentName)}&limit=1&fields=students`, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
         if (res.ok) {
           const groups = await res.json();
+          if (cancelled) {
+            return;
+          }
           setLayoutDebug(`Fetched groups for ${realStudentName}: found ${groups.length}`);
           if (groups.length > 0) {
             setWorkspaceAccess(prev => ({ ...prev, isLimited: false }));
           }
         } else {
-          setLayoutDebug(`Fetch failed with status ${res.status}`);
+          if (!cancelled) {
+            setLayoutDebug(`Fetch failed with status ${res.status}`);
+          }
         }
       } catch (e: any) {
-        setLayoutDebug(`Fetch threw error: ${e.message}`);
-        console.error('Failed to check real group access', e);
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return;
+        }
+        if (!cancelled) {
+          setLayoutDebug(`Fetch threw error: ${e.message}`);
+          console.error('Failed to check real group access', e);
+        }
       } finally {
-        setIsCheckingAccess(false);
+        if (!cancelled) {
+          setIsCheckingAccess(false);
+        }
       }
     }
     
     checkRealGroupAccess();
-  }, []);
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [data.group.id, data.profile.fullName, workspaceAccess.isLimited]);
 
-  const [dbProfile, setDbProfile] = useState<{ fullName: string; email: string; studentId: string; groupRole: string | null; projectCode: string | null } | null>(null);
+  const [dbProfile, setDbProfile] = useState<{ fullName: string; email: string; studentId: string; groupRole: string | null; projectCode: string | null } | null>(() =>
+    data.profile.user_id
+      ? {
+          fullName: data.profile.fullName,
+          email: data.profile.email,
+          studentId: data.profile.studentId,
+          groupRole: data.profile.groupRole,
+          projectCode: data.project.projectCode
+        }
+      : null
+  );
 
   useEffect(() => {
+    if (dbProfile || data.profile.user_id || !canPollApi()) {
+      return;
+    }
+
     let cancelled = false;
+    const controller = new AbortController();
 
     async function loadDbProfile() {
       try {
-        const response = await fetch('/api/profile', { credentials: 'same-origin' });
+        const response = await fetch('/api/profile', { credentials: 'same-origin', signal: controller.signal });
         if (!response.ok) return;
 
         const result = await response.json();
@@ -1261,7 +1312,10 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
 
         if (userName) {
           try {
-            const groupRes = await fetch(`/api/groups?studentName=${encodeURIComponent(userName)}`, { cache: 'no-store' });
+            const groupRes = await fetch(`/api/groups?studentName=${encodeURIComponent(userName)}&limit=1`, {
+              cache: 'no-store',
+              signal: controller.signal
+            });
             if (groupRes.ok) {
               const groups = await groupRes.json();
               if (Array.isArray(groups) && groups.length > 0) {
@@ -1284,14 +1338,20 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
             projectCode
           });
         }
-      } catch {
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
         // Silently fall back to mock data
       }
     }
 
     loadDbProfile();
-    return () => { cancelled = true; };
-  }, []);
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [data.profile.user_id, dbProfile]);
 
   const isLimitedWorkspace = isCheckingAccess ? false : workspaceAccess.isLimited;
   const limitedProfile = workspaceAccess.profile;
@@ -1306,60 +1366,66 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       ? (dbProfile.projectCode || 'No active project')
       : (isLimitedWorkspace ? 'No active project' : data.project.projectCode)
   };
-  const [realNotifications, setRealNotifications] = useState<any[]>([]);
+  const [realNotifications, setRealNotifications] = useState<any[]>(() =>
+    (data.notifications || []).map(toClientNotification)
+  );
 
-  useEffect(() => {
-    if (!data.profile.user_id) return;
-
-    let cancelled = false;
-    let inFlightController: AbortController | null = null;
-
-    const fetchNotifications = async () => {
-      if (cancelled || inFlightController || !canPollApi()) {
+  const fetchShellNotifications = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!data.profile.user_id || !canPollApi()) {
         return;
       }
 
-      const controller = new AbortController();
-      inFlightController = controller;
+      const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}&limit=20`, {
+        cache: 'no-store',
+        signal
+      });
 
-      try {
-        const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, {
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        if (notifRes.ok) {
-          const notifs = await notifRes.json();
-          if (!cancelled) {
-            setRealNotifications(notifs);
-          }
-        }
-      } catch (e) {
-        if (!isExpectedPollError(e)) {
-          console.warn('Failed to poll notifications in shell', e);
-        }
-      } finally {
-        if (inFlightController === controller) {
-          inFlightController = null;
-        }
+      if (notifRes.ok) {
+        const notifs = await notifRes.json();
+        setRealNotifications(notifs);
       }
-    };
+    },
+    [data.profile.user_id]
+  );
 
-    const pollNotifications = () => {
-      void fetchNotifications().catch((error) => {
+  useEffect(() => {
+    if (!notificationMenuOpen || !data.profile.user_id) {
+      return;
+    }
+
+    const controller = new AbortController();
+    void fetchShellNotifications(controller.signal).catch((error) => {
+      if (!isExpectedPollError(error)) {
+        console.warn('Failed to refresh notifications in shell', error);
+      }
+    });
+
+    return () => controller.abort();
+  }, [data.profile.user_id, fetchShellNotifications, notificationMenuOpen]);
+
+  useEffect(() => {
+    if (!data.profile.user_id) {
+      return;
+    }
+
+    let inFlightController: AbortController | null = null;
+    const refreshNotifications = () => {
+      inFlightController?.abort();
+      inFlightController = new AbortController();
+      void fetchShellNotifications(inFlightController.signal).catch((error) => {
         if (!isExpectedPollError(error)) {
-          console.warn('Failed to poll notifications in shell', error);
+          console.warn('Failed to refresh notifications in shell', error);
         }
       });
     };
 
-    pollNotifications();
-    window.addEventListener('thesistrack:notifications-updated', pollNotifications);
+    window.addEventListener('thesistrack:notifications-updated', refreshNotifications);
     return () => {
-      cancelled = true;
       inFlightController?.abort();
-      window.removeEventListener('thesistrack:notifications-updated', pollNotifications);
+      window.removeEventListener('thesistrack:notifications-updated', refreshNotifications);
     };
-  }, [data.profile.user_id]);
+  }, [data.profile.user_id, fetchShellNotifications]);
 
   const shellNotifications = useMemo(() => {
     if (isLimitedWorkspace) return [];
@@ -1410,6 +1476,11 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       })).filter((section) => section.items.length),
     [isLimitedWorkspace]
   );
+  const sidebarRoutes = useMemo(
+    () => navigationSections.flatMap((section) => section.items.map((item) => item.href)),
+    [navigationSections]
+  );
+  const prefetchRoute = useRoutePrefetch(sidebarRoutes);
   const limitedMainContent =
     isLimitedWorkspace && limitedProfile
       ? matchesRoute(pathname, '/students/dashboard')
@@ -1435,16 +1506,33 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     }
   };
 
-  const markNotificationRead = (id: string) => {
-    setRealNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'READ', readAt: new Date().toISOString() } : item)));
+  const markNotificationsRead = useCallback((ids: string[]) => {
+    const notificationIds = Array.from(new Set(ids.filter(Boolean)));
+    if (!notificationIds.length) {
+      return;
+    }
+
+    const readAt = new Date().toISOString();
+    setRealNotifications((prev) =>
+      prev.map((item) => (notificationIds.includes(item.id) ? { ...item, status: 'READ', readAt } : item))
+    );
+
     void fetch('/api/notifications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notificationId: id, action: 'read' }),
+      body: JSON.stringify(
+        notificationIds.length === 1
+          ? { notificationId: notificationIds[0], action: 'read' }
+          : { notificationIds, action: 'read' }
+      ),
       keepalive: true
     }).finally(() => {
       window.dispatchEvent(new Event('thesistrack:notifications-updated'));
     });
+  }, []);
+
+  const markNotificationRead = (id: string) => {
+    markNotificationsRead([id]);
   };
 
   const toggleSidebar = () => {
@@ -1533,13 +1621,13 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                         e.preventDefault();
                         e.stopPropagation();
                         const unreadIds = shellNotifications.filter(n => !n.read).map(n => n.id);
-                        unreadIds.forEach(id => markNotificationRead(id));
+                        markNotificationsRead(unreadIds);
                       }}
                     >
                       Mark all as read
                     </button>
                   )}
-                  <Link className="notification-menu-view-all is-primary" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
+                  <Link prefetch={false} className="notification-menu-view-all is-primary" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
                     {isLimitedWorkspace ? 'View setup' : 'Open center'}
                   </Link>
                 </div>
@@ -1569,7 +1657,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                         className={`notification-menu-item${notification.read ? '' : ' is-unread'}`}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                       >
-                        <Link
+                        <Link prefetch={false}
                           href={action.href}
                           className="flex gap-4 w-full"
                           onClick={() => {
@@ -1637,7 +1725,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
               )}
 
               <div className="notification-menu-footer">
-                <Link className="notification-menu-footer-link" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
+                <Link prefetch={false} className="notification-menu-footer-link" href={isLimitedWorkspace ? '/students/dashboard' : '/students/notifications'} onClick={() => setNotificationMenuOpen(false)}>
                   {isLimitedWorkspace ? 'Back to dashboard' : 'See all notifications'}
                   <i aria-hidden="true" className="fas fa-arrow-up-right-from-square" />
                 </Link>
@@ -1716,7 +1804,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
 
                 <div className="profile-dropdown-divider" />
 
-                <Link className="profile-dropdown-link" href="/students/profile" onClick={() => setProfileMenuOpen(false)}>
+                <Link prefetch={false} className="profile-dropdown-link" href="/students/profile" onClick={() => setProfileMenuOpen(false)}>
                   <i aria-hidden="true" className="fas fa-user" /> My Profile
                 </Link>
 
@@ -1724,7 +1812,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
 
 
 
-                <Link className="profile-dropdown-link" href="/students/settings" onClick={() => setProfileMenuOpen(false)}>
+                <Link prefetch={false} className="profile-dropdown-link" href="/students/settings" onClick={() => setProfileMenuOpen(false)}>
                   <i aria-hidden="true" className="fas fa-cog" /> Settings
                 </Link>
 
@@ -1751,11 +1839,14 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Student Portal</span>
             <div className="brand-mark system-brand-mark" aria-label="ThesisTrack">
-              <img
+              <Image
                 alt="ThesisTrack logo"
                 className="system-brand-logo"
+                height={56}
+                priority
                 src={themeMode === 'dark' ? '/System%20Logo/image.png' : '/System%20Logo/logo-transparent.png'}
                 style={{ transform: themeMode === 'dark' ? 'scale(1.15)' : 'none' }}
+                width={72}
               />
               <span className="system-brand-name">
                 <span>Thesis</span>
@@ -1780,12 +1871,14 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   const count = item.key === 'faculty-feedback' ? unreadFeedbackCount : 0;
 
                   return (
-                    <Link
+                    <Link prefetch={false}
                       key={item.key}
                       aria-current={isActive ? 'page' : undefined}
                       className={`sidebar-link ${isActive ? 'is-active' : ''}`}
                       href={item.href}
                       title={sidebarCollapsed ? item.label : undefined}
+                      onFocus={() => prefetchRoute(item.href)}
+                      onMouseEnter={() => prefetchRoute(item.href)}
                     >
                       <span className="sidebar-link-icon">
                         <i aria-hidden="true" className={`fas ${item.icon}`} />

@@ -6,7 +6,10 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import { PARTNER_NAV_ITEMS, type PartnerNavKey } from '@/components/partner/partner-data';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
+
+const PARTNER_PREFETCH_ROUTES = PARTNER_NAV_ITEMS.map((item) => item.href);
 
 export function PartnerShell({
   activeNav,
@@ -24,6 +27,7 @@ export function PartnerShell({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const prefetchRoute = useRoutePrefetch(PARTNER_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('TechCorp Partner Liaison');
   const [displayEmail, setDisplayEmail] = useState('partner@techcorp.inc');
   const {
@@ -180,6 +184,8 @@ export function PartnerShell({
                   className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
                   href={item.href}
                   title={sidebarCollapsed ? item.label : undefined}
+                  onFocus={() => prefetchRoute(item.href)}
+                  onMouseEnter={() => prefetchRoute(item.href)}
                 >
                   <span className="sidebar-link-icon">
                     <i aria-hidden="true" className={`fas ${item.icon}`} />

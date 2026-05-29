@@ -5,3 +5,5 @@ dist
 .next-dev-*.log
 .env
 .env.local
+
+.vercel

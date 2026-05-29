@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import type {
   AttentionAlertItem,
   DashboardAction,
@@ -88,7 +88,7 @@ function SectionFrame({
   );
 }
 
-export function DashboardHeader({
+export const DashboardHeader = memo(function DashboardHeader({
   title,
   subtitle,
   workspaceLabel,
@@ -144,6 +144,7 @@ export function DashboardHeader({
           <Link
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(0,58,143,0.18)] transition hover:-translate-y-0.5 hover:bg-[var(--primary-dark)]"
             href={primaryAction.href}
+            prefetch={false}
           >
             <i aria-hidden="true" className={`fas ${primaryAction.icon}`} />
             {primaryAction.label}
@@ -152,6 +153,7 @@ export function DashboardHeader({
             <Link
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-semibold text-[var(--text-dark)] shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
               href={secondaryAction.href}
+              prefetch={false}
             >
               <i aria-hidden="true" className={`fas ${secondaryAction.icon}`} />
               {secondaryAction.label}
@@ -174,9 +176,9 @@ export function DashboardHeader({
       </div>
     </section>
   );
-}
+});
 
-export function SummaryCard({ icon, label, value, helperText, trendLabel, tone = 'primary' }: DashboardMetric) {
+export const SummaryCard = memo(function SummaryCard({ icon, label, value, helperText, trendLabel, tone = 'primary' }: DashboardMetric) {
   return (
     <article className={cx('adviser-kpi-card group rounded-lg border border-slate-200/70 bg-white p-5 shadow-sm', `adviser-kpi-card-${tone}`)}>
       <div className="flex items-start justify-between gap-3">
@@ -204,9 +206,9 @@ export function SummaryCard({ icon, label, value, helperText, trendLabel, tone =
       </div>
     </article>
   );
-}
+});
 
-export function LiveSupervisionUpdates({
+export const LiveSupervisionUpdates = memo(function LiveSupervisionUpdates({
   items,
   loading = false,
   emptyMessage = 'No supervision updates available right now.'
@@ -272,9 +274,9 @@ export function LiveSupervisionUpdates({
       )}
     </SectionFrame>
   );
-}
+});
 
-export function RecentSubmissions({
+export const RecentSubmissions = memo(function RecentSubmissions({
   items,
   actionLabel,
   onAction,
@@ -299,7 +301,7 @@ export function RecentSubmissions({
       title={title}
       description={description}
       action={
-        <Link className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-[var(--primary)] transition hover:border-blue-200 hover:bg-blue-50 hover:text-[var(--primary-dark)]" href={actionHref}>
+        <Link className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-[var(--primary)] transition hover:border-blue-200 hover:bg-blue-50 hover:text-[var(--primary-dark)]" href={actionHref} prefetch={false}>
           {actionLinkLabel}
         </Link>
       }
@@ -358,9 +360,9 @@ export function RecentSubmissions({
       )}
     </SectionFrame>
   );
-}
+});
 
-export function AttentionAlerts({
+export const AttentionAlerts = memo(function AttentionAlerts({
   items,
   emptyMessage = 'No urgent supervision issues need attention right now.'
 }: {
@@ -401,9 +403,9 @@ export function AttentionAlerts({
       )}
     </SectionFrame>
   );
-}
+});
 
-export function QuickActions({ actions }: { actions: DashboardAction[] }) {
+export const QuickActions = memo(function QuickActions({ actions }: { actions: DashboardAction[] }) {
   return (
     <SectionFrame eyebrow="Quick Actions" title="Quick Actions" description="Open the main adviser workflows from one compact list.">
       <div className="adviser-quick-action-grid grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -413,6 +415,7 @@ export function QuickActions({ actions }: { actions: DashboardAction[] }) {
               key={action.id}
               className="adviser-quick-action group flex min-h-[84px] items-center gap-3 rounded-lg border border-slate-200/80 bg-slate-50/70 px-4 py-4 transition hover:border-[rgba(0,58,143,0.18)] hover:bg-white hover:shadow-sm"
               href={action.href}
+              prefetch={false}
             >
               <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
                 <i aria-hidden="true" className={`fas ${action.icon}`} />
@@ -444,9 +447,9 @@ export function QuickActions({ actions }: { actions: DashboardAction[] }) {
       </div>
     </SectionFrame>
   );
-}
+});
 
-export function WeeklySchedule({ items }: { items: WeeklyScheduleItem[] }) {
+export const WeeklySchedule = memo(function WeeklySchedule({ items }: { items: WeeklyScheduleItem[] }) {
   return (
     <SectionFrame eyebrow="This Week" title="This Week's Schedule" description="Consultations and defenses arranged in a compact adviser timeline.">
       {items.length ? (
@@ -476,9 +479,9 @@ export function WeeklySchedule({ items }: { items: WeeklyScheduleItem[] }) {
       )}
     </SectionFrame>
   );
-}
+});
 
-export function GroupProgressSnapshot({ items, emptyMessage = 'No group progress records available.' }: { items: GroupProgressSnapshotItem[]; emptyMessage?: string }) {
+export const GroupProgressSnapshot = memo(function GroupProgressSnapshot({ items, emptyMessage = 'No group progress records available.' }: { items: GroupProgressSnapshotItem[]; emptyMessage?: string }) {
   const averageProgress = items.length
     ? Math.round(items.reduce((total, item) => total + item.progress, 0) / items.length)
     : 0;
@@ -543,4 +546,4 @@ export function GroupProgressSnapshot({ items, emptyMessage = 'No group progress
       )}
     </SectionFrame>
   );
-}
+});

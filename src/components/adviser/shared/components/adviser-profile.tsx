@@ -308,7 +308,7 @@ export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
+            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
               <i className={`fas ${item.icon}`}></i> {item.label}
             </Link>
           ))}
@@ -412,6 +412,7 @@ export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
                     </button>
                     <Link 
                       href={`${basePath}/dashboard`}
+                      prefetch={false}
                       className="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm transition-all hover:-translate-y-0.5 px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                     >
                       <i className="fas fa-chart-line"></i> Dashboard

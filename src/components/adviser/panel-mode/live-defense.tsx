@@ -160,54 +160,71 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
 
 
   useEffect(() => {
-    (async () => {
-      try {
-        const response = await fetch('/api/auth/me', { cache: 'no-store' });
-        if (response.ok) {
-          const payload = (await response.json()) as { user?: CurrentUser; data?: { user?: CurrentUser } };
-          const user = payload?.user ?? payload?.data?.user;
-          if (user && getIdentityDisplayName(user)) {
-            setCurrentUser(user);
-            return;
+    let cancelled = false;
+
+    async function loadInitialDefenseData() {
+      setIsLoading(true);
+
+      const [userResult, advisersResult, schedulesResult] = await Promise.allSettled([
+        fetch('/api/auth/me', { cache: 'no-store' }),
+        fetch('/api/advisers?limit=100', { cache: 'no-store' }),
+        fetch('/api/defense-schedules?limit=50&projectLimit=100', { cache: 'no-store' })
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      let loadedUser = false;
+
+      if (userResult.status === 'fulfilled' && userResult.value.ok) {
+        const payload = (await userResult.value.json().catch(() => null)) as { user?: CurrentUser; data?: { user?: CurrentUser } } | null;
+        const user = payload?.user ?? payload?.data?.user;
+        if (user && getIdentityDisplayName(user)) {
+          setCurrentUser(user);
+          loadedUser = true;
+        }
+      }
+
+      if (!loadedUser) {
+        const { getStoredUser } = await import('@/lib/mock/auth');
+        if (!cancelled) {
+          const stored = getStoredUser() as CurrentUser | null;
+          if (stored && getIdentityDisplayName(stored)) {
+            setCurrentUser(stored);
           }
         }
-      } catch {}
+      }
 
-      import('@/lib/mock/auth').then(({ getStoredUser }) => {
-        const stored = getStoredUser() as CurrentUser | null;
-        if (stored && getIdentityDisplayName(stored)) setCurrentUser(stored);
-      });
-    })();
-
-    (async () => {
-      try {
-        const response = await fetch('/api/advisers', { cache: 'no-store' });
-        if (response.ok) {
-          const payload = (await response.json()) as {
-            advisers?: AdviserIdentity[];
-            panelists?: AdviserIdentity[];
-            data?: { advisers?: AdviserIdentity[]; panelists?: AdviserIdentity[] };
-          };
-          const fetchedPanelists = payload?.panelists ?? payload?.advisers ?? payload?.data?.panelists ?? payload?.data?.advisers ?? [];
-          if (fetchedPanelists.length) {
-            setAdvisers(fetchedPanelists);
-            return;
-          }
+      if (advisersResult.status === 'fulfilled' && advisersResult.value.ok) {
+        const payload = (await advisersResult.value.json().catch(() => null)) as {
+          advisers?: AdviserIdentity[];
+          panelists?: AdviserIdentity[];
+          data?: { advisers?: AdviserIdentity[]; panelists?: AdviserIdentity[] };
+        } | null;
+        const fetchedPanelists = payload?.panelists ?? payload?.advisers ?? payload?.data?.panelists ?? payload?.data?.advisers ?? [];
+        if (fetchedPanelists.length) {
+          setAdvisers(fetchedPanelists);
         }
-      } catch {}
-    })();
+      }
 
-    (async () => {
-      try {
-        const response = await fetch('/api/defense-schedules', { cache: 'no-store' });
-        if (response.ok) {
-          const payload = (await response.json()) as { assignments?: DefenseAssignment[] };
-          setDefenseAssignments(payload.assignments ?? []);
-        }
-      } catch {} finally {
+      if (schedulesResult.status === 'fulfilled' && schedulesResult.value.ok) {
+        const payload = (await schedulesResult.value.json().catch(() => null)) as { assignments?: DefenseAssignment[] } | null;
+        setDefenseAssignments(payload?.assignments ?? []);
+      }
+
+      setIsLoading(false);
+    }
+
+    void loadInitialDefenseData().catch(() => {
+      if (!cancelled) {
         setIsLoading(false);
       }
-    })();
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const defenseSchedule = useMemo<LiveDefenseScheduleItem[]>(() => {

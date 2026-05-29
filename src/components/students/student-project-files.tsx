@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type ChangeEvent, type DragEvent, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { type ChangeEvent, type DragEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import {
   DOCUMENT_FILE_ACCEPT,
@@ -322,6 +322,8 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const [permissionExpiresAt, setPermissionExpiresAt] = useState<number | null>(null);
   const [permissionCountdown, setPermissionCountdown] = useState('');
   const [leaderGrantDuration, setLeaderGrantDuration] = useState(3);
+  const uploadAllowedRef = useRef(false);
+  const permissionExpiresAtRef = useRef<number | null>(null);
 
   const PERMISSION_DURATION_OPTIONS = [
     { value: 1, label: '1 minute' },
@@ -331,6 +333,14 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   ];
 
   const isConceptStageComplete = useMemo(() => hasCompletedConceptStage(data), [data]);
+
+  useEffect(() => {
+    uploadAllowedRef.current = isUploadAllowed;
+  }, [isUploadAllowed]);
+
+  useEffect(() => {
+    permissionExpiresAtRef.current = permissionExpiresAt;
+  }, [permissionExpiresAt]);
 
   // Countdown timer for member permission expiry
   useEffect(() => {
@@ -360,14 +370,24 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   }, [permissionExpiresAt, isUploadAllowed]);
 
   useEffect(() => {
-    if (isGroupLeader) return; // Leaders always have permission, no need to poll
+    if (isGroupLeader || !currentUserId) return; // Leaders always have permission, no need to poll
+
+    let cancelled = false;
+    let inFlightController: AbortController | null = null;
 
     const pollPersonalPermission = async () => {
+      let controller: AbortController | null = null;
       try {
-        if (!currentUserId) return;
-        const res = await fetch(`/api/notifications?userId=${encodeURIComponent(currentUserId)}`, { cache: 'no-store' });
+        inFlightController?.abort();
+        controller = new AbortController();
+        inFlightController = controller;
+        const res = await fetch(
+          `/api/notifications?userId=${encodeURIComponent(currentUserId)}&status=UNREAD&entityType=permission&entityId=${encodeURIComponent(data.group.id)}&limit=5`,
+          { cache: 'no-store', signal: controller.signal }
+        );
         if (res.ok) {
           const notifs = await res.json();
+          if (cancelled) return;
           // Check if there are any 'Upload Permission Granted' notifications that are UNREAD
           const permissionNotifs = notifs.filter(
             (n: any) => n.status === 'UNREAD' && n.title === 'Upload Permission Granted' && n.entityType === 'permission' && n.entityId === data.group.id
@@ -384,13 +404,11 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
             if (Date.now() >= expiresAt) {
               // Permission has expired — consume the notification
               try {
-                await Promise.all(permissionNotifs.map((n: any) =>
-                  fetch('/api/notifications', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ notificationId: n.id, action: 'consume' })
-                  })
-                ));
+                await fetch('/api/notifications', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ notificationIds: permissionNotifs.map((n: any) => n.id), action: 'read' })
+                });
               } catch { /* ignore */ }
               setIsUploadAllowed(false);
               setPermissionExpiresAt(null);
@@ -398,28 +416,46 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
               return;
             }
 
-            if (!isUploadAllowed) {
+            if (!uploadAllowedRef.current || permissionExpiresAtRef.current !== expiresAt) {
               setToast({ tone: 'success', message: `Upload permission granted! You have ${durationMinutes} minute${durationMinutes === 1 ? '' : 's'} to upload.` });
               setIsUploadAllowed(true);
               setPermissionExpiresAt(expiresAt);
             }
             setPermissionNotificationId(permissionNotifs.map((n: any) => n.id).join(','));
           } else {
-            if (isUploadAllowed && !permissionExpiresAt) {
+            if (uploadAllowedRef.current && !permissionExpiresAtRef.current) {
               setIsUploadAllowed(false);
             }
             setPermissionNotificationId(null);
           }
         }
       } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return;
+        }
         console.error('Failed to poll personal permissions', e);
+      } finally {
+        if (inFlightController === controller) {
+          inFlightController = null;
+        }
       }
     };
 
-    // Initial check
-    pollPersonalPermission();
-    return () => {};
-  }, [currentUserId, data.group.id, isGroupLeader, isUploadAllowed, permissionExpiresAt]);
+    const refreshPermission = () => {
+      void pollPersonalPermission();
+    };
+
+    refreshPermission();
+    window.addEventListener('focus', refreshPermission);
+    window.addEventListener('thesistrack:notifications-updated', refreshPermission);
+
+    return () => {
+      cancelled = true;
+      inFlightController?.abort();
+      window.removeEventListener('focus', refreshPermission);
+      window.removeEventListener('thesistrack:notifications-updated', refreshPermission);
+    };
+  }, [currentUserId, data.group.id, isGroupLeader]);
 
   const handleRequestPermission = async () => {
     const leader = data.group.members.find((m) => m.isLeader);
@@ -481,7 +517,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
     const loadStoredDocuments = async () => {
       try {
-        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}`, {
+        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}&page=1&limit=50`, {
           cache: 'no-store'
         });
 
@@ -685,13 +721,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     updateUploadDraft('uploadedAt', new Date().toISOString());
   };
 
-  const openUploadSection = () => {
+  const openUploadSection = useCallback(() => {
     uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  }, []);
 
-  const openTrackerSection = () => {
+  const openTrackerSection = useCallback(() => {
     trackerSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  }, []);
 
 
   const resetTrackerControls = () => {
@@ -828,15 +864,14 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       // Consume ALL one-time use permission tokens if used
       if (!isGroupLeader && permissionNotificationId) {
         try {
-          const tokenIds = permissionNotificationId.split(',');
-          await Promise.all(tokenIds.map(id =>
-            fetch('/api/notifications', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ notificationId: id, action: 'consume' })
-            })
-          ));
+          const tokenIds = permissionNotificationId.split(',').filter(Boolean);
+          await fetch('/api/notifications', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notificationIds: tokenIds, action: 'read' })
+          });
           setIsUploadAllowed(false);
+          setPermissionExpiresAt(null);
           setPermissionNotificationId(null);
         } catch (e) {
           console.error('Failed to consume permission tokens', e);
@@ -858,7 +893,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
   };
 
-  const handleViewFile = async (file: ProjectFileRecord) => {
+  const handleViewFile = useCallback(async (file: ProjectFileRecord) => {
     if (file.fileUrl.startsWith('blob:')) {
       window.open(file.fileUrl, '_blank', 'noopener,noreferrer');
       return;
@@ -879,9 +914,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
         message: error instanceof Error ? error.message : 'Preview is not available for this file.'
       });
     }
-  };
+  }, []);
 
-  const handleDownloadFile = (file: ProjectFileRecord) => {
+  const handleDownloadFile = useCallback((file: ProjectFileRecord) => {
     if (file.fileUrl.startsWith('blob:')) {
       const link = document.createElement('a');
       link.href = file.fileUrl;
@@ -893,9 +928,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
 
     window.open(`/api/document-files/${file.id}/download`, '_blank', 'noopener,noreferrer');
-  };
+  }, []);
 
-  const handleDeleteFile = async (file: ProjectFileRecord) => {
+  const handleDeleteFile = useCallback(async (file: ProjectFileRecord) => {
     setPageError(null);
 
     if (file.fileUrl.startsWith('blob:')) {
@@ -926,9 +961,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     } catch (error) {
       setPageError(error instanceof Error ? error.message : 'Unable to delete the document.');
     }
-  };
+  }, []);
 
-  const handleApproveFile = (file: ProjectFileRecord) => {
+  const handleApproveFile = useCallback((file: ProjectFileRecord) => {
     const reviewedAt = new Date().toISOString();
     const nextVersionMinor = file.versionMinor + 1;
     const approvalNotes = `${getProjectFileCategoryLabel(file.category)} approved by ${adviserName} and stored as the final repository copy.`;
@@ -970,11 +1005,11 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       tone: 'success',
       message: `${file.fileName} approved and added to the official repository section.`
     });
-  };
+  }, [adviserName]);
 
-  const handleViewHistory = (file: ProjectFileRecord) => {
+  const handleViewHistory = useCallback((file: ProjectFileRecord) => {
     setHistoryFile(file);
-  };
+  }, []);
 
   const needsAttentionCount = pendingReviewCount + revisionCount;
   const hasProjectFiles = trackedFilesCount > 0;
@@ -1265,7 +1300,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     </p>
 
                     <div className="project-files-locked-actions">
-                      <Link href="/students/title-submission">
+                      <Link prefetch={false} href="/students/title-submission">
                         <i className="fas fa-pen-to-square" aria-hidden="true" />
                         Continue Title Submission
                       </Link>

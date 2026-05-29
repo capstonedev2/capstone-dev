@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useBranding } from '@/components/branding/branding-provider';
+import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
 const SYSTEM_ADMIN_NAV_ITEMS = [
@@ -29,6 +30,10 @@ const BRANDING_SUBMENU_ITEMS = [
   { key: 'landing', href: '/system-admin/branding?section=landing', label: 'Landing Page', icon: 'fa-globe' },
   { key: 'backup', href: '/system-admin/branding?section=backup', label: 'Backup & Restore Branding', icon: 'fa-file-export' }
 ] as const;
+const SYSTEM_ADMIN_PREFETCH_ROUTES = [
+  ...SYSTEM_ADMIN_NAV_ITEMS.map((item) => item.href),
+  ...BRANDING_SUBMENU_ITEMS.map((item) => item.href)
+];
 
 function getActiveBrandingSection(value: string | null): (typeof BRANDING_SUBMENU_ITEMS)[number]['key'] {
   const matchedItem = BRANDING_SUBMENU_ITEMS.find((item) => item.key === value);
@@ -52,6 +57,7 @@ export function SystemAdminShell({
   notificationCount = 2
 }: SystemAdminShellProps) {
   const router = useRouter();
+  const prefetchRoute = useRoutePrefetch(SYSTEM_ADMIN_PREFETCH_ROUTES);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { branding } = useBranding();
@@ -215,6 +221,8 @@ export function SystemAdminShell({
                         className={`sidebar-link${activeNav === 'branding' || brandingMenuOpen ? ' is-active' : ''}`}
                         title={sidebarCollapsed ? item.label : undefined}
                         type="button"
+                        onFocus={() => prefetchRoute(item.href)}
+                        onMouseEnter={() => prefetchRoute(item.href)}
                         onClick={() => {
                           setBrandingMenuOpen((current) => !current);
                           if (!isBrandingPath) {
@@ -240,6 +248,8 @@ export function SystemAdminShell({
                             href={subItem.href}
                             title={sidebarCollapsed ? subItem.label : undefined}
                             onClick={closeSidebar}
+                            onFocus={() => prefetchRoute(subItem.href)}
+                            onMouseEnter={() => prefetchRoute(subItem.href)}
                             style={{ margin: '0.28rem 0.85rem', paddingLeft: '1.15rem' }}
                           >
                             <span className="sidebar-link-icon">
@@ -259,6 +269,8 @@ export function SystemAdminShell({
                     className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
                     href={item.href}
                     title={sidebarCollapsed ? item.label : undefined}
+                    onFocus={() => prefetchRoute(item.href)}
+                    onMouseEnter={() => prefetchRoute(item.href)}
                   >
                     <span className="sidebar-link-icon">
                       <i aria-hidden="true" className={`fas ${item.icon}`}></i>

@@ -431,7 +431,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                 <button className="btn btn-primary" type="button" onClick={() => alert('Modal placeholder')}>
                   <i className="fas fa-up-right-from-square" aria-hidden="true" /> View Full Information
                 </button>
-                <Link className="btn btn-secondary" href="/students/milestones">
+                <Link prefetch={false} className="btn btn-secondary" href="/students/milestones">
                   <i className="fas fa-timeline" aria-hidden="true" /> Open Milestones
                 </Link>
               </div>
@@ -583,7 +583,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                   <i className="fas fa-plus" aria-hidden="true" />
                   Add Academic Activity
                 </button>
-                <Link
+                <Link prefetch={false}
                   className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:border-blue-200 hover:text-brand"
                   href="/students/faculty-feedback"
                 >

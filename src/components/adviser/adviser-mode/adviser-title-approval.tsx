@@ -48,7 +48,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
       setTitleError(null);
 
       try {
-        const response = await fetch('/api/title-submissions', { cache: 'no-store' });
+        const response = await fetch('/api/title-submissions?limit=50', { cache: 'no-store' });
         const payload = await response.json().catch(() => null);
 
         if (!response.ok) {
@@ -255,6 +255,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
               key={item.href}
               className={isNavItemActive(pathname, item.href) ? 'active' : ''}
               href={item.href}
+              prefetch={false}
             >
               <i className={`fas ${item.icon}`} />
               {item.label}

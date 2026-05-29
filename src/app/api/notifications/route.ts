@@ -1,6 +1,27 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getAuthenticatedUser } from '@/lib/auth';
+
+const DEFAULT_NOTIFICATION_LIMIT = 50;
+const MAX_NOTIFICATION_LIMIT = 100;
+
+type BatchNotificationInput = {
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  entityType: string | null;
+  entityId: string | null;
+};
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
 
 export async function POST(request: Request) {
   try {
@@ -8,6 +29,59 @@ export async function POST(request: Request) {
     // student accounts to successfully trigger notification requests.
 
     const data = await request.json();
+    const batchNotifications = Array.isArray(data?.notifications) ? data.notifications : null;
+
+    if (batchNotifications) {
+      const notifications: BatchNotificationInput[] = batchNotifications
+        .map((item: any): BatchNotificationInput => ({
+          userId: typeof item?.userId === 'string' ? item.userId.trim() : '',
+          title: typeof item?.title === 'string' ? item.title.trim() : '',
+          message: typeof item?.message === 'string' ? item.message.trim() : '',
+          type: typeof item?.type === 'string' ? item.type : 'info',
+          entityType: typeof item?.entityType === 'string' ? item.entityType : null,
+          entityId: typeof item?.entityId === 'string' ? item.entityId : null
+        }))
+        .filter((item: BatchNotificationInput) => item.userId && item.title && item.message);
+
+      if (!notifications.length) {
+        return NextResponse.json({ error: 'Missing required notification fields' }, { status: 400 });
+      }
+
+      const userIds = Array.from(new Set<string>(notifications.map((item) => item.userId)));
+      const existingUsers = await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true }
+      });
+      const existingUserIds = new Set(existingUsers.map((user) => user.id));
+      const missingUsers = userIds.filter((userId) => !existingUserIds.has(userId));
+
+      if (missingUsers.length) {
+        await prisma.user.createMany({
+          data: missingUsers.map((userId) => ({
+            id: userId,
+            email: `${userId}@demo.local`,
+            passwordHash: 'mock',
+            name: 'Demo Account'
+          })),
+          skipDuplicates: true
+        });
+      }
+
+      const created = await prisma.notification.createMany({
+        data: notifications.map((item: any) => ({
+          userId: item.userId,
+          title: item.title,
+          message: item.message,
+          type: item.type,
+          status: 'UNREAD',
+          entityType: item.entityType,
+          entityId: item.entityId
+        }))
+      });
+
+      return NextResponse.json({ success: true, count: created.count });
+    }
+
     const { userId, title, message, type, entityType, entityId } = data;
 
     if (!userId || !title || !message) {
@@ -52,14 +126,40 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
+    const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_NOTIFICATION_LIMIT, MAX_NOTIFICATION_LIMIT);
+    const status = searchParams.get('status')?.trim().toUpperCase();
+    const entityType = searchParams.get('entityType')?.trim();
+    const entityId = searchParams.get('entityId')?.trim();
+    const title = searchParams.get('title')?.trim();
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
     }
 
+    const where: any = {
+      userId,
+      ...(status && ['UNREAD', 'READ', 'ARCHIVED'].includes(status) ? { status } : {}),
+      ...(entityType ? { entityType } : {}),
+      ...(entityId ? { entityId } : {}),
+      ...(title ? { title } : {})
+    };
+
     const notifications = await prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' }
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        userId: true,
+        title: true,
+        message: true,
+        type: true,
+        status: true,
+        entityType: true,
+        entityId: true,
+        readAt: true,
+        createdAt: true
+      }
     });
 
     return NextResponse.json(notifications);
@@ -72,7 +172,27 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { notificationId, action } = body;
+    const { notificationId, notificationIds, action } = body;
+
+    const ids = Array.isArray(notificationIds)
+      ? notificationIds.filter((id): id is string => typeof id === 'string' && Boolean(id.trim()))
+      : [];
+
+    if (ids.length) {
+      if (action !== 'read') {
+        return NextResponse.json({ error: 'Batch updates only support read action' }, { status: 400 });
+      }
+
+      const updated = await prisma.notification.updateMany({
+        where: { id: { in: Array.from(new Set(ids)) } },
+        data: {
+          status: 'READ',
+          readAt: new Date()
+        }
+      });
+
+      return NextResponse.json({ success: true, count: updated.count });
+    }
 
     if (!notificationId) {
       return NextResponse.json({ error: 'Missing notificationId' }, { status: 400 });

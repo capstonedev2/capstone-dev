@@ -40,6 +40,20 @@ const SESSION_END_ROLES: UserRole[] = [
   UserRole.SYSTEM_ADMIN
 ];
 
+const DEFAULT_DEFENSE_SCHEDULE_LIMIT = 50;
+const DEFAULT_DEFENSE_PROJECT_LIMIT = 100;
+const MAX_DEFENSE_LIMIT = 200;
+
+function parsePositiveInteger(value: string | null, fallback: number, max: number) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.floor(parsed));
+}
+
 const SCHEDULE_TYPES = [
   'Concept Presentation',
   'Proposal Defense',
@@ -387,6 +401,9 @@ export async function GET(request: Request) {
     const authUser = await requireAuthenticatedUser(request, SCHEDULE_VIEWER_ROLES);
     const { searchParams } = new URL(request.url);
     const groupCode = normalizeText(searchParams.get('groupCode'));
+    const scheduleLimit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_DEFENSE_SCHEDULE_LIMIT, MAX_DEFENSE_LIMIT);
+    const projectLimit = parsePositiveInteger(searchParams.get('projectLimit'), DEFAULT_DEFENSE_PROJECT_LIMIT, MAX_DEFENSE_LIMIT);
+    const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
 
     const where: Prisma.DefenseScheduleWhereInput = {
       status: DefenseStatus.SCHEDULED
@@ -419,7 +436,9 @@ export async function GET(request: Request) {
       include: defenseAssignmentInclude,
       orderBy: {
         scheduledAt: 'asc'
-      }
+      },
+      skip: (page - 1) * scheduleLimit,
+      take: scheduleLimit
     });
 
     const assignments = schedules.map(formatAssignment);
@@ -439,7 +458,7 @@ export async function GET(request: Request) {
       orderBy: {
         updatedAt: 'desc'
       },
-      take: 200
+      take: projectLimit
     });
 
     return successResponse({

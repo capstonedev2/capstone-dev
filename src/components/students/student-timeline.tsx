@@ -926,7 +926,7 @@ function StageAction({ stage }: { stage: BuiltStage }) {
   const label = stage.status === 'completed' ? 'View Completed Stage' : stage.actionLabel;
 
   return (
-    <Link className="milestone-action-button" href={stage.route}>
+    <Link prefetch={false} className="milestone-action-button" href={stage.route}>
       <i className={`fas ${stage.status === 'completed' ? 'fa-circle-check' : 'fa-arrow-up-right-from-square'}`} aria-hidden="true" />
       {label}
     </Link>
@@ -1171,15 +1171,15 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
             </div>
 
             <div className="milestones-quick-button-row">
-              <Link className="milestones-quick-button is-primary" href="/students/schedule">
+              <Link prefetch={false} className="milestones-quick-button is-primary" href="/students/schedule">
                 <i className="fas fa-calendar-check" aria-hidden="true" />
                 Open Schedule
               </Link>
-              <Link className="milestones-quick-button" href="/students/project-overview">
+              <Link prefetch={false} className="milestones-quick-button" href="/students/project-overview">
                 <i className="fas fa-folder-open" aria-hidden="true" />
                 View Project
               </Link>
-              <Link className="milestones-quick-button" href="/students/faculty-feedback">
+              <Link prefetch={false} className="milestones-quick-button" href="/students/faculty-feedback">
                 <i className="fas fa-comments" aria-hidden="true" />
                 View Feedback
               </Link>
@@ -1302,17 +1302,17 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
               </div>
             </div>
             <div className="milestone-action-list">
-              <Link className="milestones-quick-button is-primary" href="/students/project-files">
+              <Link prefetch={false} className="milestones-quick-button is-primary" href="/students/project-files">
                 <i className="fas fa-upload" aria-hidden="true" />
                 Upload Requirement
               </Link>
               {scheduleAction ? (
-                <Link className="milestones-quick-button" href="/students/schedule">
+                <Link prefetch={false} className="milestones-quick-button" href="/students/schedule">
                   <i className="fas fa-calendar-days" aria-hidden="true" />
                   {scheduleAction.label}
                 </Link>
               ) : null}
-              <Link className="milestones-quick-button" href="/students/faculty-feedback">
+              <Link prefetch={false} className="milestones-quick-button" href="/students/faculty-feedback">
                 <i className="fas fa-comment-dots" aria-hidden="true" />
                 View Feedback
               </Link>

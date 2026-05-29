@@ -581,7 +581,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       if (!isBackground) setIsLoadingTitles(true);
 
       try {
-        const response = await fetch('/api/title-submissions', { cache: 'no-store' });
+        const response = await fetch('/api/title-submissions?page=1&limit=20', { cache: 'no-store' });
         const payload = await response.json().catch(() => null);
 
         if (!response.ok) {

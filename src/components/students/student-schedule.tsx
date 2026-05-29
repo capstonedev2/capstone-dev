@@ -246,7 +246,7 @@ function EventItem({
             </div>
 
             {!compact ? (
-              <Link
+              <Link prefetch={false}
                 className="inline-flex min-h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                 href={getScheduleActionHref(item)}
               >
@@ -497,11 +497,11 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Link className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-md" href="/students/milestones">
+                <Link prefetch={false} className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:shadow-md" href="/students/milestones">
                   <i className="fas fa-timeline" aria-hidden="true" />
                   Open Milestones
                 </Link>
-                <Link className="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-200 hover:bg-amber-100 hover:shadow-md" href="/students/notifications">
+                <Link prefetch={false} className="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-sm transition-all duration-200 hover:bg-amber-100 hover:shadow-md" href="/students/notifications">
                   <i className="fas fa-bell" aria-hidden="true" />
                   Review Alerts
                 </Link>
@@ -590,7 +590,7 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
                     {priorityQueue.length ? (
                       <div className="space-y-2">
                         {priorityQueue.map((item) => (
-                          <Link
+                          <Link prefetch={false}
                             key={item.id}
                             href={getScheduleActionHref(item)}
                             className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-left transition hover:border-blue-200 hover:bg-blue-50"
@@ -674,7 +674,7 @@ export function StudentSchedule({ data }: { data: StudentDashboardData }) {
                           const tone = eventTone(item);
 
                           return (
-                            <Link
+                            <Link prefetch={false}
                               key={item.id}
                               href={getScheduleActionHref(item)}
                               className="group/cell relative flex gap-2.5 rounded-lg border border-slate-200/70 bg-white p-2.5 shadow-sm transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:shadow-md hover:ring-1 hover:ring-blue-100"

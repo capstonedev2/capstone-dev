@@ -91,19 +91,36 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
 
   useEffect(() => {
     let cancelled = false;
-    async function loadLiveEvaluations() {
-      try {
-        const response = await fetch('/api/advisers/evaluations');
-        if (response.ok && !cancelled) {
-          const { evaluations } = await response.json();
-          setAdviserRecords(evaluations);
-          setPanelRecords(evaluations);
-        }
-      } catch (error) {
-        console.error('Failed to load live evaluations:', error);
+
+    async function loadEvaluationWorkspaceData() {
+      const [evaluationsResult, filesResult] = await Promise.allSettled([
+        fetch('/api/advisers/evaluations?limit=50'),
+        fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.EVALUATION_FILES}&limit=50`, {
+          cache: 'no-store'
+        })
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      if (evaluationsResult.status === 'fulfilled' && evaluationsResult.value.ok) {
+        const payload = await evaluationsResult.value.json().catch(() => null);
+        const evaluations = payload?.evaluations || [];
+        setAdviserRecords(evaluations);
+        setPanelRecords(evaluations);
+      } else if (evaluationsResult.status === 'rejected') {
+        console.error('Failed to load live evaluations:', evaluationsResult.reason);
+      }
+
+      if (filesResult.status === 'fulfilled' && filesResult.value.ok) {
+        const payload = await filesResult.value.json().catch(() => null);
+        setEvaluationFiles(payload?.files || []);
       }
     }
-    loadLiveEvaluations();
+
+    void loadEvaluationWorkspaceData();
+
     return () => { cancelled = true; };
   }, []);
 
@@ -176,35 +193,6 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   useEffect(() => {
     setEvaluationFileProjectId((current) => current || evaluationFileProjectOptions[0]?.id || '');
   }, [evaluationFileProjectOptions]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadEvaluationFiles = async () => {
-      try {
-        const response = await fetch(`/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.EVALUATION_FILES}`, {
-          cache: 'no-store'
-        });
-
-        if (!response.ok) {
-          return;
-        }
-
-        const payload = await response.json();
-        if (!cancelled) {
-          setEvaluationFiles(payload.files || []);
-        }
-      } catch {
-        // Keep the evaluation workspace usable if document listing is temporarily unavailable.
-      }
-    };
-
-    loadEvaluationFiles();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
@@ -661,6 +649,7 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
               key={`${item.href}-${item.label}`}
               className={isNavItemActive(pathname, item.href) ? 'active' : ''}
               href={item.href}
+              prefetch={false}
             >
               <i className={`fas ${item.icon}`} />
               {item.label}

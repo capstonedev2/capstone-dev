@@ -189,6 +189,7 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentArea, setEditCommentArea] = useState('');
   const [editCommentText, setEditCommentText] = useState('');
+  const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
 
   const file = useMemo(() => files.find((item) => item.id === fileId) || null, [fileId, files]);
   const submission = useMemo(
@@ -814,11 +815,36 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
 
                 <div className="bg-white p-3 sm:p-4">
                   {previewUrl ? (
-                    <iframe
-                      className="block h-[clamp(760px,82vh,1040px)] w-full rounded-xl border border-slate-200 bg-white"
-                      src={previewUrl}
-                      title={`${submission.submissionTitle} preview`}
-                    />
+                    isPreviewLoaded ? (
+                      <iframe
+                        className="block h-[clamp(760px,82vh,1040px)] w-full rounded-xl border border-slate-200 bg-white"
+                        src={previewUrl}
+                        title={`${submission.submissionTitle} preview`}
+                        onLoad={() => {
+                          if (signedUrl && !isOfficeDocument(submission)) {
+                            URL.revokeObjectURL(signedUrl);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-[clamp(760px,82vh,1040px)] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+                        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-[#003A8F]">
+                          <i className={`fas ${getWorkspaceFileIcon(submission)} text-2xl`} aria-hidden="true" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900">Load Document Preview</h3>
+                        <p className="mt-2 max-w-sm text-sm text-slate-500">
+                          The document preview is paused to save bandwidth. Click below to load the secure viewer.
+                        </p>
+                        <button
+                          className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#003A8F] px-5 text-sm font-black text-white shadow-sm transition hover:bg-[#002C6B]"
+                          type="button"
+                          onClick={() => setIsPreviewLoaded(true)}
+                        >
+                          <i className="fas fa-eye text-xs" aria-hidden="true" />
+                          Load Viewer
+                        </button>
+                      </div>
+                    )
                   ) : (
                     <div className="flex h-[clamp(760px,82vh,1040px)] items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-500">
                       Preview unavailable

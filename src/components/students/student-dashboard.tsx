@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -385,85 +385,34 @@ function EmptyState({
 }
 
 export function StudentDashboard({ data }: { data: StudentDashboardData }) {
-  const [realGroup, setRealGroup] = useState<any>(null);
+  const [realGroup, setRealGroup] = useState<any>(() =>
+    data.group.id
+      ? {
+          id: data.group.id,
+          title: data.group.groupName,
+          projectTitle: data.project.title,
+          leader: data.group.leaderName,
+          allowMemberSubmission: data.group.allowMemberSubmission ?? false
+        }
+      : null
+  );
   const [titleDraft, setTitleDraft] = useState('');
-  const [debugInfo, setDebugInfo] = useState<any>({ status: 'Loading...' });
+  const [debugInfo] = useState<any>(() => ({ status: 'Loaded from server', name: data.profile.fullName }));
   const [accessRequested, setAccessRequested] = useState(false);
   const [isTogglingAccess, setIsTogglingAccess] = useState(false);
 
-  const [realNotifications, setRealNotifications] = useState<any[]>([]);
-
-  useEffect(() => {
-    async function fetchRealGroup() {
-      try {
-        let realStudentName = data.profile.fullName;
-        
-        try {
-          const resAuth = await fetch('/api/auth/me');
-          if (resAuth.ok) {
-            const authData = await resAuth.json();
-            if (authData.user && authData.user.name) {
-              realStudentName = authData.user.name;
-            }
-          }
-        } catch (e) {
-          if (typeof window !== 'undefined') {
-            const raw = window.localStorage.getItem('capstoneAuthUser');
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              if (parsed && parsed.name) {
-                realStudentName = parsed.name;
-              }
-            }
-          }
-        }
-        
-        if (!realStudentName && typeof window !== 'undefined') {
-          try {
-            const raw = window.localStorage.getItem('capstoneAuthUser');
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              if (parsed && parsed.name) {
-                realStudentName = parsed.name;
-              }
-            }
-          } catch (e) {}
-        }
-        
-        if (!realStudentName) {
-          setDebugInfo({ status: 'Not logged in via API or Mock Storage' });
-          return;
-        }
-
-        setDebugInfo({ status: 'Logged in as', name: realStudentName });
-
-        const res = await fetch(`/api/groups?studentName=${encodeURIComponent(realStudentName)}`, { cache: 'no-store' });
-        if (res.ok) {
-          const groups = await res.json();
-          setDebugInfo((prev: any) => ({ ...prev, groupsFound: groups.length }));
-          if (groups.length > 0) {
-            setRealGroup(groups[0]);
-          }
-        } else {
-          setDebugInfo((prev: any) => ({ ...prev, groupFetchError: res.statusText }));
-        }
-
-        if (data.profile.user_id) {
-          const notifRes = await fetch(`/api/notifications?userId=${encodeURIComponent(data.profile.user_id)}`, { cache: 'no-store' });
-          if (notifRes.ok) {
-            const notifs = await notifRes.json();
-            setRealNotifications(notifs);
-          }
-        }
-
-      } catch (e: any) {
-        setDebugInfo({ status: 'Error during fetch', error: e.message });
-        console.error('Failed to fetch student real group', e);
-      }
-    }
-    fetchRealGroup();
-  }, [data.profile.user_id, data.profile.fullName]);
-
+  const realNotifications = useMemo(
+    () =>
+      (data.notifications || []).map((notification) => ({
+        id: notification.id,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        status: notification.read ? 'READ' : 'UNREAD',
+        createdAt: notification.created_at
+      })),
+    [data.notifications]
+  );
 
 
   const handleSubmitTitle = async () => {
@@ -1135,7 +1084,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   }
 
                   return (
-                    <Link key={item.id} href={item.href} className={`group relative flex items-center gap-3 overflow-hidden rounded-xl border p-3.5 transition-all ${toneClasses}`}>
+                    <Link prefetch={false} key={item.id} href={item.href} className={`group relative flex items-center gap-3 overflow-hidden rounded-xl border p-3.5 transition-all ${toneClasses}`}>
                       <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBgClass}`}>
                         <i className={`fas ${item.icon} text-[13px]`} aria-hidden="true" />
                       </div>
@@ -1225,7 +1174,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Milestone Pipeline</span>
                   <h3 className="text-lg font-bold text-slate-800">Proposal to defense</h3>
                 </div>
-                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/milestones">
+                <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/milestones">
                   Open milestones
                 </Link>
               </div>
@@ -1259,7 +1208,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Upcoming Activity</span>
                   <h4 className="text-lg font-bold text-slate-800">Next events</h4>
                 </div>
-                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/schedule">
+                <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/schedule">
                   Open schedule
                 </Link>
               </div>
@@ -1360,7 +1309,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Project Files</span>
                   <h3 className="text-lg font-bold text-slate-800">Latest submissions</h3>
                 </div>
-                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/project-files">
+                <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/project-files">
                   Open project files
                 </Link>
               </div>
@@ -1399,7 +1348,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Faculty Feedback</span>
                   <h3 className="text-lg font-bold text-slate-800">Recent comments</h3>
                 </div>
-                <Link className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/faculty-feedback">
+                <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/faculty-feedback">
                   Open feedback
                 </Link>
               </div>

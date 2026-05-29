@@ -326,7 +326,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
       setScheduleError(null);
 
       try {
-        const response = await fetch('/api/adviser-schedule-items', { cache: 'no-store' });
+        const response = await fetch('/api/adviser-schedule-items?limit=50&projectLimit=100', { cache: 'no-store' });
         const payload = await response.json().catch(() => null);
 
         if (!response.ok) {
@@ -475,7 +475,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
         </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
+            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
               <i className={`fas ${item.icon}`}></i> {item.label}
             </Link>
           ))}

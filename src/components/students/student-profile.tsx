@@ -458,7 +458,7 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                   >
                     <i className="fas fa-user-edit"></i> Edit Details
                   </button>
-                  <Link 
+                  <Link prefetch={false} 
                     href="/students/project-overview"
                     className="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm transition-all hover:-translate-y-0.5 px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                   >

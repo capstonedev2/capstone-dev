@@ -1,5 +1,6 @@
+import { cache } from 'react';
 import { NotificationStatus } from '@/generated/prisma/client';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getServerAuthenticatedUser, type PublicUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import type { AdviserNotificationRecord } from '@/components/adviser/shared/components/adviser-notifications';
 
@@ -61,9 +62,11 @@ function getNotificationHref(basePath: string, entityType: string | null) {
   return `${basePath}/notifications`;
 }
 
-export async function getAdviserNotificationRecords(basePath: string) {
-  const user = await getAuthenticatedUser();
-
+export async function getAdviserNotificationRecordsForUser(
+  user: PublicUser | null,
+  basePath: string,
+  take = 50
+) {
   if (!user) {
     return [];
   }
@@ -71,7 +74,16 @@ export async function getAdviserNotificationRecords(basePath: string) {
   const notifications = await prisma.notification.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
-    take: 50
+    take,
+    select: {
+      id: true,
+      status: true,
+      createdAt: true,
+      type: true,
+      entityType: true,
+      title: true,
+      message: true
+    }
   });
 
   return notifications.map((notification): AdviserNotificationRecord => {
@@ -92,3 +104,8 @@ export async function getAdviserNotificationRecords(basePath: string) {
     };
   });
 }
+
+export const getAdviserNotificationRecords = cache(async (basePath: string, take = 50) => {
+  const user = await getServerAuthenticatedUser();
+  return getAdviserNotificationRecordsForUser(user, basePath, take);
+});
