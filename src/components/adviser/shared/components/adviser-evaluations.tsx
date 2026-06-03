@@ -625,40 +625,7 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   }
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{meta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>{pageContent.description}</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
-            <span>{meta.badgeLabel}</span>
-          </span>
-        </div>
-
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link
-              key={`${item.href}-${item.label}`}
-              className={isNavItemActive(pathname, item.href) ? 'active' : ''}
-              href={item.href}
-              prefetch={false}
-            >
-              <i className={`fas ${item.icon}`} />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="main-content">
+    <>
         <AdviserPageHeader
           title={pageContent.title}
           description={pageContent.description}
@@ -838,7 +805,6 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
             <span>{toast.message}</span>
           </div>
         ) : null}
-      </main>
-    </div>
+      </>
   );
 }

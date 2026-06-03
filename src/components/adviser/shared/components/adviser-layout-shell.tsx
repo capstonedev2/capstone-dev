@@ -216,7 +216,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
       </header>
 
       {/* ─── Sidebar ─── */}
-      <aside className={`student-global-sidebar adviser-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Adviser Portal</span>

@@ -68,7 +68,7 @@ export const NAV_ITEMS = {
     { href: '/adviser/adviser-mode/title-approvals', icon: 'fa-file-signature', label: 'Title Approvals' },
     { href: '/adviser/adviser-mode/evaluations', icon: 'fa-star', label: 'Evaluations' },
     { href: '/adviser/adviser-mode/schedule', icon: 'fa-calendar', label: 'Schedule' },
-    { href: '/adviser/adviser-mode/reports', icon: 'fa-chart-bar', label: 'Reports' }
+    { href: '/adviser/adviser-mode/reports', icon: 'fa-chart-bar', label: 'Reports & Analytics' }
   ],
   panel: [
     { href: '/adviser/panel-mode/dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },

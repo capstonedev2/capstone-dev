@@ -52,6 +52,8 @@ export type MilestoneCheckpointMinAggregateOutputType = {
   latestFeedback: string | null
   latestFeedbackBy: string | null
   latestFeedbackAt: Date | null
+  studentStartDate: Date | null
+  studentTargetDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,6 +76,8 @@ export type MilestoneCheckpointMaxAggregateOutputType = {
   latestFeedback: string | null
   latestFeedbackBy: string | null
   latestFeedbackAt: Date | null
+  studentStartDate: Date | null
+  studentTargetDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -96,6 +100,8 @@ export type MilestoneCheckpointCountAggregateOutputType = {
   latestFeedback: number
   latestFeedbackBy: number
   latestFeedbackAt: number
+  studentStartDate: number
+  studentTargetDate: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -128,6 +134,8 @@ export type MilestoneCheckpointMinAggregateInputType = {
   latestFeedback?: true
   latestFeedbackBy?: true
   latestFeedbackAt?: true
+  studentStartDate?: true
+  studentTargetDate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -150,6 +158,8 @@ export type MilestoneCheckpointMaxAggregateInputType = {
   latestFeedback?: true
   latestFeedbackBy?: true
   latestFeedbackAt?: true
+  studentStartDate?: true
+  studentTargetDate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -172,6 +182,8 @@ export type MilestoneCheckpointCountAggregateInputType = {
   latestFeedback?: true
   latestFeedbackBy?: true
   latestFeedbackAt?: true
+  studentStartDate?: true
+  studentTargetDate?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -281,6 +293,8 @@ export type MilestoneCheckpointGroupByOutputType = {
   latestFeedback: string | null
   latestFeedbackBy: string | null
   latestFeedbackAt: Date | null
+  studentStartDate: Date | null
+  studentTargetDate: Date | null
   createdAt: Date
   updatedAt: Date
   _count: MilestoneCheckpointCountAggregateOutputType | null
@@ -326,6 +340,8 @@ export type MilestoneCheckpointWhereInput = {
   latestFeedback?: Prisma.StringNullableFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackBy?: Prisma.StringNullableFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackAt?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentStartDate?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentTargetDate?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MilestoneCheckpoint"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MilestoneCheckpoint"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
@@ -352,6 +368,8 @@ export type MilestoneCheckpointOrderByWithRelationInput = {
   latestFeedback?: Prisma.SortOrderInput | Prisma.SortOrder
   latestFeedbackBy?: Prisma.SortOrderInput | Prisma.SortOrder
   latestFeedbackAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentTargetDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   project?: Prisma.ProjectOrderByWithRelationInput
@@ -382,6 +400,8 @@ export type MilestoneCheckpointWhereUniqueInput = Prisma.AtLeast<{
   latestFeedback?: Prisma.StringNullableFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackBy?: Prisma.StringNullableFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackAt?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentStartDate?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentTargetDate?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MilestoneCheckpoint"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MilestoneCheckpoint"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
@@ -408,6 +428,8 @@ export type MilestoneCheckpointOrderByWithAggregationInput = {
   latestFeedback?: Prisma.SortOrderInput | Prisma.SortOrder
   latestFeedbackBy?: Prisma.SortOrderInput | Prisma.SortOrder
   latestFeedbackAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  studentTargetDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MilestoneCheckpointCountOrderByAggregateInput
@@ -438,6 +460,8 @@ export type MilestoneCheckpointScalarWhereWithAggregatesInput = {
   latestFeedback?: Prisma.StringNullableWithAggregatesFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackBy?: Prisma.StringNullableWithAggregatesFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentTargetDate?: Prisma.DateTimeNullableWithAggregatesFilter<"MilestoneCheckpoint"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"MilestoneCheckpoint"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MilestoneCheckpoint"> | Date | string
 }
@@ -458,6 +482,8 @@ export type MilestoneCheckpointCreateInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutMilestoneCheckpointsInput
@@ -484,6 +510,8 @@ export type MilestoneCheckpointUncheckedCreateInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutCheckpointInput
@@ -506,6 +534,8 @@ export type MilestoneCheckpointUpdateInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutMilestoneCheckpointsNestedInput
@@ -532,6 +562,8 @@ export type MilestoneCheckpointUncheckedUpdateInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutCheckpointNestedInput
@@ -556,6 +588,8 @@ export type MilestoneCheckpointCreateManyInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -576,6 +610,8 @@ export type MilestoneCheckpointUpdateManyMutationInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -598,6 +634,8 @@ export type MilestoneCheckpointUncheckedUpdateManyInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -640,6 +678,8 @@ export type MilestoneCheckpointCountOrderByAggregateInput = {
   latestFeedback?: Prisma.SortOrder
   latestFeedbackBy?: Prisma.SortOrder
   latestFeedbackAt?: Prisma.SortOrder
+  studentStartDate?: Prisma.SortOrder
+  studentTargetDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -666,6 +706,8 @@ export type MilestoneCheckpointMaxOrderByAggregateInput = {
   latestFeedback?: Prisma.SortOrder
   latestFeedbackBy?: Prisma.SortOrder
   latestFeedbackAt?: Prisma.SortOrder
+  studentStartDate?: Prisma.SortOrder
+  studentTargetDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -688,6 +730,8 @@ export type MilestoneCheckpointMinOrderByAggregateInput = {
   latestFeedback?: Prisma.SortOrder
   latestFeedbackBy?: Prisma.SortOrder
   latestFeedbackAt?: Prisma.SortOrder
+  studentStartDate?: Prisma.SortOrder
+  studentTargetDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -836,6 +880,8 @@ export type MilestoneCheckpointCreateWithoutFilesInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutMilestoneCheckpointsInput
@@ -861,6 +907,8 @@ export type MilestoneCheckpointUncheckedCreateWithoutFilesInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutCheckpointInput
@@ -898,6 +946,8 @@ export type MilestoneCheckpointUpdateWithoutFilesInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutMilestoneCheckpointsNestedInput
@@ -923,6 +973,8 @@ export type MilestoneCheckpointUncheckedUpdateWithoutFilesInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutCheckpointNestedInput
@@ -944,6 +996,8 @@ export type MilestoneCheckpointCreateWithoutProjectInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   milestone: Prisma.MilestoneCreateNestedOneWithoutCheckpointsInput
@@ -968,6 +1022,8 @@ export type MilestoneCheckpointUncheckedCreateWithoutProjectInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutCheckpointInput
@@ -1021,6 +1077,8 @@ export type MilestoneCheckpointScalarWhereInput = {
   latestFeedback?: Prisma.StringNullableFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackBy?: Prisma.StringNullableFilter<"MilestoneCheckpoint"> | string | null
   latestFeedbackAt?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentStartDate?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
+  studentTargetDate?: Prisma.DateTimeNullableFilter<"MilestoneCheckpoint"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MilestoneCheckpoint"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MilestoneCheckpoint"> | Date | string
 }
@@ -1041,6 +1099,8 @@ export type MilestoneCheckpointCreateWithoutMilestoneInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutMilestoneCheckpointsInput
@@ -1065,6 +1125,8 @@ export type MilestoneCheckpointUncheckedCreateWithoutMilestoneInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutCheckpointInput
@@ -1113,6 +1175,8 @@ export type MilestoneCheckpointCreateWithoutSubmissionsInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutMilestoneCheckpointsInput
@@ -1138,6 +1202,8 @@ export type MilestoneCheckpointUncheckedCreateWithoutSubmissionsInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutCheckpointInput
@@ -1175,6 +1241,8 @@ export type MilestoneCheckpointUpdateWithoutSubmissionsInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutMilestoneCheckpointsNestedInput
@@ -1200,6 +1268,8 @@ export type MilestoneCheckpointUncheckedUpdateWithoutSubmissionsInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   files?: Prisma.UploadedFileUncheckedUpdateManyWithoutCheckpointNestedInput
@@ -1222,6 +1292,8 @@ export type MilestoneCheckpointCreateManyProjectInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1242,6 +1314,8 @@ export type MilestoneCheckpointUpdateWithoutProjectInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   milestone?: Prisma.MilestoneUpdateOneRequiredWithoutCheckpointsNestedInput
@@ -1266,6 +1340,8 @@ export type MilestoneCheckpointUncheckedUpdateWithoutProjectInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutCheckpointNestedInput
@@ -1289,6 +1365,8 @@ export type MilestoneCheckpointUncheckedUpdateManyWithoutProjectInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1310,6 +1388,8 @@ export type MilestoneCheckpointCreateManyMilestoneInput = {
   latestFeedback?: string | null
   latestFeedbackBy?: string | null
   latestFeedbackAt?: Date | string | null
+  studentStartDate?: Date | string | null
+  studentTargetDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1330,6 +1410,8 @@ export type MilestoneCheckpointUpdateWithoutMilestoneInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutMilestoneCheckpointsNestedInput
@@ -1354,6 +1436,8 @@ export type MilestoneCheckpointUncheckedUpdateWithoutMilestoneInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutCheckpointNestedInput
@@ -1377,6 +1461,8 @@ export type MilestoneCheckpointUncheckedUpdateManyWithoutMilestoneInput = {
   latestFeedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latestFeedbackAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  studentTargetDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1439,6 +1525,8 @@ export type MilestoneCheckpointSelect<ExtArgs extends runtime.Types.Extensions.I
   latestFeedback?: boolean
   latestFeedbackBy?: boolean
   latestFeedbackAt?: boolean
+  studentStartDate?: boolean
+  studentTargetDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
@@ -1466,6 +1554,8 @@ export type MilestoneCheckpointSelectCreateManyAndReturn<ExtArgs extends runtime
   latestFeedback?: boolean
   latestFeedbackBy?: boolean
   latestFeedbackAt?: boolean
+  studentStartDate?: boolean
+  studentTargetDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
@@ -1490,6 +1580,8 @@ export type MilestoneCheckpointSelectUpdateManyAndReturn<ExtArgs extends runtime
   latestFeedback?: boolean
   latestFeedbackBy?: boolean
   latestFeedbackAt?: boolean
+  studentStartDate?: boolean
+  studentTargetDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
@@ -1514,11 +1606,13 @@ export type MilestoneCheckpointSelectScalar = {
   latestFeedback?: boolean
   latestFeedbackBy?: boolean
   latestFeedbackAt?: boolean
+  studentStartDate?: boolean
+  studentTargetDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MilestoneCheckpointOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "milestoneId" | "key" | "title" | "description" | "sequence" | "required" | "status" | "adviserReviewStatus" | "panelReviewStatus" | "submittedAt" | "reviewedAt" | "completedAt" | "latestFeedback" | "latestFeedbackBy" | "latestFeedbackAt" | "createdAt" | "updatedAt", ExtArgs["result"]["milestoneCheckpoint"]>
+export type MilestoneCheckpointOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "projectId" | "milestoneId" | "key" | "title" | "description" | "sequence" | "required" | "status" | "adviserReviewStatus" | "panelReviewStatus" | "submittedAt" | "reviewedAt" | "completedAt" | "latestFeedback" | "latestFeedbackBy" | "latestFeedbackAt" | "studentStartDate" | "studentTargetDate" | "createdAt" | "updatedAt", ExtArgs["result"]["milestoneCheckpoint"]>
 export type MilestoneCheckpointInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   milestone?: boolean | Prisma.MilestoneDefaultArgs<ExtArgs>
@@ -1561,6 +1655,8 @@ export type $MilestoneCheckpointPayload<ExtArgs extends runtime.Types.Extensions
     latestFeedback: string | null
     latestFeedbackBy: string | null
     latestFeedbackAt: Date | null
+    studentStartDate: Date | null
+    studentTargetDate: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["milestoneCheckpoint"]>
@@ -2007,6 +2103,8 @@ export interface MilestoneCheckpointFieldRefs {
   readonly latestFeedback: Prisma.FieldRef<"MilestoneCheckpoint", 'String'>
   readonly latestFeedbackBy: Prisma.FieldRef<"MilestoneCheckpoint", 'String'>
   readonly latestFeedbackAt: Prisma.FieldRef<"MilestoneCheckpoint", 'DateTime'>
+  readonly studentStartDate: Prisma.FieldRef<"MilestoneCheckpoint", 'DateTime'>
+  readonly studentTargetDate: Prisma.FieldRef<"MilestoneCheckpoint", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"MilestoneCheckpoint", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"MilestoneCheckpoint", 'DateTime'>
 }

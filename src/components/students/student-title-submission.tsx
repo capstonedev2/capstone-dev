@@ -1315,7 +1315,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const reviewProgressTone = isApprovedTimeline ? 'is-complete' : hasFeedbackAction ? 'is-warning' : '';
   const feedbackNote =
     activeSubmission.statusNote?.trim() ||
-    'Please review the rejection feedback and update your title proposal accordingly.';
+    'Please review the feedback and update your title proposal accordingly.';
   const scrollIntoView = (targetRef: RefObject<HTMLElement | null>) => {
     window.setTimeout(() => {
       targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1388,11 +1388,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           </div>
         </header>
 
-        <section className="title-submission-workflow-strip" aria-label="Title submission workflow">
+        <section className={`title-submission-workflow-strip ${normalizedRegistrationStatus === 'rejected' ? 'is-danger-workflow' : ''}`} aria-label="Title submission workflow">
           {TIMELINE_STEPS.map((step, idx) => {
             const isCompleted = idx < currentStepIndex || (isApprovedTimeline && idx <= currentStepIndex);
             const isCurrent = idx === currentStepIndex && !isApprovedTimeline;
-            const needsAttention = isCurrent && (normalizedRegistrationStatus === 'needs revision' || normalizedRegistrationStatus === 'rejected');
+            const needsAttention = isCurrent && normalizedRegistrationStatus === 'needs revision';
+            const isDanger = isCurrent && normalizedRegistrationStatus === 'rejected';
             const stateLabel = getTimelineStateLabel(step.id, isCompleted, isCurrent);
             const isPending = !isCompleted && !isCurrent;
             const showTimelineMeta = isCompleted || isCurrent;
@@ -1400,7 +1401,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             return (
               <div
                 key={step.id}
-                className={`${isCompleted ? 'is-complete' : ''} ${isCurrent ? 'is-current' : ''} ${needsAttention ? 'is-attention' : ''} ${isPending ? 'is-pending' : ''}`}
+                className={`${isCompleted ? 'is-complete' : ''} ${isDanger ? 'is-danger' : needsAttention ? 'is-attention' : isCurrent ? 'is-current' : ''} ${isPending ? 'is-pending' : ''}`}
                 aria-current={isCurrent ? 'step' : undefined}
               >
                 <span className="title-submission-workflow-icon">
@@ -1415,10 +1416,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                   <em>{String(idx + 1).padStart(2, '0')}</em>
                   <strong>{step.label}</strong>
                   <small className="title-submission-workflow-pill">
-                    <i className={`fas ${isCompleted ? 'fa-check' : needsAttention ? 'fa-circle-exclamation' : 'fa-clock'}`} aria-hidden="true" />
+                    <i className={`fas ${isCompleted ? 'fa-check' : needsAttention || isDanger ? 'fa-circle-exclamation' : 'fa-clock'}`} aria-hidden="true" />
                     {stateLabel}
                   </small>
-                  {needsAttention ? (
+                  {needsAttention || isDanger ? (
                     <p>Review adviser feedback and submit a revised title proposal.</p>
                   ) : isPending && step.id === 4 ? (
                     <p>Pending final review and approval.</p>
@@ -1428,7 +1429,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       {timelineTimeLabel ? <span><i className="fas fa-clock" aria-hidden="true" /> {timelineTimeLabel}</span> : null}
                     </span>
                   ) : null}
-                  {needsAttention ? (
+                  {needsAttention || isDanger ? (
                     <button
                       type="button"
                       className="title-submission-workflow-action"
@@ -1444,20 +1445,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           })}
         </section>
 
-        {hasFeedbackAction ? (
-          <div className="title-review-feedback-panel">
-            <div className="title-review-feedback-copy">
-              <span className="title-review-feedback-icon" aria-hidden="true">
-                <i className="fas fa-message" />
-              </span>
-              <div>
-                <strong>Feedback Available</strong>
-                <p>{feedbackNote}</p>
-              </div>
-            </div>
-
-          </div>
-        ) : null}
 
         <p className="title-review-progress-tip">
           <i className="fas fa-shield-halved" aria-hidden="true" />

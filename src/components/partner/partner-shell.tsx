@@ -134,7 +134,6 @@ export function PartnerShell({
                   { label: badgeLabel, icon: 'fa-building' }
                 ]}
                 profileActions={[
-                  { label: 'Profile', icon: 'fa-user', href: '/partner/profile' },
                   { label: 'My Requests', icon: 'fa-list', href: '/partner/requests' },
                   {
                     label: 'Sign Out',
@@ -207,21 +206,7 @@ export function PartnerShell({
 
       <main className="student-global-main">
         <div className="student-global-content">
-          <header className="top-nav" aria-labelledby="partner-page-title">
-            <div className="top-nav-leading">
-              <div className="page-title">
-                <div className="page-title-context">
-                  <span className="page-kicker">Partner Desk</span>
-                  <span className="page-breadcrumb" aria-hidden="true">
-                    <i className="fas fa-angle-right" />
-                    <span>{title}</span>
-                  </span>
-                </div>
-                <h1 id="partner-page-title">{title}</h1>
-                <p>{description}</p>
-              </div>
-            </div>
-          </header>
+
 
           <div className="page-body">
             {children}

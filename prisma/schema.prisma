@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 enum UserRole {
@@ -140,45 +140,46 @@ enum NotificationStatus {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  email               String               @unique
-  passwordHash        String
-  googleSub           String?              @unique
-  name                String
-  firstName           String?
-  lastName            String?
-  studentId           String?              @unique
-  department          String?
-  yearLevel           String?
-  role                UserRole             @default(STUDENT)
-  contactNumber       String?
-  address             String?
-  birthDate           String?
-  profileImage        String?
-  section             String?
-  accountSummary      String?
-  office              String?
-  displayName         String?
-  isSuspended         Boolean              @default(false)
-  suspendedAt         DateTime?
-  suspendedUntil      DateTime?
-  passwordResetTokens PasswordResetToken[]
-  passwordResetCodes  PasswordResetCode[]
-  uploadedFiles       UploadedFile[]
-  groupMemberships    GroupMember[]
-  ownedProjects       Project[]            @relation("ProjectOwner")
-  advisedProjects     Project[]            @relation("ProjectAdviser")
-  submissions         Submission[]         @relation("SubmissionSubmitter")
-  reviewComments      ReviewComment[]      @relation("ReviewCommentAuthor")
-  resolvedComments    ReviewComment[]      @relation("ReviewCommentResolver")
-  scheduledDefenses   DefenseSchedule[]    @relation("DefenseScheduler")
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  passwordHash         String?
+  supabaseId           String?               @unique
+  googleSub            String?               @unique
+  name                 String
+  firstName            String?
+  lastName             String?
+  studentId            String?               @unique
+  department           String?
+  yearLevel            String?
+  role                 UserRole              @default(STUDENT)
+  contactNumber        String?
+  address              String?
+  birthDate            String?
+  profileImage         String?
+  section              String?
+  accountSummary       String?
+  office               String?
+  displayName          String?
+  isSuspended          Boolean               @default(false)
+  suspendedAt          DateTime?
+  suspendedUntil       DateTime?
+  passwordResetTokens  PasswordResetToken[]
+  passwordResetCodes   PasswordResetCode[]
+  uploadedFiles        UploadedFile[]
+  groupMemberships     GroupMember[]
+  ownedProjects        Project[]             @relation("ProjectOwner")
+  advisedProjects      Project[]             @relation("ProjectAdviser")
+  submissions          Submission[]          @relation("SubmissionSubmitter")
+  reviewComments       ReviewComment[]       @relation("ReviewCommentAuthor")
+  resolvedComments     ReviewComment[]       @relation("ReviewCommentResolver")
+  scheduledDefenses    DefenseSchedule[]     @relation("DefenseScheduler")
   adviserScheduleItems AdviserScheduleItem[] @relation("AdviserScheduleCreator")
-  evaluations         Evaluation[]         @relation("EvaluationEvaluator")
-  notifications       Notification[]
-  auditLogs           AuditLog[]           @relation("AuditActor")
-  brandingAssets      BrandingAsset[]      @relation("UserBrandingAssets")
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  evaluations          Evaluation[]          @relation("EvaluationEvaluator")
+  notifications        Notification[]
+  auditLogs            AuditLog[]            @relation("AuditActor")
+  brandingAssets       BrandingAsset[]       @relation("UserBrandingAssets")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   @@index([role])
   @@index([isSuspended])
@@ -218,28 +219,28 @@ model PasswordResetCode {
 }
 
 model UploadedFile {
-  id               String      @id @default(cuid())
-  secureUrl        String?     @map("secure_url")
-  publicId         String?     @unique @map("public_id")
-  fileName         String      @map("file_name")
-  filePath         String?     @map("file_path")
-  bucketName       String?     @map("bucket_name")
-  fileType         String      @map("file_type")
-  resourceType     String?     @map("resource_type")
-  documentCategory String      @default("Uncategorized") @map("document_category")
-  category         String      @default("Uncategorized")
-  visibility       String      @default("private")
-  size             Int?        @map("file_size")
-  userId           String      @map("uploaded_by")
-  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId        String?     @map("project_id")
-  project          Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  submissionId     String?     @map("submission_id")
-  submission       Submission? @relation(fields: [submissionId], references: [id], onDelete: SetNull)
-  checkpointId     String?     @map("checkpoint_id")
+  id               String               @id @default(cuid())
+  secureUrl        String?              @map("secure_url")
+  publicId         String?              @unique @map("public_id")
+  fileName         String               @map("file_name")
+  filePath         String?              @map("file_path")
+  bucketName       String?              @map("bucket_name")
+  fileType         String               @map("file_type")
+  resourceType     String?              @map("resource_type")
+  documentCategory String               @default("Uncategorized") @map("document_category")
+  category         String               @default("Uncategorized")
+  visibility       String               @default("private")
+  size             Int?                 @map("file_size")
+  userId           String               @map("uploaded_by")
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId        String?              @map("project_id")
+  project          Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  submissionId     String?              @map("submission_id")
+  submission       Submission?          @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+  checkpointId     String?              @map("checkpoint_id")
   checkpoint       MilestoneCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
-  createdAt        DateTime    @default(now()) @map("created_at")
-  updatedAt        DateTime    @updatedAt @map("updated_at")
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
 
   @@index([userId])
   @@index([projectId])
@@ -371,13 +372,14 @@ model Project {
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
 
-  milestones       Milestone[]
+  milestones           Milestone[]
   milestoneCheckpoints MilestoneCheckpoint[]
-  submissions      Submission[]
-  files            UploadedFile[]
-  defenseSchedules DefenseSchedule[]
+  submissions          Submission[]
+  files                UploadedFile[]
+  defenseSchedules     DefenseSchedule[]
   adviserScheduleItems AdviserScheduleItem[]
-  evaluations      Evaluation[]
+  evaluations          Evaluation[]
+  industryProjects     IndustryProject[]
 
   @@index([departmentId])
   @@index([academicYearId])
@@ -429,6 +431,8 @@ model MilestoneCheckpoint {
   latestFeedback      String?
   latestFeedbackBy    String?
   latestFeedbackAt    DateTime?
+  studentStartDate    DateTime?
+  studentTargetDate   DateTime?
   createdAt           DateTime                        @default(now())
   updatedAt           DateTime                        @updatedAt
 
@@ -444,23 +448,23 @@ model MilestoneCheckpoint {
 }
 
 model Submission {
-  id            String           @id @default(cuid())
+  id            String               @id @default(cuid())
   projectId     String
-  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project       Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
   milestoneId   String?
-  milestone     Milestone?       @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  milestone     Milestone?           @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
   checkpointId  String?
   checkpoint    MilestoneCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
   submittedById String?
-  submittedBy   User?            @relation("SubmissionSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+  submittedBy   User?                @relation("SubmissionSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
   title         String
   description   String?
-  status        SubmissionStatus @default(SUBMITTED)
-  version       Int              @default(1)
-  submittedAt   DateTime         @default(now())
+  status        SubmissionStatus     @default(SUBMITTED)
+  version       Int                  @default(1)
+  submittedAt   DateTime             @default(now())
   reviewedAt    DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
 
   files    UploadedFile[]
   comments ReviewComment[]
@@ -540,16 +544,16 @@ model AdviserScheduleItem {
 }
 
 model Evaluation {
-  id                String                   @id @default(cuid())
-  projectId         String
-  project           Project                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  defenseScheduleId String?
-  defenseSchedule   DefenseSchedule?         @relation(fields: [defenseScheduleId], references: [id], onDelete: SetNull)
-  evaluatorId       String?
-  evaluator         User?                    @relation("EvaluationEvaluator", fields: [evaluatorId], references: [id], onDelete: SetNull)
-  panelRole         DefensePanelRole         @default(MEMBER)
-  score             Int?
-  recommendation    EvaluationRecommendation @default(PENDING)
+  id                 String                   @id @default(cuid())
+  projectId          String
+  project            Project                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  defenseScheduleId  String?
+  defenseSchedule    DefenseSchedule?         @relation(fields: [defenseScheduleId], references: [id], onDelete: SetNull)
+  evaluatorId        String?
+  evaluator          User?                    @relation("EvaluationEvaluator", fields: [evaluatorId], references: [id], onDelete: SetNull)
+  panelRole          DefensePanelRole         @default(MEMBER)
+  score              Int?
+  recommendation     EvaluationRecommendation @default(PENDING)
   remarks            String?
   rubricData         Json?
   studentEvaluations Json?
@@ -613,4 +617,70 @@ model BrandingAsset {
 
   @@index([type])
   @@index([uploadedById])
+}
+
+// ==========================================
+// Technology Transfer & Industry Partner Module
+// Required by Instructor
+// ==========================================
+
+enum IndustryProjectStatus {
+  PROPOSED   @map("proposed")
+  ACTIVE     @map("active")
+  COMPLETED  @map("completed")
+  TERMINATED @map("terminated")
+}
+
+model IndustryPartner {
+  id            String    @id @default(cuid())
+  name          String
+  contactPerson String?
+  email         String    @unique
+  contactNumber String?
+  address       String?
+  partnerType   String    @default("Corporate")
+  website       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  industryProjects IndustryProject[]
+  impactFeedbacks  ImpactFeedback[]
+
+  @@index([partnerType])
+}
+
+model IndustryProject {
+  id             String                @id @default(cuid())
+  partnerId      String
+  partner        IndustryPartner       @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  projectId      String
+  project        Project               @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  status         IndustryProjectStatus @default(PROPOSED)
+  moaUrl         String?
+  deploymentDate DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  deletedAt      DateTime?
+
+  impactFeedbacks ImpactFeedback[]
+
+  @@index([partnerId])
+  @@index([projectId])
+  @@index([status])
+}
+
+model ImpactFeedback {
+  id                String          @id @default(cuid())
+  industryProjectId String
+  industryProject   IndustryProject @relation(fields: [industryProjectId], references: [id], onDelete: Cascade)
+  partnerId         String
+  partner           IndustryPartner @relation(fields: [partnerId], references: [id], onDelete: Restrict)
+  rating            Int             @default(5)
+  feedback          String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([industryProjectId])
+  @@index([partnerId])
 }

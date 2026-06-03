@@ -14,6 +14,7 @@ import {
   clearGoogleRegistrationCookie,
   getGoogleRegistrationContext
 } from '@/lib/google-oauth';
+import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import {
   HttpError,
@@ -166,9 +167,40 @@ export async function POST(request: Request) {
       }
     }
 
-    const passwordHash = await hashPassword(
-      isGoogleRegistration ? crypto.randomBytes(32).toString('hex') : password
-    );
+    let passwordHash = null;
+    let supabaseId = null;
+
+    if (isGoogleRegistration) {
+      passwordHash = await hashPassword(crypto.randomBytes(32).toString('hex'));
+      supabaseId = googleRegistrationContext?.sub || null;
+    } else {
+      const supabase = await createClient();
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            firstName,
+            lastName,
+            name: buildDisplayName({
+              name: normalizeText(body.name),
+              firstName,
+              lastName,
+              email
+            })
+          }
+        }
+      });
+
+      if (authError) {
+        throw new HttpError(authError.message, 400);
+      }
+      
+      supabaseId = authData.user?.id || null;
+      // We still keep the legacy hash logic so local auth doesn't completely break for older functions if they depend on it
+      passwordHash = await hashPassword(password);
+    }
+
     const name = buildDisplayName({
       name: normalizeText(body.name),
       firstName,
@@ -179,6 +211,7 @@ export async function POST(request: Request) {
     const user = await prisma.user.create({
       data: {
         email,
+        supabaseId,
         passwordHash,
         googleSub: googleRegistrationContext?.sub || null,
         name,

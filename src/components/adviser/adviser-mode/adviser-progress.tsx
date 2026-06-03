@@ -122,40 +122,7 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
   const nextMajorDeadline = useMemo(() => getNextMajorDeadline(progressRecords), [progressRecords]);
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{adviserMeta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>Monitor milestone completion, detect delays, and track the performance of your assigned IT groups.</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${adviserMeta.badgeIcon}`} />
-            <span>{adviserMeta.badgeLabel}</span>
-          </span>
-        </div>
-
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link
-              key={item.href}
-              className={isNavItemActive(pathname, item.href) ? 'active' : ''}
-              href={item.href}
-              prefetch={false}
-            >
-              <i className={`fas ${item.icon}`} />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="main-content">
+    <>
         <AdviserPageHeader
           title="Progress"
           description="Monitor milestone completion, detect delays, and track the performance of your assigned IT groups."
@@ -201,7 +168,6 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
 
           <AtRiskGroupsPanel records={progressRecords} />
         </div>
-      </main>
-    </div>
+      </>
   );
 }

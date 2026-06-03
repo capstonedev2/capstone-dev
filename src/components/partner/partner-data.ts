@@ -8,8 +8,7 @@ export type PartnerNavKey =
   | 'requests'
   | 'implementations'
   | 'feedback'
-  | 'notifications'
-  | 'profile';
+  | 'notifications';
 
 export type PartnerStatusTone =
   | 'approved'
@@ -99,13 +98,9 @@ export type PartnerNotification = {
 export const PARTNER_NAV_ITEMS = [
   { key: 'dashboard', href: '/partner/dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
   { key: 'project', href: '/partner/project', label: 'Browse Projects', icon: 'fa-search' },
-  { key: 'details', href: '/partner/details', label: 'Project Details', icon: 'fa-info-circle' },
-  { key: 'request', href: '/partner/request', label: 'Request Adoption', icon: 'fa-handshake' },
   { key: 'requests', href: '/partner/requests', label: 'My Requests', icon: 'fa-list' },
   { key: 'implementations', href: '/partner/implementations', label: 'Active Implementations', icon: 'fa-microchip' },
-  { key: 'feedback', href: '/partner/feedback', label: 'Feedback & Reports', icon: 'fa-comment' },
-  { key: 'notifications', href: '/partner/notifications', label: 'Notifications', icon: 'fa-bell' },
-  { key: 'profile', href: '/partner/profile', label: 'Profile', icon: 'fa-user' }
+  { key: 'feedback', href: '/partner/feedback', label: 'Feedback & Reports', icon: 'fa-comment' }
 ] as const satisfies ReadonlyArray<{
   key: PartnerNavKey;
   href: string;
@@ -456,21 +451,6 @@ export const PARTNER_NOTIFICATIONS: readonly PartnerNotification[] = [
     tone: 'completed'
   }
 ] as const;
-
-export const PARTNER_PROFILE = {
-  companyName: 'TechCorp Inc.',
-  companyType: 'Technology Solutions Provider',
-  contactPerson: 'John Smith',
-  role: 'Chief Technology Officer',
-  email: 'john.smith@techcorp.com',
-  phone: '+63 917 123 4567',
-  address: 'Cagayan de Oro City, Misamis Oriental',
-  focusAreas: ['Logistics Automation', 'Enterprise Systems', 'Energy Monitoring'],
-  preferredDepartments: ['IT', 'MET', 'ESM'],
-  partnerSince: '2023',
-  activeRequests: 4,
-  successfulAdoptions: 3
-} as const;
 
 export function getPartnerTechnology(technologyId?: string | null) {
   if (!technologyId) {

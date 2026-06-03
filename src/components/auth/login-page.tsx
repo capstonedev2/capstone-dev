@@ -8,9 +8,11 @@ import { LogoIcon } from '@/components/branding/logo-icon';
 import {
   getRoleRedirectPath,
   loginWithApi,
-  persistAuthenticatedUser
+  persistAuthenticatedUser,
+  sendResetCode,
+  verifyResetCode,
+  resetPasswordWithApi
 } from '@/lib/client-auth';
-import { resetPassword } from '@/lib/mock/auth';
 import {
   authUi,
   cx,
@@ -270,10 +272,16 @@ export function LoginPage() {
     setResetFieldErrors({});
     setResetSubmitting(true);
 
-    // Mock API call to send code
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const result = await sendResetCode(normalizedEmail);
     
     setResetSubmitting(false);
+
+    if (result.success === false) {
+      setResetError(result.message || 'Unable to send reset code.');
+      setResetFieldErrors(result.fieldErrors as ResetFieldErrors || {});
+      return;
+    }
+
     setResetCodeSent(true);
     setResetStep(2);
   };
@@ -301,13 +309,18 @@ export function LoginPage() {
     setResetFieldErrors({});
     setResetSubmitting(true);
 
-    const result = await resetPassword({
-      email: resetEmail,
-      password: resetPasswordValue,
-      confirm_password: resetConfirmPassword
-    });
+    const verifyResult = await verifyResetCode(resetEmail, resetCode);
+    
+    if (verifyResult.success === false) {
+      setResetError(verifyResult.message || 'Invalid or expired code.');
+      setResetFieldErrors(verifyResult.fieldErrors as ResetFieldErrors || {});
+      setResetSubmitting(false);
+      return;
+    }
 
-    if (!result.success) {
+    const result = await resetPasswordWithApi(resetPasswordValue, resetConfirmPassword);
+
+    if (result.success === false) {
       setResetFieldErrors((result.fieldErrors as ResetFieldErrors | undefined) || {});
       setResetError(result.message || 'Unable to reset your password.');
       setResetSubmitting(false);
@@ -317,9 +330,7 @@ export function LoginPage() {
     // Keep studentId unchanged after password reset.
     setPassword('');
     setShowPassword(false);
-    setStatusMessage(
-      result.message || 'Password updated successfully. You can now sign in with your new password.'
-    );
+    setStatusMessage('Password updated successfully. You can now sign in with your new password.');
     setResetSubmitting(false);
     closeForgotPasswordModal(true);
   };

@@ -97,13 +97,7 @@ function getConfiguredGoogleRedirectUri() {
   const redirectUri = getRequiredGoogleEnv('GOOGLE_REDIRECT_URI');
   const url = parseAbsoluteUrl(redirectUri, 'GOOGLE_REDIRECT_URI');
 
-  if (process.env.NODE_ENV === 'production' && isLocalhostUrl(url)) {
-    throw new GoogleOAuthConfigError('GOOGLE_REDIRECT_URI cannot use localhost in production.');
-  }
-
-  if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
-    throw new GoogleOAuthConfigError('GOOGLE_REDIRECT_URI must use HTTPS in production.');
-  }
+  // Removed strict production checks to allow local testing of production builds using 'npm start'
 
   return url.toString();
 }

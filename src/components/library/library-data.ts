@@ -13,7 +13,6 @@ export type LibraryDocumentType =
 export type LibraryNotificationCategory =
   | 'New Publications'
   | 'Repository Updates'
-  | 'Saved Study Alerts'
   | 'Research Insights Digest';
 
 export type LibraryProject = {
@@ -28,7 +27,6 @@ export type LibraryProject = {
   keywords: string[];
   abstract: string;
   views: number;
-  savedByDefault?: boolean;
   authorsShort?: string;
   statusLabel?: string;
   technologies?: string[];
@@ -74,10 +72,7 @@ export const LIBRARY_NAV_ITEMS = [
   { key: 'dashboard', href: '/library/dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
   { key: 'browse', href: '/library/browse', label: 'Browse Projects', icon: 'fa-search' },
   { key: 'repository', href: '/library/repository', label: 'Repository', icon: 'fa-folder-open' },
-  { key: 'insights', href: '/library/insights', label: 'Research Insights', icon: 'fa-chart-line' },
-  { key: 'saved', href: '/library/saved', label: 'Saved Projects', icon: 'fa-bookmark' },
-  { key: 'notifications', href: '/library/notifications', label: 'Notifications', icon: 'fa-bell' },
-  { key: 'profile', href: '/library/profile', label: 'Profile', icon: 'fa-user' }
+  { key: 'insights', href: '/library/insights', label: 'Research Insights', icon: 'fa-chart-line' }
 ] as const;
 
 export type LibraryNavKey = (typeof LIBRARY_NAV_ITEMS)[number]['key'];
@@ -105,7 +100,6 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
     abstract:
       'This study develops an AI-powered Learning Management System that utilizes machine learning algorithms to predict student performance and provide personalized learning recommendations. The system was tested with 200 students and showed a 25% improvement in learning outcomes through real-time analytics, personalized learning paths, and early warning support for at-risk students.',
     views: 1234,
-    savedByDefault: true,
     statusLabel: 'Published | Completed 2024',
     technologies: ['Python', 'Django', 'React', 'PostgreSQL', 'TensorFlow', 'Scikit-learn', 'Docker', 'AWS'],
     achievements: [
@@ -132,7 +126,6 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
     keywords: ['Solar', 'IoT', 'Energy', 'Monitoring'],
     abstract: 'Real-time solar panel efficiency monitoring system with campus-level deployment insights.',
     views: 876,
-    savedByDefault: true,
     relatedStudyIds: [7, 4]
   },
   {
@@ -172,8 +165,7 @@ export const LIBRARY_PROJECTS: readonly LibraryProject[] = [
     type: 'AI/ML System',
     keywords: ['Drone', 'Marine', 'Pollution'],
     abstract: 'Autonomous drone system for marine pollution detection and coastal mapping.',
-    views: 784,
-    savedByDefault: true
+    views: 784
   },
   {
     id: 6,
@@ -293,16 +285,6 @@ export const LIBRARY_NOTIFICATIONS: readonly LibraryNotification[] = [
     tone: 'success'
   },
   {
-    id: 'notif-2',
-    category: 'Saved Study Alerts',
-    title: 'Saved Study Update',
-    message: 'New version of "AI-Powered Learning System" is now available with additional chapters.',
-    timeLabel: '1 day ago',
-    unread: true,
-    icon: 'fa-bookmark',
-    tone: 'warning'
-  },
-  {
     id: 'notif-3',
     category: 'Research Insights Digest',
     title: 'Research Insights Digest',
@@ -367,28 +349,6 @@ export const LIBRARY_RECOMMENDED_READING = [
     department: 'NAME',
     projectId: 5
   }
-] as const;
-
-export const LIBRARY_PROFILE = {
-  displayName: 'Sarah Rivera',
-  fullName: 'Sarah Marie Rivera',
-  email: 'sarah.rivera@university.edu.ph',
-  departmentInterest: 'Information Technology',
-  roleLabel: 'E-Library Access',
-  roleDescription: 'E-Library Access (Read-Only Repository, Optional Notifications)',
-  accountStatus: 'Active',
-  memberSince: 'January 2024',
-  savedProjects: 3,
-  documentsViewed: 24,
-  downloads: 12,
-  lastActive: 'Today'
-} as const;
-
-export const LIBRARY_PROFILE_ACTIVITY = [
-  'Viewed: AI-Powered Learning System - Feb 12, 2024',
-  'Saved: Smart Solar Energy Monitor - Feb 10, 2024',
-  'Downloaded: Marine Pollution Detector Manuscript - Feb 8, 2024',
-  'Searched: "machine learning education" - Feb 5, 2024'
 ] as const;
 
 export const LIBRARY_DOCUMENT_CATEGORY_COUNTS = [

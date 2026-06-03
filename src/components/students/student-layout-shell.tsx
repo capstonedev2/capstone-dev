@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { logout } from '@/lib/mock/auth';
+import { logoutWithApi } from '@/lib/client-auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { STUDENT_NAV_ITEMS, STUDENT_NAV_SECTIONS } from '@/components/students/student-navigation';
@@ -1596,14 +1596,14 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                 setNotificationMenuOpen((current) => !current);
               }}
             >
-              <span className="notification-trigger-icon" aria-hidden="true">
+              <span className={`notification-trigger-icon ${highPriorityNotificationsCount ? 'is-urgent' : ''}`} aria-hidden="true">
                 <i className="fas fa-bell" />
               </span>
               <span className="notification-trigger-copy">
                 <strong>Notifications</strong>
                 <small>{unreadNotificationsCount ? `${unreadNotificationsCount} unread updates` : 'All caught up'}</small>
               </span>
-              {unreadNotificationsCount ? <span className="notification-trigger-count" style={{ backgroundColor: '#ef4444', color: 'white' }}>{unreadNotificationsCount}</span> : null}
+              {unreadNotificationsCount ? <span className={`notification-trigger-count ${highPriorityNotificationsCount ? 'is-urgent' : ''}`}>{unreadNotificationsCount}</span> : null}
             </button>
 
             <div className={`notification-menu ${notificationMenuOpen ? 'is-open' : ''}`}>
@@ -1821,8 +1821,8 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                 <button
                   className="profile-dropdown-link is-danger"
                   type="button"
-                  onClick={() => {
-                    logout();
+                  onClick={async () => {
+                    await logoutWithApi();
                     router.push('/login');
                   }}
                 >

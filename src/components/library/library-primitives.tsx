@@ -25,6 +25,7 @@ type LibraryModalProps = {
   onClose: () => void;
   children: ReactNode;
   maxWidth?: number;
+  footer?: ReactNode;
 };
 
 export function LibraryCardSection({
@@ -79,7 +80,8 @@ export function LibraryModal({
   title,
   onClose,
   children,
-  maxWidth = 720
+  maxWidth = 720,
+  footer
 }: LibraryModalProps) {
   if (!open) {
     return null;
@@ -87,21 +89,56 @@ export function LibraryModal({
 
   return (
     <div
-      className="library-modal-overlay"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        background: 'rgba(15, 23, 42, 0.6)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem 1rem'
+      }}
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
         }
       }}
     >
-      <div className="library-modal-card" style={{ maxWidth }}>
-        <div className="library-modal-head">
-          <h3>{title}</h3>
-          <button className="library-icon-btn" type="button" onClick={onClose}>
+      <div 
+        style={{ 
+          maxWidth, 
+          width: '100%',
+          display: 'flex', 
+          flexDirection: 'column', 
+          maxHeight: '85vh', 
+          overflow: 'hidden',
+          background: 'white',
+          borderRadius: '1.2rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+        }}
+      >
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC' }}>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0F172A', fontWeight: 800 }}>{title}</h3>
+          <button 
+            type="button" 
+            onClick={onClose}
+            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', border: 'none', background: 'transparent', color: '#64748B', cursor: 'pointer', transition: 'background 0.2s', fontSize: '1.2rem' }}
+            onMouseOver={(e) => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#0F172A'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; }}
+          >
             <i className="fas fa-times" aria-hidden="true" />
           </button>
         </div>
-        <div className="library-modal-body">{children}</div>
+        <div style={{ overflowY: 'auto', flex: 1, padding: '1.5rem' }}>
+          {children}
+        </div>
+        {footer && (
+          <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #E2E8F0', background: '#F8FAFC', display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

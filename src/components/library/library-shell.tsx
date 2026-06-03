@@ -15,10 +15,11 @@ import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 const LIBRARY_PREFETCH_ROUTES = LIBRARY_NAV_ITEMS.map((item) => item.href);
 
 type LibraryShellProps = {
-  activeNav: LibraryNavKey;
+  activeNav: LibraryNavKey | 'notifications';
   title: string;
   description: string;
   notificationCount?: number;
+  hideHeader?: boolean;
   children: ReactNode;
 };
 
@@ -27,6 +28,7 @@ export function LibraryShell({
   title,
   description,
   notificationCount = 2,
+  hideHeader = true,
   children
 }: LibraryShellProps) {
   const router = useRouter();
@@ -95,7 +97,7 @@ export function LibraryShell({
               notificationHref="/library/notifications"
               notificationCount={notificationCount}
               notificationTitle="Library Notifications"
-              notificationDescription="Repository updates, saved alerts, and archive activity for the digital library workspace."
+              notificationDescription="Repository updates and archive activity for the digital library workspace."
               notificationItems={[
                 {
                   id: 'library-repository',
@@ -137,7 +139,6 @@ export function LibraryShell({
                 { label: 'Digital Archive', icon: 'fa-folder-open' }
               ]}
               profileActions={[
-                { label: 'Profile', icon: 'fa-user', href: '/library/profile' },
                 {
                   label: 'Sign Out',
                   icon: 'fa-right-from-bracket',
@@ -209,21 +210,23 @@ export function LibraryShell({
 
       <main className="student-global-main">
         <div className="student-global-content">
-          <header className="top-nav" aria-labelledby="library-page-title">
-            <div className="top-nav-leading">
-              <div className="page-title">
-                <div className="page-title-context">
-                  <span className="page-kicker">E-Library</span>
-                  <span className="page-breadcrumb" aria-hidden="true">
-                    <i className="fas fa-angle-right" />
-                    <span>{title}</span>
-                  </span>
+          {!hideHeader && (
+            <header className="top-nav" aria-labelledby="library-page-title">
+              <div className="top-nav-leading">
+                <div className="page-title">
+                  <div className="page-title-context">
+                    <span className="page-kicker">E-Library</span>
+                    <span className="page-breadcrumb" aria-hidden="true">
+                      <i className="fas fa-angle-right" />
+                      <span>{title}</span>
+                    </span>
+                  </div>
+                  <h1 id="library-page-title">{title}</h1>
+                  <p>{description}</p>
                 </div>
-                <h1 id="library-page-title">{title}</h1>
-                <p>{description}</p>
               </div>
-            </div>
-          </header>
+            </header>
+          )}
 
           <div className="page-body">
             {children}

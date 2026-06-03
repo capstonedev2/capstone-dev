@@ -576,6 +576,23 @@ export type EnumBrandingAssetTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel>
 }
 
+export type EnumIndustryProjectStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.IndustryProjectStatus | Prisma.EnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIndustryProjectStatusFilter<$PrismaModel> | $Enums.IndustryProjectStatus
+}
+
+export type EnumIndustryProjectStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.IndustryProjectStatus | Prisma.EnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIndustryProjectStatusWithAggregatesFilter<$PrismaModel> | $Enums.IndustryProjectStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumIndustryProjectStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumIndustryProjectStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -1095,6 +1112,23 @@ export type NestedEnumBrandingAssetTypeWithAggregatesFilter<$PrismaModel = never
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumBrandingAssetTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumIndustryProjectStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.IndustryProjectStatus | Prisma.EnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIndustryProjectStatusFilter<$PrismaModel> | $Enums.IndustryProjectStatus
+}
+
+export type NestedEnumIndustryProjectStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.IndustryProjectStatus | Prisma.EnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.IndustryProjectStatus[] | Prisma.ListEnumIndustryProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumIndustryProjectStatusWithAggregatesFilter<$PrismaModel> | $Enums.IndustryProjectStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumIndustryProjectStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumIndustryProjectStatusFilter<$PrismaModel>
 }
 
 

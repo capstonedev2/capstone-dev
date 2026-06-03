@@ -21,7 +21,6 @@ import {
   EvaluationSummaryCard,
   ProgressSummaryCard,
   ReportFilters,
-  ReportOverviewPanel,
   ReportSummaryCards,
   SupervisionSummaryCard
 } from '@/components/adviser/shared/data/report-workspace-sections';
@@ -49,10 +48,6 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
   const showProgress = reportType === 'all' || reportType === 'progress';
   const showCompletedProjects = reportType === 'all' || reportType === 'completed-projects';
   const showSupervision = reportType === 'all' || reportType === 'supervision';
-  const visibleSectionCount = [showEvaluation, showProgress, showCompletedProjects, showSupervision].filter(Boolean).length;
-  const dateRangeLabel = REPORT_DATE_RANGE_OPTIONS.find((option) => option.value === dateRange)?.label ?? 'Current Cycle';
-  const reportTypeLabel = REPORT_TYPE_OPTIONS.find((option) => option.value === reportType)?.label ?? 'All Reports';
-  const statusLabel = REPORT_STATUS_OPTIONS.find((option) => option.value === status)?.label ?? 'All Status';
 
   function clearFilters() {
     setDateRange('current-cycle');
@@ -69,49 +64,25 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
     }, 3200);
   }
 
-  function handleExport(section: ReportSectionKey, format: ReportExportFormat) {
+  function handleExport(section: ReportSectionKey | 'all', format: ReportExportFormat) {
     const sectionLabel =
-      section === 'evaluation'
-        ? 'evaluation summary'
-        : section === 'progress'
-          ? 'progress overview'
-          : section === 'completed-projects'
-            ? 'completed projects'
-            : 'supervision summary';
+      section === 'all'
+        ? 'comprehensive report'
+        : section === 'evaluation'
+          ? 'evaluation summary'
+          : section === 'progress'
+            ? 'progress overview'
+            : section === 'completed-projects'
+              ? 'completed projects'
+              : 'supervision summary';
 
     showToast(`Preparing ${sectionLabel} export in ${format.toUpperCase()} format.`, 'success');
   }
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{meta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>Generate summaries for tracking deliverables, evaluation results, and supervision activity.</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
-            <span>{meta.badgeLabel}</span>
-          </span>
-        </div>
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
-              <i className={`fas ${item.icon}`}></i> {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="main-content">
+    <>
         <AdviserPageHeader
-          title="Activity Reports"
+          title="Reports & Analytics"
           description="Generate summaries for tracking deliverables, evaluation results, and supervision activity."
           actions={
             <AdviserShellActions
@@ -125,14 +96,6 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
         />
 
         <div className="adviser-reports-page mx-auto max-w-[1600px] space-y-6">
-          <ReportOverviewPanel
-            dateRangeLabel={dateRangeLabel}
-            reportModule={reportModule}
-            reportTypeLabel={reportTypeLabel}
-            statusLabel={statusLabel}
-            visibleSectionCount={visibleSectionCount}
-          />
-
           <ReportSummaryCards metrics={reportModule.summaryMetrics} />
 
           <ReportFilters
@@ -147,15 +110,16 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
             onDateRangeChange={setDateRange}
             onReportTypeChange={setReportType}
             onStatusChange={setStatus}
+            onGlobalExport={(format) => handleExport('all', format)}
           />
 
           {showEvaluation || showProgress ? (
             <div className={`grid gap-6 ${showEvaluation && showProgress ? 'xl:grid-cols-2' : ''}`}>
               {showEvaluation ? (
-                <EvaluationSummaryCard summary={reportModule.evaluationSummary} onExport={handleExport} />
+                <EvaluationSummaryCard summary={reportModule.evaluationSummary} />
               ) : null}
               {showProgress ? (
-                <ProgressSummaryCard summary={reportModule.progressSummary} onExport={handleExport} />
+                <ProgressSummaryCard summary={reportModule.progressSummary} />
               ) : null}
             </div>
           ) : null}
@@ -164,12 +128,11 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
             <CompletedProjectsList
               projects={reportModule.completedProjects}
               viewAllHref={`${basePath}/groups`}
-              onExport={handleExport}
             />
           ) : null}
 
           {showSupervision ? (
-            <SupervisionSummaryCard summary={reportModule.supervisionSummary} onExport={handleExport} />
+            <SupervisionSummaryCard summary={reportModule.supervisionSummary} />
           ) : null}
         </div>
 
@@ -188,7 +151,6 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
             <span>{toast.message}</span>
           </div>
         ) : null}
-      </main>
-    </div>
+      </>
   );
 }

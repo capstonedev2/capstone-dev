@@ -10,6 +10,7 @@ import type {
   ReportSummaryMetric,
   ReportType
 } from '@/components/adviser/shared/data/report-workspace-data';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { formatReportDate } from '@/components/adviser/shared/data/report-workspace-data';
 
 type ReportFiltersProps = {
@@ -27,9 +28,9 @@ type ReportFiltersProps = {
 };
 
 type ExportButtonsProps = {
-  section: ReportSectionKey;
+  section: ReportSectionKey | 'all';
   formats: ReportExportFormat[];
-  onExport: (section: ReportSectionKey, format: ReportExportFormat) => void;
+  onExport: (section: ReportSectionKey | 'all', format: ReportExportFormat) => void;
 };
 
 function WorkspaceSelect<TValue extends string>({
@@ -138,111 +139,27 @@ function EmptySection({
 
 export function ExportButtons({ section, formats, onExport }: ExportButtonsProps) {
   return (
-    <div className="inline-flex flex-wrap items-center gap-2">
+    <div className="inline-flex items-center gap-1.5 rounded-[1rem] border border-slate-200 bg-white p-1 shadow-sm">
       {formats.map((format) => (
         <button
           key={`${section}-${format}`}
           type="button"
+          title={`Export as ${format.toUpperCase()}`}
           onClick={() => onExport(section, format)}
-          className="inline-flex min-h-[38px] items-center gap-2 rounded-[0.9rem] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-[#003A8F]/20 hover:bg-slate-50 hover:text-[#003A8F]"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] text-slate-500 transition hover:bg-slate-100 hover:text-[#003A8F]"
         >
           <i
             aria-hidden="true"
             className={`fas ${
               format === 'pdf' ? 'fa-file-pdf' : format === 'csv' ? 'fa-file-csv' : 'fa-file-excel'
-            } text-xs`}
+            }`}
           />
-          {format.toUpperCase()}
         </button>
       ))}
     </div>
   );
 }
 
-export function ReportOverviewPanel({
-  reportModule,
-  dateRangeLabel,
-  reportTypeLabel,
-  statusLabel,
-  visibleSectionCount
-}: {
-  reportModule: AdviserReportsModule;
-  dateRangeLabel: string;
-  reportTypeLabel: string;
-  statusLabel: string;
-  visibleSectionCount: number;
-}) {
-  return (
-    <section className="adviser-report-overview-panel overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
-        <div className="relative overflow-hidden bg-[linear-gradient(135deg,rgba(0,58,143,0.98),rgba(30,64,175,0.94))] p-6 text-white">
-          <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(246,190,0,0.22),transparent_42%)]" />
-          <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-blue-50 ring-1 ring-inset ring-white/15">
-                <i className="fas fa-chart-pie text-[10px] text-[#F6BE00]" />
-                Adviser Reporting Desk
-              </span>
-              <h2 className="mt-4 text-2xl font-extrabold tracking-[-0.04em] sm:text-3xl">Activity Reports</h2>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-blue-100">
-                Consolidated IT supervision, progress, evaluation, and completed-project records for adviser reporting.
-              </p>
-            </div>
-
-            <div className="grid min-w-[250px] grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-inset ring-white/15">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-100">Groups</p>
-                <p className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">{reportModule.totalGroups}</p>
-              </div>
-              <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-inset ring-white/15">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-blue-100">Progress</p>
-                <p className="mt-2 text-3xl font-extrabold tracking-[-0.04em]">{reportModule.averageProgress}%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col justify-between gap-5 bg-slate-50 p-6">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Current Scope</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {[dateRangeLabel, reportTypeLabel, statusLabel].map((label) => (
-                <span
-                  key={label}
-                  className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold text-[#003A8F] shadow-sm ring-1 ring-inset ring-[rgba(0,58,143,0.12)]"
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-2xl bg-white p-3 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Completed</p>
-              <p className="mt-2 text-xl font-extrabold text-emerald-600">{reportModule.completedGroups}</p>
-            </div>
-            <div className="rounded-2xl bg-white p-3 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Pending</p>
-              <p className="mt-2 text-xl font-extrabold text-amber-600">{reportModule.pendingEvaluations}</p>
-            </div>
-            <div className="rounded-2xl bg-white p-3 shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Sections</p>
-              <p className="mt-2 text-xl font-extrabold text-[#003A8F]">{visibleSectionCount}</p>
-            </div>
-          </div>
-
-          <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-            <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,#003A8F,#1E40AF,#F6BE00)]"
-              style={{ width: `${Math.min(100, reportModule.averageProgress)}%` }}
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export function ReportSummaryCards({ metrics }: { metrics: ReportSummaryMetric[] }) {
   return (
@@ -265,8 +182,9 @@ export function ReportFilters({
   onDateRangeChange,
   onReportTypeChange,
   onStatusChange,
-  onClearFilters
-}: ReportFiltersProps) {
+  onClearFilters,
+  onGlobalExport
+}: ReportFiltersProps & { onGlobalExport: (format: ReportExportFormat) => void }) {
   const activeFilterLabels = [
     dateOptions.find((option) => option.value === dateRange)?.label ?? dateRange,
     reportType !== 'all' ? reportTypeOptions.find((option) => option.value === reportType)?.label ?? reportType : null,
@@ -281,10 +199,7 @@ export function ReportFilters({
           <p className="mt-1 text-sm text-[var(--text-light)]">Tune the reporting scope before exporting or reviewing sections.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex min-h-10 items-center gap-2 rounded-2xl bg-[rgba(0,58,143,0.06)] px-4 text-sm font-bold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
-            <i className="fas fa-lock text-xs" />
-            IT Department
-          </span>
+
           {hasActiveFilters ? (
             <button
               type="button"
@@ -295,6 +210,9 @@ export function ReportFilters({
               Clear
             </button>
           ) : null}
+          <div className="ml-2 border-l border-slate-200 pl-4">
+            <ExportButtons section="all" formats={['pdf', 'csv', 'excel']} onExport={(_, format) => onGlobalExport(format)} />
+          </div>
         </div>
       </div>
 
@@ -340,49 +258,86 @@ export function ReportFilters({
 }
 
 export function EvaluationSummaryCard({
-  summary,
-  onExport
+  summary
 }: {
   summary: AdviserReportsModule['evaluationSummary'];
-  onExport: (section: ReportSectionKey, format: ReportExportFormat) => void;
 }) {
   return (
     <SectionCard
       eyebrow="Evaluation"
       title="Evaluation Summary"
       description="Average score distribution and recommendation outcomes for adviser-reviewed IT groups."
-      actions={<ExportButtons section="evaluation" formats={['pdf', 'csv', 'excel']} onExport={onExport} />}
     >
       {summary.totalReviewedGroups ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
-            label="Average Score"
-            value={summary.averageScore}
-            helperText="Average final or derived review score inside the current reporting scope."
-            icon="fa-star"
-            iconClassName="bg-blue-50 text-blue-600"
-          />
-          <MetricTile
-            label="Passed Groups"
-            value={summary.passedGroups}
-            helperText="Groups already cleared for archive, endorsement, or the next academic milestone."
-            icon="fa-circle-check"
-            iconClassName="bg-emerald-50 text-emerald-600"
-          />
-          <MetricTile
-            label="With Revision"
-            value={summary.withRevision}
-            helperText="Groups that need revisions before a final recommendation can be closed."
-            icon="fa-rotate-right"
-            iconClassName="bg-amber-50 text-amber-600"
-          />
-          <MetricTile
-            label="Failed Groups"
-            value={summary.failedGroups}
-            helperText="Groups whose current outcome still falls below the passing recommendation threshold."
-            icon="fa-triangle-exclamation"
-            iconClassName="bg-rose-50 text-rose-600"
-          />
+        <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+          <div className="flex flex-col justify-center gap-4">
+            <MetricTile
+              label="Average Score"
+              value={summary.averageScore}
+              helperText="Average final or derived review score inside the current reporting scope."
+              icon="fa-star"
+              iconClassName="bg-blue-50 text-blue-600"
+            />
+          </div>
+          
+          <div className="flex flex-col rounded-[1.5rem] border border-slate-100 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition hover:shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
+            <h3 className="mb-4 text-center text-sm font-bold tracking-tight text-slate-800">Outcome Distribution</h3>
+            <div className="relative flex-1">
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Passed', value: summary.passedGroups, color: '#10b981' },
+                      { name: 'Revision', value: summary.withRevision, color: '#f59e0b' },
+                      { name: 'Failed', value: summary.failedGroups, color: '#f43f5e' }
+                    ].filter(d => d.value > 0)}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={65}
+                    outerRadius={90}
+                    paddingAngle={4}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {
+                      [
+                        { name: 'Passed', value: summary.passedGroups, color: '#10b981' },
+                        { name: 'Revision', value: summary.withRevision, color: '#f59e0b' },
+                        { name: 'Failed', value: summary.failedGroups, color: '#f43f5e' }
+                      ].filter(d => d.value > 0).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))
+                    }
+                  </Pie>
+                  <Tooltip 
+                    cursor={{ fill: 'transparent' }}
+                    contentStyle={{ 
+                      borderRadius: '16px', 
+                      border: 'none', 
+                      boxShadow: '0 20px 40px rgba(15,23,42,0.12)',
+                      padding: '12px 20px',
+                      fontWeight: '600'
+                    }} 
+                    itemStyle={{ color: '#334155' }} 
+                  />
+                  <Legend 
+                    iconType="circle" 
+                    wrapperStyle={{ 
+                      fontSize: '13px', 
+                      fontWeight: '600', 
+                      color: '#475569',
+                      paddingTop: '20px'
+                    }} 
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Center text for the donut chart */}
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center pb-8">
+                <span className="text-3xl font-extrabold text-[var(--primary)]">{summary.totalReviewedGroups}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total</span>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <EmptySection
@@ -396,18 +351,15 @@ export function EvaluationSummaryCard({
 }
 
 export function ProgressSummaryCard({
-  summary,
-  onExport
+  summary
 }: {
   summary: AdviserReportsModule['progressSummary'];
-  onExport: (section: ReportSectionKey, format: ReportExportFormat) => void;
 }) {
   return (
     <SectionCard
       eyebrow="Progress"
       title="Progress Overview"
       description="Completion health, risk distribution, and adviser follow-up signals for assigned IT groups."
-      actions={<ExportButtons section="progress" formats={['pdf', 'csv', 'excel']} onExport={onExport} />}
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)]">
         <div className="rounded-[1.5rem] border border-slate-100 bg-[linear-gradient(135deg,rgba(0,58,143,0.06),rgba(248,250,252,0.96))] p-5">
@@ -426,32 +378,7 @@ export function ProgressSummaryCard({
               style={{ width: `${summary.averageCompletion}%` }}
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-[1.2rem] bg-white p-4 shadow-sm">
-              <p className="text-sm font-semibold text-[var(--text-light)]">Completion Index</p>
-              <p className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[var(--primary)]">
-                {summary.averageCompletion}%
-              </p>
-            </div>
-            <div className="rounded-[1.2rem] bg-white p-4 shadow-sm">
-              <p className="text-sm font-semibold text-[var(--text-light)]">On Track Groups</p>
-              <p className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-emerald-600">
-                {summary.onTrackGroups}
-              </p>
-            </div>
-            <div className="rounded-[1.2rem] bg-white p-4 shadow-sm">
-              <p className="text-sm font-semibold text-[var(--text-light)]">At Risk Groups</p>
-              <p className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-amber-600">
-                {summary.atRiskGroups}
-              </p>
-            </div>
-            <div className="rounded-[1.2rem] bg-white p-4 shadow-sm">
-              <p className="text-sm font-semibold text-[var(--text-light)]">Delayed Groups</p>
-              <p className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-rose-600">
-                {summary.delayedGroups}
-              </p>
-            </div>
-          </div>
+
         </div>
 
         <div className="space-y-4">
@@ -506,12 +433,10 @@ function CompletedProjectRow({ project }: { project: CompletedProjectRecord }) {
 
 export function CompletedProjectsList({
   projects,
-  viewAllHref,
-  onExport
+  viewAllHref
 }: {
   projects: CompletedProjectRecord[];
   viewAllHref: string;
-  onExport: (section: ReportSectionKey, format: ReportExportFormat) => void;
 }) {
   return (
     <SectionCard
@@ -519,16 +444,13 @@ export function CompletedProjectsList({
       title="Completed Projects"
       description="Completed IT groups derived from the same completion and archive movement logic used in My Groups."
       actions={
-        <>
-          <Link
-            href={viewAllHref}
-            className="inline-flex min-h-[38px] items-center gap-2 rounded-[0.9rem] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-[#003A8F]/20 hover:bg-slate-50 hover:text-[#003A8F]"
-          >
-            <i aria-hidden="true" className="fas fa-arrow-up-right-from-square text-xs" />
-            View All
-          </Link>
-          <ExportButtons section="completed-projects" formats={['pdf', 'csv', 'excel']} onExport={onExport} />
-        </>
+        <Link
+          href={viewAllHref}
+          className="inline-flex min-h-[38px] items-center gap-2 rounded-[0.9rem] border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-[#003A8F]/20 hover:bg-slate-50 hover:text-[#003A8F]"
+        >
+          <i aria-hidden="true" className="fas fa-arrow-up-right-from-square text-xs" />
+          View All
+        </Link>
       }
     >
       {projects.length ? (
@@ -562,18 +484,15 @@ export function CompletedProjectsList({
 }
 
 export function SupervisionSummaryCard({
-  summary,
-  onExport
+  summary
 }: {
   summary: AdviserReportsModule['supervisionSummary'];
-  onExport: (section: ReportSectionKey, format: ReportExportFormat) => void;
 }) {
   return (
     <SectionCard
       eyebrow="Supervision"
       title="Supervision Summary"
       description="Supervision coverage, defense pressure, and evaluation activity aligned with the current IT adviser reporting scope."
-      actions={<ExportButtons section="supervision" formats={['pdf', 'excel']} onExport={onExport} />}
     >
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <div className="grid gap-4 sm:grid-cols-2">

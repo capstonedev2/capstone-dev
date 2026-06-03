@@ -187,3 +187,13 @@ export const NotificationStatus = {
 } as const
 
 export type NotificationStatus = (typeof NotificationStatus)[keyof typeof NotificationStatus]
+
+
+export const IndustryProjectStatus = {
+  PROPOSED: 'PROPOSED',
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  TERMINATED: 'TERMINATED'
+} as const
+
+export type IndustryProjectStatus = (typeof IndustryProjectStatus)[keyof typeof IndustryProjectStatus]

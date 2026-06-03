@@ -2,7 +2,7 @@ import { AdviserReports } from '@/components/adviser/shared/components/adviser-r
 import { getAdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
 export const metadata = {
-  title: 'Reports - Adviser Portal'
+  title: 'Reports & Analytics - Adviser Portal'
 };
 
 export default async function Page() {

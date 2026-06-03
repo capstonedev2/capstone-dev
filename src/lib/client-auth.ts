@@ -268,3 +268,36 @@ export async function registerWithApi(payload: {
 }) {
   return postAuthRequest('/api/auth/register', payload);
 }
+
+export async function logoutWithApi() {
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(SESSION_STORAGE_KEY);
+      window.localStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+      window.localStorage.removeItem(PROFILE_DRAFT_STORAGE_KEY);
+      window.sessionStorage.removeItem(LEGACY_SESSION_STORAGE_KEY);
+    }
+    
+    if (typeof document !== 'undefined') {
+      document.cookie = `${SERVER_SESSION_COOKIE_KEY}=; path=/; max-age=0; samesite=lax`;
+    }
+
+    await fetch('/api/auth/logout', { method: 'POST' });
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to log out properly', error);
+    return { success: false };
+  }
+}
+
+export async function sendResetCode(email: string) {
+  return postAuthRequest('/api/auth/forgot-password' as any, { email });
+}
+
+export async function verifyResetCode(email: string, code: string) {
+  return postAuthRequest('/api/auth/verify-reset-code' as any, { email, code });
+}
+
+export async function resetPasswordWithApi(password: string, confirmPassword: string) {
+  return postAuthRequest('/api/auth/reset-password' as any, { password, confirmPassword });
+}

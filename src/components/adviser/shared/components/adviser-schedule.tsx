@@ -456,33 +456,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
     workspaceMode === 'panel' ? 'Review history' : 'Open my groups';
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{meta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>Manage consultations, milestone reviews, and defense-related sessions.</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
-            <span>{meta.badgeLabel}</span>
-          </span>
-        </div>
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
-              <i className={`fas ${item.icon}`}></i> {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="main-content">
+    <>
         <AdviserPageHeader
           title={workspaceMode === 'panel' ? 'Defense Schedule' : 'Schedule'}
           description={
@@ -1019,7 +993,6 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
             </div>
           </section>
         </div>
-      </main>
-    </div>
+      </>
   );
 }

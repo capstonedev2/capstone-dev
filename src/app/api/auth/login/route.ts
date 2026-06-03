@@ -9,6 +9,8 @@ import {
   verifyPassword
 } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import {
   HttpError,
   handleApiError,
@@ -56,14 +58,68 @@ export async function POST(request: Request) {
         : { studentId: identifier },
       select: {
         ...publicUserSelect,
-        passwordHash: true
+        passwordHash: true,
+        supabaseId: true
       }
     });
 
-    if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    if (!user) {
       throw new HttpError('Invalid credentials.', 401, {
         password: 'The Student ID/email or password is incorrect.'
       });
+    }
+
+    let isLegacyLoginSuccessful = false;
+    if (user.passwordHash) {
+      isLegacyLoginSuccessful = await verifyPassword(password, user.passwordHash);
+    }
+
+    const supabase = await createClient();
+    let authError = null;
+
+    if (user.supabaseId) {
+      const result = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password,
+      });
+      authError = result.error;
+    } else {
+      // User doesn't have a Supabase ID. Wait for legacy login to succeed to migrate them.
+      authError = new Error('No Supabase account linked.');
+    }
+
+    if (authError && !isLegacyLoginSuccessful) {
+      throw new HttpError('Invalid credentials.', 401, {
+        password: 'The Student ID/email or password is incorrect.'
+      });
+    }
+
+    // Auto-migrate legacy user to Supabase Auth if legacy login was successful but Supabase was not linked
+    if (isLegacyLoginSuccessful && !user.supabaseId) {
+      const supabaseAdmin = createServiceClient();
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: user.email,
+        password: password,
+        email_confirm: true,
+      });
+
+      if (createError) {
+        console.error('Failed to auto-migrate user to Supabase Auth', createError);
+        throw new HttpError('System error during account migration.', 500);
+      }
+
+      if (newUser.user) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { supabaseId: newUser.user.id }
+        });
+        
+        // Sign in using the newly created Supabase account
+        await supabase.auth.signInWithPassword({
+          email: user.email,
+          password,
+        });
+      }
     }
 
     const authUser = await restoreExpiredSuspension(user);

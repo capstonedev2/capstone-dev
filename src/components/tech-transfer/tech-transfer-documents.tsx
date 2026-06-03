@@ -16,6 +16,7 @@ import { TechTransferShell } from '@/components/tech-transfer/tech-transfer-shel
 export function TechTransferDocuments() {
   const [statusFilter, setStatusFilter] = useState('All Documents');
   const [selectedDocumentId, setSelectedDocumentId] = useState('');
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const documents = useMemo(() => {
     return TECH_TRANSFER_DOCUMENTS.filter((document) => {
@@ -40,6 +41,10 @@ export function TechTransferDocuments() {
           <option>Processing</option>
           <option>For Signature</option>
         </select>
+        <TechTransferButton variant="primary" onClick={() => setUploadOpen(true)}>
+          <i aria-hidden="true" className="fas fa-upload" />
+          Upload Document
+        </TechTransferButton>
       </div>
 
       <div className="stats-grid">
@@ -101,6 +106,38 @@ export function TechTransferDocuments() {
         <p><strong>Owner:</strong> {selectedDocument.owner}</p>
         <p><strong>Status:</strong> {selectedDocument.status}</p>
         <p>Use this document record to coordinate routing, signatures, and compliance attachments.</p>
+      </TechTransferModal>
+
+      <TechTransferModal
+        open={uploadOpen}
+        title="Upload Document"
+        onClose={() => setUploadOpen(false)}
+        footer={
+          <>
+            <TechTransferButton onClick={() => setUploadOpen(false)}>Cancel</TechTransferButton>
+            <TechTransferButton variant="primary" onClick={() => setUploadOpen(false)}>
+              Upload Document
+            </TechTransferButton>
+          </>
+        }
+      >
+        <div className="form-group">
+          <label htmlFor="upload-doc-type">Document Type</label>
+          <select id="upload-doc-type" defaultValue="MOA">
+            <option>Memorandum of Agreement (MOA)</option>
+            <option>Letter of Intent (LOI)</option>
+            <option>Deployment Certificate</option>
+            <option>Other Legal Document</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="upload-doc-project">Associated Project</label>
+          <input id="upload-doc-project" placeholder="e.g. AgriTech Predictor" />
+        </div>
+        <div className="form-group">
+          <label htmlFor="upload-doc-file">Select File (PDF, DOCX)</label>
+          <input id="upload-doc-file" type="file" accept=".pdf,.doc,.docx" className="form-control" />
+        </div>
       </TechTransferModal>
     </TechTransferShell>
   );

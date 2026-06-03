@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { PortalShellActionMenus, type PortalNotificationItem } from '@/components/shared/portal-shell-action-menus';
 import { getInitials, WORKSPACE_META, type WorkspaceMode } from '@/components/adviser/shared/config/dashboard-utils';
-import { logout } from '@/lib/mock/auth';
+import { logoutWithApi } from '@/lib/client-auth';
 
 type AdviserShellActionsProps = {
   basePath: string;
@@ -162,8 +162,8 @@ export function AdviserShellActions({
           label: 'Sign Out',
           icon: 'fa-right-from-bracket',
           danger: true,
-          onClick: () => {
-            logout();
+          onClick: async () => {
+            await logoutWithApi();
             router.push('/login');
           }
         }

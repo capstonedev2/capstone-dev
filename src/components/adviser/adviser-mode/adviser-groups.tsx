@@ -1591,46 +1591,20 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
   };
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{meta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>Track project groups, manage members, and monitor supervision progress.</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
-            <span>{meta.badgeLabel}</span>
-          </span>
-        </div>
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
-              <i className={`fas ${item.icon}`}></i> {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="main-content">
-        <AdviserPageHeader
-          title="My Groups"
-          description="Track project groups, manage members, and monitor supervision progress in one workspace."
-          actions={
-            <AdviserShellActions
-              basePath={basePath}
-              fullName={data.profile.fullName}
-              notificationCount={data.profile.notificationCount}
-              workspaceMode={workspaceMode}
-              onSwitchWorkspace={switchWorkspace}
-            />
-          }
-        />
+    <>
+      <AdviserPageHeader
+        title="My Groups"
+        description="Track project groups, manage members, and monitor supervision progress in one workspace."
+        actions={
+          <AdviserShellActions
+            basePath={basePath}
+            fullName={data.profile.fullName}
+            notificationCount={data.profile.notificationCount}
+            workspaceMode={workspaceMode}
+            onSwitchWorkspace={switchWorkspace}
+          />
+        }
+      />
 
         <div className="space-y-6">
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -1771,7 +1745,6 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
           }}
           onSubmit={handleCreateGroup}
         />
-      </main>
-    </div>
+    </>
   );
 }

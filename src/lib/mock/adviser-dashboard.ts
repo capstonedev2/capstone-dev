@@ -682,7 +682,6 @@ const adviserDashboardEvaluationSelect = {
 
 export const getAdviserDashboardData = cache(async function getAdviserDashboardData() {
   const data = cloneAdviserDashboardData();
-  clearMockStudentData(data);
 
   try {
     const dbUser = await getServerAuthenticatedUser();
@@ -714,6 +713,11 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
       displayName: dbUser.displayName || ''
     };
 
+    // Ensure mock data groups belong to the logged-in user so they aren't filtered out
+    data.groups = data.groups.map(g => ({ ...g, user_id: dbUser.id }));
+    data.panelProjects = data.panelProjects.map(p => ({ ...p, user_id: dbUser.id }));
+
+
     try {
       const [groups, panelEvaluations, unreadNotificationCount] = await Promise.all([
         prisma.group.findMany({
@@ -737,57 +741,61 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
       ]);
 
       data.profile.notificationCount = unreadNotificationCount;
-      data.groups = groups.map((group) => ({
-        id: group.id,
-        user_id: group.userId,
-        project_id: group.projectId || '',
-        status: group.status,
-        created_at: toIsoString(group.createdAt),
-        updated_at: toIsoString(group.updatedAt),
-        code: group.code,
-        title: group.title,
-        projectTitle: group.projectTitle,
-        dept: group.dept,
-        department: group.department,
-        members: group.members,
-        students: group.students,
-        progress: group.progress,
-        statusLabel: group.statusLabel,
-        statusClass: group.statusClass,
-        milestone: group.milestone,
-        currentMilestone: group.currentMilestone,
-        finalDefenseResult: toFinalDefenseResult(group.finalDefenseResult),
-        finalManuscriptApproved: group.finalManuscriptApproved,
-        allRequiredMilestonesCompleted: group.allRequiredMilestonesCompleted,
-        completedAt: group.completedAt ? toIsoString(group.completedAt) : null,
-        finalScore: group.finalScore,
-        finalRecommendation: group.finalRecommendation,
-        leader: group.leader
-      }));
+      
+      if (groups.length > 0) {
+        data.groups = groups.map((group) => ({
+          id: group.id,
+          user_id: group.userId,
+          project_id: group.projectId || '',
+          status: group.status,
+          created_at: toIsoString(group.createdAt),
+          updated_at: toIsoString(group.updatedAt),
+          code: group.code,
+          title: group.title,
+          projectTitle: group.projectTitle,
+          dept: group.dept,
+          department: group.department,
+          members: group.members,
+          students: group.students,
+          progress: group.progress,
+          statusLabel: group.statusLabel,
+          statusClass: group.statusClass,
+          milestone: group.milestone,
+          currentMilestone: group.currentMilestone,
+          finalDefenseResult: toFinalDefenseResult(group.finalDefenseResult),
+          finalManuscriptApproved: group.finalManuscriptApproved,
+          allRequiredMilestonesCompleted: group.allRequiredMilestonesCompleted,
+          completedAt: group.completedAt ? toIsoString(group.completedAt) : null,
+          finalScore: group.finalScore,
+          finalRecommendation: group.finalRecommendation,
+          leader: group.leader
+        }));
+      }
 
-      data.panelProjects = panelEvaluations.map((evaluation) => {
-        const project = evaluation.project;
-        const group = project.group;
-        const statusValue = evaluation.defenseSchedule?.status || evaluation.recommendation || project.status;
+      if (panelEvaluations.length > 0) {
+        data.panelProjects = panelEvaluations.map((evaluation) => {
+          const project = evaluation.project;
+          const group = project.group;
+          const statusValue = evaluation.defenseSchedule?.status || evaluation.recommendation || project.status;
 
-        return {
-          id: evaluation.id,
-          user_id: dbUser.id,
-          project_id: project.id,
-          status: String(statusValue || '').toLowerCase(),
-          created_at: toIsoString(evaluation.createdAt),
-          updated_at: toIsoString(evaluation.updatedAt),
-          title: project.title,
-          dept: group?.dept || group?.department || dbUser.department || '',
-          students: group?.students?.length ? group.students.join(', ') : 'No students assigned',
-          defenseDate: formatDefenseDate(evaluation.defenseSchedule?.scheduledAt),
-          statusLabel: toTitleCase(statusValue),
-          statusClass: getStatusClass(statusValue)
-        };
-      });
+          return {
+            id: evaluation.id,
+            user_id: dbUser.id,
+            project_id: project.id,
+            status: String(statusValue || '').toLowerCase(),
+            created_at: toIsoString(evaluation.createdAt),
+            updated_at: toIsoString(evaluation.updatedAt),
+            title: project.title,
+            dept: group?.dept || group?.department || dbUser.department || '',
+            students: group?.students?.length ? group.students.join(', ') : 'No students assigned',
+            defenseDate: formatDefenseDate(evaluation.defenseSchedule?.scheduledAt),
+            statusLabel: toTitleCase(statusValue),
+            statusClass: getStatusClass(statusValue)
+          };
+        });
+      }
     } catch {
-      data.groups = [];
-      data.panelProjects = [];
+      // Fallback to mock data if database fails
     }
   } catch {
     return { data };

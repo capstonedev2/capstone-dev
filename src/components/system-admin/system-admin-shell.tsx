@@ -293,21 +293,7 @@ export function SystemAdminShell({
 
       <main className="student-global-main">
         <div className="student-global-content">
-          <header className="top-nav" aria-labelledby="system-admin-page-title">
-            <div className="top-nav-leading">
-              <div className="page-title">
-                <div className="page-title-context">
-                  <span className="page-kicker">System Administrator</span>
-                  <span className="page-breadcrumb" aria-hidden="true">
-                    <i className="fas fa-angle-right" />
-                    <span>{currentNavItem?.label ?? title}</span>
-                  </span>
-                </div>
-                <h1 id="system-admin-page-title">{title}</h1>
-                <p>{description}</p>
-              </div>
-            </div>
-          </header>
+
           <div className="page-body">
             {children}
           </div>

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import {
   isAccountSuspended,
   publicUserSelect,
@@ -8,12 +9,7 @@ import {
   toPublicUser
 } from '@/lib/auth';
 import {
-  clearGoogleOAuthStateCookie,
-  exchangeGoogleCodeForTokens,
-  getVerifiedGoogleProfile,
-  isGoogleOAuthConfigError,
   setGoogleRegistrationCookie,
-  validateGoogleOAuthState
 } from '@/lib/google-oauth';
 import { prisma } from '@/lib/prisma';
 
@@ -84,101 +80,97 @@ function getSyncRedirect(request: NextRequest, role: ReturnType<typeof toPublicU
 }
 
 export async function GET(request: NextRequest) {
-  const code = request.nextUrl.searchParams.get('code') || '';
-  const state = request.nextUrl.searchParams.get('state') || '';
-  const error = request.nextUrl.searchParams.get('error');
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
+  const error = requestUrl.searchParams.get('error');
 
   if (error) {
-    const response = NextResponse.redirect(getLoginRedirect(request, 'cancelled'));
-    clearGoogleOAuthStateCookie(response);
-    return response;
+    return NextResponse.redirect(getLoginRedirect(request, 'cancelled'));
   }
 
-  if (!code || !validateGoogleOAuthState(request, state)) {
-    const response = NextResponse.redirect(getLoginRedirect(request, 'invalid_request'));
-    clearGoogleOAuthStateCookie(response);
-    return response;
+  if (!code) {
+    return NextResponse.redirect(getLoginRedirect(request, 'invalid_request'));
   }
 
   try {
-    const tokens = await exchangeGoogleCodeForTokens(request, code);
-    const profile = await getVerifiedGoogleProfile(tokens.id_token);
+    const supabase = await createClient();
+    
+    // Exchange code for Supabase Session
+    const { data: authData, error: authError } = await supabase.auth.exchangeCodeForSession(code);
+    
+    if (authError || !authData.user) {
+      console.error('Supabase code exchange failed', authError);
+      return NextResponse.redirect(getLoginRedirect(request, 'invalid_request'));
+    }
+
+    const supabaseUser = authData.user;
+    const email = supabaseUser.email!;
+    const name = supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || email;
+    const firstName = supabaseUser.user_metadata?.first_name || '';
+    const lastName = supabaseUser.user_metadata?.last_name || '';
+
+    const profile = {
+      email,
+      name,
+      firstName,
+      lastName,
+      sub: supabaseUser.id // Passing the Supabase ID to the register route!
+    };
+
     const user = await prisma.user.findFirst({
       where: {
         OR: [
-          {
-            googleSub: profile.sub
-          },
-          {
-            email: profile.email
-          }
+          { googleSub: supabaseUser.id },
+          { supabaseId: supabaseUser.id },
+          { email: email }
         ]
       },
       select: {
         ...publicUserSelect,
-        googleSub: true
+        googleSub: true,
+        supabaseId: true
       }
     });
 
     if (!user) {
+      // User doesn't exist locally. Redirect to register page
       const response = NextResponse.redirect(getRegisterRedirect(request, profile));
-      clearGoogleOAuthStateCookie(response);
       setGoogleRegistrationCookie(response, profile);
-      return response;
-    }
-
-    if (user.googleSub && user.googleSub !== profile.sub) {
-      const response = NextResponse.redirect(getLoginRedirect(request, 'account_mismatch'));
-      clearGoogleOAuthStateCookie(response);
       return response;
     }
 
     const authUser = await restoreExpiredSuspension(user);
 
     if (isAccountSuspended(authUser)) {
-      const response = NextResponse.redirect(getLoginRedirect(request, 'suspended'));
-      clearGoogleOAuthStateCookie(response);
-      return response;
+      return NextResponse.redirect(getLoginRedirect(request, 'suspended'));
     }
 
-    const linkedUser = user.googleSub
+    // Auto-migrate: If they existed by email but lacked a supabaseId or googleSub, link them now!
+    const linkedUser = (user.googleSub && user.supabaseId)
       ? authUser
       : await prisma.user.update({
           where: {
             id: user.id
           },
           data: {
-            googleSub: profile.sub
+            googleSub: supabaseUser.id,
+            supabaseId: supabaseUser.id
           },
           select: {
             ...publicUserSelect,
-            googleSub: true
+            googleSub: true,
+            supabaseId: true
           }
         });
+        
     const publicUser = toPublicUser(linkedUser);
     const response = NextResponse.redirect(getSyncRedirect(request, publicUser.role));
 
-    clearGoogleOAuthStateCookie(response);
     setAuthCookie(response, signAuthToken(linkedUser));
 
     return response;
   } catch (callbackError) {
-    if (isGoogleOAuthConfigError(callbackError)) {
-      console.error('Google OAuth is not configured.', callbackError);
-      const response = NextResponse.json(
-        {
-          success: false,
-          message: callbackError.message
-        },
-        { status: 500 }
-      );
-      clearGoogleOAuthStateCookie(response);
-      return response;
-    }
-
     console.error('Google OAuth callback failed.', callbackError);
-    const response = NextResponse.redirect(getLoginRedirect(request, 'error'));
-    clearGoogleOAuthStateCookie(response);
-    return response;
+    return NextResponse.redirect(getLoginRedirect(request, 'error'));
   }
 }

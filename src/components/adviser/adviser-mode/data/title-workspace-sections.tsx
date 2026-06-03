@@ -421,6 +421,7 @@ export function TitleDetailsDrawer({
   const [selectedPreviewId, setSelectedPreviewId] = useState<string>(GENERATED_PREVIEW_ID);
   const [signedPreviewUrls, setSignedPreviewUrls] = useState<Record<string, string>>({});
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'approve' | 'revise' | 'reject' | null>(null);
   const uploadedFiles = record?.uploadedFiles ?? [];
   const firstUploadedFileId = uploadedFiles[0]?.id;
   const documentData = useMemo(() => (record ? createAdviserTitleDocumentData(record) : null), [record]);
@@ -819,21 +820,21 @@ export function TitleDetailsDrawer({
                     <button
                       className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-black text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 hover:shadow-lg focus:outline-none"
                       type="button"
-                      onClick={() => onApprove(record)}
+                      onClick={() => setConfirmAction('approve')}
                     >
                       <i className="fas fa-check" /> Approve Title
                     </button>
                     <button
                       className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-50 px-6 text-sm font-black text-amber-700 shadow-sm ring-1 ring-inset ring-amber-200 transition hover:bg-amber-100 hover:ring-amber-300 focus:outline-none"
                       type="button"
-                      onClick={() => onRequestRevision(record)}
+                      onClick={() => setConfirmAction('revise')}
                     >
                       <i className="fas fa-rotate-left" /> Request Revision
                     </button>
                     <button
                       className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-black text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition hover:bg-rose-50 hover:ring-rose-300 focus:outline-none"
                       type="button"
-                      onClick={() => onReject(record)}
+                      onClick={() => setConfirmAction('reject')}
                     >
                       <i className="fas fa-ban" /> Reject
                     </button>
@@ -903,6 +904,63 @@ export function TitleDetailsDrawer({
             </aside>
           </div>
         </div>
+
+        {confirmAction && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+              <div className="flex items-start gap-4">
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
+                  confirmAction === 'approve' ? 'bg-emerald-100 text-emerald-600' :
+                  confirmAction === 'revise' ? 'bg-amber-100 text-amber-600' :
+                  'bg-rose-100 text-rose-600'
+                }`}>
+                  <i className={`fas ${
+                    confirmAction === 'approve' ? 'fa-check' :
+                    confirmAction === 'revise' ? 'fa-rotate-left' :
+                    'fa-ban'
+                  } text-xl`} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    {confirmAction === 'approve' ? 'Approve Title' :
+                     confirmAction === 'revise' ? 'Request Revision' :
+                     'Reject Title'}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    {confirmAction === 'approve' ? 'Are you sure you want to approve this title submission? This action will formally record the approval and notify the students.' :
+                     confirmAction === 'revise' ? 'Are you sure you want to request revisions for this title? The students will need to revise and resubmit.' :
+                     'Are you sure you want to reject this title submission? This is a permanent rejection.'}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  className="rounded-xl px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100"
+                  onClick={() => setConfirmAction(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className={`rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm ${
+                    confirmAction === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700' :
+                    confirmAction === 'revise' ? 'bg-amber-600 hover:bg-amber-700' :
+                    'bg-rose-600 hover:bg-rose-700'
+                  }`}
+                  onClick={() => {
+                    if (confirmAction === 'approve') onApprove(record);
+                    if (confirmAction === 'revise') onRequestRevision(record);
+                    if (confirmAction === 'reject') onReject(record);
+                    setConfirmAction(null);
+                  }}
+                >
+                  Confirm Decision
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

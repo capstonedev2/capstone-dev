@@ -294,6 +294,8 @@ export type StudentDashboardData = {
     submittedAt?: string;
     reviewedAt?: string;
     completedAt?: string;
+    studentStartDate?: string;
+    studentTargetDate?: string;
     latestFeedback?: string;
     latestFeedbackBy?: string;
     latestFeedbackAt?: string;
@@ -901,6 +903,8 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                 latestFeedback: checkpoint.latestFeedback || undefined,
                 latestFeedbackBy: checkpoint.latestFeedbackBy || undefined,
                 latestFeedbackAt: checkpoint.latestFeedbackAt?.toISOString(),
+                studentStartDate: checkpoint.studentStartDate?.toISOString(),
+                studentTargetDate: checkpoint.studentTargetDate?.toISOString(),
                 submissions: checkpoint.submissions.map((submission) => ({
                   id: submission.id,
                   title: submission.title,

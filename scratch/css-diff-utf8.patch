@@ -1,0 +1,442 @@
+﻿diff --git a/src/styles/student-workspace.css b/src/styles/student-workspace.css
+index 1d308b3..f720975 100644
+--- a/src/styles/student-workspace.css
++++ b/src/styles/student-workspace.css
+@@ -13488,7 +13488,7 @@ progress::-moz-progress-bar {
+     backdrop-filter: blur(12px);
+     border-bottom: 1px solid rgba(226, 232, 240, 0.96);
+     z-index: 70;
+-    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.03);
++    box-shadow: none;
+     transition: none;
+ }
+ 
+@@ -20460,7 +20460,7 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-stat.is-danger
+ 
+ .student-shell .student-global-navbar {
+     background: linear-gradient(90deg, var(--color-primary, #003a8f), var(--color-secondary, #1e40af)) !important;
+-    border-bottom: 3px solid #f6be00 !important;
++    
+     height: 64px !important;
+     min-height: 64px !important;
+ }
+@@ -20533,11 +20533,11 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-stat.is-danger
+     min-height: 58px !important;
+     padding: 0 !important;
+     border: 0 !important;
+-    border-bottom: 3px solid #f6be00 !important;
++    
+     background:
+         linear-gradient(90deg, rgba(0, 58, 143, 0.98), rgba(30, 64, 175, 0.98)),
+         var(--color-primary, #003a8f) !important;
+-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
++    box-shadow: none !important;
+ }
+ 
+ .student-shell .student-global-navbar::after {
+@@ -20815,15 +20815,15 @@ html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sideb
+     min-height: 72px !important;
+     overflow: visible !important;
+     border: 0 !important;
+-    border-bottom: 1px solid rgba(246, 190, 0, 0.88) !important;
++    border-bottom: 0 !important;
+     background:
+         linear-gradient(90deg, #003a8f 0%, #0f4fb5 48%, #1e40af 100%) !important;
+-    box-shadow:
+-        0 14px 34px rgba(15, 23, 42, 0.18),
+-        0 1px 0 rgba(255, 255, 255, 0.1) inset !important;
++    box-shadow: none !important;
++
++
+ }
+ 
+-.student-shell .student-global-navbar::before {
++.student-shell .student-global-navbar::before { display: none !important; } /* 
+     content: "" !important;
+     position: absolute !important;
+     left: 0 !important;
+@@ -20833,7 +20833,7 @@ html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sideb
+     pointer-events: none !important;
+     background: linear-gradient(90deg, rgba(246, 190, 0, 0.25), #f6be00 28%, #f6be00 72%, rgba(246, 190, 0, 0.25)) !important;
+     box-shadow: 0 0 12px rgba(246, 190, 0, 0.45) !important;
+-}
++*/
+ 
+ .student-shell .student-global-navbar::after {
+     content: "" !important;
+@@ -21062,7 +21062,7 @@ html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sideb
+     box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+ }
+ 
+-.student-shell .student-global-navbar::before {
++.student-shell .student-global-navbar::before { display: none !important; } /* 
+     content: "" !important;
+     position: absolute !important;
+     left: 0 !important;
+@@ -21468,7 +21468,7 @@ html[data-student-theme="dark"] .student-shell:not(.is-sidebar-collapsed) .sideb
+     border-bottom-color: rgba(0, 58, 143, 0.72) !important;
+ }
+ 
+-.student-shell .student-global-navbar::before {
++.student-shell .student-global-navbar::before { display: none !important; } /* 
+     height: 3px !important;
+     background:
+         linear-gradient(
+@@ -21504,7 +21504,7 @@ html[data-student-theme="dark"] .student-shell .student-global-navbar {
+ }
+ 
+ .student-shell[data-theme="dark"] .student-global-navbar::before,
+-html[data-student-theme="dark"] .student-shell .student-global-navbar::before {
++.student-shell .student-global-navbar::before { display: none !important; } /* 
+     background:
+         linear-gradient(
+             90deg,
+@@ -21672,7 +21672,7 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-welcome-insigh
+ .student-shell {
+     --student-premium-sidebar-surface: rgba(255, 255, 255, 0.78);
+     --student-premium-border: rgba(148, 163, 184, 0.2);
+-    --student-premium-shadow: 18px 0 48px rgba(15, 23, 42, 0.06);
++    --student-premium-shadow: none;
+ }
+ 
+ .student-shell .student-global-sidebar {
+@@ -22424,6 +22424,12 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
+ }
+ 
+ .milestone-roadmap-item.is-needs-revision .milestone-roadmap-node {
++    border-color: #f97316;
++    background: #fff7ed;
++    color: #c2410c;
++}
++
++.milestone-roadmap-item.is-rejected .milestone-roadmap-node {
+     border-color: var(--milestone-red);
+     background: var(--milestone-red-soft);
+     color: var(--milestone-red);
+@@ -22447,6 +22453,10 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
+ }
+ 
+ .milestone-roadmap-item.is-needs-revision .milestone-roadmap-panel {
++    border-color: #fed7aa;
++}
++
++.milestone-roadmap-item.is-rejected .milestone-roadmap-panel {
+     border-color: #fecdd3;
+ }
+ 
+@@ -24722,18 +24732,24 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
+ }
+ 
+ .student-title-submission-page .title-submission-workflow-strip > div.is-current {
+-    border-color: rgba(246, 190, 0, 0.62) !important;
+-    background: linear-gradient(180deg, #fffdf4, #ffffff) !important;
+-    box-shadow: inset 0 0 0 1px rgba(246, 190, 0, 0.18);
++
++
++
+     color: var(--workflow-primary-deep);
+ }
+ 
+ .student-title-submission-page .title-submission-workflow-strip > div.is-attention {
+-    border-color: rgba(246, 190, 0, 0.62) !important;
+-    background: var(--workflow-gold-soft) !important;
++
++
+     color: #7a4b00;
+ }
+ 
++.student-title-submission-page .title-submission-workflow-strip > div.is-danger {
++
++
++    color: #9f1239;
++}
++
+ .student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+     display: inline-flex !important;
+     width: 34px !important;
+@@ -24769,6 +24785,13 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
+     box-shadow: 0 0 0 4px rgba(246, 190, 0, 0.2) !important;
+ }
+ 
++.student-title-submission-page .title-submission-workflow-strip .is-danger .title-submission-workflow-icon {
++    border-color: #e11d48;
++    background: #e11d48 !important;
++    color: #ffffff;
++    box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.2) !important;
++}
++
+ .student-title-submission-page .title-submission-workflow-copy {
+     display: grid;
+     min-width: 0;
+@@ -24821,6 +24844,10 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
+     color: #9a6700;
+ }
+ 
++.student-title-submission-page .title-submission-workflow-strip .is-danger :is(em, small) {
++    color: #be123c;
++}
++
+ @media (max-width: 980px) {
+     .student-title-submission-page .title-submission-workflow-strip {
+         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+@@ -24889,6 +24916,13 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
+     color: #08214a;
+ }
+ 
++html[data-student-theme="dark"] .student-shell .student-title-submission-page .title-submission-workflow-strip .is-danger .title-submission-workflow-icon,
++.student-shell[data-theme="dark"] .student-title-submission-page .title-submission-workflow-strip .is-danger .title-submission-workflow-icon {
++    border-color: #f43f5e;
++    background: #e11d48 !important;
++    color: #ffffff;
++}
++
+ /* Title submission layout upgrade. */
+ .student-title-submission-page {
+     --title-shell-border: #dbe5f2;
+@@ -25143,6 +25177,12 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
+     transition: background-size 0.55s ease;
+ }
+ 
++.student-title-submission-page .title-submission-workflow-strip.is-danger-workflow::before {
++    background:
++        linear-gradient(90deg, var(--primary, #003A8F), #2563eb 45%, #e11d48) 0 / var(--title-progress, 0%) 100% no-repeat,
++        #dbe5f2 !important;
++}
++
+ .student-title-submission-page .title-submission-workflow-strip > div {
+     min-height: 68px;
+     grid-template-columns: 1fr !important;
+@@ -25304,10 +25344,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
+ .student-title-submission-page .title-submission-workflow-strip > div.is-attention {
+     margin-top: -1.05rem;
+     padding: 1.05rem 0.85rem 1.15rem !important;
+-    border: 1px solid rgba(246, 190, 0, 0.32) !important;
+-    border-radius: 8px;
+-    background: linear-gradient(180deg, rgba(255, 248, 225, 0.68), rgba(255, 255, 255, 0.92)) !important;
+-    box-shadow: 0 20px 42px rgba(154, 103, 0, 0.1) !important;
++
+ }
+ 
+ .student-title-submission-page .title-submission-workflow-strip .title-submission-workflow-icon {
+@@ -25873,12 +25910,6 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
+     min-height: 186px;
+     margin-top: -0.35rem;
+     padding: 0.75rem 0.72rem 0.82rem !important;
+-    border-color: rgba(246, 190, 0, 0.38) !important;
+-    background:
+-        linear-gradient(180deg, rgba(255, 248, 225, 0.88) 0%, rgba(255, 255, 255, 0.96) 100%) !important;
+-    box-shadow:
+-        0 16px 34px rgba(154, 103, 0, 0.1),
+-        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+ }
+ 
+ .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip > div.is-pending {
+@@ -26382,7 +26413,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
+     box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
+ }
+ 
+-.student-shell .student-global-navbar::before {
++.student-shell .student-global-navbar::before { display: none !important; } /* 
+     content: "" !important;
+     position: absolute !important;
+     right: 0 !important;
+@@ -26393,7 +26424,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
+     background: linear-gradient(90deg, rgba(246, 190, 0, 0.55), #f6be00 22%, #f6be00 78%, rgba(246, 190, 0, 0.55)) !important;
+     box-shadow: 0 0 12px rgba(246, 190, 0, 0.42) !important;
+ }
+-
++*/
+ .student-shell .student-global-navbar::after {
+     content: "" !important;
+     position: absolute !important;
+@@ -26910,3 +26941,190 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
+         display: none !important;
+     }
+ }
++
++/* Gantt Chart View */
++.milestones-view-toggles {
++    display: inline-flex;
++    flex-direction: row;
++    align-items: center;
++    gap: 0.5rem;
++    background: rgba(0, 58, 143, 0.05);
++    padding: 0.35rem;
++    border-radius: 12px;
++}
++
++.milestones-view-toggles button {
++    display: inline-flex;
++    align-items: center;
++    gap: 0.5rem;
++    border: none;
++    background: transparent;
++    padding: 0.5rem 1rem;
++    border-radius: 8px;
++    font-size: 0.85rem;
++    font-weight: 600;
++    color: var(--muted);
++    transition: all 0.2s ease;
++}
++
++.milestones-view-toggles button:hover {
++    color: var(--primary);
++    background: rgba(0, 58, 143, 0.05);
++}
++
++.milestones-view-toggles button.is-active {
++    background: white;
++    color: var(--primary);
++    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
++}
++
++.milestones-gantt-container {
++    padding: 1.5rem;
++    overflow-x: auto;
++}
++
++.gantt-grid {
++    display: grid;
++    grid-template-columns: 200px repeat(6, minmax(120px, 1fr));
++    gap: 1px;
++    background: var(--border);
++    border: 1px solid var(--border);
++    border-radius: 12px;
++    overflow: hidden;
++}
++
++.gantt-header-cell {
++    background: var(--surface-alt);
++    padding: 1rem;
++    font-size: 0.75rem;
++    font-weight: 700;
++    color: var(--muted);
++    text-transform: uppercase;
++    letter-spacing: 0.05em;
++    text-align: center;
++}
++
++.gantt-header-cell:first-child {
++    text-align: left;
++}
++
++.gantt-row-label {
++    background: white;
++    padding: 1rem;
++    display: flex;
++    flex-direction: column;
++    justify-content: center;
++    gap: 0.25rem;
++}
++
++.gantt-row-label strong {
++    font-size: 0.9rem;
++    color: var(--text);
++}
++
++.gantt-row-label small {
++    font-size: 0.75rem;
++    color: var(--muted);
++}
++
++.gantt-track-cell {
++    background: white;
++    position: relative;
++    padding: 0.75rem 0.25rem;
++}
++
++.gantt-bar {
++    position: absolute;
++    top: 50%;
++    left: 0.5rem;
++    right: 0.5rem;
++    transform: translateY(-50%);
++    height: 24px;
++    border-radius: 12px;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    font-size: 0.65rem;
++    font-weight: 700;
++    color: white;
++    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
++    transition: width 0.3s ease;
++}
++
++
++
++.gantt-bar.is-completed {
++    background: linear-gradient(90deg, var(--success), #22c55e);
++}
++.gantt-bar.is-in-review {
++    background: linear-gradient(90deg, var(--primary), #3b82f6);
++}
++.gantt-bar.is-needs-revision {
++    background: linear-gradient(90deg, var(--warning), #f59e0b);
++}
++.gantt-bar.is-pending {
++    background: #e2e8f0;
++    color: var(--muted);
++    box-shadow: none;
++}
++.gantt-bar.is-locked {
++    background: transparent;
++    border: 1px dashed #cbd5e1;
++    color: #94a3b8;
++    box-shadow: none;
++}
++.gantt-bar.is-overdue {
++    background: linear-gradient(90deg, #dc2626, #ef4444);
++    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
++    animation: pulse-red 2s infinite;
++}
++
++@keyframes pulse-red {
++    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
++    70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
++    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
++}
++
++/* Premium Skeleton Shimmer */
++.shimmer-bg {
++    background: #f1f5f9;
++    background-image: linear-gradient(
++        90deg,
++        rgba(255, 255, 255, 0) 0,
++        rgba(255, 255, 255, 0.6) 20%,
++        rgba(255, 255, 255, 0) 40%,
++        rgba(255, 255, 255, 0) 100%
++    );
++    background-repeat: no-repeat;
++    background-size: 800px 100%; 
++    animation: shimmer 1.5s infinite linear forwards;
++}
++
++@keyframes shimmer {
++    0% { background-position: -468px 0; }
++    100% { background-position: 468px 0; }
++}
++
++/* Urgent Notification Bell Animation */
++.notification-trigger-icon.is-urgent i {
++    color: #ef4444;
++    animation: ring-bell 2s infinite ease-in-out;
++}
++.notification-trigger-count.is-urgent {
++    background-color: #ef4444;
++    color: white;
++    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
++    animation: pulse-red-badge 2s infinite;
++}
++
++@keyframes ring-bell {
++    0%, 100% { transform: rotate(0); }
++    10%, 30%, 50% { transform: rotate(-10deg); }
++    20%, 40%, 60% { transform: rotate(10deg); }
++    70%, 80%, 90% { transform: rotate(0); }
++}
++@keyframes pulse-red-badge {
++    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
++    70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
++    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
++}

@@ -9,26 +9,30 @@ import '../styles/portal-shell-menus.css';
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-sans'
+  variable: '--font-sans',
+  preload: false
 });
 
 const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-serif'
+  variable: '--font-serif',
+  preload: false
 });
 
 const poppins = Poppins({
   subsets: ['latin'],
   display: 'swap',
   weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-student'
+  variable: '--font-student',
+  preload: false
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-adviser'
+  variable: '--font-adviser',
+  preload: false
 });
 
 export const metadata: Metadata = {
@@ -50,6 +54,8 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
         />
       </head>
       <body suppressHydrationWarning>

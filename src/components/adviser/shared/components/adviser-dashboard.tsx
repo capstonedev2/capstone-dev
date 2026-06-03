@@ -386,34 +386,7 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
   );
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{meta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>{meta.pageCopy}</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
-            <span>{meta.badgeLabel}</span>
-          </span>
-        </div>
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item, index) => (
-            <Link key={`${item.href}-${item.label}`} className={isNavItemActive(pathname, item.href) ? 'active' : ''} href={item.href} prefetch={false}>
-              <i className={`fas ${item.icon}`} />
-              {workspaceMode === 'adviser' && index === 0 ? <span id="dashboardNavLabel">{meta.navLabel}</span> : item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="main-content">
+    <>
         <AdviserPageHeader
           title={meta.pageTitle}
           description={meta.pageCopy}
@@ -433,13 +406,15 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
             <div className="adviser-command-copy">
               <span className="adviser-command-eyebrow">
                 <span className="adviser-live-dot" />
-                Adviser workbench
+                {workspaceMode === 'adviser' ? 'Adviser workbench' : 'Panel workbench'}
               </span>
               <h2 id="adviser-command-center-title">
                 Welcome back, {getShortName(data.profile.fullName)}
               </h2>
               <p>
-                Review the queue, check group risk, and move the next supervision task without leaving the dashboard.
+                {workspaceMode === 'adviser'
+                  ? 'Review the queue, check group risk, and move the next supervision task without leaving the dashboard.'
+                  : 'Review the evaluation queue, check defense schedules, and score project packets efficiently.'}
               </p>
               <div className="adviser-command-actions">
                 <Link href={primaryActionHref} prefetch={false}>
@@ -470,16 +445,18 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
 
             <div className="adviser-health-panel">
               <div className="adviser-health-header">
-                <span>Risk Overview</span>
+                <span>{workspaceMode === 'adviser' ? 'Risk Overview' : 'Evaluation Health'}</span>
                 <strong>{healthLabel}</strong>
               </div>
-              <div className="adviser-health-meter" style={healthRingStyle} aria-label={`Risk overview ${supervisionHealth}%`}>
+              <div className="adviser-health-meter" style={healthRingStyle} aria-label={`Health overview ${supervisionHealth}%`}>
                 <span />
               </div>
               <div className="adviser-health-score">
                 <strong>{supervisionHealth}%</strong>
                 <span>
-                  Based on progress, unresolved reviews, and active risk items.
+                  {workspaceMode === 'adviser'
+                    ? 'Based on progress, unresolved reviews, and active risk items.'
+                    : 'Based on evaluation completion rate and pending scorecards.'}
                 </span>
               </div>
               <div className="adviser-health-stats">
@@ -686,7 +663,6 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
             <span>{toast.message}</span>
           </div>
         ) : null}
-      </main>
-    </div>
+      </>
   );
 });

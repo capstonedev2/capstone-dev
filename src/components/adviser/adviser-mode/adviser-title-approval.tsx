@@ -231,40 +231,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   };
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{adviserMeta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>Review, validate, and manage proposed capstone project titles from your assigned IT groups.</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${adviserMeta.badgeIcon}`} />
-            <span>{adviserMeta.badgeLabel}</span>
-          </span>
-        </div>
-
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link
-              key={item.href}
-              className={isNavItemActive(pathname, item.href) ? 'active' : ''}
-              href={item.href}
-              prefetch={false}
-            >
-              <i className={`fas ${item.icon}`} />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-
-      <main className="main-content">
+    <>
         <AdviserPageHeader
           title="Title Approvals"
           description="Review, validate, and manage proposed capstone project titles from your assigned IT groups."
@@ -328,17 +295,6 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
             />
           )}
         </div>
-      </main>
-
-      <TitleDetailsDrawer
-        record={selectedRecord}
-        remarksDraft={remarksDraft}
-        onApprove={(record) => applyDecision(record, 'approved', remarksDraft)}
-        onClose={() => setSelectedTitleId(null)}
-        onReject={(record) => applyDecision(record, 'rejected', remarksDraft)}
-        onRemarksChange={setRemarksDraft}
-        onRequestRevision={(record) => applyDecision(record, 'needs-revision', remarksDraft)}
-      />
-    </div>
+      </>
   );
 }

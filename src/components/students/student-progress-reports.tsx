@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { logout } from '@/lib/mock/auth';
+import { logoutWithApi } from '@/lib/client-auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { STUDENT_NAV_ITEMS } from '@/components/students/student-navigation';
 

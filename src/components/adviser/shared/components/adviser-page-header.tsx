@@ -31,31 +31,26 @@ export function AdviserPageHeader({
   return (
     <>
       {showPageHeader ? (
-        <div className="adviser-page-header">
-          <div className="adviser-page-header-copy">
-            <div className="adviser-page-header-context">
-              <span className="adviser-page-header-kicker">{workspaceMeta.pillLabel}</span>
-              <span className="adviser-page-header-breadcrumb" aria-hidden="true">
-                <i className="fas fa-angle-right" />
-                <span>{title}</span>
-              </span>
-            </div>
+        <header className="top-nav" aria-labelledby={titleId || 'adviser-page-title'}>
+          <div className="top-nav-leading">
             <div className="page-title">
-              <h1 id={titleId}>{title}</h1>
+              <div className="page-title-context">
+                <span className="page-kicker">{workspaceMeta.pillLabel}</span>
+                <span className="page-breadcrumb" aria-hidden="true">
+                  <i className="fas fa-angle-right" />
+                  <span>{title}</span>
+                </span>
+              </div>
+              <h1 id={titleId || 'adviser-page-title'}>{title}</h1>
               <p id={descriptionId}>{description}</p>
             </div>
           </div>
-          <div className="adviser-page-header-meta">
-            <span className="adviser-page-header-chip adviser-page-header-chip-primary">
-              <i className={`fas ${workspaceMeta.badgeIcon}`} />
-              {workspaceMeta.badgeLabel}
-            </span>
-            <span className="adviser-page-header-chip">
-              <i className={`fas ${workspaceMode === 'adviser' ? 'fa-users' : 'fa-clipboard-check'}`} />
-              {secondaryMetaLabel}
-            </span>
-          </div>
-        </div>
+          {actions ? (
+            <div className="top-nav-actions">
+              {actions}
+            </div>
+          ) : null}
+        </header>
       ) : null}
     </>
   );

@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { type NextResponse } from 'next/server';
 import { cache } from 'react';
 import { UserRole, type User } from '@/generated/prisma/client';
+import { createClient } from '@/lib/supabase/server';
 import { sendAccountRestoreEmail } from '@/lib/mailer';
 import { prisma } from '@/lib/prisma';
 import {
@@ -322,7 +323,7 @@ async function getAuthTokenFromCookies() {
   return cookieStore.get(AUTH_COOKIE_NAME)?.value || null;
 }
 
-export async function getAuthenticatedUser(request?: Request) {
+async function getAuthenticatedUserLegacy(request?: Request) {
   const token = request ? getAuthTokenFromRequest(request) : await getAuthTokenFromCookies();
 
   if (!token) {
@@ -347,6 +348,41 @@ export async function getAuthenticatedUser(request?: Request) {
   const restoredUser = await restoreExpiredSuspension(user);
 
   return isAccountSuspended(restoredUser) ? null : restoredUser;
+}
+
+export async function getAuthenticatedUser(request?: Request) {
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+
+  if (authUser) {
+    let user = await prisma.user.findUnique({
+      where: { supabaseId: authUser.id },
+      select: publicUserSelect
+    });
+
+    if (!user && authUser.email) {
+      user = await prisma.user.findUnique({
+        where: { email: authUser.email },
+        select: publicUserSelect
+      });
+
+      if (user) {
+        // Link the existing user to this Supabase ID
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { supabaseId: authUser.id }
+        });
+      }
+    }
+
+    if (user) {
+      const restoredUser = await restoreExpiredSuspension(user);
+      return isAccountSuspended(restoredUser) ? null : restoredUser;
+    }
+  }
+
+  // Fallback to legacy JWT auth
+  return getAuthenticatedUserLegacy(request);
 }
 
 export const getServerAuthenticatedUser = cache(async () => getAuthenticatedUser());

@@ -5,6 +5,7 @@ import {
   hashResetToken
 } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { createServiceClient } from '@/lib/supabase/service';
 import {
   HttpError,
   handleApiError,
@@ -66,7 +67,12 @@ export async function POST(request: NextRequest) {
         userId: true,
         expiresAt: true,
         usedAt: true,
-        verifiedAt: true
+        verifiedAt: true,
+        user: {
+          select: {
+            supabaseId: true
+          }
+        }
       }
     });
 
@@ -77,6 +83,18 @@ export async function POST(request: NextRequest) {
       resetCode.expiresAt.getTime() <= Date.now()
     ) {
       throw resetSessionError();
+    }
+
+    if (resetCode.user?.supabaseId) {
+      const supabaseAdmin = createServiceClient();
+      const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+        resetCode.user.supabaseId,
+        { password }
+      );
+
+      if (authError) {
+        throw new HttpError('Failed to update password in authentication service.', 500);
+      }
     }
 
     const passwordHash = await hashPassword(password);

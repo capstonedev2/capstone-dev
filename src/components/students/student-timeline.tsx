@@ -7,9 +7,9 @@ import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger';
 type StageKey = 'concept' | 'proposal' | 'development' | 'mock-defense' | 'final-defense' | 'completion';
-type StageStatus = 'completed' | 'in-review' | 'needs-revision' | 'pending' | 'locked';
-type CheckpointStatus = 'completed' | 'in-review' | 'needs-revision' | 'pending' | 'locked';
-type ReviewStatus = 'approved' | 'in-review' | 'needs-revision' | 'pending' | 'not-required';
+type StageStatus = 'completed' | 'in-review' | 'needs-revision' | 'rejected' | 'pending' | 'locked';
+type CheckpointStatus = 'completed' | 'in-review' | 'needs-revision' | 'rejected' | 'pending' | 'locked';
+type ReviewStatus = 'approved' | 'in-review' | 'needs-revision' | 'rejected' | 'pending' | 'not-required';
 
 type CheckpointBlueprint = {
   id: string;
@@ -83,6 +83,11 @@ type BuiltCheckpoint = CheckpointBlueprint & {
   status: CheckpointStatus;
   note: string;
   recordId?: string;
+  studentStartDate?: string;
+  studentTargetDate?: string;
+  completedAt?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
 };
 
 type BuiltStage = {
@@ -97,6 +102,7 @@ type BuiltStage = {
   icon: string;
   status: StageStatus;
   progress: number;
+  isOverdue?: boolean;
   completedCheckpoints: number;
   checkpoints: BuiltCheckpoint[];
   evidence: StageEvidence[];
@@ -110,6 +116,22 @@ const SCHEDULE_CHECKPOINT_KINDS = new Set<CheckpointBlueprint['kind']>([
   'proposal-defense-scheduled',
   'mock-defense-scheduled',
   'final-defense-scheduled'
+]);
+
+const STUDENT_TASK_KINDS = new Set<CheckpointBlueprint['kind']>([
+  'title-submitted',
+  'concept-paper',
+  'chapters-uploaded',
+  'prototype-uploaded',
+  'progress-report',
+  'testing-evidence',
+  'presentation-uploaded',
+  'revisions-completed',
+  'final-manuscript',
+  'final-revisions',
+  'approved-manuscript',
+  'approval-sheet',
+  'repository-submission'
 ]);
 
 const STAGE_BLUEPRINTS: StageBlueprint[] = [
@@ -302,6 +324,8 @@ function formatStageStatus(status: StageStatus) {
       return 'In Review';
     case 'needs-revision':
       return 'Needs Revision';
+    case 'rejected':
+      return 'Rejected';
     case 'locked':
       return 'Locked';
     default:
@@ -311,8 +335,8 @@ function formatStageStatus(status: StageStatus) {
 
 function getStatusTone(status: StageStatus | CheckpointStatus | ReviewStatus): BadgeTone {
   if (status === 'completed' || status === 'approved') return 'success';
-  if (status === 'needs-revision') return 'danger';
-  if (status === 'in-review' || status === 'pending') return 'warning';
+  if (status === 'rejected') return 'danger';
+  if (status === 'needs-revision' || status === 'in-review' || status === 'pending') return 'warning';
   return 'neutral';
 }
 
@@ -324,6 +348,10 @@ function getReviewLabel(status: ReviewStatus) {
       return 'In Review';
     case 'needs-revision':
       return 'Needs Revision';
+    case 'rejected':
+      return 'Rejected';
+    case 'pending':
+      return 'Pending';
     case 'not-required':
       return 'Not Required';
     default:
@@ -339,6 +367,8 @@ function getCheckpointLabel(status: CheckpointStatus) {
       return 'In Review';
     case 'needs-revision':
       return 'Needs Revision';
+    case 'rejected':
+      return 'Rejected';
     case 'locked':
       return 'Locked';
     default:
@@ -445,7 +475,8 @@ function formatSavedDate(value?: string) {
 function mapSavedCheckpointStatus(status?: string): CheckpointStatus {
   const normalized = normalizeText(status).replace(/_/g, '-');
   if (normalized.includes('completed') || normalized.includes('approved')) return 'completed';
-  if (normalized.includes('needs-revision') || normalized.includes('rejected')) return 'needs-revision';
+  if (normalized.includes('rejected')) return 'rejected';
+  if (normalized.includes('needs-revision')) return 'needs-revision';
   if (normalized.includes('in-review') || normalized.includes('submitted') || normalized.includes('under-review')) return 'in-review';
   if (normalized.includes('locked')) return 'locked';
   return 'pending';
@@ -455,7 +486,8 @@ function mapSavedReviewStatus(status?: string): ReviewStatus {
   const normalized = normalizeText(status).replace(/_/g, '-');
   if (normalized.includes('not-required')) return 'not-required';
   if (normalized.includes('approved') || normalized.includes('completed')) return 'approved';
-  if (normalized.includes('needs-revision') || normalized.includes('rejected')) return 'needs-revision';
+  if (normalized.includes('rejected')) return 'rejected';
+  if (normalized.includes('needs-revision')) return 'needs-revision';
   if (normalized.includes('in-review') || normalized.includes('submitted') || normalized.includes('under-review')) return 'in-review';
   return 'pending';
 }
@@ -530,7 +562,12 @@ function getCheckpointStatus(
       ...checkpoint,
       status,
       note: getSavedCheckpointNote(record, status),
-      recordId: record.id
+      recordId: record.id,
+      studentStartDate: record.studentStartDate,
+      studentTargetDate: record.studentTargetDate,
+      completedAt: record.completedAt,
+      submittedAt: record.submittedAt,
+      reviewedAt: record.reviewedAt
     };
   }
 
@@ -750,13 +787,16 @@ function buildStages(data: StudentDashboardData): BuiltStage[] {
   return rawStages.map((stage) => {
     const allCheckpointsComplete = stage.completedCheckpoints === stage.checkpoints.length;
     const hasRevision = stage.checkpoints.some((checkpoint) => checkpoint.status === 'needs-revision');
+    const hasRejection = stage.checkpoints.some((checkpoint) => checkpoint.status === 'rejected');
     const hasReview = stage.checkpoints.some((checkpoint) => checkpoint.status === 'in-review');
     let status: StageStatus;
 
-    if (stage.rawStatus === 'completed' || (stage.index < currentIndex && !hasRevision)) {
+    if (stage.rawStatus === 'completed' || (stage.index < currentIndex && !hasRevision && !hasRejection)) {
       status = 'completed';
     } else if (stage.index > currentIndex) {
       status = 'locked';
+    } else if (stage.rawStatus === 'rejected' || hasRejection) {
+      status = 'rejected';
     } else if (stage.rawStatus === 'needs-revision' || hasRevision) {
       status = 'needs-revision';
     } else if (allCheckpointsComplete) {
@@ -774,6 +814,14 @@ function buildStages(data: StudentDashboardData): BuiltStage[] {
       .filter((checkpoint) => checkpoint.latestFeedback)
       .sort((left, right) => new Date(right.latestFeedbackAt || right.reviewedAt || right.submittedAt || 0).getTime() - new Date(left.latestFeedbackAt || left.reviewedAt || left.submittedAt || 0).getTime())[0];
 
+    const targetDateStr = stage.milestone?.dateLabel || stage.workflowStep?.dateLabel || stage.blueprint.defaultTarget;
+    // Basic date parsing to check if overdue, ignoring placeholder text
+    const parsedDate = new Date(targetDateStr);
+    const isOverdue = status !== 'completed' && 
+                      status !== 'locked' && 
+                      !isNaN(parsedDate.getTime()) && 
+                      parsedDate.getTime() < Date.now();
+
     return {
       id: stage.milestone?.id || stage.workflowStep?.id || `stage-${stage.blueprint.key}`,
       key: stage.blueprint.key,
@@ -786,6 +834,7 @@ function buildStages(data: StudentDashboardData): BuiltStage[] {
       icon: stage.blueprint.icon,
       status,
       progress,
+      isOverdue,
       completedCheckpoints: stage.completedCheckpoints,
       checkpoints: status === 'locked'
         ? stage.checkpoints.map((checkpoint) => ({ ...checkpoint, status: 'locked' as const, note: 'Complete the previous stage to unlock this requirement.' }))
@@ -893,6 +942,7 @@ function CheckpointIcon({ status }: { status: CheckpointStatus }) {
     completed: 'fa-check',
     'in-review': 'fa-clock',
     'needs-revision': 'fa-exclamation',
+    rejected: 'fa-xmark',
     pending: 'fa-circle',
     locked: 'fa-lock'
   };
@@ -1051,8 +1101,51 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
   const recentActivities = useMemo(() => buildRecentActivities(data, stages), [data, stages]);
   const upcomingDeadlines = useMemo(() => buildUpcomingDeadlines(data, stages), [data, stages]);
   const [expandedStages, setExpandedStages] = useState<Set<string>>(() => new Set(activeStage ? [activeStage.key] : ['concept']));
+  const [viewMode, setViewMode] = useState<'roadmap' | 'gantt'>('roadmap');
+  const [targetDatesOverrides, setTargetDatesOverrides] = useState<Record<string, string>>({});
+  const [startDatesOverrides, setStartDatesOverrides] = useState<Record<string, string>>({});
   const progressStyle = { '--progress': `${activeStage?.progress ?? 0}%` } as CSSProperties;
   const scheduleAction = getActiveScheduleAction(activeStage);
+
+  const handleUpdateTargetDate = async (checkpointId: string, recordId: string | undefined, dateValue: string) => {
+    if (!recordId) {
+      alert("This checkpoint has not been initialized in the database yet.");
+      return;
+    }
+    
+    setTargetDatesOverrides(prev => ({ ...prev, [checkpointId]: dateValue }));
+    
+    try {
+      const res = await fetch('/api/checkpoints/target-date', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkpointId: recordId, targetDate: dateValue || null })
+      });
+      if (!res.ok) throw new Error("Failed to save date");
+    } catch (error) {
+      alert("Failed to save target date. Please try again.");
+    }
+  };
+
+  const handleUpdateStartDate = async (checkpointId: string, recordId: string | undefined, dateValue: string) => {
+    if (!recordId) {
+      alert("This checkpoint has not been initialized in the database yet.");
+      return;
+    }
+    
+    setStartDatesOverrides(prev => ({ ...prev, [checkpointId]: dateValue }));
+    
+    try {
+      const res = await fetch('/api/checkpoints/target-date', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkpointId: recordId, startDate: dateValue || null })
+      });
+      if (!res.ok) throw new Error("Failed to save date");
+    } catch (error) {
+      alert("Failed to save start date. Please try again.");
+    }
+  };
 
   const toggleStage = (stageKey: string) => {
     setExpandedStages((current) => {
@@ -1072,8 +1165,166 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
     );
   };
 
+  // Calculate dynamic target weeks
+  const projectStart = new Date(data.project?.created_at || new Date());
+  const projectStartMs = projectStart.getTime();
+  let maxWeekOffset = 4; // minimum 1 month
+
+  const checkpointSpans: Record<string, { start: number, end: number }> = {};
+
+  stages.forEach((stage, sIndex) => {
+    stage.checkpoints.forEach((cp, cpIndex) => {
+      let effectiveEndDateStr = targetDatesOverrides[cp.id] !== undefined ? targetDatesOverrides[cp.id] : cp.studentTargetDate;
+      let effectiveStartDateStr = startDatesOverrides[cp.id] !== undefined ? startDatesOverrides[cp.id] : (cp as any).studentStartDate;
+      
+      // Fallback: Use actual action dates if student hasn't explicitly set target dates
+      if (!effectiveStartDateStr && cp.submittedAt) {
+        effectiveStartDateStr = cp.submittedAt;
+      }
+      
+      if (!effectiveEndDateStr) {
+        if (cp.status === 'completed' && cp.completedAt) {
+          effectiveEndDateStr = cp.completedAt;
+        } else if ((cp.status === 'in-review' || cp.status === 'needs-revision' || cp.status === 'rejected') && cp.reviewedAt) {
+          effectiveEndDateStr = cp.reviewedAt;
+        } else if (cp.submittedAt) {
+          effectiveEndDateStr = cp.submittedAt;
+        }
+      }
+      
+      if (!effectiveStartDateStr && effectiveEndDateStr) {
+        effectiveStartDateStr = effectiveEndDateStr;
+      }
+      
+      let startWeek = -1;
+      let endWeek = -1;
+
+      if (effectiveStartDateStr) {
+        startWeek = Math.max(0, Math.ceil((new Date(effectiveStartDateStr).getTime() - projectStartMs) / (1000 * 60 * 60 * 24 * 7)));
+      }
+      
+      if (effectiveEndDateStr) {
+        endWeek = Math.max(0, Math.ceil((new Date(effectiveEndDateStr).getTime() - projectStartMs) / (1000 * 60 * 60 * 24 * 7)));
+      }
+      
+      if (startWeek !== -1 || endWeek !== -1) {
+        if (startWeek === -1) startWeek = endWeek;
+        if (endWeek === -1) endWeek = startWeek;
+
+        if (endWeek > maxWeekOffset) maxWeekOffset = endWeek;
+        
+        checkpointSpans[cp.id] = {
+          start: startWeek,
+          end: endWeek
+        };
+      }
+    });
+  });
+
+  // Ensure we always have full months (blocks of 4 weeks)
+  const totalColumns = Math.ceil((maxWeekOffset + 2) / 4) * 4;
+  
+  // Calculate current week for the "Today" vertical line
+  const currentWeekIndex = Math.max(0, Math.ceil((Date.now() - projectStartMs) / (1000 * 60 * 60 * 24 * 7)));
+
   return (
     <div className="student-milestones-page">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .milestones-gantt-container, .milestones-gantt-container * {
+            visibility: visible;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .milestones-gantt-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          .gantt-waterfall-grid {
+            border: 2px solid #475569 !important;
+            box-shadow: none !important;
+            width: 100% !important;
+            grid-template-columns: 180px 65px 105px 105px repeat(${totalColumns}, minmax(15px, 1fr)) !important;
+          }
+          .gantt-waterfall-grid div {
+            border-color: #475569 !important;
+          }
+          .gantt-waterfall-grid div[style*="border-bottom"],
+          .gantt-waterfall-grid div[style*="borderBottom"] {
+            border-bottom: 1pt solid #475569 !important;
+          }
+          .gantt-waterfall-grid div[style*="border-right"],
+          .gantt-waterfall-grid div[style*="borderRight"] {
+            border-right: 1pt solid #475569 !important;
+          }
+          .gantt-waterfall-grid * {
+            font-size: 0.65rem !important;
+          }
+          .gantt-waterfall-grid .premium-date-picker {
+            font-size: 0.55rem !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            color: black !important;
+          }
+          .gantt-waterfall-grid .premium-date-picker::-webkit-calendar-picker-indicator {
+            display: none !important;
+          }
+          .today-highlight-cell {
+            background: transparent !important;
+            border-left: none !important;
+            border-right: 1px dashed #475569 !important;
+          }
+          @page {
+            size: landscape;
+            margin: 0.5cm;
+          }
+        }
+        
+        /* Premium Gantt Chart Enhancements */
+        .gantt-bar-segment {
+          transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, filter 0.2s;
+        }
+        .gantt-bar-segment:hover {
+          filter: brightness(1.15);
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+          z-index: 10;
+          position: relative;
+        }
+        .premium-date-picker {
+          width: 100%;
+          box-sizing: border-box;
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(4px);
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          border-radius: 6px;
+          padding: 3px 4px;
+          color: var(--foreground);
+          font-weight: 500;
+          transition: all 0.2s ease;
+          box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .premium-date-picker:hover, .premium-date-picker:focus {
+          background: white;
+          border-color: var(--primary);
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+          outline: none;
+        }
+        .today-highlight-cell {
+          background: linear-gradient(180deg, rgba(59, 130, 246, 0.02) 0%, rgba(59, 130, 246, 0.06) 100%) !important;
+          border-left: 1px solid rgba(59, 130, 246, 0.3) !important;
+          border-right: 1px solid rgba(59, 130, 246, 0.3) !important;
+        }
+      ` }} />
       <div className="milestones-workflow-shell">
         <section className="milestones-overview-grid" aria-label="Milestone progress overview">
           <div className="milestones-academic-panel">
@@ -1194,56 +1445,322 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
               <h3>Academic stages from concept to completion</h3>
               <p>Each stage expands into requirements, submitted evidence, reviews, feedback, and the stage gate.</p>
             </div>
-            <button className="milestones-expand-all" type="button" onClick={expandAll}>
-              {expandedStages.size === stages.length ? 'Collapse All' : 'Expand All'}
-              <i className={`fas ${expandedStages.size === stages.length ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              {viewMode === 'gantt' && (
+                <button 
+                  type="button" 
+                  onClick={() => window.print()}
+                  style={{ 
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    background: 'white', border: '1px solid var(--border)',
+                    padding: '0.5rem 1rem', borderRadius: '6px',
+                    fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+                    color: 'var(--foreground)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                >
+                  <i className="fas fa-file-pdf" aria-hidden="true" style={{ color: 'var(--danger)' }} />
+                  Export PDF
+                </button>
+              )}
+              <div className="milestones-view-toggles">
+                <button className={viewMode === 'roadmap' ? 'is-active' : ''} type="button" onClick={() => setViewMode('roadmap')}>
+                  <i className="fas fa-list-ul" aria-hidden="true" /> List
+                </button>
+                <button className={viewMode === 'gantt' ? 'is-active' : ''} type="button" onClick={() => setViewMode('gantt')}>
+                  <i className="fas fa-chart-gantt" aria-hidden="true" /> Gantt
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="milestones-roadmap-list">
-            {stages.map((stage) => {
-              const expanded = expandedStages.has(stage.key);
-              const isActive = stage.index === activeIndex && stage.status !== 'completed';
-              return (
-                <article key={stage.key} className={`milestone-roadmap-item is-${stage.status}${isActive ? ' is-active' : ''}`}>
-                  <div className="milestone-roadmap-line" aria-hidden="true">
-                    <span className="milestone-roadmap-node">
-                      <i className={`fas ${stage.status === 'completed' ? 'fa-check' : stage.status === 'locked' ? 'fa-lock' : stage.icon}`} />
-                    </span>
-                  </div>
-
-                  <div className="milestone-roadmap-panel">
-                    <button
-                      className="milestone-stage-summary"
-                      type="button"
-                      aria-expanded={expanded}
-                      onClick={() => toggleStage(stage.key)}
-                    >
-                      <span className="milestone-stage-copy">
-                        <span className="milestone-stage-number">Stage {stage.index + 1}</span>
-                        <strong>{stage.title}</strong>
-                        <small>{stage.summary}</small>
+          {viewMode === 'roadmap' ? (
+            <div className="milestones-roadmap-list">
+              {stages.map((stage) => {
+                const expanded = expandedStages.has(stage.key);
+                const isActive = stage.index === activeIndex && stage.status !== 'completed';
+                return (
+                  <article key={stage.key} className={`milestone-roadmap-item is-${stage.status}${isActive ? ' is-active' : ''}`}>
+                    <div className="milestone-roadmap-line" aria-hidden="true">
+                      <span className="milestone-roadmap-node">
+                        <i className={`fas ${stage.status === 'completed' ? 'fa-check' : stage.status === 'locked' ? 'fa-lock' : stage.icon}`} />
                       </span>
-                      <span className="milestone-stage-meta">
-                        <Badge
-                          label={formatStageStatus(stage.status)}
-                          tone={getStatusTone(stage.status)}
-                          icon={stage.status === 'locked' ? 'fa-lock' : undefined}
-                        />
-                        <span className="milestone-stage-target">
-                          <span>Target date</span>
-                          <strong>{stage.targetDate}</strong>
+                    </div>
+
+                    <div className="milestone-roadmap-panel">
+                      <button
+                        className="milestone-stage-summary"
+                        type="button"
+                        aria-expanded={expanded}
+                        onClick={() => toggleStage(stage.key)}
+                      >
+                        <span className="milestone-stage-copy">
+                          <span className="milestone-stage-number">Stage {stage.index + 1}</span>
+                          <strong>{stage.title}</strong>
+                          <small>{stage.summary}</small>
                         </span>
-                        <i className={`fas ${expanded ? 'fa-chevron-up' : 'fa-chevron-down'} milestone-stage-chevron`} aria-hidden="true" />
-                      </span>
-                    </button>
+                        <span className="milestone-stage-meta">
+                          <Badge
+                            label={formatStageStatus(stage.status)}
+                            tone={getStatusTone(stage.status)}
+                            icon={stage.status === 'locked' ? 'fa-lock' : undefined}
+                          />
+                          <span className="milestone-stage-target">
+                            <span>Target date</span>
+                            <strong>{stage.targetDate}</strong>
+                          </span>
+                          <i className={`fas ${expanded ? 'fa-chevron-up' : 'fa-chevron-down'} milestone-stage-chevron`} aria-hidden="true" />
+                        </span>
+                      </button>
 
-                    {expanded ? <StageDetails stage={stage} /> : null}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                      {expanded ? <StageDetails stage={stage} /> : null}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="milestones-gantt-container" style={{ overflowX: 'auto', paddingBottom: '1rem', margin: '0 -1.5rem', padding: '0 1.5rem 1.5rem 1.5rem' }}>
+              <div 
+                className="gantt-waterfall-grid" 
+                style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: `250px 80px 135px 135px repeat(${totalColumns}, minmax(40px, 1fr))`,
+                  minWidth: 'max-content',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  background: 'var(--card)',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                }}
+              >
+                {(() => {
+                  return (
+                    <div style={{ display: 'contents' }}>
+                      {/* Left Pane Headers spanning 2 rows */}
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem 1rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: '#f8fafc', position: 'sticky', left: 0, zIndex: 20, display: 'flex', alignItems: 'center' }}>TASK</div>
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>PROGRESS</div>
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: '#f8fafc', display: 'flex', alignItems: 'center' }}>START DATE</div>
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '2px solid var(--border)', background: '#f8fafc', display: 'flex', alignItems: 'center' }}>TARGET DATE</div>
+                      
+                      {/* Timeline Headers: Months (Row 1) */}
+                      {Array.from({ length: Math.ceil(totalColumns / 4) }).map((_, i) => {
+                        const weeksInMonth = Math.min(4, totalColumns - (i * 4));
+                        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                        // Anchor the Gantt chart from the month the project actually started
+                        const projectStartMonth = new Date(data.project?.created_at || new Date()).getMonth();
+                        const displayMonth = monthNames[(projectStartMonth + i) % 12];
+                        
+                        return (
+                          <div key={`month-${i}`} style={{
+                            gridColumn: `span ${weeksInMonth}`,
+                            padding: '0.5rem',
+                            fontWeight: 800,
+                            fontSize: '0.75rem',
+                            borderBottom: '1px solid var(--border)',
+                            borderRight: '1px solid var(--border)',
+                            background: '#f8fafc',
+                            textAlign: 'center',
+                            color: 'var(--foreground)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            {displayMonth}
+                          </div>
+                        );
+                      })}
+
+                      {/* Timeline Headers: Weeks (Row 2) */}
+                      {Array.from({ length: totalColumns }).map((_, i) => (
+                        <div key={`week-${i}`} style={{
+                          padding: '0.5rem 0',
+                          fontWeight: 600,
+                          fontSize: '0.7rem',
+                          borderBottom: '2px solid var(--border)',
+                          borderRight: '1px dashed var(--border)',
+                          background: '#f8fafc',
+                          textAlign: 'center',
+                          color: 'var(--muted-foreground)'
+                        }}>
+                          W{(i % 4) + 1}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {(() => {
+                   let currentWeekOffset = 0;
+                   
+                   return stages.map((stage) => {
+                     const stageDuration = stage.checkpoints.length;
+                     
+                     // Stage Row (Group Header)
+                     const stageRow = (
+                       <div style={{ display: 'contents' }} key={`row-${stage.id}`}>
+                         <div style={{ 
+                           padding: '0.6rem 1rem', 
+                           fontWeight: 700, 
+                           fontSize: '0.85rem',
+                           background: 'rgba(59, 130, 246, 0.08)',
+                           borderBottom: '1px solid var(--border)',
+                           borderRight: '1px solid var(--border)',
+                           position: 'sticky',
+                           left: 0,
+                           zIndex: 10,
+                           display: 'flex',
+                           alignItems: 'center',
+                           gap: '0.6rem',
+                           color: 'var(--foreground)'
+                         }}>
+                           <i className={`fas ${stage.icon}`} style={{ color: 'var(--primary)', width: '16px', textAlign: 'center' }} />
+                           {stage.title}
+                         </div>
+                         <div style={{ padding: '0.6rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'rgba(59, 130, 246, 0.08)', textAlign: 'center', fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)' }}>
+                           {stage.progress}%
+                         </div>
+                         <div style={{ padding: '0.6rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'rgba(59, 130, 246, 0.08)' }}></div>
+                         <div style={{ padding: '0.6rem', borderBottom: '1px solid var(--border)', borderRight: '2px solid var(--border)', background: 'rgba(59, 130, 246, 0.08)', fontSize: '0.75rem', color: stage.isOverdue ? 'var(--danger)' : 'var(--muted-foreground)', fontWeight: stage.isOverdue ? 700 : 500 }}>
+                           {stage.isOverdue ? 'OVERDUE' : stage.targetDate}
+                         </div>
+                         <div style={{ 
+                           gridColumn: `span ${totalColumns}`, 
+                           background: 'rgba(59, 130, 246, 0.03)', 
+                           borderBottom: '1px solid var(--border)' 
+                         }}></div>
+                       </div>
+                     );
+
+                     const checkpointRows = stage.checkpoints.map((cp) => {
+                       const effectiveEndDateStr = targetDatesOverrides[cp.id] !== undefined ? targetDatesOverrides[cp.id] : cp.studentTargetDate;
+                       const effectiveStartDateStr = startDatesOverrides[cp.id] !== undefined ? startDatesOverrides[cp.id] : (cp as any).studentStartDate;
+
+                       return (
+                         <div style={{ display: 'contents' }} key={`row-cp-${cp.id}`}>
+                           <div style={{ 
+                             padding: '0.5rem 1rem 0.5rem 2.2rem', 
+                             fontSize: '0.8rem',
+                             background: 'white',
+                             borderBottom: '1px solid var(--border)',
+                             borderRight: '1px solid var(--border)',
+                             position: 'sticky',
+                             left: 0,
+                             zIndex: 10,
+                             display: 'flex',
+                             alignItems: 'center',
+                             gap: '0.5rem',
+                             color: cp.status === 'completed' ? 'var(--foreground)' : 'var(--muted-foreground)'
+                           }}>
+                             <i className={`fas ${cp.status === 'completed' ? 'fa-check' : cp.status === 'locked' ? 'fa-lock' : 'fa-circle'}`} style={{ fontSize: '0.5rem', opacity: 0.7 }} />
+                             {cp.label}
+                           </div>
+                           <div style={{ padding: '0.5rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'white', textAlign: 'center', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
+                             {cp.status === 'completed' ? '100%' : '0%'}
+                           </div>
+                           <div style={{ padding: '0.3rem 0.5rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                             <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+                               {STUDENT_TASK_KINDS.has(cp.kind) ? (
+                                 <input 
+                                   type="date" 
+                                   className="premium-date-picker"
+                                   value={effectiveStartDateStr ? new Date(effectiveStartDateStr).toISOString().split('T')[0] : ''}
+                                   onChange={(e) => handleUpdateStartDate(cp.id, cp.recordId, e.target.value)}
+                                   style={{ fontSize: '0.65rem', width: '100%', boxSizing: 'border-box' }}
+                                   disabled={cp.status === 'completed' || cp.status === 'locked'}
+                                 />
+                               ) : (
+                                 <span style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)', opacity: 0.7, padding: '4px', userSelect: 'none' }}>-</span>
+                               )}
+                             </div>
+                           </div>
+                           <div style={{ padding: '0.3rem 0.5rem', borderBottom: '1px solid var(--border)', borderRight: '2px solid var(--border)', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                             <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+                               {STUDENT_TASK_KINDS.has(cp.kind) ? (
+                                 <input 
+                                   type="date" 
+                                   className="premium-date-picker"
+                                   value={effectiveEndDateStr ? new Date(effectiveEndDateStr).toISOString().split('T')[0] : ''}
+                                   onChange={(e) => handleUpdateTargetDate(cp.id, cp.recordId, e.target.value)}
+                                   style={{ fontSize: '0.7rem' }}
+                                   disabled={cp.status === 'completed' || cp.status === 'locked'}
+                                 />
+                               ) : (
+                                 <span style={{ fontSize: '0.65rem', color: 'var(--muted-foreground)', opacity: 0.7, padding: '4px', userSelect: 'none' }}>
+                                   {effectiveEndDateStr ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(effectiveEndDateStr)) : (SCHEDULE_CHECKPOINT_KINDS.has(cp.kind as any) ? 'Dept. Chair Action' : 'Faculty Action')}
+                                 </span>
+                               )}
+                             </div>
+                           </div>
+                           {Array.from({ length: totalColumns }).map((_, colIndex) => {
+                              const span = checkpointSpans[cp.id];
+                              let isTargetCell = false;
+                              let isFirstCell = false;
+                              let isLastCell = false;
+                              
+                              if (span) {
+                                const blocksToFill = Math.max(1, span.end - span.start);
+                                isTargetCell = colIndex >= span.start && colIndex < span.start + blocksToFill;
+                                isFirstCell = isTargetCell && colIndex === span.start;
+                                isLastCell = isTargetCell && colIndex === span.start + blocksToFill - 1;
+                              }
+                              
+                              const isToday = colIndex === currentWeekIndex;
+                              let bgColor = 'var(--primary)';
+                              let statusText = 'Pending';
+                              
+                              if (cp.status === 'completed') {
+                                bgColor = 'var(--success)';
+                                statusText = 'Completed';
+                              } else if (cp.status === 'in-review') {
+                                bgColor = 'var(--warning)';
+                                statusText = 'In Review';
+                              } else if (cp.status === 'needs-revision') {
+                                bgColor = '#F97316'; // Orange-500 instead of Red
+                                statusText = 'Needs Revision';
+                              } else if (cp.status === 'rejected') {
+                                bgColor = 'var(--danger)'; // Red for rejected
+                                statusText = 'Rejected';
+                              } else if (cp.status === 'locked') {
+                                statusText = 'Locked';
+                              }
+                              
+                              const tooltipText = `${cp.label}: ${statusText}`;
+                              
+                              return (
+                                <div key={`cell-${colIndex}`} className={isToday ? 'today-highlight-cell' : ''} style={{ 
+                                  borderBottom: '1px solid var(--border)', 
+                                  borderRight: '1px dashed var(--border)',
+                                  background: isToday ? 'transparent' : 'white',
+                                  padding: '4px 0' // Add padding so it looks like a sleek horizontal bar
+                                }}>
+                                  {isTargetCell && (
+                                    <div className="gantt-bar-segment" title={tooltipText} style={{ 
+                                      height: '100%', 
+                                      width: '100%', 
+                                      background: bgColor,
+                                      minHeight: '20px',
+                                      opacity: cp.status === 'locked' ? 0.3 : 1,
+                                      borderTopLeftRadius: isFirstCell ? '6px' : '0',
+                                      borderBottomLeftRadius: isFirstCell ? '6px' : '0',
+                                      borderTopRightRadius: isLastCell ? '6px' : '0',
+                                      borderBottomRightRadius: isLastCell ? '6px' : '0',
+                                      boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.2)'
+                                    }} />
+                                  )}
+                                </div>
+                              );
+                            })}
+                         </div>
+                       );
+                     });
+
+                     currentWeekOffset += stageDuration;
+                     return [stageRow, ...checkpointRows];
+                   });
+                })()}
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="milestones-bottom-grid" aria-label="Milestone actions and updates">

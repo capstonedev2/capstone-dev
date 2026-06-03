@@ -1,3 +1,5 @@
+import { logoutWithApi } from '@/lib/client-auth';
+
 export type UserRole =
   | 'admin'
   | 'system_admin'
@@ -711,7 +713,7 @@ export function getStoredUser() {
   return { ...publicUser };
 }
 
-export function logout() {
+export async function logout() {
   memoryStoredUser = null;
   removeStoredValue(SESSION_STORAGE_KEY);
   removeStoredValue(LEGACY_SESSION_STORAGE_KEY);
@@ -719,6 +721,8 @@ export function logout() {
   removeSessionValue(LEGACY_SESSION_STORAGE_KEY);
   removeSessionValue('capstoneAuthRememberMe');
   removeCookieValue(SERVER_SESSION_COOKIE_KEY);
+  
+  await logoutWithApi();
 }
 
 export async function loginWithMockApi(payload: LoginPayload) {

@@ -70,7 +70,10 @@ export const ModelName = {
   Evaluation: 'Evaluation',
   Notification: 'Notification',
   AuditLog: 'AuditLog',
-  BrandingAsset: 'BrandingAsset'
+  BrandingAsset: 'BrandingAsset',
+  IndustryPartner: 'IndustryPartner',
+  IndustryProject: 'IndustryProject',
+  ImpactFeedback: 'ImpactFeedback'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -93,6 +96,7 @@ export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   passwordHash: 'passwordHash',
+  supabaseId: 'supabaseId',
   googleSub: 'googleSub',
   name: 'name',
   firstName: 'firstName',
@@ -313,6 +317,8 @@ export const MilestoneCheckpointScalarFieldEnum = {
   latestFeedback: 'latestFeedback',
   latestFeedbackBy: 'latestFeedbackBy',
   latestFeedbackAt: 'latestFeedbackAt',
+  studentStartDate: 'studentStartDate',
+  studentTargetDate: 'studentTargetDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -452,6 +458,51 @@ export const BrandingAssetScalarFieldEnum = {
 } as const
 
 export type BrandingAssetScalarFieldEnum = (typeof BrandingAssetScalarFieldEnum)[keyof typeof BrandingAssetScalarFieldEnum]
+
+
+export const IndustryPartnerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  contactPerson: 'contactPerson',
+  email: 'email',
+  contactNumber: 'contactNumber',
+  address: 'address',
+  partnerType: 'partnerType',
+  website: 'website',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type IndustryPartnerScalarFieldEnum = (typeof IndustryPartnerScalarFieldEnum)[keyof typeof IndustryPartnerScalarFieldEnum]
+
+
+export const IndustryProjectScalarFieldEnum = {
+  id: 'id',
+  partnerId: 'partnerId',
+  projectId: 'projectId',
+  status: 'status',
+  moaUrl: 'moaUrl',
+  deploymentDate: 'deploymentDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type IndustryProjectScalarFieldEnum = (typeof IndustryProjectScalarFieldEnum)[keyof typeof IndustryProjectScalarFieldEnum]
+
+
+export const ImpactFeedbackScalarFieldEnum = {
+  id: 'id',
+  industryProjectId: 'industryProjectId',
+  partnerId: 'partnerId',
+  rating: 'rating',
+  feedback: 'feedback',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ImpactFeedbackScalarFieldEnum = (typeof ImpactFeedbackScalarFieldEnum)[keyof typeof ImpactFeedbackScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -68,7 +68,7 @@ export function LibraryProjectDetails() {
   const searchParams = useSearchParams();
   const projectId = Number(searchParams.get('id') ?? '1');
   const project = getProjectById(Number.isNaN(projectId) ? 1 : projectId);
-  const [saved, setSaved] = useState(Boolean(project.savedByDefault));
+  const [saved, setSaved] = useState(false);
   const [activeResource, setActiveResource] = useState<ResourceItem | null>(null);
 
   const relatedProjects = buildRelatedProjects(project.id, project.relatedStudyIds);

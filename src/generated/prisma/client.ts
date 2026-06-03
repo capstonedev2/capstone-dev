@@ -141,3 +141,18 @@ export type AuditLog = Prisma.AuditLogModel
  * 
  */
 export type BrandingAsset = Prisma.BrandingAssetModel
+/**
+ * Model IndustryPartner
+ * 
+ */
+export type IndustryPartner = Prisma.IndustryPartnerModel
+/**
+ * Model IndustryProject
+ * 
+ */
+export type IndustryProject = Prisma.IndustryProjectModel
+/**
+ * Model ImpactFeedback
+ * 
+ */
+export type ImpactFeedback = Prisma.ImpactFeedbackModel
