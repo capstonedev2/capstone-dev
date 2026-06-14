@@ -367,6 +367,13 @@ model Project {
   owner                 User?         @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   adviserId             String?
   adviser               User?         @relation("ProjectAdviser", fields: [adviserId], references: [id], onDelete: SetNull)
+  
+  // Proposal feedback integrations
+  sdgs                  String[]      @default([])
+  awards                String[]      @default([])
+  isPublished           Boolean       @default(false)
+  archivedAt            DateTime?
+
   repositoryPublishedAt DateTime?
   transferReadyAt       DateTime?
   createdAt             DateTime      @default(now())
@@ -460,6 +467,7 @@ model Submission {
   title         String
   description   String?
   status        SubmissionStatus     @default(SUBMITTED)
+  rejectionReason String?
   version       Int                  @default(1)
   submittedAt   DateTime             @default(now())
   reviewedAt    DateTime?

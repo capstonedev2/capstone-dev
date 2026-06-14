@@ -69,32 +69,46 @@ export function ProgramHeadTransfer() {
   return (
     <ProgramHeadShell activeNav="transfer" title="Technology Transfer Summary" description="Track where studies were implemented, who benefited, and which outputs are ready for adoption." notificationCount={2}>
       {/* Filter Bar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-8">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Cluster</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" defaultValue="BSIT Cluster A">
-              <option>BSIT Cluster A</option><option>All Program Clusters</option>
-            </select>
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 p-5 mb-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#0F3DDE]/5 to-[#081B4B]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="flex flex-wrap items-end gap-5 relative z-10">
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Cluster</label>
+            <div className="relative">
+              <i className="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="BSIT Cluster A">
+                <option>BSIT Cluster A</option><option>All Program Clusters</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Transfer Status</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-              <option value="All">All Statuses</option>
-              <option value="Ready for Transfer">Ready for Transfer</option>
-              <option value="Proposed">Proposed</option>
-              <option value="Deployed">Deployed</option>
-              <option value="In Use">In Use</option>
-            </select>
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Transfer Status</label>
+            <div className="relative">
+              <i className="fas fa-exchange-alt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value="All">All Statuses</option>
+                <option value="Ready for Transfer">Ready for Transfer</option>
+                <option value="Proposed">Proposed</option>
+                <option value="Deployed">Deployed</option>
+                <option value="In Use">In Use</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Beneficiary</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" defaultValue="All">
-              <option value="All">All Types</option><option>School</option><option>LGU</option><option>SME</option><option>Community</option>
-            </select>
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Beneficiary</label>
+            <div className="relative">
+              <i className="fas fa-hands-helping absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="All">
+                <option value="All">All Types</option><option>School</option><option>LGU</option><option>SME</option><option>Community</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <button onClick={() => setImpactOpen(true)} className="h-11 px-6 bg-[#003a8f] text-white rounded-xl text-sm font-bold shadow-md shadow-blue-900/20 hover:bg-[#002c6b] hover:-translate-y-0.5 transition-all flex items-center gap-2">
-            <i className="fas fa-chart-line"></i> Impact Report
+          <button onClick={() => setImpactOpen(true)} className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-black shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+            <i className="fas fa-chart-line group-hover:scale-110 transition-transform"></i> Impact Report
           </button>
         </div>
       </div>
@@ -110,28 +124,32 @@ export function ProgramHeadTransfer() {
       {/* Pipeline Chart + Checklist */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Donut Chart */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-chart-pie text-[#003a8f]"></i> Transfer Pipeline</h3>
-            <p className="text-sm text-slate-500 m-0 mt-1">Distribution of projects by transfer stage.</p>
+        <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 flex flex-col relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="p-5 border-b border-slate-100/80 flex justify-between items-center relative z-10">
+            <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+              <i className="fas fa-chart-pie text-[#0F3DDE]/70"></i> Transfer Pipeline
+            </h3>
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Distribution</p>
           </div>
-          <div className="p-6 flex flex-col items-center gap-4">
-            <div className="w-full min-w-0 h-56">
+          <div className="p-6 flex flex-col items-center gap-6 relative z-10">
+            <div className="w-full min-w-0 h-56 relative">
               <ChartResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={chartData} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={5} dataKey="value" stroke="none">
-                    {chartData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                  <Pie data={chartData} cx="50%" cy="50%" innerRadius={65} outerRadius={90} paddingAngle={6} dataKey="value" stroke="none">
+                    {chartData.map((entry, i) => <Cell key={i} fill={entry.color} className="hover:opacity-80 transition-opacity outline-none" style={{ filter: `drop-shadow(0px 4px 6px ${entry.color}40)` }} />)}
                   </Pie>
-                  <RechartsTooltip contentStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                  <RechartsTooltip contentStyle={{ borderRadius: '12px', border: '1px solid rgba(226,232,240,0.8)', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }} itemStyle={{ fontWeight: '900', color: '#081B4B' }} />
                 </PieChart>
               </ChartResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-white/20 rounded-full blur-[2px] scale-50 opacity-50"></div>
             </div>
-            <div className="w-full grid grid-cols-2 gap-2">
+            <div className="w-full grid grid-cols-2 gap-3">
               {chartData.map(item => (
-                <div key={item.name} className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></span>
-                  <span className="text-xs font-bold text-slate-600">{item.name}</span>
-                  <span className="ml-auto font-extrabold text-sm" style={{ color: item.color }}>{item.value}</span>
+                <div key={item.name} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50/80 ring-1 ring-slate-100 group/item hover:bg-white hover:ring-slate-200 hover:shadow-sm transition-all duration-300">
+                  <span className="w-3.5 h-3.5 rounded-full ring-2 ring-offset-1 ring-white shadow-sm" style={{ backgroundColor: item.color }}></span>
+                  <span className="text-xs font-bold text-slate-600 group-hover/item:text-[#081B4B] transition-colors">{item.name}</span>
+                  <span className="ml-auto font-black text-base" style={{ color: item.color }}>{item.value}</span>
                 </div>
               ))}
             </div>
@@ -140,40 +158,47 @@ export function ProgramHeadTransfer() {
 
         {/* Oversight Checklist + Footprint */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-clipboard-check text-emerald-500"></i> Oversight Checklist</h3>
+          <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
+              <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+                <i className="fas fa-clipboard-check text-emerald-500/90"></i> Oversight Checklist
+              </h3>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 relative z-10">
               {OVERSIGHT_CHECKLIST.map(item => (
-                <div key={item.label} className="flex items-center gap-4">
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm shadow-sm ${item.pct === 100 ? 'bg-emerald-50 text-emerald-600' : item.pct >= 75 ? 'bg-blue-50 text-[#003a8f]' : 'bg-amber-50 text-amber-600'}`}>
+                <div key={item.label} className="flex items-center gap-4 group/list">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm shadow-sm ring-1 transition-transform duration-300 group-hover/list:scale-105 ${item.pct === 100 ? 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 text-emerald-600 ring-emerald-200' : item.pct >= 75 ? 'bg-gradient-to-br from-blue-50 to-blue-100/50 text-[#0F3DDE] ring-blue-200' : 'bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-600 ring-amber-200'}`}>
                     <i className={`fas ${item.icon}`}></i>
                   </div>
                   <div className="flex-1">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-slate-700">{item.label}</span>
-                      <span className="font-extrabold text-slate-800">{item.value}</span>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="font-bold text-slate-700 group-hover/list:text-[#081B4B] transition-colors">{item.label}</span>
+                      <span className="font-black text-[#081B4B]">{item.value}</span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${item.pct === 100 ? 'bg-emerald-500' : item.pct >= 75 ? 'bg-[#003a8f]' : 'bg-amber-500'}`} style={{ width: `${item.pct}%` }} />
+                    <div className="w-full h-2 bg-slate-100 shadow-inner rounded-full overflow-hidden ring-1 ring-inset ring-slate-200/50">
+                      <div className={`h-full rounded-full transition-all duration-1000 ${item.pct === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : item.pct >= 75 ? 'bg-gradient-to-r from-[#0F3DDE] to-blue-500' : 'bg-gradient-to-r from-amber-500 to-amber-400'}`} style={{ width: `${item.pct}%` }} />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-map-marked-alt text-[#003a8f]"></i> Implementation Footprint</h3>
+          <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
+              <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+                <i className="fas fa-map-marked-alt text-[#0F3DDE]/90"></i> Implementation Footprint
+              </h3>
             </div>
-            <div className="p-6 grid grid-cols-2 gap-3">
+            <div className="p-6 grid grid-cols-2 gap-4 relative z-10">
               {FOOTPRINT.map(f => (
-                <div key={f.label} className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all bg-white">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: f.color }}>
+                <div key={f.label} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100/80 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-[#0F3DDE]/30 transition-all duration-300 group/card relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-0 group-hover/card:opacity-10 transition-opacity duration-300" style={{ backgroundImage: `radial-gradient(circle at top right, ${f.color}, transparent 70%)` }}></div>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm relative z-10 group-hover/card:scale-105 transition-transform duration-300" style={{ backgroundColor: f.color }}>
                     <i className={`fas ${f.icon}`}></i>
                   </div>
-                  <span className="text-sm font-bold text-slate-700">{f.label}</span>
+                  <span className="text-sm font-bold text-[#081B4B] relative z-10">{f.label}</span>
                 </div>
               ))}
             </div>

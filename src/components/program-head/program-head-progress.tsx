@@ -95,44 +95,72 @@ export function ProgramHeadProgress() {
 
   return (
     <ProgramHeadShell activeNav="progress" title="Progress Monitoring" description="Track project milestones and identify at-risk projects" notificationCount={3}>
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-8">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Department</label>
-            <select
-              className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors"
-              value={departmentFilter}
-              onChange={(event) => {
-                setDepartmentFilter(event.target.value);
-                setAdviserFilter('All Advisers');
-              }}
-            >
-              <option>All Departments</option>
-              {PROGRAM_HEAD_DEPARTMENTS.map((department) => (
-                <option key={department.code} value={department.code}>{department.code}</option>
-              ))}
-            </select>
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 p-5 mb-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-amber-500/5 to-orange-400/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="flex flex-wrap items-end gap-5 relative z-10">
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Department</label>
+            <div className="relative">
+              <i className="fas fa-building absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select
+                className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner"
+                value={departmentFilter}
+                onChange={(event) => {
+                  setDepartmentFilter(event.target.value);
+                  setAdviserFilter('All Advisers');
+                }}
+              >
+                <option>All Departments</option>
+                {PROGRAM_HEAD_DEPARTMENTS.map((department) => (
+                  <option key={department.code} value={department.code}>{department.code}</option>
+                ))}
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Risk Level</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" value={riskFilter} onChange={(event) => setRiskFilter(event.target.value)}>
-              <option value="All">All Projects</option>
-              <option value="On Track">On Track</option>
-              <option value="At Risk">At Risk</option>
-              <option value="Behind Schedule">Behind Schedule</option>
-            </select>
+          
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Risk Level</label>
+            <div className="relative">
+              <i className="fas fa-shield-alt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select 
+                className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" 
+                value={riskFilter} 
+                onChange={(event) => setRiskFilter(event.target.value)}
+              >
+                <option value="All">All Projects</option>
+                <option value="On Track">On Track</option>
+                <option value="At Risk">At Risk</option>
+                <option value="Behind Schedule">Behind Schedule</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Adviser</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" value={adviserFilter} onChange={(event) => setAdviserFilter(event.target.value)}>
-              <option>All Advisers</option>
-              {adviserOptions.map((adviser) => (
-                <option key={adviser}>{adviser}</option>
-              ))}
-            </select>
+          
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Adviser</label>
+            <div className="relative">
+              <i className="fas fa-user-tie absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select 
+                className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" 
+                value={adviserFilter} 
+                onChange={(event) => setAdviserFilter(event.target.value)}
+              >
+                <option>All Advisers</option>
+                {adviserOptions.map((adviser) => (
+                  <option key={adviser}>{adviser}</option>
+                ))}
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <button onClick={() => setRiskReportOpen(true)} className="h-11 px-6 bg-amber-500 text-white rounded-xl text-sm font-bold shadow-md hover:bg-amber-600 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-            <i className="fas fa-exclamation-triangle"></i> Risk Report
+          
+          <button 
+            onClick={() => setRiskReportOpen(true)} 
+            className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-amber-500 to-orange-400 text-white rounded-xl text-sm font-black shadow-[0_8px_20px_rgba(245,158,11,0.2)] hover:shadow-[0_12px_25px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+            <i className="fas fa-exclamation-triangle group-hover:scale-110 transition-transform"></i> Risk Report
           </button>
         </div>
       </div>

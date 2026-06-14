@@ -1,6 +1,6 @@
 export type PortalRole = 'student' | 'adviser' | 'admin';
 
-export type ProjectFileStatus = 'approved' | 'pending' | 'under_review' | 'revision';
+export type ProjectFileStatus = 'approved' | 'pending' | 'under_review' | 'revision' | 'rejected';
 
 export type ProjectFileTag = 'Draft' | 'Final' | 'Revision';
 
@@ -38,6 +38,7 @@ export type ProjectFileRecord = {
   uploadedAt: string;
   reviewedBy?: string;
   reviewedAt?: string;
+  rejectionReason?: string | null;
   latestReviewComment?: {
     id: string;
     body: string;
@@ -123,6 +124,10 @@ export function normalizeProjectFileStatus(value: string): ProjectFileStatus {
     return 'revision';
   }
 
+  if (normalized.includes('rejected') || normalized.includes('declined')) {
+    return 'rejected';
+  }
+
   return 'pending';
 }
 
@@ -134,6 +139,8 @@ export function formatProjectFileStatus(status: ProjectFileStatus) {
       return 'Under Adviser Review';
     case 'revision':
       return 'Needs Revision';
+    case 'rejected':
+      return 'Declined';
     default:
       return 'Pending Review';
   }
@@ -147,6 +154,8 @@ export function formatProjectFileAdviserStatus(status: ProjectFileStatus) {
       return 'Under Adviser Review';
     case 'revision':
       return 'Revision Requested';
+    case 'rejected':
+      return 'Declined by Adviser';
     default:
       return 'Sent to Adviser';
   }
@@ -159,6 +168,7 @@ export function getProjectFileTone(status: ProjectFileStatus): 'success' | 'warn
     case 'under_review':
       return 'info';
     case 'revision':
+    case 'rejected':
       return 'danger';
     default:
       return 'warning';
@@ -172,6 +182,7 @@ export function getProjectFileTagFromStatus(status: ProjectFileStatus): ProjectF
     case 'under_review':
       return 'Revision';
     case 'revision':
+    case 'rejected':
       return 'Revision';
     default:
       return 'Draft';
@@ -211,10 +222,11 @@ export function compareProjectFileVersions(
 
 export function sortProjectFiles(files: ProjectFileRecord[], sortBy: ProjectFileSortOption) {
   const statusOrder: Record<ProjectFileStatus, number> = {
-    revision: 0,
-    pending: 1,
-    under_review: 2,
-    approved: 3
+    rejected: 0,
+    revision: 1,
+    pending: 2,
+    under_review: 3,
+    approved: 4
   };
 
   return [...files].sort((left, right) => {

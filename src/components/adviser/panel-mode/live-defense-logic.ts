@@ -1,6 +1,7 @@
 export type DefenseArtifact = {
   label: string;
   status: 'Ready' | 'Missing' | 'For review';
+  url?: string;
 };
 
 export type ScheduleItem = {
@@ -106,30 +107,26 @@ export const MOCK_SCHEDULE: ScheduleItem[] = [
 ];
 
 export const RUBRIC = [
-  {
-    id: 'presentation',
-    label: 'Presentation & Communication',
-    desc: 'Clarity, confidence, pacing, and quality of visual support.',
-    weight: 10,
-    anchor: 'Narrative and response quality'
-  },
-  {
-    id: 'technical',
-    label: 'Technical Execution',
-    desc: 'Architecture, implementation quality, testing evidence, and working demo.',
-    weight: 10,
-    anchor: 'Build quality and validation'
-  },
-  {
-    id: 'innovation',
-    label: 'Innovation & Impact',
-    desc: 'Originality, problem fit, practical value, and feasibility of adoption.',
-    weight: 10,
-    anchor: 'Contribution and usefulness'
-  }
+  { id: 'manuscript_initial', label: 'Initial Pages', desc: 'Completeness and formatting of preliminary pages.', weight: 5, anchor: 'Project Fullblown Manuscript' },
+  { id: 'manuscript_ch1', label: 'Chapter 1', desc: 'Introduction, background, objectives, and scope.', weight: 15, anchor: 'Project Fullblown Manuscript' },
+  { id: 'manuscript_ch2', label: 'Chapter 2', desc: 'Review of related literature and conceptual framework.', weight: 10, anchor: 'Project Fullblown Manuscript' },
+  { id: 'manuscript_ch3', label: 'Chapter 3', desc: 'Methodology, system design, and architecture.', weight: 20, anchor: 'Project Fullblown Manuscript' },
+  { id: 'manuscript_ch4', label: 'Chapter 4', desc: 'Results, discussion, and implementation details.', weight: 25, anchor: 'Project Fullblown Manuscript' },
+  { id: 'manuscript_ch5', label: 'Chapter 5 & Final Pages', desc: 'Conclusion, recommendations, bibliography, and appendices.', weight: 20, anchor: 'Project Fullblown Manuscript' },
+  { id: 'manuscript_mechanics', label: 'Manuscript Mechanics', desc: 'Grammar, citations, and overall formatting.', weight: 5, anchor: 'Project Fullblown Manuscript' },
+  { id: 'output_objectives', label: 'Consistency with Objectives', desc: 'The output should be consistent with the objectives as defined during the proposal stage.', weight: 40, anchor: 'Project Output' },
+  { id: 'output_modules', label: 'Module Delivery', desc: 'All major modules and features defined after the proposal stage are delivered.', weight: 40, anchor: 'Project Output' },
+  { id: 'output_coding', label: 'Coding Style', desc: 'Code quality, maintainability, and standards.', weight: 20, anchor: 'Project Output' }
+];
+
+export const INDIVIDUAL_RUBRIC = [
+  { id: 'oral_mastery', label: 'Mastery of subject matters', desc: 'Demonstrated deep understanding of the project and domain.', weight: 40, anchor: 'Oral Examination' },
+  { id: 'oral_delivery', label: 'Delivery and Presentation of Idea', desc: 'Clarity, pacing, confidence, and professionalism.', weight: 40, anchor: 'Oral Examination' },
+  { id: 'oral_receptiveness', label: 'Ability to answer questions', desc: 'Receptiveness to feedback and ability to defend ideas.', weight: 20, anchor: 'Oral Examination' }
 ];
 
 export const MAX_SCORE = RUBRIC.reduce((a, c) => a + c.weight, 0);
+export const MAX_INDIVIDUAL_SCORE = INDIVIDUAL_RUBRIC.reduce((a, c) => a + c.weight, 0);
 
 export function formatTime(seconds: number) {
   const safeSeconds = Math.max(0, seconds);

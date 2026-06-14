@@ -725,3 +725,43 @@ tbody tr:nth-child(even) td,
 tbody tr:hover td {
   background: var(--color-background-suggestion);
 }
+
+/* Enhancements for Sidebar Dropdown Submenus */
+.sidebar-submenu {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.25rem 0 0.5rem 0;
+}
+
+.sidebar-submenu .sidebar-link {
+    min-height: 2.4rem;
+    padding: 0.5rem 1rem 0.5rem 3rem !important;
+    margin: 0 0.85rem !important;
+    border-radius: 0.75rem;
+    font-size: 0.82rem;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: var(--color-text-secondary);
+    opacity: 0.85;
+}
+
+.sidebar-submenu .sidebar-link::before {
+    display: none !important;
+}
+
+.sidebar-submenu .sidebar-link:hover {
+    background: color-mix(in srgb, var(--color-primary) 4%, transparent) !important;
+    opacity: 1;
+}
+
+.sidebar-submenu .sidebar-link.is-active {
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent) !important;
+    color: var(--color-primary) !important;
+    font-weight: 700;
+    opacity: 1;
+}
+
+.sidebar-submenu .sidebar-link.is-active .sidebar-link-icon {
+    color: var(--color-primary) !important;
+}

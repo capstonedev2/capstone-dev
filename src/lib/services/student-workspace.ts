@@ -174,6 +174,7 @@ export type StudentDashboardData = {
       email: string;
       isLeader: boolean;
       isCurrent: boolean;
+      profileImage?: string | null;
     }>;
   };
   project: {
@@ -605,7 +606,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               where: { groupId: group.id, isActive: true },
               select: {
                 id: true, userId: true, role: true, createdAt: true, updatedAt: true,
-                user: { select: { id: true, name: true, studentId: true, email: true } }
+                user: { select: { id: true, name: true, studentId: true, email: true, profileImage: true } }
               },
               take: 50
             }).catch(err => {
@@ -650,6 +651,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                 email: gm.user.email || '',
                 isLeader: gm.role === 'LEADER',
                 isCurrent: gm.user.name === userName,
+                profileImage: gm.user.profileImage || null,
               }));
               data.group.memberCount = groupMembers.length;
             } else if (group.students && group.students.length > 0 && data.group) {
@@ -659,7 +661,8 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                   id: true,
                   name: true,
                   studentId: true,
-                  email: true
+                  email: true,
+                  profileImage: true
                 }
               });
 
@@ -679,6 +682,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                   email: user?.email || '',
                   isLeader: studentName === group.leader,
                   isCurrent: studentName === userName,
+                  profileImage: user?.profileImage || null,
                 };
               });
               data.group.memberCount = group.students.length;

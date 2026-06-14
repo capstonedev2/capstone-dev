@@ -104,11 +104,37 @@ export async function POST(request: Request) {
       });
 
       if (createError) {
-        console.error('Failed to auto-migrate user to Supabase Auth', createError);
-        throw new HttpError('System error during account migration.', 500);
-      }
-
-      if (newUser.user) {
+        if (createError.code === 'email_exists' || createError.message.includes('already been registered')) {
+          // The user already exists in Supabase (likely from a partial Google Auth flow)
+          // We need to find them, link the accounts, and sync the password
+          const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+          const existingUser = listData?.users?.find(u => u.email === user.email);
+          
+          if (existingUser) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { supabaseId: existingUser.id }
+            });
+            
+            // Sync password so they can log in via email/password in the future
+            await supabaseAdmin.auth.admin.updateUserById(existingUser.id, { password });
+            
+            // Sign in
+            await supabase.auth.signInWithPassword({
+              email: user.email,
+              password,
+            });
+            
+            isLegacyLoginSuccessful = false; // Bypass the throw later
+          } else {
+            console.error('Failed to auto-migrate: email exists but user not found in list', createError);
+            throw new HttpError('System error during account migration.', 500);
+          }
+        } else {
+          console.error('Failed to auto-migrate user to Supabase Auth', createError);
+          throw new HttpError('System error during account migration.', 500);
+        }
+      } else if (newUser.user) {
         await prisma.user.update({
           where: { id: user.id },
           data: { supabaseId: newUser.user.id }

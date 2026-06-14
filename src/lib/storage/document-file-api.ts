@@ -38,6 +38,7 @@ type DocumentFilePayloadInput = UploadedFile & {
     version: number;
     submittedAt: Date;
     reviewedAt?: Date | null;
+    rejectionReason?: string | null;
     comments?: Array<{
       id: string;
       body: string;
@@ -172,6 +173,7 @@ export function toDocumentFilePayload(file: DocumentFilePayloadInput, options: D
     submissionVersion: file.submission?.version ?? null,
     submittedAt: file.submission?.submittedAt ?? null,
     reviewedAt: file.submission?.reviewedAt ?? null,
+    rejectionReason: file.submission?.rejectionReason ?? null,
     latestReviewComment: latestComment ? toReviewCommentPayload(latestComment) : null,
     reviewComments: exposedComments.map(toReviewCommentPayload),
     documentCategory: file.documentCategory,

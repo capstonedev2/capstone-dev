@@ -195,7 +195,30 @@
     }
   }
 
-  .animate-page-transition {
-    animation: page-transition 0.4s ease-out forwards;
+    .animate-page-transition {
+      animation: page-transition 0.4s ease-out forwards;
+    }
   }
-}
+
+  @media screen {
+    .print-only {
+      display: none !important;
+    }
+  }
+
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .print-only, .print-only * {
+      visibility: visible;
+    }
+    .print-only {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  }

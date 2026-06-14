@@ -182,7 +182,12 @@ export const FileItem = memo(function FileItem({
           </span>
           <div className="project-files-row-title">
             <strong>{file.fileName}</strong>
-            {file.reviewComments?.length ? (
+            {file.status === 'rejected' && file.rejectionReason ? (
+              <p className="mt-1 text-xs font-bold text-red-600">
+                <i className="fas fa-ban mr-1" aria-hidden="true" />
+                {file.rejectionReason}
+              </p>
+            ) : file.reviewComments?.length ? (
               <small className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
                 <i className="fas fa-comment-dots" aria-hidden="true" />
                 {file.reviewComments.length} adviser comment{file.reviewComments.length === 1 ? '' : 's'}

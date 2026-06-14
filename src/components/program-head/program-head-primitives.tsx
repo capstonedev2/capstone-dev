@@ -56,19 +56,20 @@ export function ProgramHeadStatCard({
   className
 }: ProgramHeadStatCardProps) {
   return (
-    <article className={`relative overflow-hidden rounded-2xl bg-white p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 group ${className || ''}`}>
-      <div className="absolute -right-6 -top-6 w-28 h-28 bg-gradient-to-br from-[#003a8f]/5 to-[#003a8f]/10 rounded-full blur-2xl group-hover:bg-[#003a8f]/15 transition-all duration-500"></div>
+    <article className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50/80 to-slate-100/50 p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] ring-1 ring-blue-100/80 backdrop-blur-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgba(15,61,222,0.08)] hover:-translate-y-1 group ${className || ''}`}>
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0F3DDE] to-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute -right-6 -top-6 w-32 h-32 bg-gradient-to-br from-[#0F3DDE]/10 to-[#0F3DDE]/15 rounded-full blur-2xl group-hover:bg-[#0F3DDE]/20 transition-all duration-500"></div>
       
       <div className="flex justify-between items-start relative z-10 mb-4">
         <h3 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">{title}</h3>
         {icon && (
-          <div className="w-10 h-10 rounded-xl bg-blue-50/80 text-[#003a8f] flex items-center justify-center text-lg shadow-sm ring-1 ring-[#003a8f]/5 transition-transform duration-300 group-hover:scale-110">
+          <div className="w-10 h-10 rounded-xl bg-blue-50/80 text-[#0F3DDE] flex items-center justify-center text-lg shadow-sm ring-1 ring-[#0F3DDE]/5 transition-transform duration-300 group-hover:scale-110">
             <i className={icon}></i>
           </div>
         )}
       </div>
       
-      <h2 className="relative z-10 text-3xl font-extrabold text-slate-800 mb-1 tracking-tight">{value}</h2>
+      <h2 className="relative z-10 text-3xl font-extrabold text-[#081B4B] mb-1 tracking-tight">{value}</h2>
       
       {note && (
         <p className="relative z-10 text-xs font-semibold text-slate-500 mt-2 flex items-center gap-1.5">

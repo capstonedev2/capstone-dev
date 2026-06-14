@@ -206,23 +206,17 @@ export function ProgramHeadShell({
         onClick={closeSidebar}
       />
 
-      <main className="student-global-main">
-        <div className="student-global-content">
-          <header className="top-nav" aria-labelledby="ph-page-title">
-            <div className="top-nav-leading">
-              <div className="page-title">
-                <div className="page-title-context">
-                  <span className="page-kicker">Program Head Portal</span>
-                  <span className="page-breadcrumb" aria-hidden="true">
-                    <i className="fas fa-angle-right" />
-                    <span>{title}</span>
-                  </span>
-                </div>
-                <h1 id="ph-page-title">{title}</h1>
-                <p>{description}</p>
-              </div>
-            </div>
-          </header>
+      <main className="student-global-main relative bg-slate-50/80">
+        {/* Decorative Light Background for Glassmorphism */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#0F3DDE]/[0.05] to-indigo-500/[0.03] blur-[80px]"></div>
+          <div className="absolute top-[20%] -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-500/[0.03] to-[#0F3DDE]/[0.03] blur-[80px]"></div>
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-overlay"></div>
+        </div>
+
+        <div className="student-global-content relative z-10">
+
           
           <div className="page-body">
             {children}

@@ -61,107 +61,146 @@ export function ProgramHeadDashboard() {
       description="IT Department | Monitoring and accreditation"
       notificationCount={3}
     >
-      <div className="flex justify-end gap-3 mb-8">
-        <button className="px-5 py-2.5 bg-white border border-slate-200 text-[#081B4B] font-bold rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all">
-          <i className="fas fa-calendar-alt mr-2 text-[#0F3DDE]"></i> View Schedule
-        </button>
-        <button className="px-5 py-2.5 bg-[#0F3DDE] text-white font-bold rounded-xl shadow-md shadow-blue-900/20 hover:bg-[#0c31b3] hover:-translate-y-0.5 transition-all">
-          <i className="fas fa-file-signature mr-2"></i> Endorse Transfers
-        </button>
+      {/* Dashboard Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#081B4B] to-[#0F3DDE] rounded-3xl p-8 mb-8 shadow-[0_8px_30px_rgba(15,61,222,0.15)] text-white">
+        {/* Decorative Background Elements */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/4 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <span className="text-xs font-bold text-blue-200 uppercase tracking-widest">Department Operations Center</span>
+            </div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">
+              Department Overview
+            </h1>
+            <p className="text-sm text-blue-100/80 font-medium max-w-xl leading-relaxed">
+              Monitor active project progress, evaluate technology transfer readiness, and manage student performance across the entire IT department.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 shrink-0">
+            <button className="group relative overflow-hidden px-5 py-2.5 bg-white/10 backdrop-blur-md ring-1 ring-white/20 text-white font-bold rounded-xl hover:bg-white/20 transition-all duration-300 flex items-center">
+              <i className="fas fa-calendar-alt mr-2.5 group-hover:scale-110 transition-transform"></i> View Schedule
+            </button>
+            <button className="group relative overflow-hidden px-6 py-2.5 bg-white text-[#0F3DDE] font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex items-center">
+              <i className="fas fa-file-signature mr-2.5 group-hover:scale-110 transition-transform"></i> Endorse Transfers
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#0F3DDE] flex items-center justify-center text-xl">
+        <div className="group relative bg-gradient-to-b from-blue-50/90 to-blue-50/40 backdrop-blur-xl ring-1 ring-blue-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.08)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0F3DDE] to-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0F3DDE]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+          <div className="relative flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 text-[#0F3DDE] flex items-center justify-center text-xl shadow-sm ring-1 ring-blue-100/50 group-hover:scale-110 transition-transform duration-300">
               <i className="fas fa-folder-open"></i>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">
+            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 bg-emerald-50 ring-1 ring-inset ring-emerald-200/50 px-2 py-1 rounded-md shadow-sm">
               <i className="fas fa-arrow-up"></i> 12%
             </span>
           </div>
-          <h3 className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-1">Tracked Projects</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#081B4B]">{itAnalytics.totalProjects}</span>
-            <span className="text-sm font-semibold text-slate-400">Total</span>
+          <h3 className="relative text-slate-500 font-extrabold text-[11px] uppercase tracking-[0.15em] mb-1">Tracked Projects</h3>
+          <div className="relative flex items-baseline gap-2">
+            <span className="text-3xl font-black text-[#081B4B] tracking-tight">{itAnalytics.totalProjects}</span>
+            <span className="text-sm font-bold text-slate-400">Total</span>
           </div>
-          <div className="mt-4 flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-[#0F3DDE] w-3/4 rounded-full"></div>
+          <div className="relative mt-4 flex items-center gap-2">
+            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div className="h-full bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] w-3/4 rounded-full relative overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-[shimmer_2s_infinite]"></div>
+              </div>
             </div>
             <span className="text-xs font-bold text-slate-500">{itAnalytics.activeProjects} active</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+        <div className="group relative bg-gradient-to-b from-blue-50/90 to-blue-50/40 backdrop-blur-xl ring-1 ring-blue-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.08)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0F3DDE] to-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0F3DDE]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+          <div className="relative flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 text-[#0F3DDE] flex items-center justify-center text-xl shadow-sm ring-1 ring-blue-100/50 group-hover:scale-110 transition-transform duration-300">
               <i className="fas fa-chart-line"></i>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">
+            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-700 bg-blue-50 ring-1 ring-inset ring-blue-200/50 px-2 py-1 rounded-md shadow-sm">
               <i className="fas fa-arrow-up"></i> 5%
             </span>
           </div>
-          <h3 className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-1">Completion Rate</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#081B4B]">{itAnalytics.completionRate}%</span>
+          <h3 className="relative text-slate-500 font-extrabold text-[11px] uppercase tracking-[0.15em] mb-1">Completion Rate</h3>
+          <div className="relative flex items-baseline gap-2">
+            <span className="text-3xl font-black text-[#081B4B] tracking-tight">{itAnalytics.completionRate}%</span>
           </div>
-          <div className="mt-4 flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${itAnalytics.completionRate}%` }}></div>
+          <div className="relative mt-4 flex items-center gap-2">
+            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div className="h-full bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] rounded-full transition-all duration-1000 relative overflow-hidden" style={{ width: `${itAnalytics.completionRate}%` }}>
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-[shimmer_2.5s_infinite]"></div>
+              </div>
             </div>
             <span className="text-xs font-bold text-slate-500">{itAnalytics.completedProjects} done</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl">
+        <div className="group relative bg-gradient-to-b from-blue-50/90 to-blue-50/40 backdrop-blur-xl ring-1 ring-blue-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.08)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0F3DDE] to-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0F3DDE]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+          <div className="relative flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 text-[#0F3DDE] flex items-center justify-center text-xl shadow-sm ring-1 ring-blue-100/50 group-hover:scale-110 transition-transform duration-300">
               <i className="fas fa-tasks"></i>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md">
+            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-700 bg-blue-50 ring-1 ring-inset ring-blue-200/50 px-2 py-1 rounded-md shadow-sm">
               <i className="fas fa-minus"></i> 0%
             </span>
           </div>
-          <h3 className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-1">Intervention Queue</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#081B4B]">{itAnalytics.interventionQueue.length}</span>
-            <span className="text-sm font-semibold text-slate-400">Items</span>
+          <h3 className="relative text-slate-500 font-extrabold text-[11px] uppercase tracking-[0.15em] mb-1">Intervention Queue</h3>
+          <div className="relative flex items-baseline gap-2">
+            <span className="text-3xl font-black text-[#081B4B] tracking-tight">{itAnalytics.interventionQueue.length}</span>
+            <span className="text-sm font-bold text-slate-400">Items</span>
           </div>
-          <div className="mt-4 flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-amber-500 rounded-full w-1/3"></div>
+          <div className="relative mt-4 flex items-center gap-2">
+            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div className="h-full bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] rounded-full w-1/3 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-[shimmer_2.2s_infinite]"></div>
+              </div>
             </div>
             <span className="text-xs font-bold text-slate-500">{itAnalytics.behindScheduleProjects} urgent</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-[#8B5CF6] flex items-center justify-center text-xl">
+        <div className="group relative bg-gradient-to-b from-blue-50/90 to-blue-50/40 backdrop-blur-xl ring-1 ring-blue-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.08)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0F3DDE] to-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0F3DDE]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+          <div className="relative flex justify-between items-start mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 text-[#0F3DDE] flex items-center justify-center text-xl shadow-sm ring-1 ring-blue-100/50 group-hover:scale-110 transition-transform duration-300">
               <i className="fas fa-shield-alt"></i>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">
+            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-700 bg-blue-50 ring-1 ring-inset ring-blue-200/50 px-2 py-1 rounded-md shadow-sm">
               <i className="fas fa-arrow-up"></i> 8%
             </span>
           </div>
-          <h3 className="text-slate-500 font-bold text-sm uppercase tracking-wider mb-1">Evidence Readiness</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#081B4B]">{itAnalytics.evidenceReadiness}%</span>
+          <h3 className="relative text-slate-500 font-extrabold text-[11px] uppercase tracking-[0.15em] mb-1">Evidence Readiness</h3>
+          <div className="relative flex items-baseline gap-2">
+            <span className="text-3xl font-black text-[#081B4B] tracking-tight">{itAnalytics.evidenceReadiness}%</span>
           </div>
-          <div className="mt-4 flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-[#8B5CF6] rounded-full transition-all duration-1000" style={{ width: `${itAnalytics.evidenceReadiness}%` }}></div>
+          <div className="relative mt-4 flex items-center gap-2">
+            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div className="h-full bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] rounded-full transition-all duration-1000 relative overflow-hidden" style={{ width: `${itAnalytics.evidenceReadiness}%` }}>
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-[shimmer_2.8s_infinite]"></div>
+              </div>
             </div>
             <span className="text-xs font-bold text-slate-500">{itAnalytics.evidenceTotal} files</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 p-3 mb-8 flex flex-wrap items-center gap-3 sticky top-0 z-10">
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 p-3 mb-8 flex flex-wrap items-center gap-3 sticky top-0 z-10">
         <div className="relative min-w-[160px] flex-1">
           <i className="fas fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <select className="w-full h-10 pl-10 pr-8 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] focus:border-[#0F3DDE] outline-none cursor-pointer transition-colors" defaultValue="AY 2025-2026">
+          <select className="w-full h-11 pl-10 pr-8 bg-slate-50/50 border border-slate-200/60 rounded-xl text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] focus:border-[#0F3DDE] focus:bg-white outline-none cursor-pointer transition-all hover:bg-slate-50 hover:border-slate-300" defaultValue="AY 2025-2026">
             <option>AY 2025-2026</option>
             <option>AY 2024-2025</option>
           </select>
@@ -171,7 +210,7 @@ export function ProgramHeadDashboard() {
         <div className="relative min-w-[160px] flex-1">
           <i className="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <select 
-            className="w-full h-10 pl-10 pr-8 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] outline-none cursor-pointer transition-colors"
+            className="w-full h-11 pl-10 pr-8 bg-slate-50/50 border border-slate-200/60 rounded-xl text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] focus:border-[#0F3DDE] focus:bg-white outline-none cursor-pointer transition-all hover:bg-slate-50 hover:border-slate-300"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -187,7 +226,7 @@ export function ProgramHeadDashboard() {
         <div className="relative min-w-[160px] flex-1">
           <i className="fas fa-chalkboard-teacher absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <select 
-            className="w-full h-10 pl-10 pr-8 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] outline-none cursor-pointer transition-colors"
+            className="w-full h-11 pl-10 pr-8 bg-slate-50/50 border border-slate-200/60 rounded-xl text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] focus:border-[#0F3DDE] focus:bg-white outline-none cursor-pointer transition-all hover:bg-slate-50 hover:border-slate-300"
             value={adviserFilter}
             onChange={(e) => setAdviserFilter(e.target.value)}
           >
@@ -200,7 +239,7 @@ export function ProgramHeadDashboard() {
         <div className="relative min-w-[160px] flex-1">
           <i className="fas fa-tags absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <select 
-            className="w-full h-10 pl-10 pr-8 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] outline-none cursor-pointer transition-colors"
+            className="w-full h-11 pl-10 pr-8 bg-slate-50/50 border border-slate-200/60 rounded-xl text-sm font-bold text-slate-700 appearance-none focus:ring-2 focus:ring-[#0F3DDE] focus:border-[#0F3DDE] focus:bg-white outline-none cursor-pointer transition-all hover:bg-slate-50 hover:border-slate-300"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
@@ -212,19 +251,22 @@ export function ProgramHeadDashboard() {
 
         <button 
           onClick={() => setExportOpen(true)}
-          className="h-10 px-5 bg-white border border-slate-200 text-[#081B4B] rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors whitespace-nowrap ml-auto"
+          className="h-11 px-6 bg-white ring-1 ring-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 hover:ring-slate-300 transition-all shadow-sm whitespace-nowrap ml-auto group"
         >
-          <i className="fas fa-file-export mr-2 text-[#0F3DDE]"></i> Export Report
+          <i className="fas fa-file-export mr-2 text-[#0F3DDE] group-hover:scale-110 transition-transform"></i> Export Report
         </button>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm flex flex-col">
-          <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-            <h3 className="font-extrabold text-[#081B4B] text-base">Project Distribution</h3>
-            <button className="text-slate-400 hover:text-[#0F3DDE]"><i className="fas fa-ellipsis-h"></i></button>
+        <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 flex flex-col relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="p-5 border-b border-slate-100/80 flex justify-between items-center relative z-10">
+            <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+              <i className="fas fa-chart-pie text-[#0F3DDE]/70"></i> Project Distribution
+            </h3>
+            <button className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-[#0F3DDE] transition-colors flex items-center justify-center"><i className="fas fa-ellipsis-h"></i></button>
           </div>
-          <div className="p-5 flex-grow flex flex-col">
+          <div className="p-5 flex-grow flex flex-col relative z-10">
             <div className="relative h-48 w-full">
               {statusChartData.length > 0 ? (
                 <ChartResponsiveContainer width="100%" height="100%">
@@ -233,69 +275,76 @@ export function ProgramHeadDashboard() {
                       data={statusChartData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={4}
+                      innerRadius={65}
+                      outerRadius={85}
+                      paddingAngle={6}
                       dataKey="value"
                       stroke="none"
                     >
                       {statusChartData.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
+                        <Cell key={entry.name} fill={entry.color} className="hover:opacity-80 transition-opacity outline-none" style={{ filter: `drop-shadow(0px 4px 6px ${entry.color}40)` }} />
                       ))}
                     </Pie>
                     <RechartsTooltip
-                      contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                      contentStyle={{ borderRadius: '12px', border: '1px solid rgba(226,232,240,0.8)', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }}
                       formatter={(value, name) => [`${value} projects`, name]}
-                      itemStyle={{ fontWeight: 'bold', color: '#081B4B' }}
+                      itemStyle={{ fontWeight: '900', color: '#081B4B' }}
                     />
                   </PieChart>
                 </ChartResponsiveContainer>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-medium text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <div className="w-full h-full flex flex-col items-center justify-center text-sm font-medium text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                  <i className="fas fa-chart-pie text-2xl mb-2 text-slate-300"></i>
                   No data available
                 </div>
               )}
               {statusChartData.length > 0 && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-white/20 rounded-full blur-[2px] scale-50 opacity-50"></div>
+              )}
+              {statusChartData.length > 0 && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-2xl font-extrabold text-[#081B4B]">{filteredAnalytics.totalProjects}</span>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total</span>
+                  <span className="text-3xl font-black text-[#081B4B] tracking-tight drop-shadow-sm">{filteredAnalytics.totalProjects}</span>
+                  <span className="text-[10px] uppercase font-bold text-[#0F3DDE] tracking-widest bg-blue-50/80 px-2 py-0.5 rounded-full mt-1 ring-1 ring-blue-100/50">Total</span>
                 </div>
               )}
             </div>
             
-            <div className="mt-4 space-y-3">
+            <div className="mt-5 space-y-3 px-2">
               {filteredAnalytics.statusDistribution.map(item => (
-                <div key={item.name} className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-sm font-semibold text-slate-700 flex-1">{item.name}</span>
-                  <span className="text-sm font-bold text-[#081B4B]">{item.value}</span>
-                  <span className="text-xs font-medium text-slate-400 w-8 text-right">{item.pct}%</span>
+                <div key={item.name} className="flex items-center gap-3 group/item p-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div className="w-3 h-3 rounded-full ring-2 ring-offset-1 ring-white shadow-sm" style={{ backgroundColor: item.color }}></div>
+                  <span className="text-sm font-bold text-slate-600 flex-1 group-hover/item:text-[#081B4B] transition-colors">{item.name}</span>
+                  <span className="text-sm font-black text-[#081B4B]">{item.value}</span>
+                  <span className="text-xs font-bold text-slate-400 w-10 text-right bg-slate-100/50 px-1.5 py-0.5 rounded-md group-hover/item:bg-slate-200/50 transition-colors">{item.pct}%</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm flex flex-col">
-          <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-            <h3 className="font-extrabold text-[#081B4B] text-base">Adviser Workload</h3>
-            <span className="text-xs font-bold text-[#0F3DDE] bg-blue-50 px-2 py-1 rounded-md">{itAnalytics.adviserWorkload.length} Active</span>
+        <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 flex flex-col relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="p-5 border-b border-slate-100/80 flex justify-between items-center relative z-10">
+            <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+              <i className="fas fa-users-cog text-[#0F3DDE]/70"></i> Adviser Workload
+            </h3>
+            <span className="text-[10px] font-black text-[#0F3DDE] uppercase tracking-widest bg-blue-50 ring-1 ring-inset ring-blue-200/50 px-2 py-1 rounded-md shadow-sm">{itAnalytics.adviserWorkload.length} Active</span>
           </div>
-          <div className="p-5 flex-grow overflow-y-auto max-h-[340px] space-y-4">
+          <div className="p-5 flex-grow overflow-y-auto max-h-[350px] space-y-3 relative z-10 custom-scrollbar pr-2">
             {itAnalytics.adviserWorkload.map(load => (
-              <div key={load.adviser} className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-bold text-[#081B4B]">
+              <div key={load.adviser} className="flex items-center gap-4 group/item p-2.5 rounded-xl hover:bg-slate-50 hover:ring-1 hover:ring-slate-200/60 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 ring-1 ring-blue-100 flex items-center justify-center text-sm font-black text-[#0F3DDE] shadow-sm group-hover/item:scale-105 transition-transform">
                   {load.adviser.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-baseline mb-1">
-                    <p className="text-sm font-bold text-slate-800 truncate">{load.adviser}</p>
-                    <span className="text-xs font-bold text-slate-500">{load.projects} projects</span>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <p className="text-sm font-black text-slate-800 truncate group-hover/item:text-[#081B4B] transition-colors">{load.adviser}</p>
+                    <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">{load.projects} PRJ</span>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex">
-                    <div className="h-full bg-[#0F3DDE]" style={{ width: `${(load.active / Math.max(1, load.projects)) * 100}%` }}></div>
-                    <div className="h-full bg-emerald-500" style={{ width: `${(load.completed / Math.max(1, load.projects)) * 100}%` }}></div>
-                    <div className="h-full bg-amber-500" style={{ width: `${(load.riskLoad / Math.max(1, load.projects)) * 100}%` }}></div>
+                  <div className="w-full h-2 bg-slate-100 shadow-inner rounded-full overflow-hidden flex ring-1 ring-inset ring-slate-200/50">
+                    <div className="h-full bg-gradient-to-r from-[#0F3DDE] to-blue-500" style={{ width: `${(load.active / Math.max(1, load.projects)) * 100}%` }}></div>
+                    <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400" style={{ width: `${(load.completed / Math.max(1, load.projects)) * 100}%` }}></div>
+                    <div className="h-full bg-gradient-to-r from-amber-500 to-orange-400" style={{ width: `${(load.riskLoad / Math.max(1, load.projects)) * 100}%` }}></div>
                   </div>
                 </div>
               </div>
@@ -303,39 +352,48 @@ export function ProgramHeadDashboard() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm flex flex-col">
-          <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-            <h3 className="font-extrabold text-[#081B4B] text-base">Intervention Queue</h3>
+        <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 flex flex-col relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="p-5 border-b border-slate-100/80 flex justify-between items-center relative z-10">
+            <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+              <i className="fas fa-exclamation-circle text-amber-500/80"></i> Intervention Queue
+            </h3>
             {itAnalytics.interventionQueue.length > 0 && (
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md">{itAnalytics.interventionQueue.length} Pending</span>
+              <span className="text-[10px] font-black text-rose-700 uppercase tracking-widest bg-rose-50 ring-1 ring-inset ring-rose-200/50 px-2 py-1 rounded-md shadow-sm">{itAnalytics.interventionQueue.length} Pending</span>
             )}
           </div>
-          <div className="p-5 flex-grow overflow-y-auto max-h-[340px] space-y-3">
+          <div className="p-5 flex-grow overflow-y-auto max-h-[350px] space-y-3 relative z-10 custom-scrollbar pr-2">
             {itAnalytics.interventionQueue.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-xl mb-3">
+                <div className="w-16 h-16 bg-gradient-to-br from-emerald-50 to-emerald-100/50 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl mb-4 ring-1 ring-emerald-200/50 shadow-sm">
                   <i className="fas fa-check-double"></i>
                 </div>
-                <p className="font-bold text-emerald-700 text-sm">All Clear</p>
-                <p className="text-xs">No urgent interventions required.</p>
+                <p className="font-black text-emerald-700 text-sm uppercase tracking-widest mb-1">All Clear</p>
+                <p className="text-xs font-medium max-w-[200px]">No urgent interventions required for any tracked projects.</p>
               </div>
             ) : (
               itAnalytics.interventionQueue.slice(0, 4).map(item => (
-                <div key={item.project.code} className="border border-slate-100 rounded-xl p-3 bg-slate-50 hover:bg-white hover:border-[#0F3DDE]/30 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-bold text-slate-500 font-mono">{item.project.code}</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                      item.priority === 'Critical' ? 'bg-red-100 text-red-700' : 
-                      item.priority === 'High' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'
+                <div key={item.project.code} className="group/item relative overflow-hidden bg-white ring-1 ring-slate-200/80 rounded-xl p-4 shadow-sm hover:ring-[#0F3DDE]/40 hover:shadow-md transition-all duration-300">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-slate-200 to-transparent group-hover/item:via-[#0F3DDE]/50 transition-colors"></div>
+                  
+                  <div className="flex justify-between items-center mb-2.5">
+                    <span className="text-[10px] font-black text-slate-400 font-mono tracking-widest bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">{item.project.code}</span>
+                    <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md tracking-wider shadow-sm ring-1 ring-inset ${
+                      item.priority === 'Critical' ? 'bg-rose-50 text-rose-700 ring-rose-200/50' : 
+                      item.priority === 'High' ? 'bg-amber-50 text-amber-700 ring-amber-200/50' : 'bg-blue-50 text-blue-700 ring-blue-200/50'
                     }`}>
                       {item.priority}
                     </span>
                   </div>
-                  <p className="text-sm font-bold text-slate-800 line-clamp-1 mb-1">{item.project.title}</p>
-                  <p className="text-xs text-slate-500 mb-2"><i className="fas fa-user-tie mr-1"></i> {item.project.adviser}</p>
-                  <div className="bg-white border border-slate-200 rounded-md p-2 text-xs text-slate-600 flex justify-between items-center">
-                    <span className="truncate">{item.action}</span>
-                    <i className="fas fa-arrow-right text-slate-300"></i>
+                  <p className="text-sm font-black text-[#081B4B] line-clamp-1 mb-1.5 group-hover/item:text-[#0F3DDE] transition-colors">{item.project.title}</p>
+                  <p className="text-xs font-bold text-slate-500 mb-3 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center text-[8px] text-slate-400"><i className="fas fa-user-tie"></i></span>
+                    {item.project.adviser}
+                  </p>
+                  
+                  <div className="bg-slate-50/80 border border-slate-100 rounded-lg p-2.5 text-[11px] font-bold text-slate-600 flex justify-between items-center group-hover/item:bg-blue-50/30 group-hover/item:text-[#0F3DDE] transition-colors">
+                    <span className="truncate pr-4"><i className="fas fa-bolt mr-1.5 opacity-50"></i> {item.action}</span>
+                    <i className="fas fa-arrow-right text-slate-300 group-hover/item:text-[#0F3DDE] group-hover/item:translate-x-0.5 transition-all"></i>
                   </div>
                 </div>
               ))
@@ -344,19 +402,19 @@ export function ProgramHeadDashboard() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm mb-8 overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 mb-8 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-50/50 to-white">
           <div>
-            <h3 className="font-extrabold text-[#081B4B] text-lg">Project Monitoring Directory</h3>
-            <p className="text-sm text-slate-500 font-medium">Detailed progress and status for {filteredProjects.length} tracked projects.</p>
+            <h3 className="font-black text-[#081B4B] text-lg tracking-tight">Project Monitoring Directory</h3>
+            <p className="text-sm text-slate-500 font-medium mt-1">Detailed progress and status for <strong className="text-slate-700">{filteredProjects.length}</strong> tracked projects.</p>
           </div>
-          <div className="relative">
-            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" placeholder="Search projects..." className="h-10 pl-9 pr-4 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white outline-none w-full sm:w-64" />
+          <div className="relative group">
+            <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+            <input type="text" placeholder="Search projects..." className="h-11 pl-11 pr-4 bg-slate-50/50 ring-1 ring-slate-200/60 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white outline-none w-full sm:w-72 transition-all shadow-inner" />
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider sticky top-0 z-10">
               <tr>
                 <th className="px-5 py-4 font-bold border-b border-slate-200">Project Title</th>
@@ -372,55 +430,58 @@ export function ProgramHeadDashboard() {
             <tbody className="divide-y divide-slate-100">
               {filteredProjects.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-5 py-12 text-center text-slate-500">
-                    <i className="fas fa-folder-open text-3xl mb-3 text-slate-300 block"></i>
-                    No projects found for the selected filters.
+                  <td colSpan={8} className="px-5 py-16 text-center">
+                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-slate-100">
+                      <i className="fas fa-search text-2xl text-slate-300"></i>
+                    </div>
+                    <p className="font-bold text-slate-700 text-base">No projects found</p>
+                    <p className="text-slate-500 text-sm mt-1">Try adjusting your filters or search query.</p>
                   </td>
                 </tr>
               ) : (
                 filteredProjects.map(project => (
-                  <tr key={project.code} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-5 py-4 align-top">
-                      <p className="font-bold text-slate-800 m-0 group-hover:text-[#0F3DDE] transition-colors line-clamp-2 leading-snug">{project.title}</p>
-                      <span className="text-xs text-slate-500 font-mono mt-1.5 inline-block bg-slate-100 px-1.5 py-0.5 rounded">{project.code}</span>
+                  <tr key={project.code} className="hover:bg-blue-50/30 transition-colors group">
+                    <td className="px-6 py-4 align-top">
+                      <p className="font-extrabold text-slate-800 m-0 group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">{project.title}</p>
+                      <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-2 inline-block">{project.code}</span>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-blue-50 text-[#0F3DDE] flex items-center justify-center text-[10px] font-bold border border-blue-100 shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 text-blue-700 flex items-center justify-center text-[10px] font-black shadow-sm ring-1 ring-blue-200/50 shrink-0">
                           {project.adviser.split(' ').map((name) => name[0]).join('')}
                         </div>
-                        <span className="text-sm font-semibold text-slate-700 whitespace-nowrap">{project.adviser}</span>
+                        <span className="text-sm font-bold text-slate-700 whitespace-nowrap">{project.adviser}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 align-top">
                       <div className="flex -space-x-2">
                         {project.students.slice(0, 3).map((_, index) => (
-                          <div key={index} className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-500 shadow-sm">
+                          <div key={index} className="w-8 h-8 rounded-full bg-slate-100 ring-2 ring-white flex items-center justify-center text-[10px] font-bold text-slate-400 shadow-sm transition-transform hover:scale-110 hover:z-10">
                             <i className="fas fa-user"></i>
                           </div>
                         ))}
                         {project.students.length > 3 && (
-                          <div className="w-7 h-7 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-600 shadow-sm z-10">
+                          <div className="w-8 h-8 rounded-full bg-slate-50 ring-2 ring-white flex items-center justify-center text-[10px] font-black text-slate-500 shadow-sm z-10">
                             +{project.students.length - 3}
                           </div>
                         )}
                       </div>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                        project.status === 'Active' ? 'bg-blue-50 text-[#0F3DDE] border border-blue-100' :
-                        project.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                        project.status === 'Pending' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                        'bg-slate-100 text-slate-600 border border-slate-200'
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm ${
+                        project.status === 'Active' ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200/50' :
+                        project.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/50' :
+                        project.status === 'Pending' ? 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200/50' :
+                        'bg-slate-50 text-slate-600 ring-1 ring-inset ring-slate-200'
                       }`}>
-                        {project.status === 'Completed' && <i className="fas fa-check"></i>}
+                        {project.status === 'Completed' && <i className="fas fa-check text-[10px]"></i>}
                         {project.status}
                       </span>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-bold ${
-                        project.riskLevel === 'On Track' ? 'text-emerald-600' :
-                        project.riskLevel === 'At Risk' ? 'text-amber-600' : 'text-red-600'
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider ${
+                        project.riskLevel === 'On Track' ? 'text-emerald-600 bg-emerald-50/50' :
+                        project.riskLevel === 'At Risk' ? 'text-amber-600 bg-amber-50/50' : 'text-rose-600 bg-rose-50/50'
                       }`}>
                         <i className={`fas ${
                           project.riskLevel === 'On Track' ? 'fa-check-circle' :
@@ -429,30 +490,32 @@ export function ProgramHeadDashboard() {
                       </span>
                     </td>
                     <td className="px-5 py-4 align-top">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#0F3DDE] rounded-full" style={{ width: `${project.progress}%` }}></div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                          <div className={`h-full rounded-full transition-all duration-1000 ${
+                            project.progress === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#0F3DDE] to-[#4A72FF]'
+                          }`} style={{ width: `${project.progress}%` }}></div>
                         </div>
-                        <span className="text-xs font-bold text-slate-600">{project.progress}%</span>
+                        <span className="text-xs font-black text-[#081B4B]">{project.progress}%</span>
                       </div>
-                      <span className="text-[10px] text-slate-400 font-medium block mt-1">{project.currentStage}</span>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mt-2 truncate max-w-[120px]" title={project.currentStage}>{project.currentStage}</span>
                     </td>
                     <td className="px-5 py-4 align-top">
                       {project.transferStatus === 'Ready for Transfer' ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-black uppercase tracking-wider ring-1 ring-inset ring-emerald-200/50 shadow-sm">
                           <i className="fas fa-rocket"></i> Ready
                         </span>
                       ) : project.transferStatus === 'Deployed' || project.transferStatus === 'In Use' ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#8B5CF6]/10 text-[#8B5CF6] text-xs font-bold border border-[#8B5CF6]/20">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 text-[11px] font-black uppercase tracking-wider ring-1 ring-inset ring-purple-200/50 shadow-sm">
                           <i className="fas fa-box-open"></i> {project.transferStatus}
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-500 font-medium">{project.transferStatus}</span>
+                        <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{project.transferStatus}</span>
                       )}
                     </td>
                     <td className="px-5 py-4 align-top text-center relative">
                       <button 
-                        className="w-8 h-8 rounded-lg text-slate-400 hover:text-[#0F3DDE] hover:bg-blue-50 transition-colors flex items-center justify-center"
+                        className="w-8 h-8 rounded-xl text-slate-400 hover:text-blue-700 hover:bg-blue-50 transition-colors flex items-center justify-center"
                         onClick={() => setActionMenuOpen(actionMenuOpen === project.code ? null : project.code)}
                       >
                         <i className="fas fa-ellipsis-v"></i>
@@ -461,22 +524,22 @@ export function ProgramHeadDashboard() {
                       {actionMenuOpen === project.code && (
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setActionMenuOpen(null)}></div>
-                          <div className="absolute right-8 top-10 w-48 bg-white border border-slate-200 shadow-lg rounded-xl z-20 py-1 text-left overflow-hidden animate-in fade-in zoom-in duration-100">
-                            <button className="w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#0F3DDE] flex items-center gap-2 font-medium">
-                              <i className="fas fa-eye w-4"></i> View Project
+                          <div className="absolute right-8 top-10 w-56 bg-white/95 backdrop-blur-xl ring-1 ring-slate-200/60 shadow-[0_12px_40px_rgba(15,23,42,0.12)] rounded-xl z-20 p-1.5 text-left overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                            <button className="w-full px-3 py-2 text-[13px] text-slate-700 hover:bg-slate-50 hover:text-[#0F3DDE] rounded-lg flex items-center gap-2.5 font-bold transition-colors">
+                              <div className="w-5 flex justify-center"><i className="fas fa-eye text-slate-400"></i></div> View Project
                             </button>
-                            <button className="w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#0F3DDE] flex items-center gap-2 font-medium">
-                              <i className="fas fa-chart-line w-4"></i> Monitor Progress
+                            <button className="w-full px-3 py-2 text-[13px] text-slate-700 hover:bg-slate-50 hover:text-[#0F3DDE] rounded-lg flex items-center gap-2.5 font-bold transition-colors">
+                              <div className="w-5 flex justify-center"><i className="fas fa-chart-line text-slate-400"></i></div> Monitor Progress
                             </button>
-                            <button className="w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#0F3DDE] flex items-center gap-2 font-medium">
-                              <i className="fas fa-file-alt w-4"></i> Generate Report
+                            <button className="w-full px-3 py-2 text-[13px] text-slate-700 hover:bg-slate-50 hover:text-[#0F3DDE] rounded-lg flex items-center gap-2.5 font-bold transition-colors">
+                              <div className="w-5 flex justify-center"><i className="fas fa-file-alt text-slate-400"></i></div> Generate Report
                             </button>
-                            <div className="h-px bg-slate-100 my-1"></div>
-                            <button className="w-full px-4 py-2 text-sm text-amber-600 hover:bg-amber-50 flex items-center gap-2 font-medium">
-                              <i className="fas fa-user-edit w-4"></i> Assign Adviser
+                            <div className="h-px bg-slate-100 my-1 mx-2"></div>
+                            <button className="w-full px-3 py-2 text-[13px] text-amber-700 hover:bg-amber-50 rounded-lg flex items-center gap-2.5 font-bold transition-colors">
+                              <div className="w-5 flex justify-center"><i className="fas fa-user-edit text-amber-500"></i></div> Assign Adviser
                             </button>
-                            <button className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
-                              <i className="fas fa-archive w-4"></i> Archive Project
+                            <button className="w-full px-3 py-2 text-[13px] text-rose-700 hover:bg-rose-50 rounded-lg flex items-center gap-2.5 font-bold transition-colors">
+                              <div className="w-5 flex justify-center"><i className="fas fa-archive text-rose-500"></i></div> Archive Project
                             </button>
                           </div>
                         </>

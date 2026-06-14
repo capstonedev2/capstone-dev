@@ -14,7 +14,7 @@ import {
 import { ProgramHeadShell } from '@/components/program-head/program-head-shell';
 
 const CATEGORY_CHART = [
-  { name: 'AI/ML Projects', value: 12, color: '#003a8f' },
+  { name: 'AI/ML Projects', value: 12, color: '#0F3DDE' },
   { name: 'IoT Systems', value: 8, color: '#16a34a' },
   { name: 'Web Applications', value: 14, color: '#7c3aed' },
   { name: 'Mobile Apps', value: 8, color: '#f59e0b' }
@@ -69,50 +69,59 @@ export function ProgramHeadProjects() {
       notificationCount={3}
     >
       {/* Premium Filter Bar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-8">
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 p-5 mb-8">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Academic Year</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#003a8f]/20 outline-none cursor-pointer hover:bg-slate-100 transition-colors" defaultValue="AY 2023-2024">
-              <option>AY 2023-2024</option>
-              <option>AY 2022-2023</option>
-              <option>AY 2021-2022</option>
-              <option>All Years</option>
-            </select>
-          </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Status</label>
-            <select
-              className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#003a8f]/20 outline-none cursor-pointer hover:bg-slate-100 transition-colors"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="All Statuses">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
-              <option value="On Hold">On Hold</option>
-            </select>
-          </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Adviser</label>
-            <select
-              className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#003a8f]/20 outline-none cursor-pointer hover:bg-slate-100 transition-colors"
-              value={adviserFilter}
-              onChange={(e) => setAdviserFilter(e.target.value)}
-            >
-              <option value="All Advisers">All Advisers</option>
-              {advisers.map(a => (
-                <option key={a} value={a}>{a}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-[2] min-w-[220px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Search</label>
+            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] mb-2 pl-1">Academic Year</label>
             <div className="relative">
-              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <select className="w-full h-11 pl-4 pr-10 rounded-xl bg-slate-50/50 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none cursor-pointer transition-all hover:bg-slate-50 hover:ring-slate-300 appearance-none shadow-inner" defaultValue="AY 2023-2024">
+                <option>AY 2023-2024</option>
+                <option>AY 2022-2023</option>
+                <option>AY 2021-2022</option>
+                <option>All Years</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
+          </div>
+          <div className="flex-1 min-w-[160px]">
+            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] mb-2 pl-1">Status</label>
+            <div className="relative">
+              <select
+                className="w-full h-11 pl-4 pr-10 rounded-xl bg-slate-50/50 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none cursor-pointer transition-all hover:bg-slate-50 hover:ring-slate-300 appearance-none shadow-inner"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="All Statuses">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="On Hold">On Hold</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
+          </div>
+          <div className="flex-1 min-w-[160px]">
+            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] mb-2 pl-1">Adviser</label>
+            <div className="relative">
+              <select
+                className="w-full h-11 pl-4 pr-10 rounded-xl bg-slate-50/50 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none cursor-pointer transition-all hover:bg-slate-50 hover:ring-slate-300 appearance-none shadow-inner"
+                value={adviserFilter}
+                onChange={(e) => setAdviserFilter(e.target.value)}
+              >
+                <option value="All Advisers">All Advisers</option>
+                {advisers.map(a => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
+          </div>
+          <div className="flex-[2] min-w-[220px] group">
+            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] mb-2 pl-1">Search</label>
+            <div className="relative">
+              <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-600 transition-colors"></i>
               <input
-                className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border-none text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#003a8f]/20 outline-none placeholder:text-slate-400 hover:bg-slate-100 transition-colors"
+                className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50/50 ring-1 ring-slate-200/60 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none placeholder:text-slate-400 hover:bg-slate-50 hover:ring-slate-300 transition-all shadow-inner"
                 placeholder="Search projects, codes, advisers..."
                 type="search"
                 value={searchQuery}
@@ -120,19 +129,20 @@ export function ProgramHeadProjects() {
               />
             </div>
           </div>
-          <div className="flex items-center gap-2.5 ml-auto">
+          <div className="flex items-center gap-3 ml-auto">
             <button
-              className="h-11 px-4 rounded-xl bg-slate-50 text-sm font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2"
+              className="h-11 px-5 rounded-xl bg-white ring-1 ring-slate-200/60 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:ring-slate-300 transition-all shadow-[0_2px_10px_rgba(15,23,42,0.04)] flex items-center gap-2 group"
               type="button"
               onClick={() => { setStatusFilter('All Statuses'); setAdviserFilter('All Advisers'); setSearchQuery(''); }}
             >
-              <i className="fas fa-undo text-xs"></i> Reset
+              <i className="fas fa-undo text-xs text-slate-400 group-hover:-rotate-180 transition-transform duration-500"></i> Reset
             </button>
             <button
               onClick={() => setExportOpen(true)}
-              className="h-11 px-6 bg-[#003a8f] text-white rounded-xl text-sm font-bold shadow-md shadow-blue-900/20 hover:bg-[#002c6b] hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2"
+              className="group relative overflow-hidden h-11 px-6 bg-gradient-to-b from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-bold shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
             >
-              <i className="fas fa-download"></i> Export Report
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+              <i className="fas fa-download group-hover:scale-110 transition-transform"></i> Export Report
             </button>
           </div>
         </div>
@@ -147,54 +157,73 @@ export function ProgramHeadProjects() {
       </div>
 
       {/* Category Distribution with Donut Chart */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 overflow-hidden mb-8">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/50 to-white">
           <div>
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2">
-              <i className="fas fa-chart-pie text-[#003a8f]"></i> Project Distribution by Category
+            <h3 className="text-xl font-black text-[#081B4B] m-0 tracking-tight flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#0F3DDE] flex items-center justify-center text-sm shadow-sm ring-1 ring-blue-100/50"><i className="fas fa-chart-pie"></i></div> Project Distribution by Category
             </h3>
-            <p className="text-sm text-slate-500 m-0 mt-1">Breakdown of all IT department projects.</p>
+            <p className="text-sm text-slate-500 font-medium m-0 mt-1 pl-[42px]">Breakdown of all IT department projects.</p>
           </div>
         </div>
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="w-full min-w-0 md:w-1/2 h-64">
+        <div className="p-8">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="w-full lg:w-5/12 h-72 relative">
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-4xl font-black text-[#081B4B]">{filteredProjects.length}</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Total</span>
+              </div>
               <ChartResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={CATEGORY_CHART}
                     cx="50%"
                     cy="50%"
-                    innerRadius={65}
-                    outerRadius={90}
-                    paddingAngle={5}
+                    innerRadius={80}
+                    outerRadius={105}
+                    paddingAngle={6}
                     dataKey="value"
                     stroke="none"
+                    cornerRadius={6}
                   >
                     {CATEGORY_CHART.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                   <RechartsTooltip
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.1)', fontSize: '13px' }}
-                    itemStyle={{ fontWeight: 'bold' }}
+                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(226,232,240,0.8)', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', padding: '12px 16px', backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)' }}
+                    itemStyle={{ fontWeight: '900', color: '#0f172a' }}
+                    formatter={(value, name) => [`${value} projects`, name]}
                   />
                 </PieChart>
               </ChartResponsiveContainer>
             </div>
-            <div className="w-full md:w-1/2 space-y-3">
+            <div className="w-full lg:w-7/12 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {CATEGORY_CHART.map((item) => (
                 <div
                   key={item.name}
-                  className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 bg-white group cursor-pointer"
+                  className="group relative flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-b from-blue-50/90 to-blue-50/40 backdrop-blur-xl ring-1 ring-blue-200/60 hover:shadow-[0_20px_40px_rgba(15,61,222,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="w-3.5 h-3.5 rounded-full shadow-sm" style={{ backgroundColor: item.color }}></span>
-                    <strong className="text-slate-700 text-sm">{item.name}</strong>
+                  <div className="absolute top-0 left-0 w-full h-1 opacity-80 group-hover:opacity-100 transition-opacity duration-300 z-10" style={{ backgroundImage: `linear-gradient(to right, ${item.color}, transparent)` }}></div>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 z-0" style={{ backgroundImage: `radial-gradient(circle at top right, ${item.color}, transparent 70%)` }}></div>
+                  
+                  <div className="relative flex items-center justify-between mb-4 z-10">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center justify-center w-10 h-10 rounded-xl shadow-sm ring-1 ring-white/50 group-hover:scale-110 transition-transform duration-300 bg-white" style={{ color: item.color, boxShadow: `0 4px 10px ${item.color}20` }}>
+                        <i className="fas fa-layer-group text-sm"></i>
+                      </span>
+                      <strong className="text-[#081B4B] text-sm font-black group-hover:text-[#0F3DDE] transition-colors">{item.name}</strong>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-extrabold text-xl" style={{ color: item.color }}>{item.value}</span>
-                    <span className="text-xs text-slate-400 font-medium">projects</span>
+                  
+                  <div className="relative flex items-end justify-between z-10 mt-2">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-black text-4xl tracking-tight" style={{ color: item.color }}>{item.value}</span>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-white/60 px-1.5 py-0.5 rounded-md">projects</span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-white ring-1 ring-blue-100 flex items-center justify-center text-blue-400 group-hover:text-[#0F3DDE] group-hover:ring-blue-300 group-hover:bg-blue-50 transition-all shadow-sm">
+                      <i className="fas fa-arrow-right -rotate-45 text-[10px] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -204,120 +233,125 @@ export function ProgramHeadProjects() {
       </div>
 
       {/* Projects Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 overflow-hidden mb-8">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/50 to-white">
           <div>
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2">
-              <i className="fas fa-list-alt text-[#003a8f]"></i> IT Department Projects — Detailed View
+            <h3 className="text-xl font-black text-[#081B4B] m-0 tracking-tight flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#0F3DDE] flex items-center justify-center text-sm shadow-sm ring-1 ring-blue-100/50"><i className="fas fa-list-alt"></i></div> IT Department Projects
             </h3>
-            <p className="text-sm text-slate-500 m-0 mt-1">{filteredProjects.length} projects match the current filters.</p>
+            <p className="text-sm text-slate-500 font-medium m-0 mt-1 pl-[42px]"><strong className="text-slate-700">{filteredProjects.length}</strong> projects match the current filters.</p>
           </div>
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 text-[#003a8f] text-xs font-bold ring-1 ring-[#003a8f]/10">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            Live data
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-black uppercase tracking-widest ring-1 ring-inset ring-emerald-200/50 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
+            Live Data
           </span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/80 text-slate-500 text-[11px] uppercase tracking-wider font-extrabold">
+          <table className="w-full text-left border-collapse min-w-[1050px]">
+            <thead className="bg-slate-50/80 text-slate-500 text-[10px] uppercase tracking-[0.15em] font-black">
               <tr>
-                <th className="px-6 py-4 border-b border-slate-100">Code</th>
-                <th className="px-6 py-4 border-b border-slate-100">Project Title</th>
-                <th className="px-6 py-4 border-b border-slate-100">Adviser</th>
-                <th className="px-6 py-4 border-b border-slate-100">Students</th>
-                <th className="px-6 py-4 border-b border-slate-100">Status</th>
-                <th className="px-6 py-4 border-b border-slate-100 w-40">Progress</th>
-                <th className="px-6 py-4 border-b border-slate-100">Start</th>
-                <th className="px-6 py-4 border-b border-slate-100">Transfer</th>
-                <th className="px-6 py-4 border-b border-slate-100 text-right">Actions</th>
+                <th className="px-6 py-5 border-b border-slate-100/80">Code</th>
+                <th className="px-6 py-5 border-b border-slate-100/80">Project Title</th>
+                <th className="px-6 py-5 border-b border-slate-100/80">Adviser</th>
+                <th className="px-6 py-5 border-b border-slate-100/80">Students</th>
+                <th className="px-6 py-5 border-b border-slate-100/80">Status</th>
+                <th className="px-6 py-5 border-b border-slate-100/80 w-44">Progress</th>
+                <th className="px-6 py-5 border-b border-slate-100/80">Start Date</th>
+                <th className="px-6 py-5 border-b border-slate-100/80">Transfer</th>
+                <th className="px-6 py-5 border-b border-slate-100/80 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-100/80 bg-white/40">
               {filteredProjects.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-6 py-16 text-center">
-                    <i className="fas fa-search text-4xl text-slate-200 mb-3 block"></i>
-                    <p className="text-slate-500 font-medium m-0">No projects found matching the selected filters.</p>
+                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-slate-100">
+                      <i className="fas fa-search text-2xl text-slate-300"></i>
+                    </div>
+                    <p className="font-bold text-slate-700 text-base m-0">No projects found</p>
+                    <p className="text-slate-500 text-sm mt-1">Try adjusting your filters or search query.</p>
                     <button
-                      className="mt-4 px-4 py-2 rounded-lg bg-slate-100 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all"
+                      className="mt-6 px-5 py-2.5 rounded-xl bg-blue-50 text-sm font-bold text-blue-700 hover:bg-blue-100 ring-1 ring-inset ring-blue-200/50 transition-all"
                       onClick={() => { setStatusFilter('All Statuses'); setAdviserFilter('All Advisers'); setSearchQuery(''); }}
                     >
-                      <i className="fas fa-undo text-xs mr-1.5"></i> Clear filters
+                      <i className="fas fa-undo text-xs mr-1.5"></i> Clear all filters
                     </button>
                   </td>
                 </tr>
               ) : (
                 filteredProjects.map((project) => (
-                  <tr key={project.code} className="group transition-all duration-200 hover:bg-blue-50/30 cursor-pointer" onClick={() => setSelectedCode(project.code)}>
-                    <td className="px-6 py-4">
-                      <code className="text-xs font-mono font-bold text-[#003a8f] bg-blue-50 px-2 py-1 rounded-md">{project.code}</code>
+                  <tr key={project.code} className="group transition-all duration-200 hover:bg-blue-50/40 cursor-pointer" onClick={() => setSelectedCode(project.code)}>
+                    <td className="px-6 py-5 align-top">
+                      <code className="text-[11px] font-mono font-black text-[#0F3DDE] bg-blue-50/80 ring-1 ring-inset ring-blue-200/50 px-2 py-1 rounded-md tracking-wide shadow-sm">{project.code}</code>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-slate-800 m-0 text-sm group-hover:text-[#003a8f] transition-colors">{project.title}</p>
-                      <span className="text-[11px] text-slate-400 mt-0.5 block">{project.category}</span>
+                    <td className="px-6 py-5 align-top">
+                      <p className="font-bold text-slate-800 m-0 text-sm group-hover:text-[#0F3DDE] transition-colors line-clamp-2 leading-snug">{project.title}</p>
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 block">{project.category}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#003a8f] to-[#1a1851] text-white flex items-center justify-center text-[10px] font-bold shadow-sm">
+                    <td className="px-6 py-5 align-top text-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 text-[#0F3DDE] flex items-center justify-center text-[10px] font-black shadow-sm ring-1 ring-blue-200/50 shrink-0">
                           {project.adviser.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <span className="font-medium text-slate-700">{project.adviser}</span>
+                        <span className="font-bold text-slate-700 whitespace-nowrap">{project.adviser}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 align-top">
                       <div className="flex -space-x-2">
                         {project.students.slice(0, 3).map((_, i) => (
-                          <div key={i} className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center text-xs font-bold text-slate-500">
-                            <i className="fas fa-user text-[9px]"></i>
+                          <div key={i} className="w-8 h-8 rounded-full bg-slate-100 ring-2 ring-white shadow-sm flex items-center justify-center text-xs font-bold text-slate-400 transition-transform hover:scale-110 hover:z-10">
+                            <i className="fas fa-user text-[10px]"></i>
                           </div>
                         ))}
                         {project.students.length > 3 && (
-                          <div className="w-7 h-7 rounded-full bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-bold text-slate-600">
+                          <div className="w-8 h-8 rounded-full bg-slate-50 ring-2 ring-white shadow-sm flex items-center justify-center text-[10px] font-black text-slate-500 z-10">
                             +{project.students.length - 3}
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 align-top">
                       <ProgramHeadStatusBadge tone={getStatusTone(project.status)}>
                         {project.status}
                       </ProgramHeadStatusBadge>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 align-top">
                       <div className="flex items-center gap-3">
-                        <div className="flex-grow h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="flex-grow h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                           <div
-                            className="h-full bg-[#003a8f] rounded-full transition-all duration-1000 ease-out"
+                            className={`h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${project.progress === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-blue-500 to-blue-400'}`}
                             style={{ width: `${project.progress}%` }}
-                          />
+                          >
+                            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-[shimmer_2s_infinite]"></div>
+                          </div>
                         </div>
-                        <span className="text-xs font-bold text-slate-600 w-8">{project.progress}%</span>
+                        <span className="text-xs font-black text-slate-700 w-8">{project.progress}%</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-slate-600">{project.startLabel}</span>
+                    <td className="px-6 py-5 align-top">
+                      <span className="text-xs font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md ring-1 ring-slate-200/50">{project.startLabel}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 align-top">
                       {project.transferStatus === 'Ready for Transfer' ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-green-50 text-green-700 text-xs font-bold border border-green-100">
-                          <i className="fas fa-check-circle"></i> Ready
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest ring-1 ring-inset ring-emerald-200/50 shadow-sm whitespace-nowrap">
+                          <i className="fas fa-rocket"></i> Ready
                         </span>
                       ) : project.transferStatus === 'Deployed' || project.transferStatus === 'In Use' ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
-                          <i className="fas fa-external-link-alt"></i> {project.transferStatus}
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 text-[10px] font-black uppercase tracking-widest ring-1 ring-inset ring-purple-200/50 shadow-sm whitespace-nowrap">
+                          <i className="fas fa-box-open"></i> {project.transferStatus}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 text-slate-600 text-xs font-medium border border-slate-200">
-                          <i className="fas fa-clock text-slate-400"></i> {project.transferStatus}
+                        <span className="inline-flex items-center gap-1.5 text-slate-500 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
+                          <i className="fas fa-clock text-slate-300"></i> {project.transferStatus}
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-6 py-5 align-top text-right" onClick={(e) => e.stopPropagation()}>
                       <button
-                        className="opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-200 h-8 px-4 rounded-lg bg-[#003a8f] text-white text-xs font-bold hover:-translate-y-0.5 hover:shadow-md shadow-sm flex items-center gap-1.5 ml-auto"
+                        className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300 h-9 px-4 rounded-xl bg-[#0F3DDE]/10 text-[#0F3DDE] text-[11px] font-black uppercase tracking-widest hover:bg-[#0F3DDE] hover:text-white shadow-sm ring-1 ring-blue-200/50 flex items-center gap-2 ml-auto"
                         onClick={() => setSelectedCode(project.code)}
                       >
-                        <i className="fas fa-eye text-[10px]"></i> View
+                        <i className="fas fa-arrow-right"></i> View
                       </button>
                     </td>
                   </tr>
@@ -339,12 +373,12 @@ export function ProgramHeadProjects() {
           <div className="space-y-6">
             {/* Project Header */}
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#003a8f] to-[#1a1851] text-white flex items-center justify-center text-xl shadow-lg">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#0F3DDE] to-[#081B4B] text-white flex items-center justify-center text-xl shadow-lg">
                 <i className="fas fa-project-diagram"></i>
               </div>
               <div>
                 <h3 className="m-0 text-xl font-bold text-slate-800">{selectedProject.title}</h3>
-                <code className="text-sm font-mono text-[#003a8f] bg-blue-50 px-2 py-0.5 rounded-md mt-1 inline-block">{selectedProject.code}</code>
+                <code className="text-sm font-mono text-[#0F3DDE] bg-blue-50 px-2 py-0.5 rounded-md mt-1 inline-block">{selectedProject.code}</code>
               </div>
             </div>
 
@@ -374,10 +408,10 @@ export function ProgramHeadProjects() {
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Progress</span>
-                <span className="text-lg font-extrabold text-[#003a8f]">{selectedProject.progress}%</span>
+                <span className="text-lg font-extrabold text-[#0F3DDE]">{selectedProject.progress}%</span>
               </div>
               <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#003a8f] to-blue-400 rounded-full transition-all duration-1000 ease-out" style={{ width: `${selectedProject.progress}%` }} />
+                <div className="h-full bg-gradient-to-r from-[#0F3DDE] to-[#4A72FF] rounded-full transition-all duration-1000 ease-out" style={{ width: `${selectedProject.progress}%` }} />
               </div>
               <p className="text-xs text-slate-500 mt-2 m-0">Current Stage: {selectedProject.currentStage}</p>
             </div>
@@ -388,7 +422,7 @@ export function ProgramHeadProjects() {
               <div className="space-y-2">
                 {selectedProject.students.map((student, i) => (
                   <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 hover:shadow-sm transition-all">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#003a8f] to-[#1a1851] text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0F3DDE] to-[#081B4B] text-white flex items-center justify-center text-xs font-bold shadow-sm">
                       {student.split(' ').map(n => n[0]).join('')}
                     </div>
                     <span className="text-sm font-medium text-slate-700">{student}</span>
@@ -416,7 +450,7 @@ export function ProgramHeadProjects() {
               <button className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all" onClick={() => setSelectedCode('')}>
                 Close
               </button>
-              <button className="flex-1 py-3 bg-[#003a8f] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#002c6b] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+              <button className="flex-1 py-3 bg-[#0F3DDE] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#0c31b3] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                 <i className="fas fa-file-pdf"></i> Generate Report
               </button>
             </div>

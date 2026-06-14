@@ -644,7 +644,7 @@ function GroupDetailsModal({
           </button>
         </div>
 
-        {group.title === 'Awaiting Adviser Approval' && onApproveTitle && (
+        {group.title === 'Pending Title Approval' && onApproveTitle && (
           <div className="mx-6 mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
             <div className="flex gap-4 items-start">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">

@@ -250,7 +250,6 @@ export function SystemAdminShell({
                             onClick={closeSidebar}
                             onFocus={() => prefetchRoute(subItem.href)}
                             onMouseEnter={() => prefetchRoute(subItem.href)}
-                            style={{ margin: '0.28rem 0.85rem', paddingLeft: '1.15rem' }}
                           >
                             <span className="sidebar-link-icon">
                               <i aria-hidden="true" className={`fas ${subItem.icon}`}></i>

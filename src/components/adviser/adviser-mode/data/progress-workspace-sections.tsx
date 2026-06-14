@@ -92,23 +92,20 @@ export function ProgressSummaryCards({ metrics }: { metrics: ProgressSummaryMetr
       {metrics.map((metric) => (
         <article
           key={metric.id}
-          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)]"
+          className="group relative flex flex-row items-center justify-between overflow-hidden rounded-[1.25rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)]"
         >
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--text-light)]">{metric.label}</p>
-              <p className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
-                {metric.value}
-              </p>
-            </div>
-            <span
-              className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
-            >
-              <i className={`fas ${metric.icon}`} />
-            </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--text-light)]">{metric.label}</p>
+            <p className="mt-1 text-3xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
+              {metric.value}
+            </p>
           </div>
-          <p className="mt-4 text-[13px] leading-[1.6] text-[var(--text-light)]">{metric.helperText}</p>
+          <span
+            className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
+          >
+            <i className={`fas ${metric.icon}`} />
+          </span>
         </article>
       ))}
     </div>
@@ -130,9 +127,7 @@ export function ProgressOverview({
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">Progress Overview</h2>
-          <p className="text-sm text-[var(--text-light)]">
-            Quick view of milestone flow, pacing, and the next adviser checkpoint.
-          </p>
+          
         </div>
         <span className="inline-flex items-center gap-2 rounded-full bg-[rgba(0,58,143,0.06)] px-3 py-1 text-xs font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.10)]">
           <i className="fas fa-building text-[10px]" />
@@ -144,22 +139,22 @@ export function ProgressOverview({
         <OverviewMetric
           label="Average Progress Percentage"
           value={`${averageProgress}%`}
-          note="Average completion across assigned IT groups."
+          note=""
         />
         <OverviewMetric
           label="Current Active Milestone"
           value={activeMilestone}
-          note="Most common active stage in the current review cycle."
+          note=""
         />
         <OverviewMetric
           label="Groups Behind Schedule"
           value={groupsBehindSchedule}
-          note="Groups flagged as at risk or delayed."
+          note=""
         />
         <OverviewMetric
           label="Next Major Deadline"
           value={deadlineCopy}
-          note={nextMajorDeadline ? getDeadlineLabel(nextMajorDeadline.deadline) : 'No urgent target date.'}
+          note=""
         />
       </div>
     </section>
@@ -181,9 +176,7 @@ export function MilestoneTracker({ records }: { records: AdviserProgressRecord[]
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-bold tracking-[-0.03em] text-[var(--text-dark)]">Milestone Tracking</h2>
-          <p className="text-sm text-[var(--text-light)]">
-            Backend-ready stage flow for thesis and capstone progress monitoring.
-          </p>
+          
         </div>
         <p className="text-sm font-semibold text-[var(--text-light)]">
           Active stage: <span className="text-[var(--primary)]">{activeMilestone}</span>
@@ -254,11 +247,8 @@ export function ProgressFilters({
 }: ProgressFiltersProps) {
   return (
     <section className="rounded-[1.75rem] bg-white p-4 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-      <div className="grid gap-3 xl:grid-cols-[minmax(170px,1fr)_minmax(160px,1fr)_minmax(180px,1fr)_minmax(220px,1fr)_minmax(320px,1.5fr)]">
-        <div className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[rgba(0,58,143,0.06)] px-4 text-sm font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
-          <i className="fas fa-lock text-xs" />
-          IT Department
-        </div>
+      <div className="grid gap-3 xl:grid-cols-[minmax(160px,1fr)_minmax(180px,1fr)_minmax(220px,1fr)_minmax(320px,1.5fr)]">
+        
 
         <WorkspaceSelect value={statusFilter} onChange={onStatusChange}>
           {statusOptions.map((option) => (
@@ -422,7 +412,7 @@ function OverviewMetric({
     <article className="rounded-[1.35rem] bg-slate-50/90 p-4">
       <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-light)]">{label}</p>
       <p className="mt-3 text-lg font-bold leading-7 text-[var(--text-dark)]">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-[var(--text-light)]">{note}</p>
+      
     </article>
   );
 }

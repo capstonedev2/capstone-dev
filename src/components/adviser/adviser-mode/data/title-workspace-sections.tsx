@@ -434,7 +434,9 @@ export function TitleDetailsDrawer({
   const selectedFileIsOffice = selectedUploadedFile ? isTitleOfficeFile(selectedUploadedFile) : false;
 
   useEffect(() => {
-    setSelectedPreviewId(firstUploadedFileId || GENERATED_PREVIEW_ID);
+    if (firstUploadedFileId) {
+      setSelectedPreviewId(firstUploadedFileId);
+    }
   }, [record?.id, firstUploadedFileId]);
 
   useEffect(() => {
@@ -488,7 +490,7 @@ export function TitleDetailsDrawer({
 
   const statusMeta = getTitleStatusMeta(record.status);
   const decisionPanelCopy = getTitleDecisionPanelCopy(record.status);
-  const selectedPreviewTitle = selectedUploadedFile?.name || 'Generated title summary';
+  const selectedPreviewTitle = selectedUploadedFile?.name || 'No file selected';
   const selectedPreviewUrl = selectedUploadedFile
     ? getTitleFilePreviewUrl(selectedUploadedFile, selectedSignedUrl)
     : null;
@@ -551,23 +553,12 @@ export function TitleDetailsDrawer({
                     <p className="text-[11px] font-black uppercase tracking-[0.15em] text-blue-700">
                       {selectedUploadedFile
                         ? `${getTitleFileExtension(selectedUploadedFile.name, selectedUploadedFile.fileType).toUpperCase()} Preview`
-                        : 'Title Summary Preview'}
+                        : 'File Preview'}
                     </p>
                     <h2 className="mt-1 truncate text-lg font-black text-slate-950">Proposal Preview</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      className={`inline-flex min-h-9 items-center justify-center gap-2 rounded-xl px-3 text-xs font-black transition ${
-                        selectedPreviewId === GENERATED_PREVIEW_ID
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-white text-blue-700 ring-1 ring-inset ring-blue-200 hover:bg-blue-50'
-                      }`}
-                      type="button"
-                      onClick={() => setSelectedPreviewId(GENERATED_PREVIEW_ID)}
-                    >
-                      <i className="fas fa-file-lines text-[10px]" aria-hidden="true" />
-                      Generated
-                    </button>
+
                     {uploadedFiles.map((file) => (
                       <button
                         key={file.id}
@@ -604,7 +595,7 @@ export function TitleDetailsDrawer({
                           <p className="text-xs font-bold text-slate-500">
                             {selectedUploadedFile
                               ? `${getTitleFileExtension(selectedUploadedFile.name, selectedUploadedFile.fileType).toUpperCase()} live preview`
-                              : 'HTML generated preview'}
+                              : 'No file available'}
                           </p>
                         </div>
                       </div>
@@ -634,20 +625,12 @@ export function TitleDetailsDrawer({
                         ) : (
                           <>
                             <button
-                              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-400 cursor-not-allowed"
                               type="button"
-                              onClick={() => openTitleSubmissionDocument(documentData)}
+                              disabled
                             >
                               <i className="fas fa-up-right-from-square text-[10px]" aria-hidden="true" />
                               Open
-                            </button>
-                            <button
-                              className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
-                              type="button"
-                              onClick={() => downloadTitleSubmissionDocument(documentData)}
-                            >
-                              <i className="fas fa-download text-[10px]" aria-hidden="true" />
-                              Download
                             </button>
                           </>
                         )}
@@ -665,7 +648,7 @@ export function TitleDetailsDrawer({
                               {previewError ? 'Preview unavailable for this file.' : 'Preparing document preview...'}
                             </p>
                             <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
-                              {previewError || 'Office documents need a temporary viewer link before they can render inside the modal.'}
+                              {previewError || 'Office documents need a temporary viewer link before they can render inside the modal. (Note: Google Docs viewer cannot render local/localhost files. Please download the file instead if testing locally).'}
                             </p>
                             {previewError ? (
                               <a
@@ -687,11 +670,14 @@ export function TitleDetailsDrawer({
                           />
                         )
                       ) : (
-                        <iframe
-                          className="block h-[clamp(620px,76vh,960px)] w-full rounded-xl border border-slate-200 bg-white"
-                          srcDoc={generatedPreviewHtml}
-                          title="Generated title submission preview"
-                        />
+                        <div className="flex h-[clamp(620px,76vh,960px)] flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 text-center">
+                          <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+                            <i className="fas fa-file-excel text-sm" aria-hidden="true" />
+                          </span>
+                          <p className="mt-4 text-sm font-black text-slate-700">
+                            No file available for preview.
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -773,8 +759,8 @@ export function TitleDetailsDrawer({
                   </div>
                 ) : (
                   <div className="mt-4 rounded-[1.25rem] bg-blue-50/50 p-4 ring-1 ring-inset ring-blue-100/50">
-                    <p className="text-sm font-medium leading-relaxed text-blue-900">
-                      No physical files were uploaded. Use the generated title summary preview for adviser review.
+                    <p className="text-sm font-medium leading-relaxed text-slate-600">
+                      No physical files were uploaded.
                     </p>
                   </div>
                 )}
@@ -1140,7 +1126,7 @@ export function TitleCard({
               <i className="fas fa-paperclip text-blue-500" /> Proposal File
             </p>
             <p className="mt-3 truncate text-sm font-black text-slate-900" title={firstFile?.name || undefined}>
-              {firstFile?.name || 'Generated title summary'}
+              {firstFile?.name || 'No proposal file'}
             </p>
             <p className="mt-1 text-xs font-bold text-slate-500">
               {fileCount ? `${fileCount} attached file${fileCount === 1 ? '' : 's'}` : 'No uploaded file'}

@@ -573,8 +573,9 @@ export function ProgramHeadSchedule() {
   return (
     <div className="space-y-8 pb-8">
       {/* HEADER SECTION */}
-      <section className="rounded-[20px] bg-white border border-slate-200 shadow-sm p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-transparent opacity-60 pointer-events-none" />
+      <section className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden p-8">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#0F3DDE]/5 to-[#081B4B]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Defense Scheduler</h1>
@@ -851,8 +852,9 @@ export function ProgramHeadSchedule() {
         <div className="sticky top-6 flex flex-col gap-6">
           
           {/* QUEUE TIMELINE */}
-          <div className="bg-white rounded-[20px] border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
-            <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+          <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden flex flex-col max-h-[500px]">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="p-5 border-b border-slate-100/80 relative z-10 flex items-center justify-between">
               <div>
                 <h3 className="text-[14px] font-bold text-slate-900">Presentation Queue</h3>
                 <p className="text-[12px] text-slate-500 font-medium mt-0.5">{presentationOrder.length} groups selected - {getTotalDurationStr()}</p>
@@ -920,7 +922,9 @@ export function ProgramHeadSchedule() {
           </div>
 
           {/* SCHEDULE SETTINGS */}
-          <div className="bg-white rounded-[20px] border border-slate-200 shadow-sm p-6">
+          <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden p-6">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
             <h3 className="text-[14px] font-bold text-slate-900 mb-5 flex items-center gap-2">
               <i className="fas fa-sliders-h text-slate-400"></i> Schedule Parameters
             </h3>
@@ -1139,6 +1143,7 @@ export function ProgramHeadSchedule() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

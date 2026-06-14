@@ -1,9 +1,20 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { MAX_SCORE, RUBRIC, scoreTone } from './live-defense-logic';
+import { scoreTone } from './live-defense-logic';
+
+export type RubricItem = {
+  id: string;
+  label: string;
+  desc: string;
+  weight: number;
+  anchor: string;
+};
 
 type Props = {
+  projectTitle: string;
+  groupRubric: RubricItem[];
+  individualRubric: RubricItem[];
   scores: Record<string, number>;
   setScore: (id: string, val: number) => void;
   individualScores: Record<string, number>;
@@ -50,14 +61,20 @@ export function DefenseEvalPanel({
   panelistVotes,
   setPanelistVote,
   panelistNames,
-  currentPanelistName
+  currentPanelistName,
+  groupRubric,
+  individualRubric,
+  projectTitle
 }: Props) {
   const [tab, setTab] = useState<'group' | 'individual'>('group');
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  
+  const MAX_SCORE = groupRubric.reduce((a, c) => a + c.weight, 0);
+  const MAX_INDIVIDUAL_SCORE = individualRubric.reduce((a, c) => a + c.weight, 0);
   const total = Object.values(scores).reduce((a, c) => a + c, 0);
-  const scored = RUBRIC.filter((r) => scores[r.id] > 0).length;
-  const progressPct = (scored / RUBRIC.length) * 100;
-  const groupComplete = scored === RUBRIC.length;
+  const scored = groupRubric.filter((r) => scores[r.id] > 0).length;
+  const progressPct = groupRubric.length > 0 ? (scored / groupRubric.length) * 100 : 0;
+  const groupComplete = scored === groupRubric.length;
   const presentMembers = members.filter((member) => attendance[member] !== false);
   const individualScored = presentMembers.filter((member) => individualScores[member] > 0).length;
   const individualAverage =
@@ -69,14 +86,7 @@ export function DefenseEvalPanel({
 
   const handleScore = (id: string, val: number) => {
     if (submitted) return;
-
     setScore(id, val);
-    const nextIdx = RUBRIC.findIndex((r) => r.id === id) + 1;
-    if (nextIdx < RUBRIC.length) {
-      const nextId = RUBRIC[nextIdx].id;
-      setCollapsed((current) => ({ ...current, [id]: true, [nextId]: false }));
-      window.setTimeout(() => sectionRefs.current[nextId]?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
-    }
   };
 
   if (isMyAdvisee) {
@@ -136,7 +146,7 @@ export function DefenseEvalPanel({
           <div className="rounded-xl border border-white bg-white/60 p-3.5 shadow-[0_2px_10px_rgba(0,58,143,0.03)] backdrop-blur-sm">
             <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Rubric Progress</p>
             <p className="mt-1 text-base font-black text-[#102033]">
-              {scored}<span className="text-slate-400 font-bold text-sm">/{RUBRIC.length} criteria</span>
+              {scored}<span className="text-slate-400 font-bold text-sm">/{groupRubric.length} criteria</span>
             </p>
           </div>
           <div className="rounded-xl border border-white bg-white/60 p-3.5 shadow-[0_2px_10px_rgba(0,58,143,0.03)] backdrop-blur-sm">
@@ -182,7 +192,7 @@ export function DefenseEvalPanel({
       <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
         {tab === 'group' ? (
           <div className="space-y-4">
-            {RUBRIC.map((criteria) => {
+            {groupRubric.map((criteria) => {
               const score = scores[criteria.id] || 0;
               const isComplete = score > 0;
 
@@ -212,33 +222,47 @@ export function DefenseEvalPanel({
                     </div>
                   </div>
 
-                  <div className="px-4 pb-4">
-                    <div className="grid grid-cols-10 gap-1 rounded-xl border border-white/60 bg-white/40 p-1 shadow-inner">
-                      {Array.from({ length: criteria.weight }, (_, index) => {
-                        const value = index + 1;
-                        const selected = score === value;
+                    <div className="px-4 pb-4">
+                        <div className="flex flex-col gap-3 rounded-xl border border-blue-100/60 bg-gradient-to-br from-blue-50/30 to-slate-50/30 p-4 shadow-[inset_0_2px_10px_rgba(0,58,143,0.02)]">
+                          <div className="flex items-center gap-4">
+                            <button
+                              type="button"
+                              onClick={() => handleScore(criteria.id, Math.max(0, score - 1))}
+                              disabled={submitted || score <= 0}
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-[#003a8f] shadow-sm transition-all hover:bg-blue-50 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed border border-blue-100/50"
+                            >
+                              <i className="fas fa-minus" />
+                            </button>
+                            
+                            <div className="flex-1 flex items-center justify-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                max={criteria.weight}
+                                value={score || ''}
+                                placeholder="0"
+                                disabled={submitted}
+                                onChange={(e) => {
+                                  const val = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                  if (!isNaN(val)) {
+                                    handleScore(criteria.id, Math.min(criteria.weight, Math.max(0, val)));
+                                  }
+                                }}
+                                className="w-20 h-12 rounded-xl border-2 border-blue-200 bg-white text-center text-xl font-black text-[#003a8f] shadow-sm transition-all focus:border-[#003a8f] focus:outline-none focus:ring-4 focus:ring-[#003a8f]/10 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-300 [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                              <span className="text-sm font-bold text-slate-400">/ {criteria.weight}</span>
+                            </div>
 
-                        return (
-                          <button
-                            key={value}
-                            type="button"
-                            disabled={submitted}
-                            onClick={() => handleScore(criteria.id, value)}
-                            className={`h-9 rounded-lg text-xs font-black transition-all duration-300 ${
-                              selected
-                                ? 'bg-gradient-to-b from-[#003a8f] to-[#082a67] text-white shadow-[0_2px_10px_rgba(0,58,143,0.3)] ring-1 ring-[#003a8f]/50 scale-[1.02]'
-                                : 'text-slate-500 hover:bg-white hover:text-[#102033] hover:shadow-sm'
-                            } disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none`}
-                          >
-                            {value}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="mt-2.5 flex items-center justify-between px-1 text-[0.6rem] font-black uppercase tracking-widest text-slate-400">
-                      <span>Needs work</span>
-                      <span>Excellent</span>
-                    </div>
+                            <button
+                              type="button"
+                              onClick={() => handleScore(criteria.id, Math.min(criteria.weight, score + 1))}
+                              disabled={submitted || score >= criteria.weight}
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#003a8f] to-[#082a67] text-white shadow-[0_4px_10px_rgba(0,58,143,0.2)] transition-all hover:shadow-[0_6px_15px_rgba(0,58,143,0.3)] active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              <i className="fas fa-plus" />
+                            </button>
+                          </div>
+                        </div>
 
                     {notes[criteria.id] === undefined ? (
                       <button
@@ -301,8 +325,8 @@ export function DefenseEvalPanel({
 
             {members.map((member) => {
               const isAbsent = attendance[member] === false;
-              const score = isAbsent ? 0 : individualScores[member] || 0;
-              const isComplete = score > 0;
+              const totalMemberScore = individualRubric.reduce((acc, criteria) => acc + (individualScores[`${member}::${criteria.id}`] || 0), 0);
+              const isComplete = totalMemberScore > 0;
 
               return (
                 <div
@@ -328,32 +352,68 @@ export function DefenseEvalPanel({
                     </div>
                     {!isAbsent && (
                       <span className={`flex items-center justify-center min-w-[3.5rem] rounded-lg border ${isComplete ? 'border-[#003a8f]/30 bg-[#003a8f] text-white shadow-md' : 'border-white bg-white text-[#102033] shadow-sm'} px-2 py-1.5 tabular-nums`}>
-                        <span className="text-base font-black leading-none">{score || '-'}</span>
-                        <span className={`text-[0.65rem] font-bold ml-0.5 mt-1 ${isComplete ? 'text-blue-100' : 'text-slate-400'}`}>/5</span>
+                        <span className="text-base font-black leading-none">{totalMemberScore || '-'}</span>
+                        <span className={`text-[0.65rem] font-bold ml-0.5 mt-1 ${isComplete ? 'text-blue-100' : 'text-slate-400'}`}>/{MAX_INDIVIDUAL_SCORE}</span>
                       </span>
                     )}
                   </div>
-                  <div className={`grid grid-cols-5 gap-1.5 rounded-xl border border-white/60 p-1.5 shadow-inner ${isAbsent ? 'bg-rose-100/50 grayscale opacity-50' : 'bg-white/40'}`}>
-                    {[1, 2, 3, 4, 5].map((value) => {
-                      const selected = score === value;
 
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          disabled={submitted || isAbsent}
-                          onClick={() => setIndividualScore(member, value)}
-                          className={`h-10 rounded-lg text-[0.8rem] font-black transition-all duration-300 ${
-                            selected
-                              ? 'bg-gradient-to-b from-[#f6be00] to-[#d4a000] text-[#102033] shadow-md ring-1 ring-[#f6be00]/50 scale-[1.05]'
-                              : 'text-slate-500 hover:bg-white hover:text-[#102033] hover:shadow-sm'
-                          } disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none`}
-                        >
-                          {value}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {!isAbsent && (
+                    <div className="space-y-4">
+                      {individualRubric.map((criteria) => {
+                         const score = individualScores[`${member}::${criteria.id}`] || 0;
+                         return (
+                           <div key={criteria.id} className="rounded-xl border border-slate-200/60 bg-white/50 p-3">
+                             <div className="flex justify-between items-center mb-3">
+                               <div>
+                                 <p className="text-xs font-bold text-[#102033]">{criteria.label}</p>
+                                 <p className="text-[0.65rem] text-slate-500 mt-0.5">{criteria.desc}</p>
+                               </div>
+                               <span className="text-[0.65rem] font-black text-[#003a8f] ml-4 shrink-0">{score} / {criteria.weight}</span>
+                             </div>
+                             <div className="flex items-center gap-3">
+                               <button
+                                 type="button"
+                                 onClick={() => setIndividualScore(`${member}::${criteria.id}`, Math.max(0, score - 1))}
+                                 disabled={submitted || score <= 0}
+                                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#003a8f] shadow-sm transition-all hover:bg-blue-50 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed border border-blue-100/50"
+                               >
+                                 <i className="fas fa-minus text-xs" />
+                               </button>
+                               
+                               <div className="flex-1 flex items-center justify-center gap-1.5">
+                                 <input
+                                   type="number"
+                                   min="0"
+                                   max={criteria.weight}
+                                   value={score || ''}
+                                   placeholder="0"
+                                   disabled={submitted}
+                                   onChange={(e) => {
+                                     const val = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                                     if (!isNaN(val)) {
+                                       setIndividualScore(`${member}::${criteria.id}`, Math.min(criteria.weight, Math.max(0, val)));
+                                     }
+                                   }}
+                                   className="w-16 h-9 rounded-lg border-2 border-blue-200 bg-white text-center text-sm font-black text-[#003a8f] shadow-sm transition-all focus:border-[#003a8f] focus:outline-none focus:ring-4 focus:ring-[#003a8f]/10 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-300 [&::-webkit-inner-spin-button]:appearance-none"
+                                 />
+                                 <span className="text-[0.65rem] font-bold text-slate-400">/ {criteria.weight}</span>
+                               </div>
+
+                               <button
+                                 type="button"
+                                 onClick={() => setIndividualScore(`${member}::${criteria.id}`, Math.min(criteria.weight, score + 1))}
+                                 disabled={submitted || score >= criteria.weight}
+                                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#003a8f] to-[#082a67] text-white shadow-sm transition-all hover:shadow-md active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+                               >
+                                 <i className="fas fa-plus text-xs" />
+                               </button>
+                             </div>
+                           </div>
+                         );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -364,9 +424,18 @@ export function DefenseEvalPanel({
       <div className="shrink-0 border-t border-slate-200 p-4">
         {submitted ? (
           <div className="space-y-3">
-            <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 py-2.5 text-sm font-black text-emerald-700">
-              <i className="fas fa-check-circle" />
-              Scores Submitted
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5">
+              <div className="flex items-center gap-2 text-sm font-black text-emerald-700">
+                <i className="fas fa-check-circle" />
+                Scores Submitted
+              </div>
+              <button 
+                type="button" 
+                onClick={() => window.print()}
+                className="flex items-center gap-2 rounded-md bg-white border border-emerald-200 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm transition-all hover:bg-emerald-100"
+              >
+                <i className="fas fa-print" /> Print Form
+              </button>
             </div>
 
             {/* Per-Panelist Vote */}
@@ -519,10 +588,150 @@ export function DefenseEvalPanel({
               {isChair ? 'End & Submit' : 'Submit Score'}
             </button>
             <p className="text-center text-xs font-semibold text-slate-500">
-              {groupComplete ? 'Ready for final submission.' : `${RUBRIC.length - scored} rubric item${RUBRIC.length - scored === 1 ? '' : 's'} remaining.`}
+              {groupComplete ? 'Ready for final submission.' : `${groupRubric.length - scored} rubric item${groupRubric.length - scored === 1 ? '' : 's'} remaining.`}
             </p>
           </div>
         )}
+      </div>
+
+      <div className="print-only bg-white text-black font-serif p-10 max-w-[800px] mx-auto">
+        <div className="flex items-center gap-6 mb-12">
+          {/* USTP Logo */}
+          <div className="w-24 h-24 shrink-0 flex items-center justify-center">
+            <img src="/System Logo/ustp-logo.png" alt="USTP Logo" className="max-w-full max-h-full object-contain" />
+          </div>
+          <div className="flex-1 text-center -ml-8">
+            <h1 className="font-bold text-[1.1rem] uppercase tracking-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>University of Science and Technology of Southern Philippines</h1>
+            <p className="text-[0.85rem]" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Alubijid | Cagayan de Oro | <span className="underline decoration-red-500 decoration-wavy">Claveria</span> | <span className="underline decoration-red-500 decoration-wavy">Panaon</span> | <span className="underline decoration-red-500 decoration-wavy">Oroquieta</span> | <span className="underline decoration-red-500 decoration-wavy">Panaon</span></p>
+          </div>
+        </div>
+
+        <div className="flex justify-end mb-8 text-[0.95rem]">
+          <div className="flex items-end">
+            <span className="mr-2">Date:</span>
+            <div className="w-48 border-b border-black font-semibold text-center">{new Date().toLocaleDateString()}</div>
+          </div>
+        </div>
+
+        <h2 className="text-center font-bold text-[1.3rem] mb-0" style={{ fontFamily: '"Times New Roman", Times, serif' }}>FINAL DEFENSE PRESENTATION</h2>
+        <h3 className="text-center text-[1rem] mb-10" style={{ fontFamily: '"Times New Roman", Times, serif' }}>(Panel's Rating)</h3>
+
+        <div className="mb-6 text-[0.95rem]">
+          <div className="flex items-end mb-6">
+            <span className="mr-2 whitespace-nowrap">Project Title:</span> 
+            <div className="flex-1 border-b border-black font-semibold pb-0.5">{projectTitle}</div>
+          </div>
+          
+          <div className="mb-6">
+            <span className="mr-2">Degree:</span>
+            <span className="font-bold">BS Information Technology</span>
+          </div>
+
+          <div className="mb-8">
+            <div className="mb-2">Group Members:</div>
+            <div className="w-80 pl-0">
+              {members.map(m => (
+                <div key={m} className="border-b border-black min-h-[1.5rem] font-semibold flex items-end pb-0.5">{m}</div>
+              ))}
+              {/* Pad with empty lines up to 4 */}
+              {Array.from({ length: Math.max(0, 4 - members.length) }).map((_, i) => (
+                <div key={`empty-${i}`} className="border-b border-black min-h-[1.5rem]" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4 text-[0.8rem] leading-tight" style={{ fontFamily: '"Arial", sans-serif' }}>
+          <p className="font-bold mb-1 text-[0.85rem]">Verdict:</p>
+          <p className="mb-0.5">
+            <span className="font-bold">APPROVED.</span> The Proponents/Researchers present an idea that potential to research based on
+          </p>
+          <p className="mb-0.5 ml-14">
+            the solid evidence gather. <span className="font-bold">25 – 50 %</span>
+          </p>
+          <p className="mb-0.5">
+            <span className="font-bold uppercase">Reoral.</span> The Proponents/Researchers failed to present a possible researchable or scholarly
+          </p>
+          <p className="ml-14">
+            Research / Special Project. <span className="font-bold">Below 25%.</span>
+          </p>
+        </div>
+
+        <table className="w-full border-collapse border border-black mb-8 text-[0.85rem]" style={{ fontFamily: '"Arial", sans-serif' }}>
+          <thead>
+            <tr>
+              <th className="border border-black px-2 py-3 text-left font-normal w-[25%] align-top">Project Full blown<br/>Manuscript (20%)</th>
+              <th className="border border-black px-2 py-3 text-left font-normal w-[20%] align-top">Project<br/>Output (20%)</th>
+              <th className="border border-black px-2 py-3 text-left font-normal w-[20%] align-top">Oral<br/>Examination<br/>(10%)</th>
+              <th className="border border-black px-2 py-3 text-left font-normal w-[15%] align-top">Total (50%)</th>
+              <th className="border border-black px-2 py-3 text-left font-normal w-[20%] align-top">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="border border-black px-2 py-5 text-center font-bold text-[1rem]">
+                {(() => {
+                  const manuscriptTotal = groupRubric.filter(r => r.anchor.includes('Manuscript')).reduce((acc, r) => acc + (scores[r.id] || 0), 0);
+                  const maxManuscript = groupRubric.filter(r => r.anchor.includes('Manuscript')).reduce((acc, r) => acc + r.weight, 0);
+                  return maxManuscript > 0 ? ((manuscriptTotal / maxManuscript) * 20).toFixed(1) : '';
+                })()}
+              </td>
+              <td className="border border-black px-2 py-5 text-center font-bold text-[1rem]">
+                {(() => {
+                  const outputTotal = groupRubric.filter(r => r.anchor.includes('Output')).reduce((acc, r) => acc + (scores[r.id] || 0), 0);
+                  const maxOutput = groupRubric.filter(r => r.anchor.includes('Output')).reduce((acc, r) => acc + r.weight, 0);
+                  return maxOutput > 0 ? ((outputTotal / maxOutput) * 20).toFixed(1) : '';
+                })()}
+              </td>
+              <td className="border border-black px-2 py-5 text-center font-bold text-[1rem]">
+                {(() => {
+                  if (members.length === 0) return '';
+                  const totalOralSum = members.reduce((sum, member) => {
+                    const memberTotal = individualRubric.reduce((acc, r) => acc + (individualScores[`${member}::${r.id}`] || 0), 0);
+                    return sum + memberTotal;
+                  }, 0);
+                  const maxOral = individualRubric.reduce((acc, r) => acc + r.weight, 0);
+                  const avgOralPoints = totalOralSum / members.length;
+                  return maxOral > 0 ? ((avgOralPoints / maxOral) * 10).toFixed(1) : '';
+                })()}
+              </td>
+              <td className="border border-black px-2 py-5 text-center font-bold text-[1rem] bg-gray-200/60">
+                {(() => {
+                  const manuscriptTotal = groupRubric.filter(r => r.anchor.includes('Manuscript')).reduce((acc, r) => acc + (scores[r.id] || 0), 0);
+                  const maxManuscript = groupRubric.filter(r => r.anchor.includes('Manuscript')).reduce((acc, r) => acc + r.weight, 0);
+                  const mScore = maxManuscript > 0 ? (manuscriptTotal / maxManuscript) * 20 : 0;
+
+                  const outputTotal = groupRubric.filter(r => r.anchor.includes('Output')).reduce((acc, r) => acc + (scores[r.id] || 0), 0);
+                  const maxOutput = groupRubric.filter(r => r.anchor.includes('Output')).reduce((acc, r) => acc + r.weight, 0);
+                  const oScore = maxOutput > 0 ? (outputTotal / maxOutput) * 20 : 0;
+
+                  const totalOralSum = members.reduce((sum, member) => {
+                    const memberTotal = individualRubric.reduce((acc, r) => acc + (individualScores[`${member}::${r.id}`] || 0), 0);
+                    return sum + memberTotal;
+                  }, 0);
+                  const maxOral = individualRubric.reduce((acc, r) => acc + r.weight, 0);
+                  const avgOralPoints = members.length > 0 ? totalOralSum / members.length : 0;
+                  const indScore = maxOral > 0 ? (avgOralPoints / maxOral) * 10 : 0;
+
+                  return (mScore + oScore + indScore).toFixed(1);
+                })()}
+              </td>
+              <td className="border border-black px-2 py-5 text-center bg-gray-200/60"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="mb-16 text-[0.95rem]">
+          <p className="mb-2">Recommendations:</p>
+          <div className="w-full min-h-[60px] whitespace-pre-wrap font-semibold">
+            {overallFeedback}
+          </div>
+        </div>
+
+        <div className="w-64">
+          <div className="border-b border-black mb-1 font-semibold text-center pb-0.5">{currentPanelistName}</div>
+          <p className="text-[0.8rem]">Panelist<br/>(Signature over Printed Name)</p>
+        </div>
       </div>
     </aside>
   );

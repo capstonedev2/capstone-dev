@@ -27079,3 +27079,50 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-shell i.profile-nav-btn-chevron, .student-shell i.portal-shell-profile-chevron, .student-shell i.sidebar-nav-chevron { font-weight: 900 !important; font-family: 'Font Awesome 6 Free' !important; }
 /* FontAwesome Chevron Fix for all roles */
 .student-shell i.profile-nav-btn-chevron, .student-shell i.portal-shell-profile-chevron, .student-shell i.sidebar-nav-chevron, i.profile-nav-btn-chevron, i.portal-shell-profile-chevron, i.sidebar-nav-chevron, .profile-nav-btn-chevron, .portal-shell-profile-chevron, .sidebar-nav-chevron { font-weight: 900 !important; font-family: 'Font Awesome 6 Free' !important; }
+
+/* -------------------------------------------------------------
+   SUBMENU SPECIFIC OVERRIDES (High Specificity)
+------------------------------------------------------------- */
+.student-shell .student-global-sidebar .sidebar-submenu .sidebar-link {
+    min-height: 2.3rem !important;
+    padding: 0.45rem 1rem 0.45rem 0.8rem !important;
+    margin: 0.15rem 0.85rem !important;
+    border-radius: 0.75rem !important;
+    font-size: 0.82rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: var(--text-meta) !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-submenu .sidebar-link::before {
+    display: none !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-submenu .sidebar-link:hover {
+    background: rgba(0, 58, 143, 0.04) !important;
+    color: var(--primary) !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-submenu .sidebar-link.is-active {
+    background: transparent !important;
+    color: var(--primary) !important;
+    font-weight: 800 !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-submenu .sidebar-link.is-active::after {
+    content: "";
+    position: absolute;
+    left: 0.2rem;
+    top: 25%;
+    bottom: 25%;
+    width: 3px;
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+.student-shell .student-global-sidebar .sidebar-submenu .sidebar-link.is-active .sidebar-link-icon {
+    color: var(--primary) !important;
+}

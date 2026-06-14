@@ -496,7 +496,13 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               <div className="member-roster">
                 {group.members.map((member) => (
                   <article key={member.id} className={`member-card project-overview-member-card ${member.isLeader ? 'is-leader' : ''} ${member.isCurrent ? 'is-current' : ''}`}>
-                    <span className="member-avatar">{getInitials(member.fullName)}</span>
+                    <span className="member-avatar flex items-center justify-center overflow-hidden">
+                      {member.profileImage ? (
+                        <img src={member.profileImage} alt={member.fullName} className="h-full w-full object-cover" />
+                      ) : (
+                        getInitials(member.fullName)
+                      )}
+                    </span>
                     <div className="member-copy">
                       <div className="member-copy-head">
                         <div className="project-overview-member-identity">

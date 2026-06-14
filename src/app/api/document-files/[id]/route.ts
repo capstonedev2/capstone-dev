@@ -40,7 +40,9 @@ const reviewStatusMap: Record<string, SubmissionStatus> = {
   save_comment: SubmissionStatus.UNDER_REVIEW,
   approved: SubmissionStatus.APPROVED,
   revision: SubmissionStatus.NEEDS_REVISION,
-  needs_revision: SubmissionStatus.NEEDS_REVISION
+  needs_revision: SubmissionStatus.NEEDS_REVISION,
+  rejected: SubmissionStatus.REJECTED,
+  declined: SubmissionStatus.REJECTED
 };
 
 const reviewDecisionMap: Record<SubmissionStatus, ReviewDecision> = {
@@ -99,7 +101,7 @@ export async function PATCH(
       return Response.json(
         {
           success: false,
-          message: 'Use a valid review status: accepted, still_reviewing, comment, approved, or needs_revision.'
+          message: 'Use a valid review status: accepted, still_reviewing, comment, approved, needs_revision, or rejected.'
         },
         { status: 400 }
       );
@@ -191,7 +193,8 @@ export async function PATCH(
             where: { id: file.submissionId },
             data: {
               status: nextStatus,
-              reviewedAt: isCommentOnly && file.submission?.reviewedAt ? file.submission.reviewedAt : nextReviewedAt
+              reviewedAt: isCommentOnly && file.submission?.reviewedAt ? file.submission.reviewedAt : nextReviewedAt,
+              rejectionReason: nextStatus === SubmissionStatus.REJECTED ? reviewNotes : undefined
             }
           })
         : file.projectId
@@ -202,6 +205,7 @@ export async function PATCH(
                 title: file.fileName,
                 description: `${file.documentCategory} document submitted for adviser review.`,
                 status: nextStatus,
+                rejectionReason: nextStatus === SubmissionStatus.REJECTED ? reviewNotes : undefined,
                 version: 1,
                 reviewedAt: nextReviewedAt,
                 files: {

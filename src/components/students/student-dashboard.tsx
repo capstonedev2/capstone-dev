@@ -1413,12 +1413,16 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                     }`}
                   >
                     <div className="relative shrink-0 transition-transform duration-300 group-hover:scale-105">
-                      <span className={`flex items-center justify-center h-11 w-11 rounded-full font-bold text-sm uppercase tracking-wider shadow-inner ring-4 ${
+                      <span className={`student-member-avatar flex items-center justify-center h-11 w-11 rounded-full font-bold text-sm uppercase tracking-wider shadow-inner ring-4 overflow-hidden ${
                         member.isCurrent 
                           ? 'bg-gradient-to-br from-blue-600 to-blue-800 text-white ring-blue-100/50' 
                           : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 ring-slate-50'
                       }`}>
-                        {getInitials(member.fullName)}
+                        {member.profileImage ? (
+                          <img src={member.profileImage} alt={member.fullName} className="h-full w-full object-cover" />
+                        ) : (
+                          getInitials(member.fullName)
+                        )}
                       </span>
                       {member.isLeader && (
                         <div className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-white shadow-md z-10 transition-transform duration-300 group-hover:rotate-12">

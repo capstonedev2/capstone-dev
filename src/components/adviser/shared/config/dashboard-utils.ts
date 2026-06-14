@@ -127,7 +127,10 @@ function formatSentenceCase(value: string) {
 }
 
 export function getGroupProjectTitle(group: AdviserDashboardData['groups'][number]) {
-  return group.projectTitle || group.title;
+  if (!group.project_id || group.milestone === 'Awaiting initial progress update' || (group.status === 'pending' && group.progress === 0)) {
+    return 'Pending Title Approval';
+  }
+  return group.projectTitle || group.title || 'Pending Title Approval';
 }
 
 export function getGroupDepartmentLabel(group: AdviserDashboardData['groups'][number]) {

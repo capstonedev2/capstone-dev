@@ -164,7 +164,8 @@ function toTitlePayload(project: any) {
     membersCount: groupMembers.length,
     memberPreview: groupMembers.map((member: any) => member.name).filter(Boolean),
     groupMembers,
-    adviserAction: latestComment?.body || 'Pending adviser review for originality, scope fit, and academic clarity.',
+    rejectionReason: latestSubmission?.rejectionReason || null,
+    adviserAction: latestSubmission?.rejectionReason || latestComment?.body || 'Pending adviser review for originality, scope fit, and academic clarity.',
     latestReviewComment: latestComment
       ? {
           id: latestComment.id,
@@ -237,6 +238,7 @@ const projectInclude = {
       id: true,
       submittedAt: true,
       reviewedAt: true,
+      rejectionReason: true,
       files: {
         select: {
           id: true,
@@ -586,7 +588,8 @@ export async function PATCH(request: Request) {
             where: { id: project.submissions[0].id },
             data: {
               status: submissionStatus,
-              reviewedAt: new Date()
+              reviewedAt: new Date(),
+              rejectionReason: submissionStatus === SubmissionStatus.REJECTED ? remarks : undefined
             }
           })
         : await tx.submission.create({
@@ -596,7 +599,8 @@ export async function PATCH(request: Request) {
               title: 'Title Proposal Submission',
               description: project.abstract,
               status: submissionStatus,
-              reviewedAt: new Date()
+              reviewedAt: new Date(),
+              rejectionReason: submissionStatus === SubmissionStatus.REJECTED ? remarks : undefined
             }
           });
 
@@ -631,9 +635,35 @@ export async function PATCH(request: Request) {
           data: {
             projectId: project.id,
             projectTitle: project.title,
-            title: project.group?.title || project.title
+            title: (project.group?.title && project.group.title !== 'Pending Student Submission') ? project.group.title : project.title
           }
         });
+
+        const otherProjects = await tx.project.findMany({
+          where: {
+            groupId: project.groupId,
+            id: { not: project.id },
+            status: { notIn: [ProjectStatus.ARCHIVED, ProjectStatus.APPROVED] }
+          },
+          select: { id: true }
+        });
+
+        if (otherProjects.length > 0) {
+          const otherProjectIds = otherProjects.map((p) => p.id);
+          
+          await tx.project.updateMany({
+            where: { id: { in: otherProjectIds } },
+            data: { status: ProjectStatus.ARCHIVED }
+          });
+          
+          await tx.submission.updateMany({
+            where: {
+              projectId: { in: otherProjectIds },
+              status: { notIn: [SubmissionStatus.APPROVED, SubmissionStatus.REJECTED, SubmissionStatus.ARCHIVED] }
+            },
+            data: { status: SubmissionStatus.REJECTED, reviewedAt: new Date() }
+          });
+        }
       }
 
       if (project.ownerId) {

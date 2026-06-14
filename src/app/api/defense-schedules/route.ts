@@ -293,7 +293,9 @@ function formatScheduleGroup(group: ScheduleGroupRecord) {
     ? group.groupMembers.map((member) => getPersonName(member.user) || member.userId)
     : group.students || [];
   const department = group.department || group.dept || activeProject?.departmentId || activeProject?.adviser?.department || 'Unassigned';
-  const titles = group.projects.map((project) => {
+  const titles = group.projects
+    .filter((project) => APPROVED_TITLE_PROJECT_STATUSES.has(project.status))
+    .map((project) => {
     const latestSubmission = project.submissions[0] || null;
 
     return {
@@ -311,7 +313,7 @@ function formatScheduleGroup(group: ScheduleGroupRecord) {
     groupId: group.id,
     projectId: approvedProject?.id || null,
     code: group.code,
-    title: group.title || group.code,
+    title: (group.title && group.title !== 'Pending Student Submission' && group.title !== 'Awaiting Adviser Approval') ? group.title : (group.projectTitle || approvedProject?.title || group.code),
     approvedTitle: approvedProject?.title || null,
     titles,
     isEligible: Boolean(approvedProject),
@@ -444,13 +446,14 @@ export async function GET(request: Request) {
     const assignments = schedules.map(formatAssignment);
     const groupWhere: Prisma.GroupWhereInput = {};
 
-    if ((authUser.role === UserRole.PROGRAM_HEAD || authUser.role === UserRole.RESEARCH_HEAD) && authUser.department) {
+    /* if ((authUser.role === UserRole.PROGRAM_HEAD || authUser.role === UserRole.RESEARCH_HEAD) && authUser.department) {
+      const deptSearch = { equals: authUser.department, mode: 'insensitive' as Prisma.QueryMode };
       groupWhere.OR = [
-        { department: authUser.department },
-        { dept: authUser.department },
-        { projects: { some: { departmentId: authUser.department } } }
+        { department: deptSearch },
+        { dept: deptSearch },
+        { projects: { some: { departmentId: deptSearch } } }
       ];
-    }
+    } */
 
     const scheduleGroups = await prisma.group.findMany({
       where: groupWhere,

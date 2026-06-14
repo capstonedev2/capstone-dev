@@ -1275,14 +1275,15 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     };
   }, [data.group.id, data.profile.fullName, workspaceAccess.isLimited]);
 
-  const [dbProfile, setDbProfile] = useState<{ fullName: string; email: string; studentId: string; groupRole: string | null; projectCode: string | null } | null>(() =>
+  const [dbProfile, setDbProfile] = useState<{ fullName: string; email: string; studentId: string; groupRole: string | null; projectCode: string | null; profileImage: string | null } | null>(() =>
     data.profile.user_id
       ? {
           fullName: data.profile.fullName,
           email: data.profile.email,
           studentId: data.profile.studentId,
           groupRole: data.profile.groupRole,
-          projectCode: data.project.projectCode
+          projectCode: data.project.projectCode,
+          profileImage: data.profile.profileImage || null
         }
       : null
   );
@@ -1335,7 +1336,8 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
             email: u.email || '',
             studentId: u.studentId || '',
             groupRole,
-            projectCode
+            projectCode,
+            profileImage: u.profileImage || null
           });
         }
       } catch (error) {
@@ -1364,7 +1366,8 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       : (isLimitedWorkspace ? 'Awaiting Assignment' : data.profile.groupRole),
     projectCode: dbProfile !== null
       ? (dbProfile.projectCode || 'No active project')
-      : (isLimitedWorkspace ? 'No active project' : data.project.projectCode)
+      : (isLimitedWorkspace ? 'No active project' : data.project.projectCode),
+    profileImage: dbProfile?.profileImage || data.profile.profileImage || null
   };
   const [realNotifications, setRealNotifications] = useState<any[]>(() =>
     (data.notifications || []).map(toClientNotification)
@@ -1746,7 +1749,13 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   setProfileMenuOpen((current) => !current);
                 }}
               >
-                <span className="profile-nav-btn-avatar">{getInitials(shellProfile.fullName)}</span>
+                <span className="profile-nav-btn-avatar flex items-center justify-center overflow-hidden">
+                  {shellProfile.profileImage ? (
+                    <img src={shellProfile.profileImage} alt={shellProfile.fullName} className="h-full w-full object-cover" />
+                  ) : (
+                    getInitials(shellProfile.fullName)
+                  )}
+                </span>
                 <span className="profile-nav-btn-copy">
                   <strong>{getShortName(shellProfile.fullName)}</strong>
                   <small>{shellProfile.groupRole}</small>

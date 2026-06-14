@@ -48,20 +48,13 @@ export function DefenseTopBar({
           : 'bg-[#f6be00] shadow-[0_0_10px_rgba(246,190,0,0.8)]';
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/60 bg-white/70 shadow-[0_4px_30px_rgba(15,43,89,0.06)] backdrop-blur-2xl">
-      <div className="flex min-h-20 flex-col gap-4 px-5 py-3.5 lg:flex-row lg:items-center lg:justify-between relative">
-        <div className="flex min-w-0 items-center gap-4">
-          <Link
-            href="/adviser/panel-mode/dashboard"
-            className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] border border-white bg-white/80 text-[#536982] shadow-[0_2px_10px_rgba(15,43,89,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-100 hover:text-[#003a8f] hover:shadow-[0_8px_20px_rgba(15,43,89,0.08)]"
-            aria-label="Exit live defense"
-            title="Exit"
-          >
-            <i className="fas fa-arrow-left transition-transform group-hover:-translate-x-0.5" />
-          </Link>
-          <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#003a8f] to-[#082a67] text-white shadow-[0_8px_20px_rgba(0,58,143,0.2)] sm:flex relative overflow-hidden">
-            <span className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_60%)] pointer-events-none" />
-            <i className={`fas fa-tower-broadcast relative z-10 ${timerActive ? 'animate-pulse text-[#f6be00]' : ''}`} />
+    <header className="sticky top-0 z-30 border-b border-white/40 bg-white/40 shadow-[0_8px_32px_rgba(15,43,89,0.06)] backdrop-blur-xl">
+      <div className="flex min-h-20 flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between relative">
+        <div className="flex min-w-0 items-center gap-5">
+
+          <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-[1.25rem] bg-[linear-gradient(135deg,#003a8f_0%,#082a67_100%)] text-white shadow-[0_8px_25px_rgba(0,58,143,0.3)] sm:flex relative overflow-hidden group">
+            <span className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.3),transparent_60%)] pointer-events-none transition-opacity duration-500 group-hover:opacity-100 opacity-50" />
+            <i className={`fas fa-tower-broadcast relative z-10 transition-transform duration-500 group-hover:scale-110 ${timerActive ? 'animate-pulse text-[#f6be00]' : ''}`} />
           </div>
           <div className="min-w-0">
             <div className="mb-1 flex flex-wrap items-center gap-2">

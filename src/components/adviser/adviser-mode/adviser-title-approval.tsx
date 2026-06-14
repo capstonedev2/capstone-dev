@@ -295,6 +295,18 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
             />
           )}
         </div>
+
+        {selectedRecord ? (
+          <TitleDetailsDrawer
+            record={selectedRecord}
+            remarksDraft={remarksDraft}
+            onRemarksChange={setRemarksDraft}
+            onClose={() => setSelectedTitleId(null)}
+            onApprove={(r) => applyDecision(r, 'approved', remarksDraft)}
+            onRequestRevision={(r) => applyDecision(r, 'needs-revision', remarksDraft)}
+            onReject={(r) => applyDecision(r, 'rejected', remarksDraft)}
+          />
+        ) : null}
       </>
   );
 }

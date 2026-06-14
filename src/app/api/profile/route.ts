@@ -71,7 +71,29 @@ export async function PATCH(request: Request) {
     if (contactNumber !== undefined) data.contactNumber = contactNumber || null;
     if (address !== undefined) data.address = address || null;
     if (birthDate !== undefined) data.birthDate = birthDate || null;
-    if (profileImage !== undefined) data.profileImage = profileImage || null;
+    
+    if (profileImage !== undefined) {
+      if (profileImage && profileImage.startsWith('data:image/')) {
+        try {
+          const { uploadBufferToCloudinary } = await import('@/lib/cloudinary');
+          const base64Data = profileImage.replace(/^data:image\/\w+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          const uploadResult = await uploadBufferToCloudinary(buffer, {
+            folder: 'thesistrack/profiles',
+            use_filename: true,
+            unique_filename: true
+          });
+          
+          data.profileImage = uploadResult.secure_url;
+        } catch (uploadError) {
+          console.error('Failed to upload profile image to Cloudinary:', uploadError);
+          throw new HttpError('Failed to upload profile image.', 500);
+        }
+      } else {
+        data.profileImage = profileImage || null;
+      }
+    }
     if (section !== undefined) data.section = section || null;
     if (accountSummary !== undefined) data.accountSummary = accountSummary || null;
     if (office !== undefined) data.office = office || null;

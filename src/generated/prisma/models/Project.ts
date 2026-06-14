@@ -34,6 +34,8 @@ export type ProjectMinAggregateOutputType = {
   groupId: string | null
   ownerId: string | null
   adviserId: string | null
+  isPublished: boolean | null
+  archivedAt: Date | null
   repositoryPublishedAt: Date | null
   transferReadyAt: Date | null
   createdAt: Date | null
@@ -50,6 +52,8 @@ export type ProjectMaxAggregateOutputType = {
   groupId: string | null
   ownerId: string | null
   adviserId: string | null
+  isPublished: boolean | null
+  archivedAt: Date | null
   repositoryPublishedAt: Date | null
   transferReadyAt: Date | null
   createdAt: Date | null
@@ -67,6 +71,10 @@ export type ProjectCountAggregateOutputType = {
   groupId: number
   ownerId: number
   adviserId: number
+  sdgs: number
+  awards: number
+  isPublished: number
+  archivedAt: number
   repositoryPublishedAt: number
   transferReadyAt: number
   createdAt: number
@@ -85,6 +93,8 @@ export type ProjectMinAggregateInputType = {
   groupId?: true
   ownerId?: true
   adviserId?: true
+  isPublished?: true
+  archivedAt?: true
   repositoryPublishedAt?: true
   transferReadyAt?: true
   createdAt?: true
@@ -101,6 +111,8 @@ export type ProjectMaxAggregateInputType = {
   groupId?: true
   ownerId?: true
   adviserId?: true
+  isPublished?: true
+  archivedAt?: true
   repositoryPublishedAt?: true
   transferReadyAt?: true
   createdAt?: true
@@ -118,6 +130,10 @@ export type ProjectCountAggregateInputType = {
   groupId?: true
   ownerId?: true
   adviserId?: true
+  sdgs?: true
+  awards?: true
+  isPublished?: true
+  archivedAt?: true
   repositoryPublishedAt?: true
   transferReadyAt?: true
   createdAt?: true
@@ -208,6 +224,10 @@ export type ProjectGroupByOutputType = {
   groupId: string | null
   ownerId: string | null
   adviserId: string | null
+  sdgs: string[]
+  awards: string[]
+  isPublished: boolean
+  archivedAt: Date | null
   repositoryPublishedAt: Date | null
   transferReadyAt: Date | null
   createdAt: Date
@@ -246,6 +266,10 @@ export type ProjectWhereInput = {
   groupId?: Prisma.StringNullableFilter<"Project"> | string | null
   ownerId?: Prisma.StringNullableFilter<"Project"> | string | null
   adviserId?: Prisma.StringNullableFilter<"Project"> | string | null
+  sdgs?: Prisma.StringNullableListFilter<"Project">
+  awards?: Prisma.StringNullableListFilter<"Project">
+  isPublished?: Prisma.BoolFilter<"Project"> | boolean
+  archivedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   repositoryPublishedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   transferReadyAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -276,6 +300,10 @@ export type ProjectOrderByWithRelationInput = {
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   adviserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sdgs?: Prisma.SortOrder
+  awards?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   repositoryPublishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   transferReadyAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -309,6 +337,10 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   groupId?: Prisma.StringNullableFilter<"Project"> | string | null
   ownerId?: Prisma.StringNullableFilter<"Project"> | string | null
   adviserId?: Prisma.StringNullableFilter<"Project"> | string | null
+  sdgs?: Prisma.StringNullableListFilter<"Project">
+  awards?: Prisma.StringNullableListFilter<"Project">
+  isPublished?: Prisma.BoolFilter<"Project"> | boolean
+  archivedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   repositoryPublishedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   transferReadyAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -339,6 +371,10 @@ export type ProjectOrderByWithAggregationInput = {
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   adviserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sdgs?: Prisma.SortOrder
+  awards?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   repositoryPublishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   transferReadyAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -362,6 +398,10 @@ export type ProjectScalarWhereWithAggregatesInput = {
   groupId?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
   ownerId?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
   adviserId?: Prisma.StringNullableWithAggregatesFilter<"Project"> | string | null
+  sdgs?: Prisma.StringNullableListFilter<"Project">
+  awards?: Prisma.StringNullableListFilter<"Project">
+  isPublished?: Prisma.BoolWithAggregatesFilter<"Project"> | boolean
+  archivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
   repositoryPublishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
   transferReadyAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
@@ -374,6 +414,10 @@ export type ProjectCreateInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -404,6 +448,10 @@ export type ProjectUncheckedCreateInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -424,6 +472,10 @@ export type ProjectUpdateInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,6 +506,10 @@ export type ProjectUncheckedUpdateInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -479,6 +535,10 @@ export type ProjectCreateManyInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -491,6 +551,10 @@ export type ProjectUpdateManyMutationInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -508,6 +572,10 @@ export type ProjectUncheckedUpdateManyInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -540,6 +608,10 @@ export type ProjectCountOrderByAggregateInput = {
   groupId?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   adviserId?: Prisma.SortOrder
+  sdgs?: Prisma.SortOrder
+  awards?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   repositoryPublishedAt?: Prisma.SortOrder
   transferReadyAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -556,6 +628,8 @@ export type ProjectMaxOrderByAggregateInput = {
   groupId?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   adviserId?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   repositoryPublishedAt?: Prisma.SortOrder
   transferReadyAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -572,6 +646,8 @@ export type ProjectMinOrderByAggregateInput = {
   groupId?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   adviserId?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
+  archivedAt?: Prisma.SortOrder
   repositoryPublishedAt?: Prisma.SortOrder
   transferReadyAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -813,6 +889,14 @@ export type ProjectCreatekeywordsInput = {
   set: string[]
 }
 
+export type ProjectCreatesdgsInput = {
+  set: string[]
+}
+
+export type ProjectCreateawardsInput = {
+  set: string[]
+}
+
 export type ProjectUpdatekeywordsInput = {
   set?: string[]
   push?: string | string[]
@@ -820,6 +904,16 @@ export type ProjectUpdatekeywordsInput = {
 
 export type EnumProjectStatusFieldUpdateOperationsInput = {
   set?: $Enums.ProjectStatus
+}
+
+export type ProjectUpdatesdgsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type ProjectUpdateawardsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type ProjectCreateNestedOneWithoutMilestonesInput = {
@@ -926,6 +1020,10 @@ export type ProjectCreateWithoutOwnerInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -954,6 +1052,10 @@ export type ProjectUncheckedCreateWithoutOwnerInput = {
   academicYearId?: string | null
   groupId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -984,6 +1086,10 @@ export type ProjectCreateWithoutAdviserInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1012,6 +1118,10 @@ export type ProjectUncheckedCreateWithoutAdviserInput = {
   academicYearId?: string | null
   groupId?: string | null
   ownerId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1066,6 +1176,10 @@ export type ProjectScalarWhereInput = {
   groupId?: Prisma.StringNullableFilter<"Project"> | string | null
   ownerId?: Prisma.StringNullableFilter<"Project"> | string | null
   adviserId?: Prisma.StringNullableFilter<"Project"> | string | null
+  sdgs?: Prisma.StringNullableListFilter<"Project">
+  awards?: Prisma.StringNullableListFilter<"Project">
+  isPublished?: Prisma.BoolFilter<"Project"> | boolean
+  archivedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   repositoryPublishedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   transferReadyAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
@@ -1094,6 +1208,10 @@ export type ProjectCreateWithoutFilesInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1123,6 +1241,10 @@ export type ProjectUncheckedCreateWithoutFilesInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1158,6 +1280,10 @@ export type ProjectUpdateWithoutFilesInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1187,6 +1313,10 @@ export type ProjectUncheckedUpdateWithoutFilesInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1206,6 +1336,10 @@ export type ProjectCreateWithoutGroupInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1234,6 +1368,10 @@ export type ProjectUncheckedCreateWithoutGroupInput = {
   academicYearId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1280,6 +1418,10 @@ export type ProjectCreateWithoutDepartmentInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1308,6 +1450,10 @@ export type ProjectUncheckedCreateWithoutDepartmentInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1354,6 +1500,10 @@ export type ProjectCreateWithoutAcademicYearInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1382,6 +1532,10 @@ export type ProjectUncheckedCreateWithoutAcademicYearInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1428,6 +1582,10 @@ export type ProjectCreateWithoutMilestonesInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1457,6 +1615,10 @@ export type ProjectUncheckedCreateWithoutMilestonesInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1492,6 +1654,10 @@ export type ProjectUpdateWithoutMilestonesInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1521,6 +1687,10 @@ export type ProjectUncheckedUpdateWithoutMilestonesInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1540,6 +1710,10 @@ export type ProjectCreateWithoutMilestoneCheckpointsInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1569,6 +1743,10 @@ export type ProjectUncheckedCreateWithoutMilestoneCheckpointsInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1604,6 +1782,10 @@ export type ProjectUpdateWithoutMilestoneCheckpointsInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1633,6 +1815,10 @@ export type ProjectUncheckedUpdateWithoutMilestoneCheckpointsInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1652,6 +1838,10 @@ export type ProjectCreateWithoutSubmissionsInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1681,6 +1871,10 @@ export type ProjectUncheckedCreateWithoutSubmissionsInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1716,6 +1910,10 @@ export type ProjectUpdateWithoutSubmissionsInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1745,6 +1943,10 @@ export type ProjectUncheckedUpdateWithoutSubmissionsInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1764,6 +1966,10 @@ export type ProjectCreateWithoutDefenseSchedulesInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1793,6 +1999,10 @@ export type ProjectUncheckedCreateWithoutDefenseSchedulesInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1828,6 +2038,10 @@ export type ProjectUpdateWithoutDefenseSchedulesInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1857,6 +2071,10 @@ export type ProjectUncheckedUpdateWithoutDefenseSchedulesInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1876,6 +2094,10 @@ export type ProjectCreateWithoutAdviserScheduleItemsInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1905,6 +2127,10 @@ export type ProjectUncheckedCreateWithoutAdviserScheduleItemsInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -1940,6 +2166,10 @@ export type ProjectUpdateWithoutAdviserScheduleItemsInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1969,6 +2199,10 @@ export type ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1988,6 +2222,10 @@ export type ProjectCreateWithoutEvaluationsInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2017,6 +2255,10 @@ export type ProjectUncheckedCreateWithoutEvaluationsInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2052,6 +2294,10 @@ export type ProjectUpdateWithoutEvaluationsInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2081,6 +2327,10 @@ export type ProjectUncheckedUpdateWithoutEvaluationsInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2100,6 +2350,10 @@ export type ProjectCreateWithoutIndustryProjectsInput = {
   abstract?: string | null
   keywords?: Prisma.ProjectCreatekeywordsInput | string[]
   status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2129,6 +2383,10 @@ export type ProjectUncheckedCreateWithoutIndustryProjectsInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2164,6 +2422,10 @@ export type ProjectUpdateWithoutIndustryProjectsInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2193,6 +2455,10 @@ export type ProjectUncheckedUpdateWithoutIndustryProjectsInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2216,6 +2482,10 @@ export type ProjectCreateManyOwnerInput = {
   academicYearId?: string | null
   groupId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2232,6 +2502,10 @@ export type ProjectCreateManyAdviserInput = {
   academicYearId?: string | null
   groupId?: string | null
   ownerId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2244,6 +2518,10 @@ export type ProjectUpdateWithoutOwnerInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2272,6 +2550,10 @@ export type ProjectUncheckedUpdateWithoutOwnerInput = {
   academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2296,6 +2578,10 @@ export type ProjectUncheckedUpdateManyWithoutOwnerInput = {
   academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2308,6 +2594,10 @@ export type ProjectUpdateWithoutAdviserInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2336,6 +2626,10 @@ export type ProjectUncheckedUpdateWithoutAdviserInput = {
   academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2360,6 +2654,10 @@ export type ProjectUncheckedUpdateManyWithoutAdviserInput = {
   academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2376,6 +2674,10 @@ export type ProjectCreateManyGroupInput = {
   academicYearId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2388,6 +2690,10 @@ export type ProjectUpdateWithoutGroupInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2416,6 +2722,10 @@ export type ProjectUncheckedUpdateWithoutGroupInput = {
   academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2440,6 +2750,10 @@ export type ProjectUncheckedUpdateManyWithoutGroupInput = {
   academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2456,6 +2770,10 @@ export type ProjectCreateManyDepartmentInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2468,6 +2786,10 @@ export type ProjectUpdateWithoutDepartmentInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2496,6 +2818,10 @@ export type ProjectUncheckedUpdateWithoutDepartmentInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2520,6 +2846,10 @@ export type ProjectUncheckedUpdateManyWithoutDepartmentInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2536,6 +2866,10 @@ export type ProjectCreateManyAcademicYearInput = {
   groupId?: string | null
   ownerId?: string | null
   adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
   repositoryPublishedAt?: Date | string | null
   transferReadyAt?: Date | string | null
   createdAt?: Date | string
@@ -2548,6 +2882,10 @@ export type ProjectUpdateWithoutAcademicYearInput = {
   abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2576,6 +2914,10 @@ export type ProjectUncheckedUpdateWithoutAcademicYearInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2600,6 +2942,10 @@ export type ProjectUncheckedUpdateManyWithoutAcademicYearInput = {
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2711,6 +3057,10 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   groupId?: boolean
   ownerId?: boolean
   adviserId?: boolean
+  sdgs?: boolean
+  awards?: boolean
+  isPublished?: boolean
+  archivedAt?: boolean
   repositoryPublishedAt?: boolean
   transferReadyAt?: boolean
   createdAt?: boolean
@@ -2742,6 +3092,10 @@ export type ProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   groupId?: boolean
   ownerId?: boolean
   adviserId?: boolean
+  sdgs?: boolean
+  awards?: boolean
+  isPublished?: boolean
+  archivedAt?: boolean
   repositoryPublishedAt?: boolean
   transferReadyAt?: boolean
   createdAt?: boolean
@@ -2764,6 +3118,10 @@ export type ProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   groupId?: boolean
   ownerId?: boolean
   adviserId?: boolean
+  sdgs?: boolean
+  awards?: boolean
+  isPublished?: boolean
+  archivedAt?: boolean
   repositoryPublishedAt?: boolean
   transferReadyAt?: boolean
   createdAt?: boolean
@@ -2786,13 +3144,17 @@ export type ProjectSelectScalar = {
   groupId?: boolean
   ownerId?: boolean
   adviserId?: boolean
+  sdgs?: boolean
+  awards?: boolean
+  isPublished?: boolean
+  archivedAt?: boolean
   repositoryPublishedAt?: boolean
   transferReadyAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "abstract" | "keywords" | "status" | "departmentId" | "academicYearId" | "groupId" | "ownerId" | "adviserId" | "repositoryPublishedAt" | "transferReadyAt" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
+export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "abstract" | "keywords" | "status" | "departmentId" | "academicYearId" | "groupId" | "ownerId" | "adviserId" | "sdgs" | "awards" | "isPublished" | "archivedAt" | "repositoryPublishedAt" | "transferReadyAt" | "createdAt" | "updatedAt", ExtArgs["result"]["project"]>
 export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   department?: boolean | Prisma.Project$departmentArgs<ExtArgs>
   academicYear?: boolean | Prisma.Project$academicYearArgs<ExtArgs>
@@ -2852,6 +3214,10 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     groupId: string | null
     ownerId: string | null
     adviserId: string | null
+    sdgs: string[]
+    awards: string[]
+    isPublished: boolean
+    archivedAt: Date | null
     repositoryPublishedAt: Date | null
     transferReadyAt: Date | null
     createdAt: Date
@@ -3302,6 +3668,10 @@ export interface ProjectFieldRefs {
   readonly groupId: Prisma.FieldRef<"Project", 'String'>
   readonly ownerId: Prisma.FieldRef<"Project", 'String'>
   readonly adviserId: Prisma.FieldRef<"Project", 'String'>
+  readonly sdgs: Prisma.FieldRef<"Project", 'String[]'>
+  readonly awards: Prisma.FieldRef<"Project", 'String[]'>
+  readonly isPublished: Prisma.FieldRef<"Project", 'Boolean'>
+  readonly archivedAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly repositoryPublishedAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly transferReadyAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Project", 'DateTime'>

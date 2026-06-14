@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
-import { artifactTone, MAX_SCORE, MOCK_SCHEDULE, RUBRIC, type ScheduleItem } from './live-defense-logic';
+import { artifactTone, MAX_SCORE, MOCK_SCHEDULE, RUBRIC, INDIVIDUAL_RUBRIC, type ScheduleItem } from './live-defense-logic';
 import { DefenseTopBar } from './defense-top-bar';
 import { DefenseLeftPanel } from './defense-left-panel';
 import { DefenseEvalPanel } from './defense-eval-panel';
@@ -129,7 +129,8 @@ function toAssignedScheduleItem(assignment: DefenseAssignment): LiveDefenseSched
     artifacts: [
       { label: 'Manuscript', status: 'For review' },
       { label: 'Presentation deck', status: 'For review' },
-      { label: 'Panel checklist', status: 'Ready' }
+      { label: 'Panel checklist', status: 'Ready' },
+      { label: 'Rating Form', status: 'Ready', url: '/Rating-Form.docx' }
     ],
     assignedPanelists: assignment.panelists
   };
@@ -228,8 +229,23 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
   }, []);
 
   const defenseSchedule = useMemo<LiveDefenseScheduleItem[]>(() => {
-    return defenseAssignments.map(toAssignedScheduleItem);
-  }, [defenseAssignments]);
+    let schedules = defenseAssignments.map(toAssignedScheduleItem);
+
+    if (currentUser) {
+      const role = normalizeIdentityValue(currentUser.role);
+      const isProgramHeadOrAdmin = ['program_head', 'admin', 'system_admin'].includes(role);
+
+      if (!isProgramHeadOrAdmin) {
+        schedules = schedules.filter((schedule) => {
+          const isPanelist = schedule.assignedPanelists?.some((p) => isSameIdentity(p, currentUser));
+          const isAdviser = schedule.adviser.toLowerCase() === getIdentityDisplayName(currentUser).toLowerCase();
+          return isPanelist || isAdviser;
+        });
+      }
+    }
+
+    return schedules;
+  }, [defenseAssignments, currentUser]);
 
   useEffect(() => {
     if (idx >= defenseSchedule.length) {
@@ -488,6 +504,31 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
     setSessionDuration((current) => current + 300);
   }
 
+  async function handleSubmitScore() {
+    setSubmitted(true);
+    setTimerActive(false);
+
+    try {
+      const currentPanelistName = panelists.find((p) => p.isMe)?.name ?? '';
+      const vote = panelistVotes[currentPanelistName];
+
+      await fetch(`/api/defense-schedules/${group.id}/evaluate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scores,
+          individualScores,
+          notes,
+          feedback,
+          vote,
+          isChairSubmit: isChair
+        })
+      });
+    } catch (err) {
+      console.error('Failed to submit evaluation:', err);
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 z-[1000] flex h-[100dvh] w-screen items-center justify-center bg-[#f8fafc]">
@@ -499,7 +540,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
     );
   }
 
-  if (defenseAssignments.length === 0) {
+  if (defenseSchedule.length === 0) {
     return (
       <div className="fixed inset-0 z-[1000] flex h-[100dvh] w-screen items-center justify-center bg-[#f8fafc]">
         <div className="max-w-md text-center">
@@ -524,7 +565,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
 
   return (
     <div
-      className="relative flex min-h-[calc(100vh-4rem)] w-full flex-col overflow-hidden font-sans text-slate-900"
+      className={`relative flex w-full flex-col font-sans text-slate-900 ${sessionStarted ? 'h-[calc(100vh-4rem)] overflow-hidden' : 'min-h-[calc(100vh-4rem)] overflow-x-hidden'}`}
       style={{
         background:
           'radial-gradient(circle at top left, rgba(0, 58, 143, 0.06), transparent 28%), radial-gradient(circle at top right, rgba(246, 190, 0, 0.07), transparent 22%), linear-gradient(180deg, #f8fafc 0%, #eff4fa 100%)'
@@ -547,10 +588,8 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
         adviser={group.adviser}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden xl:flex-row">
-
-
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-transparent">
+      <div className="flex flex-1 flex-col min-h-0">
+        <main className="flex-1 flex flex-col min-h-0 bg-transparent">
           {showMemberWaitingRoom ? (
             <div className="flex min-h-full items-center justify-center p-4 sm:p-6 relative">
               {/* Premium Background Glow for Waiting Room */}
@@ -699,50 +738,80 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
               </section>
             </div>
           ) : !sessionStarted ? (
-            <div className="min-h-full p-4 sm:p-8 relative">
-              <div className="flex flex-col min-h-full w-full gap-8 relative z-10">
-                <section className="flex flex-col overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_20px_60px_rgba(15,43,89,0.08)]">
-                  <div className="border-b border-white/40 bg-gradient-to-br from-[#003a8f] to-[#082a67] p-8 sm:p-10 text-white relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[radial-gradient(circle_at_center,rgba(246,190,0,0.15),transparent_60%)] pointer-events-none blur-2xl" />
+            <div className="min-h-full p-4 sm:p-8 relative bg-[#f8fbff]">
+              {/* Background Ambient Glows */}
+              <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/10 blur-[120px] pointer-events-none" />
+              <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+              
+              <div className="flex flex-col min-h-full w-full gap-6 relative z-10">
+                <section className="flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-[0_20px_60px_rgba(15,43,89,0.08)]">
+                  <div className="border-b border-white/20 bg-[#003a8f] p-6 sm:p-10 text-white relative overflow-hidden group">
+                    {/* Deep Premium Gradients & Glows */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#003a8f] via-[#082a67] to-[#041533] z-0 opacity-95" />
+                    <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-400/20 blur-[60px] pointer-events-none mix-blend-screen transition-opacity duration-700 group-hover:opacity-100" />
+                    <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-[#f6be00]/10 blur-[50px] pointer-events-none mix-blend-screen" />
+                    
+                    {/* Animated Grid Pattern */}
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+CjxwYXRoIGQ9Ik0gMjAgMCBMIDAgMCAwIDIwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMikiIHN0cm9rZS13aWR0aD0iMSIgLz4KPC9zdmc+')] opacity-40 z-0 mask-image:linear-gradient(to_bottom,white,transparent)" />
+
                     <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="max-w-3xl">
-                        <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-widest text-white backdrop-blur-sm">
-                          <span className="h-2 w-2 rounded-full bg-[#f6be00] animate-pulse shadow-[0_0_10px_rgba(246,190,0,0.8)]" />
+                      <div className="max-w-3xl transform transition-transform duration-500 hover:translate-x-1">
+                        <div className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-[0.15em] text-white backdrop-blur-md shadow-sm">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#f6be00] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#f6be00] shadow-[0_0_10px_rgba(246,190,0,0.8)]"></span>
+                          </span>
                           Chair Ready Room
-                        </span>
-                        <h2 className="mt-5 text-[clamp(1.8rem,3vw,2.5rem)] font-black tracking-tight text-white leading-tight">{group.title}</h2>
-                        <div className="mt-4 flex flex-wrap gap-3 text-[0.75rem] font-bold text-blue-100 uppercase tracking-wide">
-                          <span className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-sm">
-                            <i className="fas fa-users text-[#f6be00]" />
+                        </div>
+                        <h2 className="mt-4 text-[clamp(1.5rem,3vw,2.5rem)] font-black tracking-tight text-white leading-tight drop-shadow-sm">
+                          {group.title}
+                        </h2>
+                        <div className="mt-4 flex flex-wrap gap-3 text-[0.75rem] font-bold text-blue-50 uppercase tracking-wider">
+                          <span className="group/badge inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md transition-all hover:bg-white/10 hover:shadow-md">
+                            <i className="fas fa-users text-[#f6be00] transition-transform group-hover/badge:scale-110" />
                             {group.group}
                           </span>
-                          <span className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-sm">
-                            <i className="fas fa-user-tie text-[#f6be00]" />
+                          <span className="group/badge inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md transition-all hover:bg-white/10 hover:shadow-md">
+                            <i className="fas fa-user-tie text-[#f6be00] transition-transform group-hover/badge:scale-110" />
                             {group.adviser}
                           </span>
-                          <span className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-sm">
-                            <i className="fas fa-location-dot text-[#f6be00]" />
+                          <span className="group/badge inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md transition-all hover:bg-white/10 hover:shadow-md">
+                            <i className="fas fa-location-dot text-[#f6be00] transition-transform group-hover/badge:scale-110" />
                             {group.room}
                           </span>
                         </div>
                       </div>
-                      <div className="w-full rounded-[1.25rem] border border-white/10 bg-white/10 p-5 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.2)] lg:min-w-[380px] xl:w-[440px]">
-                        <div className="mb-5 flex items-center justify-between">
+                      
+                      <div className="w-full rounded-[1.5rem] border border-white/20 bg-white/10 backdrop-blur-xl p-6 shadow-[0_20px_40px_rgba(0,58,143,0.3)] lg:min-w-[400px] xl:w-[440px] transition-all duration-500 hover:-translate-y-1 hover:bg-white/[0.15]">
+                        <div className="mb-6 flex items-start justify-between">
                           <div>
-                            <p className="text-[0.7rem] font-black uppercase tracking-widest text-blue-200">Readiness</p>
-                            <p className="mt-1 text-lg font-black text-white">{readyItemCount}/{readinessItems.length} checks ready</p>
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.2em] text-blue-200/80">System Readiness</p>
+                            <div className="mt-2 flex items-baseline gap-2">
+                              <p className="text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                {readyItemCount}
+                              </p>
+                              <span className="text-blue-200/50 font-bold text-lg">/ {readinessItems.length} checks</span>
+                            </div>
                           </div>
-                          <span className={`rounded-full px-3 py-1.5 text-[0.65rem] font-black uppercase tracking-wider ${readyItemCount === readinessItems.length ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-[#f6be00]/20 text-[#f6be00] border border-[#f6be00]/30'}`}>
-                            {readyItemCount === readinessItems.length ? 'Ready' : 'Pending'}
+                          <span className={`flex items-center gap-2 rounded-full px-4 py-2 text-[0.65rem] font-black uppercase tracking-[0.2em] transition-all duration-300 ${readyItemCount === readinessItems.length ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
+                            {readyItemCount === readinessItems.length && <i className="fas fa-check-circle text-emerald-400" />}
+                            {readyItemCount === readinessItems.length ? 'All Systems Go' : 'Pending Action'}
                           </span>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          {readinessItems.map((item) => (
-                            <div key={item.id} className="flex items-center gap-3 rounded-[1rem] border border-white/10 bg-white/5 px-3 py-3">
-                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.6rem] border ${item.ready ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-white/10 border-white/20 text-blue-200'}`}>
-                                <i className={`fas ${item.ready ? 'fa-check' : item.icon} text-xs`} />
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          {readinessItems.map((item, i) => (
+                            <div 
+                              key={item.id} 
+                              className="group/item flex items-center gap-3.5 rounded-[1.25rem] border border-white/10 bg-black/10 px-4 py-3.5 transition-all duration-300 hover:bg-white/10 hover:border-white/30"
+                              style={{ animationDelay: `${i * 100}ms` }}
+                            >
+                              <span className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.85rem] border transition-all duration-300 ${item.ready ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 group-hover/item:text-emerald-200' : 'bg-white/5 border-white/20 text-blue-100/60 group-hover/item:text-blue-100'}`}>
+                                <i className={`fas ${item.ready ? 'fa-check' : item.icon} text-[13px] relative z-10 ${item.ready ? 'scale-110 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]' : ''} transition-transform`} />
                               </span>
-                              <span className="min-w-0 text-[0.7rem] font-black text-white uppercase tracking-wider leading-snug">{item.label}</span>
+                              <span className={`min-w-0 text-[0.7rem] font-black uppercase tracking-widest leading-tight transition-colors ${item.ready ? 'text-white' : 'text-blue-100/70 group-hover/item:text-white'}`}>
+                                {item.label}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -750,54 +819,72 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
                     </div>
                   </div>
 
-                  <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.9fr)] bg-gradient-to-b from-transparent to-slate-50/50 flex-1">
+                  <div className="grid gap-6 p-5 sm:p-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.9fr)] bg-white/40 flex-1">
                     <div className="flex flex-col">
                       <div className="flex items-center justify-between gap-3 mb-5">
-                        <div>
-                          <h3 className="text-[0.8rem] font-black uppercase tracking-widest text-[#102033]">Evaluation Setup</h3>
-                          <p className="mt-1 text-sm font-medium text-[#536982]">
-                            {isChair ? 'Configure the questions the panel will use for Q&A and scoring.' : 'Prepared by the panel chair.'}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-[1rem] bg-blue-50 text-[#003a8f] shadow-inner">
+                            <i className="fas fa-file-signature text-lg" />
+                          </div>
+                          <div>
+                            <h3 className="text-[0.75rem] font-black uppercase tracking-[0.15em] text-[#102033]">Rating Form Setup</h3>
+                            <p className="mt-0.5 text-[0.8rem] font-medium text-[#536982]">
+                              {isChair ? 'Configure the interactive rating form that will be distributed to all panelists.' : 'The panel chair is configuring the rating form.'}
+                            </p>
+                          </div>
                         </div>
                         {isChair && (
                           <button
                             type="button"
                             onClick={addEvaluationNeed}
-                            className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-black text-[#003a8f] shadow-sm transition-all hover:border-[#003a8f] hover:bg-blue-50 hover:shadow-md"
+                            className="group inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white px-4 py-2 text-[0.75rem] font-black text-[#003a8f] shadow-[0_2px_10px_rgba(0,58,143,0.06)] transition-all duration-300 hover:border-[#003a8f]/30 hover:bg-blue-50/50 hover:shadow-[0_8px_25px_rgba(0,58,143,0.12)] hover:-translate-y-0.5"
                           >
-                            <i className="fas fa-plus" />
-                            Add Focus
+                            <i className="fas fa-plus text-blue-400 transition-transform group-hover:rotate-90" />
+                            Add Custom Field
                           </button>
                         )}
                       </div>
-                      <div className="space-y-3 flex-1">
+                      
+                      <div className="mb-4 rounded-[1rem] bg-blue-50/50 p-4 border border-blue-100 flex gap-3">
+                        <i className="fas fa-info-circle text-[#003a8f] mt-0.5" />
+                        <p className="text-[0.8rem] text-blue-900 leading-relaxed font-medium">
+                          Once the session starts, this rating form will automatically distribute to all panelists' workspaces. They can fill out their scores interactively (similar to Google Docs), and the system will compile them into a downloadable/printable grading sheet at the end.
+                        </p>
+                      </div>
+
+                      <div className="space-y-4 flex-1">
                         {evaluationNeeds.map((need, index) => (
-                          <div key={`evaluation-need-${index}`} className="group relative overflow-hidden rounded-[1.25rem] border border-white/80 bg-white/70 backdrop-blur-sm p-4 shadow-[0_4px_20px_rgba(15,43,89,0.03)] transition-all hover:border-[#b6c9e5] hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(15,43,89,0.06)]">
-                            <span className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#003a8f] to-blue-400" />
-                            <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 border border-blue-100 px-3 py-1.5 text-[0.65rem] font-black uppercase tracking-widest text-[#003a8f] shadow-sm">
-                              <i className="fas fa-circle-question" />
-                              Question {index + 1}
-                            </span>
-                            {isChair ? (
-                              <div className="flex min-w-0 gap-3">
-                                <textarea
-                                  value={need}
-                                  onChange={(event) => updateEvaluationNeed(index, event.target.value)}
-                                  placeholder="Enter an evaluation question or panel focus."
-                                  className="min-h-24 flex-1 resize-none rounded-[1rem] border border-slate-200 bg-white p-4 text-[0.95rem] font-semibold leading-relaxed text-[#102033] outline-none shadow-inner transition focus:border-[#003a8f] focus:ring-2 focus:ring-[#003a8f]/20"
-                                />
+                          <div key={`evaluation-need-${index}`} className="group relative overflow-hidden rounded-[1.5rem] border border-white bg-white/80 backdrop-blur-xl p-5 shadow-[0_8px_30px_rgba(15,43,89,0.04)] transition-all duration-500 hover:border-blue-200/60 hover:shadow-[0_15px_40px_rgba(0,58,143,0.08)]">
+                            <span className="absolute inset-y-0 left-0 w-2 bg-gradient-to-b from-[#003a8f] via-[#1a5cc7] to-blue-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+                            
+                            <div className="mb-4 flex items-center justify-between">
+                              <span className="inline-flex items-center gap-2 rounded-full bg-blue-50/80 border border-blue-100/50 px-3.5 py-1.5 text-[0.65rem] font-black uppercase tracking-[0.2em] text-[#003a8f] shadow-sm">
+                                <i className="fas fa-cube opacity-70" />
+                                Custom Criteria {index + 1}
+                              </span>
+                              
+                              {isChair && (
                                 <button
                                   type="button"
                                   onClick={() => removeEvaluationNeed(index)}
                                   disabled={evaluationNeeds.length <= 1}
-                                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.85rem] border border-rose-100 bg-rose-50 text-rose-500 transition-colors hover:bg-rose-500 hover:text-white hover:border-rose-500 disabled:cursor-not-allowed disabled:opacity-40"
-                                  aria-label="Remove evaluation question"
+                                  className="flex h-8 w-8 items-center justify-center rounded-full text-rose-400 transition-all hover:bg-rose-50 hover:text-rose-600 disabled:opacity-30 disabled:hover:bg-transparent"
+                                  aria-label="Remove criteria"
                                 >
-                                  <i className="fas fa-trash text-sm" />
+                                  <i className="fas fa-times" />
                                 </button>
-                              </div>
+                              )}
+                            </div>
+                            
+                            {isChair ? (
+                              <textarea
+                                value={need}
+                                onChange={(event) => updateEvaluationNeed(index, event.target.value)}
+                                placeholder="Enter specific criteria, rubric instructions, or key focus areas..."
+                                className="min-h-[100px] w-full resize-none rounded-[1rem] border-0 bg-slate-50/50 p-4 text-[0.95rem] font-medium leading-relaxed text-[#102033] shadow-inner transition-all duration-300 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#003a8f]/20 focus:outline-none"
+                              />
                             ) : (
-                              <p className="min-w-0 text-[0.95rem] font-bold leading-relaxed text-[#102033]">{need || 'No question set yet.'}</p>
+                              <p className="min-w-0 text-[0.95rem] font-medium leading-relaxed text-[#102033] p-2">{need || 'No custom criteria set yet.'}</p>
                             )}
                           </div>
                         ))}
@@ -805,55 +892,76 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
                       {!evaluationSetupReady && (
                         <p className="mt-4 rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-700 shadow-sm flex items-center gap-3">
                           <i className="fas fa-triangle-exclamation text-base" />
-                          Please add at least one evaluation question before starting the defense.
+                          Please define the rating form criteria before starting the defense.
                         </p>
                       )}
                     </div>
 
                     <div className="flex flex-col gap-6">
-                      <div className="rounded-[1.5rem] border border-white/80 bg-white/70 backdrop-blur-sm p-6 shadow-[0_8px_30px_rgba(15,43,89,0.04)]">
-                        <div className="flex items-center justify-between gap-3 mb-5">
-                          <div>
-                            <h3 className="text-[0.7rem] font-black uppercase tracking-widest text-[#102033]">Defense Packet</h3>
-                            <p className="mt-1 text-xs font-medium text-[#536982]">{packetReadyCount}/{group.artifacts.length} items ready</p>
+                      <div className="group/packet rounded-[1.5rem] border border-white/80 bg-white/60 backdrop-blur-xl p-7 shadow-[0_8px_30px_rgba(15,43,89,0.04)] transition-all duration-500 hover:bg-white/80 hover:shadow-[0_15px_40px_rgba(15,43,89,0.08)]">
+                        <div className="flex items-center justify-between gap-3 mb-6">
+                          <div className="flex items-center gap-3.5">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-[1rem] bg-indigo-50 text-indigo-500 transition-transform duration-500 group-hover/packet:scale-110 group-hover/packet:rotate-3">
+                              <i className="fas fa-folder-open" />
+                            </div>
+                            <div>
+                              <h3 className="text-[0.75rem] font-black uppercase tracking-[0.15em] text-[#102033]">Defense Packet</h3>
+                              <p className="mt-0.5 text-xs font-semibold text-[#536982]">{packetReadyCount}/{group.artifacts.length} items ready</p>
+                            </div>
                           </div>
-                          <span className={`rounded-full px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider shadow-sm ${packetIssueCount ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'}`}>
-                            {packetIssueCount ? `${packetIssueCount} Open` : 'Complete'}
+                          <span className={`rounded-full px-3.5 py-1.5 text-[0.65rem] font-black uppercase tracking-wider shadow-sm transition-colors ${packetIssueCount ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'}`}>
+                            {packetIssueCount ? `${packetIssueCount} Open Items` : 'Complete'}
                           </span>
                         </div>
-                        <div className="space-y-3">
-                          {group.artifacts.map((artifact) => (
-                            <div key={artifact.label} className="flex items-center justify-between gap-3 rounded-[1rem] border border-slate-100 bg-white p-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-colors hover:border-blue-100">
-                              <span className="flex min-w-0 items-center gap-3 text-sm font-bold text-[#102033]">
-                                <span className={`flex w-7 h-7 items-center justify-center rounded-md ${artifact.status === 'Ready' ? 'bg-emerald-50 text-emerald-600' : artifact.status === 'Missing' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'}`}>
-                                  <i className={`fas ${artifact.status === 'Ready' ? 'fa-check' : artifact.status === 'Missing' ? 'fa-triangle-exclamation' : 'fa-clock'} text-[10px]`} />
+                        
+                        <div className="space-y-3.5">
+                          {group.artifacts.map((artifact) => {
+                            const innerContent = (
+                              <div className="group/item flex items-center justify-between gap-3 rounded-[1rem] border border-white bg-white/50 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-all duration-300 hover:border-blue-200/60 hover:bg-white hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(15,43,89,0.06)]">
+                                <span className="flex min-w-0 items-center gap-3.5 text-sm font-bold text-[#102033]">
+                                  <span className={`flex w-8 h-8 items-center justify-center rounded-[0.75rem] transition-colors duration-300 ${artifact.status === 'Ready' ? 'bg-emerald-50 text-emerald-600 group-hover/item:bg-emerald-100' : artifact.status === 'Missing' ? 'bg-rose-50 text-rose-600 group-hover/item:bg-rose-100' : 'bg-amber-50 text-amber-600 group-hover/item:bg-amber-100'}`}>
+                                    {artifact.url ? <i className="fas fa-file-arrow-down text-xs" /> : <i className={`fas ${artifact.status === 'Ready' ? 'fa-check' : artifact.status === 'Missing' ? 'fa-triangle-exclamation' : 'fa-clock'} text-xs`} />}
+                                  </span>
+                                  <span className="min-w-0 text-[0.85rem] leading-tight break-words">{artifact.label}</span>
                                 </span>
-                                <span className="min-w-0 text-[0.85rem] leading-tight break-words">{artifact.label}</span>
-                              </span>
-                              <span className={`rounded-md border px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-widest ${artifactTone(artifact.status)}`}>
-                                {artifact.status}
-                              </span>
-                            </div>
-                          ))}
+                                <span className={`rounded-lg border px-3 py-1.5 text-[0.6rem] font-black uppercase tracking-widest ${artifactTone(artifact.status)}`}>
+                                  {artifact.status}
+                                </span>
+                              </div>
+                            );
+                            
+                            return artifact.url ? (
+                              <a key={artifact.label} href={artifact.url} target="_blank" rel="noopener noreferrer" className="block outline-none" download>
+                                {innerContent}
+                              </a>
+                            ) : (
+                              <div key={artifact.label}>
+                                {innerContent}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
 
-                      <div className="rounded-[1.5rem] border border-blue-100 bg-gradient-to-br from-[#f2f7ff] to-[#e6f0ff] p-6 shadow-inner relative overflow-hidden">
-                        <div className="absolute -right-4 -bottom-4 text-[6rem] text-[#003a8f]/5 pointer-events-none">
+                      <div className="rounded-[1.5rem] border border-blue-100/50 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-[#f2f7ff] to-white p-7 shadow-[inset_0_2px_20px_rgba(255,255,255,1)] relative overflow-hidden group/flow">
+                        <div className="absolute -right-8 -bottom-8 text-[8rem] text-[#003a8f]/[0.03] transition-transform duration-700 group-hover/flow:scale-110 group-hover/flow:-rotate-6 pointer-events-none">
                           <i className="fas fa-route" />
                         </div>
-                        <p className="text-[0.7rem] font-black uppercase tracking-widest text-[#003a8f] mb-4">Panel Flow Preview</p>
-                        <div className="grid gap-3 text-[0.8rem] font-bold text-[#102033] relative z-10">
-                          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm p-2 rounded-xl">
-                            <span className="flex h-7 w-7 items-center justify-center rounded-[0.6rem] bg-[#003a8f] text-white shadow-sm">1</span>
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="h-6 w-1.5 rounded-full bg-[#003a8f]" />
+                          <p className="text-[0.75rem] font-black uppercase tracking-[0.15em] text-[#003a8f]">Panel Flow Preview</p>
+                        </div>
+                        <div className="grid gap-3.5 text-[0.8rem] font-bold text-[#102033] relative z-10">
+                          <div className="flex items-center gap-3.5 bg-white/80 backdrop-blur-md p-3 rounded-xl border border-white shadow-sm transition-transform hover:translate-x-1">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.6rem] bg-[#003a8f] text-white shadow-sm font-black">1</span>
                             Confirm roll call
                           </div>
-                          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm p-2 rounded-xl">
-                            <span className="flex h-7 w-7 items-center justify-center rounded-[0.6rem] bg-[#003a8f] text-white shadow-sm">2</span>
+                          <div className="flex items-center gap-3.5 bg-white/60 backdrop-blur-md p-3 rounded-xl border border-white/50 transition-transform hover:translate-x-1">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.6rem] bg-white text-blue-400 shadow-sm font-black">2</span>
                             Use chair questions during Q&A
                           </div>
-                          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm p-2 rounded-xl">
-                            <span className="flex h-7 w-7 items-center justify-center rounded-[0.6rem] bg-[#003a8f] text-white shadow-sm">3</span>
+                          <div className="flex items-center gap-3.5 bg-white/60 backdrop-blur-md p-3 rounded-xl border border-white/50 transition-transform hover:translate-x-1">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.6rem] bg-white text-blue-400 shadow-sm font-black">3</span>
                             Submit individual panel score
                           </div>
                         </div>
@@ -919,23 +1027,180 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
               </div>
             </div>
           ) : (
-            <div className="flex min-h-full flex-col p-4 sm:p-6 relative z-10">
-              <section className="flex min-h-[520px] flex-1 flex-col overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_20px_60px_rgba(15,43,89,0.08)]">
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/40 bg-gradient-to-r from-white via-white/80 to-[#f2f7ff] px-6 py-4">
-                  <div className="min-w-0 flex items-center gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.8rem] bg-gradient-to-br from-[#003a8f] to-[#082a67] text-white shadow-[0_4px_15px_rgba(0,58,143,0.2)]">
-                      <i className="fas fa-desktop" />
+            <div className="flex min-h-0 flex-1 flex-col p-2 sm:p-3 relative z-10">
+              <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/60 bg-white shadow-[0_10px_40px_rgba(15,43,89,0.06)]">
+                <div className="shrink-0 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/50 bg-gradient-to-r from-slate-50 to-white px-5 py-3">
+                  <div className="min-w-0 flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-900 to-slate-900 text-white shadow-sm">
+                      <i className="fas fa-desktop text-sm" />
                     </div>
                     <div>
-                      <p className="text-[0.65rem] font-black uppercase tracking-widest text-[#003a8f]">Presentation Workspace</p>
-                      <h2 className="mt-0.5 truncate text-[1.1rem] font-black text-[#102033] tracking-tight">{group.title}</h2>
+                      <p className="text-[0.6rem] font-black uppercase tracking-widest text-[#003a8f] flex items-center gap-1.5">
+                        <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Session Active
+                      </p>
+                      <h2 className="mt-0.5 truncate text-base font-black text-[#102033] tracking-tight">{group.title}</h2>
                     </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFocusMode(!focusMode)}
+                      className={`flex items-center justify-center h-9 w-9 rounded-lg border transition-all duration-300 ${
+                        focusMode ? 'border-[#003a8f] bg-[#003a8f] text-white shadow-sm' : 'border-slate-200 bg-white text-[#536982] hover:border-blue-200 hover:text-[#003a8f]'
+                      }`}
+                      title="Focus Mode"
+                    >
+                      <i className={`fas ${focusMode ? 'fa-compress' : 'fa-expand'}`} />
+                    </button>
+
+                    {isChair && (
+                      <div className="flex items-center gap-2">
+                        <div className="flex bg-slate-100/80 rounded-lg p-0.5 border border-slate-200">
+                          <button
+                            type="button"
+                            onClick={() => setTimerActive(!timerActive)}
+                            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.7rem] font-black transition-all ${
+                              timerActive ? 'bg-amber-100 text-amber-800' : 'bg-white text-[#003a8f] shadow-sm'
+                            }`}
+                          >
+                            <i className={`fas ${timerActive ? 'fa-pause' : 'fa-play'}`} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={addFiveMinutes}
+                            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[0.7rem] font-black text-[#536982] hover:text-[#003a8f]"
+                            title="Add 5 Minutes"
+                          >
+                            <i className="fas fa-plus" /> 5m
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTimer(sessionDuration);
+                              setTimerActive(false);
+                            }}
+                            className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[0.7rem] font-black text-[#536982] hover:text-rose-600"
+                            title="Reset Timer"
+                          >
+                            <i className="fas fa-rotate-left" />
+                          </button>
+                        </div>
+
+                        {canNext ? (
+                          <button
+                            type="button"
+                            onClick={nextGroup}
+                            disabled={!submitted || Object.keys(panelistVotes).length < panelists.length}
+                            className="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#003a8f] to-[#082a67] px-4 py-2 text-[0.75rem] font-black text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <span className="hidden sm:inline">{!submitted ? 'Wait for Subs...' : Object.keys(panelistVotes).length < panelists.length ? 'Pending Votes' : 'Next Group'}</span>
+                            <i className="fas fa-arrow-right transition-transform group-hover:translate-x-0.5" />
+                          </button>
+                        ) : (
+                          <Link
+                            href="/adviser/panel-mode/dashboard"
+                            onClick={clearAllSessionSnapshots}
+                            className={`group flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[0.75rem] font-black text-white shadow-sm transition-all hover:bg-emerald-700 ${!submitted || Object.keys(panelistVotes).length < panelists.length ? 'pointer-events-none opacity-50' : ''}`}
+                          >
+                            <span className="hidden sm:inline">{submitted ? 'Complete Session' : 'Wait for Subs...'}</span>
+                            <i className="fas fa-check" />
+                          </Link>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="min-h-0 flex-1 bg-gradient-to-b from-[#f8fbff] to-white relative">
+                <div className="min-h-0 flex-1 relative flex flex-col xl:flex-row bg-slate-50 overflow-hidden">
                   {sessionStarted ? (
-                    <DefenseEvalPanel
+                    <>
+                      {/* Left Side: Presentation & Context Pane */}
+                      <div className="flex-1 flex flex-col relative min-w-0 border-b xl:border-b-0 xl:border-r border-slate-200 bg-gradient-to-br from-[#f8fbff] to-slate-50">
+                        {deckAvailable && group.deckUrl !== '#' ? (
+                          <div className="flex-1 flex flex-col">
+                            <iframe src={group.deckUrl} className="w-full flex-1 border-0 bg-white shadow-sm" title="Presentation Deck" />
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center flex-1 p-8 text-center relative overflow-hidden group bg-gradient-to-br from-slate-50 to-[#f0f5ff]">
+                            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,58,143,0.05),transparent_70%)] pointer-events-none" />
+                            
+                            {/* Animated Background Elements */}
+                            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#003a8f]/5 rounded-full blur-3xl animate-pulse" />
+                            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#f6be00]/5 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
+
+                            <div className="relative">
+                              <div className="absolute -inset-4 bg-white/40 blur-xl rounded-full" />
+                              <div className="relative flex h-32 w-32 items-center justify-center rounded-[2.5rem] bg-white border border-blue-100/60 shadow-[0_10px_40px_rgba(0,58,143,0.08)] text-5xl text-[#003a8f]/30 mb-8 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-[0_20px_50px_rgba(0,58,143,0.12)]">
+                                <i className="fas fa-file-powerpoint bg-gradient-to-br from-[#003a8f]/40 to-[#003a8f]/10 bg-clip-text text-transparent" />
+                                <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 border-2 border-white shadow-sm">
+                                  <i className="fas fa-exclamation text-sm" />
+                                </div>
+                              </div>
+                            </div>
+                            <h3 className="text-[1.5rem] font-black text-[#102033] tracking-tight drop-shadow-sm">Awaiting Presentation Deck</h3>
+                            <p className="mt-4 max-w-md text-[0.95rem] font-medium text-[#536982] leading-relaxed">
+                              This group has not linked an interactive presentation. Please refer to their <span className="font-bold text-[#003a8f]">Defense Packet</span> below for the submitted manuscript and materials.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Unified Context Bottom Bar */}
+                        <div className="shrink-0 relative border-t border-white/20 p-5 lg:p-6 flex flex-col xl:flex-row gap-8 bg-white shadow-[0_-10px_40px_rgba(0,58,143,0.04)] z-20">
+                          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#003a8f]/10 to-transparent" />
+                          
+                          {/* Evaluation Questions */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-slate-400 mb-3 flex items-center gap-2">
+                              <span className="flex items-center justify-center w-5 h-5 rounded border border-blue-100 bg-blue-50 text-[#003a8f]"><i className="fas fa-clipboard-question text-[10px]" /></span>
+                              Panel Focus Areas
+                            </p>
+                            <div className="flex flex-wrap gap-2.5">
+                              {activeEvaluationNeeds.map((need, index) => (
+                                <div key={`need-${index}`} className="group/need flex items-center gap-2.5 rounded-xl border border-slate-200/60 bg-slate-50/50 pl-2 pr-4 py-2 text-[0.8rem] font-bold text-[#102033] transition-all hover:bg-white hover:border-blue-200 hover:shadow-sm">
+                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white border border-slate-200 text-[#003a8f] shadow-sm font-black group-hover/need:bg-[#003a8f] group-hover/need:text-white group-hover/need:border-[#003a8f] transition-colors">
+                                    {index + 1}
+                                  </span>
+                                  <span className="truncate">{need}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Defense Packet */}
+                          <div className="flex-1 min-w-0 xl:border-l border-slate-200/60 xl:pl-8">
+                            <p className="text-[0.65rem] font-black uppercase tracking-[0.15em] text-slate-400 mb-3 flex items-center gap-2">
+                              <span className="flex items-center justify-center w-5 h-5 rounded border border-amber-100 bg-amber-50 text-amber-600"><i className="fas fa-folder-open text-[10px]" /></span>
+                              Defense Packet
+                            </p>
+                            <div className="flex flex-wrap gap-2.5">
+                              {group.artifacts.map((artifact) => {
+                                const isReady = artifact.status === 'Ready';
+                                const content = (
+                                  <div className={`group/artifact flex items-center gap-3 rounded-xl border px-3 py-2 transition-all ${isReady ? 'bg-white border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-[#003a8f]/30 hover:shadow-[0_4px_15px_rgba(0,58,143,0.08)] hover:-translate-y-0.5' : 'bg-slate-50/50 border-slate-100 opacity-60 grayscale'}`}>
+                                    <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${isReady ? 'bg-blue-50 text-[#003a8f] group-hover/artifact:bg-[#003a8f] group-hover/artifact:text-white' : 'bg-slate-200 text-slate-400'} transition-colors`}>
+                                      <i className={`fas ${isReady ? 'fa-file-pdf' : 'fa-file-circle-xmark'} text-xs`} />
+                                    </div>
+                                    <span className="text-[0.8rem] font-black text-[#102033] tracking-tight">{artifact.label}</span>
+                                    {artifact.url && isReady && <i className="fas fa-download ml-2 text-[0.7rem] text-slate-300 group-hover/artifact:text-[#003a8f]" />}
+                                  </div>
+                                );
+                                return artifact.url && isReady ? (
+                                  <a key={artifact.label} href={artifact.url} target="_blank" rel="noopener noreferrer" className="block outline-none" download>
+                                    {content}
+                                  </a>
+                                ) : (
+                                  <div key={artifact.label}>{content}</div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Side: Evaluation Panel */}
+                      <div className="w-full xl:w-[480px] shrink-0 flex flex-col min-h-0 bg-slate-50">
+                        <DefenseEvalPanel
                       scores={scores}
                       setScore={(id, value) => setScores((previous) => ({ ...previous, [id]: value }))}
                       individualScores={individualScores}
@@ -948,10 +1213,7 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
                       overallFeedback={feedback}
                       setOverallFeedback={setFeedback}
                       submitted={submitted}
-                      onSubmit={() => {
-                        setSubmitted(true);
-                        setTimerActive(false);
-                      }}
+                      onSubmit={handleSubmitScore}
                       isChair={isChair}
                       isMyAdvisee={group.isMyAdvisee}
                       focusMode={focusMode}
@@ -961,163 +1223,31 @@ export function LiveDefenseView({ data }: { data: AdviserDashboardData }) {
                       setPanelistVote={(name, vote) => setPanelistVotes((prev) => ({ ...prev, [name]: vote }))}
                       panelistNames={panelists.map((p) => p.name)}
                       currentPanelistName={panelists.find((p) => p.isMe)?.name ?? ''}
+                      projectTitle={group.title}
+                      groupRubric={RUBRIC}
+                      individualRubric={INDIVIDUAL_RUBRIC}
                     />
-                  ) : (
-                    <div className="flex h-full min-h-[520px] flex-col items-center justify-center text-center p-8">
-                      <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.5rem] border border-white bg-white/50 backdrop-blur-md text-4xl text-slate-300 shadow-[0_8px_30px_rgba(15,43,89,0.06)]">
-                        <i className="fas fa-hourglass-start relative z-10" />
                       </div>
-                      <h3 className="mt-5 text-xl font-black text-[#102033] tracking-tight">Session Not Started</h3>
-                      <p className="mt-2 text-[0.95rem] font-medium text-[#536982]">
-                        Waiting for the chair to begin the defense.
+                    </>
+                  ) : (
+                    <div className="flex h-full w-full min-h-[520px] flex-col items-center justify-center text-center p-8 bg-slate-50">
+                      <div className="relative flex h-24 w-24 items-center justify-center rounded-[2rem] border border-slate-200 bg-white text-4xl text-slate-300 shadow-[0_8px_30px_rgba(15,43,89,0.04)] mb-6">
+                        <div className="absolute inset-0 rounded-[2rem] bg-[#003a8f]/5 animate-pulse" />
+                        <i className="fas fa-hourglass-start relative z-10 text-slate-400" />
+                      </div>
+                      <h3 className="text-2xl font-black text-[#102033] tracking-tight">Session Pending</h3>
+                      <p className="mt-3 text-[1rem] font-medium text-[#536982] max-w-sm leading-relaxed">
+                        The live workspace will open automatically once the panel chair authorizes the start of the defense.
                       </p>
                     </div>
                   )}
                 </div>
               </section>
-
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-2xl px-5 py-4 shadow-[0_8px_30px_rgba(15,43,89,0.06)] relative z-20">
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFocusMode(!focusMode)}
-                    className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-[0.8rem] font-black transition-all duration-300 ${
-                      focusMode ? 'border-[#003a8f] bg-[#003a8f] text-white shadow-[0_4px_15px_rgba(0,58,143,0.3)]' : 'border-white bg-white text-[#536982] shadow-sm hover:border-blue-200 hover:text-[#003a8f]'
-                    }`}
-                  >
-                    <i className={`fas ${focusMode ? 'fa-compress' : 'fa-expand'}`} />
-                    {focusMode ? 'Exit Focus' : 'Focus Mode'}
-                  </button>
-                  <div className="flex items-center gap-2 rounded-xl border border-white bg-white/80 px-4 py-2.5 text-[0.8rem] font-bold text-[#536982] shadow-sm">
-                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Live Scoring Active
-                  </div>
-
-                </div>
-
-                {isChair && (
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex bg-white/80 border border-white shadow-sm rounded-xl overflow-hidden p-1 mr-2">
-                      <button
-                        type="button"
-                        onClick={() => setTimerActive(!timerActive)}
-                        className={`flex items-center gap-2 rounded-[0.65rem] px-4 py-2 text-[0.75rem] font-black transition-all ${
-                          timerActive ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-[#003a8f] text-white hover:bg-blue-800 shadow-sm'
-                        }`}
-                      >
-                        <i className={`fas ${timerActive ? 'fa-pause' : 'fa-play'}`} />
-                        {timerActive ? 'Pause' : 'Resume'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={addFiveMinutes}
-                        className="flex items-center gap-2 rounded-[0.65rem] bg-transparent px-3 py-2 text-[0.75rem] font-black text-[#536982] transition-colors hover:bg-slate-100"
-                        title="Add 5 Minutes"
-                      >
-                        <i className="fas fa-plus text-[#003a8f]" />
-                        5m
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setTimer(sessionDuration);
-                          setTimerActive(false);
-                        }}
-                        className="flex items-center gap-2 rounded-[0.65rem] bg-transparent px-3 py-2 text-[0.75rem] font-black text-[#536982] transition-colors hover:bg-slate-100"
-                        title="Reset Timer"
-                      >
-                        <i className="fas fa-rotate-left" />
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={endAllDefenses}
-                      className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[0.8rem] font-black text-rose-700 transition-all hover:bg-rose-100 hover:border-rose-300 hover:shadow-sm"
-                    >
-                      <i className="fas fa-stop-circle" />
-                      End All Defenses
-                    </button>
-                    {canNext ? (
-                      <button
-                        type="button"
-                        onClick={nextGroup}
-                        disabled={!submitted || Object.keys(panelistVotes).length < panelists.length}
-                        className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#003a8f] to-[#082a67] px-5 py-2.5 text-[0.8rem] font-black text-white shadow-[0_4px_15px_rgba(0,58,143,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,58,143,0.3)] disabled:cursor-not-allowed disabled:transform-none disabled:opacity-50 disabled:shadow-none"
-                      >
-                        {!submitted ? 'Waiting for Submission...' : Object.keys(panelistVotes).length < panelists.length ? 'Complete Voting First' : 'Next Defense Group'}
-                        <i className="fas fa-arrow-right transition-transform group-hover:translate-x-1" />
-                      </button>
-                    ) : (
-                      <Link
-                        href="/adviser/panel-mode/dashboard"
-                        onClick={clearAllSessionSnapshots}
-                        className={`group flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-700 px-5 py-2.5 text-[0.8rem] font-black text-white shadow-[0_4px_15px_rgba(16,185,129,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(16,185,129,0.3)] ${!submitted || Object.keys(panelistVotes).length < panelists.length ? 'pointer-events-none opacity-50 shadow-none' : ''}`}
-                      >
-                        {submitted ? 'Complete Session & Exit' : 'Waiting for Submission...'}
-                        <i className="fas fa-check transition-transform group-hover:scale-110" />
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </main>
 
-        {sessionStarted && (
-          <aside className={`flex min-h-0 shrink-0 flex-col border-l border-white/60 bg-white/80 backdrop-blur-2xl shadow-[-10px_0_30px_rgba(0,58,143,0.05)] xl:h-auto ${focusMode ? 'hidden' : 'w-full xl:w-[420px]'}`}>
-            <div className="shrink-0 border-b border-slate-200/50 p-6 bg-gradient-to-b from-white/90 to-transparent">
-              <p className="text-[0.65rem] font-black uppercase tracking-widest text-[#003a8f]/60 mb-1">Defense Material</p>
-              <h3 className="flex items-center gap-2.5 text-lg font-black text-[#102033] tracking-tight">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#003a8f] to-[#082a67] shadow-md">
-                  <i className="fas fa-list-check text-white text-sm" />
-                </span>
-                Brief & Context
-              </h3>
-            </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-6">
-              <div className="rounded-[1.25rem] border border-white/80 bg-white/60 p-5 shadow-[0_2px_10px_rgba(0,58,143,0.03)]">
-                <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Live Panel Score</p>
-                <div className="mt-3 flex items-end justify-between relative z-10">
-                  <span className="text-4xl font-black tabular-nums text-[#003a8f] tracking-tighter">{totalScore}</span>
-                  <span className="text-sm font-black text-slate-400 mb-1">/{MAX_SCORE}</span>
-                </div>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 shadow-inner relative z-10">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#003a8f] to-blue-400 transition-all duration-500" style={{ width: `${(scoredCriteria / RUBRIC.length) * 100}%` }} />
-                </div>
-              </div>
-
-              <div className="rounded-[1.25rem] border border-white/80 bg-white/60 p-5 shadow-[0_2px_10px_rgba(0,58,143,0.03)]">
-                <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Evaluation Questions</p>
-                <div className="mt-4 grid gap-3">
-                  {activeEvaluationNeeds.map((need, index) => (
-                    <div key={`brief-evaluation-need-${index}`} className="flex items-start gap-3 rounded-xl bg-white/80 p-3 shadow-sm border border-slate-100">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-blue-50 text-[0.65rem] font-black text-[#003a8f]">
-                        {index + 1}
-                      </span>
-                      <p className="text-xs font-semibold leading-relaxed text-[#102033] mt-0.5">{need}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[1.25rem] border border-white/80 bg-white/60 p-5 shadow-[0_2px_10px_rgba(0,58,143,0.03)]">
-                <p className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Defense Packet</p>
-                <div className="mt-4 space-y-2.5">
-                  {group.artifacts.map((artifact) => (
-                    <div key={artifact.label} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-white p-2.5 shadow-sm">
-                      <span className="text-xs font-bold text-[#102033]">{artifact.label}</span>
-                      <span className={`rounded-md border px-2 py-1 text-[0.55rem] font-black uppercase tracking-widest ${artifactTone(artifact.status)}`}>
-                        {artifact.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </aside>
-        )}
       </div>
     </div>
   );

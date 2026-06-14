@@ -42,26 +42,36 @@ export function ProgramHeadEvidence() {
   return (
     <ProgramHeadShell activeNav="evidence" title="Accreditation & Evidence Management" description="Prepare documentation for program accreditation and quality assurance" notificationCount={2}>
       {/* Filter Bar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-8">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[180px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Academic Year</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" defaultValue="AY 2023-2024">
-              <option>AY 2023-2024</option><option>AY 2022-2023</option><option>AY 2021-2022</option>
-            </select>
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 p-5 mb-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#0F3DDE]/5 to-[#081B4B]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="flex flex-wrap items-end gap-5 relative z-10">
+          <div className="flex-1 min-w-[180px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Academic Year</label>
+            <div className="relative">
+              <i className="fas fa-calendar-alt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="AY 2023-2024">
+                <option>AY 2023-2024</option><option>AY 2022-2023</option><option>AY 2021-2022</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div className="flex-1 min-w-[180px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Evidence Type</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
-              <option value="All">All Evidence Types</option>
-              <option value="Student Outputs">Student Outputs</option>
-              <option value="Faculty Research">Faculty Research</option>
-              <option value="Industry Linkages">Industry Linkages</option>
-              <option value="Community Engagement">Community Engagement</option>
-            </select>
+          <div className="flex-1 min-w-[180px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Evidence Type</label>
+            <div className="relative">
+              <i className="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
+                <option value="All">All Evidence Types</option>
+                <option value="Student Outputs">Student Outputs</option>
+                <option value="Faculty Research">Faculty Research</option>
+                <option value="Industry Linkages">Industry Linkages</option>
+                <option value="Community Engagement">Community Engagement</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <button onClick={() => setReportOpen(true)} className="h-11 px-6 bg-[#003a8f] text-white rounded-xl text-sm font-bold shadow-md shadow-blue-900/20 hover:bg-[#002c6b] hover:-translate-y-0.5 transition-all flex items-center gap-2">
-            <i className="fas fa-file-alt"></i> Accreditation Report
+          <button onClick={() => setReportOpen(true)} className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-black shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+            <i className="fas fa-file-alt group-hover:scale-110 transition-transform"></i> Accreditation Report
           </button>
         </div>
       </div>
@@ -79,17 +89,18 @@ export function ProgramHeadEvidence() {
       </div>
 
       {/* Requirements Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden mb-8">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100/80 relative z-10">
           <div>
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-tasks text-[#003a8f]"></i> Accreditation Requirements</h3>
-            <p className="text-sm text-slate-500 m-0 mt-1">{completePct}% of requirements are complete.</p>
+            <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-tasks text-[#0F3DDE]/70"></i> Accreditation Requirements</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0 mt-1">{completePct}% of requirements are complete.</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-32 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-[#003a8f] rounded-full" style={{ width: `${completePct}%` }} />
+            <div className="w-32 h-2.5 bg-slate-100 shadow-inner rounded-full overflow-hidden ring-1 ring-inset ring-slate-200/50">
+              <div className="h-full bg-gradient-to-r from-[#0F3DDE] to-blue-500 rounded-full shadow-[0_0_10px_rgba(15,61,222,0.5)]" style={{ width: `${completePct}%` }} />
             </div>
-            <span className="text-sm font-extrabold text-[#003a8f]">{completePct}%</span>
+            <span className="text-sm font-black text-[#081B4B]">{completePct}%</span>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -144,12 +155,13 @@ export function ProgramHeadEvidence() {
       {/* Documents + Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Documents */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-folder-open text-amber-500"></i> Evidence Repository</h3>
-            <p className="text-sm text-slate-500 m-0 mt-1">{DOCUMENTS.length} documents uploaded.</p>
+        <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
+            <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-folder-open text-[#0F3DDE]/70"></i> Evidence Repository</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0 mt-1">{DOCUMENTS.length} documents uploaded.</p>
           </div>
-          <div className="p-6 space-y-3">
+          <div className="p-6 space-y-3 relative z-10">
             {DOCUMENTS.map(doc => (
               <div key={doc.name} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all bg-white group cursor-pointer">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: doc.color }}>
@@ -171,12 +183,13 @@ export function ProgramHeadEvidence() {
         </div>
 
         {/* Timeline */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-stream text-[#003a8f]"></i> Accreditation Timeline</h3>
-            <p className="text-sm text-slate-500 m-0 mt-1">Track preparation milestones.</p>
+        <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
+            <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-stream text-[#0F3DDE]/70"></i> Accreditation Timeline</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0 mt-1">Track preparation milestones.</p>
           </div>
-          <div className="p-6">
+          <div className="p-6 relative z-10">
             <div className="relative">
               {/* Vertical line */}
               <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-slate-200"></div>

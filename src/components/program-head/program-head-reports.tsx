@@ -52,28 +52,42 @@ export function ProgramHeadReports() {
   return (
     <ProgramHeadShell activeNav="reports" title="Reports & Analytics" description="Comprehensive program performance analysis" notificationCount={2}>
       {/* Filter Bar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-8">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Department</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" defaultValue="All">
-              <option value="All">All Departments</option><option>IT</option><option>MET</option><option>TCM</option><option>ESM</option><option>NAME</option>
-            </select>
+      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-200/50 p-5 mb-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#0F3DDE]/5 to-[#081B4B]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="flex flex-wrap items-end gap-5 relative z-10">
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Department</label>
+            <div className="relative">
+              <i className="fas fa-building absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="All">
+                <option value="All">All Departments</option><option>IT</option><option>MET</option><option>TCM</option><option>ESM</option><option>NAME</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Report Type</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" defaultValue="Annual">
-              <option value="Annual">Annual Program Report</option><option>Department Performance</option><option>Student Success Metrics</option><option>Technology Transfer Analytics</option>
-            </select>
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Report Type</label>
+            <div className="relative">
+              <i className="fas fa-file-invoice absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="Annual">
+                <option value="Annual">Annual Program Report</option><option>Department Performance</option><option>Student Success Metrics</option><option>Technology Transfer Analytics</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div className="flex-1 min-w-[160px]">
-            <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Period</label>
-            <select className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-slate-100 transition-colors" defaultValue="AY 2023-2024">
-              <option>AY 2023-2024</option><option>AY 2022-2023</option><option>AY 2021-2022</option>
-            </select>
+          <div className="flex-1 min-w-[160px] group">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Period</label>
+            <div className="relative">
+              <i className="fas fa-calendar-alt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
+              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="AY 2023-2024">
+                <option>AY 2023-2024</option><option>AY 2022-2023</option><option>AY 2021-2022</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <button onClick={() => setReportOpen(true)} className="h-11 px-6 bg-[#003a8f] text-white rounded-xl text-sm font-bold shadow-md shadow-blue-900/20 hover:bg-[#002c6b] hover:-translate-y-0.5 transition-all flex items-center gap-2">
-            <i className="fas fa-chart-line"></i> Generate Report
+          <button onClick={() => setReportOpen(true)} className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-black shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+            <i className="fas fa-chart-line group-hover:scale-110 transition-transform"></i> Generate Report
           </button>
         </div>
       </div>
@@ -91,18 +105,19 @@ export function ProgramHeadReports() {
       </div>
 
       {/* Department Performance */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-slate-100">
+      <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden mb-8">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 border-b border-slate-100/80 relative z-10">
           <div>
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-chart-bar text-[#003a8f]"></i> Department Performance Comparison</h3>
-            <p className="text-sm text-slate-500 m-0 mt-1">Completion rate, project load, and transfer output by department.</p>
+            <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-chart-bar text-[#0F3DDE]/70"></i> Department Performance Comparison</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0 mt-1">Completion rate, project load, and transfer output by department.</p>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider text-[#003a8f]">
+          <span className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider text-[#0F3DDE]">
             <i className="fas fa-bullseye text-[11px]" /> Target {PERFORMANCE_TARGET}%
           </span>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6 p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6 p-6 relative z-10">
           <div className="rounded-2xl bg-[#003a8f] p-5 text-white shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -215,11 +230,12 @@ export function ProgramHeadReports() {
       </div>
 
       {/* Annual Stats Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div className="px-6 py-5 border-b border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-table text-[#003a8f]"></i> Annual Program Statistics</h3>
+      <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden mb-8">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
+          <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-table text-[#0F3DDE]/70"></i> Annual Program Statistics</h3>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative z-10">
           <table className="w-full text-left border-collapse">
             <thead className="bg-slate-50/80 text-slate-500 text-[11px] uppercase tracking-wider font-extrabold">
               <tr>
@@ -251,30 +267,32 @@ export function ProgramHeadReports() {
 
       {/* Insights + Recommendations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100">
-            <h3 className="text-lg font-bold text-slate-800 m-0 flex items-center gap-2"><i className="fas fa-lightbulb text-amber-500"></i> Key Insights</h3>
+        <div className="group bg-gradient-to-b from-amber-50/90 to-amber-50/50 backdrop-blur-xl ring-1 ring-amber-200/60 rounded-2xl shadow-[0_8px_30px_rgb(245,158,11,0.04)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)] transition-all duration-300 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="px-6 py-5 border-b border-amber-200/60 bg-amber-100/30 relative z-10">
+            <h3 className="text-lg font-black text-amber-900 m-0 flex items-center gap-2"><i className="fas fa-lightbulb text-amber-500"></i> Key Insights</h3>
           </div>
-          <div className="p-6 space-y-3">
+          <div className="p-6 space-y-3 relative z-10">
             {INSIGHTS.map((item, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: item.color }}>
+              <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-white/80 border border-amber-100/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group/item">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm ring-1 ring-amber-200 group-hover/item:scale-110 transition-transform duration-300" style={{ backgroundColor: item.color }}>
                   <i className={`fas ${item.icon}`}></i>
                 </div>
-                <span className="text-sm font-medium text-slate-700">{item.text}</span>
+                <span className="text-sm font-bold text-amber-900">{item.text}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-blue-100 bg-blue-50/50">
-            <h3 className="text-lg font-bold text-[#003a8f] m-0 flex items-center gap-2"><i className="fas fa-clipboard-list text-[#003a8f]"></i> Recommendations</h3>
+        <div className="group bg-gradient-to-b from-blue-50/90 to-blue-50/50 backdrop-blur-xl ring-1 ring-blue-200/60 rounded-2xl shadow-[0_8px_30px_rgb(15,61,222,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.08)] transition-all duration-300 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="px-6 py-5 border-b border-blue-200/60 bg-blue-100/30 relative z-10">
+            <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-clipboard-list text-[#0F3DDE]"></i> Recommendations</h3>
           </div>
-          <div className="p-6 space-y-3">
+          <div className="p-6 space-y-3 relative z-10">
             {RECOMMENDATIONS.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white border border-slate-100">
-                <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#003a8f] flex items-center justify-center mt-0.5"><i className={`fas ${item.icon} text-sm`}></i></div>
-                <span className="text-sm font-medium text-slate-700 pt-1">{item.text}</span>
+              <div key={i} className="flex items-start gap-4 p-3.5 rounded-xl bg-white/80 border border-blue-100/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group/item">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 text-[#0F3DDE] flex items-center justify-center mt-0.5 shadow-sm ring-1 ring-blue-200 group-hover/item:scale-110 transition-transform duration-300"><i className={`fas ${item.icon} text-sm`}></i></div>
+                <span className="text-sm font-bold text-[#081B4B] pt-1">{item.text}</span>
               </div>
             ))}
           </div>

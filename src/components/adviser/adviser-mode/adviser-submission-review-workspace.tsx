@@ -16,7 +16,7 @@ import {
   type CommentCategory
 } from '@/components/adviser/adviser-mode/data/submission-workspace-data';
 
-type ReviewPatchStatus = 'accepted' | 'approved' | 'needs_revision' | 'comment';
+type ReviewPatchStatus = 'accepted' | 'approved' | 'needs_revision' | 'rejected' | 'comment';
 type ReviewInfoTab = 'notes' | 'history' | 'details';
 
 const COMMENT_CATEGORIES: CommentCategory[] = [
@@ -513,6 +513,21 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
     );
   }
 
+  function declineSubmission() {
+    const reason = window.prompt('Provide a reason for declining this research/submission:');
+    if (reason === null) return; // cancelled
+    if (!reason.trim()) {
+      alert('A declined remark is required when declining a submission.');
+      return;
+    }
+
+    void updateReviewStatus(
+      'rejected',
+      `Declined: ${reason.trim()}`,
+      true
+    );
+  }
+
   function reopenApprovedAsRevision() {
     const confirmed = window.confirm(
       'Change this approved submission back to Needs Revision? This will notify the student that a revised version is required.'
@@ -616,6 +631,10 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
             <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 text-sm font-black text-orange-600 transition hover:bg-orange-50 disabled:opacity-60" type="button" disabled={isSaving} onClick={sendReminder}>
               <i className={`fas ${activeQuickAction === 'reminder' ? 'fa-spinner fa-spin' : 'fa-bell'} text-xs`} aria-hidden="true" />
               {activeQuickAction === 'reminder' ? 'Sending Reminder...' : 'Send Reminder'}
+            </button>
+            <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-300 bg-white px-4 text-sm font-black text-red-700 transition hover:bg-red-50 disabled:opacity-60" type="button" disabled={isSaving} onClick={declineSubmission}>
+              <i className="fas fa-ban text-xs" aria-hidden="true" />
+              Decline Submission
             </button>
             <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60" type="button" disabled={isSaving} onClick={approveAndNotifyStudent}>
               <i className="fas fa-circle-check text-xs" aria-hidden="true" />

@@ -5,8 +5,12 @@ export const metadata = {
   title: 'Dashboard - Adviser Portal'
 };
 
+import { requireAuthenticatedUser, buildDisplayName } from '@/lib/auth';
+
 export default async function Page() {
+  const user = await requireAuthenticatedUser();
   const { data } = await getAdviserDashboardData();
+  data.profile.fullName = buildDisplayName(user) || 'Adviser';
   return <AdviserDashboard data={data} />;
 }
 
