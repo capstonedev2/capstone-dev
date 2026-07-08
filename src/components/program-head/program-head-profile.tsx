@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PROGRAM_HEAD_PROFILE } from '@/components/program-head/program-head-data';
 import {
   ProgramHeadButton,
@@ -19,8 +19,73 @@ const DEPT_STATS = [
 export function ProgramHeadProfile() {
   const [editOpen, setEditOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
+  
+  const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState<any>(null);
+  
+  // Form states
+  const [editName, setEditName] = useState('');
+  const [editOffice, setEditOffice] = useState('');
+  const [editBio, setEditBio] = useState('');
 
-  const initials = PROGRAM_HEAD_PROFILE.displayName.split(' ').map(n => n[0]).join('');
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch('/api/profile');
+        if (res.ok) {
+          const data = await res.json();
+          setProfileData(data.user);
+          setEditName(data.user.name || '');
+          setEditOffice(data.user.office || '');
+          setEditBio(data.user.accountSummary || '');
+        }
+      } catch (e) {
+        console.error('Failed to fetch profile', e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  const handleUpdateProfile = async () => {
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName,
+          office: editOffice,
+          accountSummary: editBio
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfileData(data.user);
+        setEditOpen(false);
+        
+        // Update local storage so the shell header updates immediately
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('capstoneAuthUser', JSON.stringify(data.user));
+          // Emit a storage event to force other components to sync
+          window.dispatchEvent(new Event('storage'));
+          // Reload the page to ensure all static shells are updated globally
+          window.location.reload();
+        }
+      } else {
+        alert('Failed to update profile');
+      }
+    } catch (e) {
+      alert('An error occurred');
+    }
+  };
+
+  const displayName = profileData?.name || PROGRAM_HEAD_PROFILE.displayName;
+  const initials = displayName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
+
+  if (loading) {
+    return <ProgramHeadShell activeNav="profile" title="My Profile"><div className="p-8 text-center text-slate-500">Loading profile...</div></ProgramHeadShell>;
+  }
 
   return (
     <ProgramHeadShell activeNav="profile" title="My Profile" description="Department Chair - Information Technology Department" notificationCount={2}>
@@ -35,9 +100,9 @@ export function ProgramHeadProfile() {
               {initials}
             </div>
             <div className="flex-1 pt-2">
-              <h2 className="text-2xl font-bold text-slate-800 m-0">{PROGRAM_HEAD_PROFILE.displayName}</h2>
+              <h2 className="text-2xl font-bold text-slate-800 m-0">{displayName}</h2>
               <div className="flex items-center gap-3 mt-1 flex-wrap">
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-[#003a8f] text-xs font-bold ring-1 ring-[#003a8f]/10">{PROGRAM_HEAD_PROFILE.role}</span>
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-[#003a8f] text-xs font-bold ring-1 ring-[#003a8f]/10">{profileData?.role?.replace('_', ' ') || PROGRAM_HEAD_PROFILE.role}</span>
                 <span className="text-sm text-slate-500">{PROGRAM_HEAD_PROFILE.rank}</span>
               </div>
             </div>
@@ -62,12 +127,11 @@ export function ProgramHeadProfile() {
           </div>
           <div className="p-6 space-y-4">
             {[
-              ['Full Name', PROGRAM_HEAD_PROFILE.fullName, 'fa-user'],
-              ['Employee ID', PROGRAM_HEAD_PROFILE.employeeId, 'fa-id-badge'],
-              ['Email', PROGRAM_HEAD_PROFILE.email, 'fa-envelope'],
-              ['Contact', PROGRAM_HEAD_PROFILE.contact, 'fa-phone'],
-              ['Office', PROGRAM_HEAD_PROFILE.office, 'fa-map-marker-alt'],
-              ['Consultation', PROGRAM_HEAD_PROFILE.consultationHours, 'fa-clock']
+              ['Full Name', displayName, 'fa-user'],
+              ['Email', profileData?.email || PROGRAM_HEAD_PROFILE.email, 'fa-envelope'],
+              ['Office', profileData?.office || 'Not provided', 'fa-map-marker-alt'],
+              ['Bio', profileData?.accountSummary || 'Not provided', 'fa-address-card'],
+              ['Department', profileData?.department || 'IT Department', 'fa-building']
             ].map(([label, value, icon]) => (
               <div key={label as string} className="flex items-center gap-4">
                 <div className="w-9 h-9 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center">
@@ -75,7 +139,7 @@ export function ProgramHeadProfile() {
                 </div>
                 <div>
                   <span className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">{label}</span>
-                  <span className="text-sm font-medium text-slate-800">{value}</span>
+                  <span className="text-sm font-medium text-slate-800 break-words">{value}</span>
                 </div>
               </div>
             ))}
@@ -165,17 +229,14 @@ export function ProgramHeadProfile() {
 
       {/* Edit Profile Modal */}
       <ProgramHeadModal open={editOpen} title="Edit Profile" onClose={() => setEditOpen(false)}>
-        <div className="ph-form-field"><label htmlFor="ph-profile-name">Full Name</label><input className="ph-input" defaultValue={PROGRAM_HEAD_PROFILE.fullName} id="ph-profile-name" /></div>
-        <div className="ph-form-field"><label htmlFor="ph-profile-email">Email</label><input className="ph-input" defaultValue={PROGRAM_HEAD_PROFILE.email} id="ph-profile-email" /></div>
-        <div className="ph-form-field"><label htmlFor="ph-profile-contact">Contact Number</label><input className="ph-input" defaultValue={PROGRAM_HEAD_PROFILE.contact} id="ph-profile-contact" /></div>
-        <div className="ph-form-field"><label htmlFor="ph-profile-office">Office Location</label><input className="ph-input" defaultValue={PROGRAM_HEAD_PROFILE.office} id="ph-profile-office" /></div>
-        <div className="ph-form-field"><label htmlFor="ph-profile-hours">Consultation Hours</label><input className="ph-input" defaultValue={PROGRAM_HEAD_PROFILE.consultationHours} id="ph-profile-hours" /></div>
-        <div className="ph-form-field"><label htmlFor="ph-profile-bio">Bio</label>
-          <textarea className="ph-textarea" defaultValue="Professor of Computer Science, Department Chair of IT Department. Research interests in Data Science, AI in Education, and Technology Transfer." id="ph-profile-bio" rows={3} />
+        <div className="ph-form-field"><label htmlFor="ph-profile-name">Full Name</label><input className="ph-input" value={editName} onChange={(e) => setEditName(e.target.value)} id="ph-profile-name" /></div>
+        <div className="ph-form-field"><label htmlFor="ph-profile-office">Office Location</label><input className="ph-input" value={editOffice} onChange={(e) => setEditOffice(e.target.value)} id="ph-profile-office" /></div>
+        <div className="ph-form-field"><label htmlFor="ph-profile-bio">Bio / Account Summary</label>
+          <textarea className="ph-textarea" value={editBio} onChange={(e) => setEditBio(e.target.value)} id="ph-profile-bio" rows={3} />
         </div>
         <div className="ph-modal-actions">
           <ProgramHeadButton onClick={() => setEditOpen(false)}>Cancel</ProgramHeadButton>
-          <ProgramHeadButton variant="primary" onClick={() => setEditOpen(false)}>Save Changes</ProgramHeadButton>
+          <ProgramHeadButton variant="primary" onClick={handleUpdateProfile}>Save Changes</ProgramHeadButton>
         </div>
       </ProgramHeadModal>
 

@@ -606,7 +606,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               where: { groupId: group.id, isActive: true },
               select: {
                 id: true, userId: true, role: true, createdAt: true, updatedAt: true,
-                user: { select: { id: true, name: true, studentId: true, email: true, profileImage: true } }
+                user: { select: { id: true, name: true, displayName: true, studentId: true, email: true, profileImage: true } }
               },
               take: 50
             }).catch(err => {
@@ -646,7 +646,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                 status: 'active',
                 created_at: gm.createdAt.toISOString(),
                 updated_at: gm.updatedAt.toISOString(),
-                fullName: gm.user.name || '',
+                fullName: gm.user.displayName || gm.user.name || '',
                 studentId: gm.user.studentId || '',
                 email: gm.user.email || '',
                 isLeader: gm.role === 'LEADER',
@@ -660,6 +660,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                 select: {
                   id: true,
                   name: true,
+                  displayName: true,
                   studentId: true,
                   email: true,
                   profileImage: true
@@ -677,11 +678,11 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                   status: 'active',
                   created_at: group.createdAt.toISOString(),
                   updated_at: group.updatedAt.toISOString(),
-                  fullName: studentName,
+                  fullName: user?.displayName || user?.name || studentName,
                   studentId: user?.studentId || '',
                   email: user?.email || '',
                   isLeader: studentName === group.leader,
-                  isCurrent: studentName === userName,
+                  isCurrent: studentName === userName || (user?.name === userName),
                   profileImage: user?.profileImage || null,
                 };
               });

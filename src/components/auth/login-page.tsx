@@ -78,9 +78,13 @@ export function LoginPage() {
 
   useEffect(() => {
     try {
+      const remembered = localStorage.getItem('capstoneRememberedIdentifier');
       const draft = JSON.parse(localStorage.getItem('capstoneStudentProfileDraft') || 'null');
 
-      if (draft?.studentId) {
+      if (remembered) {
+        setIdentifier(remembered);
+        setRememberMe(true);
+      } else if (draft?.studentId) {
         setIdentifier(String(draft.studentId));
       }
 
@@ -249,6 +253,12 @@ export function LoginPage() {
 
     try {
       sessionStorage.setItem('capstoneAuthRememberMe', rememberMe ? 'true' : 'false');
+      
+      if (rememberMe) {
+        localStorage.setItem('capstoneRememberedIdentifier', identifier.trim());
+      } else {
+        localStorage.removeItem('capstoneRememberedIdentifier');
+      }
     } catch {
       // Ignore storage issues.
     }

@@ -23,6 +23,7 @@ export type AdviserDashboardData = {
     accountSummary?: string;
     profileImage?: string;
     displayName?: string;
+    rawRole?: string;
   };
   adviserActivity: Array<{
     id: string;
@@ -710,7 +711,8 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
       office: dbUser.office || '',
       accountSummary: dbUser.accountSummary || '',
       profileImage: dbUser.profileImage || '',
-      displayName: dbUser.displayName || ''
+      displayName: dbUser.displayName || '',
+      rawRole: dbUser.role
     };
 
     // Ensure mock data groups belong to the logged-in user so they aren't filtered out

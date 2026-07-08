@@ -14717,7 +14717,7 @@ progress::-moz-progress-bar {
         display: none;
     }
 
-    .student-shell .profile-nav-btn-copy {
+    .student-shell .profile-nav-btn-copy small {
         display: none;
     }
 
@@ -26542,7 +26542,9 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-shell .student-global-navbar-actions :is(.profile-pill, .portal-shell-profile-trigger) {
-    min-width: 174px !important;
+    min-width: auto !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
     height: 48px !important;
     min-height: 48px !important;
     padding: 0.4rem 0.75rem 0.4rem 0.42rem !important;
@@ -27126,3 +27128,24 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-shell .student-global-sidebar .sidebar-submenu .sidebar-link.is-active .sidebar-link-icon {
     color: var(--primary) !important;
 }
+
+.profile-dropdown .dashboard-mode-switch { flex-direction: column !important; }
+.profile-dropdown .dashboard-mode-switch button { justify-content: flex-start !important; white-space: nowrap !important; }
+
+
+.dashboard-mode-switch { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.28rem; border-radius: 999px; background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%); border: 1px solid rgba(229, 231, 235, 0.9); box-shadow: 0 10px 24px rgba(31, 41, 55, 0.05); }
+.dashboard-mode-switch button { border: none; background: transparent; color: #6B7280; font-family: inherit; font-size: 0.76rem; font-weight: 700; padding: 0.52rem 0.95rem; border-radius: 999px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.01em; }
+.dashboard-mode-switch button:hover { color: #003A8F; background: rgba(0, 58, 143, 0.06); }
+.dashboard-mode-switch button.active { background: linear-gradient(135deg, #003A8F, #002C6B); color: white; box-shadow: 0 12px 24px rgba(0, 58, 143, 0.18); }
+
+
+.workspace-mode-menu { display: grid; gap: 0.2rem; }
+.workspace-mode-item { width: 100%; border: none; background: transparent; text-decoration: none; color: #475569; font-family: inherit; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.9rem; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s ease; }
+.workspace-mode-item-left { display: flex; align-items: center; gap: 0.7rem; }
+.workspace-mode-item-left i { width: 1rem; text-align: center; color: #64748b; transition: all 0.2s ease; }
+.workspace-mode-item:hover { background: rgba(0, 58, 143, 0.04); color: #1e293b; }
+.workspace-mode-item:hover .workspace-mode-item-left i { color: #003a8f; }
+.workspace-mode-item.is-active { background: rgba(0, 58, 143, 0.08); color: #003a8f; }
+.workspace-mode-item.is-active .workspace-mode-item-left i { color: #003a8f; }
+.workspace-mode-item.is-active .fa-circle-check { color: #003a8f; }
+

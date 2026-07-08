@@ -1,0 +1,5537 @@
+PGDMP
+
+6
+
+.
+
+~
+
+thesistrack_erd
+
+17.10
+
+17.10
+
+0
+
+0
+
+ENCODING
+
+ENCODING
+
+SET client_encoding = 'UTF8';
+
+false
+
+0
+
+0
+
+STDSTRINGS
+
+STDSTRINGS
+
+(
+
+SET standard_conforming_strings = 'on';
+
+false
+
+0
+
+0
+
+SEARCHPATH
+
+SEARCHPATH
+
+8
+
+SELECT pg_catalog.set_config('search_path', '', false);
+
+false
+
+1262
+
+26500
+
+thesistrack_erd
+
+DATABASE
+
+CREATE DATABASE thesistrack_erd WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'English_United States.1252';
+
+DROP DATABASE thesistrack_erd;
+
+postgres
+
+false
+
+2615
+
+27227
+
+figure_19_1_user_access
+
+SCHEMA
+
+'
+
+CREATE SCHEMA figure_19_1_user_access;
+
+%
+
+DROP SCHEMA figure_19_1_user_access;
+
+postgres
+
+false
+
+2615
+
+27228
+
+figure_19_2_project_management
+
+SCHEMA
+
+.
+
+CREATE SCHEMA figure_19_2_project_management;
+
+,
+
+DROP SCHEMA figure_19_2_project_management;
+
+postgres
+
+false
+
+2615
+
+27229
+
+figure_19_3_evaluation_defense
+
+SCHEMA
+
+.
+
+CREATE SCHEMA figure_19_3_evaluation_defense;
+
+,
+
+DROP SCHEMA figure_19_3_evaluation_defense;
+
+postgres
+
+false
+
+2615
+
+27230
+ 
+
+figure_19_4_repository_archiving
+
+SCHEMA
+
+0
+
+CREATE SCHEMA figure_19_4_repository_archiving;
+
+.
+
+DROP SCHEMA figure_19_4_repository_archiving;
+
+postgres
+
+false
+
+2615
+
+27231
+
+figure_19_5_technology_transfer
+
+SCHEMA
+
+/
+
+CREATE SCHEMA figure_19_5_technology_transfer;
+
+-
+
+DROP SCHEMA figure_19_5_technology_transfer;
+
+postgres
+
+false
+
+2615
+
+27232
+
+figure_19_6_notifications_audit
+
+SCHEMA
+
+/
+
+CREATE SCHEMA figure_19_6_notifications_audit;
+
+-
+
+DROP SCHEMA figure_19_6_notifications_audit;
+
+postgres
+
+false
+
+1259
+
+27279
+
+academic_years
+
+TABLE
+
+CREATE TABLE figure_19_1_user_access.academic_years (
+    academic_year_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    year_label character varying(100),
+    start_date date,
+    end_date date,
+    is_active boolean DEFAULT false
+);
+
+3
+
+DROP TABLE figure_19_1_user_access.academic_years;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27233
+
+departments
+
+TABLE
+
+r
+
+CREATE TABLE figure_19_1_user_access.departments (
+    department_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    department_name character varying(255) NOT NULL,
+    department_code character varying(50),
+    description text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+0
+
+DROP TABLE figure_19_1_user_access.departments;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27342
+
+password_reset_tokens
+
+TABLE
+
+2
+
+CREATE TABLE figure_19_1_user_access.password_reset_tokens (
+    reset_token_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid,
+    token text,
+    expires_at timestamp without time zone,
+    is_used boolean DEFAULT false,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+:
+
+DROP TABLE figure_19_1_user_access.password_reset_tokens;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27255
+
+permissions
+
+TABLE
+
+1
+
+CREATE TABLE figure_19_1_user_access.permissions (
+    permission_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    permission_name character varying(150) NOT NULL,
+    module character varying(100),
+    action character varying(100),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+0
+
+DROP TABLE figure_19_1_user_access.permissions;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27262
+
+role_permissions
+
+TABLE
+
+CREATE TABLE figure_19_1_user_access.role_permissions (
+    role_permission_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    role_id uuid,
+    permission_id uuid,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+5
+
+DROP TABLE figure_19_1_user_access.role_permissions;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27243
+
+roles
+
+TABLE
+
+:
+
+CREATE TABLE figure_19_1_user_access.roles (
+    role_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    role_name character varying(100) NOT NULL,
+    role_description text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+*
+
+DROP TABLE figure_19_1_user_access.roles;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27286
+
+semesters
+
+TABLE
+
+'
+
+CREATE TABLE figure_19_1_user_access.semesters (
+    semester_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    academic_year_id uuid,
+    semester_name character varying(100),
+    semester_code character varying(50),
+    start_date date,
+    end_date date,
+    is_active boolean DEFAULT false
+);
+
+.
+
+DROP TABLE figure_19_1_user_access.semesters;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27325
+
+
+user_sessions
+
+TABLE
+
+h
+
+CREATE TABLE figure_19_1_user_access.user_sessions (
+    session_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid,
+    session_token text,
+    ip_address character varying(100),
+    user_agent text,
+    login_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    logout_at timestamp without time zone,
+    is_active boolean DEFAULT true
+);
+
+2
+
+DROP TABLE figure_19_1_user_access.user_sessions;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27298
+
+users
+
+TABLE
+
+CREATE TABLE figure_19_1_user_access.users (
+    user_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    department_id uuid,
+    role_id uuid,
+    email character varying(255) NOT NULL,
+    password_hash text,
+    name character varying(255),
+    first_name character varying(100),
+    last_name character varying(100),
+    contact_number character varying(50),
+    address text,
+    birth_date date,
+    profile_image text,
+    display_name character varying(255),
+    auth_provider character varying(50) DEFAULT 'local'::character varying,
+    provider_account_id character varying(255),
+    email_verified boolean DEFAULT false,
+    is_suspended boolean DEFAULT false,
+    suspended_at timestamp without time zone,
+    last_login_at timestamp without time zone,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+*
+
+DROP TABLE figure_19_1_user_access.users;
+
+figure_19_1_user_access
+
+heap
+r
+
+postgres
+
+false
+
+6
+
+1259
+
+27478
+
+document_versions
+
+TABLE
+
+CREATE TABLE figure_19_2_project_management.document_versions (
+    document_version_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    document_id uuid,
+    version_no integer,
+    file_name character varying(255),
+    file_path text,
+    mime_type character varying(100),
+    change_description text,
+    uploaded_by uuid,
+    uploaded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+=
+
+DROP TABLE figure_19_2_project_management.document_versions;
+
+figure_19_2_project_management
+
+heap
+r
+
+postgres
+
+false
+
+7
+
+1259
+
+27439
+
+milestone_submissions
+
+TABLE
+
+/
+
+CREATE TABLE figure_19_2_project_management.milestone_submissions (
+    submission_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    milestone_id uuid,
+    submitted_by uuid,
+    submission_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    remarks text,
+    status character varying(100)
+);
+
+A
+
+DROP TABLE figure_19_2_project_management.milestone_submissions;
+
+figure_19_2_project_management
+
+heap
+r
+
+postgres
+
+false
+
+7
+
+1259
+
+27424
+
+milestones
+
+TABLE
+
+CREATE TABLE figure_19_2_project_management.milestones (
+    milestone_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    project_id uuid,
+    title character varying(255),
+    description text,
+    due_date date,
+    status character varying(100),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+6
+
+DROP TABLE figure_19_2_project_management.milestones;
+
+figure_19_2_project_management
+
+heap
+r
+
+postgres
+
+false
+
+7
+
+1259
+
+27407
+
+project_advisers
+
+TABLE
+
+
+
+CREATE TABLE figure_19_2_project_management.project_advisers (
+    project_adviser_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    project_id uuid,
+    user_id uuid,
+    adviser_role character varying(100),
+    assigned_at date,
+    is_primary boolean DEFAULT false
+);
+
+<
+
+DROP TABLE figure_19_2_project_management.project_advisers;
+
+figure_19_2_project_management
+
+heap
+r
+
+postgres
+
+false
+
+7
+
+1259
+
+27458
+
+project_documents
+
+TABLE
+
+CREATE TABLE figure_19_2_project_management.project_documents (
+    document_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    project_id uuid,
+    uploaded_by uuid,
+    document_type character varying(100),
+    title character varying(255),
+    file_name character varying(255),
+    file_path text,
+    mime_type character varying(100),
+    description text,
+    uploaded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    is_latest boolean DEFAULT true
+);
+
+=
+
+DROP TABLE figure_19_2_project_management.project_documents;
+
+figure_19_2_project_management
+
+heap
+r
+
+postgres
+
+false
+
+7
+
+1259
+
+27390
+
+project_members
+
+TABLE
+
+CREATE TABLE figure_19_2_project_management.project_members (
+    project_member_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    project_id uuid,
+    user_id uuid,
+    role_in_project character varying(100),
+    join_date date,
+    is_active boolean DEFAULT true
+);
+
+;
+
+DROP TABLE figure_19_2_project_management.project_members;
+
+figure_19_2_project_management
+
+heap
+r
+
+postgres
+
+false
+
+7
+
+1259
+
+27359
+
+projects
+
+TABLE
+
+)
+
+CREATE TABLE figure_19_2_project_management.projects (
+    project_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    department_id uuid,
+    academic_year_id uuid,
+    semester_id uuid,
+    created_by uuid,
+    title text NOT NULL,
+    abstract text,
+    keywords text,
+    category character varying(150),
+    status character varying(100) DEFAULT 'pending'::character varying,
+    stage character varying(100),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+4
+
+DROP TABLE figure_19_2_project_management.projects;
+
+figure_19_2_project_management
+
+heap
+r
+
+postgres
+
+false
+
+7
+
+1259
+
+27620
+
+defense_documents
+
+TABLE
+
+Z
+
+CREATE TABLE figure_19_3_evaluation_defense.defense_documents (
+    defense_document_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    schedule_id uuid,
+    document_type character varying(100),
+    file_name character varying(255),
+    file_path text,
+    uploaded_by uuid,
+    uploaded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+=
+
+DROP TABLE figure_19_3_evaluation_defense.defense_documents;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27525
+
+defense_panels
+
+TABLE
+
+CREATE TABLE figure_19_3_evaluation_defense.defense_panels (
+    panel_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    schedule_id uuid,
+    user_id uuid,
+    panel_role character varying(100)
+);
+
+:
+
+DROP TABLE figure_19_3_evaluation_defense.defense_panels;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27602
+
+defense_results
+
+TABLE
+
+CREATE TABLE figure_19_3_evaluation_defense.defense_results (
+    defense_result_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    schedule_id uuid,
+    overall_decision character varying(100),
+    remarks text,
+    approved_by uuid,
+    approved_at timestamp without time zone
+);
+
+;
+
+DROP TABLE figure_19_3_evaluation_defense.defense_results;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27498
+
+defense_schedules
+
+TABLE
+
+CREATE TABLE figure_19_3_evaluation_defense.defense_schedules (
+    schedule_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    project_id uuid,
+    academic_year_id uuid,
+    semester_id uuid,
+    schedule_date date,
+    start_time time without time zone,
+    end_time time without time zone,
+    venue character varying(255),
+    status character varying(100),
+    created_by uuid,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+=
+
+DROP TABLE figure_19_3_evaluation_defense.defense_schedules;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27588
+
+evaluation_attachments
+
+TABLE
+
+A
+
+CREATE TABLE figure_19_3_evaluation_defense.evaluation_attachments (
+    attachment_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    evaluation_id uuid,
+    file_name character varying(255),
+    file_path text,
+    file_type character varying(100),
+    uploaded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+B
+
+DROP TABLE figure_19_3_evaluation_defense.evaluation_attachments;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27564
+
+evaluations
+
+TABLE
+
+*
+
+CREATE TABLE figure_19_3_evaluation_defense.evaluations (
+    evaluation_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    schedule_id uuid,
+    evaluator_id uuid,
+    rubric_id uuid,
+    score numeric(5,2),
+    remarks text,
+    submitted_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+7
+
+DROP TABLE figure_19_3_evaluation_defense.evaluations;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27639
+
+grades
+
+TABLE
+
+-
+
+CREATE TABLE figure_19_3_evaluation_defense.grades (
+    grade_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    evaluation_id uuid,
+    final_grade character varying(50),
+    equivalent character varying(50),
+    encoded_by uuid,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+2
+
+DROP TABLE figure_19_3_evaluation_defense.grades;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27550
+
+rubric_criteria
+
+TABLE
+
+CREATE TABLE figure_19_3_evaluation_defense.rubric_criteria (
+    criterion_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    rubric_id uuid,
+    criteria_description text,
+    weight_percentage numeric(5,2),
+    order_no integer,
+    is_active boolean DEFAULT true
+);
+
+;
+
+DROP TABLE figure_19_3_evaluation_defense.rubric_criteria;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27541
+
+rubrics
+
+TABLE
+
+CREATE TABLE figure_19_3_evaluation_defense.rubrics (
+    rubric_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying(255),
+    description text,
+    is_active boolean DEFAULT true
+);
+
+3
+
+DROP TABLE figure_19_3_evaluation_defense.rubrics;
+
+figure_19_3_evaluation_defense
+
+heap
+r
+
+postgres
+
+false
+
+8
+
+1259
+
+27727
+
+archive_access_logs
+
+TABLE
+
+
+
+CREATE TABLE figure_19_4_repository_archiving.archive_access_logs (
+    access_log_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    library_archive_id uuid,
+    accessed_by uuid,
+    access_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    purpose text
+);
+
+A
+
+DROP TABLE figure_19_4_repository_archiving.archive_access_logs;
+
+ 
+
+figure_19_4_repository_archiving
+
+heap
+r
+
+postgres
+
+false
+
+9
+
+1259
+
+27746
+
+archive_requests
+
+TABLE
+
+J
+
+CREATE TABLE figure_19_4_repository_archiving.archive_requests (
+    archive_request_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    repository_record_id uuid,
+    requested_by uuid,
+    request_date date,
+    purpose text,
+    status character varying(100),
+    processed_by uuid,
+    processed_at timestamp without time zone
+);
+
+>
+
+DROP TABLE figure_19_4_repository_archiving.archive_requests;
+
+ 
+
+figure_19_4_repository_archiving
+
+heap
+r
+
+postgres
+
+false
+
+9
+
+1259
+
+27696
+
+final_manuscripts
+
+TABLE
+
+y
+
+CREATE TABLE figure_19_4_repository_archiving.final_manuscripts (
+    final_manuscript_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    repository_record_id uuid,
+    title text,
+    file_path text,
+    approved_by uuid,
+    approved_at timestamp without time zone,
+    copyright_status character varying(100),
+    license_type character varying(100),
+    embargo_until date
+);
+
+?
+
+DROP TABLE figure_19_4_repository_archiving.final_manuscripts;
+
+ 
+
+figure_19_4_repository_archiving
+
+heap
+r
+
+postgres
+
+false
+
+9
+
+1259
+
+27714
+
+library_archives
+
+TABLE
+
+CREATE TABLE figure_19_4_repository_archiving.library_archives (
+    library_archive_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    repository_record_id uuid,
+    archive_code character varying(100),
+    location character varying(255),
+    archive_date date,
+    remarks text
+);
+
+>
+
+DROP TABLE figure_19_4_repository_archiving.library_archives;
+
+ 
+
+figure_19_4_repository_archiving
+
+heap
+r
+
+postgres
+
+false
+
+9
+
+1259
+
+27676
+
+repository_files
+
+TABLE
+
+CREATE TABLE figure_19_4_repository_archiving.repository_files (
+    repository_file_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    repository_record_id uuid,
+    file_name character varying(255),
+    file_path text,
+    file_type character varying(100),
+    file_size bigint,
+    version_no integer,
+    is_main boolean DEFAULT false,
+    uploaded_by uuid,
+    uploaded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+>
+
+DROP TABLE figure_19_4_repository_archiving.repository_files;
+
+ 
+
+figure_19_4_repository_archiving
+
+heap
+r
+
+postgres
+
+false
+
+9
+
+1259
+
+27656
+
+repository_records
+
+TABLE
+
+CREATE TABLE figure_19_4_repository_archiving.repository_records (
+    repository_record_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    project_id uuid,
+    title text,
+    abstract text,
+    keywords text,
+    status character varying(100),
+    visibility character varying(100),
+    published_at timestamp without time zone,
+    archived_at timestamp without time zone,
+    archived_by uuid,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+@
+
+DROP TABLE figure_19_4_repository_archiving.repository_records;
+
+ 
+
+figure_19_4_repository_archiving
+
+heap
+r
+
+postgres
+
+false
+
+9
+
+1259
+
+27799
+
+collaboration_interest
+
+TABLE
+
+m
+
+CREATE TABLE figure_19_5_technology_transfer.collaboration_interest (
+    collaboration_interest_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    partner_id uuid,
+    industry_project_id uuid,
+    interest_type character varying(100),
+    description text,
+    submitted_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    status character varying(100)
+);
+
+C
+
+DROP TABLE figure_19_5_technology_transfer.collaboration_interest;
+
+figure_19_5_technology_transfer
+
+heap
+r
+
+postgres
+
+false
+
+10
+
+1259
+
+27818
+
+collaboration_outcomes
+
+TABLE
+
+l
+
+CREATE TABLE figure_19_5_technology_transfer.collaboration_outcomes (
+    collaboration_outcome_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    industry_project_id uuid,
+    outcome_type character varying(100),
+    description text,
+    date_achieved date,
+    status character varying(100),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+C
+
+DROP TABLE figure_19_5_technology_transfer.collaboration_outcomes;
+
+figure_19_5_technology_transfer
+
+heap
+r
+
+postgres
+
+false
+
+10
+
+1259
+
+27832
+
+impact_feedback_records
+
+TABLE
+
+3
+
+CREATE TABLE figure_19_5_technology_transfer.impact_feedback_records (
+    impact_feedback_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    industry_project_id uuid,
+    feedback_type character varying(100),
+    feedback_description text,
+    rating integer,
+    feedback_date date,
+    submitted_by uuid
+);
+
+D
+
+DROP TABLE figure_19_5_technology_transfer.impact_feedback_records;
+
+figure_19_5_technology_transfer
+
+heap
+r
+
+postgres
+
+false
+
+10
+
+1259
+
+27769
+
+industry_partners
+
+TABLE
+
+-
+
+CREATE TABLE figure_19_5_technology_transfer.industry_partners (
+    partner_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    partner_name character varying(255),
+    contact_person character varying(255),
+    "position" character varying(100),
+    email character varying(255),
+    contact_number character varying(50),
+    address text,
+    partner_type character varying(100),
+    website character varying(255),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+>
+
+DROP TABLE figure_19_5_technology_transfer.industry_partners;
+
+figure_19_5_technology_transfer
+
+heap
+r
+
+postgres
+
+false
+
+10
+
+1259
+
+27779
+
+industry_projects
+
+TABLE
+
+CREATE TABLE figure_19_5_technology_transfer.industry_projects (
+    industry_project_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    partner_id uuid,
+    project_id uuid,
+    title text,
+    description text,
+    start_date date,
+    end_date date,
+    status character varying(100),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+>
+
+DROP TABLE figure_19_5_technology_transfer.industry_projects;
+
+figure_19_5_technology_transfer
+
+heap
+r
+
+postgres
+
+false
+
+10
+
+1259
+
+27882
+
+audit_logs
+
+TABLE
+
+CREATE TABLE figure_19_6_notifications_audit.audit_logs (
+    audit_log_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid,
+    action character varying(100),
+    module character varying(100),
+    table_name character varying(100),
+    record_id uuid,
+    old_values text,
+    new_values text,
+    ip_address character varying(100),
+    user_agent text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+7
+
+DROP TABLE figure_19_6_notifications_audit.audit_logs;
+
+figure_19_6_notifications_audit
+
+heap
+r
+
+postgres
+
+false
+
+11
+
+1259
+
+27865
+
+notification_read_logs
+
+TABLE
+
+CREATE TABLE figure_19_6_notifications_audit.notification_read_logs (
+    notification_read_log_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    notification_id uuid,
+    user_id uuid,
+    read_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+C
+
+DROP TABLE figure_19_6_notifications_audit.notification_read_logs;
+
+figure_19_6_notifications_audit
+
+heap
+r
+
+postgres
+
+false
+
+11
+
+1259
+
+27850
+
+
+notifications
+
+TABLE
+
+CREATE TABLE figure_19_6_notifications_audit.notifications (
+    notification_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid,
+    title character varying(255),
+    message text,
+    type character varying(100),
+    reference_id uuid,
+    reference_type character varying(100),
+    is_read boolean DEFAULT false,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+:
+
+DROP TABLE figure_19_6_notifications_audit.notifications;
+
+figure_19_6_notifications_audit
+
+heap
+r
+
+postgres
+
+false
+
+11
+
+1259
+
+27896
+
+system_settings
+
+TABLE
+
+*
+
+CREATE TABLE figure_19_6_notifications_audit.system_settings (
+    setting_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    setting_key character varying(150),
+    setting_value text,
+    description text,
+    updated_by uuid,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+<
+
+DROP TABLE figure_19_6_notifications_audit.system_settings;
+
+figure_19_6_notifications_audit
+
+heap
+r
+
+postgres
+
+false
+
+11
+
+0
+
+27279
+
+academic_years
+
+TABLE DATA
+
+x
+
+COPY figure_19_1_user_access.academic_years (academic_year_id, year_label, start_date, end_date, is_active) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+227
+
+at
+
+0
+
+27233
+
+departments
+
+TABLE DATA
+
+COPY figure_19_1_user_access.departments (department_id, department_name, department_code, description, created_at, updated_at) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+223
+
+~t
+
+0
+
+27342
+
+password_reset_tokens
+
+TABLE DATA
+
+COPY figure_19_1_user_access.password_reset_tokens (reset_token_id, user_id, token, expires_at, is_used, created_at) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+231
+
+t
+
+0
+
+27255
+
+permissions
+
+TABLE DATA
+
+r
+
+COPY figure_19_1_user_access.permissions (permission_id, permission_name, module, action, created_at) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+225
+
+t
+
+0
+
+27262
+
+role_permissions
+
+TABLE DATA
+
+s
+
+COPY figure_19_1_user_access.role_permissions (role_permission_id, role_id, permission_id, created_at) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+226
+
+t
+
+0
+
+27243
+
+roles
+
+TABLE DATA
+
+n
+
+COPY figure_19_1_user_access.roles (role_id, role_name, role_description, created_at, updated_at) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+224
+
+t
+
+0
+
+27286
+
+semesters
+
+TABLE DATA
+
+COPY figure_19_1_user_access.semesters (semester_id, academic_year_id, semester_name, semester_code, start_date, end_date, is_active) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+228
+
+u
+
+0
+
+27325
+
+
+user_sessions
+
+TABLE DATA
+
+COPY figure_19_1_user_access.user_sessions (session_id, user_id, session_token, ip_address, user_agent, login_at, logout_at, is_active) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+230
+
+,u
+
+0
+
+27298
+
+users
+
+TABLE DATA
+
+=
+
+COPY figure_19_1_user_access.users (user_id, department_id, role_id, email, password_hash, name, first_name, last_name, contact_number, address, birth_date, profile_image, display_name, auth_provider, provider_account_id, email_verified, is_suspended, suspended_at, last_login_at, created_at, updated_at) FROM stdin;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+229
+
+Iu
+
+0
+
+27478
+
+document_versions
+
+TABLE DATA
+
+COPY figure_19_2_project_management.document_versions (document_version_id, document_id, version_no, file_name, file_path, mime_type, change_description, uploaded_by, uploaded_at) FROM stdin;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+238
+
+fu
+
+0
+
+27439
+
+milestone_submissions
+
+TABLE DATA
+
+COPY figure_19_2_project_management.milestone_submissions (submission_id, milestone_id, submitted_by, submission_date, remarks, status) FROM stdin;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+236
+
+u
+
+0
+
+27424
+
+milestones
+
+TABLE DATA
+
+COPY figure_19_2_project_management.milestones (milestone_id, project_id, title, description, due_date, status, created_at, updated_at) FROM stdin;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+235
+
+u
+
+0
+
+27407
+
+project_advisers
+
+TABLE DATA
+
+COPY figure_19_2_project_management.project_advisers (project_adviser_id, project_id, user_id, adviser_role, assigned_at, is_primary) FROM stdin;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+234
+
+u
+
+0
+
+27458
+
+project_documents
+
+TABLE DATA
+
+COPY figure_19_2_project_management.project_documents (document_id, project_id, uploaded_by, document_type, title, file_name, file_path, mime_type, description, uploaded_at, is_latest) FROM stdin;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+237
+
+u
+
+0
+
+27390
+
+project_members
+
+TABLE DATA
+
+COPY figure_19_2_project_management.project_members (project_member_id, project_id, user_id, role_in_project, join_date, is_active) FROM stdin;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+233
+
+u
+
+0
+
+27359
+
+projects
+
+TABLE DATA
+
+COPY figure_19_2_project_management.projects (project_id, department_id, academic_year_id, semester_id, created_by, title, abstract, keywords, category, status, stage, created_at, updated_at) FROM stdin;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+232
+
+v
+
+0
+
+27620
+
+defense_documents
+
+TABLE DATA
+
+COPY figure_19_3_evaluation_defense.defense_documents (defense_document_id, schedule_id, document_type, file_name, file_path, uploaded_by, uploaded_at) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+246
+
+1v
+
+0
+
+27525
+
+defense_panels
+
+TABLE DATA
+
+l
+
+COPY figure_19_3_evaluation_defense.defense_panels (panel_id, schedule_id, user_id, panel_role) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+240
+
+Nv
+
+0
+
+27602
+
+defense_results
+
+TABLE DATA
+
+COPY figure_19_3_evaluation_defense.defense_results (defense_result_id, schedule_id, overall_decision, remarks, approved_by, approved_at) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+245
+
+kv
+
+0
+
+27498
+
+defense_schedules
+
+TABLE DATA
+
+COPY figure_19_3_evaluation_defense.defense_schedules (schedule_id, project_id, academic_year_id, semester_id, schedule_date, start_time, end_time, venue, status, created_by, created_at) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+239
+
+v
+
+0
+
+27588
+
+evaluation_attachments
+
+TABLE DATA
+
+COPY figure_19_3_evaluation_defense.evaluation_attachments (attachment_id, evaluation_id, file_name, file_path, file_type, uploaded_at) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+244
+
+v
+
+0
+
+27564
+
+evaluations
+
+TABLE DATA
+
+COPY figure_19_3_evaluation_defense.evaluations (evaluation_id, schedule_id, evaluator_id, rubric_id, score, remarks, submitted_at) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+243
+
+v
+
+0
+
+27639
+
+grades
+
+TABLE DATA
+
+COPY figure_19_3_evaluation_defense.grades (grade_id, evaluation_id, final_grade, equivalent, encoded_by, updated_at) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+247
+
+v
+
+0
+
+27550
+
+rubric_criteria
+
+TABLE DATA
+
+COPY figure_19_3_evaluation_defense.rubric_criteria (criterion_id, rubric_id, criteria_description, weight_percentage, order_no, is_active) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+242
+
+v
+
+0
+
+27541
+
+rubrics
+
+TABLE DATA
+
+b
+
+COPY figure_19_3_evaluation_defense.rubrics (rubric_id, name, description, is_active) FROM stdin;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+241
+
+w
+
+0
+
+27727
+
+archive_access_logs
+
+TABLE DATA
+
+COPY figure_19_4_repository_archiving.archive_access_logs (access_log_id, library_archive_id, accessed_by, access_date, purpose) FROM stdin;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+252
+
+6w
+
+0
+
+27746
+
+archive_requests
+
+TABLE DATA
+
+COPY figure_19_4_repository_archiving.archive_requests (archive_request_id, repository_record_id, requested_by, request_date, purpose, status, processed_by, processed_at) FROM stdin;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+253
+
+Sw
+
+0
+
+27696
+
+final_manuscripts
+
+TABLE DATA
+
+COPY figure_19_4_repository_archiving.final_manuscripts (final_manuscript_id, repository_record_id, title, file_path, approved_by, approved_at, copyright_status, license_type, embargo_until) FROM stdin;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+250
+
+pw
+
+0
+
+27714
+
+library_archives
+
+TABLE DATA
+
+COPY figure_19_4_repository_archiving.library_archives (library_archive_id, repository_record_id, archive_code, location, archive_date, remarks) FROM stdin;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+251
+
+w
+
+0
+
+27676
+
+repository_files
+
+TABLE DATA
+
+COPY figure_19_4_repository_archiving.repository_files (repository_file_id, repository_record_id, file_name, file_path, file_type, file_size, version_no, is_main, uploaded_by, uploaded_at) FROM stdin;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+249
+
+w
+
+0
+
+27656
+
+repository_records
+
+TABLE DATA
+
+COPY figure_19_4_repository_archiving.repository_records (repository_record_id, project_id, title, abstract, keywords, status, visibility, published_at, archived_at, archived_by, created_at, updated_at) FROM stdin;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+248
+
+w
+
+0
+
+27799
+
+collaboration_interest
+
+TABLE DATA
+
+COPY figure_19_5_technology_transfer.collaboration_interest (collaboration_interest_id, partner_id, industry_project_id, interest_type, description, submitted_at, status) FROM stdin;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+256
+
+w
+
+0
+
+27818
+
+collaboration_outcomes
+
+TABLE DATA
+
+COPY figure_19_5_technology_transfer.collaboration_outcomes (collaboration_outcome_id, industry_project_id, outcome_type, description, date_achieved, status, created_at) FROM stdin;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+257
+
+x
+
+0
+
+27832
+
+impact_feedback_records
+
+TABLE DATA
+
+COPY figure_19_5_technology_transfer.impact_feedback_records (impact_feedback_id, industry_project_id, feedback_type, feedback_description, rating, feedback_date, submitted_by) FROM stdin;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+258
+
+x
+
+0
+
+27769
+
+industry_partners
+
+TABLE DATA
+
+COPY figure_19_5_technology_transfer.industry_partners (partner_id, partner_name, contact_person, "position", email, contact_number, address, partner_type, website, created_at, updated_at) FROM stdin;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+254
+
+;x
+
+0
+
+27779
+
+industry_projects
+
+TABLE DATA
+
+COPY figure_19_5_technology_transfer.industry_projects (industry_project_id, partner_id, project_id, title, description, start_date, end_date, status, created_at, updated_at) FROM stdin;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+255
+
+Xx
+
+0
+
+27882
+
+audit_logs
+
+TABLE DATA
+
+COPY figure_19_6_notifications_audit.audit_logs (audit_log_id, user_id, action, module, table_name, record_id, old_values, new_values, ip_address, user_agent, created_at) FROM stdin;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+261
+
+ux
+
+0
+
+27865
+
+notification_read_logs
+
+TABLE DATA
+
+COPY figure_19_6_notifications_audit.notification_read_logs (notification_read_log_id, notification_id, user_id, read_at) FROM stdin;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+260
+
+x
+
+0
+
+27850
+
+
+notifications
+
+TABLE DATA
+
+COPY figure_19_6_notifications_audit.notifications (notification_id, user_id, title, message, type, reference_id, reference_type, is_read, created_at) FROM stdin;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+259
+
+x
+
+0
+
+27896
+
+system_settings
+
+TABLE DATA
+
+COPY figure_19_6_notifications_audit.system_settings (setting_id, setting_key, setting_value, description, updated_by, updated_at) FROM stdin;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+262
+
+x
+
+2606
+
+27285
+"
+
+academic_years academic_years_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.academic_years
+    ADD CONSTRAINT academic_years_pkey PRIMARY KEY (academic_year_id);
+
+]
+
+ALTER TABLE ONLY figure_19_1_user_access.academic_years DROP CONSTRAINT academic_years_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+227
+
+2606
+
+27242
+
+departments departments_pkey
+
+CONSTRAINT
+
+v
+
+ALTER TABLE ONLY figure_19_1_user_access.departments
+    ADD CONSTRAINT departments_pkey PRIMARY KEY (department_id);
+
+W
+
+ALTER TABLE ONLY figure_19_1_user_access.departments DROP CONSTRAINT departments_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+223
+
+2606
+
+27351
+0
+
+password_reset_tokens password_reset_tokens_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (reset_token_id);
+
+k
+
+ALTER TABLE ONLY figure_19_1_user_access.password_reset_tokens DROP CONSTRAINT password_reset_tokens_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+231
+
+2606
+
+27353
+5
+
+password_reset_tokens password_reset_tokens_token_key
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_token_key UNIQUE (token);
+
+p
+
+ALTER TABLE ONLY figure_19_1_user_access.password_reset_tokens DROP CONSTRAINT password_reset_tokens_token_key;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+231
+
+2606
+
+27261
+
+permissions permissions_pkey
+
+CONSTRAINT
+
+v
+
+ALTER TABLE ONLY figure_19_1_user_access.permissions
+    ADD CONSTRAINT permissions_pkey PRIMARY KEY (permission_id);
+
+W
+
+ALTER TABLE ONLY figure_19_1_user_access.permissions DROP CONSTRAINT permissions_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+225
+
+2606
+
+27268
+&
+
+role_permissions role_permissions_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.role_permissions
+    ADD CONSTRAINT role_permissions_pkey PRIMARY KEY (role_permission_id);
+
+a
+
+ALTER TABLE ONLY figure_19_1_user_access.role_permissions DROP CONSTRAINT role_permissions_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+226
+
+2606
+
+27252
+
+roles roles_pkey
+
+CONSTRAINT
+
+d
+
+ALTER TABLE ONLY figure_19_1_user_access.roles
+    ADD CONSTRAINT roles_pkey PRIMARY KEY (role_id);
+
+K
+
+ALTER TABLE ONLY figure_19_1_user_access.roles DROP CONSTRAINT roles_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+224
+
+2606
+
+27254
+
+roles roles_role_name_key
+
+CONSTRAINT
+
+j
+
+ALTER TABLE ONLY figure_19_1_user_access.roles
+    ADD CONSTRAINT roles_role_name_key UNIQUE (role_name);
+
+T
+
+ALTER TABLE ONLY figure_19_1_user_access.roles DROP CONSTRAINT roles_role_name_key;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+224
+
+2606
+
+27292
+
+semesters semesters_pkey
+
+CONSTRAINT
+
+p
+
+ALTER TABLE ONLY figure_19_1_user_access.semesters
+    ADD CONSTRAINT semesters_pkey PRIMARY KEY (semester_id);
+
+S
+
+ALTER TABLE ONLY figure_19_1_user_access.semesters DROP CONSTRAINT semesters_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+228
+
+2606
+
+27334
+ 
+
+user_sessions user_sessions_pkey
+
+CONSTRAINT
+
+w
+
+ALTER TABLE ONLY figure_19_1_user_access.user_sessions
+    ADD CONSTRAINT user_sessions_pkey PRIMARY KEY (session_id);
+
+[
+
+ALTER TABLE ONLY figure_19_1_user_access.user_sessions DROP CONSTRAINT user_sessions_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+230
+
+2606
+
+27336
+-
+
+user_sessions user_sessions_session_token_key
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.user_sessions
+    ADD CONSTRAINT user_sessions_session_token_key UNIQUE (session_token);
+
+h
+
+ALTER TABLE ONLY figure_19_1_user_access.user_sessions DROP CONSTRAINT user_sessions_session_token_key;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+230
+
+2606
+
+27312
+
+users users_email_key
+
+CONSTRAINT
+
+b
+
+ALTER TABLE ONLY figure_19_1_user_access.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+P
+
+ALTER TABLE ONLY figure_19_1_user_access.users DROP CONSTRAINT users_email_key;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+229
+
+2606
+
+27310
+
+users users_pkey
+
+CONSTRAINT
+
+d
+
+ALTER TABLE ONLY figure_19_1_user_access.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+K
+
+ALTER TABLE ONLY figure_19_1_user_access.users DROP CONSTRAINT users_pkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+229
+
+2606
+
+27314
+#
+
+users users_provider_account_id_key
+
+CONSTRAINT
+
+~
+
+ALTER TABLE ONLY figure_19_1_user_access.users
+    ADD CONSTRAINT users_provider_account_id_key UNIQUE (provider_account_id);
+
+^
+
+ALTER TABLE ONLY figure_19_1_user_access.users DROP CONSTRAINT users_provider_account_id_key;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+229
+
+2606
+
+27486
+(
+
+document_versions document_versions_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.document_versions
+    ADD CONSTRAINT document_versions_pkey PRIMARY KEY (document_version_id);
+
+j
+
+ALTER TABLE ONLY figure_19_2_project_management.document_versions DROP CONSTRAINT document_versions_pkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+238
+
+2606
+
+27447
+0
+
+milestone_submissions milestone_submissions_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.milestone_submissions
+    ADD CONSTRAINT milestone_submissions_pkey PRIMARY KEY (submission_id);
+
+r
+
+ALTER TABLE ONLY figure_19_2_project_management.milestone_submissions DROP CONSTRAINT milestone_submissions_pkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+236
+
+2606
+
+27433
+
+milestones milestones_pkey
+
+CONSTRAINT
+
+z
+
+ALTER TABLE ONLY figure_19_2_project_management.milestones
+    ADD CONSTRAINT milestones_pkey PRIMARY KEY (milestone_id);
+
+\
+
+ALTER TABLE ONLY figure_19_2_project_management.milestones DROP CONSTRAINT milestones_pkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+235
+
+2606
+
+27413
+&
+
+project_advisers project_advisers_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_advisers
+    ADD CONSTRAINT project_advisers_pkey PRIMARY KEY (project_adviser_id);
+
+h
+
+ALTER TABLE ONLY figure_19_2_project_management.project_advisers DROP CONSTRAINT project_advisers_pkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+234
+
+2606
+
+27467
+(
+
+project_documents project_documents_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_documents
+    ADD CONSTRAINT project_documents_pkey PRIMARY KEY (document_id);
+
+j
+
+ALTER TABLE ONLY figure_19_2_project_management.project_documents DROP CONSTRAINT project_documents_pkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+237
+
+2606
+
+27396
+$
+
+project_members project_members_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_members
+    ADD CONSTRAINT project_members_pkey PRIMARY KEY (project_member_id);
+
+f
+
+ALTER TABLE ONLY figure_19_2_project_management.project_members DROP CONSTRAINT project_members_pkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+233
+
+2606
+
+27369
+
+projects projects_pkey
+
+CONSTRAINT
+
+t
+
+ALTER TABLE ONLY figure_19_2_project_management.projects
+    ADD CONSTRAINT projects_pkey PRIMARY KEY (project_id);
+
+X
+
+ALTER TABLE ONLY figure_19_2_project_management.projects DROP CONSTRAINT projects_pkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+232
+
+2606
+
+27628
+(
+
+defense_documents defense_documents_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_documents
+    ADD CONSTRAINT defense_documents_pkey PRIMARY KEY (defense_document_id);
+
+j
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_documents DROP CONSTRAINT defense_documents_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+246
+
+2606
+
+27530
+"
+
+defense_panels defense_panels_pkey
+
+CONSTRAINT
+
+~
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_panels
+    ADD CONSTRAINT defense_panels_pkey PRIMARY KEY (panel_id);
+
+d
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_panels DROP CONSTRAINT defense_panels_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+240
+
+2606
+
+27609
+$
+
+defense_results defense_results_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_results
+    ADD CONSTRAINT defense_results_pkey PRIMARY KEY (defense_result_id);
+
+f
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_results DROP CONSTRAINT defense_results_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+245
+
+2606
+
+27504
+(
+
+defense_schedules defense_schedules_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules
+    ADD CONSTRAINT defense_schedules_pkey PRIMARY KEY (schedule_id);
+
+j
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules DROP CONSTRAINT defense_schedules_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+239
+
+2606
+
+27596
+2
+
+evaluation_attachments evaluation_attachments_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluation_attachments
+    ADD CONSTRAINT evaluation_attachments_pkey PRIMARY KEY (attachment_id);
+
+t
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluation_attachments DROP CONSTRAINT evaluation_attachments_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+244
+
+2606
+
+27572
+
+evaluations evaluations_pkey
+
+CONSTRAINT
+
+}
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations
+    ADD CONSTRAINT evaluations_pkey PRIMARY KEY (evaluation_id);
+
+^
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations DROP CONSTRAINT evaluations_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+243
+
+2606
+
+27645
+
+grades grades_pkey
+
+CONSTRAINT
+
+n
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.grades
+    ADD CONSTRAINT grades_pkey PRIMARY KEY (grade_id);
+
+T
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.grades DROP CONSTRAINT grades_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+247
+
+2606
+
+27558
+$
+
+rubric_criteria rubric_criteria_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.rubric_criteria
+    ADD CONSTRAINT rubric_criteria_pkey PRIMARY KEY (criterion_id);
+
+f
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.rubric_criteria DROP CONSTRAINT rubric_criteria_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+242
+
+2606
+
+27549
+
+rubrics rubrics_pkey
+
+CONSTRAINT
+
+q
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.rubrics
+    ADD CONSTRAINT rubrics_pkey PRIMARY KEY (rubric_id);
+
+V
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.rubrics DROP CONSTRAINT rubrics_pkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+241
+
+2606
+
+27735
+,
+
+archive_access_logs archive_access_logs_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_access_logs
+    ADD CONSTRAINT archive_access_logs_pkey PRIMARY KEY (access_log_id);
+
+p
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_access_logs DROP CONSTRAINT archive_access_logs_pkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+252
+
+2606
+
+27753
+&
+
+archive_requests archive_requests_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests
+    ADD CONSTRAINT archive_requests_pkey PRIMARY KEY (archive_request_id);
+
+j
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests DROP CONSTRAINT archive_requests_pkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+253
+
+2606
+
+27703
+(
+
+final_manuscripts final_manuscripts_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.final_manuscripts
+    ADD CONSTRAINT final_manuscripts_pkey PRIMARY KEY (final_manuscript_id);
+
+l
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.final_manuscripts DROP CONSTRAINT final_manuscripts_pkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+250
+
+2606
+
+27721
+&
+
+library_archives library_archives_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.library_archives
+    ADD CONSTRAINT library_archives_pkey PRIMARY KEY (library_archive_id);
+
+j
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.library_archives DROP CONSTRAINT library_archives_pkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+251
+
+2606
+
+27685
+&
+
+repository_files repository_files_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_files
+    ADD CONSTRAINT repository_files_pkey PRIMARY KEY (repository_file_id);
+
+j
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_files DROP CONSTRAINT repository_files_pkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+249
+
+2606
+
+27665
+*
+
+repository_records repository_records_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_records
+    ADD CONSTRAINT repository_records_pkey PRIMARY KEY (repository_record_id);
+
+n
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_records DROP CONSTRAINT repository_records_pkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+248
+
+2606
+
+27807
+2
+
+collaboration_interest collaboration_interest_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_interest
+    ADD CONSTRAINT collaboration_interest_pkey PRIMARY KEY (collaboration_interest_id);
+
+u
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_interest DROP CONSTRAINT collaboration_interest_pkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+256
+
+2606
+
+27826
+2
+
+collaboration_outcomes collaboration_outcomes_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_outcomes
+    ADD CONSTRAINT collaboration_outcomes_pkey PRIMARY KEY (collaboration_outcome_id);
+
+u
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_outcomes DROP CONSTRAINT collaboration_outcomes_pkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+257
+
+2606
+
+27839
+4
+
+impact_feedback_records impact_feedback_records_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.impact_feedback_records
+    ADD CONSTRAINT impact_feedback_records_pkey PRIMARY KEY (impact_feedback_id);
+
+w
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.impact_feedback_records DROP CONSTRAINT impact_feedback_records_pkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+258
+
+2606
+
+27778
+(
+
+industry_partners industry_partners_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_partners
+    ADD CONSTRAINT industry_partners_pkey PRIMARY KEY (partner_id);
+
+k
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_partners DROP CONSTRAINT industry_partners_pkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+254
+
+2606
+
+27788
+(
+
+industry_projects industry_projects_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_projects
+    ADD CONSTRAINT industry_projects_pkey PRIMARY KEY (industry_project_id);
+
+k
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_projects DROP CONSTRAINT industry_projects_pkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+255
+
+2606
+
+27890
+
+audit_logs audit_logs_pkey
+
+CONSTRAINT
+
+{
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.audit_logs
+    ADD CONSTRAINT audit_logs_pkey PRIMARY KEY (audit_log_id);
+
+]
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.audit_logs DROP CONSTRAINT audit_logs_pkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+261
+
+2606
+
+27871
+2
+
+notification_read_logs notification_read_logs_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notification_read_logs
+    ADD CONSTRAINT notification_read_logs_pkey PRIMARY KEY (notification_read_log_id);
+
+u
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notification_read_logs DROP CONSTRAINT notification_read_logs_pkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+260
+
+2606
+
+27859
+ 
+
+notifications notifications_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notifications
+    ADD CONSTRAINT notifications_pkey PRIMARY KEY (notification_id);
+
+c
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notifications DROP CONSTRAINT notifications_pkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+259
+
+2606
+
+27904
+$
+
+system_settings system_settings_pkey
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.system_settings
+    ADD CONSTRAINT system_settings_pkey PRIMARY KEY (setting_id);
+
+g
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.system_settings DROP CONSTRAINT system_settings_pkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+262
+
+2606
+
+27906
+/
+
+system_settings system_settings_setting_key_key
+
+CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.system_settings
+    ADD CONSTRAINT system_settings_setting_key_key UNIQUE (setting_key);
+
+r
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.system_settings DROP CONSTRAINT system_settings_setting_key_key;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+262
+
+2606
+
+27354
+8
+
+password_reset_tokens password_reset_tokens_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.password_reset_tokens
+    ADD CONSTRAINT password_reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+
+s
+
+ALTER TABLE ONLY figure_19_1_user_access.password_reset_tokens DROP CONSTRAINT password_reset_tokens_user_id_fkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+5011
+
+231
+
+229
+
+2606
+
+27274
+4
+
+role_permissions role_permissions_permission_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.role_permissions
+    ADD CONSTRAINT role_permissions_permission_id_fkey FOREIGN KEY (permission_id) REFERENCES figure_19_1_user_access.permissions(permission_id) ON DELETE CASCADE;
+
+o
+
+ALTER TABLE ONLY figure_19_1_user_access.role_permissions DROP CONSTRAINT role_permissions_permission_id_fkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+225
+
+226
+
+5001
+
+2606
+
+27269
+.
+
+role_permissions role_permissions_role_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.role_permissions
+    ADD CONSTRAINT role_permissions_role_id_fkey FOREIGN KEY (role_id) REFERENCES figure_19_1_user_access.roles(role_id) ON DELETE CASCADE;
+
+i
+
+ALTER TABLE ONLY figure_19_1_user_access.role_permissions DROP CONSTRAINT role_permissions_role_id_fkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+226
+
+4997
+
+224
+
+2606
+
+27293
+)
+
+semesters semesters_academic_year_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.semesters
+    ADD CONSTRAINT semesters_academic_year_id_fkey FOREIGN KEY (academic_year_id) REFERENCES figure_19_1_user_access.academic_years(academic_year_id) ON DELETE CASCADE;
+
+d
+
+ALTER TABLE ONLY figure_19_1_user_access.semesters DROP CONSTRAINT semesters_academic_year_id_fkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+5005
+
+228
+
+227
+
+2606
+
+27337
+(
+
+user_sessions user_sessions_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.user_sessions
+    ADD CONSTRAINT user_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+
+c
+
+ALTER TABLE ONLY figure_19_1_user_access.user_sessions DROP CONSTRAINT user_sessions_user_id_fkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+230
+
+5011
+
+229
+
+2606
+
+27315
+
+users users_department_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.users
+    ADD CONSTRAINT users_department_id_fkey FOREIGN KEY (department_id) REFERENCES figure_19_1_user_access.departments(department_id) ON DELETE SET NULL;
+
+Y
+
+ALTER TABLE ONLY figure_19_1_user_access.users DROP CONSTRAINT users_department_id_fkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+229
+
+4995
+
+223
+
+2606
+
+27320
+
+users users_role_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_1_user_access.users
+    ADD CONSTRAINT users_role_id_fkey FOREIGN KEY (role_id) REFERENCES figure_19_1_user_access.roles(role_id) ON DELETE SET NULL;
+
+S
+
+ALTER TABLE ONLY figure_19_1_user_access.users DROP CONSTRAINT users_role_id_fkey;
+
+figure_19_1_user_access
+
+postgres
+
+false
+
+224
+
+229
+
+4997
+
+2606
+
+27487
+4
+
+document_versions document_versions_document_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.document_versions
+    ADD CONSTRAINT document_versions_document_id_fkey FOREIGN KEY (document_id) REFERENCES figure_19_2_project_management.project_documents(document_id) ON DELETE CASCADE;
+
+v
+
+ALTER TABLE ONLY figure_19_2_project_management.document_versions DROP CONSTRAINT document_versions_document_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+237
+
+5033
+
+238
+
+2606
+
+27492
+4
+
+document_versions document_versions_uploaded_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.document_versions
+    ADD CONSTRAINT document_versions_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+v
+
+ALTER TABLE ONLY figure_19_2_project_management.document_versions DROP CONSTRAINT document_versions_uploaded_by_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+229
+
+5011
+
+238
+
+2606
+
+27448
+=
+
+milestone_submissions milestone_submissions_milestone_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.milestone_submissions
+    ADD CONSTRAINT milestone_submissions_milestone_id_fkey FOREIGN KEY (milestone_id) REFERENCES figure_19_2_project_management.milestones(milestone_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_2_project_management.milestone_submissions DROP CONSTRAINT milestone_submissions_milestone_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+236
+
+235
+
+5029
+
+2606
+
+27453
+=
+
+milestone_submissions milestone_submissions_submitted_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.milestone_submissions
+    ADD CONSTRAINT milestone_submissions_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY figure_19_2_project_management.milestone_submissions DROP CONSTRAINT milestone_submissions_submitted_by_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+5011
+
+236
+
+229
+
+2606
+
+27434
+%
+
+milestones milestones_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.milestones
+    ADD CONSTRAINT milestones_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+
+g
+
+ALTER TABLE ONLY figure_19_2_project_management.milestones DROP CONSTRAINT milestones_project_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+232
+
+235
+
+5023
+
+2606
+
+27414
+1
+
+project_advisers project_advisers_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_advisers
+    ADD CONSTRAINT project_advisers_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+
+s
+
+ALTER TABLE ONLY figure_19_2_project_management.project_advisers DROP CONSTRAINT project_advisers_project_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+5023
+
+232
+
+234
+
+2606
+
+27419
+.
+
+project_advisers project_advisers_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_advisers
+    ADD CONSTRAINT project_advisers_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+
+p
+
+ALTER TABLE ONLY figure_19_2_project_management.project_advisers DROP CONSTRAINT project_advisers_user_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+229
+
+234
+
+5011
+
+2606
+
+27468
+3
+
+project_documents project_documents_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_documents
+    ADD CONSTRAINT project_documents_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+
+u
+
+ALTER TABLE ONLY figure_19_2_project_management.project_documents DROP CONSTRAINT project_documents_project_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+237
+
+232
+
+5023
+
+2606
+
+27473
+4
+
+project_documents project_documents_uploaded_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_documents
+    ADD CONSTRAINT project_documents_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+v
+
+ALTER TABLE ONLY figure_19_2_project_management.project_documents DROP CONSTRAINT project_documents_uploaded_by_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+229
+
+5011
+
+237
+
+2606
+
+27397
+/
+
+project_members project_members_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_members
+    ADD CONSTRAINT project_members_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+
+q
+
+ALTER TABLE ONLY figure_19_2_project_management.project_members DROP CONSTRAINT project_members_project_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+232
+
+233
+
+5023
+
+2606
+
+27402
+,
+
+project_members project_members_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.project_members
+    ADD CONSTRAINT project_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+
+n
+
+ALTER TABLE ONLY figure_19_2_project_management.project_members DROP CONSTRAINT project_members_user_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+229
+
+233
+
+5011
+
+2606
+
+27375
+'
+
+projects projects_academic_year_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.projects
+    ADD CONSTRAINT projects_academic_year_id_fkey FOREIGN KEY (academic_year_id) REFERENCES figure_19_1_user_access.academic_years(academic_year_id) ON DELETE SET NULL;
+
+i
+
+ALTER TABLE ONLY figure_19_2_project_management.projects DROP CONSTRAINT projects_academic_year_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+227
+
+5005
+
+232
+
+2606
+
+27385
+!
+
+projects projects_created_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.projects
+    ADD CONSTRAINT projects_created_by_fkey FOREIGN KEY (created_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+c
+
+ALTER TABLE ONLY figure_19_2_project_management.projects DROP CONSTRAINT projects_created_by_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+232
+
+229
+
+5011
+
+2606
+
+27370
+$
+
+projects projects_department_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.projects
+    ADD CONSTRAINT projects_department_id_fkey FOREIGN KEY (department_id) REFERENCES figure_19_1_user_access.departments(department_id) ON DELETE SET NULL;
+
+f
+
+ALTER TABLE ONLY figure_19_2_project_management.projects DROP CONSTRAINT projects_department_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+223
+
+4995
+
+232
+
+2606
+
+27380
+"
+
+projects projects_semester_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_2_project_management.projects
+    ADD CONSTRAINT projects_semester_id_fkey FOREIGN KEY (semester_id) REFERENCES figure_19_1_user_access.semesters(semester_id) ON DELETE SET NULL;
+
+d
+
+ALTER TABLE ONLY figure_19_2_project_management.projects DROP CONSTRAINT projects_semester_id_fkey;
+
+figure_19_2_project_management
+
+postgres
+
+false
+
+5007
+
+232
+
+228
+
+2606
+
+27629
+4
+
+defense_documents defense_documents_schedule_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_documents
+    ADD CONSTRAINT defense_documents_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+
+v
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_documents DROP CONSTRAINT defense_documents_schedule_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+239
+
+5037
+
+246
+
+2606
+
+27634
+4
+
+defense_documents defense_documents_uploaded_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_documents
+    ADD CONSTRAINT defense_documents_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+v
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_documents DROP CONSTRAINT defense_documents_uploaded_by_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+246
+
+5011
+
+229
+
+2606
+
+27531
+.
+
+defense_panels defense_panels_schedule_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_panels
+    ADD CONSTRAINT defense_panels_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+
+p
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_panels DROP CONSTRAINT defense_panels_schedule_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+240
+
+5037
+
+239
+
+2606
+
+27536
+*
+
+defense_panels defense_panels_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_panels
+    ADD CONSTRAINT defense_panels_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+
+l
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_panels DROP CONSTRAINT defense_panels_user_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+229
+
+5011
+
+240
+
+2606
+
+27615
+0
+
+defense_results defense_results_approved_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_results
+    ADD CONSTRAINT defense_results_approved_by_fkey FOREIGN KEY (approved_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+r
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_results DROP CONSTRAINT defense_results_approved_by_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+229
+
+5011
+
+245
+
+2606
+
+27610
+0
+
+defense_results defense_results_schedule_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_results
+    ADD CONSTRAINT defense_results_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+
+r
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_results DROP CONSTRAINT defense_results_schedule_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+5037
+
+245
+
+239
+
+2606
+
+27510
+9
+
+defense_schedules defense_schedules_academic_year_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules
+    ADD CONSTRAINT defense_schedules_academic_year_id_fkey FOREIGN KEY (academic_year_id) REFERENCES figure_19_1_user_access.academic_years(academic_year_id) ON DELETE SET NULL;
+
+{
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules DROP CONSTRAINT defense_schedules_academic_year_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+5005
+
+227
+
+239
+
+2606
+
+27520
+3
+
+defense_schedules defense_schedules_created_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules
+    ADD CONSTRAINT defense_schedules_created_by_fkey FOREIGN KEY (created_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+u
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules DROP CONSTRAINT defense_schedules_created_by_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+5011
+
+239
+
+229
+
+2606
+
+27505
+3
+
+defense_schedules defense_schedules_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules
+    ADD CONSTRAINT defense_schedules_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+
+u
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules DROP CONSTRAINT defense_schedules_project_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+239
+
+232
+
+5023
+
+2606
+
+27515
+4
+
+defense_schedules defense_schedules_semester_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules
+    ADD CONSTRAINT defense_schedules_semester_id_fkey FOREIGN KEY (semester_id) REFERENCES figure_19_1_user_access.semesters(semester_id) ON DELETE SET NULL;
+
+v
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.defense_schedules DROP CONSTRAINT defense_schedules_semester_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+5007
+
+228
+
+239
+
+2606
+
+27597
+@
+
+evaluation_attachments evaluation_attachments_evaluation_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluation_attachments
+    ADD CONSTRAINT evaluation_attachments_evaluation_id_fkey FOREIGN KEY (evaluation_id) REFERENCES figure_19_3_evaluation_defense.evaluations(evaluation_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluation_attachments DROP CONSTRAINT evaluation_attachments_evaluation_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+243
+
+5045
+
+244
+
+2606
+
+27578
+)
+
+evaluations evaluations_evaluator_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations
+    ADD CONSTRAINT evaluations_evaluator_id_fkey FOREIGN KEY (evaluator_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+k
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations DROP CONSTRAINT evaluations_evaluator_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+243
+
+229
+
+5011
+
+2606
+
+27583
+&
+
+evaluations evaluations_rubric_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations
+    ADD CONSTRAINT evaluations_rubric_id_fkey FOREIGN KEY (rubric_id) REFERENCES figure_19_3_evaluation_defense.rubrics(rubric_id) ON DELETE SET NULL;
+
+h
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations DROP CONSTRAINT evaluations_rubric_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+241
+
+5041
+
+243
+
+2606
+
+27573
+(
+
+evaluations evaluations_schedule_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations
+    ADD CONSTRAINT evaluations_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+
+j
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.evaluations DROP CONSTRAINT evaluations_schedule_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+239
+
+5037
+
+243
+
+2606
+
+27651
+
+grades grades_encoded_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.grades
+    ADD CONSTRAINT grades_encoded_by_fkey FOREIGN KEY (encoded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+_
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.grades DROP CONSTRAINT grades_encoded_by_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+5011
+
+229
+
+247
+
+2606
+
+27646
+ 
+
+grades grades_evaluation_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.grades
+    ADD CONSTRAINT grades_evaluation_id_fkey FOREIGN KEY (evaluation_id) REFERENCES figure_19_3_evaluation_defense.evaluations(evaluation_id) ON DELETE CASCADE;
+
+b
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.grades DROP CONSTRAINT grades_evaluation_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+247
+
+243
+
+5045
+
+2606
+
+27559
+.
+
+rubric_criteria rubric_criteria_rubric_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.rubric_criteria
+    ADD CONSTRAINT rubric_criteria_rubric_id_fkey FOREIGN KEY (rubric_id) REFERENCES figure_19_3_evaluation_defense.rubrics(rubric_id) ON DELETE CASCADE;
+
+p
+
+ALTER TABLE ONLY figure_19_3_evaluation_defense.rubric_criteria DROP CONSTRAINT rubric_criteria_rubric_id_fkey;
+
+figure_19_3_evaluation_defense
+
+postgres
+
+false
+
+241
+
+5041
+
+242
+
+2606
+
+27741
+8
+
+archive_access_logs archive_access_logs_accessed_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_access_logs
+    ADD CONSTRAINT archive_access_logs_accessed_by_fkey FOREIGN KEY (accessed_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+|
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_access_logs DROP CONSTRAINT archive_access_logs_accessed_by_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+252
+
+229
+
+5011
+
+
+
+2606
+
+27736
+?
+
+archive_access_logs archive_access_logs_library_archive_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_access_logs
+    ADD CONSTRAINT archive_access_logs_library_archive_id_fkey FOREIGN KEY (library_archive_id) REFERENCES figure_19_4_repository_archiving.library_archives(library_archive_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_access_logs DROP CONSTRAINT archive_access_logs_library_archive_id_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+251
+
+5061
+
+252
+
+2606
+
+27764
+3
+
+archive_requests archive_requests_processed_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests
+    ADD CONSTRAINT archive_requests_processed_by_fkey FOREIGN KEY (processed_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+w
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests DROP CONSTRAINT archive_requests_processed_by_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+5011
+
+253
+
+229
+
+2606
+
+27754
+;
+
+archive_requests archive_requests_repository_record_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests
+    ADD CONSTRAINT archive_requests_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests DROP CONSTRAINT archive_requests_repository_record_id_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+5055
+
+248
+
+253
+
+2606
+
+27759
+3
+
+archive_requests archive_requests_requested_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests
+    ADD CONSTRAINT archive_requests_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+w
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.archive_requests DROP CONSTRAINT archive_requests_requested_by_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+229
+
+5011
+
+253
+
+2606
+
+27709
+4
+
+final_manuscripts final_manuscripts_approved_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.final_manuscripts
+    ADD CONSTRAINT final_manuscripts_approved_by_fkey FOREIGN KEY (approved_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+x
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.final_manuscripts DROP CONSTRAINT final_manuscripts_approved_by_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+229
+
+250
+
+5011
+
+2606
+
+27704
+=
+
+final_manuscripts final_manuscripts_repository_record_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.final_manuscripts
+    ADD CONSTRAINT final_manuscripts_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.final_manuscripts DROP CONSTRAINT final_manuscripts_repository_record_id_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+250
+
+248
+
+5055
+
+2606
+
+27722
+;
+
+library_archives library_archives_repository_record_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.library_archives
+    ADD CONSTRAINT library_archives_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.library_archives DROP CONSTRAINT library_archives_repository_record_id_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+251
+
+248
+
+5055
+
+2606
+
+27686
+;
+
+repository_files repository_files_repository_record_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_files
+    ADD CONSTRAINT repository_files_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_files DROP CONSTRAINT repository_files_repository_record_id_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+5055
+
+249
+
+248
+
+2606
+
+27691
+2
+
+repository_files repository_files_uploaded_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_files
+    ADD CONSTRAINT repository_files_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+v
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_files DROP CONSTRAINT repository_files_uploaded_by_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+229
+
+249
+
+5011
+
+2606
+
+27671
+6
+
+repository_records repository_records_archived_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_records
+    ADD CONSTRAINT repository_records_archived_by_fkey FOREIGN KEY (archived_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+z
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_records DROP CONSTRAINT repository_records_archived_by_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+229
+
+248
+
+5011
+
+2606
+
+27666
+5
+
+repository_records repository_records_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_records
+    ADD CONSTRAINT repository_records_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+
+y
+
+ALTER TABLE ONLY figure_19_4_repository_archiving.repository_records DROP CONSTRAINT repository_records_project_id_fkey;
+
+ 
+
+figure_19_4_repository_archiving
+
+postgres
+
+false
+
+5023
+
+232
+
+248
+
+2606
+
+27813
+F
+
+collaboration_interest collaboration_interest_industry_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_interest
+    ADD CONSTRAINT collaboration_interest_industry_project_id_fkey FOREIGN KEY (industry_project_id) REFERENCES figure_19_5_technology_transfer.industry_projects(industry_project_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_interest DROP CONSTRAINT collaboration_interest_industry_project_id_fkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+255
+
+5069
+
+256
+
+2606
+
+27808
+=
+
+collaboration_interest collaboration_interest_partner_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_interest
+    ADD CONSTRAINT collaboration_interest_partner_id_fkey FOREIGN KEY (partner_id) REFERENCES figure_19_5_technology_transfer.industry_partners(partner_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_interest DROP CONSTRAINT collaboration_interest_partner_id_fkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+254
+
+256
+
+5067
+
+2606
+
+27827
+F
+
+collaboration_outcomes collaboration_outcomes_industry_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_outcomes
+    ADD CONSTRAINT collaboration_outcomes_industry_project_id_fkey FOREIGN KEY (industry_project_id) REFERENCES figure_19_5_technology_transfer.industry_projects(industry_project_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.collaboration_outcomes DROP CONSTRAINT collaboration_outcomes_industry_project_id_fkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+255
+
+5069
+
+257
+
+2606
+
+27840
+H
+
+impact_feedback_records impact_feedback_records_industry_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.impact_feedback_records
+    ADD CONSTRAINT impact_feedback_records_industry_project_id_fkey FOREIGN KEY (industry_project_id) REFERENCES figure_19_5_technology_transfer.industry_projects(industry_project_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.impact_feedback_records DROP CONSTRAINT impact_feedback_records_industry_project_id_fkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+258
+
+255
+
+5069
+
+2606
+
+27845
+A
+
+impact_feedback_records impact_feedback_records_submitted_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.impact_feedback_records
+    ADD CONSTRAINT impact_feedback_records_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.impact_feedback_records DROP CONSTRAINT impact_feedback_records_submitted_by_fkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+258
+
+229
+
+5011
+
+2606
+
+27789
+3
+
+industry_projects industry_projects_partner_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_projects
+    ADD CONSTRAINT industry_projects_partner_id_fkey FOREIGN KEY (partner_id) REFERENCES figure_19_5_technology_transfer.industry_partners(partner_id) ON DELETE CASCADE;
+
+v
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_projects DROP CONSTRAINT industry_projects_partner_id_fkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+255
+
+254
+
+5067
+
+2606
+
+27794
+3
+
+industry_projects industry_projects_project_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_projects
+    ADD CONSTRAINT industry_projects_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+
+v
+
+ALTER TABLE ONLY figure_19_5_technology_transfer.industry_projects DROP CONSTRAINT industry_projects_project_id_fkey;
+
+figure_19_5_technology_transfer
+
+postgres
+
+false
+
+5023
+
+255
+
+232
+
+2606
+
+27891
+"
+
+audit_logs audit_logs_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.audit_logs
+    ADD CONSTRAINT audit_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+e
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.audit_logs DROP CONSTRAINT audit_logs_user_id_fkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+5011
+
+261
+
+229
+
+2606
+
+27872
+B
+
+notification_read_logs notification_read_logs_notification_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notification_read_logs
+    ADD CONSTRAINT notification_read_logs_notification_id_fkey FOREIGN KEY (notification_id) REFERENCES figure_19_6_notifications_audit.notifications(notification_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notification_read_logs DROP CONSTRAINT notification_read_logs_notification_id_fkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+260
+
+259
+
+5077
+
+2606
+
+27877
+:
+
+notification_read_logs notification_read_logs_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notification_read_logs
+    ADD CONSTRAINT notification_read_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+
+}
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notification_read_logs DROP CONSTRAINT notification_read_logs_user_id_fkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+260
+
+229
+
+5011
+
+2606
+
+27860
+(
+
+notifications notifications_user_id_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notifications
+    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+
+k
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.notifications DROP CONSTRAINT notifications_user_id_fkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+229
+
+259
+
+5011
+
+2606
+
+27907
+/
+
+system_settings system_settings_updated_by_fkey
+
+
+FK CONSTRAINT
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.system_settings
+    ADD CONSTRAINT system_settings_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+
+r
+
+ALTER TABLE ONLY figure_19_6_notifications_audit.system_settings DROP CONSTRAINT system_settings_updated_by_fkey;
+
+figure_19_6_notifications_audit
+
+postgres
+
+false
+
+229
+
+5011
+
+262
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+
+
+
+x
+

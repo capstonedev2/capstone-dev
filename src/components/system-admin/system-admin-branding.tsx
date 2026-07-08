@@ -138,6 +138,41 @@ const ASSET_FIELDS: Array<{
     description: 'Registration background image or video (max 20MB).',
     accept: 'image/png,image/jpeg,image/webp,video/mp4,video/webm',
     maxBytes: 20_000_000
+  },
+  {
+    key: 'hallOfExcellence1',
+    label: 'Award Showcase Image 1',
+    description: 'Cover photo for the first Hall of Excellence project.',
+    accept: 'image/png,image/jpeg,image/webp',
+    maxBytes: 10_000_000
+  },
+  {
+    key: 'hallOfExcellence2',
+    label: 'Award Showcase Image 2',
+    description: 'Cover photo for the second Hall of Excellence project.',
+    accept: 'image/png,image/jpeg,image/webp',
+    maxBytes: 10_000_000
+  },
+  {
+    key: 'hallOfExcellence3',
+    label: 'Award Showcase Image 3',
+    description: 'Cover photo for the third Hall of Excellence project.',
+    accept: 'image/png,image/jpeg,image/webp',
+    maxBytes: 10_000_000
+  },
+  {
+    key: 'hallOfExcellence4',
+    label: 'Award Showcase Image 4',
+    description: 'Cover photo for the fourth Hall of Excellence project.',
+    accept: 'image/png,image/jpeg,image/webp',
+    maxBytes: 10_000_000
+  },
+  {
+    key: 'hallOfExcellence5',
+    label: 'Award Showcase Image 5',
+    description: 'Cover photo for the fifth Hall of Excellence project.',
+    accept: 'image/png,image/jpeg,image/webp',
+    maxBytes: 10_000_000
   }
 ];
 

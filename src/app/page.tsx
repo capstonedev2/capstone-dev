@@ -8,6 +8,7 @@ import {
 } from '@/components/public/landing-managed-content';
 import { LandingNavigation } from '@/components/public/landing-navigation';
 import { LandingRevealController } from '@/components/public/landing-reveal-controller';
+import { HallOfExcellence } from '@/components/public/hall-of-excellence';
 import { PublicLayout } from '@/components/layouts/public-layout';
 
 import styles from './page.module.css';
@@ -56,37 +57,43 @@ const workflowSteps = [
     icon: 'fas fa-lightbulb',
     title: 'Concept',
     description: 'Define the research topic, problem scope, and initial capstone study ideas.',
-    artifact: 'Topic brief'
+    artifact: 'Topic brief',
+    theme: 'blue'
   },
   {
     icon: 'fas fa-file-signature',
     title: 'Proposal',
     description: 'Submit the formal proposal for adviser and panel evaluation and approval.',
-    artifact: 'Approved proposal'
+    artifact: 'Approved proposal',
+    theme: 'blue'
   },
   {
     icon: 'fas fa-code',
     title: 'Development',
     description: 'Build the system, conduct testing, and track chapter submissions.',
-    artifact: 'Working system'
+    artifact: 'Working system',
+    theme: 'green'
   },
   {
     icon: 'fas fa-chalkboard-user',
     title: 'Mock Defense',
     description: 'Present a practice defense, gather feedback, and refine the study.',
-    artifact: 'Panel feedback'
+    artifact: 'Panel feedback',
+    theme: 'gold'
   },
   {
     icon: 'fas fa-user-graduate',
     title: 'Final Defense',
     description: 'Defend the completed project before the panel and submit revisions.',
-    artifact: 'Final manuscript'
+    artifact: 'Final manuscript',
+    theme: 'blue'
   },
   {
     icon: 'fas fa-circle-check',
     title: 'Completion',
     description: 'Finalize deliverables, upload evidence, and publish to the repository.',
-    artifact: 'Repository record'
+    artifact: 'Repository record',
+    theme: 'gold'
   }
 ];
 
@@ -129,6 +136,7 @@ const missionItems = [
     text: 'Contribute significantly to the National Development Goals of food security and safety; and energy sufficiency and security through technology solutions.'
   }
 ];
+
 
 export default function Page() {
   return (
@@ -261,6 +269,8 @@ export default function Page() {
             </div>
           </section>
 
+          <HallOfExcellence />
+
           <section id="workflow" className={styles.workflowSection}>
             <div className={styles.container}>
               <div className={styles.workflowHeader}>
@@ -276,27 +286,58 @@ export default function Page() {
                 </div>
               </div>
 
-              <ol className={styles.workflowTimeline}>
-                {workflowSteps.map((step, index) => (
-                  <li key={step.title} className={styles.workflowStep} data-reveal="fade-up">
-                    <div className={styles.workflowIconWrap}>
-                      <span className={styles.stepNumber}>{String(index + 1).padStart(2, '0')}</span>
-                      <div className={styles.workflowIcon}>
-                        <i className={step.icon} />
+              <div className="relative mt-16 mb-10 w-full pb-8 px-4 sm:px-6 md:overflow-x-auto hide-scrollbar">
+                <div className="relative w-full mx-auto md:min-w-[1200px] max-w-6xl md:max-w-none">
+                  {/* Desktop Background Rail Line */}
+                  <div className="hidden md:block absolute top-[2.75rem] left-[5%] right-[5%] h-2 bg-gradient-to-r from-[#003A8F] via-[#418bff] to-[#f6be00] rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] opacity-90" />
+                  
+                  {/* Mobile Vertical Rail Line */}
+                  <div className="md:hidden absolute top-[2.5rem] bottom-[2.5rem] left-[3.15rem] sm:left-[3.65rem] w-1.5 bg-gradient-to-b from-[#003A8F] via-[#418bff] to-[#f6be00] rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] opacity-90" />
+
+                  <div className="flex flex-col md:flex-row justify-between relative z-10 gap-8 md:gap-4">
+                    {workflowSteps.map((step, index) => {
+                      const t = step.theme === 'gold' 
+                        ? { icon: 'text-[#f6be00]', ring: 'ring-[#f6be00]/30', groupHoverRing: 'group-hover:ring-[#f6be00]', numBg: 'bg-[#f6be00]', numText: 'text-white', cardBorder: 'border-t-[#f6be00]', cardHover: 'hover:border-[#f6be00] hover:shadow-[0_20px_50px_rgba(246,190,0,0.12)]', badgeBg: 'bg-yellow-50', badgeText: 'text-[#b17800]' }
+                        : step.theme === 'green'
+                        ? { icon: 'text-emerald-600', ring: 'ring-emerald-600/30', groupHoverRing: 'group-hover:ring-emerald-600', numBg: 'bg-emerald-600', numText: 'text-white', cardBorder: 'border-t-emerald-600', cardHover: 'hover:border-emerald-400 hover:shadow-[0_20px_50px_rgba(5,150,105,0.12)]', badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-700' }
+                        : { icon: 'text-[#003A8F]', ring: 'ring-[#003A8F]/30', groupHoverRing: 'group-hover:ring-[#003A8F]', numBg: 'bg-[#003A8F]', numText: 'text-white', cardBorder: 'border-t-[#003A8F]', cardHover: 'hover:border-blue-300 hover:shadow-[0_20px_50px_rgba(0,58,143,0.12)]', badgeBg: 'bg-blue-50', badgeText: 'text-[#003A8F]' };
+
+                      return (
+                      <div key={step.title} className="flex flex-row md:flex-col items-center md:items-start flex-1 gap-6 md:gap-0" data-reveal="fade-up" style={{ animationDelay: `${index * 100}ms` }}>
+                        
+                        {/* Milestone Circle Marker */}
+                        <div className="relative mb-0 md:mb-6 group cursor-default flex-shrink-0">
+                          <div className={`w-[4.5rem] h-[4.5rem] sm:w-[5.5rem] sm:h-[5.5rem] rounded-full flex items-center justify-center border-[4px] border-white shadow-[0_8px_20px_rgba(15,43,89,0.06)] ring-1 ${t.ring} ${t.groupHoverRing} transition-all duration-300 group-hover:-translate-y-1 relative z-10 bg-white ${t.icon}`}>
+                            <i className={`${step.icon} text-xl sm:text-2xl drop-shadow-sm transition-transform duration-300 group-hover:scale-110`} />
+                          </div>
+                          
+                          {/* Step Number Badge */}
+                          <div className={`absolute -bottom-1 -right-1 sm:bottom-0 sm:-right-2 w-7 h-7 rounded-full border-[2px] border-white flex items-center justify-center text-[0.65rem] font-black z-20 shadow-sm ${t.numBg} ${t.numText}`}>
+                            {String(index + 1).padStart(2, '0')}
+                          </div>
+                        </div>
+                        
+                        {/* Content Card */}
+                        <div className={`bg-white rounded-xl p-5 shadow-[0_10px_30px_rgba(15,43,89,0.04)] border border-slate-100 transition-all duration-300 h-full flex flex-col items-start w-[180px] sm:w-[200px] border-t-4 ${t.cardBorder} ${t.cardHover}`}>
+                          <h3 className="text-[1.05rem] font-black text-slate-900 mb-2">{step.title}</h3>
+                          <p className="text-[0.8rem] text-slate-500 font-medium leading-[1.6] mb-5 flex-grow">{step.description}</p>
+                          
+                          {/* Artifact Badge */}
+                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[0.65rem] font-black uppercase tracking-wider mt-auto ${t.badgeBg} ${t.badgeText}`}>
+                            <i className="fas fa-file-contract opacity-70" />
+                            {step.artifact}
+                          </div>
+                        </div>
+                        
                       </div>
-                    </div>
-                    <div className={styles.workflowStepBody}>
-                      <h3>{step.title}</h3>
-                      <p>{step.description}</p>
-                      <span className={styles.workflowArtifact}>{step.artifact}</span>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+                    )})}
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
-          <section id="about" className={`${styles.homeAboutSection} relative py-24 sm:py-32 overflow-hidden bg-[#f7fbff]`}>
+          <section id="about" className={`${styles.homeAboutSection} relative py-16 sm:py-20 overflow-hidden bg-[#f7fbff]`}>
             {/* Premium Ambient Backgrounds */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(0,58,143,0.06),transparent_70%)] pointer-events-none" />
             <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(246,190,0,0.05),transparent_60%)] pointer-events-none blur-3xl" />
@@ -304,9 +345,9 @@ export default function Page() {
 
             <div className="relative z-10 w-[min(1680px,calc(100%-3rem))] mx-auto">
               
-              <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 mb-8">
+              <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6 mb-6">
                 {/* Left Card: Premium Light Glassmorphism */}
-                <article className={`${styles.homeAboutSummaryCard} relative overflow-hidden bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-10 sm:p-14 transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)] group`} data-reveal="fade-right">
+                <article className={`${styles.homeAboutSummaryCard} relative overflow-hidden bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)] group`} data-reveal="fade-right">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-blue-50/30 pointer-events-none" />
                   
                   <div className="relative z-10">
@@ -315,13 +356,13 @@ export default function Page() {
                 </article>
 
                 {/* Right Card: Dynamic Workflow Display */}
-                <aside className={`${styles.homeAboutFlowCard} relative overflow-hidden bg-gradient-to-br from-white/90 to-[#f2f7ff]/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-10 sm:p-14 flex flex-col justify-center transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)]`} aria-label="System workflow preview" data-reveal="fade-left">
+                <aside className={`${styles.homeAboutFlowCard} relative overflow-hidden bg-gradient-to-br from-white/90 to-[#f2f7ff]/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 flex flex-col justify-center transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)]`} aria-label="System workflow preview" data-reveal="fade-left">
                   
                   {/* Decorative corner accent */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#f6be00]/20 to-transparent pointer-events-none rounded-bl-[100px]" />
                   
                   <div className="relative z-10">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-14">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                       <span className={`${styles.homeAboutFlowKicker} text-[0.8rem] font-extrabold uppercase text-[#003a8f] flex items-center gap-2`}>
                         <i className="fas fa-route text-[#f6be00]" />
                         System Flow
@@ -337,11 +378,11 @@ export default function Page() {
                       
                       <div className="relative flex justify-between gap-2">
                         {systemFlowItems.map((item, index) => (
-                          <div key={item.title} className="flex flex-col items-center gap-4 relative z-10 group/item">
-                            <div className={`${styles.homeAboutFlowIcon} w-14 h-14 sm:w-16 sm:h-16 rounded-[1rem] bg-white text-[#003a8f] flex items-center justify-center text-xl sm:text-2xl shadow-[0_8px_20px_rgba(15,43,89,0.08)] border border-white ring-1 ring-[#e2eaf5] group-hover/item:bg-[#003a8f] group-hover/item:text-white transition-colors duration-200`}>
+                          <div key={item.title} className="flex flex-col items-center gap-3 relative z-10 group/item">
+                            <div className={`${styles.homeAboutFlowIcon} w-12 h-12 sm:w-14 sm:h-14 rounded-[1rem] bg-white text-[#003a8f] flex items-center justify-center text-lg sm:text-xl shadow-[0_8px_20px_rgba(15,43,89,0.08)] border border-white ring-1 ring-[#e2eaf5] group-hover/item:bg-[#003a8f] group-hover/item:text-white transition-colors duration-200`}>
                               <i className={item.icon} />
                             </div>
-                            <strong className={`${styles.homeAboutFlowLabel} text-[0.7rem] sm:text-[0.75rem] font-black uppercase tracking-wider text-[#102033] bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-md`}>{item.title}</strong>
+                            <strong className={`${styles.homeAboutFlowLabel} text-[0.65rem] sm:text-[0.7rem] font-black uppercase tracking-wider text-[#102033] bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-md`}>{item.title}</strong>
                           </div>
                         ))}
                       </div>
@@ -351,22 +392,22 @@ export default function Page() {
               </div>
 
               {/* Bottom 3 Cards: Feature Showcase */}
-              <div className="grid md:grid-cols-3 gap-6 mb-12">
+              <div className="grid md:grid-cols-3 gap-4 mb-8">
                 {systemOutcomes.map((outcome, index) => (
                   <article 
                     key={outcome.title} 
-                    className={`${styles.homeAboutOutcomeCard} group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/80 rounded-[1.5rem] p-8 shadow-[0_12px_30px_rgba(15,43,89,0.03)] transition-colors duration-200 hover:bg-white`}
+                    className={`${styles.homeAboutOutcomeCard} group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/80 rounded-[1.5rem] p-6 shadow-[0_12px_30px_rgba(15,43,89,0.03)] transition-colors duration-200 hover:bg-white`}
                     data-reveal="fade-up"
                     style={{ '--reveal-delay': `${index * 0.1}s` } as any}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-[#f0f5ff]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
                     
                     <div className="relative z-10">
-                      <div className={`${styles.homeAboutOutcomeIcon} inline-flex h-[4rem] w-[4rem] items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#ffffff] to-[#eaf3ff] text-[#003a8f] text-[1.5rem] mb-6 shadow-[0_4px_15px_rgba(15,43,89,0.05)] border border-white ring-1 ring-[#dfeaf8] transition-colors duration-200`}>
+                      <div className={`${styles.homeAboutOutcomeIcon} inline-flex h-[3rem] w-[3rem] items-center justify-center rounded-[0.8rem] bg-gradient-to-br from-[#ffffff] to-[#eaf3ff] text-[#003a8f] text-[1.25rem] mb-4 shadow-[0_4px_15px_rgba(15,43,89,0.05)] border border-white ring-1 ring-[#dfeaf8] transition-colors duration-200`}>
                         <i className={outcome.icon} />
                       </div>
-                      <h3 className={`${styles.homeAboutOutcomeTitle} text-[1.15rem] font-black text-[#14243a] mb-3`}>{outcome.title}</h3>
-                      <p className={`${styles.homeAboutOutcomeText} text-[0.95rem] text-[#536982] leading-[1.65] font-medium`}>{outcome.description}</p>
+                      <h3 className={`${styles.homeAboutOutcomeTitle} text-[1.1rem] font-black text-[#14243a] mb-2`}>{outcome.title}</h3>
+                      <p className={`${styles.homeAboutOutcomeText} text-[0.9rem] text-[#536982] leading-[1.6] font-medium`}>{outcome.description}</p>
                     </div>
                   </article>
                 ))}

@@ -14,10 +14,10 @@ type EvaluateBody = {
   isChairSubmit?: boolean;
 };
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const { id: scheduleId } = await context.params;
     const authUser = await requireAuthenticatedUser(request);
-    const scheduleId = params.id;
     const body = await parseJsonBody<EvaluateBody>(request);
 
     // 1. Validate the schedule exists

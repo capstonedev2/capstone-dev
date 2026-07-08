@@ -314,6 +314,7 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
         credentials: 'same-origin',
         body: JSON.stringify({
           name: nextProfile.fullName || '',
+          email: nextProfile.email || '',
           displayName: nextProfile.displayName || '',
           contactNumber: nextProfile.contactNumber || '',
           address: nextProfile.address || '',
@@ -676,7 +677,7 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                     </div>
                     <div className="form-field">
                       <label htmlFor="student-profile-email" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Email</label>
-                      <input id="student-profile-email" type="email" className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-slate-500 shadow-sm cursor-not-allowed" value={draft.email} readOnly title="Your email address is set during registration." />
+                      <input id="student-profile-email" type="email" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.email || ''} onChange={(event) => updateDraftField('email', event.target.value)} title="Your academic email address." />
                       <p className="text-xs text-slate-400 mt-1.5"><i className="fas fa-circle-info mr-1"></i> Your email address is set during registration.</p>
                     </div>
                     <div className="form-field">

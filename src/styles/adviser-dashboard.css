@@ -6102,7 +6102,9 @@ tr:hover {
 }
 
 .adviser-shell .adviser-global-navbar-actions .portal-shell-profile-trigger {
-    min-width: 174px !important;
+    min-width: auto !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
     height: 48px !important;
     min-height: 48px !important;
     padding: 0.4rem 0.75rem 0.4rem 0.42rem !important;
@@ -6196,7 +6198,7 @@ tr:hover {
 
 @media (max-width: 720px) {
     .adviser-shell .portal-shell-notification-trigger-copy,
-    .adviser-shell .portal-shell-profile-copy {
+    .adviser-shell .portal-shell-profile-copy small {
         display: none !important;
     }
 }
@@ -8456,7 +8458,9 @@ tr:hover {
 }
 
 .adviser-shell .adviser-global-navbar-actions .portal-shell-profile-trigger {
-    min-width: 174px !important;
+    min-width: auto !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
     height: 48px !important;
     min-height: 48px !important;
     padding: 0.4rem 0.75rem 0.4rem 0.42rem !important;
@@ -8585,3 +8589,7 @@ tr:hover {
 .adviser-shell .adviser-global-navbar-actions :is(.portal-shell-notification-trigger-count, .notification-trigger-count) {
     font-weight: 700 !important;
 }
+
+.profile-dropdown .dashboard-mode-switch { flex-direction: column !important; }
+.profile-dropdown .dashboard-mode-switch button { justify-content: flex-start !important; white-space: nowrap !important; }
+

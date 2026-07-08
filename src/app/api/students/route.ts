@@ -47,6 +47,7 @@ export async function GET(request: Request) {
     const departmentTerms = getDepartmentSearchTerms(department);
     const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_STUDENT_LIMIT, MAX_STUDENT_LIMIT);
     const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
+    const availableOnly = searchParams.get('availableOnly') === 'true';
 
     const whereClause: any = { role: 'STUDENT' };
     if (departmentTerms.length) {
@@ -72,6 +73,17 @@ export async function GET(request: Request) {
       skip: (page - 1) * limit,
       take: limit
     });
+    
+    if (availableOnly) {
+      const allGroups = await prisma.group.findMany({
+        select: { students: true }
+      });
+      
+      const assignedNames = new Set(allGroups.flatMap(g => g.students.map(s => s.trim().toLowerCase())));
+      
+      const filtered = students.filter(student => !assignedNames.has(student.name.trim().toLowerCase()));
+      return NextResponse.json(filtered);
+    }
     
     return NextResponse.json(students);
   } catch (error) {

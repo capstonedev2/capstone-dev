@@ -207,6 +207,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
             fullName={data.profile.fullName}
             notificationCount={data.profile.notificationCount}
             notificationItems={notificationPreviewItems}
+            rawRole={data.profile.rawRole}
             themeMode={themeMode}
             workspaceMode={workspaceMode}
             onToggleTheme={() => updateAdviserTheme(themeMode === 'dark' ? 'light' : 'dark')}

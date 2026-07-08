@@ -122,11 +122,11 @@ export function LandingManagedAboutSummary() {
       <p className="text-[1.05rem] text-[#536982] leading-[1.75] mb-10 max-w-xl font-medium">
         {landing.aboutDescription}
       </p>
-      <div className="grid grid-cols-3 gap-5" aria-label="System scope">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-5" aria-label="System scope">
         {metrics.map((metric) => (
-          <div key={metric.id} className="bg-white/90 backdrop-blur-sm border border-[#e2eaf5] shadow-[0_8px_20px_rgba(15,43,89,0.03)] rounded-[1.2rem] p-5 text-center group-hover:border-[#c6d7ef] hover:shadow-[0_10px_22px_rgba(15,43,89,0.06)] transition-shadow duration-200">
-            <strong className="block text-[1.8rem] font-black text-[#003a8f] mb-1">{metric.value}</strong>
-            <span className="text-[0.7rem] font-bold text-[#66758a] uppercase tracking-wider">{metric.label}</span>
+          <div key={metric.id} className="flex-1 bg-white/90 backdrop-blur-sm border border-[#e2eaf5] shadow-[0_8px_20px_rgba(15,43,89,0.03)] rounded-[1.2rem] p-4 sm:p-5 text-center group-hover:border-[#c6d7ef] hover:shadow-[0_10px_22px_rgba(15,43,89,0.06)] transition-all duration-200">
+            <strong className="block text-[1.5rem] sm:text-[1.8rem] font-black text-[#003a8f] mb-0.5 sm:mb-1">{metric.value}</strong>
+            <span className="text-[0.65rem] sm:text-[0.7rem] font-bold text-[#66758a] uppercase tracking-wider">{metric.label}</span>
           </div>
         ))}
       </div>

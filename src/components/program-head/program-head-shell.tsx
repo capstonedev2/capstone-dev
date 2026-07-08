@@ -78,10 +78,10 @@ export function ProgramHeadShell({
 
   return (
     <div
-      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      className={`student-shell adviser-shell adviser-workspace-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
     >
-      <header className="student-global-navbar">
+      <header className="student-global-navbar adviser-global-navbar">
         <div className="student-global-navbar-main">
           <button
             aria-label={toggleLabel}
@@ -144,14 +144,38 @@ export function ProgramHeadShell({
                   { label: 'Program Head', icon: 'fa-user-tie', tone: 'primary' },
                   { label: departmentLabel, icon: 'fa-building-columns' }
                 ]}
+                extraProfileSection={
+                  <>
+                    <span className="portal-shell-profile-dropdown-label">Workspace Mode</span>
+                    <div className="workspace-mode-menu" aria-label="Switch dashboard mode">
+                      <button type="button" className="workspace-mode-item is-active">
+                        <span className="workspace-mode-item-left">
+                          <i className="fas fa-building-user" /> Program Head
+                        </span>
+                        <i className="fas fa-circle-check" />
+                      </button>
+                      <button type="button" className="workspace-mode-item" onClick={() => router.push('/adviser/adviser-mode/dashboard')}>
+                        <span className="workspace-mode-item-left">
+                          <i className="fas fa-chalkboard-user" /> Adviser
+                        </span>
+                      </button>
+                      <button type="button" className="workspace-mode-item" onClick={() => router.push('/adviser/panel-mode/dashboard')}>
+                        <span className="workspace-mode-item-left">
+                          <i className="fas fa-scale-balanced" /> Panel
+                        </span>
+                      </button>
+                    </div>
+                  </>
+                }
                 profileActions={[
+                  { label: 'Profile Settings', icon: 'fa-user-pen', onClick: () => router.push('/program-head/profile') },
                   { label: 'Sign Out', icon: 'fa-right-from-bracket', danger: true, onClick: handleLogout }
                 ]}
               />
         </div>
       </header>
 
-      <aside className={`student-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
+      <aside className={`student-global-sidebar adviser-global-sidebar sidebar${sidebarOpen ? ' is-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-header-copy">
             <span className="sidebar-context-kicker">Program Head Portal</span>
@@ -206,7 +230,7 @@ export function ProgramHeadShell({
         onClick={closeSidebar}
       />
 
-      <main className="student-global-main relative bg-slate-50/80">
+      <main className="student-global-main adviser-global-main relative bg-slate-50/80">
         {/* Decorative Light Background for Glassmorphism */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
@@ -215,7 +239,7 @@ export function ProgramHeadShell({
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-overlay"></div>
         </div>
 
-        <div className="student-global-content relative z-10">
+        <div className="student-global-content adviser-global-content relative z-10">
 
           
           <div className="page-body">

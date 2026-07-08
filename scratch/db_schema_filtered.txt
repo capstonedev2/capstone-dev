@@ -1,0 +1,103 @@
+CREATE TABLE figure_19_1_user_access.academic_years (
+CREATE TABLE figure_19_1_user_access.departments (
+CREATE TABLE figure_19_1_user_access.password_reset_tokens (
+CREATE TABLE figure_19_1_user_access.permissions (
+CREATE TABLE figure_19_1_user_access.role_permissions (
+CREATE TABLE figure_19_1_user_access.roles (
+CREATE TABLE figure_19_1_user_access.semesters (
+CREATE TABLE figure_19_1_user_access.user_sessions (
+CREATE TABLE figure_19_1_user_access.users (
+CREATE TABLE figure_19_2_project_management.document_versions (
+CREATE TABLE figure_19_2_project_management.milestone_submissions (
+CREATE TABLE figure_19_2_project_management.milestones (
+CREATE TABLE figure_19_2_project_management.project_advisers (
+CREATE TABLE figure_19_2_project_management.project_documents (
+CREATE TABLE figure_19_2_project_management.project_members (
+CREATE TABLE figure_19_2_project_management.projects (
+CREATE TABLE figure_19_3_evaluation_defense.defense_documents (
+CREATE TABLE figure_19_3_evaluation_defense.defense_panels (
+CREATE TABLE figure_19_3_evaluation_defense.defense_results (
+CREATE TABLE figure_19_3_evaluation_defense.defense_schedules (
+CREATE TABLE figure_19_3_evaluation_defense.evaluation_attachments (
+CREATE TABLE figure_19_3_evaluation_defense.evaluations (
+CREATE TABLE figure_19_3_evaluation_defense.grades (
+CREATE TABLE figure_19_3_evaluation_defense.rubric_criteria (
+CREATE TABLE figure_19_3_evaluation_defense.rubrics (
+CREATE TABLE figure_19_4_repository_archiving.archive_access_logs (
+CREATE TABLE figure_19_4_repository_archiving.archive_requests (
+CREATE TABLE figure_19_4_repository_archiving.final_manuscripts (
+CREATE TABLE figure_19_4_repository_archiving.library_archives (
+CREATE TABLE figure_19_4_repository_archiving.repository_files (
+CREATE TABLE figure_19_4_repository_archiving.repository_records (
+CREATE TABLE figure_19_5_technology_transfer.collaboration_interest (
+CREATE TABLE figure_19_5_technology_transfer.collaboration_outcomes (
+CREATE TABLE figure_19_5_technology_transfer.impact_feedback_records (
+CREATE TABLE figure_19_5_technology_transfer.industry_partners (
+CREATE TABLE figure_19_5_technology_transfer.industry_projects (
+CREATE TABLE figure_19_6_notifications_audit.audit_logs (
+CREATE TABLE figure_19_6_notifications_audit.notification_read_logs (
+CREATE TABLE figure_19_6_notifications_audit.notifications (
+CREATE TABLE figure_19_6_notifications_audit.system_settings (
+    ADD CONSTRAINT password_reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT role_permissions_permission_id_fkey FOREIGN KEY (permission_id) REFERENCES figure_19_1_user_access.permissions(permission_id) ON DELETE CASCADE;
+    ADD CONSTRAINT role_permissions_role_id_fkey FOREIGN KEY (role_id) REFERENCES figure_19_1_user_access.roles(role_id) ON DELETE CASCADE;
+    ADD CONSTRAINT semesters_academic_year_id_fkey FOREIGN KEY (academic_year_id) REFERENCES figure_19_1_user_access.academic_years(academic_year_id) ON DELETE CASCADE;
+    ADD CONSTRAINT user_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT users_department_id_fkey FOREIGN KEY (department_id) REFERENCES figure_19_1_user_access.departments(department_id) ON DELETE SET NULL;
+    ADD CONSTRAINT users_role_id_fkey FOREIGN KEY (role_id) REFERENCES figure_19_1_user_access.roles(role_id) ON DELETE SET NULL;
+    ADD CONSTRAINT document_versions_document_id_fkey FOREIGN KEY (document_id) REFERENCES figure_19_2_project_management.project_documents(document_id) ON DELETE CASCADE;
+    ADD CONSTRAINT document_versions_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT milestone_submissions_milestone_id_fkey FOREIGN KEY (milestone_id) REFERENCES figure_19_2_project_management.milestones(milestone_id) ON DELETE CASCADE;
+    ADD CONSTRAINT milestone_submissions_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT milestones_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT project_advisers_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT project_advisers_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT project_documents_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT project_documents_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT project_members_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT project_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT projects_academic_year_id_fkey FOREIGN KEY (academic_year_id) REFERENCES figure_19_1_user_access.academic_years(academic_year_id) ON DELETE SET NULL;
+    ADD CONSTRAINT projects_created_by_fkey FOREIGN KEY (created_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT projects_department_id_fkey FOREIGN KEY (department_id) REFERENCES figure_19_1_user_access.departments(department_id) ON DELETE SET NULL;
+    ADD CONSTRAINT projects_semester_id_fkey FOREIGN KEY (semester_id) REFERENCES figure_19_1_user_access.semesters(semester_id) ON DELETE SET NULL;
+    ADD CONSTRAINT defense_documents_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+    ADD CONSTRAINT defense_documents_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT defense_panels_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+    ADD CONSTRAINT defense_panels_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT defense_results_approved_by_fkey FOREIGN KEY (approved_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT defense_results_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+    ADD CONSTRAINT defense_schedules_academic_year_id_fkey FOREIGN KEY (academic_year_id) REFERENCES figure_19_1_user_access.academic_years(academic_year_id) ON DELETE SET NULL;
+    ADD CONSTRAINT defense_schedules_created_by_fkey FOREIGN KEY (created_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT defense_schedules_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT defense_schedules_semester_id_fkey FOREIGN KEY (semester_id) REFERENCES figure_19_1_user_access.semesters(semester_id) ON DELETE SET NULL;
+    ADD CONSTRAINT evaluation_attachments_evaluation_id_fkey FOREIGN KEY (evaluation_id) REFERENCES figure_19_3_evaluation_defense.evaluations(evaluation_id) ON DELETE CASCADE;
+    ADD CONSTRAINT evaluations_evaluator_id_fkey FOREIGN KEY (evaluator_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT evaluations_rubric_id_fkey FOREIGN KEY (rubric_id) REFERENCES figure_19_3_evaluation_defense.rubrics(rubric_id) ON DELETE SET NULL;
+    ADD CONSTRAINT evaluations_schedule_id_fkey FOREIGN KEY (schedule_id) REFERENCES figure_19_3_evaluation_defense.defense_schedules(schedule_id) ON DELETE CASCADE;
+    ADD CONSTRAINT grades_encoded_by_fkey FOREIGN KEY (encoded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT grades_evaluation_id_fkey FOREIGN KEY (evaluation_id) REFERENCES figure_19_3_evaluation_defense.evaluations(evaluation_id) ON DELETE CASCADE;
+    ADD CONSTRAINT rubric_criteria_rubric_id_fkey FOREIGN KEY (rubric_id) REFERENCES figure_19_3_evaluation_defense.rubrics(rubric_id) ON DELETE CASCADE;
+    ADD CONSTRAINT archive_access_logs_accessed_by_fkey FOREIGN KEY (accessed_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT archive_access_logs_library_archive_id_fkey FOREIGN KEY (library_archive_id) REFERENCES figure_19_4_repository_archiving.library_archives(library_archive_id) ON DELETE CASCADE;
+    ADD CONSTRAINT archive_requests_processed_by_fkey FOREIGN KEY (processed_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT archive_requests_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+    ADD CONSTRAINT archive_requests_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT final_manuscripts_approved_by_fkey FOREIGN KEY (approved_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT final_manuscripts_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+    ADD CONSTRAINT library_archives_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+    ADD CONSTRAINT repository_files_repository_record_id_fkey FOREIGN KEY (repository_record_id) REFERENCES figure_19_4_repository_archiving.repository_records(repository_record_id) ON DELETE CASCADE;
+    ADD CONSTRAINT repository_files_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT repository_records_archived_by_fkey FOREIGN KEY (archived_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT repository_records_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT collaboration_interest_industry_project_id_fkey FOREIGN KEY (industry_project_id) REFERENCES figure_19_5_technology_transfer.industry_projects(industry_project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT collaboration_interest_partner_id_fkey FOREIGN KEY (partner_id) REFERENCES figure_19_5_technology_transfer.industry_partners(partner_id) ON DELETE CASCADE;
+    ADD CONSTRAINT collaboration_outcomes_industry_project_id_fkey FOREIGN KEY (industry_project_id) REFERENCES figure_19_5_technology_transfer.industry_projects(industry_project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT impact_feedback_records_industry_project_id_fkey FOREIGN KEY (industry_project_id) REFERENCES figure_19_5_technology_transfer.industry_projects(industry_project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT impact_feedback_records_submitted_by_fkey FOREIGN KEY (submitted_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT industry_projects_partner_id_fkey FOREIGN KEY (partner_id) REFERENCES figure_19_5_technology_transfer.industry_partners(partner_id) ON DELETE CASCADE;
+    ADD CONSTRAINT industry_projects_project_id_fkey FOREIGN KEY (project_id) REFERENCES figure_19_2_project_management.projects(project_id) ON DELETE CASCADE;
+    ADD CONSTRAINT audit_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;
+    ADD CONSTRAINT notification_read_logs_notification_id_fkey FOREIGN KEY (notification_id) REFERENCES figure_19_6_notifications_audit.notifications(notification_id) ON DELETE CASCADE;
+    ADD CONSTRAINT notification_read_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE CASCADE;
+    ADD CONSTRAINT system_settings_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES figure_19_1_user_access.users(user_id) ON DELETE SET NULL;

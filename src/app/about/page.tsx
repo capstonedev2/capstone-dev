@@ -503,53 +503,74 @@ export default function AboutPage() {
           <section
             id="capstone-team"
             aria-labelledby="capstone-team-title"
-            className={styles.teamSection}
+            className="relative overflow-hidden bg-[#060D1A] py-24 sm:py-32 isolate"
           >
-            <div className={styles.container}>
-              <div className={styles.teamIntro} data-reveal="fade-up">
-                <span className={styles.sectionKicker}>Capstone Team</span>
-                <h2 id="capstone-team-title">
-                  Meet the <span>Developers</span>
+            {/* Ambient Dark Mode Background Glows */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-[radial-gradient(ellipse_at_top,rgba(0,58,143,0.15),transparent_70%)] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_bottom_left,rgba(246,190,0,0.06),transparent_60%)] pointer-events-none blur-3xl" />
+            <div className="absolute top-1/4 right-0 w-[800px] h-[800px] bg-[radial-gradient(circle_at_center,rgba(65,139,255,0.08),transparent_60%)] pointer-events-none blur-3xl" />
+
+            <div className="relative z-10 w-[min(1400px,calc(100%-3rem))] mx-auto">
+              <div className="flex flex-col items-center text-center mb-16 sm:mb-20" data-reveal="fade-up">
+                <span className="mb-4 inline-flex items-center gap-2 rounded-xl border border-[#f6be00]/20 bg-[#f6be00]/10 px-4 py-2 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-[#f6be00] backdrop-blur-md">
+                  <i className="fas fa-users-gear" /> Capstone Team
+                </span>
+                <h2 id="capstone-team-title" className="m-0 text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+                  Meet the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ffe98b] to-[#f6be00]">Developers</span>
                 </h2>
-                <p>
+                <p className="max-w-2xl mx-auto mt-6 text-[1rem] text-slate-300 leading-[1.7]">
                   The people behind the Thesis and Capstone Project Inventory, Progress
                   Monitoring, and Technology Transfer Management System.
                 </p>
               </div>
 
-              <div className={styles.teamGrid}>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 {teamMembers.map((member, index) => (
                   <article
                     key={member.id}
-                    className={styles.teamCard}
+                    className="group relative flex flex-col items-center text-center rounded-[2rem] bg-white/[0.03] backdrop-blur-xl border border-white/10 p-8 sm:p-10 transition-all duration-500 ease-out hover:bg-white/[0.06] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(0,58,143,0.2)] overflow-hidden"
                     data-reveal="fade-up"
                     style={{ transitionDelay: `${index * 100}ms` }}
                   >
-                    <div className={styles.teamCardAccent} aria-hidden="true" />
-                    <div className={styles.teamImageFrame}>
-                      <img
-                        src={member.image}
-                        alt={`${member.name} profile image`}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                    {/* Subtle Top Glow on Hover */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#418bff] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    
+                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 mb-6 rounded-full p-1 bg-gradient-to-b from-white/20 to-transparent">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-white/10 relative">
+                        <img
+                          src={member.image}
+                          alt={`${member.name} profile image`}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                        />
+                      </div>
+                      {/* Avatar Ring Glow */}
+                      <div className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_0_25px_rgba(65,139,255,0.3)] transition-shadow duration-500" />
                     </div>
-                    <div className={styles.teamCardInfo}>
-                      <h3>{member.name}</h3>
-                      <span className={styles.teamRoleBadge}>
-                        <i className={getTeamRoleIcon(member.role)} aria-hidden="true" />
-                        {member.role}
-                      </span>
-                      <p>{member.shortBio}</p>
+                    
+                    <h3 className="text-xl sm:text-[1.35rem] font-black text-white mb-3">
+                      {member.name}
+                    </h3>
+                    
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#003A8F]/40 border border-[#003A8F]/60 text-[#93c5fd] text-[0.65rem] font-bold uppercase tracking-widest mb-5">
+                      <i className={getTeamRoleIcon(member.role)} aria-hidden="true" />
+                      {member.role}
                     </div>
+                    
+                    <p className="text-[0.85rem] text-slate-400 leading-[1.65] font-medium">
+                      {member.shortBio}
+                    </p>
                   </article>
                 ))}
               </div>
 
-              <div className={styles.teamQuoteBand} data-reveal="fade-up">
-                <i className="fas fa-quote-left" aria-hidden="true" />
-                <p>
-                  Built with dedication for better academic research management.
+              <div className="mt-16 sm:mt-24 max-w-3xl mx-auto rounded-2xl bg-gradient-to-r from-white/5 to-transparent border border-white/10 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-center gap-6 text-center sm:text-left" data-reveal="fade-up">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#f6be00]/20 text-[#f6be00] text-xl shrink-0">
+                  <i className="fas fa-quote-left" aria-hidden="true" />
+                </div>
+                <p className="text-lg text-slate-300 font-medium italic">
+                  "Built with dedication for better academic research management."
                 </p>
               </div>
             </div>

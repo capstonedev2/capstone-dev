@@ -10,6 +10,7 @@ type AdviserShellActionsProps = {
   fullName: string;
   notificationCount: number;
   notificationItems?: PortalNotificationItem[];
+  rawRole?: string;
   themeMode?: 'light' | 'dark' | 'system';
   workspaceMode: WorkspaceMode;
   onToggleTheme?: () => void;
@@ -93,6 +94,7 @@ export function AdviserShellActions({
   fullName,
   notificationCount,
   notificationItems,
+  rawRole,
   themeMode = 'light',
   workspaceMode,
   onToggleTheme,
@@ -145,18 +147,31 @@ export function AdviserShellActions({
           ) : null}
 
           <span className="portal-shell-profile-dropdown-label">Workspace Mode</span>
-          <div className="dashboard-mode-switch" aria-label="Switch dashboard mode">
-            <button type="button" className={workspaceMode === 'adviser' ? 'active' : ''} onClick={() => onSwitchWorkspace('adviser')}>
-              <i className="fas fa-chalkboard-user" /> Adviser
+          <div className="workspace-mode-menu" aria-label="Switch dashboard mode">
+            {rawRole === 'PROGRAM_HEAD' ? (
+              <button type="button" className="workspace-mode-item" onClick={() => router.push('/program-head/dashboard')}>
+                <span className="workspace-mode-item-left">
+                  <i className="fas fa-building-user" /> Program Head
+                </span>
+              </button>
+            ) : null}
+            <button type="button" className={`workspace-mode-item ${workspaceMode === 'adviser' ? 'is-active' : ''}`} onClick={() => onSwitchWorkspace('adviser')}>
+              <span className="workspace-mode-item-left">
+                <i className="fas fa-chalkboard-user" /> Adviser
+              </span>
+              {workspaceMode === 'adviser' && <i className="fas fa-circle-check" />}
             </button>
-            <button type="button" className={workspaceMode === 'panel' ? 'active' : ''} onClick={() => onSwitchWorkspace('panel')}>
-              <i className="fas fa-scale-balanced" /> Panel
+            <button type="button" className={`workspace-mode-item ${workspaceMode === 'panel' ? 'is-active' : ''}`} onClick={() => onSwitchWorkspace('panel')}>
+              <span className="workspace-mode-item-left">
+                <i className="fas fa-scale-balanced" /> Panel
+              </span>
+              {workspaceMode === 'panel' && <i className="fas fa-circle-check" />}
             </button>
           </div>
         </>
       }
       profileActions={[
-        { label: 'My Profile', icon: 'fa-user', href: `${basePath}/profile` },
+        { label: 'Profile Settings', icon: 'fa-user-pen', href: `${basePath}/profile` },
         { label: 'Notifications', icon: 'fa-bell', href: `${basePath}/notifications` },
         {
           label: 'Sign Out',

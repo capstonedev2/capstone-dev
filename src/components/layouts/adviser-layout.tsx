@@ -5,5 +5,5 @@ export function AdviserLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <ProtectedRoute allowedRole="adviser">{children}</ProtectedRoute>;
+  return <ProtectedRoute allowedRole={['adviser', 'panel', 'program_head']}>{children}</ProtectedRoute>;
 }

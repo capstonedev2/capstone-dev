@@ -224,7 +224,11 @@ export async function PUT(request: Request) {
       title?: string;
       projectTitle?: string;
       allowMemberSubmission?: boolean;
+      leader?: string;
     } = {};
+    if (body.leader !== undefined) {
+      updateData.leader = body.leader;
+    }
     if (Object.prototype.hasOwnProperty.call(body, 'students')) {
       const parsedStudents = parseStudentNames(students);
       const assignedStudents = await findAssignedStudents(parsedStudents, id);

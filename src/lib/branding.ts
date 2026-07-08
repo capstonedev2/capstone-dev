@@ -30,6 +30,11 @@ export type BrandingAssets = {
   favicon: string;
   loginBackground: string;
   registerBackground: string;
+  hallOfExcellence1: string;
+  hallOfExcellence2: string;
+  hallOfExcellence3: string;
+  hallOfExcellence4: string;
+  hallOfExcellence5: string;
 };
 
 export type BrandingLandingFeature = {
@@ -201,7 +206,12 @@ const DEFAULT_ASSETS: BrandingAssets = {
   institutionLogo: DEFAULT_INSTITUTION_LOGO_SRC,
   favicon: SYSTEM_LOGO_SRC,
   loginBackground: DEFAULT_AUTH_BACKGROUND_SRC,
-  registerBackground: DEFAULT_AUTH_BACKGROUND_SRC
+  registerBackground: DEFAULT_AUTH_BACKGROUND_SRC,
+  hallOfExcellence1: '/images/awards/award_1.png',
+  hallOfExcellence2: '/images/awards/award_2.png',
+  hallOfExcellence3: '/images/awards/award_3.png',
+  hallOfExcellence4: '/images/awards/award_4.png',
+  hallOfExcellence5: '/images/awards/award_5.png'
 };
 
 const DEFAULT_LANDING: BrandingLandingSettings = {

@@ -30,7 +30,7 @@ type ResetShellProps = {
   icon: string;
   label: string;
   title: string;
-  description: string;
+  description: ReactNode;
   children: ReactNode;
 };
 
@@ -151,17 +151,22 @@ function PasswordResetShell({
       <section className={authUi.shell} aria-labelledby={titleId}>
         <div className="w-full max-w-[560px] overflow-hidden bg-transparent">
           <div className="flex min-w-0 flex-col justify-center px-4 py-5 sm:py-7">
-            <div className="w-full flex justify-center">
-              <div className="w-full max-w-[500px] rounded-[24px] border border-white/50 bg-white/[0.30] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-8">
-                <div className="mb-7 flex flex-col items-center text-center">
-                  <span className="mb-3 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
-                    <i className={icon} aria-hidden="true" />
+            <div className="w-full flex justify-center relative">
+              {/* Decorative background glow behind the modal */}
+              <div className="absolute top-1/2 left-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-[#003A8F]/20 to-[#f6be00]/10 blur-[80px] pointer-events-none" />
+              
+              <div className="relative w-full max-w-[500px] rounded-[2rem] border border-white/60 bg-white/40 p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_24px_50px_-12px_rgba(0,10,40,0.25)] backdrop-blur-xl sm:p-10">
+                <div className="mb-8 flex flex-col items-center text-center">
+                  <div className="mb-4 inline-flex items-center justify-center h-12 w-12 rounded-2xl border border-white/80 bg-gradient-to-br from-white to-white/60 shadow-sm">
+                    <i className={cx(icon, "text-xl text-[#003A8F]")} aria-hidden="true" />
+                  </div>
+                  <span className="mb-2 inline-flex items-center gap-2 text-[0.7rem] font-extrabold uppercase tracking-widest text-[#003A8F]/80">
                     {label}
                   </span>
-                  <h2 className="m-0 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-slate-800" id={titleId}>
+                  <h2 className="m-0 text-3xl font-extrabold leading-tight tracking-tight text-slate-800" id={titleId}>
                     {title}
                   </h2>
-                  <p className="mt-3 max-w-md text-sm font-semibold leading-6 text-slate-700">{description}</p>
+                  <p className="mt-3 max-w-sm text-[0.95rem] font-medium leading-relaxed text-slate-600">{description}</p>
                 </div>
 
                 {children}
@@ -304,6 +309,14 @@ export function VerifyResetCodePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const codeInputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
+  const maskEmail = (emailStr: string) => {
+    if (!emailStr || !emailStr.includes('@')) return emailStr;
+    const [local, domain] = emailStr.split('@');
+    if (local.length <= 2) return `${local[0]}***@${domain}`;
+    // Show first 2 characters, then asterisks for the rest of the local part
+    return `${local.slice(0, 2)}••••••@${domain}`;
+  };
+
   useEffect(() => {
     setEmail(getStoredResetEmail());
 
@@ -393,7 +406,12 @@ export function VerifyResetCodePage() {
       icon="fas fa-key"
       label="Verification"
       title="Verify reset code"
-      description="Enter the code sent to your email before it expires."
+      description={
+        <>
+          We sent a secure code to <strong className="text-[#003A8F] font-extrabold">{maskEmail(email) || 'your email address'}</strong>.
+          <br className="hidden sm:block" /> Please enter it below before it expires.
+        </>
+      }
     >
       <form className={authUi.form} aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
         <div className={authUi.formGroup}>
@@ -406,26 +424,34 @@ export function VerifyResetCodePage() {
             aria-labelledby="reset-code-label"
             aria-describedby={fieldErrors.code ? 'verify-code-error' : undefined}
           >
-            {Array.from({ length: 6 }).map((_, index) => (
-              <input
-                key={index}
-                ref={(element) => {
-                  codeInputRefs.current[index] = element;
-                }}
-                className="h-12 min-w-0 rounded-xl border border-[rgba(255,255,255,0.64)] bg-[rgba(255,255,255,0.64)] text-center text-lg font-extrabold text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_rgba(15,23,42,0.06)] outline-none backdrop-blur-[14px] transition-all duration-300 ease-out focus:border-[#003A8F] focus:bg-[rgba(255,255,255,0.84)] focus:shadow-[inset_0_1px_0_rgba(255,255,255,0.94),0_0_0_4px_rgba(0,58,143,0.16),0_16px_34px_rgba(0,58,143,0.14)] focus:outline-none"
-                type="text"
-                inputMode="numeric"
-                autoComplete={index === 0 ? 'one-time-code' : 'off'}
-                maxLength={1}
-                value={codeDigits[index] || ''}
-                onChange={(event) => updateCodeDigit(index, event.target.value)}
-                onKeyDown={(event) => handleCodeKeyDown(index, event.key)}
-                aria-label={`Reset code digit ${index + 1}`}
-                aria-invalid={fieldErrors.code ? 'true' : 'false'}
-                disabled={isSubmitting}
-                required
-              />
-            ))}
+            {Array.from({ length: 6 }).map((_, index) => {
+              const hasValue = Boolean(codeDigits[index]);
+              return (
+                <input
+                  key={index}
+                  ref={(element) => {
+                    codeInputRefs.current[index] = element;
+                  }}
+                  className={cx(
+                    "h-14 sm:h-16 min-w-0 rounded-2xl border-2 text-center text-2xl font-black shadow-sm outline-none transition-all duration-300 ease-out focus:outline-none disabled:opacity-50",
+                    hasValue 
+                      ? "border-white bg-white text-[#003A8F] shadow-[0_4px_12px_rgba(0,58,143,0.08)] scale-[1.02]" 
+                      : "border-white/50 bg-white/40 text-slate-900 focus:-translate-y-1 focus:scale-105 focus:border-[#003A8F] focus:bg-white focus:text-[#003A8F] focus:shadow-[0_8px_20px_rgba(0,58,143,0.12)] focus:ring-4 focus:ring-[#003A8F]/10"
+                  )}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                  maxLength={1}
+                  value={codeDigits[index] || ''}
+                  onChange={(event) => updateCodeDigit(index, event.target.value)}
+                  onKeyDown={(event) => handleCodeKeyDown(index, event.key)}
+                  aria-label={`Reset code digit ${index + 1}`}
+                  aria-invalid={fieldErrors.code ? 'true' : 'false'}
+                  disabled={isSubmitting}
+                  required
+                />
+              );
+            })}
           </div>
           {fieldErrors.code ? (
             <span className={authUi.fieldError} id="verify-code-error">
@@ -445,8 +471,8 @@ export function VerifyResetCodePage() {
           </div>
         ) : null}
 
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-          <button type="submit" className={authUi.submitButton} disabled={isSubmitting}>
+        <div className="grid gap-3 sm:grid-cols-2 mt-2">
+          <button type="submit" className={cx(authUi.submitButton, "!rounded-2xl h-12 sm:h-14 text-base shadow-[0_8px_20px_rgba(0,58,143,0.2)] hover:-translate-y-0.5 transition-all")} disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <span className={authUi.spinner} aria-hidden="true" />
@@ -458,7 +484,7 @@ export function VerifyResetCodePage() {
           </button>
           <Link
             href="/forgot-password"
-            className={cx(authUi.secondaryButton, 'h-10 rounded-xl sm:h-12 sm:rounded-2xl')}
+            className="group flex h-12 sm:h-14 items-center justify-center rounded-2xl border-2 border-white bg-white/70 px-5 text-sm font-extrabold text-slate-700 shadow-sm backdrop-blur-md transition-all hover:bg-white hover:text-[#003A8F] hover:shadow-md active:scale-[0.98]"
           >
             Send new code
           </Link>

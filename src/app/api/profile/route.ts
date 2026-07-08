@@ -32,6 +32,7 @@ export async function GET(request: Request) {
 
 type UpdateProfileBody = {
   name?: unknown;
+  email?: unknown;
   displayName?: unknown;
   contactNumber?: unknown;
   address?: unknown;
@@ -54,6 +55,7 @@ export async function PATCH(request: Request) {
     const body = await parseJsonBody<UpdateProfileBody>(request);
 
     const name = body.name !== undefined ? normalizeText(body.name) : undefined;
+    const email = body.email !== undefined ? normalizeText(body.email)?.toLowerCase() : undefined;
     const displayName = body.displayName !== undefined ? normalizeText(body.displayName) : undefined;
     const contactNumber = body.contactNumber !== undefined ? normalizeText(body.contactNumber) : undefined;
     const address = body.address !== undefined ? normalizeText(body.address) : undefined;
@@ -67,6 +69,19 @@ export async function PATCH(request: Request) {
     const data: Record<string, string | null> = {};
 
     if (name !== undefined) data.name = name || null;
+    
+    if (email !== undefined && email !== user.email) {
+      if (!email || !email.includes('@')) {
+        throw new HttpError('Please provide a valid email address.', 400);
+      }
+      // Check if email is already taken
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser && existingUser.id !== user.id) {
+        throw new HttpError('This email is already registered to another user.', 409);
+      }
+      data.email = email;
+    }
+
     if (displayName !== undefined) data.displayName = displayName || null;
     if (contactNumber !== undefined) data.contactNumber = contactNumber || null;
     if (address !== undefined) data.address = address || null;
@@ -102,11 +117,37 @@ export async function PATCH(request: Request) {
       throw new HttpError('No profile fields were provided to update.', 400);
     }
 
+    const oldName = user.name;
+    const newName = typeof data.name === 'string' ? data.name : null;
+
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data,
       select: publicUserSelect
     });
+
+    if (newName && newName !== oldName) {
+      try {
+        const groupsWithOldName = await prisma.group.findMany({
+          where: { students: { has: oldName } }
+        });
+        
+        for (const grp of groupsWithOldName) {
+           const updatedStudents = grp.students.map(s => s === oldName ? newName : s);
+           await prisma.group.update({
+             where: { id: grp.id },
+             data: { students: updatedStudents }
+           });
+        }
+        
+        await prisma.group.updateMany({
+           where: { leader: oldName },
+           data: { leader: newName }
+        });
+      } catch (err) {
+        console.error('Failed to sync group name changes:', err);
+      }
+    }
 
     return successResponse({
       message: 'Profile updated successfully.',

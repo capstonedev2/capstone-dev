@@ -192,12 +192,12 @@ export function buildDisplayName({
   lastName,
   email
 }: {
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  email: string;
+  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email: string | null;
 }) {
-  return normalizeText(name) || normalizeText(`${firstName || ''} ${lastName || ''}`) || email;
+  return normalizeText(name || '') || normalizeText(`${firstName || ''} ${lastName || ''}`) || (email || '');
 }
 
 export async function hashPassword(password: string) {
@@ -387,7 +387,7 @@ export async function getAuthenticatedUser(request?: Request) {
 
 export const getServerAuthenticatedUser = cache(async () => getAuthenticatedUser());
 
-export async function requireAuthenticatedUser(request: Request, allowedRoles?: UserRole[]) {
+export async function requireAuthenticatedUser(request?: Request, allowedRoles?: UserRole[]) {
   const user = await getAuthenticatedUser(request);
 
   if (!user) {

@@ -603,6 +603,7 @@ function GroupDetailsModal({
   onClose,
   onAssignLeader,
   onOpenAddStudent,
+  onRemoveStudent,
   onApproveTitle
 }: {
   group: LifecycleGroup | null;
@@ -610,6 +611,7 @@ function GroupDetailsModal({
   onClose: () => void;
   onAssignLeader: (groupId: string, leader: string) => void;
   onOpenAddStudent: (groupId: string) => void;
+  onRemoveStudent?: (groupId: string, student: string) => void;
   onApproveTitle?: (groupId: string, projectTitle: string) => void;
 }) {
   if (!open || !group) return null;
@@ -790,14 +792,26 @@ function GroupDetailsModal({
                         Leader
                       </span>
                     ) : completed ? null : (
-                      <button
-                        type="button"
-                        onClick={() => onAssignLeader(group.id, student)}
-                        className="inline-flex min-h-[32px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-700 transition hover:bg-amber-100"
-                      >
-                        <i className="fas fa-crown text-[10px]"></i>
-                        Set as Leader
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => onAssignLeader(group.id, student)}
+                          className="inline-flex min-h-[32px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-700 transition hover:bg-amber-100"
+                        >
+                          <i className="fas fa-crown text-[10px]"></i>
+                          Set as Leader
+                        </button>
+                        {onRemoveStudent ? (
+                          <button
+                            type="button"
+                            onClick={() => onRemoveStudent(group.id, student)}
+                            className="inline-flex min-h-[32px] items-center justify-center w-8 rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
+                            title="Remove student from group"
+                          >
+                            <i className="fas fa-user-minus text-xs"></i>
+                          </button>
+                        ) : null}
+                      </>
                     )}
                   </div>
                 </div>
@@ -1316,9 +1330,10 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
   useEffect(() => {
     async function fetchStudents() {
       try {
-        const [studentsResponse, groupsResponse] = await Promise.all([
-          fetch(`/api/students?department=${encodeURIComponent(adviserDepartment)}&limit=200`),
-          fetch(`/api/groups?department=${encodeURIComponent(adviserDepartment)}&fields=students&limit=200`)
+        const [studentsResponse, groupsResponse, myGroupsResponse] = await Promise.all([
+          fetch(`/api/students?department=${encodeURIComponent(adviserDepartment)}&limit=200&availableOnly=true`),
+          fetch(`/api/groups?department=${encodeURIComponent(adviserDepartment)}&fields=students&limit=200`),
+          fetch(`/api/groups?userId=${encodeURIComponent(data.profile.user_id)}`)
         ]);
 
         if (studentsResponse.ok) {
@@ -1336,16 +1351,32 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
         } else {
           setAssignedStudentKeys([]);
         }
+
+        if (myGroupsResponse.ok) {
+          const myDbGroups = await myGroupsResponse.json();
+          // Map DB groups to ManagedAdviserGroup structure
+          const mappedGroups = myDbGroups.map((g: any) => ({
+            ...g,
+            id: g.id,
+            user_id: g.userId,
+            project_id: g.projectId,
+            status: g.status,
+            created_at: g.createdAt,
+            updated_at: g.updatedAt,
+            milestone: g.milestone || 1,
+            currentMilestone: g.currentMilestone || 1,
+            leader: g.leader || null
+          }));
+          setGroups(mappedGroups);
+        }
       } catch (e) {
         console.error('Failed to fetch students', e);
         setAssignedStudentKeys([]);
       }
     }
-    
-    if (addStudentModalOpen || createGroupModalOpen) {
-      fetchStudents();
-    }
-  }, [addStudentModalOpen, createGroupModalOpen, adviserDepartment]);
+    // Always fetch on mount, and re-fetch if modals are opened
+    fetchStudents();
+  }, [addStudentModalOpen, createGroupModalOpen, adviserDepartment, data.profile.user_id]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -1500,6 +1531,59 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     } catch (e) {
       console.error('Failed to update group students on server', e);
       alert('An error occurred while adding the student.');
+    }
+  };
+
+  const handleRemoveStudentFromGroup = async (groupId: string, student: string) => {
+    const targetGroup = groups.find((group) => group.id === groupId);
+    if (!targetGroup || !targetGroup.students.includes(student) || getComputedGroupStatus(targetGroup) === 'completed') {
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to remove ${student} from this group?`)) {
+      return;
+    }
+
+    const nextStudents = targetGroup.students.filter((s) => s !== student);
+    let nextLeader = targetGroup.leader;
+    if (nextLeader === student) {
+      nextLeader = nextStudents[0] || '';
+    }
+
+    try {
+      const response = await fetch('/api/groups', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: groupId, students: nextStudents, leader: nextLeader })
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => null);
+        alert(error?.error || 'Failed to remove student from group.');
+        return;
+      }
+
+      setGroups((currentGroups) =>
+        currentGroups.map((group) => {
+          if (group.id !== groupId) {
+            return group;
+          }
+          return {
+            ...group,
+            students: nextStudents,
+            leader: nextLeader,
+            members: nextStudents.length
+          };
+        })
+      );
+      
+      const removedKey = normalizeStudentRosterName(student);
+      setAssignedStudentKeys((currentKeys) => currentKeys.filter(k => k !== removedKey));
+    } catch (e) {
+      console.error('Failed to remove group student on server', e);
+      alert('An error occurred while removing the student.');
     }
   };
 
@@ -1719,6 +1803,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
           onClose={() => setDetailsOpen(false)}
           onAssignLeader={assignLeaderToGroup}
           onApproveTitle={handleApproveTitle}
+          onRemoveStudent={handleRemoveStudentFromGroup}
           onOpenAddStudent={(groupId) => {
             setDetailsOpen(false);
             openAddStudentModal(groupId);
