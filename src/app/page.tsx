@@ -177,7 +177,7 @@ export default function Page() {
                 <div className={`${styles.sectionIntro} ${styles.institutionIntro}`} data-reveal="fade-up">
                   <span className={styles.sectionKicker}>Our Institution</span>
                   <h2>
-                    University <span>Vision &amp; Mission</span>
+                    USTP <span>Vision &amp; Mission</span>
                   </h2>
                   <p>
                     Guided by a commitment to excellence, innovation, and national development,
@@ -195,7 +195,7 @@ export default function Page() {
                     </div>
                     <span>Vision</span>
                   </div>
-                  <h3>University Vision</h3>
+                  <h3>USTP Vision</h3>
                   <p>
                     A nationally-recognized S&amp;T university providing the vital link
                     between education and the economy.
@@ -213,7 +213,7 @@ export default function Page() {
                     </div>
                     <span>Mission</span>
                   </div>
-                  <h3>University Mission</h3>
+                  <h3>USTP Mission</h3>
                   <ul className={styles.institutionMissionList}>
                     {missionItems.map(item => (
                       <li key={item.text}>

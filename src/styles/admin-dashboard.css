@@ -354,26 +354,24 @@ tbody tr:hover td{
 }
 
 .main-content{
-  margin-left:280px;
+  margin-left:calc(280px + 1.25rem);
   padding:5.9rem 1.25rem 2rem;
-  background:#f8fafc;
   transition:margin-left .2s ease;
 }
 
 .top-nav{
   position:fixed;
-  top:0;
-  left:0;
-  right:0;
+  top:1.25rem;
+  left:calc(280px + 2.5rem);
+  right:1.25rem;
   min-height:5rem;
   margin:0;
   padding:0 1rem;
-  border:0;
-  border-bottom:1px solid rgba(226,232,240,.96);
-  border-radius:0;
-  background:rgba(255,255,255,.98);
-  box-shadow:0 1px 0 rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.03);
-  backdrop-filter:blur(12px);
+  border:1px solid rgba(229,231,235,.92);
+  border-radius:1.45rem;
+  background:rgba(255,255,255,.85);
+  box-shadow:0 16px 34px rgba(31,41,55,.06),inset 0 0 0 1px rgba(255,255,255,.7);
+  backdrop-filter:blur(20px);
   z-index:120;
 }
 
@@ -558,7 +556,7 @@ tbody tr:hover td{
   }
 
   .dashboard-wrapper.is-sidebar-collapsed .main-content{
-    margin-left:5.5rem;
+    margin-left:calc(5.5rem + 1.25rem);
   }
 }
 
@@ -576,6 +574,8 @@ tbody tr:hover td{
 
   .top-nav{
     padding:.7rem 1rem;
+    left:1rem;
+    right:1rem;
   }
 
   .shell-top-brand>span:last-child>span:last-child{

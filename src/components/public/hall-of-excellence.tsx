@@ -61,7 +61,7 @@ const outstandingAwards: Award[] = [
       { name: "Best Presenter", icon: "fas fa-microphone" }
     ],
     color: "#f6be00",
-    deptColor: "#003A8F",
+    deptColor: "#1a1a1a",
     adviser: "Dr. A. Velasquez",
     year: "2024"
   },
@@ -135,8 +135,8 @@ const outstandingAwards: Award[] = [
     description: "Machine learning model predicting student dropout risks based on early academic performance and engagement markers.",
     abstract: "Student retention remains a critical challenge. This research applied predictive modeling algorithms (Random Forest, SVM) to historical registrar data, attendance patterns, and LMS engagement. The model achieved an 89% accuracy rate, providing administrators with actionable insights to deploy early intervention programs effectively.",
     icon: "fas fa-chart-pie",
-    color: "#c084fc",
-    deptColor: "#6b21a8",
+    color: "#f6be00",
+    deptColor: "#1a1a1a",
     adviser: "Prof. D. Suarez",
     year: "2023"
   },
@@ -162,11 +162,80 @@ const outstandingAwards: Award[] = [
     deptColor: "#be123c",
     adviser: "Mr. E. Navarro",
     year: "2022"
+  },
+  {
+    category: "Excellence in Engineering",
+    title: "Automated CNC Plasma Cutter",
+    teamImage: "/images/awards/award_4.png",
+    galleryImages: [
+      "/images/awards/award_4.png",
+      "/images/awards/award_2.png",
+      "/images/awards/award_1.png"
+    ],
+    brandingAssetKey: "hallOfExcellence1",
+    authors: [
+      { name: "M. Delos Santos", avatar: "https://i.pravatar.cc/150?u=mdelos", role: "Lead Engineer" },
+      { name: "R. Castro", avatar: "https://i.pravatar.cc/150?u=rcastro", role: "Fabricator" }
+    ],
+    department: "BS Manufacturing Engineering Technology",
+    description: "A low-cost, high-precision CNC plasma cutter designed for small-scale metal fabrication workshops.",
+    abstract: "This project designed and fabricated a 3-axis automated CNC plasma cutting table. By utilizing open-source controllers and repurposed stepper motors, the team reduced manufacturing costs by 60% compared to commercial alternatives, while maintaining a cutting tolerance of ±0.5mm on carbon steel plates.",
+    icon: "fas fa-cogs",
+    additionalAwards: [
+      { name: "Best Prototype", icon: "fas fa-wrench" }
+    ],
+    color: "#EF4444",
+    deptColor: "#991B1B",
+    adviser: "Engr. V. Reyes",
+    year: "2023"
+  },
+  {
+    category: "Best in Maritime Innovation",
+    title: "Autonomous Ocean Data Buoy",
+    teamImage: "/images/awards/award_2.png",
+    galleryImages: [
+      "/images/awards/award_2.png",
+      "/images/awards/award_3.png",
+      "/images/awards/award_5.png"
+    ],
+    brandingAssetKey: "hallOfExcellence2",
+    authors: [
+      { name: "P. Ocampo", avatar: "https://i.pravatar.cc/150?u=pocampo", role: "Naval Architect" },
+      { name: "A. Lim", avatar: "https://i.pravatar.cc/150?u=alim", role: "Systems Designer" }
+    ],
+    department: "BS Naval Architecture and Marine Engineering",
+    description: "A self-righting autonomous buoy for continuous monitoring of marine water quality and surface currents.",
+    abstract: "Addressing the need for accessible marine environmental data, this capstone produced a solar-powered autonomous buoy. Featuring a unique self-righting hull design optimized via CFD, it houses sensors for salinity, temperature, and turbidity. It transmits data in real-time via satellite, providing crucial data for local marine biologists.",
+    icon: "fas fa-ship",
+    color: "#06B6D4",
+    deptColor: "#164E63",
+    adviser: "Dr. L. Fernandez",
+    year: "2024"
   }
 ];
 
-export function HallOfExcellence() {
+const deptMap: Record<string, string> = {
+  "IT": "BS Information Technology",
+  "ESM": "BS Energy Systems & Management",
+  "TCM": "BS Tech. Comm. Management",
+  "MET": "BS Manufacturing Engineering Technology",
+  "NAME": "BS Naval Architecture and Marine Engineering"
+};
+
+export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: string }) {
   const { branding } = useBranding();
+
+  const filteredAwards = filterDepartmentId 
+    ? outstandingAwards.filter(a => a.department === deptMap[filterDepartmentId])
+    : outstandingAwards;
+
+  if (filteredAwards.length === 0) return null;
+
+  // Ensure enough copies exist so the container always overflows, enabling the infinite scroll animation.
+  // We mirror the array exactly in half for the jump-back logic.
+  const repeatedBase = Array.from({ length: Math.max(1, Math.ceil(5 / filteredAwards.length)) }).flatMap(() => filteredAwards);
+  const displayAwards = [...repeatedBase, ...repeatedBase];
+
   const [selectedAward, setSelectedAward] = useState<Award | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -257,7 +326,6 @@ export function HallOfExcellence() {
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) > 0) {
         e.preventDefault();
-        // Add to velocity instead of setting it directly for smooth accumulation
         wheelVelocity += e.deltaY * 0.15; 
       }
     };
@@ -270,6 +338,7 @@ export function HallOfExcellence() {
       container.removeEventListener('wheel', handleWheel);
     };
   }, [isHovered]);
+
   return (
     <>
       <style>{`
@@ -283,6 +352,31 @@ export function HallOfExcellence() {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
+        .card-3d-wrapper {
+          perspective: 1200px;
+        }
+        .card-3d-element {
+          transform-style: preserve-3d;
+          transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .card-3d-wrapper:hover .card-3d-element {
+          transform: rotateY(-8deg) rotateX(4deg) scale3d(1.03, 1.03, 1.03);
+        }
+        /* Add a subtle glare effect on hover */
+        .card-3d-element::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(125deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 60%);
+          background-size: 200% 200%;
+          background-position: 200% 0%;
+          transition: background-position 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+          z-index: 20;
+          pointer-events: none;
+        }
+        .card-3d-wrapper:hover .card-3d-element::after {
+          background-position: -20% 100%;
+        }
       `}</style>
 
       <section className="relative overflow-hidden bg-gradient-to-b from-white to-[#f4f8fc] pt-24 pb-16">
@@ -291,15 +385,25 @@ export function HallOfExcellence() {
         
         <div className="relative z-10 w-[min(1680px,calc(100%-3rem))] mx-auto mb-16">
           <div className="flex flex-col items-center text-center" data-reveal="fade-up">
-            <span className="mb-4 inline-flex items-center gap-2 rounded-xl border border-[#f6be00]/30 bg-[#f6be00]/10 px-4 py-2 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-[#b17800]">
+            <span 
+              className={`mb-4 inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] ${filterDepartmentId ? '' : 'border-[#f6be00]/30 bg-[#f6be00]/10 text-[#b17800]'}`}
+              style={filterDepartmentId ? { borderColor: 'color-mix(in srgb, var(--department-primary) 30%, transparent)', backgroundColor: 'color-mix(in srgb, var(--department-primary) 10%, transparent)', color: 'var(--department-primary)' } : undefined}
+            >
               <i className="fas fa-star" /> Hall of Excellence
             </span>
             <h2 className="m-0 text-3xl sm:text-5xl font-black text-[#102033] tracking-tight leading-tight">
               Celebrating Outstanding <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#b17800] to-[#f6be00]">Student Innovations</span>
+              <span 
+                className={`text-transparent bg-clip-text ${filterDepartmentId ? '' : 'bg-gradient-to-r from-[#b17800] to-[#f6be00]'}`}
+                style={filterDepartmentId ? { backgroundImage: 'linear-gradient(to right, var(--department-primary), var(--department-secondary))' } : undefined}
+              >
+                {filterDepartmentId ? `${filterDepartmentId} Innovations` : 'Student Innovations'}
+              </span>
             </h2>
             <p className="mt-4 max-w-2xl text-[0.95rem] font-medium leading-relaxed text-slate-600">
-              Highlighting the highest caliber of student research, technical execution, and impactful capstone projects archived within the university repository.
+              {filterDepartmentId 
+                ? `Highlighting the highest caliber of research, technical execution, and impactful capstone projects from the ${deptMap[filterDepartmentId]} program.`
+                : 'Highlighting the highest caliber of student research, technical execution, and impactful capstone projects archived within the university repository.'}
             </p>
           </div>
         </div>
@@ -318,14 +422,14 @@ export function HallOfExcellence() {
             className="flex gap-6 sm:gap-8 overflow-x-auto pb-12 pt-4 hide-scrollbar px-6 sm:px-12 cursor-grab active:cursor-grabbing"
           >
             {/* We duplicate the array to allow infinite seamless scrolling */}
-            {[...outstandingAwards, ...outstandingAwards].map((award, index) => (
+            {displayAwards.map((award, index) => (
               <div 
                 key={`${award.category}-${index}`} 
-                className="block shrink-0 group/card cursor-pointer"
+                className="block shrink-0 group/card cursor-pointer card-3d-wrapper"
                 onClick={(e) => handleCardClick(e, award)}
               >
                     <article 
-                      className="relative rounded-[2rem] w-[320px] sm:w-[400px] h-[450px] overflow-hidden group/card cursor-pointer shadow-[0_8px_30px_rgba(15,23,42,0.08)] hover:shadow-[0_20px_40px_rgba(0,58,143,0.15)] transition-all duration-500 ease-out hover:-translate-y-2" 
+                      className="card-3d-element relative rounded-[2rem] w-[320px] sm:w-[400px] h-[450px] overflow-hidden shadow-[0_8px_30px_rgba(15,23,42,0.08)] hover:shadow-[15px_20px_40px_rgba(0,58,143,0.25)]" 
                     >
                       {/* Full Cover Image with Branding Fallback */}
                       <img 
@@ -346,7 +450,10 @@ export function HallOfExcellence() {
                             ...(award.additionalAwards || [])
                           ].map((aw, idx) => (
                             <div key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-lg w-max">
-                              <i className={`${aw.icon} text-[#f6be00] text-sm`} />
+                              <i 
+                                className={`${aw.icon} text-sm ${filterDepartmentId ? '' : 'text-[#f6be00]'}`} 
+                                style={filterDepartmentId ? { color: 'var(--department-primary)' } : undefined}
+                              />
                               <span className="text-[0.65rem] font-black uppercase tracking-widest">{aw.name}</span>
                             </div>
                           ))}
@@ -355,10 +462,14 @@ export function HallOfExcellence() {
                         {/* Bottom Content Area */}
                         <div className="flex flex-col mt-auto">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[#f6be00] text-[0.65rem] font-black uppercase tracking-widest drop-shadow-md">
-                              {award.department}
-                            </span>
-                            <span className="w-1 h-1 rounded-full bg-white/40" />
+                            {!filterDepartmentId && (
+                              <>
+                                <span className="text-[#f6be00] text-[0.65rem] font-black uppercase tracking-widest drop-shadow-md">
+                                  {award.department}
+                                </span>
+                                <span className="w-1 h-1 rounded-full bg-white/40" />
+                              </>
+                            )}
                             <span className="text-white/80 text-[0.65rem] font-bold uppercase tracking-widest drop-shadow-md">
                               Class of {award.year}
                             </span>
@@ -418,7 +529,7 @@ export function HallOfExcellence() {
           />
           
           {/* Modal Content - Expanded to Ultra-Premium Layout */}
-          <div className="relative bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-900/5 w-full max-w-5xl overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-300 max-h-full">
+          <div className="relative bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-900/5 w-full max-w-5xl overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-300 max-h-[95vh] sm:max-h-[85vh]">
             
             {/* Left Column: Hero Image Carousel */}
             <div className="md:w-[45%] relative min-h-[250px] md:min-h-full flex-shrink-0 group/modalimg overflow-hidden">
@@ -477,7 +588,10 @@ export function HallOfExcellence() {
                       ...(selectedAward.additionalAwards || [])
                     ].map((aw, idx) => (
                       <div key={idx} className="flex items-center gap-3 bg-black/40 backdrop-blur-md rounded-full pr-4 pl-1 py-1 border border-white/20">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-[#f6be00]">
+                        <div 
+                          className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20"
+                          style={{ color: filterDepartmentId ? 'var(--department-primary)' : selectedAward.color }}
+                        >
                           <i className={`${aw.icon} text-xs`} />
                         </div>
                         <span className="text-sm font-black text-white">{aw.name}</span>
@@ -489,7 +603,7 @@ export function HallOfExcellence() {
             </div>
 
             {/* Right Column: Content */}
-            <div className="md:w-[55%] flex flex-col h-full max-h-full bg-white relative">
+            <div className="md:w-[55%] flex flex-col flex-grow overflow-hidden bg-white relative">
               {/* Header */}
               <div className={`px-8 pt-10 pb-6 relative`}>
                 <button 
@@ -506,8 +620,21 @@ export function HallOfExcellence() {
                 <h2 className="text-3xl sm:text-4xl font-black leading-tight mt-4 bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-500 pb-1">
                   {selectedAward.title}
                 </h2>
-                <div className="inline-flex items-center gap-1.5 mt-3 px-2.5 py-1 rounded-md bg-slate-100 text-slate-500 text-[0.65rem] font-black uppercase tracking-widest">
-                  <i className="far fa-calendar-check" /> Awarded Class of {selectedAward.year}
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-500 text-[0.65rem] font-black uppercase tracking-widest">
+                    <i className="far fa-calendar-check" /> Class of {selectedAward.year}
+                  </div>
+                  <div 
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[0.65rem] font-black uppercase tracking-widest"
+                    style={{ 
+                      backgroundColor: filterDepartmentId 
+                        ? 'color-mix(in srgb, var(--department-primary) 10%, transparent)' 
+                        : `color-mix(in srgb, ${selectedAward.deptColor || selectedAward.color} 10%, transparent)`,
+                      color: filterDepartmentId ? 'var(--department-primary)' : (selectedAward.deptColor || selectedAward.color)
+                    }}
+                  >
+                    <i className="fas fa-building" /> {selectedAward.department}
+                  </div>
                 </div>
               </div>
               
@@ -516,7 +643,10 @@ export function HallOfExcellence() {
                 
                 {/* Awards Earned Section */}
                 <div className="mb-8">
-                  <h4 className="text-[0.7rem] font-black uppercase tracking-widest text-[#b17800] mb-3 flex items-center gap-2">
+                  <h4 
+                    className="text-[0.7rem] font-black uppercase tracking-widest mb-3 flex items-center gap-2"
+                    style={{ color: filterDepartmentId ? 'var(--department-primary)' : selectedAward.color }}
+                  >
                     <i className="fas fa-medal opacity-70"></i> Awards & Recognition
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -524,7 +654,14 @@ export function HallOfExcellence() {
                       { name: selectedAward.category, icon: selectedAward.icon },
                       ...(selectedAward.additionalAwards || [])
                     ].map((aw, idx) => (
-                      <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-[#f6be00]/10 text-[#b17800] border border-[#f6be00]/20 rounded-full shadow-sm">
+                      <div 
+                        key={idx} 
+                        className="flex items-center gap-2 px-3 py-1.5 border rounded-full shadow-sm"
+                        style={filterDepartmentId 
+                          ? { backgroundColor: 'color-mix(in srgb, var(--department-primary) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--department-primary) 20%, transparent)', color: 'var(--department-primary)' }
+                          : { backgroundColor: `color-mix(in srgb, ${selectedAward.color} 10%, transparent)`, borderColor: `color-mix(in srgb, ${selectedAward.color} 20%, transparent)`, color: selectedAward.color }
+                        }
+                      >
                         <i className={`${aw.icon} text-sm`} />
                         <span className="text-[0.7rem] font-bold uppercase tracking-wide">{aw.name}</span>
                       </div>

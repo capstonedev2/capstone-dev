@@ -994,7 +994,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           {/* Main Hero Card */}
-          <article className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-slate-200/80 transition-all duration-300 hover:shadow-md">
+          <article className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-white/85 backdrop-blur-xl p-5 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] border border-white/40 transition-all duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] hover:-translate-y-1">
 
             <div className="relative z-10 flex flex-col gap-5">
               {/* Header: Status and Badges */}
@@ -1114,7 +1114,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
           {/* Side Progress Card */}
           <div className="lg:col-span-1 h-full">
-            <article className="h-full relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-slate-200/80 flex flex-col transition-all duration-300 hover:shadow-md">
+            <article className="h-full relative overflow-hidden rounded-2xl bg-white/85 backdrop-blur-xl p-5 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] border border-white/40 flex flex-col transition-all duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] hover:-translate-y-1">
                <div className="flex items-center justify-between w-full mb-2">
                  <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Progress Monitoring</h3>
                  <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
@@ -1168,7 +1168,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
           {/* Column 1: Milestone Pipeline */}
           <div className="flex flex-col gap-5">
-            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Milestone Pipeline</span>
@@ -1202,7 +1202,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
           {/* Column 2: Upcoming Activity & Submission Health */}
           <div className="flex flex-col gap-5">
-            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Upcoming Activity</span>
@@ -1246,7 +1246,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex flex-col gap-1 mb-5">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Submission Health</span>
                 <h4 className="text-lg font-bold text-slate-800">Review status overview</h4>
@@ -1303,7 +1303,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
           {/* Column 3: Project Files, Feedback, Team */}
           <div className="flex flex-col gap-5">
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+            <section className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Project Files</span>
@@ -1342,7 +1342,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </section>
 
-            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 hover:shadow-md transition-shadow">
+            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Faculty Feedback</span>
@@ -1393,7 +1393,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 hover:shadow-md transition-shadow">
+            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-6 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5 pb-4 border-b border-slate-100">
                 <div className="flex flex-col gap-1.5">
                   <span className="flex items-center gap-2 text-[11px] font-bold text-[#003A8F] uppercase tracking-widest">

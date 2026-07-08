@@ -5,6 +5,7 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 import { LandingRevealController } from "@/components/public/landing-reveal-controller";
 import { LandingFooter } from "@/components/public/landing-footer";
 import { DepartmentSectionNavigation } from "@/components/public/department-section-navigation";
+import { HallOfExcellence } from "@/components/public/hall-of-excellence";
 import { departmentsData } from "@/lib/landing/departments-data";
 import { mergeDepartmentBranding } from "@/lib/landing/managed-departments";
 import { BRANDING_SETTING_KEY, DEFAULT_BRANDING, sanitizeBrandingSettings } from "@/lib/branding";
@@ -319,6 +320,9 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
               </div>
             </div>
           </section>
+
+          {/* ── HALL OF EXCELLENCE ── */}
+          <HallOfExcellence filterDepartmentId={department.id} />
 
           {/* ── CTA SECTION ── */}
           <section className="pb-20 sm:pb-28">

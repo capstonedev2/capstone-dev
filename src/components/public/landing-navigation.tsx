@@ -165,19 +165,7 @@ export function LandingNavigation() {
           </div>
 
           <div className={styles.navActions}>
-            <button
-              type="button"
-              className={styles.themeToggleButton}
-              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-pressed={darkMode}
-              onClick={() => setDarkMode(current => !current)}
-              style={{ minWidth: '2.8rem', width: '2.8rem', padding: 0 }}
-              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              <span className={styles.themeToggleIcon} aria-hidden="true" style={{ width: '100%', height: '100%', background: 'transparent', fontSize: '1.1rem' }}>
-                <i className={`fas ${darkMode ? 'fa-sun' : 'fa-moon'}`} />
-              </span>
-            </button>
+
             {navigation.showLogin ? (
               <Link href="/login" className={`${styles.buttonPrimary} ${styles.navActionButton}`}>
                 <span className={styles.buttonText}>{navigation.loginLabel}</span>
