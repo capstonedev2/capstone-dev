@@ -1123,41 +1123,67 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                {/* Center content wrapper */}
                <div className="flex flex-col items-center justify-center flex-grow py-4">
                  {/* Premium Progress Orb */}
-                 <div className="relative flex items-center justify-center h-36 w-36">
-                   <div className="absolute inset-0 bg-blue-50 rounded-full scale-110 opacity-50 pointer-events-none" />
-                   <svg className="relative z-10 w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
+                 <div className="relative flex items-center justify-center h-44 w-44 my-4">
+                   {/* Outer glow aura */}
+                   <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-3xl animate-pulse pointer-events-none" />
+                   
+                   {/* Background decoration ring */}
+                   <div className="absolute inset-3 border border-dashed border-[var(--border)] rounded-full animate-[spin_40s_linear_infinite] opacity-60 pointer-events-none" />
+                   
+                   <svg className="relative z-10 w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 36 36">
+                     <defs>
+                       <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                         <stop offset="0%" stopColor="#60A5FA" />
+                         <stop offset="100%" stopColor="#003A8F" />
+                       </linearGradient>
+                       <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                         <feGaussianBlur stdDeviation="1" result="blur" />
+                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                       </filter>
+                     </defs>
+                     {/* Track */}
                      <path
-                       className="text-[var(--text)]"
+                       className="text-[var(--border)]"
                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                        fill="none"
                        stroke="currentColor"
-                       strokeWidth="2.5"
+                       strokeWidth="1.5"
                      />
+                     {/* Progress */}
                      <path
-                       className="text-[#003A8F] transition-all duration-1000 ease-out drop-shadow-sm"
+                       className="transition-all duration-1000 ease-out"
                        strokeDasharray={`${data.project.progressPercentage}, 100`}
                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                        fill="none"
-                       stroke="currentColor"
-                       strokeWidth="2.5"
+                       stroke="url(#progressGradient)"
+                       strokeWidth="3"
                        strokeLinecap="round"
+                       filter="url(#glow)"
                      />
                    </svg>
                    <div className="absolute flex flex-col items-center justify-center z-20">
-                     <span className="text-3xl font-extrabold text-[#003A8F]">{data.project.progressPercentage}%</span>
-                     <span className="text-[9px] font-bold text-[var(--text-meta)] uppercase tracking-wider mt-1">Completed</span>
+                     <span className="text-4xl font-black bg-gradient-to-br from-[#3B82F6] to-[#003A8F] bg-clip-text text-transparent drop-shadow-sm tracking-tighter">
+                       {data.project.progressPercentage}%
+                     </span>
+                     <span className="text-[9px] font-extrabold text-[var(--muted)] uppercase tracking-[0.2em] mt-1">Completed</span>
                    </div>
                  </div>
                </div>
                
                {/* Upgraded Current Focus Block */}
-               <div className="flex flex-col gap-2 w-full bg-blue-50/40 p-4 rounded-xl border border-blue-100/80 mt-auto">
-                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
-                   <i className="fas fa-crosshairs" aria-hidden="true"></i> Current Focus
-                 </span>
-                 <p className="text-sm font-bold text-[var(--text)] leading-tight">{currentPhaseTitle}</p>
+               <div className="flex flex-col w-full bg-[var(--surface-alt)] p-5 rounded-2xl border border-[var(--border)] mt-auto relative overflow-hidden group">
+                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#3B82F6] to-[#003A8F]" />
+                 <div className="flex items-center gap-2 mb-2">
+                   <div className="flex items-center justify-center h-6 w-6 rounded-lg bg-blue-500/10 text-[#3B82F6]">
+                     <i className="fas fa-crosshairs text-[10px]" aria-hidden="true"></i>
+                   </div>
+                   <span className="text-[10px] font-extrabold text-[var(--primary)] uppercase tracking-widest">
+                     Current Focus
+                   </span>
+                 </div>
+                 <p className="text-[15px] font-black text-[var(--text)] leading-tight mb-1">{currentPhaseTitle}</p>
                  <span className="text-[11px] text-[var(--muted)] font-medium leading-relaxed line-clamp-2">{currentPhaseSummary}</span>
-                 <button className="bg-[#003A8F] hover:bg-blue-800 transition-colors text-white text-[13px] font-semibold py-2 px-4 rounded-lg mt-2 w-full flex items-center justify-center gap-2 shadow-sm">
+                 <button className="bg-gradient-to-r from-[#003A8F] to-[#1E40AF] hover:from-[#002c6b] hover:to-[#003A8F] transition-all text-white text-[12px] font-bold py-2.5 px-4 rounded-xl mt-4 w-full flex items-center justify-center gap-2 shadow-md shadow-blue-900/20 active:scale-[0.98]">
                    <i className="fas fa-file-alt"></i> View guidelines
                  </button>
                </div>
@@ -1178,25 +1204,33 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   Open milestones
                 </Link>
               </div>
-              <div className="flex flex-col gap-2.5">
-                {workflow.map((item, index) => {
-                  const workflowStatus = getWorkflowStatusConfig(item.status);
+              {workflow.length > 0 ? (
+                <div className="flex flex-col gap-2.5">
+                  {workflow.map((item, index) => {
+                    const workflowStatus = getWorkflowStatusConfig(item.status);
 
-                  return (
-                    <article key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] ${item.status === 'completed' ? 'bg-[var(--surface-alt)]' : item.status === 'current' ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-[var(--surface)]'}`}>
-                      <span className={`flex items-center justify-center h-7 w-7 rounded-full font-bold text-xs shrink-0 ${item.status === 'current' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-[var(--muted)]'}`}>{index + 1}</span>
-                      <div className="flex flex-col flex-grow">
-                        <strong className="text-[13px] font-bold text-[var(--text)] leading-tight">{item.title}</strong>
-                        <small className="text-[11px] text-[var(--muted)] font-medium">{item.summary}</small>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <Badge label={workflowStatus.label} tone={workflowStatus.tone} />
-                        <small className="text-[9px] font-bold text-[var(--text-meta)] uppercase tracking-wider">{item.dateLabel}</small>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+                    return (
+                      <article key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] ${item.status === 'completed' ? 'bg-[var(--surface-alt)]' : item.status === 'current' ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-[var(--surface)]'}`}>
+                        <span className={`flex items-center justify-center h-7 w-7 rounded-full font-bold text-xs shrink-0 ${item.status === 'current' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-[var(--muted)]'}`}>{index + 1}</span>
+                        <div className="flex flex-col flex-grow">
+                          <strong className="text-[13px] font-bold text-[var(--text)] leading-tight">{item.title}</strong>
+                          <small className="text-[11px] text-[var(--muted)] font-medium">{item.summary}</small>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <Badge label={workflowStatus.label} tone={workflowStatus.tone} />
+                          <small className="text-[9px] font-bold text-[var(--text-meta)] uppercase tracking-wider">{item.dateLabel}</small>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No milestones assigned"
+                  description="Your academic workflow has not been initialized yet. Check back later."
+                  icon="fa-route"
+                />
+              )}
             </article>
           </div>
 

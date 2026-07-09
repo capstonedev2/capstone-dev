@@ -32,6 +32,7 @@ export function ProgramHeadShell({
   children
 }: ProgramHeadShellProps) {
   const router = useRouter();
+  
   const prefetchRoute = useRoutePrefetch(PROGRAM_HEAD_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('Dr. Anna Dimagiba');
   const [displayEmail, setDisplayEmail] = useState('program.head@university.edu.ph');
@@ -76,9 +77,27 @@ export function ProgramHeadShell({
     router.refresh();
   };
 
+  const [themeMode, setThemeMode] = useState('light');
+  
+  useEffect(() => {
+    const currentTheme = document.documentElement.getAttribute('data-student-theme') || 'light';
+    setThemeMode(currentTheme);
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-student-theme') {
+          setThemeMode(document.documentElement.getAttribute('data-student-theme') || 'light');
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-student-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
-      className={`student-shell adviser-shell adviser-workspace-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      className={`student-shell adviser-shell adviser-workspace-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`} data-theme={themeMode}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
     >
       <header className="student-global-navbar adviser-global-navbar">
@@ -230,7 +249,7 @@ export function ProgramHeadShell({
         onClick={closeSidebar}
       />
 
-      <main className="student-global-main adviser-global-main relative bg-slate-50/80">
+      <main className="student-global-main adviser-global-main relative">
         {/* Decorative Light Background for Glassmorphism */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
@@ -250,3 +269,8 @@ export function ProgramHeadShell({
     </div>
   );
 }
+
+
+
+
+

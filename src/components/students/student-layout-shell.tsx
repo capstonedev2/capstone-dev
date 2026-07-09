@@ -1113,6 +1113,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       const storedTheme = window.localStorage.getItem(STUDENT_THEME_STORAGE_KEY);
       const nextTheme = getResolvedStudentTheme(storedTheme);
       setThemeMode(nextTheme);
+      document.documentElement.dataset.theme = nextTheme;
       document.documentElement.dataset.studentTheme = nextTheme;
       window.localStorage.setItem(STUDENT_THEME_STORAGE_KEY, nextTheme);
     };
@@ -1125,6 +1126,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     return () => {
       window.removeEventListener('storage', applyStoredTheme);
       window.removeEventListener('thesistrack:student-theme-changed', applyStoredTheme);
+      delete document.documentElement.dataset.theme;
       delete document.documentElement.dataset.studentTheme;
     };
   }, []);
@@ -1136,6 +1138,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       return;
     }
 
+    document.documentElement.dataset.theme = nextTheme;
     document.documentElement.dataset.studentTheme = nextTheme;
     window.localStorage.setItem(STUDENT_THEME_STORAGE_KEY, nextTheme);
     window.dispatchEvent(new Event('thesistrack:student-theme-changed'));
@@ -1911,7 +1914,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
         onClick={() => setSidebarOpen(false)}
       />
 
-      <main className="student-global-main relative bg-[var(--surface-alt)]">
+      <main className="student-global-main relative">
         {/* Decorative Light Background for Glassmorphism */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>

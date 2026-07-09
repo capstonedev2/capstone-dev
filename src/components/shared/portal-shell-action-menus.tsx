@@ -86,6 +86,28 @@ export function PortalShellActionMenus({
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(new Set());
+  const [themeMode, setThemeMode] = useState('light');
+
+  useEffect(() => {
+    const currentTheme = document.documentElement.getAttribute('data-student-theme') || 'light';
+    setThemeMode(currentTheme);
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-student-theme') {
+          setThemeMode(document.documentElement.getAttribute('data-student-theme') || 'light');
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-student-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const updateTheme = (nextTheme: string) => {
+    setThemeMode(nextTheme);
+    document.documentElement.setAttribute('data-student-theme', nextTheme);
+    window.localStorage.setItem('studentWorkspaceTheme', nextTheme);
+  };
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
@@ -319,6 +341,29 @@ export function PortalShellActionMenus({
                 </div>
               </div>
             ) : null}
+
+            <div className="portal-shell-profile-dropdown-divider" />
+            <div className="portal-shell-profile-dropdown-section">
+              <span className="portal-shell-profile-dropdown-label">Theme</span>
+              <button
+                aria-label={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}
+                aria-pressed={themeMode === 'dark'}
+                className="profile-theme-toggle"
+                type="button"
+                onClick={() => updateTheme(themeMode === 'dark' ? 'light' : 'dark')}
+              >
+                <span className="profile-theme-toggle-icon">
+                  <i aria-hidden="true" className={`fas ${themeMode === 'dark' ? 'fa-moon' : 'fa-sun'}`} />
+                </span>
+                <span className="profile-theme-toggle-copy">
+                  <strong>{themeMode === 'dark' ? 'Dark Mode' : 'Light Mode'}</strong>
+                  <small>Switch workspace appearance</small>
+                </span>
+                <span className="profile-theme-toggle-track" aria-hidden="true">
+                  <span />
+                </span>
+              </button>
+            </div>
 
             {extraProfileSection ? (
               <>

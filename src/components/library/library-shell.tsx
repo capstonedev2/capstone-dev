@@ -32,6 +32,7 @@ export function LibraryShell({
   children
 }: LibraryShellProps) {
   const router = useRouter();
+  
   const prefetchRoute = useRoutePrefetch(LIBRARY_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('Sarah Rivera');
   const [displayEmail, setDisplayEmail] = useState('library@university.edu.ph');
@@ -70,9 +71,27 @@ export function LibraryShell({
     };
   }, [closeSidebar]);
 
+  const [themeMode, setThemeMode] = useState('light');
+  
+  useEffect(() => {
+    const currentTheme = document.documentElement.getAttribute('data-student-theme') || 'light';
+    setThemeMode(currentTheme);
+    
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-student-theme') {
+          setThemeMode(document.documentElement.getAttribute('data-student-theme') || 'light');
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-student-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
-      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`}
+      className={`student-shell${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}${sidebarOpen ? ' is-sidebar-open' : ''}`} data-theme={themeMode}
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
     >
       <header className="student-global-navbar">
@@ -208,7 +227,7 @@ export function LibraryShell({
         onClick={closeSidebar}
       />
 
-      <main className="student-global-main relative bg-[var(--surface-alt)]">
+      <main className="student-global-main relative">
         {/* Decorative Light Background for Glassmorphism */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
@@ -243,3 +262,8 @@ export function LibraryShell({
     </div>
   );
 }
+
+
+
+
+

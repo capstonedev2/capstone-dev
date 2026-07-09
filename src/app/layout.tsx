@@ -51,7 +51,7 @@ export default function RootLayout({
   return (
     <html className={`${inter.variable} ${playfairDisplay.variable} ${poppins.variable} ${plusJakartaSans.variable}`} lang="en" data-scroll-behavior="smooth">
       <head>
-        <meta name="color-scheme" content="only light" />
+        <meta name="color-scheme" content="light dark" />
         <meta name="darkreader-lock" content="true" />
         <link
           rel="stylesheet"

@@ -6076,7 +6076,7 @@ tr:hover {
     width: 100% !important;
     max-width: 1600px !important;
     min-width: 0 !important;
-    background: rgba(255, 255, 255, 0.85) !important;
+    background: transparent !important;
     border-radius: 1.45rem !important;
     box-shadow: 0 16px 34px rgba(31, 41, 55, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.7) !important;
     backdrop-filter: blur(20px) !important;
@@ -8492,7 +8492,7 @@ tr:hover {
     width: 100% !important;
     max-width: 1600px !important;
     min-width: 0 !important;
-    background: rgba(255, 255, 255, 0.85) !important;
+    background: transparent !important;
     border-radius: 1.45rem !important;
     box-shadow: 0 16px 34px rgba(31, 41, 55, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.7) !important;
     backdrop-filter: blur(20px) !important;
