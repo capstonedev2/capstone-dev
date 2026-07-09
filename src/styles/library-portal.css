@@ -3,11 +3,11 @@
   --library-primary-dark: #002C6B;
   --library-secondary: #F6BE00;
   --library-accent: #FFF0B3;
-  --library-bg: #F9FAFB;
-  --library-card: #FFFFFF;
-  --library-text: #1F2937;
-  --library-muted: #6B7280;
-  --library-border: #E5E7EB;
+  ---bg: var(--bg);
+  ---card: var(--surface);
+  ---text: var(--text);
+  ---muted: var(--muted);
+  ---border: var(--border);
   --library-success: #16A34A;
   --library-warning: #D97706;
   --library-danger: #DC2626;
@@ -941,7 +941,7 @@
   margin-left: 280px;
   min-height: 100vh;
   padding: 6.25rem 1.25rem 2rem;
-  background: #f8fafc;
+  background: var(--surface);
   transition: margin-left 0.2s ease;
 }
 
@@ -982,7 +982,7 @@
 
 .library-page-title p {
   margin-top: 0;
-  color: #64748b;
+  color: var(--text);
   font-size: 0.82rem;
 }
 
@@ -1022,7 +1022,7 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 0.85rem;
-  background: #f8fafc;
+  background: var(--surface);
   border: 1px solid rgb(226 232 240 / 0.92);
   color: var(--library-primary);
 }
@@ -1122,11 +1122,11 @@
   --library-primary-light: #002C6B;
   --library-secondary: #F6BE00;
   --library-accent: #F6BE00;
-  --library-bg: #F8FAFC;
-  --library-card: #FFFFFF;
-  --library-text: #111827;
-  --library-muted: #64748B;
-  --library-border: #E5E7EB;
+  ---bg: var(--bg);
+  ---card: var(--surface);
+  ---text: var(--text);
+  ---muted: var(--muted);
+  ---border: var(--border);
   --library-shadow-sm: 0 8px 24px rgb(15 23 42 / 0.05);
   --library-shadow-md: 0 16px 36px rgb(15 23 42 / 0.08);
   --library-shadow-lg: 0 22px 52px rgb(15 23 42 / 0.12);
@@ -1185,7 +1185,7 @@
 
 .library-icon-btn,
 .library-profile-trigger {
-  background: #fff;
+  background: var(--surface);
   border-color: rgb(226 232 240 / 0.96);
   box-shadow: 0 1px 0 rgb(15 23 42 / 0.04), 0 8px 18px rgb(15 23 42 / 0.04);
 }
@@ -1243,8 +1243,8 @@
 }
 
 .library-table th {
-  background: #f8fafc;
-  color: #475569;
+  background: var(--surface);
+  color: var(--text);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -1278,7 +1278,7 @@
 
 .library-btn.is-outline {
   border-color: rgb(0 58 143 / 0.14);
-  background: #fff;
+  background: var(--surface);
   color: var(--library-primary);
 }
 
@@ -1366,7 +1366,7 @@
   display: flex;
   max-width: 720px;
   margin: 0 auto 1.5rem;
-  background: #fff;
+  background: var(--surface);
   border-radius: 999px;
   padding: 0.5rem;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
@@ -1444,7 +1444,7 @@
 }
 
 .library-pill-btn:hover {
-  background: #fff;
+  background: var(--surface);
   border-color: var(--library-primary);
   color: var(--library-primary);
   transform: translateY(-1px);
@@ -1475,7 +1475,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 1.75rem;
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 1.25rem;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
@@ -1561,7 +1561,7 @@
   border-radius: 1.25rem;
   overflow: hidden;
   text-decoration: none;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid rgba(226, 232, 240, 0.9);
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
@@ -1608,7 +1608,7 @@
   width: 3rem;
   height: 3rem;
   border-radius: 1rem;
-  background: #fff;
+  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1680,7 +1680,7 @@
   grid-template-columns: 2.5fr 1.5fr 2fr 1fr 100px;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background: #f8fafc;
+  background: var(--surface);
   border-bottom: 1px solid var(--library-border);
   font-size: 0.8rem;
   font-weight: 700;
@@ -1711,7 +1711,7 @@
 }
 
 .library-list-row:hover {
-  background: #f1f5f9;
+  background: var(--surface);
 }
 
 .library-list-row strong {
@@ -1784,7 +1784,7 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   padding: 1.5rem;
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid rgba(226, 232, 240, 0.7);
   border-radius: 1.25rem;
   box-shadow: 0 4px 24px rgba(15, 23, 42, 0.02);
@@ -1795,13 +1795,13 @@
   flex-direction: column;
   padding: 1rem;
   border-radius: 0.85rem;
-  background: #f8fafc;
+  background: var(--surface);
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .library-dept-mini-card:hover {
   transform: translateY(-2px);
-  background: #f1f5f9;
+  background: var(--surface);
 }
 
 .library-dept-mini-head {

@@ -1457,7 +1457,7 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                     fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
                     color: 'var(--foreground)'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-alt)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                 >
                   <i className="fas fa-file-pdf" aria-hidden="true" style={{ color: 'var(--danger)' }} />
@@ -1538,10 +1538,10 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                   return (
                     <div style={{ display: 'contents' }}>
                       {/* Left Pane Headers spanning 2 rows */}
-                      <div style={{ gridRow: 'span 2', padding: '0.75rem 1rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: '#f8fafc', position: 'sticky', left: 0, zIndex: 20, display: 'flex', alignItems: 'center' }}>TASK</div>
-                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>PROGRESS</div>
-                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: '#f8fafc', display: 'flex', alignItems: 'center' }}>START DATE</div>
-                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '2px solid var(--border)', background: '#f8fafc', display: 'flex', alignItems: 'center' }}>TARGET DATE</div>
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem 1rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: 'var(--surface-alt)', position: 'sticky', left: 0, zIndex: 20, display: 'flex', alignItems: 'center' }}>TASK</div>
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: 'var(--surface-alt)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>PROGRESS</div>
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '1px solid var(--border)', background: 'var(--surface-alt)', display: 'flex', alignItems: 'center' }}>START DATE</div>
+                      <div style={{ gridRow: 'span 2', padding: '0.75rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border)', borderRight: '2px solid var(--border)', background: 'var(--surface-alt)', display: 'flex', alignItems: 'center' }}>TARGET DATE</div>
                       
                       {/* Timeline Headers: Months (Row 1) */}
                       {Array.from({ length: Math.ceil(totalColumns / 4) }).map((_, i) => {
@@ -1559,7 +1559,7 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                             fontSize: '0.75rem',
                             borderBottom: '1px solid var(--border)',
                             borderRight: '1px solid var(--border)',
-                            background: '#f8fafc',
+                            background: 'var(--surface-alt)',
                             textAlign: 'center',
                             color: 'var(--foreground)',
                             textTransform: 'uppercase',
@@ -1578,7 +1578,7 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                           fontSize: '0.7rem',
                           borderBottom: '2px solid var(--border)',
                           borderRight: '1px dashed var(--border)',
-                          background: '#f8fafc',
+                          background: 'var(--surface-alt)',
                           textAlign: 'center',
                           color: 'var(--muted-foreground)'
                         }}>
@@ -1640,7 +1640,7 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                            <div style={{ 
                              padding: '0.5rem 1rem 0.5rem 2.2rem', 
                              fontSize: '0.8rem',
-                             background: 'white',
+                             background: 'var(--surface)',
                              borderBottom: '1px solid var(--border)',
                              borderRight: '1px solid var(--border)',
                              position: 'sticky',
@@ -1654,10 +1654,10 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                              <i className={`fas ${cp.status === 'completed' ? 'fa-check' : cp.status === 'locked' ? 'fa-lock' : 'fa-circle'}`} style={{ fontSize: '0.5rem', opacity: 0.7 }} />
                              {cp.label}
                            </div>
-                           <div style={{ padding: '0.5rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'white', textAlign: 'center', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
+                           <div style={{ padding: '0.5rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'var(--surface)', textAlign: 'center', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
                              {cp.status === 'completed' ? '100%' : '0%'}
                            </div>
-                           <div style={{ padding: '0.3rem 0.5rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                           <div style={{ padding: '0.3rem 0.5rem', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
                              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
                                {STUDENT_TASK_KINDS.has(cp.kind) ? (
                                  <input 
@@ -1673,7 +1673,7 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                                )}
                              </div>
                            </div>
-                           <div style={{ padding: '0.3rem 0.5rem', borderBottom: '1px solid var(--border)', borderRight: '2px solid var(--border)', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                           <div style={{ padding: '0.3rem 0.5rem', borderBottom: '1px solid var(--border)', borderRight: '2px solid var(--border)', background: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
                              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
                                {STUDENT_TASK_KINDS.has(cp.kind) ? (
                                  <input 
@@ -1730,7 +1730,7 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
                                 <div key={`cell-${colIndex}`} className={isToday ? 'today-highlight-cell' : ''} style={{ 
                                   borderBottom: '1px solid var(--border)', 
                                   borderRight: '1px dashed var(--border)',
-                                  background: isToday ? 'transparent' : 'white',
+                                  background: isToday ? 'transparent' : 'var(--surface)',
                                   padding: '4px 0' // Add padding so it looks like a sleek horizontal bar
                                 }}>
                                   {isTargetCell && (

@@ -18,11 +18,10 @@ export async function createClient() {
               console.log('[Supabase Server] Setting cookie:', name);
               cookieStore.set(name, value, options);
             });
-          } catch (error) {
-            console.error('[Supabase Server] Failed to set cookies:', error);
-            // This can happen if setAll is called from a Server Component
-            // (e.g. during a render). It can be safely ignored as long as
-            // the middleware is correctly updating the session.
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
           }
         },
       },

@@ -6,11 +6,11 @@
   --portal-primary-light: #9a2a2a;
   --portal-secondary: #f6be00;
   --portal-accent: #fff0b3;
-  --portal-bg: #f9fafb;
-  --portal-card: #ffffff;
-  --portal-text: #1f2937;
-  --portal-muted: #6b7280;
-  --portal-border: #e5e7eb;
+  ---bg: var(--bg);
+  ---card: var(--surface);
+  ---text: var(--text);
+  ---muted: var(--muted);
+  ---border: var(--border);
   --portal-success: #10b981;
   --portal-warning: #f59e0b;
   --portal-danger: #ef4444;
@@ -156,7 +156,7 @@
   height: 44px;
   border: 1px solid rgb(229 231 235 / 0.92);
   border-radius: 1rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--portal-primary);
   box-shadow: 0 12px 28px rgb(31 41 55 / 0.06);
   cursor: pointer;
@@ -220,7 +220,7 @@
   padding: 0 0.95rem;
   border: 1px solid rgb(229 231 235 / 0.92);
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
   color: var(--portal-text);
   box-shadow: 0 12px 28px rgb(31 41 55 / 0.06);
   cursor: pointer;
@@ -536,7 +536,7 @@
   padding: 0.625rem 0.9rem;
   border: 1px solid var(--portal-border);
   border-radius: 0.5rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--portal-text);
 }
 
@@ -752,7 +752,7 @@
   padding: 0.625rem 1rem;
   border: 1px solid transparent;
   border-radius: 0.5rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--portal-primary);
   font-weight: 600;
   cursor: pointer;
@@ -860,7 +860,7 @@
   max-height: 90vh;
   overflow-y: auto;
   border-radius: 1rem;
-  background: #fff;
+  background: var(--surface);
   box-shadow: var(--portal-shadow-xl);
 }
 
@@ -927,7 +927,7 @@
   padding: 1rem 1.1rem;
   border: 1px solid var(--portal-border);
   border-radius: 1rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .partner-app .notification-item.unread,
@@ -1032,7 +1032,7 @@
   padding: 0.5rem 0.9rem;
   border: 1px solid var(--portal-border);
   border-radius: 0.5rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--portal-text);
   cursor: pointer;
 }
@@ -1243,7 +1243,7 @@
 .partner-app .dashboard-wrapper,
 .tt-app .dashboard-wrapper {
   padding-top: 5rem;
-  background: #f8fafc;
+  background: var(--surface);
 }
 
 .partner-app .main-content,
@@ -1298,7 +1298,7 @@
 .tt-app .page-title p {
   margin-top: 0;
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--text);
 }
 
 .partner-app .user-area,
@@ -1346,7 +1346,7 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 0.85rem;
-  background: #f8fafc;
+  background: var(--surface);
   border: 1px solid rgb(226 232 240 / 0.92);
   color: var(--portal-primary);
 }
@@ -1467,11 +1467,11 @@
   --portal-primary-light: #002C6B;
   --portal-secondary: #F6BE00;
   --portal-accent: #F6BE00;
-  --portal-bg: #F8FAFC;
-  --portal-card: #FFFFFF;
-  --portal-text: #111827;
-  --portal-muted: #64748B;
-  --portal-border: #E5E7EB;
+  ---bg: var(--bg);
+  ---card: var(--surface);
+  ---text: var(--text);
+  ---muted: var(--muted);
+  ---border: var(--border);
   --portal-success: #10B981;
   --portal-warning: #F59E0B;
   --portal-danger: #EF4444;
@@ -1548,7 +1548,7 @@
 .tt-app .notif-icon,
 .tt-app .portal-mobile-nav,
 .tt-app .profile-trigger {
-  background: #fff;
+  background: var(--surface);
   border-color: rgb(226 232 240 / 0.96);
   box-shadow: 0 1px 0 rgb(15 23 42 / 0.04), 0 8px 18px rgb(15 23 42 / 0.04);
 }
@@ -1641,8 +1641,8 @@
 
 .partner-app th,
 .tt-app th {
-  background: #f8fafc;
-  color: #475569;
+  background: var(--surface);
+  color: var(--text);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -1682,7 +1682,7 @@
 .partner-app .btn-outline,
 .tt-app .btn-outline {
   border-color: rgb(0 58 143 / 0.14);
-  background: #fff;
+  background: var(--surface);
   color: var(--portal-primary);
 }
 

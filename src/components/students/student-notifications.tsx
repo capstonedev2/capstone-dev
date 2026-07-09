@@ -9,7 +9,7 @@ type NotificationType = StudentDashboardData['notifications'][number]['type'];
 type StudentNotification = StudentDashboardData['notifications'][number];
 
 const BADGE_STYLES: Record<BadgeTone, string> = {
-  neutral: 'border-slate-200 bg-slate-100 text-slate-700',
+  neutral: 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)]',
   success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   warning: 'border-amber-200 bg-amber-50 text-amber-700',
   danger: 'border-rose-200 bg-rose-50 text-rose-700',
@@ -19,7 +19,7 @@ const BADGE_STYLES: Record<BadgeTone, string> = {
 const PRIMARY_ACTION_CLASS =
   'inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#002c6b] bg-[#003A8F] px-4 text-sm font-semibold text-white shadow-sm transition duration-150 hover:-translate-y-px hover:bg-[#002c6b] hover:shadow-md';
 const SECONDARY_ACTION_CLASS =
-  'inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition duration-150 hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900';
+  'inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--text)] shadow-sm transition duration-150 hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)] hover:text-[var(--text)]';
 
 function sortByCreatedAtDesc<T extends { created_at: string }>(items: T[]) {
   return [...items].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
@@ -126,7 +126,7 @@ function getNotificationTypeMeta(type: NotificationType) {
         icon: 'fa-diagram-project',
         tone: 'neutral' as BadgeTone,
         indicatorClass: 'bg-slate-400',
-        iconWrapClass: 'bg-slate-100 text-slate-600',
+        iconWrapClass: 'bg-[var(--surface-alt)] text-[var(--muted)]',
         surfaceClass: 'from-slate-50/90 to-white'
       };
     default:
@@ -135,7 +135,7 @@ function getNotificationTypeMeta(type: NotificationType) {
         icon: 'fa-bell',
         tone: 'neutral' as BadgeTone,
         indicatorClass: 'bg-slate-400',
-        iconWrapClass: 'bg-slate-100 text-slate-600',
+        iconWrapClass: 'bg-[var(--surface-alt)] text-[var(--muted)]',
         surfaceClass: 'from-slate-50/90 to-white'
       };
   }
@@ -164,7 +164,7 @@ function NotificationCard({
   const isPermissionRequest = item.title === 'Upload Permission Request';
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/80 transition duration-150 hover:-translate-y-px hover:shadow-md">
+    <article className="group relative overflow-hidden rounded-2xl bg-[var(--surface)] shadow-sm ring-1 ring-slate-200/80 transition duration-150 hover:-translate-y-px hover:shadow-md">
       <span className={`absolute inset-y-0 left-0 w-1 ${typeMeta.indicatorClass}`} />
       <div className="p-5 pl-6">
         <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -180,12 +180,12 @@ function NotificationCard({
                 {isPermissionRequest && !item.read ? <Badge label="Action Required" tone="danger" icon="fa-hand" /> : null}
               </div>
               <h4 className="mt-3 text-base font-bold leading-6 text-slate-950 sm:text-lg">{item.title}</h4>
-              <p className="mt-1 text-sm leading-6 text-slate-600">{item.message}</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{item.message}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
                   <i className="fas fa-clock" aria-hidden="true" /> {item.dateLabel}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
                   <i className="fas fa-layer-group" aria-hidden="true" /> {item.priority === 'high' ? 'Needs immediate attention' : 'Routine update'}
                 </span>
               </div>
@@ -203,7 +203,7 @@ function NotificationCard({
                   <i className="fas fa-check" aria-hidden="true" /> Accept
                 </button>
                 <button
-                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-600 shadow-sm transition duration-150 hover:-translate-y-px hover:border-rose-300 hover:bg-rose-50 hover:shadow-md"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-[var(--surface)] px-4 text-sm font-semibold text-rose-600 shadow-sm transition duration-150 hover:-translate-y-px hover:border-rose-300 hover:bg-rose-50 hover:shadow-md"
                   type="button"
                   onClick={() => onAction(item.id, 'reject')}
                 >
@@ -251,12 +251,12 @@ function NotificationSection({
   onAction?: (id: string, action: 'accept' | 'reject') => void;
 }) {
   return (
-    <section className="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-200/80">
+    <section className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">{kicker}</span>
           <h3 className="mt-2 text-xl font-bold text-slate-950">{title}</h3>
-          <p className="mt-1 max-w-[58ch] text-sm leading-6 text-slate-600">{copy}</p>
+          <p className="mt-1 max-w-[58ch] text-sm leading-6 text-[var(--muted)]">{copy}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -272,7 +272,7 @@ function NotificationSection({
           ))}
         </div>
       ) : (
-        <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-600">{emptyCopy}</div>
+        <div className="mt-5 rounded-2xl bg-[var(--surface-alt)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">{emptyCopy}</div>
       )}
     </section>
   );
@@ -526,14 +526,14 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
       <div className="page-body">
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_380px]">
-          <article className="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-slate-200/80">
+          <article className="rounded-[28px] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-slate-200/80">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#003A8F]">Notification Center</span>
                 <h2 className="mt-2 max-w-[18ch] text-[clamp(1.65rem,3vw,2.15rem)] font-extrabold leading-tight text-slate-950">
                   A cleaner student inbox for alerts, deadlines, and review updates
                 </h2>
-                <p className="mt-3 max-w-[62ch] text-sm leading-7 text-slate-600">
+                <p className="mt-3 max-w-[62ch] text-sm leading-7 text-[var(--muted)]">
                   Focus on the urgent item first, process what still needs action, then keep the remaining updates organized without losing the academic trail.
                 </p>
               </div>
@@ -550,7 +550,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {summaryCards.map((item) => (
-                <article key={item.label} className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200/80">
+                <article key={item.label} className="rounded-2xl bg-[var(--surface-alt)] p-4 ring-1 ring-slate-200/80">
                   <div className="flex items-start justify-between gap-3">
                     <span
                       className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
@@ -565,10 +565,10 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                     >
                       <i className={`fas ${item.icon}`} aria-hidden="true" />
                     </span>
-                    <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-500">{item.label}</span>
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--muted)]">{item.label}</span>
                   </div>
                   <strong className="mt-4 block text-3xl font-extrabold leading-none text-slate-950">{item.value}</strong>
-                  <p className="mt-2 text-xs leading-5 text-slate-600">{item.note}</p>
+                  <p className="mt-2 text-xs leading-5 text-[var(--muted)]">{item.note}</p>
                 </article>
               ))}
             </div>
@@ -597,7 +597,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
               {focusNotification ? (
                 <>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{focusNotification.message}</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{focusNotification.message}</p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Badge label={focusNotificationMeta?.label || 'Notification'} tone={focusNotificationMeta?.tone || 'info'} icon={focusNotificationMeta?.icon} />
@@ -618,12 +618,12 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                   </div>
                 </>
               ) : (
-                <p className="mt-3 text-sm leading-7 text-slate-600">No active notification is waiting in the current view.</p>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">No active notification is waiting in the current view.</p>
               )}
 
-              <div className="mt-6 rounded-2xl bg-white/80 p-4 ring-1 ring-white/70">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Latest Inbox Activity</p>
-                <p className="mt-2 text-sm leading-6 text-slate-700">
+              <div className="mt-6 rounded-2xl bg-[var(--surface)] p-4 ring-1 ring-white/70">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Latest Inbox Activity</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--text)]">
                   {latestNotification ? `${latestNotification.title} was recorded on ${latestNotification.dateLabel}.` : 'No student portal notification has been recorded yet.'}
                 </p>
               </div>
@@ -631,11 +631,11 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
           </article>
         </section>
 
-        <section className="rounded-[24px] bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+        <section className="rounded-[24px] bg-[var(--surface)] p-4 shadow-sm ring-1 ring-slate-200/80">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Inbox Filters</span>
-              <p className="mt-2 text-sm text-slate-600">Refine the inbox by type or read state without leaving the current workflow.</p>
+              <p className="mt-2 text-sm text-[var(--muted)]">Refine the inbox by type or read state without leaving the current workflow.</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -656,14 +656,14 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                   className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition ${
                     isActive
                       ? 'border-[#003A8F]/20 bg-[#003A8F]/10 text-[#003A8F]'
-                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-slate-900'
+                      : 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
                   }`}
                   type="button"
                   onClick={() => setTypeFilter(option.value)}
                 >
                   <i className={`fas ${option.icon} text-[12px]`} aria-hidden="true" />
                   {option.label}
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-white/80 text-[#003A8F]' : 'bg-white text-slate-500'}`}>{count}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-[var(--surface)] text-[#003A8F]' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>{count}</span>
                 </button>
               );
             })}
@@ -671,9 +671,9 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <label className="grid gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Status</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Status</span>
               <select
-                className="min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium text-slate-800 outline-none transition focus:border-[#003A8F] focus:bg-white focus:ring-4 focus:ring-[#003A8F]/10"
+                className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-sm font-medium text-[var(--text)] outline-none transition focus:border-[#003A8F] focus:bg-[var(--surface)] focus:ring-4 focus:ring-[#003A8F]/10"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'all' | 'read' | 'unread')}
               >
@@ -718,12 +718,12 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
               onAction={handleAction}
             />
 
-            <section className="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-200/80">
+            <section className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Completed</span>
                   <h3 className="mt-2 text-xl font-bold text-slate-950">Archived after review</h3>
-                  <p className="mt-1 max-w-[58ch] text-sm leading-6 text-slate-600">Read notifications stay stored for reference, traceability, and follow-up navigation.</p>
+                  <p className="mt-1 max-w-[58ch] text-sm leading-6 text-[var(--muted)]">Read notifications stay stored for reference, traceability, and follow-up navigation.</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -743,12 +743,12 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-600">
+                  <div className="mt-5 rounded-2xl bg-[var(--surface-alt)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
                     No completed notification is available after the current filters were applied.
                   </div>
                 )
               ) : (
-                <div className="mt-5 rounded-2xl bg-slate-50 px-4 py-5 text-sm leading-6 text-slate-600">
+                <div className="mt-5 rounded-2xl bg-[var(--surface-alt)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
                   Completed notifications are hidden by default to keep the inbox focused. Open this section when you need past items.
                 </div>
               )}
@@ -756,7 +756,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
           </div>
 
           <aside className="grid gap-4 xl:sticky xl:top-6 xl:self-start">
-            <article className="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-200/80">
+            <article className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Action Queue</span>
@@ -774,31 +774,31 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                     return (
                       <Link prefetch={false}
                         key={item.id}
-                        className="flex items-start gap-3 rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-white hover:shadow-sm"
+                        className="flex items-start gap-3 rounded-2xl bg-[var(--surface-alt)] px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-[var(--surface)] hover:shadow-sm"
                         href={action.href}
                       >
                         <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${typeMeta.iconWrapClass}`}>
                           <i className={`fas ${typeMeta.icon}`} aria-hidden="true" />
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold leading-5 text-slate-900">{item.title}</p>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          <p className="text-sm font-semibold leading-5 text-[var(--text)]">{item.title}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
                             <span>{item.dateLabel}</span>
                             <span className="text-[#F6BE00]">•</span>
                             <span>{typeMeta.label}</span>
                           </div>
                         </div>
-                        <i className="fas fa-chevron-right mt-1 text-xs text-slate-400" aria-hidden="true" />
+                        <i className="fas fa-chevron-right mt-1 text-xs text-[var(--text-meta)]" aria-hidden="true" />
                       </Link>
                     );
                   })
                 ) : (
-                  <p className="text-sm leading-6 text-slate-600">No priority item is waiting in the current filtered view.</p>
+                  <p className="text-sm leading-6 text-[var(--muted)]">No priority item is waiting in the current filtered view.</p>
                 )}
               </div>
             </article>
 
-            <article className="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-200/80">
+            <article className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Notification Breakdown</span>
               <h3 className="mt-2 text-lg font-bold text-slate-950">Where updates are coming from</h3>
 
@@ -806,23 +806,23 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                 {notificationBreakdown.map((item) => (
                   <Link prefetch={false}
                     key={item.key}
-                    className="flex items-center gap-3 rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-white hover:shadow-sm"
+                    className="flex items-center gap-3 rounded-2xl bg-[var(--surface-alt)] px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-[var(--surface)] hover:shadow-sm"
                     href={item.href}
                   >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
                       <i className={`fas ${item.icon}`} aria-hidden="true" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <strong className="block text-sm text-slate-900">{item.label}</strong>
-                      <small className="text-xs text-slate-500">{item.count} alert{item.count === 1 ? '' : 's'}</small>
+                      <strong className="block text-sm text-[var(--text)]">{item.label}</strong>
+                      <small className="text-xs text-[var(--muted)]">{item.count} alert{item.count === 1 ? '' : 's'}</small>
                     </div>
-                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm">{item.count}</span>
+                    <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-bold text-[var(--text)] shadow-sm">{item.count}</span>
                   </Link>
                 ))}
               </div>
             </article>
 
-            <article className="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-200/80">
+            <article className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Quick Access</span>
               <h3 className="mt-2 text-lg font-bold text-slate-950">Continue related student workflows</h3>
 
@@ -834,15 +834,15 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
                 ].map((item) => (
                   <Link prefetch={false}
                     key={item.href}
-                    className="flex items-start gap-3 rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-white hover:shadow-sm"
+                    className="flex items-start gap-3 rounded-2xl bg-[var(--surface-alt)] px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-[var(--surface)] hover:shadow-sm"
                     href={item.href}
                   >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
                       <i className={`fas ${item.icon}`} aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                      <strong className="block text-sm text-slate-900">{item.label}</strong>
-                      <small className="text-xs leading-5 text-slate-500">{item.copy}</small>
+                      <strong className="block text-sm text-[var(--text)]">{item.label}</strong>
+                      <small className="text-xs leading-5 text-[var(--muted)]">{item.copy}</small>
                     </div>
                   </Link>
                 ))}

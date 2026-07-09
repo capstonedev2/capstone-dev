@@ -71,7 +71,7 @@ function MiniFileProgress({ status }: { status: ProjectFileStatus }) {
         const label = getFileProgressLabel(status, index);
         const icon = getFileProgressIcon(status, index);
 
-        let dotColor = 'bg-slate-200 text-slate-400 border-slate-200';
+        let dotColor = 'bg-slate-200 text-[var(--text-meta)] border-[var(--border)]';
         if (isCompleted) {
           if (isRevisionNode) {
             dotColor = 'bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-200/50';

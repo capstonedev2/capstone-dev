@@ -31,7 +31,7 @@
 .fra-summary-pending .fra-summary-icon { background: #fef3c7; color: #b45309; }
 .fra-summary-review .fra-summary-icon { background: #dbeafe; color: #1e40af; }
 .fra-summary-approved .fra-summary-icon { background: #d1fae5; color: #047857; }
-.fra-summary-archived .fra-summary-icon { background: #f1f5f9; color: #475569; }
+.fra-summary-archived .fra-summary-icon { background: var(--surface); color: var(--text); }
 
 .fra-summary-body { display: grid; gap: 0.3rem; }
 
@@ -173,7 +173,7 @@
   padding: 0 1rem 0 2.65rem;
   border: 1px solid var(--border);
   border-radius: 0.95rem;
-  background: #fff;
+  background: var(--surface);
   transition: var(--transition);
 }
 
@@ -190,7 +190,7 @@
   padding: 0 0.95rem;
   border: 1px solid var(--border);
   border-radius: 0.95rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .fra-filter-meta { margin-left: auto; }
@@ -333,7 +333,7 @@
   padding: 0.8rem 1rem;
   border: 1px solid rgba(231,229,228,0.9);
   border-radius: 0.85rem;
-  background: #f8fafc;
+  background: var(--surface);
 }
 
 .fra-chain-step.is-complete {
@@ -383,7 +383,7 @@
   padding: 0.6rem 0.85rem;
   border: 1px solid rgba(231,229,228,0.85);
   border-radius: 0.75rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .fra-file-item > i { color: #ef4444; }
@@ -565,7 +565,7 @@
   padding: 0 1rem 0 2.65rem;
   border: 1px solid var(--border);
   border-radius: 0.95rem;
-  background: #fff;
+  background: var(--surface);
   transition: var(--transition);
 }
 
@@ -580,7 +580,7 @@
   padding: 0 0.95rem;
   border: 1px solid var(--border);
   border-radius: 0.95rem;
-  background: #fff;
+  background: var(--surface);
 }
 
 .repo-filter-actions {

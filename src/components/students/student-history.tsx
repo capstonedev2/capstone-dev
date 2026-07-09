@@ -59,7 +59,7 @@ const HISTORY_FILTERS: Array<{ key: HistoryFilterKey; label: string; icon: strin
 const HISTORY_EVENT_FILTERS: HistoryEventFilterKey[] = ['submissions', 'feedback', 'revisions', 'approvals', 'milestones', 'files'];
 
 const BADGE_TONE_STYLES: Record<BadgeTone, string> = {
-  neutral: 'border-slate-200 bg-slate-100 text-slate-700',
+  neutral: 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)]',
   success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   warning: 'border-amber-200 bg-amber-50 text-amber-700',
   danger: 'border-rose-200 bg-rose-50 text-rose-700',
@@ -67,7 +67,7 @@ const BADGE_TONE_STYLES: Record<BadgeTone, string> = {
 };
 
 const ICON_TONE_STYLES: Record<BadgeTone, string> = {
-  neutral: 'bg-slate-100 text-slate-600',
+  neutral: 'bg-[var(--surface-alt)] text-[var(--muted)]',
   success: 'bg-emerald-100 text-emerald-700',
   warning: 'bg-amber-100 text-amber-700',
   danger: 'bg-rose-100 text-rose-700',
@@ -75,7 +75,7 @@ const ICON_TONE_STYLES: Record<BadgeTone, string> = {
 };
 
 const SUMMARY_TONE_STYLES: Record<BadgeTone, string> = {
-  neutral: 'border-slate-200/80 bg-slate-50 text-slate-700',
+  neutral: 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)]',
   success: 'border-emerald-100 bg-emerald-50/80 text-emerald-700',
   warning: 'border-amber-100 bg-amber-50/80 text-amber-700',
   danger: 'border-rose-100 bg-rose-50/80 text-rose-700',
@@ -85,7 +85,7 @@ const SUMMARY_TONE_STYLES: Record<BadgeTone, string> = {
 const PRIMARY_LINK_CLASS =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#002c6b] bg-[#003A8F] px-4 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(0,58,143,0.18)] transition duration-150 hover:-translate-y-px hover:bg-[#002c6b] hover:shadow-[0_18px_36px_rgba(0,58,143,0.22)]';
 const SECONDARY_LINK_CLASS =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition duration-150 hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--text)] shadow-sm transition duration-150 hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)] hover:text-[var(--text)]';
 
 function getInitials(value: string) {
   return value
@@ -692,21 +692,21 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
       </header>
 
       <div className="page-body">
-        <section className="grid gap-5 rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)] xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,1fr)]">
+        <section className="grid gap-5 rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)] xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,1fr)]">
           <div className="grid gap-4">
             <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#003A8F]">Activity Timeline</span>
             <div className="grid gap-3">
               <h2 className="max-w-[18ch] text-[clamp(1.7rem,3vw,2.25rem)] font-extrabold leading-tight text-slate-950">
                 Cleaner project history for review cycles, submissions, and milestone movement
               </h2>
-              <p className="max-w-[64ch] text-sm leading-7 text-slate-600">
+              <p className="max-w-[64ch] text-sm leading-7 text-[var(--muted)]">
                 Major academic actions stay visible first. Routine updates are still preserved, but they sit under each date group so the timeline remains easier to scan.
               </p>
             </div>
 
             <div className="rounded-[22px] border border-blue-100 bg-gradient-to-r from-blue-50 to-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-              <p className="text-sm font-semibold text-slate-900">Latest major activity</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
+              <p className="text-sm font-semibold text-[var(--text)]">Latest major activity</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
                 {latestMajorEntry
                   ? `${latestMajorEntry.title} was recorded on ${formatHistoryDateTime(latestMajorEntry.timestamp)} under ${latestMajorEntry.sourceLabel}.`
                   : 'Project activity will appear here once submissions, reviews, and milestone actions are recorded.'}
@@ -736,21 +736,21 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                   <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${ICON_TONE_STYLES[item.tone]}`}>
                     <i className={`fas ${item.icon}`} aria-hidden="true" />
                   </span>
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{item.label}</span>
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[var(--muted)]">{item.label}</span>
                 </div>
                 <strong className="mt-4 block text-3xl font-extrabold leading-none text-slate-950">{item.value}</strong>
-                <p className="mt-2 text-xs leading-5 text-slate-600">{item.note}</p>
+                <p className="mt-2 text-xs leading-5 text-[var(--muted)]">{item.note}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
+        <section className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">History Filters</span>
               <h3 className="mt-2 text-xl font-bold text-slate-950">Focus the activity stream</h3>
-              <p className="mt-1 max-w-[56ch] text-sm leading-6 text-slate-600">
+              <p className="mt-1 max-w-[56ch] text-sm leading-6 text-[var(--muted)]">
                 Filter the timeline by event type, search for a specific item, and keep minor updates collapsed until you need the extra detail.
               </p>
             </div>
@@ -772,14 +772,14 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                   className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition ${
                     isActive
                       ? 'border-[#003A8F]/20 bg-[#003A8F]/10 text-[#003A8F]'
-                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white hover:text-slate-900'
+                      : 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
                   }`}
                   type="button"
                   onClick={() => setSelectedFilter(filter.key)}
                 >
                   <i className={`fas ${filter.icon} text-[12px]`} aria-hidden="true" />
                   {filter.label}
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-white/80 text-[#003A8F]' : 'bg-white text-slate-500'}`}>{count}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-[var(--surface)] text-[#003A8F]' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>{count}</span>
                 </button>
               );
             })}
@@ -787,11 +787,11 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
 
           <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
             <label className="grid gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Search Timeline</span>
-              <span className="flex min-h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-600 transition focus-within:border-[#003A8F] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#003A8F]/10">
-                <i className="fas fa-magnifying-glass text-slate-400" aria-hidden="true" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Search Timeline</span>
+              <span className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-sm text-[var(--muted)] transition focus-within:border-[#003A8F] focus-within:bg-[var(--surface)] focus-within:ring-4 focus-within:ring-[#003A8F]/10">
+                <i className="fas fa-magnifying-glass text-[var(--text-meta)]" aria-hidden="true" />
                 <input
-                  className="w-full border-0 bg-transparent p-0 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
+                  className="w-full border-0 bg-transparent p-0 text-sm font-medium text-[var(--text)] outline-none placeholder:text-[var(--text-meta)]"
                   type="search"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
@@ -802,7 +802,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
 
             <div className="flex items-end">
               <button
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)] hover:text-[var(--text)]"
                 type="button"
                 onClick={handleResetFilters}
               >
@@ -814,12 +814,12 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
         </section>
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_320px] 2xl:grid-cols-[minmax(0,1.75fr)_340px]">
-          <article className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
+          <article className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Timeline View</span>
                 <h3 className="mt-2 text-xl font-bold text-slate-950">Grouped project activity by month and date</h3>
-                <p className="mt-1 max-w-[60ch] text-sm leading-6 text-slate-600">
+                <p className="mt-1 max-w-[60ch] text-sm leading-6 text-[var(--muted)]">
                   Important actions stay pinned near the top of each date group. Minor system updates remain available through the expanded timeline controls.
                 </p>
               </div>
@@ -833,7 +833,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                     <div className="flex items-center gap-3">
                       <div className="rounded-full bg-[#003A8F]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#003A8F]">{monthGroup.label}</div>
                       <div className="h-px flex-1 bg-slate-200" />
-                      <span className="text-xs font-medium text-slate-500">{monthGroup.total} activities</span>
+                      <span className="text-xs font-medium text-[var(--muted)]">{monthGroup.total} activities</span>
                     </div>
 
                     <div className="space-y-5">
@@ -848,10 +848,10 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                         return (
                           <div key={dayGroup.key} className="grid gap-4 lg:grid-cols-[108px_minmax(0,1fr)]">
                             <div className="flex lg:block">
-                              <div className="inline-flex w-full items-center gap-4 rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-3 lg:grid lg:gap-1 lg:px-3 lg:text-center">
-                                <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">{dayGroup.weekday}</span>
+                              <div className="inline-flex w-full items-center gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 lg:grid lg:gap-1 lg:px-3 lg:text-center">
+                                <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">{dayGroup.weekday}</span>
                                 <strong className="text-2xl font-extrabold leading-none text-slate-950">{dayGroup.dayNumber}</strong>
-                                <span className="text-xs text-slate-500">{dayGroup.monthStamp}</span>
+                                <span className="text-xs text-[var(--muted)]">{dayGroup.monthStamp}</span>
                               </div>
                             </div>
 
@@ -860,10 +860,10 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                                 <article
                                   key={entry.id}
                                   className={`group relative rounded-[24px] p-4 shadow-sm ring-1 transition duration-150 hover:-translate-y-px hover:shadow-md ${
-                                    entry.priority === 'major' ? 'bg-white ring-slate-200' : 'bg-slate-50/80 ring-slate-200/80'
+                                    entry.priority === 'major' ? 'bg-[var(--surface)] ring-slate-200' : 'bg-[var(--surface-alt)] ring-slate-200/80'
                                   }`}
                                 >
-                                  <span className={`absolute -left-[27px] top-5 flex h-5 w-5 items-center justify-center rounded-full border-4 border-white ${ICON_TONE_STYLES[entry.tone]}`}>
+                                  <span className={`absolute -left-[27px] top-5 flex h-5 w-5 items-center justify-center rounded-full border-4 border-[var(--border)] ${ICON_TONE_STYLES[entry.tone]}`}>
                                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
                                   </span>
 
@@ -872,29 +872,29 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                                       <div className="flex flex-wrap items-center gap-2">
                                         <Badge label={entry.eventLabel} tone={entry.tone} icon={entry.icon} />
                                         <Badge label={entry.statusLabel} tone={entry.statusTone} />
-                                        <span className="text-xs font-medium text-slate-500">{formatHistoryTime(entry.timestamp)}</span>
+                                        <span className="text-xs font-medium text-[var(--muted)]">{formatHistoryTime(entry.timestamp)}</span>
                                       </div>
 
                                       <div className="mt-3">
                                         <h4 className="text-base font-bold leading-6 text-slate-950">{entry.title}</h4>
-                                        <p className="mt-1 text-sm leading-6 text-slate-600">{entry.description}</p>
+                                        <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{entry.description}</p>
                                       </div>
                                     </div>
 
-                                    <div className="flex min-w-[170px] items-center gap-3 rounded-2xl bg-slate-50 px-3 py-2">
+                                    <div className="flex min-w-[170px] items-center gap-3 rounded-2xl bg-[var(--surface-alt)] px-3 py-2">
                                       <span className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold ${ICON_TONE_STYLES[entry.tone]}`}>
                                         {getInitials(entry.actor)}
                                       </span>
                                       <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-slate-900">{entry.actor}</p>
-                                        <p className="truncate text-xs text-slate-500">{entry.sourceLabel}</p>
+                                        <p className="truncate text-sm font-semibold text-[var(--text)]">{entry.actor}</p>
+                                        <p className="truncate text-xs text-[var(--muted)]">{entry.sourceLabel}</p>
                                       </div>
                                     </div>
                                   </div>
 
                                   <div className="mt-3 flex flex-wrap gap-2">
                                     {entry.details.map((detail) => (
-                                      <span key={`${entry.id}-${detail}`} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                                      <span key={`${entry.id}-${detail}`} className="rounded-full bg-[var(--surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)]">
                                         {detail}
                                       </span>
                                     ))}
@@ -914,7 +914,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                               {hiddenMinorCount ? (
                                 <button
                                   aria-expanded={isExpanded}
-                                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                                  className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)] hover:text-[var(--text)]"
                                   type="button"
                                   onClick={() => toggleGroupExpansion(dayGroup.key)}
                                 >
@@ -926,7 +926,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                               {isExpanded && minorEntries.length > defaultMinorVisibleCount ? (
                                 <button
                                   aria-expanded={isExpanded}
-                                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-white hover:text-slate-900"
+                                  className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-alt)] px-3.5 py-2 text-sm font-semibold text-[var(--text)] transition hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text)]"
                                   type="button"
                                   onClick={() => toggleGroupExpansion(dayGroup.key)}
                                 >
@@ -943,14 +943,14 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                 ))}
               </div>
             ) : (
-              <div className="mt-6 rounded-[24px] border border-dashed border-slate-300 bg-slate-50/80 p-8 text-center">
+              <div className="mt-6 rounded-[24px] border border-dashed border-[var(--border-strong)] bg-[var(--surface-alt)] p-8 text-center">
                 <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
                   <i className="fas fa-clock-rotate-left text-lg" aria-hidden="true" />
                 </span>
                 <strong className="mt-4 block text-lg font-bold text-slate-950">No history records match the current filter</strong>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Try clearing the search or switching to another activity tab to restore the full timeline.</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Try clearing the search or switching to another activity tab to restore the full timeline.</p>
                 <button
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)] hover:text-[var(--text)]"
                   type="button"
                   onClick={handleResetFilters}
                 >
@@ -962,26 +962,26 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
           </article>
 
           <aside className="grid gap-4 xl:sticky xl:top-6 xl:self-start">
-            <article className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
+            <article className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Current Context</span>
               <h3 className="mt-2 text-lg font-bold text-slate-950">What matters next</h3>
               <div className="mt-4 space-y-3">
-                <div className="rounded-2xl bg-slate-50 p-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Current Milestone</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">{data.project.currentMilestone}</p>
+                <div className="rounded-2xl bg-[var(--surface-alt)] p-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Current Milestone</p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--text)]">{data.project.currentMilestone}</p>
                 </div>
-                <div className="rounded-2xl bg-slate-50 p-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Repository Status</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">{data.project.repositoryStatus}</p>
+                <div className="rounded-2xl bg-[var(--surface-alt)] p-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Repository Status</p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--text)]">{data.project.repositoryStatus}</p>
                 </div>
-                <div className="rounded-2xl bg-slate-50 p-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Upcoming Deadline</p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-slate-900">{data.project.upcomingDeadline}</p>
+                <div className="rounded-2xl bg-[var(--surface-alt)] p-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Upcoming Deadline</p>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-[var(--text)]">{data.project.upcomingDeadline}</p>
                 </div>
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
+            <article className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Activity Mix</span>
               <h3 className="mt-2 text-lg font-bold text-slate-950">Where the timeline is busiest</h3>
               <div className="mt-4 space-y-2.5">
@@ -991,7 +991,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                   return (
                     <button
                       key={filterKey}
-                      className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-left transition hover:-translate-y-px hover:border-slate-300 hover:bg-white"
+                      className="flex w-full items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-3.5 py-3 text-left transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface)]"
                       type="button"
                       onClick={() => setSelectedFilter(filterKey)}
                     >
@@ -1000,33 +1000,33 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                           <i className={`fas ${filter.icon}`} aria-hidden="true" />
                         </span>
                         <span>
-                          <span className="block text-sm font-semibold text-slate-900">{filter.label}</span>
-                          <span className="block text-xs text-slate-500">Mapped from the student workspace records</span>
+                          <span className="block text-sm font-semibold text-[var(--text)]">{filter.label}</span>
+                          <span className="block text-xs text-[var(--muted)]">Mapped from the student workspace records</span>
                         </span>
                       </span>
-                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm">{filterCounts[filterKey]}</span>
+                      <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-bold text-[var(--text)] shadow-sm">{filterCounts[filterKey]}</span>
                     </button>
                   );
                 })}
               </div>
             </article>
 
-            <article className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
+            <article className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Related Pages</span>
               <h3 className="mt-2 text-lg font-bold text-slate-950">Jump to the source modules</h3>
               <div className="mt-4 space-y-2.5">
                 {quickLinks.map((item) => (
                   <Link prefetch={false}
                     key={item.href}
-                    className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3 transition hover:-translate-y-px hover:border-slate-300 hover:bg-white"
+                    className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-3.5 py-3 transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface)]"
                     href={item.href}
                   >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
                       <i className={`fas ${item.icon}`} aria-hidden="true" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-slate-900">{item.label}</span>
-                      <span className="mt-1 block text-xs leading-5 text-slate-500">{item.copy}</span>
+                      <span className="block text-sm font-semibold text-[var(--text)]">{item.label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{item.copy}</span>
                     </span>
                   </Link>
                 ))}

@@ -13,6 +13,7 @@
   }
 
   :root {
+    color-scheme: light;
     --font-sans: 'Inter', sans-serif;
     --font-serif: 'Playfair Display', Georgia, serif;
     --font-student: 'Poppins', sans-serif;

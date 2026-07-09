@@ -506,12 +506,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         </header>
 
         <div className="page-body p-6">
-          <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-slate-200 bg-white p-12 text-center shadow-sm">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-100 text-slate-400 shadow-sm">
+          <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface)] p-12 text-center shadow-sm">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--surface-alt)] text-[var(--text-meta)] shadow-sm">
               <i className="fas fa-users-slash text-3xl" aria-hidden="true" />
             </div>
-            <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-800">Group Assignment Required</h3>
-            <p className="mx-auto mt-4 max-w-lg text-slate-500 leading-relaxed">
+            <h3 className="mt-6 text-2xl font-bold tracking-tight text-[var(--text)]">Group Assignment Required</h3>
+            <p className="mx-auto mt-4 max-w-lg text-[var(--muted)] leading-relaxed">
               You must be assigned to a project group before you can access the Title Submission workspace and submit proposals. Please contact your coordinator to be added to a group.
             </p>
           </div>
@@ -1341,7 +1341,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     }, 2200);
   };
   return (
-    <div className="student-title-submission-page p-4 pt-2 lg:p-6 lg:pt-2 bg-[#F8FAFC] min-h-screen relative">
+    <div className="student-title-submission-page p-4 pt-2 lg:p-6 lg:pt-2 bg-[var(--bg)] min-h-screen relative">
       {notice && (
         <div className={`fixed bottom-8 right-6 z-[9999] rounded-xl p-4 shadow-xl flex items-start gap-3 w-96 animate-in slide-in-from-right-8 fade-in duration-300 border ${
           notice.tone === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
@@ -1453,12 +1453,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       </section>
 
       {/* Hero Banner */}
-      <div className="legacy-title-hero hidden bg-gradient-to-br from-[#003A8F] via-[#0b2866] to-[#1E40AF] rounded-[1.5rem] p-8 text-white flex flex-col md:flex-row justify-between relative overflow-hidden shadow-2xl shadow-[#003A8F]/20 mb-8 border border-white/10 group">
+      <div className="legacy-title-hero hidden bg-gradient-to-br from-[#003A8F] via-[#0b2866] to-[#1E40AF] rounded-[1.5rem] p-8 text-white flex flex-col md:flex-row justify-between relative overflow-hidden shadow-2xl shadow-[#003A8F]/20 mb-8 border border-[var(--border)] group">
         <div className="z-10 flex flex-col justify-between w-full md:w-1/2">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-sm font-semibold tracking-wide text-blue-100">Proposal {String(activeSubmission.proposalNumber).padStart(2, '0')}</span>
-              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${titleStatusTone === 'success' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/20 text-white'}`}>
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${titleStatusTone === 'success' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-[var(--surface)] text-white'}`}>
                 {activeSubmission.registrationStatus}
               </span>
             </div>
@@ -1498,29 +1498,29 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       </div>
 
             {/* Timeline Stepper */}
-      <div className="legacy-title-timeline hidden bg-white rounded-[1.25rem] border border-slate-200/80 p-8 shadow-sm mb-8 relative overflow-hidden">
+      <div className="legacy-title-timeline hidden bg-[var(--surface)] rounded-[1.25rem] border border-[var(--border)] p-8 shadow-sm mb-8 relative overflow-hidden">
         <div className="flex items-center justify-between relative max-w-[90%] mx-auto">
-          <div className="absolute left-10 right-10 top-6 -translate-y-1/2 h-1 bg-slate-100 z-0 rounded-full"></div>
+          <div className="absolute left-10 right-10 top-6 -translate-y-1/2 h-1 bg-[var(--surface-alt)] z-0 rounded-full"></div>
           <div className="absolute left-10 top-6 -translate-y-1/2 h-1 bg-blue-600 z-0 rounded-full transition-all duration-1000" style={{ width: `calc(${(currentStepIndex / 5) * 100}% - ${(currentStepIndex / 5) * 80}px)` }}></div>
           
           {TIMELINE_STEPS.map((step, idx) => {
              const isCompleted = idx <= currentStepIndex;
              const isCurrent = idx === currentStepIndex;
              
-             let circleClasses = "bg-white border-slate-200 text-slate-300";
-             if (isCompleted) circleClasses = "bg-white border-blue-600 text-blue-600";
+             let circleClasses = "bg-[var(--surface)] border-[var(--border)] text-[var(--muted)]";
+             if (isCompleted) circleClasses = "bg-[var(--surface)] border-blue-600 text-blue-600";
              if (isCurrent) circleClasses = "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200/50";
              if (step.label === 'Approved' && isCompleted) circleClasses = "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200/50";
              
              return (
-               <div key={idx} className="relative z-10 flex flex-col items-center gap-3 bg-white px-4">
+               <div key={idx} className="relative z-10 flex flex-col items-center gap-3 bg-[var(--surface)] px-4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg shadow-sm border-2 transition-all ${circleClasses}`}>
                     <i className={`fas ${step.icon}`}></i>
                   </div>
                   <div className="text-center">
-                    <p className={`text-xs font-bold ${isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>{step.label}</p>
+                    <p className={`text-xs font-bold ${isCompleted ? 'text-[var(--text)]' : 'text-[var(--text-meta)]'}`}>{step.label}</p>
                     {/* Removed hardcoded fake date */}
-                    {!isCompleted && step.label === 'Registered' && <p className="text-[10px] font-bold text-slate-300 mt-0.5">-</p>}
+                    {!isCompleted && step.label === 'Registered' && <p className="text-[10px] font-bold text-[var(--muted)] mt-0.5">-</p>}
                   </div>
                </div>
              )
@@ -1529,7 +1529,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       </div>
 
       {/* Modern Pill Tabs */}
-      <div className="title-submission-tabs flex items-center gap-2 bg-slate-200/40 p-1.5 rounded-2xl border border-slate-200 mb-8 w-fit shadow-inner">
+      <div className="title-submission-tabs flex items-center gap-2 bg-slate-200/40 p-1.5 rounded-2xl border border-[var(--border)] mb-8 w-fit shadow-inner">
         {titleSubmissionTabs.map((tab) => {
           const isDisabled = tab.id === 'Documents' && (!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim());
           const isActive = activeTab === tab.id;
@@ -1541,7 +1541,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               }}
               disabled={isDisabled}
               aria-pressed={isActive}
-              className={`px-6 py-2.5 text-[13px] font-extrabold rounded-xl transition-all duration-300 ${isActive ? 'bg-white text-[#003A8F] shadow-[0_4px_12px_-4px_rgba(0,58,143,0.15)] ring-1 ring-slate-100 scale-105' : isDisabled ? 'text-slate-400 cursor-not-allowed opacity-60 bg-slate-100/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100/80'}`}
+              className={`px-6 py-2.5 text-[13px] font-extrabold rounded-xl transition-all duration-300 ${isActive ? 'bg-[var(--surface)] text-[var(--info)] shadow-[0_4px_12px_-4px_rgba(0,58,143,0.15)] ring-1 ring-slate-100 scale-105' : isDisabled ? 'text-[var(--text-meta)] cursor-not-allowed opacity-60 bg-[var(--surface-alt)]' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-alt)]'}`}
             >
               <div className="flex items-center gap-2">
                 <i className={`fas ${isDisabled ? 'fa-lock' : tab.icon} text-[11px]`} aria-hidden="true"></i>
@@ -1561,9 +1561,9 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Upload Section */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden flex flex-col h-[400px]">
                   <div className="p-5 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-800">Upload Concept Paper</h3>
+                    <h3 className="text-sm font-bold text-[var(--text)]">Upload Concept Paper</h3>
                   </div>
                   <div className="p-6 pt-0 flex-1 flex flex-col">
                     <button 
@@ -1573,14 +1573,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                       disabled={!canUpload}
-                      className={`group relative flex-1 flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all overflow-hidden ${isDragging ? 'border-[#003A8F] bg-[#003A8F]/5 shadow-inner' : 'border-slate-300 bg-slate-50/50 hover:border-[#003A8F]/50 hover:bg-[#003A8F]/5'}`}
+                      className={`group relative flex-1 flex flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all overflow-hidden ${isDragging ? 'border-[#003A8F] bg-[#003A8F]/5 shadow-inner' : 'border-[var(--border-strong)] bg-[var(--surface-alt)] hover:border-[#003A8F]/50 hover:bg-[#003A8F]/5'}`}
                     >
-                      <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 mb-4 group-hover:bg-[#003A8F]/10 group-hover:text-[#003A8F] transition-colors">
+                      <div className="h-12 w-12 rounded-lg bg-[var(--surface-alt)] flex items-center justify-center text-[var(--muted)] mb-4 group-hover:bg-[#003A8F]/10 group-hover:text-[var(--info)] transition-colors">
                         <i className="fas fa-cloud-arrow-up text-xl"></i>
                       </div>
-                      <h4 className="text-[15px] font-bold text-slate-800 mb-1">Drag & drop your file here</h4>
+                      <h4 className="text-[15px] font-bold text-[var(--text)] mb-1">Drag & drop your file here</h4>
                       <p className="text-sm font-medium text-blue-600">or click to browse</p>
-                      <p className="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-widest">Supports: PDF, DOCX - Max size: 10MB</p>
+                      <p className="text-[10px] text-[var(--text-meta)] mt-4 font-bold uppercase tracking-widest">Supports: PDF, DOCX - Max size: 10MB</p>
                       <input
                         ref={fileInputRef}
                         hidden
@@ -1595,16 +1595,16 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                     {activeSubmission.attachments.length > 0 && (
                       <div className="mt-4 flex flex-col gap-2 max-h-[140px] overflow-y-auto pr-1">
                         {activeSubmission.attachments.map((attachment) => (
-                          <div key={attachment.id} className="p-3 rounded-lg border border-slate-200 bg-white shadow-sm flex items-center gap-3">
-                            <div className="h-9 w-9 bg-slate-100 rounded flex items-center justify-center text-blue-600 shrink-0">
+                          <div key={attachment.id} className="p-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm flex items-center gap-3">
+                            <div className="h-9 w-9 bg-[var(--surface-alt)] rounded flex items-center justify-center text-blue-600 shrink-0">
                               <i className={`fas ${attachment.fileName.toLowerCase().endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-word'} text-base`}></i>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-slate-800 truncate">{attachment.fileName}</p>
-                              <p className="text-[10px] font-bold text-slate-500">{attachment.sizeLabel} - Uploaded</p>
+                              <p className="text-sm font-bold text-[var(--text)] truncate">{attachment.fileName}</p>
+                              <p className="text-[10px] font-bold text-[var(--muted)]">{attachment.sizeLabel} - Uploaded</p>
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
-                              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded text-slate-500">
+                              <div className="flex items-center gap-1.5 bg-[var(--surface-alt)] border border-[var(--border)] px-2 py-0.5 rounded text-[var(--muted)]">
                                 <i className="fas fa-check text-[9px]"></i>
                                 <span className="text-[10px] font-bold">Uploaded</span>
                               </div>
@@ -1615,7 +1615,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                                   handleRemoveAttachment(attachment.id);
                                 }}
                                 disabled={!canUpload}
-                                className="h-7 w-7 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-7 w-7 rounded-full bg-[var(--surface)] border border-[var(--border)] shadow-sm flex items-center justify-center text-[var(--text-meta)] hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Remove file"
                               >
                                 <i className="fas fa-trash-can text-[11px]"></i>
@@ -1629,37 +1629,37 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 </div>
 
                 {/* Document Preview */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden flex flex-col h-[400px]">
                   <div className="p-5 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-800">Document Preview</h3>
+                    <h3 className="text-sm font-bold text-[var(--text)]">Document Preview</h3>
                   </div>
                   <div className="p-6 pt-0 flex-1 flex flex-col relative">
-                    <div className="bg-slate-50 rounded-2xl border border-slate-100 flex-1 flex flex-col p-6 overflow-hidden relative shadow-inner">
+                    <div className="bg-[var(--surface-alt)] rounded-2xl border border-[var(--border)] flex-1 flex flex-col p-6 overflow-hidden relative shadow-inner">
                        {activeSubmission.attachments.length > 0 ? (
                          activeSubmission.attachments[0].downloadUrl && activeSubmission.attachments[0].fileName.toLowerCase().endsWith('.pdf') ? (
-                           <div className="w-full flex-1 rounded-lg overflow-hidden border border-slate-200 shadow-sm bg-white relative">
+                           <div className="w-full flex-1 rounded-lg overflow-hidden border border-[var(--border)] shadow-sm bg-[var(--surface)] relative">
                              <object data={activeSubmission.attachments[0].downloadUrl} type="application/pdf" className="w-full h-full absolute inset-0">
-                               <div className="flex flex-col items-center justify-center text-center h-full p-8 bg-white">
-                                 <i className="fas fa-file-pdf text-3xl text-slate-300 mb-4"></i>
-                                 <p className="text-sm font-bold text-slate-500 mb-1">PDF viewer not available</p>
-                                 <p className="text-xs text-slate-400 font-medium">Your browser does not support inline PDFs.</p>
+                               <div className="flex flex-col items-center justify-center text-center h-full p-8 bg-[var(--surface)]">
+                                 <i className="fas fa-file-pdf text-3xl text-[var(--muted)] mb-4"></i>
+                                 <p className="text-sm font-bold text-[var(--muted)] mb-1">PDF viewer not available</p>
+                                 <p className="text-xs text-[var(--text-meta)] font-medium">Your browser does not support inline PDFs.</p>
                                </div>
                              </object>
                            </div>
                          ) : (
-                           <div className="bg-white rounded-lg shadow-sm border border-slate-200 w-full flex-1 p-8 overflow-hidden flex flex-col items-center justify-center text-center">
-                              <i className={`fas ${activeSubmission.attachments[0].fileName.toLowerCase().includes('.doc') ? 'fa-file-word text-blue-500' : 'fa-file text-slate-400'} text-4xl mb-4`}></i>
-                              <h4 className="font-extrabold text-slate-800 mb-2 max-w-[200px] truncate">{activeSubmission.attachments[0].fileName}</h4>
-                              <p className="text-xs font-medium text-slate-500">Preview is only available for PDF documents.</p>
+                           <div className="bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border)] w-full flex-1 p-8 overflow-hidden flex flex-col items-center justify-center text-center">
+                              <i className={`fas ${activeSubmission.attachments[0].fileName.toLowerCase().includes('.doc') ? 'fa-file-word text-blue-500' : 'fa-file text-[var(--text-meta)]'} text-4xl mb-4`}></i>
+                              <h4 className="font-extrabold text-[var(--text)] mb-2 max-w-[200px] truncate">{activeSubmission.attachments[0].fileName}</h4>
+                              <p className="text-xs font-medium text-[var(--muted)]">Preview is only available for PDF documents.</p>
                            </div>
                          )
                        ) : (
                          <div className="flex-1 flex flex-col items-center justify-center text-center">
-                           <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center mb-4 text-slate-400">
+                           <div className="h-12 w-12 rounded-lg bg-[var(--surface-alt)] flex items-center justify-center mb-4 text-[var(--text-meta)]">
                              <i className="fas fa-file-pdf text-xl"></i>
                            </div>
-                           <p className="text-sm font-bold text-slate-500 mb-1">No document uploaded</p>
-                           <p className="text-xs text-slate-400 font-medium">Upload a concept paper to see a preview here.</p>
+                           <p className="text-sm font-bold text-[var(--muted)] mb-1">No document uploaded</p>
+                           <p className="text-xs text-[var(--text-meta)] font-medium">Upload a concept paper to see a preview here.</p>
                          </div>
                        )}
                     </div>
@@ -1668,29 +1668,29 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               </div>
 
               {/* Version History Quick View */}
-              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-slate-800">Version History</h3>
+              <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm">
+                <div className="p-6 border-b border-[var(--border)] flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-[var(--text)]">Version History</h3>
                 </div>
                 <div className="p-2">
                   <table className="w-full text-left">
                     <tbody>
                       {activeSubmission.attachments.map((att, i) => (
-                        <tr key={i} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
-                          <td className="p-4 font-bold text-slate-700 text-[13px] flex items-center gap-3">
+                        <tr key={i} className="border-b border-slate-50 last:border-0 hover:bg-[var(--surface-alt)] transition-colors">
+                          <td className="p-4 font-bold text-[var(--text)] text-[13px] flex items-center gap-3">
                             <i className="fas fa-file-word text-blue-600 text-lg"></i> {att.fileName}
-                            {i === 0 && <span className="bg-[#EFF6FF] text-[#003A8F] text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded flex items-center gap-1"><i className="fas fa-circle text-[5px]"></i> Current</span>}
+                            {i === 0 && <span className="bg-[var(--info-soft)] text-[var(--info)] text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded flex items-center gap-1"><i className="fas fa-circle text-[5px]"></i> Current</span>}
                           </td>
-                          <td className="p-4 text-[12px] font-semibold text-slate-500">{att.uploadedAtLabel}</td>
-                          <td className="p-4 text-[12px] font-semibold text-slate-500">{att.sizeLabel}</td>
-                          <td className="p-4 text-[12px] font-semibold text-slate-400">{att.uploadedBy || data.group.leaderName || 'Group Member'}</td>
+                          <td className="p-4 text-[12px] font-semibold text-[var(--muted)]">{att.uploadedAtLabel}</td>
+                          <td className="p-4 text-[12px] font-semibold text-[var(--muted)]">{att.sizeLabel}</td>
+                          <td className="p-4 text-[12px] font-semibold text-[var(--text-meta)]">{att.uploadedBy || data.group.leaderName || 'Group Member'}</td>
                         </tr>
                       ))}
                       {activeSubmission.attachments.length === 0 && (
                         <tr>
-                          <td colSpan={4} className="p-8 text-center text-sm font-medium text-slate-400">
+                          <td colSpan={4} className="p-8 text-center text-sm font-medium text-[var(--text-meta)]">
                             <div className="flex flex-col items-center gap-2">
-                              <i className="fas fa-folder-open text-3xl text-slate-200 mb-2"></i>
+                              <i className="fas fa-folder-open text-3xl text-[var(--muted)] mb-2"></i>
                               No document versions yet
                             </div>
                           </td>
@@ -1705,24 +1705,24 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
           
           {activeTab === 'Details' && (
-            <div ref={detailsPanelRef} className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8 flex flex-col relative overflow-hidden">
+            <div ref={detailsPanelRef} className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-8 flex flex-col relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
               
               <div className="mb-8 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-blue-50 text-[#003A8F] flex items-center justify-center text-xl shadow-sm border border-blue-100"><i className="fas fa-file-signature"></i></div>
+                <div className="h-12 w-12 rounded-xl bg-blue-50 text-[var(--info)] flex items-center justify-center text-xl shadow-sm border border-blue-100"><i className="fas fa-file-signature"></i></div>
                 <div>
-                  <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">Proposal Details</h3>
-                  <p className="text-[13px] text-slate-500 font-medium mt-1">Provide the official title and a brief note to your adviser.</p>
+                  <h3 className="text-xl font-extrabold text-[var(--text)] tracking-tight">Proposal Details</h3>
+                  <p className="text-[13px] text-[var(--muted)] font-medium mt-1">Provide the official title and a brief note to your adviser.</p>
                 </div>
               </div>
 
               <div className="space-y-8">
                 <div>
-                  <label htmlFor="proposedTitle" className="block text-[13px] font-extrabold text-slate-700 uppercase tracking-wider mb-3">
+                  <label htmlFor="proposedTitle" className="block text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider mb-3">
                     Proposed Title <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#003A8F] transition-colors">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-[var(--info)] transition-colors">
                       <i className="fas fa-heading"></i>
                     </div>
                     <input
@@ -1731,21 +1731,21 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
                       placeholder="Enter the official, finalized title of your study"
-                      className="block w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-slate-800 shadow-sm transition-all placeholder:text-slate-400 focus:bg-white focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-white hover:border-slate-300 text-sm font-bold outline-none disabled:opacity-60 disabled:bg-slate-100"
+                      className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-11 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--text-meta)] focus:bg-[var(--surface)] focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-[var(--surface)] hover:border-[var(--border-strong)] text-sm font-bold outline-none disabled:opacity-60 disabled:bg-[var(--surface-alt)]"
                       disabled={!canUpload}
                     />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-500 mt-2.5 flex items-center gap-1.5">
+                  <p className="text-[11px] font-bold text-[var(--muted)] mt-2.5 flex items-center gap-1.5">
                     <i className="fas fa-exclamation-circle text-rose-400"></i> A proposed title is required before you can proceed to upload documents.
                   </p>
                 </div>
 
                 <div>
-                  <label htmlFor="briefDescription" className="block text-[13px] font-extrabold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    Note to Adviser <span className="text-slate-400 font-bold text-[10px] px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200">OPTIONAL</span>
+                  <label htmlFor="briefDescription" className="block text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider mb-3 flex items-center gap-2">
+                    Note to Adviser <span className="text-[var(--text-meta)] font-bold text-[10px] px-2 py-0.5 bg-[var(--surface-alt)] rounded-md border border-[var(--border)]">OPTIONAL</span>
                   </label>
                   <div className="relative group">
-                    <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-slate-400 group-focus-within:text-[#003A8F] transition-colors">
+                    <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-[var(--info)] transition-colors">
                       <i className="fas fa-comment-dots"></i>
                     </div>
                     <textarea
@@ -1757,17 +1757,17 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       }
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
                       placeholder="Add specific questions, context, or areas you want your adviser to focus on..."
-                      className="block w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-slate-800 shadow-sm transition-all placeholder:text-slate-400 focus:bg-white focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-white hover:border-slate-300 text-sm font-medium outline-none min-h-[160px] resize-y disabled:opacity-60 disabled:bg-slate-100 leading-relaxed"
+                      className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-11 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--text-meta)] focus:bg-[var(--surface)] focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-[var(--surface)] hover:border-[var(--border-strong)] text-sm font-medium outline-none min-h-[160px] resize-y disabled:opacity-60 disabled:bg-[var(--surface-alt)] leading-relaxed"
                       disabled={!canUpload}
                     />
                   </div>
                 </div>
               </div>
               
-              <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+              <div className="mt-8 pt-6 border-t border-[var(--border)] flex items-center justify-between">
                  <div className="flex items-center gap-3">
                    <div className={`h-2.5 w-2.5 rounded-full ${!activeSubmission.proposedTitle.trim() ? 'bg-[#F6BE00] animate-pulse' : 'bg-[#003A8F]'}`}></div>
-                   <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                   <span className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)]">
                      {!activeSubmission.proposedTitle.trim() ? 'Awaiting Title' : 'Details Complete'}
                    </span>
                  </div>
@@ -1778,7 +1778,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                      }
                    }}
                    disabled={!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()}
-                   className={`text-xs font-extrabold px-6 py-3 rounded-lg shadow-md transition-all flex items-center gap-2 ${(!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()) ? 'bg-slate-200 cursor-not-allowed text-slate-400 shadow-none' : 'bg-slate-800 hover:bg-slate-900 text-white hover:shadow-lg hover:-translate-y-0.5'}`}
+                   className={`text-xs font-extrabold px-6 py-3 rounded-lg shadow-md transition-all flex items-center gap-2 ${(!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()) ? 'bg-slate-200 cursor-not-allowed text-[var(--text-meta)] shadow-none' : 'bg-slate-800 hover:bg-slate-900 text-white hover:shadow-lg hover:-translate-y-0.5'}`}
                  >
                    Continue to Documents <i className="fas fa-arrow-right"></i>
                  </button>
@@ -1787,33 +1787,33 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           )}
           
           {!['Documents', 'Details'].includes(activeTab) && (
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-12 text-center text-slate-500 flex flex-col items-center justify-center h-[400px]">
-               <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-5 text-2xl text-slate-300 border border-slate-100">
+            <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-12 text-center text-[var(--muted)] flex flex-col items-center justify-center h-[400px]">
+               <div className="h-16 w-16 bg-[var(--surface-alt)] rounded-2xl flex items-center justify-center mb-5 text-2xl text-[var(--muted)] border border-[var(--border)]">
                  <i className="fas fa-laptop-code"></i>
                </div>
-               <h3 className="text-lg font-extrabold text-slate-700 mb-2">Tab Content Pending</h3>
+               <h3 className="text-lg font-extrabold text-[var(--text)] mb-2">Tab Content Pending</h3>
                <p className="text-[13px] font-medium max-w-sm leading-relaxed">The {activeTab} view is currently being implemented. Please use Details and Documents to submit your proposal.</p>
             </div>
           )}
 
 
           {/* Action Banner (Proceed to Next Stage) */}
-          <div className="title-submission-cta-panel bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
+          <div className="title-submission-cta-panel bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-10 -translate-y-10"></div>
             <div className="flex items-center gap-5 z-10">
               <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm relative">
-                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm border-2 border-white"><i className="fas fa-info text-[10px]"></i></div>
+                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm border-2 border-[var(--border)]"><i className="fas fa-info text-[10px]"></i></div>
                 <i className="fas fa-clipboard-check text-2xl"></i>
               </div>
               <div>
-                <h4 className="text-base font-extrabold text-slate-800 mb-1">
+                <h4 className="text-base font-extrabold text-[var(--text)] mb-1">
                    {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
                      ? 'Your proposal has been approved!' 
                      : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
                      ? 'Proposal submitted successfully' 
                      : 'Ready to submit your proposal?'}
                 </h4>
-                <p className="text-[13px] text-slate-500 font-medium">
+                <p className="text-[13px] text-[var(--muted)] font-medium">
                    {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
                      ? 'Please proceed to the official title registration to complete the process.' 
                      : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
@@ -1825,13 +1825,13 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             
             {activeSubmission.registrationStatus.toLowerCase() === 'approved' ? (
               <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
-                <div className="w-full sm:w-auto bg-[#EFF6FF] text-[#003A8F] text-sm font-extrabold px-6 py-3.5 rounded-xl border-2 border-[#BFDBFE] flex items-center justify-center gap-3 whitespace-nowrap">
+                <div className="w-full sm:w-auto bg-[var(--info-soft)] text-[var(--info)] text-sm font-extrabold px-6 py-3.5 rounded-xl border-2 border-[var(--info)] flex items-center justify-center gap-3 whitespace-nowrap">
                   <i className="fas fa-circle-check"></i> Title Approved
                 </div>
                 <button 
                   type="button"
                   onClick={handleCreateSubmission}
-                  className="w-full sm:w-auto bg-white border-2 border-slate-200 hover:border-[#003A8F] hover:text-[#003A8F] text-slate-600 text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="w-full sm:w-auto bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[#003A8F] hover:text-[var(--info)] text-[var(--muted)] text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <i className="fas fa-plus"></i> Submit Another Title
                 </button>
@@ -1840,14 +1840,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
                 <button 
                   disabled
-                  className="w-full sm:w-auto bg-slate-100 text-slate-400 text-sm font-extrabold px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 whitespace-nowrap cursor-not-allowed"
+                  className="w-full sm:w-auto bg-[var(--surface-alt)] text-[var(--text-meta)] text-sm font-extrabold px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 whitespace-nowrap cursor-not-allowed"
                 >
                   Proposal Under Review <i className="fas fa-clock text-xs"></i>
                 </button>
                 <button 
                   type="button"
                   onClick={handleCreateSubmission}
-                  className="w-full sm:w-auto bg-white border-2 border-slate-200 hover:border-[#003A8F] hover:text-[#003A8F] text-slate-600 text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="w-full sm:w-auto bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[#003A8F] hover:text-[var(--info)] text-[var(--muted)] text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <i className="fas fa-plus"></i> Submit Another Title
                 </button>
@@ -1868,11 +1868,11 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
         {/* Right Column - Made Sticky for Better UX */}
         <div className="title-submission-side-rail flex flex-col gap-6 sticky top-8 h-fit animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 ease-out fill-mode-both">
-           <div className="title-submission-side-card title-submission-progress-card bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6" style={titleProgressStyle}>
+           <div className="title-submission-side-card title-submission-progress-card bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6" style={titleProgressStyle}>
              <div className="flex items-start justify-between gap-4 mb-5">
                <div>
-                 <h3 className="text-[13px] font-extrabold text-slate-800 uppercase tracking-wider">Workflow Progress</h3>
-                 <p className="mt-1 text-xs font-semibold text-slate-500">{nextActionLabel}</p>
+                 <h3 className="text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider">Workflow Progress</h3>
+                 <p className="mt-1 text-xs font-semibold text-[var(--muted)]">{nextActionLabel}</p>
                </div>
                <div className="title-submission-progress-orb" aria-label={`Workflow progress ${submissionProgressPercent}%`}>
                  <span>{submissionProgressPercent}%</span>
@@ -1896,8 +1896,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
            
            {/* Proposal Options Selector */}
            {visibleSubmissions.length > 1 && (
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden">
-               <h3 className="text-[13px] font-extrabold text-slate-800 mb-4 uppercase tracking-wider">Your Proposals</h3>
+            <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 relative overflow-hidden">
+               <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-4 uppercase tracking-wider">Your Proposals</h3>
                <div className="space-y-2">
                  {visibleSubmissions.map((sub) => (
                     <div
@@ -1914,15 +1914,15 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       className={`w-full text-left p-3 rounded-xl text-sm font-bold border transition-all flex items-center justify-between gap-2 cursor-pointer ${
                         activeSubmissionId === sub.id
                         ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm'
-                        : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        : 'bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)]'
                       }`}
                     >
                       <span className="truncate flex-1">{sub.proposalLabel}</span>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className={`text-[9px] px-2 py-0.5 rounded uppercase tracking-widest ${
-                           sub.registrationStatus.toLowerCase() === 'approved' ? 'bg-[#EFF6FF] text-[#003A8F]' :
-                           sub.registrationStatus.toLowerCase() === 'draft' ? 'bg-slate-200 text-slate-600' :
-                           'bg-[#FFF8E1] text-[#9A6700]'
+                           sub.registrationStatus.toLowerCase() === 'approved' ? 'bg-[var(--info-soft)] text-[var(--info)]' :
+                           sub.registrationStatus.toLowerCase() === 'draft' ? 'bg-slate-200 text-[var(--muted)]' :
+                           'bg-[var(--warning-soft)] text-[var(--warning)]'
                         }`}>
                           {sub.registrationStatus}
                         </span>
@@ -1933,7 +1933,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                               e.stopPropagation();
                               handleDeleteDraftSubmission(sub.id);
                             }}
-                            className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 ml-1"
+                            className="text-[var(--text-meta)] hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 ml-1"
                             aria-label={`Delete ${sub.proposalLabel} draft`}
                             title="Delete Draft"
                           >
@@ -1951,94 +1951,94 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
            <div
              ref={adviserFeedbackRef}
              tabIndex={-1}
-             className={`title-submission-adviser-feedback-card bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 relative overflow-hidden ${isFeedbackHighlighted ? 'is-feedback-focused' : ''}`}
+             className={`title-submission-adviser-feedback-card bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 relative overflow-hidden ${isFeedbackHighlighted ? 'is-feedback-focused' : ''}`}
            >
              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-2xl -z-10 translate-x-4 -translate-y-4"></div>
-             <h3 className="text-[13px] font-extrabold text-slate-800 mb-6 uppercase tracking-wider">Adviser Review Status</h3>
+             <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-6 uppercase tracking-wider">Adviser Review Status</h3>
              <div className="flex items-center gap-4 mb-6 relative z-10">
                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(activeSubmission.adviser)}&background=0D8ABC&color=fff`} alt={activeSubmission.adviser} className="h-12 w-12 rounded-full shadow-sm ring-2 ring-white" />
                <div className="flex-1 min-w-0">
-                 <p className="text-sm font-extrabold text-slate-800 flex items-center justify-between w-full">
+                 <p className="text-sm font-extrabold text-[var(--text)] flex items-center justify-between w-full">
                     <span className="truncate">{activeSubmission.adviser}</span>
-                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-widest ${titleStatusTone === 'success' ? 'bg-[#EFF6FF] text-[#003A8F]' : 'bg-[#FFF8E1] text-[#9A6700]'}`}>
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-widest ${titleStatusTone === 'success' ? 'bg-[var(--info-soft)] text-[var(--info)]' : 'bg-[var(--warning-soft)] text-[var(--warning)]'}`}>
                       {activeSubmission.registrationStatus}
                     </span>
                  </p>
-                 <p className="text-[11px] text-slate-400 font-bold mt-1.5 uppercase tracking-wide">Reviewed on {formatDateTimeLabel(activeSubmission.lastReviewedAt)}</p>
+                 <p className="text-[11px] text-[var(--text-meta)] font-bold mt-1.5 uppercase tracking-wide">Reviewed on {formatDateTimeLabel(activeSubmission.lastReviewedAt)}</p>
                </div>
              </div>
-             <div className={`p-4 rounded-xl text-[13px] font-semibold leading-relaxed border ${titleStatusTone === 'success' ? 'bg-[#EFF6FF] border-[#BFDBFE] text-[#003A8F]' : 'bg-[#FFF8E1] border-[#FDE68A] text-[#9A6700]'}`}>
+             <div className={`p-4 rounded-xl text-[13px] font-semibold leading-relaxed border ${titleStatusTone === 'success' ? 'bg-[var(--info-soft)] border-[var(--info)] text-[var(--info)]' : 'bg-[var(--warning-soft)] border-[var(--warning)] text-[var(--warning)]'}`}>
                {activeSubmission.statusNote || 'Waiting for adviser review. Comments and remarks will appear here.'}
              </div>
            </div>
            
            {/* Document Checklist */}
-           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+           <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6">
              <div className="flex justify-between items-center mb-6">
-               <h3 className="text-[13px] font-extrabold text-slate-800 uppercase tracking-wider">Document Checklist</h3>
-               <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center shadow-sm border border-slate-100">
-                  <i className="fas fa-list-check text-slate-400 text-xs"></i>
+               <h3 className="text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider">Document Checklist</h3>
+               <div className="h-8 w-8 rounded-full bg-[var(--surface-alt)] flex items-center justify-center shadow-sm border border-[var(--border)]">
+                  <i className="fas fa-list-check text-[var(--text-meta)] text-xs"></i>
                </div>
              </div>
              <ul className="space-y-4">
                {documentChecklistItems.map((item) => (
-                 <li key={item.id} className="flex items-center gap-3 text-xs font-bold text-slate-600">
-                    <div className={`h-4 w-4 rounded-full flex items-center justify-center shrink-0 ${item.complete ? 'bg-[#EFF6FF] text-[#003A8F]' : 'bg-slate-100 text-slate-400'}`}>
+                 <li key={item.id} className="flex items-center gap-3 text-xs font-bold text-[var(--muted)]">
+                    <div className={`h-4 w-4 rounded-full flex items-center justify-center shrink-0 ${item.complete ? 'bg-[var(--info-soft)] text-[var(--info)]' : 'bg-[var(--surface-alt)] text-[var(--text-meta)]'}`}>
                       <i className={`fas ${item.complete ? 'fa-check' : 'fa-circle'} text-[8px]`}></i>
                     </div>
                     {item.label}
                  </li>
                ))}
-               <li className="flex items-center justify-between text-xs font-bold text-slate-500 mt-4 pt-4 border-t border-slate-100">
+               <li className="flex items-center justify-between text-xs font-bold text-[var(--muted)] mt-4 pt-4 border-t border-[var(--border)]">
                   <div className="flex items-center gap-3">
-                    <div className="h-4 w-4 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0"><i className="fas fa-asterisk text-[8px]"></i></div>
+                    <div className="h-4 w-4 rounded-full bg-[var(--surface-alt)] text-[var(--text-meta)] flex items-center justify-center shrink-0"><i className="fas fa-asterisk text-[8px]"></i></div>
                     Appendices (if applicable)
                   </div>
-                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-1 rounded-md">Optional</span>
+                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-[var(--text-meta)] bg-[var(--surface-alt)] px-2 py-1 rounded-md">Optional</span>
                </li>
              </ul>
            </div>
            
            {/* Submission Analytics */}
-           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
-             <h3 className="text-[13px] font-extrabold text-slate-800 mb-5 uppercase tracking-wider">Submission Analytics</h3>
+           <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6">
+             <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-5 uppercase tracking-wider">Submission Analytics</h3>
              <div className="grid grid-cols-4 gap-2">
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] text-[#003A8F] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-file-lines text-xs"></i></div>
-                 <span className="text-sm font-extrabold text-slate-800">{submissions.filter(s => !['draft', 'pending', 'awaiting title'].includes(s.registrationStatus?.toLowerCase())).length}</span>
-                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Submits</span>
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-file-lines text-xs"></i></div>
+                 <span className="text-sm font-extrabold text-[var(--text)]">{submissions.filter(s => !['draft', 'pending', 'awaiting title'].includes(s.registrationStatus?.toLowerCase())).length}</span>
+                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Submits</span>
                </div>
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-clock text-xs"></i></div>
-                  <span className="text-sm font-extrabold text-slate-800">N/A</span>
-                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Avg. Days</span>
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-[var(--surface-alt)] text-[var(--muted)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-clock text-xs"></i></div>
+                  <span className="text-sm font-extrabold text-[var(--text)]">N/A</span>
+                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Avg. Days</span>
                </div>
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-[#FFF8E1] text-[#9A6700] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-shield-halved text-xs"></i></div>
-                  <span className="text-sm font-extrabold text-slate-800">N/A</span>
-                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Approval</span>
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-[var(--warning-soft)] text-[var(--warning)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-shield-halved text-xs"></i></div>
+                  <span className="text-sm font-extrabold text-[var(--text)]">N/A</span>
+                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Approval</span>
                </div>
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-slate-100 bg-slate-50 hover:bg-slate-100 transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-[#EFF6FF] text-[#003A8F] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-chart-pie text-xs"></i></div>
-                  <span className="text-sm font-extrabold text-slate-800">{submissionProgressPercent}%</span>
-                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Complete</span>
+               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
+                 <div className="h-7 w-7 rounded-lg bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-chart-pie text-xs"></i></div>
+                  <span className="text-sm font-extrabold text-[var(--text)]">{submissionProgressPercent}%</span>
+                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Complete</span>
                </div>
              </div>
            </div>
            
            {/* Recent Activity */}
-           <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
-             <h3 className="text-[13px] font-extrabold text-slate-800 mb-6 uppercase tracking-wider">Recent Activity</h3>
-             <div className="relative border-l-2 border-slate-100 ml-2 space-y-6">
+           <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6">
+             <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-6 uppercase tracking-wider">Recent Activity</h3>
+             <div className="relative border-l-2 border-[var(--border)] ml-2 space-y-6">
                {activeSubmission.revisionHistory.slice(0, 4).map((hist, i) => (
                  <div key={i} className="relative pl-5">
-                   <div className={`absolute -left-[9px] top-0.5 h-4 w-4 rounded-full border-[3px] border-white shadow-sm ${hist.status.toLowerCase().includes('approved') ? 'bg-[#003A8F]' : hist.status.toLowerCase().includes('submitted') ? 'bg-[#F6BE00]' : 'bg-slate-300'}`}></div>
-                   <p className="text-xs font-bold text-slate-700 leading-snug">{hist.note}</p>
-                   <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-wide">{hist.dateLabel}</p>
+                   <div className={`absolute -left-[9px] top-0.5 h-4 w-4 rounded-full border-[3px] border-[var(--border)] shadow-sm ${hist.status.toLowerCase().includes('approved') ? 'bg-[#003A8F]' : hist.status.toLowerCase().includes('submitted') ? 'bg-[#F6BE00]' : 'bg-[var(--border)]'}`}></div>
+                   <p className="text-xs font-bold text-[var(--text)] leading-snug">{hist.note}</p>
+                   <p className="text-[10px] font-bold text-[var(--text-meta)] mt-1.5 uppercase tracking-wide">{hist.dateLabel}</p>
                  </div>
                ))}
                {activeSubmission.revisionHistory.length === 0 && (
-                 <div className="pl-5 text-xs font-medium text-slate-400">No recent activity on this proposal.</div>
+                 <div className="pl-5 text-xs font-medium text-[var(--text-meta)]">No recent activity on this proposal.</div>
                )}
              </div>
            </div>

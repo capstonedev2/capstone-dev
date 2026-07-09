@@ -981,12 +981,12 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
         <div className="mb-5 flex flex-col gap-1 pt-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Student workspace command center</span>
+            <span className="text-xs font-bold text-[var(--muted)] uppercase tracking-widest">Student workspace command center</span>
           </div>
           <h1 className="text-3xl font-extrabold text-[#003A8F] tracking-tight flex items-center gap-2">
             Welcome back, {data.profile.fullName || 'Student'} <span className="text-2xl hover:animate-pulse cursor-default">👋</span>
           </h1>
-          <p className="text-sm text-slate-500 font-medium max-w-2xl mt-0.5">
+          <p className="text-sm text-[var(--muted)] font-medium max-w-2xl mt-0.5">
             Track project progress, adviser feedback, milestones, and submission readiness from one focused student workspace.
           </p>
         </div>
@@ -994,12 +994,12 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           {/* Main Hero Card */}
-          <article className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-white/85 backdrop-blur-xl p-5 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] border border-white/40 transition-all duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] hover:-translate-y-1">
+          <article className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-[var(--surface)] backdrop-blur-xl p-5 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] border border-[var(--border)] transition-all duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] hover:-translate-y-1">
 
             <div className="relative z-10 flex flex-col gap-5">
               {/* Header: Status and Badges */}
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <span className="text-[11px] font-bold tracking-widest text-slate-400 uppercase">Project Workspace</span>
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+                <span className="text-[11px] font-bold tracking-widest text-[var(--text-meta)] uppercase">Project Workspace</span>
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full ${projectStatusTone === 'success' ? 'bg-emerald-100 text-emerald-700' : projectStatusTone === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
                     {data.project.status}
@@ -1013,8 +1013,8 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                 {projectStatusTone !== 'success' || (realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation')) ? (
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h2 className="text-2xl font-bold tracking-tight text-slate-800 flex items-center gap-3">
-                        <i className="fas fa-lock text-slate-400" aria-hidden="true"></i>
+                      <h2 className="text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-3">
+                        <i className="fas fa-lock text-[var(--text-meta)]" aria-hidden="true"></i>
                         Project title pending approval
                       </h2>
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700 align-middle">
@@ -1026,16 +1026,16 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                             : 'Awaiting Adviser Approval'}
                       </span>
                     </div>
-                    <p className="text-base text-slate-500 max-w-2xl leading-relaxed">
+                    <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
                       Your project title will appear here once the concept proposal has been submitted and approved by your adviser.
                     </p>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+                    <h2 className="text-2xl font-bold tracking-tight text-[var(--text)]">
                       {realGroup ? realGroup.projectTitle || realGroup.title : data.project.title}
                     </h2>
-                    <p className="text-base text-slate-600 max-w-3xl leading-relaxed">
+                    <p className="text-base text-[var(--muted)] max-w-3xl leading-relaxed">
                       {data.project.description ||
                         'Track academic progress, active deliverables, faculty guidance, and the next capstone commitments from one focused workspace.'}
                     </p>
@@ -1044,21 +1044,21 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               </div>
 
               {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600">
-                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                  <i className="fas fa-hashtag text-slate-400" aria-hidden="true" />
+              <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-[var(--muted)]">
+                <span className="flex items-center gap-2 bg-[var(--surface)] px-3 py-1.5 rounded-lg border border-[var(--border)] shadow-sm">
+                  <i className="fas fa-hashtag text-[var(--text-meta)]" aria-hidden="true" />
                   {data.project.projectCode}
                 </span>
-                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                  <i className="fas fa-user-tie text-slate-400" aria-hidden="true" />
+                <span className="flex items-center gap-2 bg-[var(--surface)] px-3 py-1.5 rounded-lg border border-[var(--border)] shadow-sm">
+                  <i className="fas fa-user-tie text-[var(--text-meta)]" aria-hidden="true" />
                   {data.project.adviser}
                 </span>
-                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                  <i className="fas fa-users text-slate-400" aria-hidden="true" />
+                <span className="flex items-center gap-2 bg-[var(--surface)] px-3 py-1.5 rounded-lg border border-[var(--border)] shadow-sm">
+                  <i className="fas fa-users text-[var(--text-meta)]" aria-hidden="true" />
                   {data.group.groupCode !== 'N/A' ? data.group.groupCode : data.group.groupName}
                 </span>
-                <span className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                  <i className="fas fa-calendar-check text-slate-400" aria-hidden="true" />
+                <span className="flex items-center gap-2 bg-[var(--surface)] px-3 py-1.5 rounded-lg border border-[var(--border)] shadow-sm">
+                  <i className="fas fa-calendar-check text-[var(--text-meta)]" aria-hidden="true" />
                   {nextSchedule?.startDateLabel ?? 'No scheduled review'}
                 </span>
               </div>
@@ -1070,16 +1070,16 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   let iconBgClass = '';
                   
                   if (item.tone === 'danger') {
-                    toneClasses = 'border-red-200 bg-white hover:border-red-300 hover:shadow-md hover:shadow-red-50 text-slate-800';
+                    toneClasses = 'border-red-200 bg-[var(--surface)] hover:border-red-300 hover:shadow-md hover:shadow-red-50 text-[var(--text)]';
                     iconBgClass = 'bg-red-50 text-red-600';
                   } else if (item.tone === 'warning') {
-                    toneClasses = 'border-amber-200 bg-white hover:border-amber-300 hover:shadow-md hover:shadow-amber-50 text-slate-800';
+                    toneClasses = 'border-amber-200 bg-[var(--surface)] hover:border-amber-300 hover:shadow-md hover:shadow-amber-50 text-[var(--text)]';
                     iconBgClass = 'bg-amber-50 text-amber-600';
                   } else if (item.tone === 'success') {
-                    toneClasses = 'border-emerald-200 bg-white hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-50 text-slate-800';
+                    toneClasses = 'border-emerald-200 bg-[var(--surface)] hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-50 text-[var(--text)]';
                     iconBgClass = 'bg-emerald-50 text-emerald-600';
                   } else {
-                    toneClasses = 'border-blue-200 bg-white hover:border-blue-300 hover:shadow-md hover:shadow-blue-50 text-slate-800';
+                    toneClasses = 'border-blue-200 bg-[var(--surface)] hover:border-blue-300 hover:shadow-md hover:shadow-blue-50 text-[var(--text)]';
                     iconBgClass = 'bg-blue-50 text-blue-600';
                   }
 
@@ -1089,22 +1089,22 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                         <i className={`fas ${item.icon} text-[13px]`} aria-hidden="true" />
                       </div>
                       <div className="flex flex-col flex-grow">
-                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">{item.meta}</span>
-                        <span className="text-sm font-bold text-slate-900 leading-tight">{item.label}</span>
+                        <span className="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-0.5">{item.meta}</span>
+                        <span className="text-sm font-bold text-[var(--text)] leading-tight">{item.label}</span>
                       </div>
-                      <i className="fas fa-chevron-right text-slate-400 group-hover:text-blue-600 transition-colors text-xs" aria-hidden="true" />
+                      <i className="fas fa-chevron-right text-[var(--text-meta)] group-hover:text-blue-600 transition-colors text-xs" aria-hidden="true" />
                     </Link>
                   );
                 })}
               </div>
 
               {/* Project Metrics */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5 mt-1 border-t border-slate-200/60">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-5 mt-1 border-t border-[var(--border)]">
                 {summaryCards.map((item) => (
                   <div key={item.id} className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.label}</span>
-                    <strong className="text-base font-bold text-slate-900 leading-tight">{item.value}</strong>
-                    <span className="text-[11px] text-slate-500 line-clamp-1">{item.note}</span>
+                    <span className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">{item.label}</span>
+                    <strong className="text-base font-bold text-[var(--text)] leading-tight">{item.value}</strong>
+                    <span className="text-[11px] text-[var(--muted)] line-clamp-1">{item.note}</span>
                   </div>
                 ))}
               </div>
@@ -1114,9 +1114,9 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
           {/* Side Progress Card */}
           <div className="lg:col-span-1 h-full">
-            <article className="h-full relative overflow-hidden rounded-2xl bg-white/85 backdrop-blur-xl p-5 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] border border-white/40 flex flex-col transition-all duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] hover:-translate-y-1">
+            <article className="h-full relative overflow-hidden rounded-2xl bg-[var(--surface)] backdrop-blur-xl p-5 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] border border-[var(--border)] flex flex-col transition-all duration-300 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] hover:-translate-y-1">
                <div className="flex items-center justify-between w-full mb-2">
-                 <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Progress Monitoring</h3>
+                 <h3 className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Progress Monitoring</h3>
                  <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
                </div>
                
@@ -1127,7 +1127,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                    <div className="absolute inset-0 bg-blue-50 rounded-full scale-110 opacity-50 pointer-events-none" />
                    <svg className="relative z-10 w-full h-full transform -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
                      <path
-                       className="text-slate-100"
+                       className="text-[var(--text)]"
                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                        fill="none"
                        stroke="currentColor"
@@ -1145,7 +1145,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                    </svg>
                    <div className="absolute flex flex-col items-center justify-center z-20">
                      <span className="text-3xl font-extrabold text-[#003A8F]">{data.project.progressPercentage}%</span>
-                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Completed</span>
+                     <span className="text-[9px] font-bold text-[var(--text-meta)] uppercase tracking-wider mt-1">Completed</span>
                    </div>
                  </div>
                </div>
@@ -1155,8 +1155,8 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
                    <i className="fas fa-crosshairs" aria-hidden="true"></i> Current Focus
                  </span>
-                 <p className="text-sm font-bold text-slate-900 leading-tight">{currentPhaseTitle}</p>
-                 <span className="text-[11px] text-slate-600 font-medium leading-relaxed line-clamp-2">{currentPhaseSummary}</span>
+                 <p className="text-sm font-bold text-[var(--text)] leading-tight">{currentPhaseTitle}</p>
+                 <span className="text-[11px] text-[var(--muted)] font-medium leading-relaxed line-clamp-2">{currentPhaseSummary}</span>
                  <button className="bg-[#003A8F] hover:bg-blue-800 transition-colors text-white text-[13px] font-semibold py-2 px-4 rounded-lg mt-2 w-full flex items-center justify-center gap-2 shadow-sm">
                    <i className="fas fa-file-alt"></i> View guidelines
                  </button>
@@ -1168,11 +1168,11 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
           {/* Column 1: Milestone Pipeline */}
           <div className="flex flex-col gap-5">
-            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Milestone Pipeline</span>
-                  <h3 className="text-lg font-bold text-slate-800">Proposal to defense</h3>
+                  <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Milestone Pipeline</span>
+                  <h3 className="text-lg font-bold text-[var(--text)]">Proposal to defense</h3>
                 </div>
                 <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/milestones">
                   Open milestones
@@ -1183,15 +1183,15 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   const workflowStatus = getWorkflowStatusConfig(item.status);
 
                   return (
-                    <article key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border border-slate-100 ${item.status === 'completed' ? 'bg-slate-50' : item.status === 'current' ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-white'}`}>
-                      <span className={`flex items-center justify-center h-7 w-7 rounded-full font-bold text-xs shrink-0 ${item.status === 'current' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-slate-600'}`}>{index + 1}</span>
+                    <article key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] ${item.status === 'completed' ? 'bg-[var(--surface-alt)]' : item.status === 'current' ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-[var(--surface)]'}`}>
+                      <span className={`flex items-center justify-center h-7 w-7 rounded-full font-bold text-xs shrink-0 ${item.status === 'current' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-200 text-[var(--muted)]'}`}>{index + 1}</span>
                       <div className="flex flex-col flex-grow">
-                        <strong className="text-[13px] font-bold text-slate-800 leading-tight">{item.title}</strong>
-                        <small className="text-[11px] text-slate-500 font-medium">{item.summary}</small>
+                        <strong className="text-[13px] font-bold text-[var(--text)] leading-tight">{item.title}</strong>
+                        <small className="text-[11px] text-[var(--muted)] font-medium">{item.summary}</small>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <Badge label={workflowStatus.label} tone={workflowStatus.tone} />
-                        <small className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{item.dateLabel}</small>
+                        <small className="text-[9px] font-bold text-[var(--text-meta)] uppercase tracking-wider">{item.dateLabel}</small>
                       </div>
                     </article>
                   );
@@ -1202,11 +1202,11 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
           {/* Column 2: Upcoming Activity & Submission Health */}
           <div className="flex flex-col gap-5">
-            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Upcoming Activity</span>
-                  <h4 className="text-lg font-bold text-slate-800">Next events</h4>
+                  <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Upcoming Activity</span>
+                  <h4 className="text-lg font-bold text-[var(--text)]">Next events</h4>
                 </div>
                 <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/schedule">
                   Open schedule
@@ -1215,9 +1215,9 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               {schedulePreview.length ? (
                 <div className="flex flex-col gap-2.5">
                   {schedulePreview.map((item) => (
-                    <article key={item.id} className="flex flex-col gap-2 p-3.5 rounded-xl border border-slate-100 bg-slate-50/80 hover:bg-slate-50 transition-colors">
+                    <article key={item.id} className="flex flex-col gap-2 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
                       <div className="flex items-start justify-between">
-                        <strong className="text-[13px] font-bold text-slate-800 leading-tight">{item.title}</strong>
+                        <strong className="text-[13px] font-bold text-[var(--text)] leading-tight">{item.title}</strong>
                         <Badge
                           label={item.type}
                           tone={
@@ -1228,12 +1228,12 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                           }
                         />
                       </div>
-                      <div className="flex flex-col gap-1 text-[10px] text-slate-500 font-bold uppercase tracking-wide">
-                        <span className="flex items-center gap-1.5"><i className="fas fa-calendar-day w-3.5 text-center text-slate-400" /> {item.startDateLabel}</span>
-                        <span className="flex items-center gap-1.5"><i className="fas fa-clock w-3.5 text-center text-slate-400" /> {item.time}</span>
-                        <span className="flex items-center gap-1.5"><i className="fas fa-location-dot w-3.5 text-center text-slate-400" /> {item.location}</span>
+                      <div className="flex flex-col gap-1 text-[10px] text-[var(--muted)] font-bold uppercase tracking-wide">
+                        <span className="flex items-center gap-1.5"><i className="fas fa-calendar-day w-3.5 text-center text-[var(--text-meta)]" /> {item.startDateLabel}</span>
+                        <span className="flex items-center gap-1.5"><i className="fas fa-clock w-3.5 text-center text-[var(--text-meta)]" /> {item.time}</span>
+                        <span className="flex items-center gap-1.5"><i className="fas fa-location-dot w-3.5 text-center text-[var(--text-meta)]" /> {item.location}</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 font-medium mt-0.5 line-clamp-2">{createExcerpt(item.description, 116)}</p>
+                      <p className="text-[11px] text-[var(--muted)] font-medium mt-0.5 line-clamp-2">{createExcerpt(item.description, 116)}</p>
                     </article>
                   ))}
                 </div>
@@ -1246,10 +1246,10 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex flex-col gap-1 mb-5">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Submission Health</span>
-                <h4 className="text-lg font-bold text-slate-800">Review status overview</h4>
+                <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Submission Health</span>
+                <h4 className="text-lg font-bold text-[var(--text)]">Review status overview</h4>
               </div>
               
               <div className="flex flex-col gap-3.5 mb-5">
@@ -1258,7 +1258,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                     <span className="text-emerald-700">Approved</span>
                     <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 text-xs rounded-full border border-emerald-100">{approvedCount}</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
                     <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(approvedCount / Math.max(data.documents.length, 1)) * 100}%` }} />
                   </div>
                 </div>
@@ -1268,7 +1268,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                     <span className="text-amber-700">Pending Review</span>
                     <span className="text-amber-700 bg-amber-50 px-2 py-0.5 text-xs rounded-full border border-amber-100">{pendingCount}</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
                     <div className="h-full bg-amber-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(pendingCount / Math.max(data.documents.length, 1)) * 100}%` }} />
                   </div>
                 </div>
@@ -1278,7 +1278,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                     <span className="text-red-700">Needs Revision</span>
                     <span className="text-red-700 bg-red-50 px-2 py-0.5 text-xs rounded-full border border-red-100">{revisionCount}</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
                     <div className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(revisionCount / Math.max(data.documents.length, 1)) * 100}%` }} />
                   </div>
                 </div>
@@ -1289,9 +1289,9 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   <strong className="text-xl font-black text-amber-700">{dueSoonCount}</strong>
                   <span className="text-[9px] font-bold text-amber-600 uppercase tracking-widest text-center leading-tight">Due<br/>soon</span>
                 </div>
-                <div className={`flex flex-col items-center justify-center gap-1 transition-colors rounded-xl p-3 border ${overdueCount ? 'bg-red-50/80 hover:bg-red-50 border-red-200' : 'bg-slate-50 border-slate-100'}`}>
-                  <strong className={`text-xl font-black ${overdueCount ? 'text-red-700' : 'text-slate-700'}`}>{overdueCount}</strong>
-                  <span className={`text-[9px] font-bold uppercase tracking-widest text-center leading-tight ${overdueCount ? 'text-red-600' : 'text-slate-500'}`}>Overdue</span>
+                <div className={`flex flex-col items-center justify-center gap-1 transition-colors rounded-xl p-3 border ${overdueCount ? 'bg-red-50/80 hover:bg-red-50 border-red-200' : 'bg-[var(--surface-alt)] border-[var(--border)]'}`}>
+                  <strong className={`text-xl font-black ${overdueCount ? 'text-red-700' : 'text-[var(--text)]'}`}>{overdueCount}</strong>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest text-center leading-tight ${overdueCount ? 'text-red-600' : 'text-[var(--muted)]'}`}>Overdue</span>
                 </div>
                 <div className="flex flex-col items-center justify-center gap-1 bg-blue-50/80 hover:bg-blue-50 transition-colors rounded-xl p-3 border border-blue-100">
                   <strong className="text-xl font-black text-blue-700">{unreadFeedbackCount}</strong>
@@ -1303,11 +1303,11 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
           {/* Column 3: Project Files, Feedback, Team */}
           <div className="flex flex-col gap-5">
-            <section className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+            <section className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Project Files</span>
-                  <h3 className="text-lg font-bold text-slate-800">Latest submissions</h3>
+                  <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Project Files</span>
+                  <h3 className="text-lg font-bold text-[var(--text)]">Latest submissions</h3>
                 </div>
                 <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/project-files">
                   Open project files
@@ -1316,19 +1316,19 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               {recentUploads.length ? (
                 <div className="flex flex-col gap-2.5">
                   {recentUploads.map((item) => (
-                    <article key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer group">
+                    <article key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors cursor-pointer group">
                       <div className="flex items-center gap-3">
                         <span className="flex items-center justify-center h-10 w-10 rounded-lg bg-blue-100 text-blue-600 shrink-0 transition-transform group-hover:scale-105">
                           <i className="fas fa-file-lines text-lg" aria-hidden="true" />
                         </span>
                         <div className="flex flex-col">
-                          <strong className="text-[13px] font-bold text-slate-800 group-hover:text-[#003A8F] transition-colors leading-tight">{item.fileName}</strong>
-                          <small className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{CATEGORY_LABELS[item.category] ?? item.category}</small>
+                          <strong className="text-[13px] font-bold text-[var(--text)] group-hover:text-[#003A8F] transition-colors leading-tight">{item.fileName}</strong>
+                          <small className="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-wider">{CATEGORY_LABELS[item.category] ?? item.category}</small>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">{item.uploadDateLabel}</span>
+                        <span className="text-[9px] font-semibold text-[var(--text-meta)] uppercase tracking-wider">{item.uploadDateLabel}</span>
                       </div>
                     </article>
                   ))}
@@ -1342,11 +1342,11 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </section>
 
-            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Faculty Feedback</span>
-                  <h3 className="text-lg font-bold text-slate-800">Recent comments</h3>
+                  <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Faculty Feedback</span>
+                  <h3 className="text-lg font-bold text-[var(--text)]">Recent comments</h3>
                 </div>
                 <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/faculty-feedback">
                   Open feedback
@@ -1360,13 +1360,13 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                     return (
                       <article
                         key={item.id}
-                        className={`flex flex-col gap-3 p-4 rounded-xl border ${item.unread ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-white border-slate-100 shadow-sm'} transition-colors group cursor-pointer`}
+                        className={`flex flex-col gap-3 p-4 rounded-xl border ${item.unread ? 'bg-blue-50/40 border-blue-100 shadow-sm' : 'bg-[var(--surface)] border-[var(--border)] shadow-sm'} transition-colors group cursor-pointer`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex flex-col">
-                            <strong className="text-[13px] font-bold text-slate-800 group-hover:text-[#003A8F] transition-colors leading-tight">{item.title}</strong>
-                            <small className="text-[11px] text-slate-500 font-medium mt-0.5">
-                              {item.facultyName} <span className="mx-1 text-slate-300">•</span> {item.dateLabel}
+                            <strong className="text-[13px] font-bold text-[var(--text)] group-hover:text-[#003A8F] transition-colors leading-tight">{item.title}</strong>
+                            <small className="text-[11px] text-[var(--muted)] font-medium mt-0.5">
+                              {item.facultyName} <span className="mx-1 text-[var(--muted)]">•</span> {item.dateLabel}
                             </small>
                           </div>
                           <div className="flex flex-col gap-1 items-end shrink-0">
@@ -1374,9 +1374,9 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                             <Badge label={statusConfig.label} tone={statusConfig.tone} />
                           </div>
                         </div>
-                        <div className="relative bg-slate-50 p-3 rounded-lg border border-slate-100">
-                           <i className="fas fa-quote-left absolute top-2.5 left-2.5 text-slate-200 text-lg" aria-hidden="true" />
-                           <p className="text-[11px] text-slate-600 font-medium italic relative z-10 pl-6 leading-relaxed line-clamp-3">
+                        <div className="relative bg-[var(--surface-alt)] p-3 rounded-lg border border-[var(--border)]">
+                           <i className="fas fa-quote-left absolute top-2.5 left-2.5 text-[var(--muted)] text-lg" aria-hidden="true" />
+                           <p className="text-[11px] text-[var(--muted)] font-medium italic relative z-10 pl-6 leading-relaxed line-clamp-3">
                              {createExcerpt(item.content, 156)}
                            </p>
                         </div>
@@ -1393,13 +1393,13 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               )}
             </article>
 
-            <article className="bg-white/85 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-6 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
-              <div className="flex justify-between items-start mb-5 pb-4 border-b border-slate-100">
+            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-6 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+              <div className="flex justify-between items-start mb-5 pb-4 border-b border-[var(--border)]">
                 <div className="flex flex-col gap-1.5">
                   <span className="flex items-center gap-2 text-[11px] font-bold text-[#003A8F] uppercase tracking-widest">
                     <i className="fas fa-users" aria-hidden="true" /> {data.group.groupCode !== 'N/A' ? data.group.groupCode : 'Project Team'}
                   </span>
-                  <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">{data.group.groupName}</h3>
+                  <h3 className="text-xl font-extrabold text-[var(--text)] tracking-tight">{data.group.groupName}</h3>
                 </div>
               </div>
               <div className="flex flex-col gap-3">
@@ -1409,14 +1409,14 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                     className={`group flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 ${
                       member.isCurrent 
                         ? 'bg-blue-50/30 border-blue-200/60 shadow-sm hover:shadow-md hover:bg-blue-50/50' 
-                        : 'bg-white border-slate-200/60 hover:bg-slate-50 hover:border-slate-300 shadow-sm hover:shadow-md'
+                        : 'bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface-alt)] hover:border-[var(--border-strong)] shadow-sm hover:shadow-md'
                     }`}
                   >
                     <div className="relative shrink-0 transition-transform duration-300 group-hover:scale-105">
                       <span className={`student-member-avatar flex items-center justify-center h-11 w-11 rounded-full font-bold text-sm uppercase tracking-wider shadow-inner ring-4 overflow-hidden ${
                         member.isCurrent 
                           ? 'bg-gradient-to-br from-blue-600 to-blue-800 text-white ring-blue-100/50' 
-                          : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 ring-slate-50'
+                          : 'bg-gradient-to-br from-slate-100 to-slate-200 text-[var(--text)] ring-slate-50'
                       }`}>
                         {member.profileImage ? (
                           <img src={member.profileImage} alt={member.fullName} className="h-full w-full object-cover" />
@@ -1425,17 +1425,17 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                         )}
                       </span>
                       {member.isLeader && (
-                        <div className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-white shadow-md z-10 transition-transform duration-300 group-hover:rotate-12">
+                        <div className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-[var(--border)] shadow-md z-10 transition-transform duration-300 group-hover:rotate-12">
                           <i className="fas fa-crown text-[10px] text-white drop-shadow-sm" aria-hidden="true" />
                         </div>
                       )}
                     </div>
                     <div className="flex flex-col flex-grow justify-center">
-                      <strong className={`text-[15px] font-extrabold leading-tight tracking-tight ${member.isCurrent ? 'text-blue-900' : 'text-slate-800'}`}>
+                      <strong className={`text-[15px] font-extrabold leading-tight tracking-tight ${member.isCurrent ? 'text-blue-900' : 'text-[var(--text)]'}`}>
                         {member.fullName}
                       </strong>
                       <div className="flex items-center gap-2 mt-1">
-                        <small className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
+                        <small className="text-[11px] font-semibold text-[var(--muted)] uppercase tracking-widest">
                           {member.studentId}
                         </small>
                       </div>

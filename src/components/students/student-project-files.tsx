@@ -213,16 +213,16 @@ function GroupAssignmentRequired() {
       </header>
 
       <div className="page-body p-8 sm:p-12 lg:p-16">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-slate-200/40 relative overflow-hidden group">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-[var(--border)] bg-[var(--surface)] backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-slate-200/40 relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50/50 -z-10"></div>
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
 
-          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500 shadow-inner mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 ring-4 ring-white">
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-[var(--muted)] shadow-inner mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 ring-4 ring-white">
             <i className="fas fa-users-slash text-4xl" aria-hidden="true" />
           </div>
-          <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Group Assignment Required</h3>
-          <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-500 leading-relaxed">
+          <h3 className="text-3xl font-extrabold tracking-tight text-[var(--text)]">Group Assignment Required</h3>
+          <p className="mx-auto mt-5 max-w-lg text-base font-medium text-[var(--muted)] leading-relaxed">
             You must be assigned to a project group before you can access the project files repository and begin uploading chapters or documents. Please contact your coordinator.
           </p>
         </div>
@@ -251,7 +251,7 @@ function TitleApprovalRequired() {
       </header>
 
       <div className="page-body p-8 sm:p-12 lg:p-16">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-indigo-200/80 bg-white/80 backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-indigo-200/40 relative overflow-hidden group">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-indigo-200/80 bg-[var(--surface)] backdrop-blur-sm p-12 sm:p-16 text-center shadow-xl shadow-indigo-200/40 relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-blue-50/50 -z-10"></div>
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-700 -z-10"></div>
@@ -259,8 +259,8 @@ function TitleApprovalRequired() {
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 text-indigo-600 shadow-inner mb-8 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 ring-4 ring-white">
             <i className="fas fa-lock text-4xl" aria-hidden="true" />
           </div>
-          <h3 className="text-3xl font-extrabold tracking-tight text-slate-800">Stage 1 Required</h3>
-          <p className="mx-auto mt-5 max-w-lg text-base font-medium text-slate-600 leading-relaxed">
+          <h3 className="text-3xl font-extrabold tracking-tight text-[var(--text)]">Stage 1 Required</h3>
+          <p className="mx-auto mt-5 max-w-lg text-base font-medium text-[var(--muted)] leading-relaxed">
             Complete Stage 1: Concept Proposal in the <strong className="text-indigo-700">Title Submission</strong> workspace before accessing the project files repository. Once Stage 1 is marked complete, your group can begin uploading chapters, revisions, and project documents.
           </p>
         </div>
@@ -1161,7 +1161,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   {isGroupLeader && data.group?.id && (
                     <div className="relative group/permissions">
                       <button type="button" className="flex items-center gap-2.5 rounded-xl border border-blue-200/60 bg-gradient-to-br from-indigo-50 to-blue-50 px-4 py-2 shadow-sm transition-all duration-300 hover:border-blue-300 hover:from-indigo-100 hover:to-blue-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/80 shadow-sm border border-blue-100/50">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[var(--surface)] shadow-sm border border-blue-100/50">
                           <i className="fas fa-user-lock text-blue-600 transition-transform duration-300 group-hover/permissions:scale-110" aria-hidden="true" />
                         </div>
                         <span className="text-sm font-bold text-blue-900">Manage Permissions</span>
@@ -1170,15 +1170,15 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
                       <div className="absolute right-0 top-full z-20 hidden w-64 flex-col pt-3 group-hover/permissions:flex animate-in fade-in slide-in-from-top-2 duration-200">
                         {/* Little triangle pointer */}
-                        <div className="absolute right-6 top-1.5 h-3 w-3 rotate-45 border-l border-t border-slate-200/60 bg-white/95" />
+                        <div className="absolute right-6 top-1.5 h-3 w-3 rotate-45 border-l border-t border-[var(--border)] bg-[var(--surface)]" />
 
-                        <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/95 p-2 shadow-2xl shadow-blue-900/10 ring-1 ring-slate-900/5 backdrop-blur-xl">
-                          <div className="px-3 pb-2 pt-1.5 border-b border-slate-100/50 mb-1">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Grant Timed Upload</h4>
+                        <div className="flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-2xl shadow-blue-900/10 ring-1 ring-slate-900/5 backdrop-blur-xl">
+                          <div className="px-3 pb-2 pt-1.5 border-b border-[var(--border)]/50 mb-1">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-meta)]">Grant Timed Upload</h4>
                           </div>
 
-                          <div className="px-3 py-2 border-b border-slate-100/50 mb-1">
-                            <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-1.5">Time Limit</label>
+                          <div className="px-3 py-2 border-b border-[var(--border)]/50 mb-1">
+                            <label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-meta)] block mb-1.5">Time Limit</label>
                             <div className="flex gap-1">
                               {PERMISSION_DURATION_OPTIONS.map(opt => (
                                 <button
@@ -1188,7 +1188,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                   className={`flex-1 rounded-lg px-2 py-1.5 text-[10px] font-bold transition-all ${
                                     leaderGrantDuration === opt.value
                                       ? 'bg-blue-600 text-white shadow-sm'
-                                      : 'bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600'
+                                      : 'bg-[var(--surface-alt)] text-[var(--muted)] hover:bg-blue-50 hover:text-blue-600'
                                   }`}
                                 >
                                   {opt.value}m
@@ -1209,7 +1209,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                   className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition group/item ${
                                     isAllowed
                                       ? 'bg-emerald-50 cursor-default'
-                                      : 'hover:bg-slate-50 hover:text-blue-600'
+                                      : 'hover:bg-[var(--surface-alt)] hover:text-blue-600'
                                   }`}
                                   onClick={async () => {
                                     if (!member.user_id || isAllowed) return;
@@ -1239,14 +1239,14 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                     <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition ${
                                       isAllowed
                                         ? 'bg-emerald-100 text-emerald-700'
-                                        : 'bg-slate-100 text-slate-600 group-hover/item:bg-blue-100 group-hover/item:text-blue-700'
+                                        : 'bg-[var(--surface-alt)] text-[var(--muted)] group-hover/item:bg-blue-100 group-hover/item:text-blue-700'
                                     }`}>
                                       {isAllowed ? <i className="fas fa-check" aria-hidden="true" /> : member.fullName.charAt(0).toUpperCase()}
                                     </span>
                                     <span className={`text-sm font-semibold transition truncate ${
                                       isAllowed
                                         ? 'text-emerald-800'
-                                        : 'text-slate-700 group-hover/item:text-blue-700'
+                                        : 'text-[var(--text)] group-hover/item:text-blue-700'
                                     }`}>
                                       {member.fullName}
                                     </span>
@@ -1254,7 +1254,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                   <span className={`text-[10px] font-bold uppercase tracking-wider ${
                                     isAllowed
                                       ? 'text-emerald-600'
-                                      : 'text-slate-400 group-hover/item:text-blue-600'
+                                      : 'text-[var(--text-meta)] group-hover/item:text-blue-600'
                                   }`}>
                                     {isAllowed ? `${leaderGrantDuration}m ✓` : 'Allow'}
                                   </span>
@@ -1262,7 +1262,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                               );
                             })
                           ) : (
-                            <div className="px-3 py-3 text-center text-xs text-slate-500">
+                            <div className="px-3 py-3 text-center text-xs text-[var(--muted)]">
                               No members available.
                             </div>
                           )}
@@ -1342,7 +1342,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 rounded-xl bg-white/80 border border-emerald-200 px-4 py-2 shadow-sm">
+                        <div className="flex items-center gap-2 rounded-xl bg-[var(--surface)] border border-emerald-200 px-4 py-2 shadow-sm">
                           <i className="fas fa-clock text-emerald-600 text-sm" aria-hidden="true" />
                           <span className="text-lg font-black tabular-nums text-emerald-800 tracking-tight">{permissionCountdown}</span>
                           <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600">remaining</span>
@@ -1361,7 +1361,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                           ? 'border-blue-500 bg-blue-50/80 shadow-inner scale-[1.01]'
                           : uploadDraft.file
                             ? 'border-emerald-300 bg-emerald-50/30'
-                            : 'border-slate-300 bg-slate-50/50 hover:border-blue-400 hover:bg-blue-50/40 hover:shadow-sm'
+                            : 'border-[var(--border-strong)] bg-[var(--surface-alt)] hover:border-blue-400 hover:bg-blue-50/40 hover:shadow-sm'
                       }`}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
@@ -1369,30 +1369,30 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     >
                       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 
-                      <div className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-md mb-6 transition-all duration-500 z-10 ${isDragOver ? 'scale-110 shadow-blue-200 shadow-lg' : uploadDraft.file ? 'scale-110 shadow-emerald-200 shadow-lg' : 'group-hover:scale-110 group-hover:shadow-blue-100 group-hover:shadow-lg rotate-3 group-hover:rotate-0'}`}>
+                      <div className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--surface)] shadow-md mb-6 transition-all duration-500 z-10 ${isDragOver ? 'scale-110 shadow-blue-200 shadow-lg' : uploadDraft.file ? 'scale-110 shadow-emerald-200 shadow-lg' : 'group-hover:scale-110 group-hover:shadow-blue-100 group-hover:shadow-lg rotate-3 group-hover:rotate-0'}`}>
                         <div className={`absolute inset-0 rounded-2xl ${uploadDraft.file ? 'bg-emerald-400/20' : 'bg-blue-400/20'} animate-ping opacity-0 group-hover:opacity-100 duration-1000`}></div>
                         <i className={`fas ${uploadDraft.file ? getProjectFileTypeIcon(uploadDraft.file.name, uploadDraft.file.type) : 'fa-cloud-arrow-up'} text-3xl transition-colors duration-300 ${uploadDraft.file ? 'text-emerald-600' : isDragOver ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
                       </div>
 
-                      <h4 className={`text-lg font-extrabold transition-colors z-10 ${uploadDraft.file ? 'text-emerald-800' : 'text-slate-700 group-hover:text-blue-700'}`}>
+                      <h4 className={`text-lg font-extrabold transition-colors z-10 ${uploadDraft.file ? 'text-emerald-800' : 'text-[var(--text)] group-hover:text-blue-700'}`}>
                         {uploadDraft.file ? uploadDraft.file.name : 'Drag and drop your file here'}
                       </h4>
 
-                      <p className="mt-2 text-sm text-slate-500 font-medium z-10 max-w-sm text-center">
+                      <p className="mt-2 text-sm text-[var(--muted)] font-medium z-10 max-w-sm text-center">
                         {uploadDraft.file ? 'The selected file is ready for secure private storage and version tracking.' : 'or click to browse from your computer'}
                       </p>
 
                       {!uploadDraft.file && (
-                        <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-slate-500 z-10">
-                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
-                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOC</span>
-                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200/80 shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-file-powerpoint text-amber-500 text-sm"></i> PPT</span>
+                        <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-[var(--muted)] z-10">
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOC</span>
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-file-powerpoint text-amber-500 text-sm"></i> PPT</span>
                         </div>
                       )}
 
                       {uploadDraft.file && (
                         <div className="mt-8 flex items-center gap-3 z-10">
-                          <button className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-slate-50 transition-all" type="button" onClick={(e) => { e.stopPropagation(); handleBrowseFile(); }}>
+                          <button className="flex items-center gap-2 rounded-xl bg-[var(--surface)] px-4 py-2 text-sm font-bold text-[var(--text)] shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-[var(--surface-alt)] transition-all" type="button" onClick={(e) => { e.stopPropagation(); handleBrowseFile(); }}>
                             <i className="fas fa-folder-open text-blue-500" aria-hidden="true" /> Change File
                           </button>
                           <button className="flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 shadow-sm ring-1 ring-inset ring-rose-200 hover:bg-rose-100 transition-all" type="button" onClick={(e) => { e.stopPropagation(); clearSelectedFile(); }}>
@@ -1414,9 +1414,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   <section className="project-files-upload-fields flex flex-col gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="flex flex-col gap-2.5">
-                        <label htmlFor="project-file-category" className="text-sm font-bold text-slate-700 ml-1">Category <span className="text-rose-500">*</span></label>
+                        <label htmlFor="project-file-category" className="text-sm font-bold text-[var(--text)] ml-1">Category <span className="text-rose-500">*</span></label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-blue-600 transition-colors">
                             <i className="fas fa-tags"></i>
                           </div>
                           <select
@@ -1424,20 +1424,20 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                             value={uploadDraft.category}
                             onChange={(event) => updateUploadDraft('category', event.target.value)}
                             disabled={isUploading}
-                            className="block w-full appearance-none rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-10 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="block w-full appearance-none rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-12 pr-10 text-[var(--text)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-[var(--surface)] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-[var(--surface-alt)] sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           >
                             {PROJECT_FILE_CATEGORY_OPTIONS.map((option) => (
                               <option key={option.key} value={option.key}>{option.label}</option>
                             ))}
                           </select>
-                          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none" aria-hidden="true" />
+                          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[var(--text-meta)] pointer-events-none" aria-hidden="true" />
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-2.5">
-                        <label htmlFor="project-file-tag" className="text-sm font-bold text-slate-700 ml-1">Tag / Version <span className="text-rose-500">*</span></label>
+                        <label htmlFor="project-file-tag" className="text-sm font-bold text-[var(--text)] ml-1">Tag / Version <span className="text-rose-500">*</span></label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-blue-600 transition-colors">
                             <i className="fas fa-code-branch"></i>
                           </div>
                           <select
@@ -1445,21 +1445,21 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                             value={uploadDraft.tag}
                             onChange={(event) => updateUploadDraft('tag', event.target.value as ProjectFileUploadState['tag'])}
                             disabled={isUploading}
-                            className="block w-full appearance-none rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-10 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="block w-full appearance-none rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-12 pr-10 text-[var(--text)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-[var(--surface)] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-[var(--surface-alt)] sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           >
                             {PROJECT_FILE_TAG_OPTIONS.map((tag) => (
                               <option key={tag} value={tag}>{tag}</option>
                             ))}
                           </select>
-                          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none" aria-hidden="true" />
+                          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[var(--text-meta)] pointer-events-none" aria-hidden="true" />
                         </div>
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-2.5">
-                      <label htmlFor="project-file-version-notes" className="text-sm font-bold text-slate-700 ml-1">Version Notes <span className="text-slate-400 font-medium text-[10px] uppercase tracking-wider ml-1 px-2 py-0.5 bg-slate-100 rounded-md">Optional</span></label>
+                      <label htmlFor="project-file-version-notes" className="text-sm font-bold text-[var(--text)] ml-1">Version Notes <span className="text-[var(--text-meta)] font-medium text-[10px] uppercase tracking-wider ml-1 px-2 py-0.5 bg-[var(--surface-alt)] rounded-md">Optional</span></label>
                       <div className="relative group">
-                        <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                        <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-blue-600 transition-colors">
                           <i className="fas fa-comment-dots"></i>
                         </div>
                         <textarea
@@ -1468,7 +1468,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                           onChange={(event) => updateUploadDraft('versionNotes', event.target.value)}
                           placeholder="Summarize what changed in this version..."
                           disabled={isUploading}
-                          className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/50 py-3.5 pl-12 pr-4 text-slate-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-slate-50 sm:text-sm font-medium outline-none min-h-[120px] resize-y disabled:opacity-60 disabled:cursor-not-allowed leading-relaxed"
+                          className="block w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-12 pr-4 text-[var(--text)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-[var(--text-meta)] focus:bg-[var(--surface)] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-[var(--surface-alt)] sm:text-sm font-medium outline-none min-h-[120px] resize-y disabled:opacity-60 disabled:cursor-not-allowed leading-relaxed"
                         />
                       </div>
                     </div>
@@ -1480,9 +1480,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                       </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-4 pt-6 border-t border-slate-100">
-                      <button className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200/80 hover:bg-slate-50 hover:text-slate-900 hover:ring-slate-300 transition-all disabled:opacity-50" type="button" onClick={resetUploadDraft} disabled={isUploading}>
-                        <i className="fas fa-rotate-left text-slate-400" aria-hidden="true" /> Reset
+                    <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-4 pt-6 border-t border-[var(--border)]">
+                      <button className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-[var(--surface)] px-6 py-3.5 text-sm font-bold text-[var(--text)] shadow-sm ring-1 ring-inset ring-slate-200/80 hover:bg-[var(--surface-alt)] hover:text-[var(--text)] hover:ring-slate-300 transition-all disabled:opacity-50" type="button" onClick={resetUploadDraft} disabled={isUploading}>
+                        <i className="fas fa-rotate-left text-[var(--text-meta)]" aria-hidden="true" /> Reset
                       </button>
 
                       <button
@@ -1549,9 +1549,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <span className="section-kicker">Adviser Feedback</span>
-                        <h4 className="mt-1 text-lg font-extrabold text-slate-900">Revision Comments</h4>
+                        <h4 className="mt-1 text-lg font-extrabold text-[var(--text)]">Revision Comments</h4>
                       </div>
-                      <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
+                      <span className="w-fit rounded-full bg-[var(--surface)] px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
                         {historyFile.reviewComments.length} comment{historyFile.reviewComments.length === 1 ? '' : 's'}
                       </span>
                     </div>
@@ -1561,13 +1561,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                         const parsedComment = parseReviewCommentBody(comment.body);
 
                         return (
-                          <article key={comment.id} className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+                          <article key={comment.id} className="rounded-2xl border border-blue-100 bg-[var(--surface)] p-4 shadow-sm">
                             <div className="flex items-start gap-3">
                               <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#003A8F] text-xs font-black text-white">
                                 {index + 1}
                               </span>
                               <div className="min-w-0 flex-1">
-                                <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
+                                <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-[var(--muted)]">
                                   <span>{comment.authorName || adviserName}</span>
                                   <span aria-hidden="true">|</span>
                                   <span>{formatProjectFileDateTime(String(comment.createdAt))}</span>
@@ -1578,7 +1578,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                                     {parsedComment.area}
                                   </p>
                                 ) : null}
-                                <p className="mt-3 text-sm leading-6 text-slate-700">{parsedComment.text}</p>
+                                <p className="mt-3 text-sm leading-6 text-[var(--text)]">{parsedComment.text}</p>
                               </div>
                             </div>
                           </article>

@@ -1,46 +1,87 @@
-:root {
+
+:root, [data-theme="light"] {
     --primary: #003A8F;
-    --primary-deep: #1A1851;
-    --primary-bright: #002C6B;
-    --primary-soft: #EFF6FF;
+    --primary-deep: #002c6b;
+    --primary-bright: #3B82F6;
+    --primary-soft: rgba(0, 58, 143, 0.1);
     --secondary: #F6BE00;
-    --secondary-deep: #9A6700;
-    --secondary-soft: #FFF8E1;
-    --accent: #FFF0B3;
+    --secondary-deep: #d4a000;
+    --secondary-soft: rgba(246, 190, 0, 0.15);
     --bg: #F8FAFC;
     --surface: #FFFFFF;
-    --surface-alt: #FBFCFE;
-    --surface-accent: #FFF9EB;
-    --border: #E5E7EB;
-    --border-strong: #D1D5DB;
-    --text: #111827;
-    --muted: #6b7280;
-    --muted-strong: #4b5563;
-    --success: #15803D;
-    --success-soft: #F0FDF4;
-    --warning: #B45309;
-    --warning-soft: #FFF7E6;
-    --danger: #B91C1C;
-    --danger-soft: #FEF2F2;
-    --info: #1D4ED8;
-    --info-soft: #EFF6FF;
-    --archived: #475569;
-    --archived-soft: #F1F5F9;
-    --transfer: #0F766E;
-    --transfer-soft: #ECFEFF;
-    --shadow-sm: 0 12px 28px rgba(15, 23, 42, 0.05);
-    --shadow-md: 0 18px 42px rgba(15, 23, 42, 0.09);
-    --shadow-lg: 0 24px 56px rgba(15, 23, 42, 0.12);
+    --surface-alt: #F1F5F9;
+    --surface-accent: #E2E8F0;
+    --surface-sunken: #F8FAFC;
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --text: #0F172A;
+    --muted: #475569;
+    --muted-strong: #334155;
+    --text-meta: #64748B;
+    --success: #10B981;
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --warning: #F59E0B;
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --danger: #EF4444;
+    --danger-soft: rgba(239, 68, 68, 0.15);
+    --info: #3B82F6;
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --archived: #64748B;
+    --archived-soft: rgba(100, 116, 139, 0.15);
+    --transfer: #14B8A6;
+    --transfer-soft: rgba(20, 184, 166, 0.15);
+    --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.12);
     --radius-sm: 12px;
     --radius-md: 18px;
     --radius-lg: 26px;
     --sidebar-width: 280px;
-    --surface-sunken: #f5f7fb;
-    --text-meta: #6b7280;
-    --border-color: #e5e7eb;
+    --border-color: #E2E8F0;
     --bg-active: rgba(0, 58, 143, 0.08);
     --transition-fast: all 0.18s ease;
 }
+
+[data-theme="dark"] {
+    --primary: #3B82F6;
+    --primary-deep: #1E3A8A;
+    --primary-bright: #60A5FA;
+    --primary-soft: rgba(59, 130, 246, 0.15);
+    --secondary: #FBBF24;
+    --secondary-deep: #D97706;
+    --secondary-soft: rgba(251, 191, 36, 0.15);
+    --bg: #0F172A;
+    --surface: #1E293B;
+    --surface-alt: #0F172A;
+    --surface-accent: #334155;
+    --surface-sunken: #020617;
+    --border: #334155;
+    --border-strong: #475569;
+    --text: #F8FAFC;
+    --muted: #94A3B8;
+    --muted-strong: #CBD5E1;
+    --text-meta: #94A3B8;
+    --success: #34D399;
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --warning: #FBBF24;
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --danger: #F87171;
+    --danger-soft: rgba(239, 68, 68, 0.15);
+    --info: #60A5FA;
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --archived: #94A3B8;
+    --archived-soft: rgba(148, 163, 184, 0.15);
+    --transfer: #2DD4BF;
+    --transfer-soft: rgba(20, 184, 166, 0.15);
+    --shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 18px 42px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.5);
+    --border-color: #334155;
+    --bg-active: rgba(59, 130, 246, 0.12);
+}
+
+
+
 
 * {
     box-sizing: border-box;
@@ -56,11 +97,13 @@ body {
 body {
     font-family: var(--font-student), "Poppins", "Segoe UI", sans-serif;
     background:
-        radial-gradient(circle at top left, rgba(0, 58, 143, 0.06), transparent 22%),
-        radial-gradient(circle at top right, rgba(246, 190, 0, 0.1), transparent 18%),
-        linear-gradient(180deg, #fbfcfe 0%, #f4f7fb 34%, #eef2f7 100%);
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.15), transparent 22%),
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.1), transparent 18%),
+        linear-gradient(180deg, #0F172A 0%, #020617 100%);
     color: var(--text);
 }
+
+
 
 body::-webkit-scrollbar {
     width: 10px;
@@ -100,9 +143,11 @@ button {
     display: flex;
     min-height: 100vh;
     background:
-        radial-gradient(circle at top right, rgba(246, 190, 0, 0.08), transparent 24%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(248, 250, 252, 0.76));
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.05), transparent 24%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.4), rgba(2, 6, 23, 0.76));
 }
+
+
 
 .sidebar {
     @apply fixed inset-y-0 left-0 flex flex-col text-white;
@@ -341,10 +386,10 @@ button {
 }
 
 .sidebar-link.is-active {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.2);
     color: white;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
 .sidebar-link.is-active::before {
@@ -513,11 +558,10 @@ button {
     align-items: center;
     padding: 1.15rem 1.35rem;
     margin-bottom: 1.25rem;
-    border: 1px solid rgba(229, 231, 235, 0.92);
-    border-radius: 1.45rem;
-    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--border);
+    background: rgba(30, 41, 59, 0.75);
     backdrop-filter: blur(14px);
-    box-shadow: 0 16px 34px rgba(31, 41, 55, 0.06);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
     position: relative;
     z-index: 20;
 }
@@ -566,7 +610,7 @@ button {
     border-radius: 999px;
     background: rgba(0, 58, 143, 0.05);
     border: 1px solid rgba(0, 58, 143, 0.08);
-    color: #64748b;
+    color: var(--text);
     font-size: 0.74rem;
     font-weight: 700;
 }
@@ -647,11 +691,13 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.92));
     color: var(--primary);
-    border: 1px solid rgba(0, 58, 143, 0.08);
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
 }
+
+
 
 .icon-btn:hover,
 .top-nav-alert-link:hover,
@@ -667,9 +713,9 @@ button {
     align-items: center;
     gap: 0.72rem;
     padding: 0.54rem 0.68rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
-    border: 1px solid rgba(0, 58, 143, 0.08);
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.92));
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
     color: var(--text);
 }
 
@@ -763,9 +809,9 @@ button {
     min-height: 3.2rem;
     padding: 0.35rem 0.45rem 0.35rem 0.35rem;
     border-radius: 999px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
-    border: 1px solid rgba(0, 58, 143, 0.08);
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.92));
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
     color: var(--text);
     transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
 }
@@ -838,7 +884,7 @@ button {
     gap: 0.85rem;
     padding: 1rem;
     border-radius: 1.35rem;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    background: var(--surface);
     box-shadow: 0 28px 60px rgba(15, 23, 42, 0.14), 0 4px 16px rgba(15, 23, 42, 0.06);
     border: 1px solid var(--border);
 }
@@ -918,7 +964,7 @@ button {
 }
 
 .notification-menu-view-all.is-secondary {
-    background: #f8fafc;
+    background: var(--surface);
     border-color: rgba(203, 213, 225, 0.9);
     color: var(--primary);
 }
@@ -1002,13 +1048,13 @@ button {
 
 .notification-menu-item:hover {
     transform: translateY(-1px);
-    background: white;
+    background: var(--surface);
     border-color: rgba(0, 58, 143, 0.16);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
 .notification-menu-item.is-unread {
-    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    background: var(--surface);
     border-color: rgba(0, 58, 143, 0.14);
 }
 
@@ -1188,7 +1234,7 @@ button {
     gap: 0.65rem;
     min-height: 44px;
     padding: 0.34rem 0.95rem 0.34rem 0.42rem;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 1rem;
     box-shadow: 0 12px 26px rgba(31, 41, 55, 0.06);
@@ -1261,7 +1307,7 @@ button {
     right: 0;
     min-width: 18rem;
     width: min(19rem, calc(100vw - 2rem));
-    background: #fff;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 1.2rem;
     box-shadow: 0 28px 60px rgba(15, 23, 42, 0.14);
@@ -1497,8 +1543,8 @@ button {
     padding: 0 !important;
     border-right: 1px solid #dbe3ef !important;
     border-radius: 0 !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
     box-shadow: none !important;
     transform: translateX(0) !important;
 }
@@ -1528,7 +1574,7 @@ button {
     min-height: 114px !important;
     padding: 0.85rem 1rem 1rem !important;
     border-bottom: 1px solid #dbe3ef !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
 }
 
 .student-shell .brand-mark,
@@ -1538,18 +1584,18 @@ button {
 .student-shell .sidebar-nav-heading,
 .student-shell .sidebar-link,
 .student-shell .sidebar-link-label {
-    color: #0f172a !important;
+    color: var(--text) !important;
 }
 
 .student-shell .brand-mark i,
 .student-shell .sidebar-link-icon {
-    color: #475569 !important;
+    color: var(--text) !important;
 }
 
 .student-shell .sidebar-nav {
     padding: 1rem 1rem 1.25rem !important;
     gap: 1.15rem !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
 }
 
 .student-shell .sidebar-nav-heading {
@@ -1693,7 +1739,7 @@ button {
     grid-row: 1 !important;
     gap: 0 !important;
     min-width: 0 !important;
-    color: #0f172a !important;
+    color: var(--text) !important;
     font-size: 1.5rem !important;
     font-weight: 900 !important;
     line-height: 0.95 !important;
@@ -1704,7 +1750,7 @@ button {
 .student-shell .system-brand-name span,
 .student-shell .system-brand-name strong {
     display: inline !important;
-    color: #0f172a !important;
+    color: var(--text) !important;
     font-size: inherit !important;
     font-weight: inherit !important;
     line-height: inherit !important;
@@ -1723,7 +1769,7 @@ button {
     grid-row: 2 !important;
     min-width: 0 !important;
     overflow: hidden !important;
-    color: #64748b !important;
+    color: var(--text) !important;
     font-size: 0.72rem !important;
     font-weight: 600 !important;
     line-height: 1.15 !important;
@@ -1751,7 +1797,7 @@ button {
 .student-shell .sidebar-header p {
     display: block !important;
     margin: 0.45rem 0 0 !important;
-    color: #64748b !important;
+    color: var(--text) !important;
     font-size: 0.76rem !important;
     font-weight: 500 !important;
     line-height: 1.35 !important;
@@ -2000,8 +2046,8 @@ button {
     padding: 0.75rem;
     border: 1px solid rgba(226, 232, 240, 0.95);
     border-radius: 0.95rem;
-    background: #f8fafc;
-    color: #0f172a;
+    background: var(--surface);
+    color: var(--text);
     text-align: left;
     cursor: pointer;
     transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
@@ -2021,7 +2067,7 @@ button {
     align-items: center;
     justify-content: center;
     border-radius: 0.8rem;
-    background: #ffffff;
+    background: var(--surface);
     color: #003A8F;
     box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.95);
 }
@@ -2033,13 +2079,13 @@ button {
 }
 
 .profile-theme-toggle-copy strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.88rem;
     line-height: 1.2;
 }
 
 .profile-theme-toggle-copy small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.76rem;
     line-height: 1.35;
 }
@@ -2059,7 +2105,7 @@ button {
     width: 1.18rem;
     height: 1.18rem;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
     transition: transform 0.16s ease;
 }
@@ -2080,7 +2126,7 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%);
+    background: var(--surface);
     border-radius: 1rem;
     transition: var(--transition-fast);
     box-shadow: 0 12px 28px rgba(31, 41, 55, 0.06);
@@ -2226,7 +2272,7 @@ button {
 .page-strip-stat small {
     display: block;
     margin-top: 0.35rem;
-    color: #64748b;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -2254,7 +2300,7 @@ button {
     min-height: 2.75rem;
     padding: 0.75rem 1rem;
     border-radius: 0.95rem;
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    background: var(--surface);
     border: 1px solid rgba(0, 58, 143, 0.12);
     color: var(--primary);
     font-weight: 700;
@@ -2303,7 +2349,7 @@ button {
 .student-dashboard-card {
     border-radius: 1.5rem;
     border: 1px solid rgba(229, 231, 235, 0.92);
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: var(--shadow-sm);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -2463,7 +2509,7 @@ button {
     border: 1px solid rgba(229, 231, 235, 0.92);
     border-radius: 1.2rem;
     overflow: hidden;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-dashboard-meta-item {
@@ -2507,7 +2553,7 @@ button {
     padding: 1rem 1.05rem;
     border-radius: 1rem;
     border: 1px solid rgba(226, 232, 240, 0.92);
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-dashboard-focus-callout {
@@ -2584,7 +2630,7 @@ button {
     padding: 0.75rem 1rem;
     border-radius: 999px;
     border: 1px solid rgba(148, 163, 184, 0.32);
-    background: #ffffff;
+    background: var(--surface);
     color: var(--primary);
     font-weight: 700;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
@@ -2611,7 +2657,7 @@ button {
     padding: 0.95rem 1rem;
     border-radius: 1rem;
     border: 1px solid rgba(226, 232, 240, 0.92);
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-progress-panel-item span {
@@ -2646,7 +2692,7 @@ button {
     padding: 1.35rem;
     border-radius: 1rem;
     border-color: #dbe5f1;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
@@ -2670,7 +2716,7 @@ button {
 }
 
 .student-progress-reports-page .progress-reports-form .form-field label {
-    color: #475569;
+    color: var(--text);
     font-size: 0.76rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -2679,9 +2725,9 @@ button {
 
 .student-progress-reports-page .progress-reports-form .form-field input,
 .student-progress-reports-page .progress-reports-form .form-field textarea {
-    border-color: #cbd5e1;
+    border-color: var(--border);
     border-radius: 0.85rem;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.035);
 }
 
@@ -2705,7 +2751,7 @@ button {
 }
 
 .student-progress-reports-page .progress-reports-percent-input span {
-    color: #64748b;
+    color: var(--text);
     font-weight: 900;
 }
 
@@ -2724,7 +2770,7 @@ button {
 
 .student-progress-reports-page .progress-reports-form-actions .form-helper {
     max-width: 28ch;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.45;
 }
@@ -2739,13 +2785,13 @@ button {
     padding: 1rem;
     border-radius: 0.95rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: none;
 }
 
 .student-progress-reports-page .progress-reports-history-summary {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.55;
 }
@@ -2755,7 +2801,7 @@ button {
     padding: 0.85rem;
     border-radius: 0.85rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-progress-reports-page .progress-reports-detail-grid > div {
@@ -2766,7 +2812,7 @@ button {
 
 .student-progress-reports-page .progress-reports-detail-grid span {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.68rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -2796,7 +2842,7 @@ button {
 }
 
 .student-progress-reports-page .progress-reports-history-footer small {
-    color: #64748b;
+    color: var(--text);
 }
 
 @media (max-width: 720px) {
@@ -2836,7 +2882,7 @@ button {
 
 .student-dashboard-stat {
     min-height: 11.5rem;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-insights-card {
@@ -2985,7 +3031,7 @@ button {
     padding: 0.9rem 0.95rem;
     border-radius: 14px;
     border: 1px solid rgba(229, 231, 235, 0.92);
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-deadline-item.is-warning {
@@ -2999,7 +3045,7 @@ button {
 }
 
 .student-deadline-item.is-neutral {
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-phase-tracker-item {
@@ -3010,7 +3056,7 @@ button {
     padding: 0.9rem 0.95rem;
     border-radius: 14px;
     border: 1px solid rgba(229, 231, 235, 0.92);
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-phase-tracker-item.is-completed {
@@ -3029,7 +3075,7 @@ button {
 }
 
 .student-phase-tracker-item.is-pending {
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-phase-tracker-item.is-delayed {
@@ -3103,7 +3149,7 @@ button {
 .student-priority-card,
 .student-feedback-card,
 .student-notification-card {
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-upload-preview-card {
@@ -3274,7 +3320,7 @@ button {
 }
 
 .dashboard-hero-main .student-dashboard-pending-title {
-    color: #64748b;
+    color: var(--text);
     font-style: italic;
 }
 
@@ -4008,7 +4054,7 @@ button {
     width: 100%;
     border: 1px solid var(--border-strong);
     border-radius: 14px;
-    background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    background: var(--surface);
     padding: 0.82rem 0.95rem;
     color: var(--text);
     transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
@@ -4113,7 +4159,7 @@ progress::-moz-progress-bar {
 }
 
 .btn.btn-secondary {
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    background: var(--surface);
     border-color: rgba(0, 58, 143, 0.14);
     color: var(--primary);
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
@@ -4121,7 +4167,7 @@ progress::-moz-progress-bar {
 
 .btn.btn-ghost,
 .table-btn {
-    background: #fff;
+    background: var(--surface);
     color: var(--muted-strong);
     border: 1px solid rgba(209, 213, 219, 0.88);
 }
@@ -4178,7 +4224,7 @@ progress::-moz-progress-bar {
     position: sticky;
     top: 0;
     z-index: 1;
-    background: linear-gradient(180deg, #f8fafc, #f3f4f6);
+    background: var(--surface);
     color: var(--muted);
     font-size: 0.78rem;
     text-transform: uppercase;
@@ -4276,7 +4322,7 @@ progress::-moz-progress-bar {
     height: 1.25rem;
     margin-top: 0.2rem;
     border-radius: 999px;
-    background: white;
+    background: var(--surface);
     border: 3px solid var(--border-strong);
     position: relative;
     z-index: 1;
@@ -4483,7 +4529,7 @@ progress::-moz-progress-bar {
     grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
     padding: 1rem;
     border-radius: var(--radius-md);
-    background: linear-gradient(180deg, #f8fafc, #ffffff);
+    background: var(--surface);
     border: 1px solid var(--border);
     width: 100%;
 }
@@ -4514,7 +4560,7 @@ progress::-moz-progress-bar {
     width: 100%;
     border: 1px solid var(--border-strong);
     border-radius: 14px;
-    background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    background: var(--surface);
     padding: 0.82rem 0.95rem;
     color: var(--text);
     resize: vertical;
@@ -4668,7 +4714,7 @@ progress::-moz-progress-bar {
     padding: 0.75rem 0.85rem;
     border: 1px solid var(--border-strong);
     border-radius: 14px;
-    background: #fff;
+    background: var(--surface);
 }
 
 .profile-summary-card .detail-grid {
@@ -4948,7 +4994,7 @@ progress::-moz-progress-bar {
     border-radius: 50%;
     border: 4px solid #fff;
     overflow: visible;
-    background: #fff;
+    background: var(--surface);
     box-shadow: var(--shadow-md);
 }
 
@@ -5112,7 +5158,7 @@ progress::-moz-progress-bar {
 }
 
 .student-profile-page .profile-actions .profile-action-btn.btn-outline {
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    background: var(--surface);
     border-color: rgba(0, 58, 143, 0.16);
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
 }
@@ -5122,7 +5168,7 @@ progress::-moz-progress-bar {
 }
 
 .student-profile-page .profile-actions .profile-action-btn.btn-outline:hover {
-    background: linear-gradient(180deg, #f5f9ff, #ffffff);
+    background: var(--surface);
     color: var(--primary);
     border-color: rgba(0, 58, 143, 0.24);
 }
@@ -5154,7 +5200,7 @@ progress::-moz-progress-bar {
 .student-profile-page .info-header {
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(135deg, #f9fafb, #ffffff);
+    background: var(--surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -5274,7 +5320,7 @@ progress::-moz-progress-bar {
     gap: 0.75rem;
     padding: 0.95rem 1rem;
     border-radius: 0.95rem;
-    background: #fff;
+    background: var(--surface);
     border: 1px solid rgba(0, 58, 143, 0.12);
 }
 
@@ -6027,7 +6073,7 @@ progress::-moz-progress-bar {
     padding: 1rem 1.25rem;
     margin: 0 -1.35rem;
     border-bottom: 1px solid rgba(229, 231, 235, 0.92);
-    background: linear-gradient(135deg, #f8fafc, #ffffff);
+    background: var(--surface);
 }
 
 .profile-display-head h3 {
@@ -6098,7 +6144,7 @@ progress::-moz-progress-bar {
     padding: 1rem 1.25rem;
     margin: -1.35rem -1.35rem 0;
     border-bottom: 1px solid rgba(229, 231, 235, 0.92);
-    background: linear-gradient(135deg, #f8fafc, #ffffff);
+    background: var(--surface);
 }
 
 .profile-info-header h3 {
@@ -6297,19 +6343,19 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.85rem, 3vw, 2.15rem);
     font-weight: 800;
 }
 
 .student-notifications-page .page-title p {
     max-width: 62ch;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-notifications-page .surface-card,
 .student-notifications-page .stack-card {
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     border-radius: 1.5rem;
     box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
@@ -6353,7 +6399,7 @@ progress::-moz-progress-bar {
 
 .student-notifications-page .student-notifications-overview-copy p {
     max-width: 62ch;
-    color: #475569;
+    color: var(--text);
 }
 
 .student-notifications-page .student-notifications-overview-actions {
@@ -6373,7 +6419,7 @@ progress::-moz-progress-bar {
 }
 
 .student-notifications-page .student-notifications-overview-actions .btn.btn-secondary {
-    background: #ffffff;
+    background: var(--surface);
     color: #334155;
     border: 1px solid #cbd5e1;
     box-shadow: none;
@@ -6392,12 +6438,12 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-notifications-page .student-notifications-summary-card span,
 .student-notifications-page .student-notifications-summary-card small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-notifications-page .student-notifications-summary-card span {
@@ -6409,7 +6455,7 @@ progress::-moz-progress-bar {
 
 .student-notifications-page .student-notifications-summary-card strong {
     margin-top: 0.32rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.5rem;
     line-height: 1.05;
 }
@@ -6420,7 +6466,7 @@ progress::-moz-progress-bar {
     padding: 1.15rem;
     border-radius: 1.1rem;
     border: 1px solid #dbeafe;
-    background: linear-gradient(180deg, #eff6ff, #ffffff);
+    background: var(--surface);
 }
 
 .student-notifications-page .student-notifications-focus-head {
@@ -6433,7 +6479,7 @@ progress::-moz-progress-bar {
 
 .student-notifications-page .student-notifications-focus-head h3 {
     margin-top: 0.2rem;
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-notifications-page .student-notifications-focus-meta {
@@ -6475,7 +6521,7 @@ progress::-moz-progress-bar {
 
 .student-notifications-page .student-notifications-inbox-card .card-heading p {
     max-width: 56ch;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-notifications-page .student-notifications-toolbar {
@@ -6485,7 +6531,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1.1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-notifications-page .student-notifications-toolbar .form-field {
@@ -6509,9 +6555,9 @@ progress::-moz-progress-bar {
     min-height: 2rem;
     padding: 0.3rem 0.75rem;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.82rem;
     font-weight: 600;
 }
@@ -6536,12 +6582,12 @@ progress::-moz-progress-bar {
 
 .student-notifications-page .student-notifications-group-head h3 {
     margin: 0;
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-notifications-page .student-notifications-group-head p {
     margin-top: 0.2rem;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-notifications-page .student-notifications-card-list {
@@ -6552,7 +6598,7 @@ progress::-moz-progress-bar {
     gap: 0.95rem;
     padding: 1.05rem;
     border-left: 4px solid transparent;
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-notifications-page .student-notification-entry::before {
@@ -6561,12 +6607,12 @@ progress::-moz-progress-bar {
 
 .student-notifications-page .student-notification-entry.is-unread {
     border-left-color: #003A8F;
-    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    background: var(--surface);
 }
 
 .student-notifications-page .student-notification-entry.is-priority {
     border-left-color: #dc2626;
-    background: linear-gradient(180deg, #fff7f7, #ffffff);
+    background: var(--surface);
 }
 
 .student-notifications-page .student-notification-entry-head {
@@ -6611,7 +6657,7 @@ progress::-moz-progress-bar {
 .student-notifications-page .student-notification-entry-icon.is-general,
 .student-notifications-page .student-notification-entry-icon.is-transfer {
     background: #e2e8f0;
-    color: #475569;
+    color: var(--text);
 }
 
 .student-notifications-page .student-notification-entry-copy {
@@ -6626,14 +6672,14 @@ progress::-moz-progress-bar {
 }
 
 .student-notifications-page .student-notification-entry-title strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.45;
 }
 
 .student-notifications-page .student-notification-entry-title p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.6;
 }
 
@@ -6650,7 +6696,7 @@ progress::-moz-progress-bar {
     min-height: 2rem;
     padding: 0.3rem 0.7rem;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     color: #334155;
     font-size: 0.8rem;
@@ -6692,7 +6738,7 @@ progress::-moz-progress-bar {
     padding: 0.95rem 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
@@ -6742,14 +6788,14 @@ progress::-moz-progress-bar {
 .student-notifications-page .student-notifications-mini-copy strong,
 .student-notifications-page .student-notifications-breakdown-item strong,
 .student-notifications-page .student-notifications-quick-link strong {
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.45;
 }
 
 .student-notifications-page .student-notifications-mini-copy small,
 .student-notifications-page .student-notifications-breakdown-item small,
 .student-notifications-page .student-notifications-quick-link small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -6883,18 +6929,18 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.85rem, 3vw, 2.15rem);
     font-weight: 800;
 }
 
 .student-repository-page .page-title p {
     max-width: 64ch;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-repository-page .surface-card {
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     border-radius: 1.5rem;
     box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
@@ -6936,7 +6982,7 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-overview-copy p {
     max-width: 62ch;
-    color: #475569;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-overview-actions {
@@ -6956,7 +7002,7 @@ progress::-moz-progress-bar {
 }
 
 .student-repository-page .student-repository-overview-actions .btn.btn-secondary {
-    background: #ffffff;
+    background: var(--surface);
     color: #334155;
     border: 1px solid #cbd5e1;
     box-shadow: none;
@@ -6976,12 +7022,12 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-repository-page .student-repository-summary-card span,
 .student-repository-page .student-repository-summary-card small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-summary-card span {
@@ -6993,7 +7039,7 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-summary-card strong {
     margin-top: 0.32rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.5rem;
     line-height: 1.05;
 }
@@ -7023,7 +7069,7 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-results-card .card-heading p {
     max-width: 56ch;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-results-head-badges {
@@ -7043,7 +7089,7 @@ progress::-moz-progress-bar {
     padding: 0.3rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-repository-page .student-repository-view-toggle-btn {
@@ -7091,7 +7137,7 @@ progress::-moz-progress-bar {
     font-weight: 900;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #475569;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-toolbar .form-field input,
@@ -7101,7 +7147,7 @@ progress::-moz-progress-bar {
     border: 1px solid #cbd5e1;
     border-radius: 0.85rem;
     padding: 0.75rem 0.9rem;
-    background: #ffffff;
+    background: var(--surface);
     color: #111827;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 18px rgba(15, 23, 42, 0.035);
     transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
@@ -7159,7 +7205,7 @@ progress::-moz-progress-bar {
 .student-repository-page .student-repository-saved-toggle {
     padding: 0.7rem 0.95rem;
     border-color: rgba(0, 58, 143, 0.14);
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
     color: #003A8F;
 }
@@ -7180,7 +7226,7 @@ progress::-moz-progress-bar {
 .student-repository-page .student-repository-reset-btn {
     padding: 0.7rem 0.95rem;
     border: 0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: none;
     color: #003A8F;
 }
@@ -7243,14 +7289,14 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-scholar-citation {
     margin: 0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.84rem;
     line-height: 1.6;
 }
 
 .student-repository-page .student-repository-scholar-summary {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.65;
 }
 
@@ -7267,7 +7313,7 @@ progress::-moz-progress-bar {
     min-height: 2rem;
     padding: 0.28rem 0.72rem;
     border-radius: 999px;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     color: #334155;
     font-size: 0.8rem;
@@ -7331,7 +7377,7 @@ progress::-moz-progress-bar {
     display: grid;
     gap: 1rem;
     padding: 1.15rem;
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-repository-page .student-repository-card-head {
@@ -7351,7 +7397,7 @@ progress::-moz-progress-bar {
     padding: 0;
     border: 0;
     background: transparent;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.5;
@@ -7364,7 +7410,7 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-card-summary {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.65;
     display: -webkit-box;
     -webkit-line-clamp: 4;
@@ -7382,7 +7428,7 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-table-shell {
     border-radius: 1rem;
-    border-color: #e2e8f0;
+    border-color: var(--border);
 }
 
 .student-repository-page .student-repository-table-title-cell {
@@ -7419,7 +7465,7 @@ progress::-moz-progress-bar {
 }
 
 .student-repository-page .student-repository-table-title-copy small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -7429,7 +7475,7 @@ progress::-moz-progress-bar {
 }
 
 .student-repository-page .student-repository-table-metrics span {
-    color: #475569;
+    color: var(--text);
     font-size: 0.84rem;
     line-height: 1.4;
 }
@@ -7502,15 +7548,15 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-repository-page .student-repository-modal-citation strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-modal-citation span {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-modal-summary {
@@ -7525,7 +7571,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-repository-page .student-repository-modal-summary article.is-wide {
@@ -7534,11 +7580,11 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-modal-summary span,
 .student-repository-page .student-repository-modal-summary small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-modal-summary strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-repository-page .student-repository-modal-section {
@@ -7548,13 +7594,13 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-modal-section h4 {
     margin: 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
 }
 
 .student-repository-page .student-repository-modal-section p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.65;
 }
 
@@ -7573,7 +7619,7 @@ progress::-moz-progress-bar {
     padding: 0.95rem 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-repository-page .student-repository-modal-list-item {
@@ -7595,13 +7641,13 @@ progress::-moz-progress-bar {
 
 .student-repository-page .student-repository-modal-doc-item strong,
 .student-repository-page .student-repository-modal-related-btn strong {
-    color: #0f172a;
+    color: var(--text);
     text-align: left;
 }
 
 .student-repository-page .student-repository-modal-doc-item small,
 .student-repository-page .student-repository-modal-related-btn small {
-    color: #64748b;
+    color: var(--text);
     text-align: left;
 }
 
@@ -7768,7 +7814,7 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.95rem, 3vw, 2.2rem);
     font-weight: 800;
     line-height: 1.04;
@@ -7777,7 +7823,7 @@ progress::-moz-progress-bar {
 
 .student-project-files-page .page-title p {
     max-width: 60ch;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.6;
 }
@@ -7805,7 +7851,7 @@ progress::-moz-progress-bar {
 .student-project-files-page .project-files-hero-copy h2 {
     margin: 0;
     max-width: 16ch;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(2rem, 3.8vw, 2.9rem);
     line-height: 1;
     letter-spacing: -0.05em;
@@ -7814,7 +7860,7 @@ progress::-moz-progress-bar {
 .student-project-files-page .project-files-hero-copy p {
     margin: 0;
     max-width: 62ch;
-    color: #475569;
+    color: var(--text);
     font-size: 0.96rem;
     line-height: 1.7;
 }
@@ -7874,7 +7920,7 @@ progress::-moz-progress-bar {
 .student-project-files-page .page-strip,
 .student-project-files-page .surface-card {
     margin-bottom: 0;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     border-radius: 1.5rem;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
@@ -7942,7 +7988,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-header-actions .btn.btn-secondary {
-    background: #ffffff;
+    background: var(--surface);
     color: #002C6B;
     border: 1px solid rgba(0, 58, 143, 0.18);
     box-shadow: none;
@@ -7950,7 +7996,7 @@ progress::-moz-progress-bar {
 
 .student-project-files-page .project-files-header-actions .project-files-upload-button,
 .student-project-files-page .project-files-submit-card .btn.btn-secondary {
-    background: #f8fafc;
+    background: var(--surface);
     color: #334155;
     border: 1px solid #cbd5e1;
     box-shadow: none;
@@ -7963,7 +8009,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-stat-grid .page-strip-stat {
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     border-radius: 1rem;
     padding: 1rem;
@@ -7975,20 +8021,20 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-stat-grid .page-strip-stat span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.72rem;
     letter-spacing: 0.08em;
 }
 
 .student-project-files-page .project-files-stat-grid .page-strip-stat strong {
     margin-top: 0.45rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.5rem;
     line-height: 1.1;
 }
 
 .student-project-files-page .project-files-stat-grid .page-strip-stat small {
-    color: #475569;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-main-grid {
@@ -8031,11 +8077,11 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #f8fafc, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-tracker-insight span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.76rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -8043,14 +8089,14 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-tracker-insight strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.4;
 }
 
 .student-project-files-page .project-files-tracker-insight p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.85rem;
     line-height: 1.6;
 }
@@ -8074,7 +8120,7 @@ progress::-moz-progress-bar {
     padding: 0.35rem 0.45rem 0.35rem 0.9rem;
     border-radius: 999px;
     border: 1px solid #dbeafe;
-    background: #ffffff;
+    background: var(--surface);
     color: #334155;
     font-weight: 700;
     transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease, transform 0.18s ease;
@@ -8115,7 +8161,7 @@ progress::-moz-progress-bar {
     padding: 0.9rem 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #f8fafc, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-filter-meta > div {
@@ -8124,11 +8170,11 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-filter-meta strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-filter-meta span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.84rem;
     line-height: 1.55;
 }
@@ -8152,7 +8198,7 @@ progress::-moz-progress-bar {
     padding: 1.1rem;
     border-radius: 1.1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #f8fafc, #ffffff);
+    background: var(--surface);
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
@@ -8174,11 +8220,11 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-step-head strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-step-head small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -8197,7 +8243,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-submit-card {
-    background: linear-gradient(180deg, #eff6ff, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-upload-grid textarea {
@@ -8211,15 +8257,15 @@ progress::-moz-progress-bar {
     padding: 1.35rem;
     border-width: 2px;
     border-style: dashed;
-    border-color: #cbd5e1;
+    border-color: var(--border);
     border-radius: 1rem;
-    background: linear-gradient(180deg, #f8fbff, #ffffff);
+    background: var(--surface);
     transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
 .student-project-files-page .project-files-dropzone.is-dragover {
     border-color: #3b82f6;
-    background: linear-gradient(180deg, #eff6ff, #ffffff);
+    background: var(--surface);
     box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.14);
 }
 
@@ -8230,18 +8276,18 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-dropzone strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.4;
 }
 
 .student-project-files-page .project-files-dropzone span {
-    color: #475569;
+    color: var(--text);
     line-height: 1.55;
 }
 
 .student-project-files-page .project-files-dropzone small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.5;
 }
 
@@ -8255,7 +8301,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid rgba(148, 163, 184, 0.22);
-    background: linear-gradient(180deg, #f8fafc, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-upload-preview-head {
@@ -8280,21 +8326,21 @@ progress::-moz-progress-bar {
 .student-project-files-page .project-files-upload-preview-grid div {
     padding: 0.95rem 1rem;
     border-radius: 1rem;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
 }
 
 .student-project-files-page .project-files-upload-preview-grid span,
 .student-project-files-page .project-files-upload-preview-grid small {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.8rem;
 }
 
 .student-project-files-page .project-files-upload-preview-grid strong {
     display: block;
     margin: 0.3rem 0 0.25rem;
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -8308,19 +8354,19 @@ progress::-moz-progress-bar {
     padding: 0.85rem 0.95rem;
     border-radius: 1rem;
     border: 1px solid rgba(148, 163, 184, 0.2);
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-role-card strong {
     display: block;
-    color: #0f172a;
+    color: var(--text);
     margin-bottom: 0.3rem;
 }
 
 .student-project-files-page .project-files-role-card p {
     margin: 0;
     font-size: 0.86rem;
-    color: #475569;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -8366,7 +8412,7 @@ progress::-moz-progress-bar {
     padding: 0 0.95rem;
     border: 1px solid var(--border-strong);
     border-radius: 14px;
-    background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-search-control:focus-within {
@@ -8375,7 +8421,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-search-control i {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-search-control input {
@@ -8395,7 +8441,7 @@ progress::-moz-progress-bar {
     padding: 0.85rem 1rem;
     border: 1px solid #e2e8f0;
     border-radius: 1rem;
-    background: linear-gradient(180deg, #f8fafc, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-table-summary div {
@@ -8406,13 +8452,13 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-table-summary strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.05rem;
 }
 
 .student-project-files-page .project-files-table-summary span,
 .student-project-files-page .project-files-table-summary small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-state {
@@ -8422,7 +8468,7 @@ progress::-moz-progress-bar {
     padding: 0.95rem 1rem;
     border-radius: 1rem;
     border: 1px solid rgba(148, 163, 184, 0.2);
-    background: #f8fafc;
+    background: var(--surface);
     color: #334155;
 }
 
@@ -8444,7 +8490,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #f8fafc, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-skeleton-block {
@@ -8470,7 +8516,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-table-shell {
-    border-color: #e2e8f0;
+    border-color: var(--border);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
@@ -8479,12 +8525,12 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-table th {
-    background: linear-gradient(180deg, #f8fafc, #eff6ff);
-    color: #64748b;
+    background: var(--surface);
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-table-row td {
-    background: #ffffff;
+    background: var(--surface);
     transition: background 0.18s ease;
 }
 
@@ -8498,7 +8544,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-row-note {
-    color: #475569;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.5;
     max-width: 28ch;
@@ -8510,7 +8556,7 @@ progress::-moz-progress-bar {
     min-height: 2rem;
     padding: 0.2rem 0.72rem;
     border-radius: 999px;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     color: #334155;
     font-size: 0.8rem;
@@ -8536,11 +8582,11 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-pagination-copy strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-pagination-copy span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.84rem;
 }
 
@@ -8563,7 +8609,7 @@ progress::-moz-progress-bar {
     height: 2.35rem;
     border-radius: 999px;
     border: 1px solid #dbeafe;
-    background: #ffffff;
+    background: var(--surface);
     color: #002C6B;
     font-weight: 700;
 }
@@ -8589,14 +8635,14 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
     transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .student-project-files-page .project-files-repository-item:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    background: linear-gradient(180deg, #ffffff, #f1f5f9);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-repository-head {
@@ -8625,14 +8671,14 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-repository-copy strong {
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.45;
 }
 
 .student-project-files-page .project-files-repository-copy p,
 .student-project-files-page .project-files-repository-note {
     margin: 0;
-    color: #475569;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-repository-subcopy {
@@ -8658,7 +8704,7 @@ progress::-moz-progress-bar {
     min-height: 2rem;
     padding: 0.3rem 0.72rem;
     border-radius: 999px;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     color: #334155;
     font-size: 0.8rem;
@@ -8821,16 +8867,16 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-history-summary span,
 .student-project-files-page .project-files-history-summary small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-history-summary strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-project-files-page .project-files-history-list {
@@ -8844,7 +8890,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-history-item-head {
@@ -8875,7 +8921,7 @@ progress::-moz-progress-bar {
     min-height: 2rem;
     padding: 0.3rem 0.7rem;
     border-radius: 999px;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     color: #334155;
     font-size: 0.8rem;
@@ -9076,7 +9122,7 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.95rem, 3vw, 2.2rem);
     font-weight: 800;
     line-height: 1.04;
@@ -9085,14 +9131,14 @@ progress::-moz-progress-bar {
 
 .student-schedule-page .page-title p {
     max-width: 60ch;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.6;
 }
 
 .student-schedule-page .surface-card,
 .student-schedule-page .stack-card {
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     border-radius: 1.45rem;
     box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
@@ -9139,7 +9185,7 @@ progress::-moz-progress-bar {
 
 .student-schedule-page .student-schedule-overview-copy p {
     max-width: 64ch;
-    color: #475569;
+    color: var(--text);
 }
 
 .student-schedule-page .student-schedule-overview-actions {
@@ -9160,7 +9206,7 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-overview-actions .btn.btn-secondary {
-    background: #ffffff;
+    background: var(--surface);
     color: #334155;
     border: 1px solid #cbd5e1;
     box-shadow: none;
@@ -9181,13 +9227,13 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .student-schedule-page .student-schedule-summary-card:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
+    background: var(--surface);
+    border-color: var(--border);
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
 }
 
@@ -9198,7 +9244,7 @@ progress::-moz-progress-bar {
 
 .student-schedule-page .student-schedule-summary-card span,
 .student-schedule-page .student-schedule-summary-card small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-schedule-page .student-schedule-summary-card span {
@@ -9210,7 +9256,7 @@ progress::-moz-progress-bar {
 
 .student-schedule-page .student-schedule-summary-card strong {
     margin-top: 0.3rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.5rem;
     line-height: 1.05;
 }
@@ -9238,7 +9284,7 @@ progress::-moz-progress-bar {
 .student-schedule-page .student-schedule-calendar-card .card-heading p,
 .student-schedule-page .student-schedule-section-stack .card-heading p {
     max-width: 58ch;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-schedule-page .student-schedule-week-grid {
@@ -9256,19 +9302,19 @@ progress::-moz-progress-bar {
     padding: 0.95rem;
     border-radius: 1.1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .student-schedule-page .student-schedule-day-card:hover {
     transform: translateY(-1px);
-    border-color: #cbd5e1;
+    border-color: var(--border);
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
 }
 
 .student-schedule-page .student-schedule-day-card.is-today {
     border-color: #93c5fd;
-    background: linear-gradient(180deg, #eff6ff, #ffffff);
+    background: var(--surface);
     box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.08);
 }
 
@@ -9278,7 +9324,7 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-day-head span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -9286,7 +9332,7 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-day-head strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.35;
 }
@@ -9305,13 +9351,13 @@ progress::-moz-progress-bar {
     padding: 0.72rem 0.78rem;
     border-radius: 0.95rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .student-schedule-page .student-schedule-day-event:hover {
     transform: translateY(-1px);
-    border-color: #cbd5e1;
+    border-color: var(--border);
     box-shadow: 0 10px 18px rgba(15, 23, 42, 0.05);
 }
 
@@ -9337,13 +9383,13 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-day-event strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.84rem;
     line-height: 1.45;
 }
 
 .student-schedule-page .student-schedule-day-event small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -9379,7 +9425,7 @@ progress::-moz-progress-bar {
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.9);
     border: 1px dashed #cbd5e1;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 600;
 }
@@ -9397,8 +9443,8 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-side-panel .detail-item {
-    background: #f8fafc;
-    border-color: #e2e8f0;
+    background: var(--surface);
+    border-color: var(--border);
     min-height: 100%;
 }
 
@@ -9409,7 +9455,7 @@ progress::-moz-progress-bar {
 .student-schedule-page .student-schedule-alert-card {
     gap: 0.32rem;
     border-left: 4px solid #f59e0b;
-    background: linear-gradient(180deg, #fff7ed, #ffffff);
+    background: var(--surface);
     transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -9419,16 +9465,16 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-alert-card strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-schedule-page .student-schedule-alert-card small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-schedule-page .student-schedule-alert-rail .status-step {
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
     color: #334155;
 }
 
@@ -9469,13 +9515,13 @@ progress::-moz-progress-bar {
 
 .student-schedule-page .student-schedule-event-card {
     border-left: 4px solid transparent;
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .student-schedule-page .student-schedule-event-card:hover {
     transform: translateY(-1px);
-    border-color: #cbd5e1;
+    border-color: var(--border);
     box-shadow: 0 14px 26px rgba(15, 23, 42, 0.06);
 }
 
@@ -9493,8 +9539,8 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-date-badge {
-    background: #f8fafc;
-    border-color: #e2e8f0;
+    background: var(--surface);
+    border-color: var(--border);
 }
 
 .student-schedule-page .student-schedule-date-badge.is-overdue {
@@ -9524,13 +9570,13 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-event-headline strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
 }
 
 .student-schedule-page .student-schedule-event-headline p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -9544,8 +9590,8 @@ progress::-moz-progress-bar {
 }
 
 .student-schedule-page .student-schedule-event-card .schedule-item-meta span {
-    background: #ffffff;
-    border-color: #e2e8f0;
+    background: var(--surface);
+    border-color: var(--border);
     color: #334155;
 }
 
@@ -9646,7 +9692,7 @@ progress::-moz-progress-bar {
 
 .student-faculty-feedback-page .surface-card,
 .student-faculty-feedback-page .stack-card {
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     border-radius: 1.5rem;
     box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
@@ -9672,13 +9718,13 @@ progress::-moz-progress-bar {
 
 .student-faculty-feedback-page .student-feedback-overview-copy h2 {
     margin: 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.55rem, 2.6vw, 1.9rem);
     line-height: 1.08;
 }
 
 .student-faculty-feedback-page .student-feedback-overview-copy p {
-    color: #475569;
+    color: var(--text);
 }
 
 .student-faculty-feedback-page .student-feedback-overview-actions .btn {
@@ -9697,13 +9743,13 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 0.95rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
 }
 
 .student-faculty-feedback-page .student-feedback-summary-card span,
 .student-faculty-feedback-page .student-feedback-summary-card small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-faculty-feedback-page .student-feedback-summary-card span {
@@ -9714,7 +9760,7 @@ progress::-moz-progress-bar {
 }
 
 .student-faculty-feedback-page .student-feedback-summary-card strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.55rem;
     line-height: 1.1;
 }
@@ -9734,7 +9780,7 @@ progress::-moz-progress-bar {
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-faculty-feedback-page .student-feedback-filter-pills {
@@ -9747,9 +9793,9 @@ progress::-moz-progress-bar {
     min-height: 2.45rem;
     padding: 0.55rem 0.85rem;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--surface);
     border-color: rgba(203, 213, 225, 0.92);
-    color: #475569;
+    color: var(--text);
     box-shadow: none;
 }
 
@@ -9798,7 +9844,7 @@ progress::-moz-progress-bar {
     border-radius: 1.25rem;
     border: 1px solid #e2e8f0;
     border-left-width: 4px;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
 }
 
@@ -9851,7 +9897,7 @@ progress::-moz-progress-bar {
 }
 
 .student-faculty-feedback-page .student-feedback-entry-title strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.45;
 }
@@ -9879,9 +9925,9 @@ progress::-moz-progress-bar {
     min-height: 2rem;
     padding: 0.28rem 0.72rem;
     border-radius: 999px;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.84rem;
 }
 
@@ -9907,8 +9953,8 @@ progress::-moz-progress-bar {
 
 .student-faculty-feedback-page .student-feedback-reply-block {
     margin-top: 0;
-    background: #f8fafc;
-    border-color: #e2e8f0;
+    background: var(--surface);
+    border-color: var(--border);
 }
 
 .student-faculty-feedback-page .student-feedback-reply-block strong {
@@ -9916,11 +9962,11 @@ progress::-moz-progress-bar {
     align-items: baseline;
     gap: 0.45rem;
     flex-wrap: wrap;
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-faculty-feedback-page .student-feedback-reply-block small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 500;
 }
@@ -10033,7 +10079,7 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.95rem, 3vw, 2.2rem);
     font-weight: 800;
     line-height: 1.04;
@@ -10042,7 +10088,7 @@ progress::-moz-progress-bar {
 
 .student-milestones-page .page-title p {
     max-width: 60ch;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.6;
 }
@@ -10055,7 +10101,7 @@ progress::-moz-progress-bar {
 .student-milestones-page .page-strip,
 .student-milestones-page .surface-card,
 .student-milestones-page .stack-card {
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #e2e8f0;
     border-radius: 1.45rem;
     box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
@@ -10097,13 +10143,13 @@ progress::-moz-progress-bar {
     padding: 1rem 1.05rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .student-milestones-page .student-milestones-summary-card:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
+    background: var(--surface);
+    border-color: var(--border);
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
 }
 
@@ -10114,7 +10160,7 @@ progress::-moz-progress-bar {
 
 .student-milestones-page .student-milestones-summary-card span,
 .student-milestones-page .student-milestones-summary-card small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-milestones-page .student-milestones-summary-card span {
@@ -10125,7 +10171,7 @@ progress::-moz-progress-bar {
 }
 
 .student-milestones-page .student-milestones-summary-card strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.18rem;
     line-height: 1.35;
 }
@@ -10137,19 +10183,19 @@ progress::-moz-progress-bar {
     padding: 1.2rem 1.15rem;
     border-radius: 1.25rem;
     border: 1px solid #bfdbfe;
-    background: linear-gradient(180deg, #f8fbff, #ffffff);
+    background: var(--surface);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .student-milestones-page .student-milestones-spotlight h3 {
     margin: 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.25rem;
 }
 
 .student-milestones-page .student-milestones-spotlight p,
 .student-milestones-page .student-milestones-roadmap-copy p {
-    color: #475569;
+    color: var(--text);
     line-height: 1.65;
 }
 
@@ -10162,7 +10208,7 @@ progress::-moz-progress-bar {
 .student-milestones-page .student-milestones-ongoing-details .detail-item {
     min-height: 100%;
     background: rgba(248, 250, 252, 0.96);
-    border-color: #e2e8f0;
+    border-color: var(--border);
 }
 
 .student-milestones-page .student-milestones-progress {
@@ -10179,12 +10225,12 @@ progress::-moz-progress-bar {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    color: #475569;
+    color: var(--text);
     font-size: 0.88rem;
 }
 
 .student-milestones-page .student-milestones-progress-head strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
 }
 
@@ -10231,14 +10277,14 @@ progress::-moz-progress-bar {
     padding: 1.1rem 1.15rem;
     border-radius: 1.1rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: none;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .student-milestones-page .timeline-content:hover {
     transform: translateY(-1px);
-    border-color: #cbd5e1;
+    border-color: var(--border);
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
 }
 
@@ -10253,23 +10299,23 @@ progress::-moz-progress-bar {
 }
 
 .student-milestones-page .timeline-item.is-pending .timeline-point {
-    border-color: #cbd5e1;
-    background: #ffffff;
+    border-color: var(--border);
+    background: var(--surface);
 }
 
 .student-milestones-page .timeline-item.is-completed .timeline-content {
     border-color: rgba(22, 163, 74, 0.22);
-    background: linear-gradient(180deg, #ffffff, #f6fef9);
+    background: var(--surface);
 }
 
 .student-milestones-page .timeline-item.is-ongoing .timeline-content {
     border-color: rgba(217, 119, 6, 0.24);
-    background: linear-gradient(180deg, #fffdfa, #ffffff);
+    background: var(--surface);
     box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.06);
 }
 
 .student-milestones-page .timeline-item.is-pending .timeline-content {
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-milestones-page .timeline-step-label {
@@ -10278,9 +10324,9 @@ progress::-moz-progress-bar {
 }
 
 .student-milestones-page .timeline-date {
-    color: #475569;
-    border-color: #e2e8f0;
-    background: #f8fafc;
+    color: var(--text);
+    border-color: var(--border);
+    background: var(--surface);
 }
 
 .student-milestones-page .student-milestones-roadmap-copy {
@@ -10302,7 +10348,7 @@ progress::-moz-progress-bar {
     flex-wrap: wrap;
     padding-top: 0.8rem;
     border-top: 1px solid #e2e8f0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.86rem;
 }
 
@@ -10318,28 +10364,28 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .student-milestones-page .student-milestones-cluster-item:hover {
     transform: translateY(-1px);
-    border-color: #cbd5e1;
+    border-color: var(--border);
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
 }
 
 .student-milestones-page .student-milestones-cluster-item.is-completed {
     border-color: rgba(22, 163, 74, 0.2);
-    background: linear-gradient(180deg, #ffffff, #f6fef9);
+    background: var(--surface);
 }
 
 .student-milestones-page .student-milestones-cluster-item.is-pending {
     border-color: rgba(217, 119, 6, 0.18);
-    background: linear-gradient(180deg, #ffffff, #fffdfa);
+    background: var(--surface);
 }
 
 .student-milestones-page .student-milestones-ongoing-card {
-    background: linear-gradient(180deg, #f8fbff, #ffffff);
+    background: var(--surface);
     border-color: #dbeafe;
 }
 
@@ -10373,7 +10419,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     text-decoration: none;
     color: inherit;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -10406,11 +10452,11 @@ progress::-moz-progress-bar {
 }
 
 .student-milestones-page .student-milestones-link-copy strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .student-milestones-page .student-milestones-link-copy small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -10489,14 +10535,14 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.85rem, 3vw, 2.15rem);
     font-weight: 800;
 }
 
 .student-history-page .page-title p {
     max-width: 60ch;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-history-page .page-strip,
@@ -10504,7 +10550,7 @@ progress::-moz-progress-bar {
 .student-history-page .stat-card {
     border-radius: 1.5rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 }
 
@@ -10626,13 +10672,13 @@ progress::-moz-progress-bar {
 
 .student-history-page .student-history-entry-copy strong {
     display: block;
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.4;
 }
 
 .student-history-page .student-history-entry-copy p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.6;
 }
 
@@ -10650,7 +10696,7 @@ progress::-moz-progress-bar {
     border-radius: 999px;
     background: rgba(248, 250, 252, 0.96);
     border: 1px solid rgba(209, 213, 219, 0.9);
-    color: #475569;
+    color: var(--text);
     font-size: 0.8rem;
 }
 
@@ -10664,13 +10710,13 @@ progress::-moz-progress-bar {
 }
 
 .student-history-page .student-history-spotlight strong {
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.45;
 }
 
 .student-history-page .student-history-spotlight p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.65;
 }
 
@@ -10710,12 +10756,12 @@ progress::-moz-progress-bar {
 }
 
 .student-history-page .student-history-link-copy strong {
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.35;
 }
 
 .student-history-page .student-history-link-copy small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.5;
 }
 
@@ -10798,7 +10844,7 @@ progress::-moz-progress-bar {
 
 .project-overview-page .page-breadcrumb {
     padding: 0.24rem 0.58rem;
-    background: #f8fafc;
+    background: var(--surface);
     border-color: #dbeafe;
 }
 
@@ -10811,7 +10857,7 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.95rem, 3vw, 2.2rem);
     font-weight: 800;
     line-height: 1.04;
@@ -10820,7 +10866,7 @@ progress::-moz-progress-bar {
 
 .project-overview-page .page-title p {
     max-width: 60ch;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.6;
 }
@@ -10830,7 +10876,7 @@ progress::-moz-progress-bar {
 .project-overview-page .page-strip {
     border-radius: 1.45rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 }
 
@@ -10846,7 +10892,7 @@ progress::-moz-progress-bar {
 .project-overview-page .project-overview-evidence-metrics span,
 .project-overview-page .page-strip-stat span,
 .project-overview-page .project-overview-progress-meta span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.11em;
@@ -10855,7 +10901,7 @@ progress::-moz-progress-bar {
 
 .project-overview-page .card-heading h3,
 .project-overview-page .project-overview-evidence-head h3 {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.1rem;
     font-weight: 700;
 }
@@ -10863,7 +10909,7 @@ progress::-moz-progress-bar {
 .project-overview-page .hero-card p,
 .project-overview-page .surface-card p,
 .project-overview-page .reading-copy {
-    color: #475569;
+    color: var(--text);
     font-size: 0.92rem;
 }
 
@@ -10876,8 +10922,8 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .ui-badge.is-neutral {
-    background: #f1f5f9;
-    border-color: #e2e8f0;
+    background: var(--surface);
+    border-color: var(--border);
     color: #334155;
 }
 
@@ -10957,7 +11003,7 @@ progress::-moz-progress-bar {
 
 .project-overview-page .btn.btn-secondary,
 .project-overview-page .project-overview-evidence-strip .page-strip-action {
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #cbd5e1;
     color: #334155;
     box-shadow: none;
@@ -10965,7 +11011,7 @@ progress::-moz-progress-bar {
 
 .project-overview-page .btn.btn-secondary:hover,
 .project-overview-page .project-overview-evidence-strip .page-strip-action:hover {
-    background: #f8fafc;
+    background: var(--surface);
     border-color: #94a3b8;
 }
 
@@ -11002,7 +11048,7 @@ progress::-moz-progress-bar {
 .project-overview-page .project-overview-summary-title h2 {
     margin: 0;
     max-width: 24ch;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.9rem, 2.8vw, 2.35rem);
     font-weight: 800;
     line-height: 1.08;
@@ -11070,11 +11116,11 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .progress-orb strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .project-overview-page .progress-orb span {
-    color: #64748b;
+    color: var(--text);
 }
 
 .project-overview-page .project-overview-progress-meta {
@@ -11083,7 +11129,7 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .project-overview-progress-meta strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.96rem;
     line-height: 1.45;
 }
@@ -11097,7 +11143,7 @@ progress::-moz-progress-bar {
 .project-overview-page .project-overview-panel-card {
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .project-overview-page .project-overview-summary-facts div {
@@ -11110,7 +11156,7 @@ progress::-moz-progress-bar {
 .project-overview-page .project-overview-summary-facts strong,
 .project-overview-page .project-overview-detail-item strong,
 .project-overview-page .project-overview-panel-card strong {
-    color: #0f172a;
+    color: var(--text);
 }
 
 .project-overview-page .project-overview-info-grid {
@@ -11153,8 +11199,8 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .project-overview-detail-item:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
+    background: var(--surface);
+    border-color: var(--border);
     box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
 }
 
@@ -11174,14 +11220,14 @@ progress::-moz-progress-bar {
     gap: 0.9rem;
     padding: 1rem 1.05rem;
     border-radius: 1rem;
-    border-color: #e2e8f0;
-    background: #ffffff;
+    border-color: var(--border);
+    background: var(--surface);
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .project-overview-page .project-overview-member-card:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
+    background: var(--surface);
+    border-color: var(--border);
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
 }
 
@@ -11215,7 +11261,7 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .project-overview-member-identity strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.96rem;
     line-height: 1.35;
 }
@@ -11224,7 +11270,7 @@ progress::-moz-progress-bar {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem 0.8rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     font-weight: 500;
     letter-spacing: normal;
@@ -11286,14 +11332,14 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .project-overview-evidence-strip .page-strip-copy h2 {
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.45rem, 2.5vw, 1.7rem);
     font-weight: 700;
     line-height: 1.15;
 }
 
 .project-overview-page .project-overview-evidence-strip .page-strip-copy p {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.92rem;
     line-height: 1.7;
 }
@@ -11341,19 +11387,19 @@ progress::-moz-progress-bar {
     padding: 1rem 1.05rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: none;
     transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .project-overview-page .project-overview-evidence-strip .page-strip-stat:hover {
     transform: translateY(-1px);
-    border-color: #cbd5e1;
+    border-color: var(--border);
     box-shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
 }
 
 .project-overview-page .project-overview-evidence-strip .page-strip-stat strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.15rem;
 }
 
@@ -11362,7 +11408,7 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .project-overview-evidence-strip .page-strip-stat small {
-    color: #64748b;
+    color: var(--text);
 }
 
 .project-overview-page .project-overview-evidence-grid {
@@ -11395,14 +11441,14 @@ progress::-moz-progress-bar {
     border-radius: 999px;
     border: 1px solid #dbeafe;
     background: #eff6ff;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     font-weight: 800;
     line-height: 1;
 }
 
 .project-overview-page .project-overview-evidence-card > p {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.65;
 }
@@ -11421,11 +11467,11 @@ progress::-moz-progress-bar {
     padding: 0.9rem 0.95rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .project-overview-page .project-overview-evidence-metrics strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.4;
 }
@@ -11439,11 +11485,11 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .project-overview-page .project-overview-evidence-latest small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -11452,7 +11498,7 @@ progress::-moz-progress-bar {
 
 .project-overview-page .project-overview-evidence-latest strong,
 .project-overview-page .project-overview-evidence-empty strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.98rem;
     line-height: 1.45;
 }
@@ -11460,13 +11506,13 @@ progress::-moz-progress-bar {
 .project-overview-page .project-overview-evidence-latest p,
 .project-overview-page .project-overview-evidence-empty p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.88rem;
     line-height: 1.55;
 }
 
 .project-overview-page .project-overview-evidence-meta {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.84rem;
     line-height: 1.5;
 }
@@ -11510,13 +11556,13 @@ progress::-moz-progress-bar {
 
 .project-overview-page .project-overview-modal-copy h3 {
     margin: 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.35rem;
 }
 
 .project-overview-page .project-overview-modal-copy p {
     margin: 0;
-    color: #64748b;
+    color: var(--text);
     line-height: 1.6;
 }
 
@@ -11528,7 +11574,7 @@ progress::-moz-progress-bar {
     border-radius: 1rem;
     background: linear-gradient(180deg, rgba(255, 250, 243, 0.9), rgba(255, 255, 255, 0.96));
     border: 1px solid rgba(246, 190, 0, 0.24);
-    color: #475569;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -11560,7 +11606,7 @@ progress::-moz-progress-bar {
 
 .project-overview-page .project-overview-upload-hint {
     margin: 0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.5;
 }
@@ -11579,11 +11625,11 @@ progress::-moz-progress-bar {
     border-radius: 0.95rem;
     background: var(--surface-alt);
     border: 1px solid var(--border);
-    color: #0f172a;
+    color: var(--text);
 }
 
 .project-overview-page .project-overview-upload-item small {
-    color: #64748b;
+    color: var(--text);
     white-space: nowrap;
 }
 
@@ -11613,12 +11659,12 @@ progress::-moz-progress-bar {
 }
 
 .project-overview-page .project-overview-checkbox strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.92rem;
 }
 
 .project-overview-page .project-overview-checkbox span span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.83rem;
     line-height: 1.55;
 }
@@ -11786,7 +11832,7 @@ progress::-moz-progress-bar {
 .student-title-submission-page .title-submission-hero-copy h2 {
     margin: 0;
     max-width: 17ch;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(2rem, 3.8vw, 2.9rem);
     line-height: 1;
     letter-spacing: -0.05em;
@@ -11795,7 +11841,7 @@ progress::-moz-progress-bar {
 .student-title-submission-page .title-submission-hero-copy p {
     margin: 0;
     max-width: 62ch;
-    color: #475569;
+    color: var(--text);
     font-size: 0.96rem;
     line-height: 1.7;
 }
@@ -11960,7 +12006,7 @@ progress::-moz-progress-bar {
 
 .student-title-submission-page .title-submission-queue-item-head span {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -11970,14 +12016,14 @@ progress::-moz-progress-bar {
 .student-title-submission-page .title-submission-queue-item-head strong {
     display: block;
     margin-top: 0.28rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.4;
 }
 
 .student-title-submission-page .title-submission-queue-item p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     line-height: 1.6;
 }
 
@@ -11990,7 +12036,7 @@ progress::-moz-progress-bar {
 
 .student-title-submission-page .title-submission-queue-meta small,
 .student-title-submission-page .title-submission-upload-meta span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.8rem;
     line-height: 1.5;
 }
@@ -12028,7 +12074,7 @@ progress::-moz-progress-bar {
 
 .student-title-submission-page .title-submission-requirement-card span {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -12037,13 +12083,13 @@ progress::-moz-progress-bar {
 
 .student-title-submission-page .title-submission-requirement-card strong {
     display: block;
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.45;
 }
 
 .student-title-submission-page .title-submission-requirement-card small {
     display: block;
-    color: #64748b;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -12059,7 +12105,7 @@ progress::-moz-progress-bar {
     padding: 1rem 1.05rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-title-submission-page .title-submission-upload-item-head {
@@ -12072,14 +12118,14 @@ progress::-moz-progress-bar {
 
 .student-title-submission-page .title-submission-upload-item-head strong {
     display: block;
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.4;
 }
 
 .student-title-submission-page .title-submission-upload-item-head small {
     display: block;
     margin-top: 0.24rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
 }
 
@@ -12105,7 +12151,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid rgba(191, 219, 254, 0.88);
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-title-submission-page .title-submission-guide-icon {
@@ -12123,13 +12169,13 @@ progress::-moz-progress-bar {
 .student-title-submission-page .title-submission-format-card span,
 .student-title-submission-page .title-submission-review-step strong {
     display: block;
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.45;
 }
 
 .student-title-submission-page .title-submission-side-highlight p {
     margin: 0.25rem 0 0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.86rem;
     line-height: 1.55;
 }
@@ -12152,7 +12198,7 @@ progress::-moz-progress-bar {
 .student-title-submission-page .title-submission-package-item span,
 .student-title-submission-page .title-submission-format-card > span {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -12161,7 +12207,7 @@ progress::-moz-progress-bar {
 
 .student-title-submission-page .title-submission-package-item strong {
     display: block;
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.4;
 }
@@ -12170,7 +12216,7 @@ progress::-moz-progress-bar {
 .student-title-submission-page .title-submission-review-step small,
 .student-title-submission-page .title-submission-format-card p {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.8rem;
     line-height: 1.5;
 }
@@ -12196,7 +12242,7 @@ progress::-moz-progress-bar {
     min-height: 1.85rem;
     padding: 0 0.68rem;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--surface);
     color: #003A8F;
     font-size: 0.75rem;
     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
@@ -12219,7 +12265,7 @@ progress::-moz-progress-bar {
     padding: 0.9rem 0.95rem;
     border-radius: 0.95rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-title-submission-page .title-submission-review-step > span {
@@ -12244,12 +12290,12 @@ progress::-moz-progress-bar {
     -webkit-background-clip: initial;
     -webkit-text-fill-color: currentColor;
     background-clip: initial;
-    color: #0f172a;
+    color: var(--text);
 }
 
 .register-title-page .page-title p {
     max-width: 52ch;
-    color: #64748b;
+    color: var(--text);
 }
 
 .register-title-page .register-title-header-copy {
@@ -12270,7 +12316,7 @@ progress::-moz-progress-bar {
     margin-bottom: 0;
     border-radius: 1.5rem;
     border-color: rgba(226, 232, 240, 0.95);
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 }
 
@@ -12305,13 +12351,13 @@ progress::-moz-progress-bar {
     padding: 1rem 1.1rem;
     border-radius: 1.1rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-meta-card span,
 .register-title-page .register-title-status-meta span {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -12320,14 +12366,14 @@ progress::-moz-progress-bar {
 
 .register-title-page .register-title-meta-card strong,
 .register-title-page .register-title-status-meta strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     line-height: 1.45;
 }
 
 .register-title-page .register-title-meta-card small,
 .register-title-page .register-title-status-top small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.5;
 }
@@ -12367,7 +12413,7 @@ progress::-moz-progress-bar {
     padding: 1.5rem;
     border-radius: 1.5rem;
     border-color: rgba(226, 232, 240, 0.95);
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 }
 
@@ -12387,14 +12433,14 @@ progress::-moz-progress-bar {
 }
 
 .register-title-page .card-heading h3 {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.2rem;
 }
 
 .register-title-page .card-heading p {
     margin-top: 0.45rem;
     max-width: 58ch;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.92rem;
     line-height: 1.6;
 }
@@ -12424,7 +12470,7 @@ progress::-moz-progress-bar {
 .register-title-page .form-field label {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--text);
 }
 
 .register-title-page .form-field input,
@@ -12432,8 +12478,8 @@ progress::-moz-progress-bar {
 .register-title-page .form-field textarea {
     border: 1px solid #cbd5e1;
     border-radius: 0.75rem;
-    background: #ffffff;
-    color: #0f172a;
+    background: var(--surface);
+    color: var(--text);
     box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
@@ -12460,8 +12506,8 @@ progress::-moz-progress-bar {
 .register-title-page .form-field input:disabled,
 .register-title-page .form-field select:disabled,
 .register-title-page .form-field textarea:disabled {
-    background: #f8fafc;
-    color: #475569;
+    background: var(--surface);
+    color: var(--text);
     border-style: solid;
 }
 
@@ -12478,7 +12524,7 @@ progress::-moz-progress-bar {
     flex: 1;
     margin: 0;
     max-width: 36rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.88rem;
     line-height: 1.65;
 }
@@ -12501,7 +12547,7 @@ progress::-moz-progress-bar {
 }
 
 .register-title-page .btn.btn-secondary {
-    background: #ffffff;
+    background: var(--surface);
     color: #003A8F;
     border: 1px solid #bfdbfe;
     box-shadow: none;
@@ -12513,15 +12559,15 @@ progress::-moz-progress-bar {
 }
 
 .register-title-page .btn.btn-ghost {
-    background: #f8fafc;
+    background: var(--surface);
     color: #334155;
     border: 1px solid #e2e8f0;
     box-shadow: none;
 }
 
 .register-title-page .btn.btn-ghost:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: var(--surface);
+    border-color: var(--border);
 }
 
 .register-title-page .register-title-status-panel {
@@ -12529,7 +12575,7 @@ progress::-moz-progress-bar {
     padding: 1.2rem;
     border-radius: 1.25rem;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-status-top {
@@ -12558,7 +12604,7 @@ progress::-moz-progress-bar {
     padding: 0.9rem 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-timeline {
@@ -12581,7 +12627,7 @@ progress::-moz-progress-bar {
     padding: 1rem 1rem 1rem 1.65rem;
     border-radius: 1.15rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: none;
 }
 
@@ -12628,8 +12674,8 @@ progress::-moz-progress-bar {
     padding: 0.28rem 0.7rem;
     border-radius: 999px;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    color: #475569;
+    background: var(--surface);
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 600;
     white-space: nowrap;
@@ -12643,8 +12689,8 @@ progress::-moz-progress-bar {
 }
 
 .register-title-page .ui-badge.is-neutral {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--surface);
+    color: var(--text);
 }
 
 .register-title-page .ui-badge.is-info {
@@ -12674,7 +12720,7 @@ progress::-moz-progress-bar {
 
 .register-title-page .register-title-strip-head h2 {
     margin: 0.3rem 0 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.45rem, 2.8vw, 1.9rem);
     line-height: 1.08;
     letter-spacing: -0.04em;
@@ -12683,7 +12729,7 @@ progress::-moz-progress-bar {
 .register-title-page .register-title-strip-head p {
     margin: 0.55rem 0 0;
     max-width: 66ch;
-    color: #64748b;
+    color: var(--text);
     line-height: 1.65;
 }
 
@@ -12714,7 +12760,7 @@ progress::-moz-progress-bar {
     padding: 1rem 1.05rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-workflow-card {
@@ -12736,7 +12782,7 @@ progress::-moz-progress-bar {
 .register-title-page .register-title-workflow-head h3,
 .register-title-page .register-title-side-card h3 {
     margin: 0.2rem 0 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.05rem;
 }
 
@@ -12754,7 +12800,7 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border-radius: 1rem;
     border: 1px solid #e2e8f0;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-step.is-completed {
@@ -12811,7 +12857,7 @@ progress::-moz-progress-bar {
 .register-title-page .register-title-feedback-item strong,
 .register-title-page .register-title-validation-match strong,
 .register-title-page .register-title-empty-card strong {
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.4;
 }
 
@@ -12822,7 +12868,7 @@ progress::-moz-progress-bar {
 .register-title-page .register-title-validation-card p,
 .register-title-page .register-title-empty-card p {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.9rem;
     line-height: 1.65;
 }
@@ -12831,7 +12877,7 @@ progress::-moz-progress-bar {
 .register-title-page .register-title-side-meta small,
 .register-title-page .register-title-feedback-head small,
 .register-title-page .register-title-validation-card small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.8rem;
     line-height: 1.5;
 }
@@ -12868,7 +12914,7 @@ progress::-moz-progress-bar {
 .register-title-page .register-title-form-section-head strong,
 .register-title-page .register-title-field-hint,
 .register-title-page .register-title-submit-note {
-    color: #64748b;
+    color: var(--text);
 }
 
 .register-title-page .register-title-side-meta span,
@@ -12881,7 +12927,7 @@ progress::-moz-progress-bar {
 
 .register-title-page .register-title-side-meta strong,
 .register-title-page .register-title-form-summary-item strong {
-    color: #0f172a;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -12892,11 +12938,11 @@ progress::-moz-progress-bar {
 
 .register-title-page .register-title-form-summary-item {
     min-height: 7rem;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-form-summary-item small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -12905,13 +12951,13 @@ progress::-moz-progress-bar {
 }
 
 .register-title-page .register-title-form-section-head strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
 }
 
 .register-title-page .register-title-form-section-head p {
     margin: 0;
-    color: #64748b;
+    color: var(--text);
     line-height: 1.55;
 }
 
@@ -12947,7 +12993,7 @@ progress::-moz-progress-bar {
     padding: 0.95rem 1rem;
     border-radius: 1rem;
     border: 1px solid rgba(191, 219, 254, 0.85);
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-panel-actions .btn {
@@ -12960,7 +13006,7 @@ progress::-moz-progress-bar {
 }
 
 .register-title-page .register-title-feedback-item {
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-validation-card {
@@ -12969,7 +13015,7 @@ progress::-moz-progress-bar {
 
 .register-title-page .register-title-validation-match {
     padding: 0.9rem 1rem;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .register-title-page .register-title-history-card {
@@ -13471,7 +13517,7 @@ progress::-moz-progress-bar {
     display: flex;
     min-height: 100vh;
     padding-top: 5rem;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-global-navbar {
@@ -13510,7 +13556,7 @@ progress::-moz-progress-bar {
     width: 3rem;
     height: 3rem;
     border-radius: 0.95rem;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.96);
     box-shadow: none;
 }
@@ -13551,7 +13597,7 @@ progress::-moz-progress-bar {
 .student-shell-brand-mark p {
     margin: 0;
     font-size: 0.71rem;
-    color: #64748b;
+    color: var(--text);
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: 0.02em;
@@ -13565,7 +13611,7 @@ progress::-moz-progress-bar {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.96);
     border-radius: 0.85rem;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 18px rgba(15, 23, 42, 0.05);
@@ -13812,7 +13858,7 @@ progress::-moz-progress-bar {
 .student-shell .profile-pill {
     min-height: 3rem;
     border-radius: 1rem;
-    background: #fff;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.96);
     box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 18px rgba(15, 23, 42, 0.04);
 }
@@ -13842,7 +13888,7 @@ progress::-moz-progress-bar {
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 0.85rem;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.9);
     box-shadow: none;
     color: var(--primary);
@@ -13858,7 +13904,7 @@ progress::-moz-progress-bar {
 .student-shell .notification-trigger-copy small,
 .student-shell .profile-nav-btn-copy small {
     font-size: 0.72rem;
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-shell .notification-trigger-count {
@@ -13869,7 +13915,7 @@ progress::-moz-progress-bar {
 }
 
 .student-shell .profile-nav-btn-chevron {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-shell .notification-menu,
@@ -13888,7 +13934,7 @@ progress::-moz-progress-bar {
     justify-content: center;
     margin-left: var(--sidebar-width);
     padding: 1.5rem 1rem 2.5rem;
-    background: #f8fafc;
+    background: var(--surface);
     transition: margin-left 0.2s ease;
 }
 
@@ -14031,20 +14077,20 @@ progress::-moz-progress-bar {
     padding: 1.15rem;
     border: 1px solid #e2e8f0;
     border-radius: 1.15rem;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
 .student-project-files-page .project-files-hero-stat.is-warning {
-    background: linear-gradient(135deg, #ffffff, #fffbeb);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-hero-stat.is-success {
-    background: linear-gradient(135deg, #ffffff, #f0fdf4);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-hero-stat.is-info {
-    background: linear-gradient(135deg, #ffffff, #faf5ff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-stat-icon {
@@ -14088,13 +14134,13 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-hero-stat strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.45rem;
     line-height: 1.1;
 }
 
 .student-project-files-page .project-files-hero-stat small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -14168,12 +14214,12 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-upload-step strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.86rem;
 }
 
 .student-project-files-page .project-files-upload-step small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.76rem;
 }
 
@@ -14228,17 +14274,17 @@ progress::-moz-progress-bar {
     padding: 1rem;
     border: 1px solid #f59e0b;
     border-radius: 1rem;
-    background: linear-gradient(135deg, #fffdf7, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-review-status.is-success {
     border-color: #22c55e;
-    background: linear-gradient(135deg, #f0fdf4, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-review-status.is-danger {
     border-color: #ef4444;
-    background: linear-gradient(135deg, #fef2f2, #ffffff);
+    background: var(--surface);
 }
 
 .student-project-files-page .project-files-review-status-icon {
@@ -14272,20 +14318,20 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-review-status-cell span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 700;
 }
 
 .student-project-files-page .project-files-review-status-cell strong {
-    color: #0f172a;
+    color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .student-project-files-page .project-files-review-status-cell small {
-    color: #64748b;
+    color: var(--text);
     line-height: 1.45;
 }
 
@@ -14325,9 +14371,9 @@ progress::-moz-progress-bar {
     min-height: 2.9rem;
     border-radius: 0.7rem;
     padding-inline: 1rem;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid #cbd5e1;
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.9rem;
     font-weight: 800;
     cursor: pointer;
@@ -14382,9 +14428,9 @@ progress::-moz-progress-bar {
 .student-project-files-page .project-files-table th {
     height: 3.1rem;
     padding: 0.75rem 1rem;
-    background: #f8fafc;
+    background: var(--surface);
     border-bottom: 1px solid #e2e8f0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.72rem;
     font-weight: 800;
 }
@@ -14424,7 +14470,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-date-cell small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.76rem;
 }
 
@@ -14451,13 +14497,13 @@ progress::-moz-progress-bar {
     padding: 0;
     border: 0;
     background: transparent;
-    color: #0f172a;
+    color: var(--text);
     box-shadow: none;
     border-radius: 0.45rem;
 }
 
 .student-project-files-page .project-files-row-actions .project-files-icon-action:hover {
-    background: #f1f5f9;
+    background: var(--surface);
     transform: none;
 }
 
@@ -14479,7 +14525,7 @@ progress::-moz-progress-bar {
 }
 
 .student-project-files-page .project-files-pagination-copy span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
 }
 
@@ -14551,7 +14597,7 @@ progress::-moz-progress-bar {
 
 .student-project-files-page .project-files-locked-description {
     margin: 0;
-    color: #475569;
+    color: var(--text);
     font-size: 0.98rem;
     line-height: 1.6;
 }
@@ -14815,7 +14861,7 @@ progress::-moz-progress-bar {
 .student-shell .profile-pill {
     border-radius: 1rem;
     border: 1px solid rgba(226, 232, 240, 0.96);
-    background: #fff;
+    background: var(--surface);
     box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 18px rgba(15, 23, 42, 0.04);
 }
 
@@ -14826,7 +14872,7 @@ progress::-moz-progress-bar {
 .student-shell .notification-trigger-icon,
 .student-shell .profile-nav-btn-avatar {
     border-radius: 0.85rem;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.9);
     color: var(--primary);
 }
@@ -14900,9 +14946,9 @@ progress::-moz-progress-bar {
 .student-shell .page-breadcrumb {
     min-height: 1.65rem;
     padding: 0.22rem 0.6rem;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid rgba(148, 163, 184, 0.18);
-    color: #64748b;
+    color: var(--text);
     font-size: 0.73rem;
     font-weight: 800;
     line-height: 1;
@@ -14930,7 +14976,7 @@ progress::-moz-progress-bar {
 .student-shell .page-title p {
     max-width: 48rem;
     margin: 0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.94rem;
     line-height: 1.6;
 }
@@ -14980,7 +15026,7 @@ progress::-moz-progress-bar {
 .student-shell .dashboard-action-card,
 .student-shell .student-project-metric,
 .student-shell .student-dashboard-meta-item {
-    background: #f8fafc;
+    background: var(--surface);
     border-color: rgba(226, 232, 240, 0.96);
 }
 
@@ -15017,7 +15063,7 @@ progress::-moz-progress-bar {
 .student-shell .btn.btn-ghost,
 .student-shell .table-btn,
 .student-shell .page-strip-action {
-    background: #fff;
+    background: var(--surface);
     border-color: rgba(0, 58, 143, 0.14);
     color: var(--primary);
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
@@ -15040,7 +15086,7 @@ progress::-moz-progress-bar {
 .student-shell select,
 .student-shell textarea {
     border-color: rgba(209, 213, 219, 0.94);
-    background: linear-gradient(180deg, #fff 0%, #fcfbfa 100%);
+    background: var(--surface);
     color: #111827;
 }
 
@@ -15201,8 +15247,8 @@ progress::-moz-progress-bar {
 
 .student-shell table th,
 .student-shell .table-shell th {
-    background: #F8FAFC;
-    color: #475569;
+    background: var(--surface);
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -15278,7 +15324,7 @@ progress::-moz-progress-bar {
 
 .student-dashboard-welcome-strip h1 {
     margin: 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.65rem, 2.7vw, 2.2rem);
     font-weight: 900;
     letter-spacing: 0;
@@ -15288,7 +15334,7 @@ progress::-moz-progress-bar {
 .student-dashboard-welcome-strip p {
     max-width: 850px;
     margin: 0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.9rem;
     font-weight: 650;
     line-height: 1.55;
@@ -15311,7 +15357,7 @@ progress::-moz-progress-bar {
     border: 1px solid rgba(226, 232, 240, 0.96);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.86);
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.8rem;
     font-weight: 900;
     text-decoration: none;
@@ -15354,7 +15400,7 @@ progress::-moz-progress-bar {
 
 .student-dashboard-welcome-insights small {
     overflow: hidden;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.66rem;
     font-weight: 850;
     letter-spacing: 0.08em;
@@ -15594,7 +15640,7 @@ progress::-moz-progress-bar {
 }
 
 .student-shell .student-dashboard-stat .stat-card-icon {
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: inset 0 0 0 1px rgba(0, 58, 143, 0.08), 0 10px 20px rgba(15, 23, 42, 0.05);
 }
 
@@ -15736,7 +15782,7 @@ progress::-moz-progress-bar {
 
 .student-dashboard-files-card .dashboard-upload-item {
     border-color: rgba(0, 58, 143, 0.1);
-    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    background: var(--surface);
 }
 
 .student-dashboard-files-card .table-file-icon {
@@ -15746,7 +15792,7 @@ progress::-moz-progress-bar {
 
 .student-dashboard-files-card .student-dashboard-file-summary-item {
     border-color: rgba(226, 232, 240, 0.96);
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-dashboard-side-panel {
@@ -15790,11 +15836,11 @@ progress::-moz-progress-bar {
 .student-dashboard-health-panel .student-deadline-item,
 .student-dashboard-notification-panel .student-summary-metric,
 .student-dashboard-team-panel .student-summary-metric {
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-dashboard-readiness-panel .student-dashboard-readiness-item {
-    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    background: var(--surface);
 }
 
 .student-dashboard-feedback-panel .student-feedback-card.is-highlighted,
@@ -16545,7 +16591,7 @@ html[data-student-theme="dark"] .settings-theme-options button.is-selected span 
     width: 1.38rem;
     height: 1.38rem;
     border-radius: 999px;
-    background: #fff;
+    background: var(--surface);
     box-shadow: 0 6px 12px rgba(15, 23, 42, 0.2);
 }
 
@@ -18762,7 +18808,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
     --sidebar-width: 248px;
     --student-shell-topbar-height: 38px;
     padding-top: var(--student-shell-topbar-height);
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .student-global-navbar {
@@ -18852,14 +18898,14 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
 .student-global-sidebar {
     top: var(--student-shell-topbar-height);
     width: var(--sidebar-width);
-    background: #ffffff;
+    background: var(--surface);
     border-right: 1px solid #dbe3ef;
     box-shadow: none;
 }
 
 .student-shell .sidebar {
-    background: #ffffff;
-    color: #0f172a;
+    background: var(--surface);
+    color: var(--text);
     border-right: 1px solid #dbe3ef;
     box-shadow: none;
 }
@@ -18875,7 +18921,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
     justify-content: center;
     padding: 0.85rem 1rem;
     border-bottom: 1px solid #dbe3ef;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-shell .sidebar-header-copy {
@@ -18892,7 +18938,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
 .student-shell .brand-mark {
     justify-content: flex-start;
     gap: 0.5rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.35rem;
 }
 
@@ -18910,7 +18956,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
 }
 
 .student-shell .brand-mark span {
-    color: #0f172a;
+    color: var(--text);
     font-weight: 800;
 }
 
@@ -18927,7 +18973,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
 .student-shell .sidebar-nav {
     gap: 0.8rem;
     padding: 1rem 1rem 1.5rem;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-shell .sidebar-nav-group {
@@ -18940,7 +18986,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
     gap: 0.45rem;
     padding: 0 0 0.25rem;
     margin: 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -18959,7 +19005,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
     padding: 0.55rem 0.7rem;
     margin: 0;
     border-radius: 0.22rem;
-    color: #0f172a;
+    color: var(--text);
     font-weight: 500;
     border: 0;
     box-shadow: none;
@@ -18986,7 +19032,7 @@ html[data-student-theme="dark"] .student-shell .project-overview-page .project-o
 
 .student-shell .sidebar-link-icon {
     width: 1.2rem;
-    color: #475569;
+    color: var(--text);
     font-size: 0.95rem;
     filter: none;
 }
@@ -19094,14 +19140,14 @@ html[data-student-theme="dark"] .student-global-sidebar,
 html[data-student-theme="dark"] .student-shell .sidebar,
 .student-shell[data-theme="dark"] .student-global-sidebar,
 .student-shell[data-theme="dark"] .sidebar {
-    background: #ffffff;
-    color: #0f172a;
+    background: var(--surface);
+    color: var(--text);
     border-right-color: #dbe3ef;
 }
 
 html[data-student-theme="dark"] .student-shell .sidebar-header,
 .student-shell[data-theme="dark"] .sidebar-header {
-    background: #ffffff;
+    background: var(--surface);
     border-bottom-color: #dbe3ef;
 }
 
@@ -19111,7 +19157,7 @@ html[data-student-theme="dark"] .student-shell .sidebar-link,
 .student-shell[data-theme="dark"] .brand-mark span,
 .student-shell[data-theme="dark"] .sidebar-nav-heading,
 .student-shell[data-theme="dark"] .sidebar-link {
-    color: #0f172a;
+    color: var(--text);
 }
 
 html[data-student-theme="dark"] .student-shell .brand-mark strong,
@@ -19121,7 +19167,7 @@ html[data-student-theme="dark"] .student-shell .brand-mark strong,
 
 html[data-student-theme="dark"] .student-shell .sidebar-link-icon,
 .student-shell[data-theme="dark"] .sidebar-link-icon {
-    color: #475569;
+    color: var(--text);
 }
 
 html[data-student-theme="dark"] .student-shell .sidebar-link:hover,
@@ -19175,7 +19221,7 @@ html[data-student-theme="dark"] .student-shell .sidebar-link.is-active .sidebar-
 
     .student-shell.is-sidebar-collapsed .sidebar-nav-heading {
         justify-content: flex-start;
-        color: #0f172a;
+        color: var(--text);
         font-size: 0.78rem;
     }
 
@@ -20035,8 +20081,8 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-stat.is-danger
     padding: 0 !important;
     border-right: 1px solid #dbe3ef !important;
     border-radius: 0 !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
     box-shadow: none !important;
     transform: translateX(0) !important;
 }
@@ -20051,7 +20097,7 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-stat.is-danger
     min-height: 114px !important;
     padding: 0.85rem 1rem 1rem !important;
     border-bottom: 1px solid #dbe3ef !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
 }
 
 .student-shell .brand-mark,
@@ -20061,18 +20107,18 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-stat.is-danger
 .student-shell .sidebar-nav-heading,
 .student-shell .sidebar-link,
 .student-shell .sidebar-link-label {
-    color: #0f172a !important;
+    color: var(--text) !important;
 }
 
 .student-shell .brand-mark i,
 .student-shell .sidebar-link-icon {
-    color: #475569 !important;
+    color: var(--text) !important;
 }
 
 .student-shell .sidebar-nav {
     padding: 1rem 1rem 1.25rem !important;
     gap: 1.15rem !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
 }
 
 .student-shell .sidebar-nav-heading {
@@ -20397,7 +20443,7 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-stat.is-danger
     .student-shell:not(.is-sidebar-collapsed) .sidebar-header .system-brand-subtitle {
         overflow: visible !important;
         max-width: none !important;
-        color: #475569 !important;
+        color: var(--text) !important;
         font-size: 0.62rem !important;
         font-weight: 700 !important;
         letter-spacing: -0.045em !important;
@@ -21678,7 +21724,7 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-welcome-insigh
 }
 
 .student-shell .student-global-sidebar .system-brand-subtitle {
-    color: #475569 !important;
+    color: var(--text) !important;
     font-size: 0.62rem !important;
     font-weight: 700 !important;
     letter-spacing: 0 !important;
@@ -21727,7 +21773,7 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-welcome-insigh
     gap: 0.6rem !important;
     margin: 0 0 0.55rem !important;
     padding: 0 !important;
-    color: #0f172a !important;
+    color: var(--text) !important;
     font-size: 0.78rem !important;
     font-weight: 800 !important;
     letter-spacing: 0 !important;
@@ -21902,19 +21948,19 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 
 .student-milestones-page {
-    --milestone-navy: #002c6b;
-    --milestone-navy-2: #0f4c81;
-    --milestone-gold: #d97706;
-    --milestone-gold-soft: #fff7ed;
-    --milestone-green: #16a34a;
-    --milestone-green-soft: #f0fdf4;
-    --milestone-red: #dc2626;
-    --milestone-red-soft: #fff1f2;
-    --milestone-ink: #0f172a;
-    --milestone-muted: #64748b;
-    --milestone-line: #e2e8f0;
-    --milestone-soft: #f8fafc;
-    color: var(--milestone-ink);
+    --milestone-navy: var(--primary);
+    --milestone-navy-2: var(--primary-bright);
+    --milestone-gold: var(--secondary);
+    --milestone-gold-soft: var(--secondary-soft);
+    --milestone-green: var(--success);
+    --milestone-green-soft: var(--success-soft);
+    --milestone-red: var(--danger);
+    --milestone-red-soft: var(--danger-soft);
+    --milestone-ink: var(--text);
+    --milestone-muted: var(--muted);
+    --milestone-line: var(--border);
+    --milestone-soft: var(--bg);
+    color: var(--text);
 }
 
 .milestones-workflow-shell {
@@ -21938,8 +21984,8 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 .milestones-bottom-panel {
     border: 1px solid var(--milestone-line);
     border-radius: 1rem;
-    background: #ffffff;
-    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.06);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
 }
 
 .milestones-academic-panel,
@@ -21985,7 +22031,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 .milestones-spotlight-card > p {
     margin: 0;
     max-width: 62rem;
-    color: #475569;
+    color: var(--muted);
     font-size: 0.95rem;
     line-height: 1.7;
 }
@@ -22103,8 +22149,8 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     padding: 0.34rem 0.62rem;
     border: 1px solid #e2e8f0;
     border-radius: 999px;
-    background: #f8fafc;
-    color: #475569;
+    background: var(--surface);
+    color: var(--text);
     font-size: 0.74rem;
     font-weight: 800;
     line-height: 1.1;
@@ -22133,7 +22179,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     display: grid;
     gap: 1rem;
     border-color: #bfdbfe;
-    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    background: var(--surface);
 }
 
 .milestones-spotlight-grid {
@@ -22162,7 +22208,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     position: absolute;
     inset: 0.62rem;
     border-radius: inherit;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: inset 0 0 0 1px #edf2f7;
 }
 
@@ -22199,7 +22245,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     padding: 0.8rem;
     border: 1px solid var(--milestone-line);
     border-radius: 0.8rem;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .milestones-spotlight-facts span,
@@ -22264,7 +22310,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     padding: 0.7rem 0.85rem;
     border: 1px solid #cbd5e1;
     border-radius: 0.72rem;
-    background: #ffffff;
+    background: var(--surface);
     color: var(--milestone-navy);
     font-size: 0.84rem;
     font-weight: 800;
@@ -22298,9 +22344,9 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 .milestone-action-button.is-disabled,
 .milestone-action-button.is-disabled:hover {
     cursor: not-allowed;
-    border-color: #cbd5e1;
-    background: #f1f5f9;
-    color: #64748b;
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
     box-shadow: none;
     transform: none;
 }
@@ -22363,8 +22409,8 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     height: 2.55rem;
     border: 2px solid #cbd5e1;
     border-radius: 50%;
-    background: #ffffff;
-    color: #64748b;
+    background: var(--surface);
+    color: var(--text);
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
@@ -22397,7 +22443,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     overflow: hidden;
     border: 1px solid var(--milestone-line);
     border-radius: 0.95rem;
-    background: #ffffff;
+    background: var(--surface);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -22419,7 +22465,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 
 .milestone-roadmap-item.is-locked .milestone-roadmap-panel {
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .milestone-stage-summary {
@@ -22498,7 +22544,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(18rem, 0.9fr);
     border-top: 1px solid var(--milestone-line);
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .milestone-stage-column {
@@ -22613,8 +22659,8 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     flex: 0 0 auto;
     border: 1px solid #cbd5e1;
     border-radius: 50%;
-    background: #ffffff;
-    color: #64748b;
+    background: var(--surface);
+    color: var(--text);
     font-size: 0.76rem;
 }
 
@@ -22643,9 +22689,9 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 
 .milestone-check-icon.is-locked {
-    border-color: #cbd5e1;
-    background: #f1f5f9;
-    color: #64748b;
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
 }
 
 .milestone-evidence-icon {
@@ -22658,7 +22704,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     padding: 0.72rem;
     border: 1px solid var(--milestone-line);
     border-radius: 0.75rem;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .milestone-evidence-item .milestone-status-badge {
@@ -22709,7 +22755,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     display: -webkit-box;
     margin: 0;
     overflow: hidden;
-    color: #475569;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.55;
     -webkit-box-orient: vertical;
@@ -22753,7 +22799,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     padding: 0.85rem;
     border: 1px dashed #cbd5e1;
     border-radius: 0.78rem;
-    background: #f8fafc;
+    background: var(--surface);
     color: var(--milestone-muted);
     font-size: 0.84rem;
     line-height: 1.45;
@@ -22936,7 +22982,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 
 .premium-hero-section {
   display: flex;
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  background: var(--surface);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.8);
   padding: 3rem;
@@ -22974,7 +23020,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: #64748b;
+  color: var(--text);
   margin-bottom: 1rem;
 }
 
@@ -23001,8 +23047,8 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
-  background: #F1F5F9;
-  color: #475569;
+  background: var(--surface);
+  color: var(--text);
 }
 .hero-chip.is-blue {
   background: #EFF6FF;
@@ -23031,7 +23077,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   font-weight: 600;
 }
 .hero-premium-meta i {
-  color: #64748B;
+  color: var(--text);
 }
 
 .hero-premium-actions {
@@ -23082,12 +23128,12 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 
 .btn-premium-secondary {
-  background: white;
+  background: var(--surface);
   color: #111827;
   border: 1px solid #E5E7EB;
 }
 .btn-premium-secondary:hover {
-  background: #F8FAFC;
+  background: var(--surface);
   transform: translateY(-2px);
 }
 
@@ -23095,7 +23141,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: white;
+  background: var(--surface);
   border: 1px solid #E5E7EB;
   color: #4B5563;
   display: inline-flex;
@@ -23105,7 +23151,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   cursor: pointer;
 }
 .btn-premium-icon:hover {
-  background: #F8FAFC;
+  background: var(--surface);
 }
 
 .hero-premium-right {
@@ -23144,7 +23190,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   top: 15%;
   width: 140px;
   height: 180px;
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.08);
   border: 1px solid #E2E8F0;
@@ -23165,7 +23211,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   display: block;
   width: 100%;
   height: 8px;
-  background: #F1F5F9;
+  background: var(--surface);
   border-radius: 4px;
   margin-bottom: 8px;
   box-shadow: 0 16px 0 #F1F5F9, 0 32px 0 #F1F5F9, 0 48px 0 #F1F5F9;
@@ -23176,7 +23222,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   top: 30%;
   width: 120px;
   height: 120px;
-  background: white;
+  background: var(--surface);
   border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.08);
   border: 1px solid #E2E8F0;
@@ -23230,7 +23276,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 .progress-bar-premium {
   flex: 1;
   height: 8px;
-  background: #F1F5F9;
+  background: var(--surface);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -23242,7 +23288,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 .progress-note {
   font-size: 0.75rem;
-  color: #64748B;
+  color: var(--text);
   margin: 0;
 }
 
@@ -23263,7 +23309,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 
 .progress-list-item span {
   font-size: 0.85rem;
-  color: #64748B;
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -23283,7 +23329,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 
 .premium-surface-card {
-  background: white;
+  background: var(--surface);
   border: 1px solid rgba(229, 231, 235, 0.6);
   border-radius: 20px;
   padding: 1.5rem;
@@ -23348,7 +23394,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: white;
+  background: var(--surface);
   border: 2px solid #E5E7EB;
   display: flex;
   align-items: center;
@@ -23370,7 +23416,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 .timeline-status-text {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748B;
+  color: var(--text);
 }
 .timeline-date {
   font-size: 0.7rem;
@@ -23416,7 +23462,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   gap: 0.5rem;
   padding: 0 1.5rem;
   border-bottom: 1px solid #E5E7EB;
-  background: #F8FAFC;
+  background: var(--surface);
 }
 .workspace-tab {
   padding: 0.8rem 1.25rem;
@@ -23424,7 +23470,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   border: none;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #64748B;
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -23459,9 +23505,9 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   padding: 1rem 1.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748B;
+  color: var(--text);
   border-bottom: 1px solid #E5E7EB;
-  background: white;
+  background: var(--surface);
 }
 .premium-table td {
   padding: 1rem 1.5rem;
@@ -23471,7 +23517,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   vertical-align: middle;
 }
 .premium-table tr:hover td {
-  background: #F8FAFC;
+  background: var(--surface);
 }
 .table-file-name {
   display: flex;
@@ -23495,7 +23541,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 .table-type {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748B;
+  color: var(--text);
 }
 .table-date {
   color: #4B5563;
@@ -23509,7 +23555,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   cursor: pointer;
 }
 .table-action-btn:hover {
-  background: #F1F5F9;
+  background: var(--surface);
   color: #111827;
 }
 
@@ -23621,7 +23667,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 .team-info span {
   font-size: 0.75rem;
-  color: #64748B;
+  color: var(--text);
 }
 
 .premium-schedule-list {
@@ -23635,7 +23681,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   padding: 1rem;
   border-radius: 12px;
   border: 1px solid #E5E7EB;
-  background: white;
+  background: var(--surface);
 }
 .schedule-date-box {
   display: flex;
@@ -23643,14 +23689,14 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   align-items: center;
   justify-content: center;
   width: 50px;
-  background: #F8FAFC;
+  background: var(--surface);
   border-radius: 8px;
   padding: 0.5rem;
 }
 .s-month {
   font-size: 0.7rem;
   font-weight: 700;
-  color: #64748B;
+  color: var(--text);
   text-transform: uppercase;
 }
 .s-day {
@@ -23669,7 +23715,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 .schedule-info span {
   font-size: 0.75rem;
-  color: #64748B;
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -23692,7 +23738,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 1rem;
-  background: #F8FAFC;
+  background: var(--surface);
   border-radius: 12px;
   border: 1px solid #F1F5F9;
   color: #4B5563;
@@ -23708,7 +23754,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   font-weight: 600;
 }
 .quick-action-btn:hover {
-  background: white;
+  background: var(--surface);
   border-color: #E5E7EB;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   color: var(--primary);
@@ -23727,7 +23773,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #F1F5F9;
+  background: var(--surface);
   color: #94A3B8;
   display: flex;
   align-items: center;
@@ -23742,7 +23788,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 .premium-empty-state p {
   font-size: 0.85rem;
-  color: #64748B;
+  color: var(--text);
   margin: 0;
 }
 
@@ -23790,7 +23836,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 
 /* Professional title submission workbench refinement. */
 .student-title-submission-page {
-    background: #f8fafc !important;
+    background: var(--surface) !important;
 }
 
 .student-title-submission-page .legacy-title-hero,
@@ -23808,7 +23854,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     padding: 1.25rem;
     border: 1px solid #dbe3ef;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
@@ -23838,7 +23884,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 .student-title-submission-page .title-submission-command-copy h2 {
     margin: 0;
     max-width: 34ch;
-    color: #0f172a;
+    color: var(--text);
     font-size: clamp(1.5rem, 2.25vw, 2.1rem);
     font-weight: 850;
     line-height: 1.12;
@@ -23865,7 +23911,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 750;
 }
@@ -23895,7 +23941,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 
 .student-title-submission-page .title-submission-progress-head strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.35rem;
     font-weight: 850;
 }
@@ -23916,7 +23962,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 
 .student-title-submission-page .title-submission-progress-summary p {
     margin: 0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     font-weight: 750;
 }
@@ -23951,14 +23997,14 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
 }
 
 .student-title-submission-page .title-submission-readiness-list strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.82rem;
     font-weight: 800;
 }
 
 .student-title-submission-page .title-submission-readiness-list small {
     margin-top: 0.12rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.74rem;
     font-weight: 650;
     line-height: 1.35;
@@ -23971,7 +24017,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     margin-bottom: 1rem;
     border-top: 1px solid #dbe3ef;
     border-bottom: 1px solid #dbe3ef;
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .student-title-submission-page .title-submission-workflow-strip > div {
@@ -23996,7 +24042,7 @@ html[data-student-theme="dark"] .student-shell .student-global-sidebar .sidebar-
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    background: #f1f5f9;
+    background: var(--surface);
     font-size: 0.78rem;
 }
 
@@ -24155,7 +24201,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
 .student-title-submission-page .title-submission-workflow-strip > div {
     border-right: 0 !important;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.045);
 }
 
@@ -24183,7 +24229,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
 
 .student-title-submission-page .grid.grid-cols-4 > div {
     border-color: transparent !important;
-    background: #f8fafc !important;
+    background: var(--surface) !important;
 }
 
 .student-title-submission-page [class*="border-2"]:not([class*="border-dashed"]) {
@@ -24238,7 +24284,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     padding: 1.25rem !important;
     border: 1px solid var(--title-card-border) !important;
     border-radius: 8px !important;
-    background: linear-gradient(135deg, #ffffff, #fbfdff) !important;
+    background: var(--surface) !important;
     box-shadow: var(--title-shadow) !important;
 }
 
@@ -24285,7 +24331,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     padding: 1.25rem 1rem;
     border: 1px solid var(--title-card-border) !important;
     border-radius: 8px;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: var(--title-shadow-soft);
 }
 
@@ -24318,8 +24364,8 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     height: 42px;
     border: 1px solid #dbe3ef;
     border-radius: 999px;
-    background: #f8fafc;
-    color: #64748b;
+    background: var(--surface);
+    color: var(--text);
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
@@ -24331,14 +24377,14 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 
 .student-title-submission-page .title-submission-workflow-strip .is-current span {
     border-color: #f6be00;
-    background: #ffffff8f;
+    background: var(--surface);
     color: #003a8f;
     box-shadow: 0 0 0 5px rgba(246, 190, 0, 0.16);
 }
 
 .student-title-submission-page .title-submission-workflow-strip strong {
     margin-top: 0.2rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.78rem;
 }
 
@@ -24346,7 +24392,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     display: block;
     max-width: 14ch;
     overflow: hidden;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.68rem;
     font-weight: 700;
     line-height: 1.2;
@@ -24377,7 +24423,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-side-rail > .bg-white {
     border: 1px solid var(--title-card-border) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: var(--title-shadow-soft) !important;
 }
 
@@ -24400,7 +24446,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-main-stack input,
 .student-title-submission-page .title-submission-main-stack textarea {
     border-color: #dbe3ef !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
 }
 
@@ -24461,7 +24507,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-title-submission-page .title-submission-progress-orb span {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.95rem;
     font-weight: 850;
 }
@@ -24494,14 +24540,14 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-title-submission-page .title-submission-side-readiness strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 850;
 }
 
 .student-title-submission-page .title-submission-side-readiness small {
     margin-top: 0.1rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.7rem;
     font-weight: 650;
     line-height: 1.32;
@@ -24524,7 +24570,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-side-rail .grid.grid-cols-4 > div {
     border: 1px solid #e8eef6 !important;
     border-radius: 8px !important;
-    background: #f8fafc !important;
+    background: var(--surface) !important;
 }
 
 .student-title-submission-page .title-submission-side-rail ul li {
@@ -24652,7 +24698,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
     padding: 0.75rem !important;
     border: 1px solid #dbe5f2 !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05) !important;
 }
 
@@ -24677,8 +24723,8 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
     padding: 0.68rem !important;
     border: 1px solid #edf2f7 !important;
     border-radius: 8px;
-    background: #ffffff !important;
-    color: #64748b;
+    background: var(--surface) !important;
+    color: var(--text);
     text-align: left !important;
     transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
@@ -24717,8 +24763,8 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
     justify-content: center;
     border: 1px solid #dbe5f2;
     border-radius: 8px !important;
-    background: #ffffff !important;
-    color: #64748b;
+    background: var(--surface) !important;
+    color: var(--text);
     font-size: 0.78rem;
     box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06) !important;
 }
@@ -24757,7 +24803,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
 }
 
 .student-title-submission-page .title-submission-workflow-copy em {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.6rem;
     font-style: normal;
     font-weight: 850;
@@ -24770,7 +24816,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
     margin-top: 0 !important;
     max-width: none !important;
     overflow: hidden;
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.8rem !important;
     font-weight: 850;
     line-height: 1.15;
@@ -24782,7 +24828,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page :i
     display: block;
     max-width: none !important;
     overflow: hidden;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.68rem !important;
     font-weight: 750;
     line-height: 1.15;
@@ -24893,7 +24939,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     padding: 1rem !important;
     border: 1px solid var(--title-shell-border) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: var(--title-shell-shadow) !important;
 }
 
@@ -24948,7 +24994,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-side-rail > .bg-white {
     border: 1px solid var(--title-shell-border) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: var(--title-shell-shadow) !important;
 }
 
@@ -24969,7 +25015,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-main-stack textarea {
     border-color: var(--title-shell-border) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
 }
 
 .student-title-submission-page .title-submission-main-stack input:focus,
@@ -24981,7 +25027,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-cta-panel {
     border-color: #bfdbfe !important;
     border-left: 4px solid var(--primary, #003A8F) !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: var(--title-shell-shadow) !important;
 }
 
@@ -25016,7 +25062,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-title-submission-page .title-submission-side-rail [role="button"] {
-    border-color: #e2e8f0 !important;
+    border-color: var(--border) !important;
     border-radius: 8px !important;
     box-shadow: none !important;
 }
@@ -25034,7 +25080,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-side-rail .grid.grid-cols-4 > div {
     border: 1px solid #e8eef6 !important;
     border-radius: 8px !important;
-    background: #f8fafc !important;
+    background: var(--surface) !important;
 }
 
 @media (min-width: 1180px) {
@@ -25159,7 +25205,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     height: 38px !important;
     flex-basis: 38px;
     border-radius: 12px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08) !important;
     transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
 }
@@ -25196,7 +25242,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-title-submission-page .title-submission-workflow-copy em {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.58rem;
 }
 
@@ -25386,7 +25432,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-title-submission-page .title-submission-workflow-strip .is-pending em {
-    color: #475569;
+    color: var(--text);
 }
 
 .student-title-submission-page .title-submission-workflow-strip strong {
@@ -25422,9 +25468,9 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-title-submission-page .title-submission-workflow-strip .is-pending small.title-submission-workflow-pill {
-    border-color: #cbd5e1;
+    border-color: var(--border);
     background: #eef2f7;
-    color: #475569;
+    color: var(--text);
 }
 
 .student-title-submission-page .title-submission-workflow-copy p {
@@ -25462,7 +25508,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     padding: 0.55rem 1.05rem;
     border: 1px solid #fb923c;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--surface);
     color: #f28c00;
     font-size: 0.82rem;
     font-weight: 900;
@@ -25691,7 +25737,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     justify-content: center;
     border: 1px solid rgba(0, 58, 143, 0.1);
     border-radius: 8px;
-    background: linear-gradient(135deg, #eef5ff 0%, #ffffff 100%);
+    background: var(--surface);
     color: #003A8F;
     font-size: 1.25rem;
     box-shadow: 0 12px 24px rgba(0, 58, 143, 0.08);
@@ -25923,8 +25969,8 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 
 .student-title-submission-page .title-review-progress-card .is-pending .title-submission-workflow-icon {
     border-color: #dbe4ef !important;
-    background: #ffffff !important;
-    color: #64748b !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
     box-shadow:
         0 8px 20px rgba(15, 23, 42, 0.08),
         0 0 0 8px rgba(241, 245, 249, 0.9) !important;
@@ -25969,7 +26015,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .student-title-submission-page .title-review-progress-card .is-pending .title-submission-workflow-copy em {
-    color: #64748b;
+    color: var(--text);
 }
 
 .student-title-submission-page .title-review-progress-card .title-submission-workflow-strip strong {
@@ -26009,8 +26055,8 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 
 .student-title-submission-page .title-review-progress-card .is-pending .title-submission-workflow-pill {
     border-color: #dbe4ef !important;
-    background: #f1f5f9 !important;
-    color: #475569 !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
 }
 
 .student-title-submission-page .title-review-progress-card .title-submission-workflow-copy p {
@@ -26066,7 +26112,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     padding: 0.42rem 0.78rem;
     border: 1px solid #fb923c;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--surface);
     color: #f28c00;
     font-size: 0.72rem;
     font-weight: 900;
@@ -26306,7 +26352,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     --role-shell-navbar-height: 72px;
     min-height: 100vh !important;
     padding-top: var(--role-shell-navbar-height) !important;
-    background: #f8fafc !important;
+    background: var(--surface) !important;
 }
 
 .student-shell :is(
@@ -26564,7 +26610,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
     border-radius: 0 !important;
     background: rgba(255, 255, 255, 0.78) !important;
-    color: #0f172a !important;
+    color: var(--text) !important;
     box-shadow: 18px 0 48px rgba(15, 23, 42, 0.06) !important;
     backdrop-filter: blur(22px) saturate(155%) !important;
     transition: width 0.2s ease, transform 0.2s ease !important;
@@ -26631,7 +26677,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     display: block !important;
     grid-column: 2 !important;
     grid-row: 2 !important;
-    color: #475569 !important;
+    color: var(--text) !important;
     font-size: 0.62rem !important;
     font-weight: 500 !important;
     letter-spacing: 0 !important;
@@ -26658,7 +26704,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     gap: 0.6rem !important;
     margin: 0 0 0.55rem !important;
     padding: 0 !important;
-    color: #0f172a !important;
+    color: var(--text) !important;
     font-size: 0.78rem !important;
     font-weight: 600 !important;
     letter-spacing: 0 !important;
@@ -26802,7 +26848,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     justify-content: center !important;
     min-width: 0 !important;
     padding: 1rem 1rem 2.5rem !important;
-    background: #f8fafc !important;
+    background: var(--surface) !important;
     transition: margin-left 0.2s ease !important;
 }
 
@@ -26810,6 +26856,12 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     width: 100% !important;
     max-width: 1600px !important;
     min-width: 0 !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 1.45rem !important;
+    box-shadow: 0 16px 34px rgba(31, 41, 55, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) !important;
+    padding: 1.5rem !important;
+    min-height: calc(100vh - 6rem) !important;
 }
 
 @media (min-width: 1101px) {
@@ -26921,7 +26973,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .milestones-view-toggles button.is-active {
-    background: white;
+    background: var(--surface);
     color: var(--primary);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -26957,7 +27009,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .gantt-row-label {
-    background: white;
+    background: var(--surface);
     padding: 1rem;
     display: flex;
     flex-direction: column;
@@ -26976,7 +27028,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 .gantt-track-cell {
-    background: white;
+    background: var(--surface);
     position: relative;
     padding: 0.75rem 0.25rem;
 }
@@ -27035,7 +27087,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 
 /* Premium Skeleton Shimmer */
 .shimmer-bg {
-    background: #f1f5f9;
+    background: var(--surface);
     background-image: linear-gradient(
         90deg,
         rgba(255, 255, 255, 0) 0,
@@ -27133,17 +27185,17 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .profile-dropdown .dashboard-mode-switch button { justify-content: flex-start !important; white-space: nowrap !important; }
 
 
-.dashboard-mode-switch { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.28rem; border-radius: 999px; background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%); border: 1px solid rgba(229, 231, 235, 0.9); box-shadow: 0 10px 24px rgba(31, 41, 55, 0.05); }
+.dashboard-mode-switch { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.28rem; border-radius: 999px; background: var(--surface); border: 1px solid rgba(229, 231, 235, 0.9); box-shadow: 0 10px 24px rgba(31, 41, 55, 0.05); }
 .dashboard-mode-switch button { border: none; background: transparent; color: #6B7280; font-family: inherit; font-size: 0.76rem; font-weight: 700; padding: 0.52rem 0.95rem; border-radius: 999px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.01em; }
 .dashboard-mode-switch button:hover { color: #003A8F; background: rgba(0, 58, 143, 0.06); }
 .dashboard-mode-switch button.active { background: linear-gradient(135deg, #003A8F, #002C6B); color: white; box-shadow: 0 12px 24px rgba(0, 58, 143, 0.18); }
 
 
 .workspace-mode-menu { display: grid; gap: 0.2rem; }
-.workspace-mode-item { width: 100%; border: none; background: transparent; text-decoration: none; color: #475569; font-family: inherit; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.9rem; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s ease; }
+.workspace-mode-item { width: 100%; border: none; background: transparent; text-decoration: none; color: var(--text); font-family: inherit; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.9rem; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s ease; }
 .workspace-mode-item-left { display: flex; align-items: center; gap: 0.7rem; }
-.workspace-mode-item-left i { width: 1rem; text-align: center; color: #64748b; transition: all 0.2s ease; }
-.workspace-mode-item:hover { background: rgba(0, 58, 143, 0.04); color: #1e293b; }
+.workspace-mode-item-left i { width: 1rem; text-align: center; color: var(--text); transition: all 0.2s ease; }
+.workspace-mode-item:hover { background: rgba(0, 58, 143, 0.04); color: var(--text); }
 .workspace-mode-item:hover .workspace-mode-item-left i { color: #003a8f; }
 .workspace-mode-item.is-active { background: rgba(0, 58, 143, 0.08); color: #003a8f; }
 .workspace-mode-item.is-active .workspace-mode-item-left i { color: #003a8f; }

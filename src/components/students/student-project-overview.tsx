@@ -123,7 +123,7 @@ function isImageEvidenceFile(file: File) {
 }
 
 const OVERVIEW_PILL_STYLES: Record<BadgeTone, string> = {
-  neutral: 'border-slate-200 bg-slate-100 text-slate-700',
+  neutral: 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)]',
   success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   warning: 'border-amber-200 bg-amber-50 text-amber-700',
   danger: 'border-rose-200 bg-rose-50 text-rose-700',
@@ -204,9 +204,9 @@ function MetaStat({
   value: string | number;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-3.5 py-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-[var(--text)]">{value}</p>
     </div>
   );
 }
@@ -395,7 +395,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                   <div className="project-overview-summary-title flex items-center flex-wrap gap-3 mb-2">
                     {projectStatusTone !== 'success' ? (
                       <>
-                        <h2 className="text-xl font-medium text-slate-500 italic flex items-center">
+                        <h2 className="text-xl font-medium text-[var(--muted)] italic flex items-center">
                           <i className="fas fa-lock text-sm mr-2 opacity-60"></i>
                           Project title pending approval
                         </h2>
@@ -410,9 +410,9 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     <Badge label={project.status} tone={projectStatusTone} />
                   </div>
                   {projectStatusTone !== 'success' ? (
-                    <p className="project-overview-summary-copy text-sm text-slate-500 max-w-2xl">Your project title will appear here once the concept proposal has been officially approved.</p>
+                    <p className="project-overview-summary-copy text-sm text-[var(--muted)] max-w-2xl">Your project title will appear here once the concept proposal has been officially approved.</p>
                   ) : (
-                    <p className="project-overview-summary-copy text-sm text-slate-600 max-w-2xl">{project.description}</p>
+                    <p className="project-overview-summary-copy text-sm text-[var(--muted)] max-w-2xl">{project.description}</p>
                   )}
                 </div>
               </div>
@@ -436,29 +436,29 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                 </Link>
               </div>
             </div>
-            <div className="hero-card-side project-overview-summary-side flex flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="hero-card-side project-overview-summary-side flex flex-col gap-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
               <div className="flex flex-col items-center justify-center text-center gap-3">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 w-full text-left">Progress</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] w-full text-left">Progress</span>
                 <div className="progress-orb my-2" style={progressOrbStyle}>
                   <strong>{project.progressPercentage}%</strong>
                   <span>Progress</span>
                 </div>
                 {project.progressPercentage === 0 && (
-                  <p className="text-xs text-slate-500 max-w-[200px] leading-relaxed">No milestone progress yet. Start by opening milestones.</p>
+                  <p className="text-xs text-[var(--muted)] max-w-[200px] leading-relaxed">No milestone progress yet. Start by opening milestones.</p>
                 )}
               </div>
-              <div className="grid grid-cols-1 gap-3.5 pt-4 border-t border-slate-100 w-full">
+              <div className="grid grid-cols-1 gap-3.5 pt-4 border-t border-[var(--border)] w-full">
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-500">Current milestone</span>
-                  <strong className="text-slate-800 text-right">{project.currentMilestone || 'Not started'}</strong>
+                  <span className="text-[var(--muted)]">Current milestone</span>
+                  <strong className="text-[var(--text)] text-right">{project.currentMilestone || 'Not started'}</strong>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-500">Upcoming deadline</span>
-                  <strong className="text-slate-800 text-right">{project.upcomingDeadline || 'Not set'}</strong>
+                  <span className="text-[var(--muted)]">Upcoming deadline</span>
+                  <strong className="text-[var(--text)] text-right">{project.upcomingDeadline || 'Not set'}</strong>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-500">Repository status</span>
-                  <strong className="text-slate-800 text-right">{project.repositoryStatus || 'Pending'}</strong>
+                  <span className="text-[var(--muted)]">Repository status</span>
+                  <strong className="text-[var(--text)] text-right">{project.repositoryStatus || 'Pending'}</strong>
                 </div>
               </div>
             </div>
@@ -476,9 +476,9 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                 {details.map((item) => {
                   const isPending = !item.value || item.value === 'Not assigned' || item.value === 'Pending' || item.value === 'None';
                   return (
-                    <div key={item.label} className="flex flex-col gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-4 shadow-sm transition-colors hover:border-slate-200">
-                      <span className="text-xs font-medium uppercase tracking-wider text-slate-500">{item.label}</span>
-                      <strong className={`text-sm ${isPending ? 'text-slate-400 font-medium italic' : 'text-slate-800 font-semibold'}`}>{isPending ? 'Not available' : item.value}</strong>
+                    <div key={item.label} className="flex flex-col gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-4 shadow-sm transition-colors hover:border-[var(--border)]">
+                      <span className="text-xs font-medium uppercase tracking-wider text-[var(--muted)]">{item.label}</span>
+                      <strong className={`text-sm ${isPending ? 'text-[var(--text-meta)] font-medium italic' : 'text-[var(--text)] font-semibold'}`}>{isPending ? 'Not available' : item.value}</strong>
                     </div>
                   );
                 })}
@@ -523,15 +523,15 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               </div>
 
               <div className="stack-list">
-                <article className="stack-card project-overview-panel-card rounded-xl border border-slate-100 bg-white shadow-sm p-5">
+                <article className="stack-card project-overview-panel-card rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm p-5">
                   <div className="stack-card-head flex items-center justify-between mb-2">
-                    <strong className="text-sm font-semibold text-slate-800">Adviser</strong>
+                    <strong className="text-sm font-semibold text-[var(--text)]">Adviser</strong>
                     <Badge 
                       label={project.adviser && project.adviser !== 'Not assigned' ? 'Assigned' : 'Pending Assignment'} 
                       tone={project.adviser && project.adviser !== 'Not assigned' ? 'success' : 'warning'} 
                     />
                   </div>
-                  <p className="text-sm text-slate-600">{project.adviser && project.adviser !== 'Not assigned' ? project.adviser : 'No adviser assigned yet.'}</p>
+                  <p className="text-sm text-[var(--muted)]">{project.adviser && project.adviser !== 'Not assigned' ? project.adviser : 'No adviser assigned yet.'}</p>
                 </article>
               </div>
             </article>
@@ -549,13 +549,13 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
             </div>
           </section>
 
-          <section className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-label="Academic activities and supporting evidence">
-            <div className="flex flex-col gap-5 border-b border-slate-200 pb-5 lg:flex-row lg:items-start lg:justify-between">
+          <section className="space-y-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm" aria-label="Academic activities and supporting evidence">
+            <div className="flex flex-col gap-5 border-b border-[var(--border)] pb-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <span className="section-kicker">Presentations and Achievements</span>
-                  <h2 className="text-xl font-semibold text-slate-900">Academic activities and supporting evidence</h2>
-                  <p className="max-w-3xl text-sm leading-6 text-slate-500">
+                  <h2 className="text-xl font-semibold text-[var(--text)]">Academic activities and supporting evidence</h2>
+                  <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">
                     Track presentations, supporting files, and recognitions in one cleaner section built for thesis monitoring and accreditation support.
                   </p>
                 </div>
@@ -564,7 +564,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-1">
                       <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand">Latest activity</span>
-                      <p className="text-sm leading-6 text-slate-700">
+                      <p className="text-sm leading-6 text-[var(--text)]">
                         {latestEvent
                           ? `Latest activity logged: ${latestEvent.eventName} on ${latestEvent.dateLabel}.${latestEvidence ? ` Latest evidence: ${getEvidenceFileLabel(latestEvidence)}.` : ''}`
                           : 'No academic activities recorded yet.'}
@@ -590,7 +590,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                   Add Academic Activity
                 </button>
                 <Link prefetch={false}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:border-blue-200 hover:text-brand"
+                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text)] shadow-sm transition duration-200 hover:border-blue-200 hover:text-brand"
                   href="/students/faculty-feedback"
                 >
                   <i className="fas fa-comments" aria-hidden="true" />
@@ -605,34 +605,34 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-              <article className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 shadow-sm">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Events</span>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-800">{presentations.length}</strong>
-                <p className="mt-1 text-xs text-slate-500">Recorded academic activities</p>
+              <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-4 shadow-sm">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Events</span>
+                <strong className="mt-2 block text-2xl font-semibold text-[var(--text)]">{presentations.length}</strong>
+                <p className="mt-1 text-xs text-[var(--muted)]">Recorded academic activities</p>
               </article>
-              <article className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 shadow-sm">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Certificates</span>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-800">{certificateCount}</strong>
-                <p className="mt-1 text-xs text-slate-500">Attached certificate files</p>
+              <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-4 shadow-sm">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Certificates</span>
+                <strong className="mt-2 block text-2xl font-semibold text-[var(--text)]">{certificateCount}</strong>
+                <p className="mt-1 text-xs text-[var(--muted)]">Attached certificate files</p>
               </article>
-              <article className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 shadow-sm">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Evidence Photos</span>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-800">{presentationPhotoCount}</strong>
-                <p className="mt-1 text-xs text-slate-500">Photos linked to activities</p>
+              <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-4 shadow-sm">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Evidence Photos</span>
+                <strong className="mt-2 block text-2xl font-semibold text-[var(--text)]">{presentationPhotoCount}</strong>
+                <p className="mt-1 text-xs text-[var(--muted)]">Photos linked to activities</p>
               </article>
               <article className="rounded-xl border border-yellow-100 bg-yellow-50/80 p-4 shadow-sm">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700">Recognitions</span>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-800">{recognizedEvents}</strong>
-                <p className="mt-1 text-xs text-slate-500">Awards and distinctions logged</p>
+                <strong className="mt-2 block text-2xl font-semibold text-[var(--text)]">{recognizedEvents}</strong>
+                <p className="mt-1 text-xs text-[var(--muted)]">Awards and distinctions logged</p>
               </article>
-              <article className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 shadow-sm">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Highest Scope</span>
-                <strong className="mt-2 block text-lg font-semibold text-slate-800">{highestScope}</strong>
-                <p className="mt-1 text-xs text-slate-500">Most advanced activity reach</p>
+              <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-4 shadow-sm">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Highest Scope</span>
+                <strong className="mt-2 block text-lg font-semibold text-[var(--text)]">{highestScope}</strong>
+                <p className="mt-1 text-xs text-[var(--muted)]">Most advanced activity reach</p>
               </article>
             </div>
 
-            <div className="border-b border-slate-200">
+            <div className="border-b border-[var(--border)]">
               <div className="flex gap-6 overflow-x-auto">
                 {[
                   { key: 'events' as const, label: 'Events', count: eventRecords.length },
@@ -645,7 +645,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     <button
                       key={tab.key}
                       className={`inline-flex shrink-0 items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-sm font-semibold transition ${
-                        isActive ? 'border-brand text-brand' : 'border-transparent text-slate-400 hover:text-slate-600'
+                        isActive ? 'border-brand text-brand' : 'border-transparent text-[var(--text-meta)] hover:text-[var(--muted)]'
                       }`}
                       type="button"
                       role="tab"
@@ -653,7 +653,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                       onClick={() => setActiveAcademicActivityTab(tab.key)}
                     >
                       <span>{tab.label}</span>
-                      <span className={`inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-blue-50 text-brand' : 'bg-slate-100 text-slate-500'}`}>
+                      <span className={`inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-blue-50 text-brand' : 'bg-[var(--surface-alt)] text-[var(--muted)]'}`}>
                         {tab.count}
                       </span>
                     </button>
@@ -669,12 +669,12 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     {eventRecords.map((activity) => (
                       <article
                         key={`event-tab-${activity.id}`}
-                        className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-white"
+                        className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-[var(--surface)]"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="space-y-2">
-                            <h3 className="text-base font-semibold text-slate-800">{activity.eventName}</h3>
-                            <p className="text-sm leading-6 text-slate-500">
+                            <h3 className="text-base font-semibold text-[var(--text)]">{activity.eventName}</h3>
+                            <p className="text-sm leading-6 text-[var(--muted)]">
                               {activity.description || 'No event description provided yet.'}
                             </p>
                           </div>
@@ -684,18 +684,18 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                           </div>
                         </div>
 
-                        <div className="mt-4 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
+                        <div className="mt-4 flex flex-col gap-2 text-sm text-[var(--muted)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
                           <span className="inline-flex items-center gap-2">
-                            <i className="fas fa-calendar-day text-xs text-slate-400" aria-hidden="true" />
+                            <i className="fas fa-calendar-day text-xs text-[var(--text-meta)]" aria-hidden="true" />
                             {activity.dateLabel}
                           </span>
                           <span className="inline-flex items-center gap-2">
-                            <i className="fas fa-location-dot text-xs text-slate-400" aria-hidden="true" />
+                            <i className="fas fa-location-dot text-xs text-[var(--text-meta)]" aria-hidden="true" />
                             {activity.venue || 'To be announced'}
                           </span>
                           {activity.activityStatus ? (
                             <span className="inline-flex items-center gap-2">
-                              <i className="fas fa-circle-check text-xs text-slate-400" aria-hidden="true" />
+                              <i className="fas fa-circle-check text-xs text-[var(--text-meta)]" aria-hidden="true" />
                               {activity.activityStatus}
                             </span>
                           ) : null}
@@ -704,10 +704,10 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-6 text-left">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-6 py-6 text-left">
                     <div>
-                      <strong className="block text-sm font-semibold text-slate-800">No academic activities yet</strong>
-                      <p className="mt-1 text-sm text-slate-500">Log your first presentation, exhibit, or workshop.</p>
+                      <strong className="block text-sm font-semibold text-[var(--text)]">No academic activities yet</strong>
+                      <p className="mt-1 text-sm text-[var(--muted)]">Log your first presentation, exhibit, or workshop.</p>
                     </div>
                     <button
                       className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#003A8F] px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[#1E40AF]"
@@ -727,26 +727,26 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     {evidenceRecords.map((activity) => (
                       <article
                         key={`evidence-tab-${activity.id}`}
-                        className="flex flex-col gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-slate-50/60 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-[var(--surface-alt)] sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="flex min-w-0 items-start gap-3">
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-brand">
                             <i className={`fas ${activity.certificateFile ? 'fa-file-lines' : 'fa-images'}`} aria-hidden="true" />
                           </div>
                           <div className="min-w-0 space-y-1">
-                            <h3 className="truncate text-sm font-semibold text-slate-800">{getEvidenceFileLabel(activity)}</h3>
-                            <p className="text-sm text-slate-600">{activity.eventName}</p>
-                            <p className="text-sm leading-6 text-slate-500">{getEvidenceNote(activity)}</p>
+                            <h3 className="truncate text-sm font-semibold text-[var(--text)]">{getEvidenceFileLabel(activity)}</h3>
+                            <p className="text-sm text-[var(--muted)]">{activity.eventName}</p>
+                            <p className="text-sm leading-6 text-[var(--muted)]">{getEvidenceNote(activity)}</p>
                           </div>
                         </div>
 
-                        <div className="grid gap-2 text-sm text-slate-500 sm:min-w-[220px]">
+                        <div className="grid gap-2 text-sm text-[var(--muted)] sm:min-w-[220px]">
                           <span className="inline-flex items-center gap-2">
-                            <i className="fas fa-calendar-day text-xs text-slate-400" aria-hidden="true" />
+                            <i className="fas fa-calendar-day text-xs text-[var(--text-meta)]" aria-hidden="true" />
                             {activity.dateLabel}
                           </span>
                           <span className="inline-flex items-center gap-2">
-                            <i className="fas fa-camera text-xs text-slate-400" aria-hidden="true" />
+                            <i className="fas fa-camera text-xs text-[var(--text-meta)]" aria-hidden="true" />
                             {activity.photoCount} photo{activity.photoCount === 1 ? '' : 's'}
                           </span>
                         </div>
@@ -767,10 +767,10 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-6 text-left">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-6 py-6 text-left">
                     <div>
-                      <strong className="block text-sm font-semibold text-slate-800">Upload your first evidence</strong>
-                      <p className="mt-1 text-sm text-slate-500">Certificates and photo evidence will appear here.</p>
+                      <strong className="block text-sm font-semibold text-[var(--text)]">Upload your first evidence</strong>
+                      <p className="mt-1 text-sm text-[var(--muted)]">Certificates and photo evidence will appear here.</p>
                     </div>
                     <button
                       className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#003A8F] px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[#1E40AF]"
@@ -795,8 +795,8 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="space-y-2">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-700">Recognition</span>
-                            <h3 className="text-base font-semibold text-slate-800">{activity.achievement}</h3>
-                            <p className="text-sm leading-6 text-slate-500">{getRecognitionSummary(activity)}</p>
+                            <h3 className="text-base font-semibold text-[var(--text)]">{activity.achievement}</h3>
+                            <p className="text-sm leading-6 text-[var(--muted)]">{getRecognitionSummary(activity)}</p>
                           </div>
                           <div className="flex flex-wrap gap-2">
                             <InfoPill label="Achievement" tone="accent" icon="fa-award" />
@@ -804,17 +804,17 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                           </div>
                         </div>
 
-                        <div className="mt-4 space-y-2 text-sm text-slate-500">
+                        <div className="mt-4 space-y-2 text-sm text-[var(--muted)]">
                           <span className="inline-flex items-center gap-2">
-                            <i className="fas fa-calendar-day text-xs text-slate-400" aria-hidden="true" />
+                            <i className="fas fa-calendar-day text-xs text-[var(--text-meta)]" aria-hidden="true" />
                             {activity.dateLabel}
                           </span>
                           <span className="inline-flex items-center gap-2">
-                            <i className="fas fa-presentation-screen text-xs text-slate-400" aria-hidden="true" />
+                            <i className="fas fa-presentation-screen text-xs text-[var(--text-meta)]" aria-hidden="true" />
                             {activity.eventName}
                           </span>
                           <span className="inline-flex items-center gap-2">
-                            <i className="fas fa-location-dot text-xs text-slate-400" aria-hidden="true" />
+                            <i className="fas fa-location-dot text-xs text-[var(--text-meta)]" aria-hidden="true" />
                             {activity.venue || 'Venue to be announced'}
                           </span>
                         </div>
@@ -822,9 +822,9 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-6 py-10 text-center">
-                    <strong className="block text-base text-slate-800">No recognitions recorded yet.</strong>
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                  <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-6 py-10 text-center">
+                    <strong className="block text-base text-[var(--text)]">No recognitions recorded yet.</strong>
+                    <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                       Awards and distinctions will appear here after the group logs a recognized or awarded academic activity.
                     </p>
                     <button

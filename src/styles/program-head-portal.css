@@ -3,11 +3,11 @@
   --ph-primary-dark: #002c6b;
   --ph-secondary: #f6be00;
   --ph-accent: #fff0b3;
-  --ph-bg: #f9fafb;
-  --ph-card: #ffffff;
-  --ph-text: #1f2937;
-  --ph-muted: #6b7280;
-  --ph-border: #e5e7eb;
+  ---bg: var(--bg);
+  ---card: var(--surface);
+  ---text: var(--text);
+  ---muted: var(--muted);
+  ---border: var(--border);
   --ph-success: #16a34a;
   --ph-warning: #f59e0b;
   --ph-danger: #dc2626;
@@ -204,7 +204,7 @@
   height: 2.9rem;
   border: 1px solid rgb(0 58 143 / 0.12);
   border-radius: 1rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--ph-primary);
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
 }
@@ -249,7 +249,7 @@
   padding: 0 1rem;
   border: 1px solid rgb(0 58 143 / 0.12);
   border-radius: 1rem;
-  background: #fff;
+  background: var(--surface);
   color: var(--ph-primary);
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
   cursor: pointer;
@@ -933,7 +933,7 @@
   margin-left: 280px;
   min-height: 100vh;
   padding: 0 2rem 3rem;
-  background: #f8fafc;
+  background: var(--surface);
   transition: margin-left 0.2s ease;
 }
 
@@ -978,7 +978,7 @@
 .ph-page-title p {
   margin-top: 0;
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--text);
 }
 
 .ph-top-actions {
@@ -1024,7 +1024,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
+  background: var(--surface);
   border: 1px solid rgb(226 232 240 / 0.92);
   color: var(--ph-primary);
 }
@@ -1124,11 +1124,11 @@
   --ph-primary-light: #002C6B;
   --ph-secondary: #F6BE00;
   --ph-accent: #F6BE00;
-  --ph-bg: #F8FAFC;
-  --ph-card: #FFFFFF;
-  --ph-text: #111827;
-  --ph-muted: #64748B;
-  --ph-border: #E5E7EB;
+  ---bg: var(--bg);
+  ---card: var(--surface);
+  ---text: var(--text);
+  ---muted: var(--muted);
+  ---border: var(--border);
   --ph-shadow-sm: 0 8px 24px rgb(15 23 42 / 0.05);
   --ph-shadow-md: 0 16px 36px rgb(15 23 42 / 0.08);
   --ph-shadow-lg: 0 22px 52px rgb(15 23 42 / 0.12);
@@ -1182,7 +1182,7 @@
 .ph-icon-btn,
 .ph-shell-icon-btn,
 .ph-profile-trigger {
-  background: #fff;
+  background: var(--surface);
   border-color: rgb(226 232 240 / 0.96);
   box-shadow: 0 1px 0 rgb(15 23 42 / 0.04), 0 8px 18px rgb(15 23 42 / 0.04);
 }
@@ -1236,8 +1236,8 @@
 }
 
 .ph-table th {
-  background: #f8fafc;
-  color: #475569;
+  background: var(--surface);
+  color: var(--text);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -1271,7 +1271,7 @@
 
 .ph-btn:not(.is-primary):not(.is-warning):not(.is-danger) {
   border-color: rgb(0 58 143 / 0.14);
-  background: #fff;
+  background: var(--surface);
   color: var(--ph-primary);
 }
 

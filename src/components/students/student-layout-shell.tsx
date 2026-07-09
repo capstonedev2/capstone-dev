@@ -438,13 +438,13 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
               <i className="fas fa-user-graduate" /> Student Portal
             </span>
             <h1>Welcome, {getFirstName(profile.fullName)}</h1>
-            <p className="text-slate-500">Your student account is active. Project tools unlock after your group, adviser, and project record are assigned.</p>
+            <p className="text-[var(--muted)]">Your student account is active. Project tools unlock after your group, adviser, and project record are assigned.</p>
           </div>
         </div>
       </div>
 
       <section className="hero-card !mb-0 !grid !gap-5 relative">
-        <div className="hero-card-main relative overflow-hidden rounded-3xl bg-white border border-slate-200/60 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-8 isolate transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+        <div className="hero-card-main relative overflow-hidden rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-8 isolate transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
           {/* Subtle Decorative Accent */}
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-400" />
           <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-sky-50 blur-3xl pointer-events-none" aria-hidden="true" />
@@ -453,7 +453,7 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-600/20 shadow-sm">
               <i className="fas fa-hourglass-half" aria-hidden="true" /> Pending assignment
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-inset ring-slate-500/20 shadow-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-bold text-[var(--text)] ring-1 ring-inset ring-slate-500/20 shadow-sm">
               <i className="fas fa-id-card" aria-hidden="true" /> {profile.studentId}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-700 ring-1 ring-inset ring-sky-600/20 shadow-sm">
@@ -462,10 +462,10 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
           </div>
 
           <div className="space-y-4 relative z-10">
-            <h2 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="max-w-3xl text-3xl font-bold tracking-tight text-[var(--text)]">
               Your capstone workspace is being prepared
             </h2>
-            <p className="max-w-2xl text-lg text-slate-600 leading-relaxed">
+            <p className="max-w-2xl text-lg text-[var(--muted)] leading-relaxed">
               Your account is active, but project tools stay locked until your official group and adviser are assigned.
               Once those assignments are added, your workspace can unlock and your project pages can populate
               automatically.
@@ -473,20 +473,20 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 relative z-10">
-            <div className="group rounded-2xl border border-slate-200 bg-slate-50/50 p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md cursor-default">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Workspace status</span>
-              <p className="mt-3 text-xl font-bold text-slate-900">Pending assignment</p>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed">Project tools unlock after group and adviser assignment.</p>
+            <div className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--surface)] hover:shadow-md cursor-default">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Workspace status</span>
+              <p className="mt-3 text-xl font-bold text-[var(--text)]">Pending assignment</p>
+              <p className="mt-2 text-sm text-[var(--muted)] leading-relaxed">Project tools unlock after group and adviser assignment.</p>
             </div>
-            <div className="group rounded-2xl border border-slate-200 bg-slate-50/50 p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md cursor-default">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Available now</span>
-              <p className="mt-3 text-xl font-bold text-slate-900">Profile & repository</p>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed">You can still confirm your details and explore completed studies.</p>
+            <div className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--surface)] hover:shadow-md cursor-default">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Available now</span>
+              <p className="mt-3 text-xl font-bold text-[var(--text)]">Profile & repository</p>
+              <p className="mt-2 text-sm text-[var(--muted)] leading-relaxed">You can still confirm your details and explore completed studies.</p>
             </div>
-            <div className="group rounded-2xl border border-slate-200 bg-slate-50/50 p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md cursor-default sm:col-span-2 xl:col-span-1">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Unlock trigger</span>
-              <p className="mt-3 text-xl font-bold text-slate-900">Assignment record</p>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed">Group, adviser, and active project details feed the workspace.</p>
+            <div className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--surface)] hover:shadow-md cursor-default sm:col-span-2 xl:col-span-1">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Unlock trigger</span>
+              <p className="mt-3 text-xl font-bold text-[var(--text)]">Assignment record</p>
+              <p className="mt-2 text-sm text-[var(--muted)] leading-relaxed">Group, adviser, and active project details feed the workspace.</p>
             </div>
           </div>
 
@@ -494,18 +494,18 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
             <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl bg-[var(--student-primary,#0f4c81)] px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 hover:bg-sky-800" href="/students/repository">
               <i className="fas fa-book" aria-hidden="true" /> Browse Repository
             </Link>
-            <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:scale-105 active:scale-95" href="/students/profile">
-              <i className="fas fa-user text-slate-400" aria-hidden="true" /> Review Profile
+            <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-bold text-[var(--text)] shadow-sm transition-all duration-300 hover:bg-[var(--surface-alt)] hover:scale-105 active:scale-95" href="/students/profile">
+              <i className="fas fa-user text-[var(--text-meta)]" aria-hidden="true" /> Review Profile
             </Link>
           </div>
         </div>
 
         <div className="hero-card-side h-full">
-          <div className="h-full rounded-3xl border border-slate-200/60 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-            <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-5">
+          <div className="h-full rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+            <div className="flex items-start justify-between gap-3 border-b border-[var(--border)] pb-5">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Status overview</span>
-                <h3 className="mt-2 text-xl font-bold text-slate-900">Assignment summary</h3>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Status overview</span>
+                <h3 className="mt-2 text-xl font-bold text-[var(--text)]">Assignment summary</h3>
               </div>
               <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600 ring-1 ring-inset ring-emerald-500/20 shadow-sm">
                 {progressPercent}% ready
@@ -514,9 +514,9 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
 
             <div className="mt-5 space-y-3">
               {statusItems.map((item) => (
-                <div key={item.label} className="group rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all duration-300 hover:border-slate-200 hover:bg-slate-50 hover:shadow-sm">
+                <div key={item.label} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-4 transition-all duration-300 hover:border-[var(--border)] hover:bg-[var(--surface-alt)] hover:shadow-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-bold text-slate-700">{item.label}</span>
+                    <span className="text-sm font-bold text-[var(--text)]">{item.label}</span>
                     <span
                       className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] shadow-sm transition-colors duration-300 ${
                         item.tone === 'success'
@@ -525,20 +525,20 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
                             ? 'bg-sky-100 text-sky-700 ring-1 ring-inset ring-sky-600/20 group-hover:bg-sky-200'
                             : item.tone === 'warning'
                               ? 'bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-600/20 group-hover:bg-amber-200'
-                              : 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-500/20 group-hover:bg-slate-200'
+                              : 'bg-[var(--surface-alt)] text-[var(--muted)] ring-1 ring-inset ring-slate-500/20 group-hover:bg-slate-200'
                       }`}
                     >
                       {item.value}
                     </span>
                   </div>
-                  <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">{item.helper}</p>
+                  <p className="mt-1.5 text-sm text-[var(--muted)] leading-relaxed">{item.helper}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 transition-colors duration-300 hover:bg-slate-100/80">
-              <p className="text-sm font-bold text-slate-900">No active project yet</p>
-              <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
+            <div className="mt-5 rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--surface-alt)] p-4 transition-colors duration-300 hover:bg-[var(--surface-alt)]">
+              <p className="text-sm font-bold text-[var(--text)]">No active project yet</p>
+              <p className="mt-1.5 text-sm text-[var(--muted)] leading-relaxed">
                 Group name, adviser, project title, and workspace activity appear here after assignment.
               </p>
             </div>
@@ -549,17 +549,17 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.95fr)]">
         <div className="space-y-6">
           <article className="surface-card !p-6 rounded-3xl shadow-sm transition-shadow duration-300 hover:shadow-md">
-            <div className="card-heading border-b border-slate-100 pb-4 mb-5">
+            <div className="card-heading border-b border-[var(--border)] pb-4 mb-5">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Setup progress</span>
-                <h3 className="mt-1 text-xl font-bold text-slate-900">Pre-assignment checklist</h3>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Setup progress</span>
+                <h3 className="mt-1 text-xl font-bold text-[var(--text)]">Pre-assignment checklist</h3>
               </div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-600 ring-1 ring-inset ring-sky-500/20">
                 <i className="fas fa-check-circle"></i> {completedSteps} of {setupSteps.length} complete
               </span>
             </div>
 
-            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100 shadow-inner">
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--surface-alt)] shadow-inner">
               <div
                 className="h-full rounded-full bg-[var(--student-primary,#0f4c81)] transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(15,76,129,0.4)]"
                 style={{ width: `${progressPercent}%` }}
@@ -571,33 +571,33 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
                 <div
                   key={step.key}
                   className={`group flex items-start gap-4 rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md ${
-                    step.done ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-200 bg-white'
+                    step.done ? 'border-emerald-200 bg-emerald-50/50' : 'border-[var(--border)] bg-[var(--surface)]'
                   }`}
                 >
                   <div
                     className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm shadow-sm transition-colors duration-300 ${
-                      step.done ? 'bg-emerald-500 text-white group-hover:bg-emerald-600' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-500'
+                      step.done ? 'bg-emerald-500 text-white group-hover:bg-emerald-600' : 'bg-[var(--surface-alt)] text-[var(--text-meta)] group-hover:bg-slate-200 group-hover:text-[var(--muted)]'
                     }`}
                   >
                     <i className={`fas ${step.done ? 'fa-check' : step.icon}`} aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">
                         Step {index + 1}
                       </span>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.15em] shadow-sm ${
-                          step.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                          step.done ? 'bg-emerald-100 text-emerald-700' : 'bg-[var(--surface-alt)] text-[var(--muted)]'
                         }`}
                       >
                         {step.done ? 'Complete' : 'Pending'}
                       </span>
                     </div>
-                    <p className={`mt-1.5 text-sm font-bold ${step.done ? 'text-emerald-900' : 'text-slate-900'}`}>
+                    <p className={`mt-1.5 text-sm font-bold ${step.done ? 'text-emerald-900' : 'text-[var(--text)]'}`}>
                       {step.label}
                     </p>
-                    <p className="mt-1 text-sm text-slate-500 leading-relaxed">{step.description}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)] leading-relaxed">{step.description}</p>
                   </div>
                 </div>
               ))}
@@ -605,30 +605,30 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
           </article>
 
           <article className="surface-card !p-6 rounded-3xl shadow-sm transition-shadow duration-300 hover:shadow-md">
-            <div className="card-heading border-b border-slate-100 pb-4 mb-5">
+            <div className="card-heading border-b border-[var(--border)] pb-4 mb-5">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Next steps</span>
-                <h3 className="mt-1 text-xl font-bold text-slate-900">What you can do now</h3>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Next steps</span>
+                <h3 className="mt-1 text-xl font-bold text-[var(--text)]">What you can do now</h3>
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {nextSteps.map((item) => (
-                <div key={item.title} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-md">
+                <div key={item.title} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-md">
                   <div className="flex items-start gap-4">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-[var(--student-primary,#0f4c81)] shadow-sm transition-colors duration-300 group-hover:bg-[var(--student-primary,#0f4c81)] group-hover:text-white">
                       <i className={`fas ${item.icon} text-lg`} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                      <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">{item.description}</p>
+                      <p className="text-sm font-bold text-[var(--text)]">{item.title}</p>
+                      <p className="mt-1.5 text-sm text-[var(--muted)] leading-relaxed">{item.description}</p>
                       {item.href ? (
                         <Link prefetch={false} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--student-primary,#0f4c81)] hover:text-sky-700 transition-colors" href={item.href}>
                           {item.action}
                           <i className="fas fa-arrow-right text-xs transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
                         </Link>
                       ) : (
-                        <span className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-slate-400">
+                        <span className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--text-meta)]">
                           <i className="fas fa-clock text-xs" aria-hidden="true" />
                           Waiting for assignment
                         </span>
@@ -643,19 +643,19 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
 
         <div className="space-y-6">
           <article className="surface-card !p-6 rounded-3xl shadow-sm transition-shadow duration-300 hover:shadow-md">
-            <div className="card-heading border-b border-slate-100 pb-4 mb-5">
+            <div className="card-heading border-b border-[var(--border)] pb-4 mb-5">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Available now</span>
-                <h3 className="mt-1 text-xl font-bold text-slate-900">Open student features</h3>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Available now</span>
+                <h3 className="mt-1 text-xl font-bold text-[var(--text)]">Open student features</h3>
               </div>
             </div>
 
             <div className="mt-4 space-y-3">
-              <div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+              <div className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-md">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-bold text-slate-900">Review Profile</p>
-                    <p className="mt-1 text-sm text-slate-500">Check the student record saved during registration.</p>
+                    <p className="text-sm font-bold text-[var(--text)]">Review Profile</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">Check the student record saved during registration.</p>
                   </div>
                   <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-600 ring-1 ring-inset ring-emerald-500/20">
                     Available
@@ -663,11 +663,11 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
                 </div>
               </div>
 
-              <div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+              <div className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-md">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-bold text-slate-900">Browse Repository</p>
-                    <p className="mt-1 text-sm text-slate-500">Explore completed research and academic references.</p>
+                    <p className="text-sm font-bold text-[var(--text)]">Browse Repository</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">Explore completed research and academic references.</p>
                   </div>
                   <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-600 ring-1 ring-inset ring-emerald-500/20">
                     Available
@@ -678,22 +678,22 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
           </article>
 
           <article className="surface-card !p-6 rounded-3xl shadow-sm transition-shadow duration-300 hover:shadow-md">
-            <div className="card-heading border-b border-slate-100 pb-4 mb-5">
+            <div className="card-heading border-b border-[var(--border)] pb-4 mb-5">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Locked until assignment</span>
-                <h3 className="mt-1 text-xl font-bold text-slate-900">Awaiting workspace</h3>
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-meta)]">Locked until assignment</span>
+                <h3 className="mt-1 text-xl font-bold text-[var(--text)]">Awaiting workspace</h3>
               </div>
             </div>
 
             <div className="mt-4 grid gap-3">
               {lockedFeatures.map((feature) => (
-                <div key={feature.label} className="group rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-4 transition-colors duration-300 hover:bg-slate-100">
+                <div key={feature.label} className="group rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] p-4 transition-colors duration-300 hover:bg-[var(--surface-alt)]">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm font-bold text-slate-700">{feature.label}</p>
-                      <p className="mt-1 text-sm text-slate-500 leading-relaxed">{feature.description}</p>
+                      <p className="text-sm font-bold text-[var(--text)]">{feature.label}</p>
+                      <p className="mt-1 text-sm text-[var(--muted)] leading-relaxed">{feature.description}</p>
                     </div>
-                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm ring-1 ring-slate-200 transition-transform duration-300 group-hover:scale-110">
+                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--text-meta)] shadow-sm ring-1 ring-slate-200 transition-transform duration-300 group-hover:scale-110">
                       <i className="fas fa-lock" aria-hidden="true" />
                     </span>
                   </div>
@@ -797,20 +797,20 @@ function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
-              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-200">Student ID</span>
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 backdrop-blur-sm">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Student ID</span>
               <p className="mt-2 text-lg font-semibold text-white">{profile.studentId}</p>
-              <p className="mt-1 text-sm text-slate-200">Used to match your official student record.</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">Used to match your official student record.</p>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
-              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-200">Department</span>
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 backdrop-blur-sm">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Department</span>
               <p className="mt-2 text-lg font-semibold text-white">{profile.department}</p>
-              <p className="mt-1 text-sm text-slate-200">Helps route your profile to the right academic workspace.</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">Helps route your profile to the right academic workspace.</p>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm sm:col-span-2 xl:col-span-1">
-              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-200">Year level</span>
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 backdrop-blur-sm sm:col-span-2 xl:col-span-1">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Year level</span>
               <p className="mt-2 text-lg font-semibold text-white">{profile.yearLevel}</p>
-              <p className="mt-1 text-sm text-slate-200">Stored as part of your registration profile.</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">Stored as part of your registration profile.</p>
             </div>
           </div>
 
@@ -825,22 +825,22 @@ function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile
         </div>
 
         <div className="hero-card-side">
-          <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 backdrop-blur-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-200">Profile status</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Profile status</span>
                 <h3 className="mt-2 text-xl font-semibold text-white">Assignment readiness</h3>
               </div>
-              <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-semibold text-[var(--text)]">
                 {progressPercent}% ready
               </span>
             </div>
 
             <div className="mt-5 space-y-3">
               {statusItems.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/15 bg-slate-950/10 px-4 py-3">
+                <div key={item.label} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-sunken)] px-4 py-3">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-medium text-slate-100">{item.label}</span>
+                    <span className="text-sm font-medium text-[var(--text)]">{item.label}</span>
                     <span
                       className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
                         item.tone === 'success'
@@ -849,20 +849,20 @@ function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile
                             ? 'bg-sky-400/15 text-sky-100'
                             : item.tone === 'warning'
                               ? 'bg-amber-300/15 text-amber-100'
-                              : 'bg-white/10 text-slate-100'
+                              : 'bg-[var(--surface)] text-[var(--text)]'
                       }`}
                     >
                       {item.value}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-slate-200">{item.helper}</p>
+                  <p className="mt-1 text-sm text-[var(--muted)]">{item.helper}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3">
+            <div className="mt-4 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-3">
               <p className="text-sm font-semibold text-white">Waiting for assignment</p>
-              <p className="mt-1 text-sm text-slate-200">
+              <p className="mt-1 text-sm text-[var(--muted)]">
                 Group role, adviser, project code, and workspace details appear here after official assignment.
               </p>
             </div>
@@ -914,33 +914,33 @@ function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile
                 <div
                   key={step.key}
                   className={`flex items-start gap-3 rounded-2xl border px-4 py-3 ${
-                    step.done ? 'border-emerald-200 bg-emerald-50/80' : 'border-slate-200 bg-slate-50'
+                    step.done ? 'border-emerald-200 bg-emerald-50/80' : 'border-[var(--border)] bg-[var(--surface-alt)]'
                   }`}
                 >
                   <div
                     className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm ${
-                      step.done ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400'
+                      step.done ? 'bg-emerald-500 text-white' : 'bg-[var(--surface)] text-[var(--text-meta)]'
                     }`}
                   >
                     <i className={`fas ${step.done ? 'fa-check' : step.icon}`} aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-meta)]">
                         Step {index + 1}
                       </span>
                       <span
                         className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                          step.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                          step.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-[var(--muted)]'
                         }`}
                       >
                         {step.done ? 'Complete' : 'Pending'}
                       </span>
                     </div>
-                    <p className={`mt-2 text-sm font-semibold ${step.done ? 'text-emerald-900' : 'text-slate-900'}`}>
+                    <p className={`mt-2 text-sm font-semibold ${step.done ? 'text-emerald-900' : 'text-[var(--text)]'}`}>
                       {step.label}
                     </p>
-                    <p className="mt-1 text-sm text-slate-500">{step.description}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">{step.description}</p>
                   </div>
                 </div>
               ))}
@@ -962,22 +962,22 @@ function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile
                 <div
                   key={item.label}
                   className={`rounded-2xl border px-4 py-4 ${
-                    item.done ? 'border-emerald-200 bg-emerald-50/80' : 'border-slate-200 bg-slate-50'
+                    item.done ? 'border-emerald-200 bg-emerald-50/80' : 'border-[var(--border)] bg-[var(--surface-alt)]'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className={`text-sm font-semibold ${item.done ? 'text-emerald-900' : 'text-slate-900'}`}>
+                    <p className={`text-sm font-semibold ${item.done ? 'text-emerald-900' : 'text-[var(--text)]'}`}>
                       {item.label}
                     </p>
                     <span
                       className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                        item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                        item.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-[var(--muted)]'
                       }`}
                     >
                       {item.done ? 'Ready' : 'Pending'}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-slate-500">{item.value}</p>
+                  <p className="mt-2 text-sm text-[var(--muted)]">{item.value}</p>
                 </div>
               ))}
             </div>
@@ -993,11 +993,11 @@ function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile
 
             <div className="mt-4 space-y-3">
               {nextMilestones.map((item, index) => (
-                <div key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-semibold text-[var(--student-primary,#0f4c81)] shadow-sm">
+                <div key={item} className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-sm font-semibold text-[var(--student-primary,#0f4c81)] shadow-sm">
                     {index + 1}
                   </div>
-                  <p className="text-sm text-slate-600">{item}</p>
+                  <p className="text-sm text-[var(--muted)]">{item}</p>
                 </div>
               ))}
             </div>
@@ -1705,7 +1705,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                               <i className="fas fa-check mr-1" aria-hidden="true" /> Accept
                             </button>
                             <button
-                              className="flex-1 rounded-md border border-rose-200 bg-white px-2 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition"
+                              className="flex-1 rounded-md border border-rose-200 bg-[var(--surface)] px-2 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition"
                               onClick={(e) => { e.preventDefault(); handleAction(notification.id, 'reject'); }}
                             >
                               <i className="fas fa-xmark mr-1" aria-hidden="true" /> Reject
@@ -1911,8 +1911,15 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
         onClick={() => setSidebarOpen(false)}
       />
 
-      <main className="student-global-main">
-        <div className="student-global-content">
+      <main className="student-global-main relative bg-[var(--surface-alt)]">
+        {/* Decorative Light Background for Glassmorphism */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#0F3DDE]/[0.05] to-indigo-500/[0.03] blur-[80px]"></div>
+          <div className="absolute top-[20%] -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-500/[0.03] to-[#0F3DDE]/[0.03] blur-[80px]"></div>
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-overlay"></div>
+        </div>
+        <div className="student-global-content relative z-10">
           {isCheckingAccess ? (
             <div className="flex min-h-[80vh] items-center justify-center">
               <div className="flex flex-col items-center gap-4">

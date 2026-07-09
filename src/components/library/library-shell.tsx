@@ -208,8 +208,15 @@ export function LibraryShell({
         onClick={closeSidebar}
       />
 
-      <main className="student-global-main">
-        <div className="student-global-content">
+      <main className="student-global-main relative bg-[var(--surface-alt)]">
+        {/* Decorative Light Background for Glassmorphism */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
+          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#0F3DDE]/[0.05] to-indigo-500/[0.03] blur-[80px]"></div>
+          <div className="absolute top-[20%] -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-500/[0.03] to-[#0F3DDE]/[0.03] blur-[80px]"></div>
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-overlay"></div>
+        </div>
+        <div className="student-global-content relative z-10">
           {!hideHeader && (
             <header className="top-nav" aria-labelledby="library-page-title">
               <div className="top-nav-leading">

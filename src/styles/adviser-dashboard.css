@@ -170,7 +170,7 @@
             gap: 0.3rem;
             padding: 0.28rem;
             border-radius: 999px;
-            background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%);
+            background: var(--surface);
             border: 1px solid rgba(229, 231, 235, 0.9);
             box-shadow: 0 10px 24px rgba(31, 41, 55, 0.05);
         }
@@ -205,7 +205,7 @@
 
         .profile-nav-btn {
             border: 1px solid var(--border);
-            background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%);
+            background: var(--surface);
             color: var(--text-dark);
             font-family: inherit;
             font-size: 0.82rem;
@@ -255,7 +255,7 @@
             top: calc(100% + 0.8rem);
             right: 0;
             min-width: 270px;
-            background: white;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 1.2rem;
             box-shadow: 0 28px 60px rgba(15, 23, 42, 0.14);
@@ -366,7 +366,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%);
+            background: var(--surface);
             border-radius: 1rem;
             transition: var(--transition);
             box-shadow: 0 12px 28px rgba(31, 41, 55, 0.06);
@@ -470,7 +470,7 @@
             border-radius: 0.5rem;
             font-family: inherit;
             font-size: 0.875rem;
-            background: white;
+            background: var(--surface);
             transition: var(--transition);
         }
 
@@ -483,7 +483,7 @@
 
         /* Table Container */
         .table-container {
-            background: white;
+            background: var(--surface);
             border-radius: 1rem;
             overflow-x: auto;
             box-shadow: var(--shadow-sm);
@@ -629,7 +629,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--surface);
             border-radius: 1rem;
             max-width: 550px;
             width: 90%;
@@ -656,7 +656,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #F9FAFB, #FFFFFF);
+            background: var(--surface);
         }
 
         .modal-header h3 {
@@ -825,7 +825,7 @@
         }
 
         .quick-action-card {
-            background: white;
+            background: var(--surface);
             border-radius: 0.875rem;
             padding: 1.25rem;
             text-align: center;
@@ -896,7 +896,7 @@
             top: 20px;
             right: 20px;
             padding: 1rem 1.25rem;
-            background: white;
+            background: var(--surface);
             border-radius: 0.75rem;
             box-shadow: var(--shadow-lg);
             z-index: 3000;
@@ -930,7 +930,7 @@
 
         /* Activity Feed */
         .activity-feed {
-            background: white;
+            background: var(--surface);
             border-radius: 1rem;
             border: 1px solid var(--border);
             overflow: hidden;
@@ -1000,7 +1000,7 @@
         }
 
         .panel-focus-card {
-            background: white;
+            background: var(--surface);
             border-radius: 1rem;
             border: 1px solid var(--border);
             padding: 1.25rem;
@@ -1331,7 +1331,7 @@
             width: 3rem;
             height: 3rem;
             border-radius: 0.95rem;
-            background: #f8fafc;
+            background: var(--surface);
             border: 1px solid rgba(226, 232, 240, 0.96);
             box-shadow: none;
         }
@@ -1350,9 +1350,9 @@
     --secondary-dark: #A16207;
     --secondary-light: #FFE08A;
     --accent: #F6BE00;
-    --bg: #F8FAFC;
+    --bg: var(--bg);
     --bg-light: #F8FAFC;
-    --panel: #FFFFFF;
+    --panel: var(--surface);
     --card-white: #FFFFFF;
     --text: #111827;
     --text-dark: #111827;
@@ -1424,7 +1424,7 @@ body {
     height: 3rem;
     border-radius: 0.95rem;
     border-color: rgba(226, 232, 240, 0.96);
-    background: #FFFFFF;
+    background: var(--surface);
     color: var(--primary);
     box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 18px rgba(15, 23, 42, 0.04);
 }
@@ -1461,7 +1461,7 @@ body {
 
 .adviser-shell-brand > span:first-child {
     border-color: rgba(226, 232, 240, 0.98);
-    background: #FFFFFF;
+    background: var(--surface);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 }
 
@@ -1504,7 +1504,7 @@ body {
     flex-wrap: wrap;
     align-items: center;
     gap: 0.7rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.16em;
@@ -1738,7 +1738,7 @@ body {
 .form-group textarea {
     border-color: var(--border);
     border-radius: 0.95rem;
-    background: #FFFFFF;
+    background: var(--surface);
     color: var(--text-dark);
 }
 
@@ -1774,7 +1774,7 @@ body {
 }
 
 .btn-outline {
-    background: #FFFFFF;
+    background: var(--surface);
     border: 1px solid rgba(0, 58, 143, 0.14);
     color: var(--primary);
 }
@@ -1785,7 +1785,7 @@ body {
 }
 
 .dashboard-mode-switch {
-    background: #FFFFFF;
+    background: var(--surface);
     border-color: rgba(226, 232, 240, 0.96);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
@@ -1813,7 +1813,7 @@ body {
 }
 
 .profile-dropdown-header {
-    background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+    background: var(--surface);
     border-bottom-color: rgba(226, 232, 240, 0.9);
 }
 
@@ -1834,9 +1834,9 @@ table {
 
 thead th,
 th {
-    background: #F8FAFC;
+    background: var(--surface);
     border-bottom-color: var(--border);
-    color: #475569;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -1845,7 +1845,7 @@ th {
 
 tbody td,
 td {
-    background: #FFFFFF;
+    background: var(--surface);
     border-bottom-color: var(--border);
     color: #334155;
 }
@@ -2066,7 +2066,7 @@ tr:hover {
     border-radius: 50%;
     border: 4px solid #fff;
     overflow: visible;
-    background: #fff;
+    background: var(--surface);
     box-shadow: var(--shadow-md);
 }
 
@@ -2230,7 +2230,7 @@ tr:hover {
 }
 
 .adviser-profile-page .profile-actions .profile-action-btn.btn-outline {
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
+    background: var(--surface);
     border-color: rgba(0, 58, 143, 0.16);
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
 }
@@ -2240,7 +2240,7 @@ tr:hover {
 }
 
 .adviser-profile-page .profile-actions .profile-action-btn.btn-outline:hover {
-    background: linear-gradient(180deg, #f5f9ff, #ffffff);
+    background: var(--surface);
     color: var(--primary);
     border-color: rgba(0, 58, 143, 0.24);
 }
@@ -2272,7 +2272,7 @@ tr:hover {
 .adviser-profile-page .info-header {
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(135deg, #f9fafb, #ffffff);
+    background: var(--surface);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2392,7 +2392,7 @@ tr:hover {
     gap: 0.75rem;
     padding: 0.95rem 1rem;
     border-radius: 0.95rem;
-    background: #fff;
+    background: var(--surface);
     border: 1px solid rgba(0, 58, 143, 0.12);
 }
 
@@ -2587,7 +2587,7 @@ tr:hover {
     width: 3rem;
     height: 3rem;
     border-radius: 0.95rem;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.96);
     box-shadow: none;
     display: inline-flex;
@@ -2609,7 +2609,7 @@ tr:hover {
 .adviser-shell-mode-switch {
     display: flex;
     align-items: center;
-    background: #FFFFFF;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.96);
     border-radius: 1rem;
     padding: 0.25rem;
@@ -2652,7 +2652,7 @@ tr:hover {
 .adviser-shell .profile-pill {
     min-height: 3rem;
     border-radius: 1rem;
-    background: #fff;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.96);
     box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 18px rgba(15, 23, 42, 0.04);
 }
@@ -2682,7 +2682,7 @@ tr:hover {
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 0.85rem;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid rgba(226, 232, 240, 0.9);
     box-shadow: none;
     color: var(--primary);
@@ -2698,7 +2698,7 @@ tr:hover {
 .adviser-shell .notification-trigger-copy small,
 .adviser-shell .profile-nav-btn-copy small {
     font-size: 0.72rem;
-    color: #64748b;
+    color: var(--text);
 }
 
 .adviser-shell .notification-trigger-count {
@@ -2709,7 +2709,7 @@ tr:hover {
 }
 
 .adviser-shell .profile-nav-btn-chevron {
-    color: #64748b;
+    color: var(--text);
 }
 
 .adviser-shell .notification-menu,
@@ -2735,8 +2735,8 @@ tr:hover {
     border-radius: 999px;
     font-size: 0.72rem;
     font-weight: 700;
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--surface);
+    color: var(--text);
     border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
@@ -3153,9 +3153,9 @@ tr:hover {
     min-height: 1.75rem;
     align-items: center;
     border-radius: 999px;
-    background: #f1f5f9;
+    background: var(--surface);
     padding: 0.18rem 0.6rem;
-    color: #475569;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 700;
 }
@@ -3630,21 +3630,13 @@ tr:hover {
     align-items: stretch !important;
     padding: 0 !important;
     border: 0 !important;
-    border-bottom: 1px solid rgba(246, 190, 0, 0.9) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
     background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 50%, #1e40af 100%) !important;
     box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
 }
 
 .adviser-global-navbar::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: -2px !important;
-    height: 3px !important;
-    background: linear-gradient(90deg, rgba(246, 190, 0, 0.55), #f6be00 22%, #f6be00 78%, rgba(246, 190, 0, 0.55)) !important;
-    box-shadow: none !important;
-    pointer-events: none !important;
+    display: none !important;
 }
 
 .adviser-global-navbar::after {
@@ -4305,7 +4297,7 @@ tr:hover {
 .adviser-shell[data-theme="dark"] [class*="bg-white"][class*="text-slate"],
 .adviser-shell[data-theme="dark"] [class*="bg-white"] [class*="text-slate"],
 .adviser-shell[data-theme="dark"] [class*="bg-slate-100"] {
-    color: #0f172a !important;
+    color: var(--text) !important;
     -webkit-text-fill-color: currentColor !important;
 }
 
@@ -4314,7 +4306,7 @@ tr:hover {
 .adviser-shell[data-theme="dark"] [class*="rounded-full"][class*="bg-white"] *,
 .adviser-shell[data-theme="dark"] [class*="bg-white"][class*="text-slate"] *,
 .adviser-shell[data-theme="dark"] [class*="bg-slate-100"] * {
-    color: #0f172a !important;
+    color: var(--text) !important;
     -webkit-text-fill-color: currentColor !important;
 }
 
@@ -4343,7 +4335,7 @@ tr:hover {
     .adviser-shell[data-theme="system"] [class*="bg-white"][class*="text-slate"],
     .adviser-shell[data-theme="system"] [class*="bg-white"] [class*="text-slate"],
     .adviser-shell[data-theme="system"] [class*="bg-slate-100"] {
-        color: #0f172a !important;
+        color: var(--text) !important;
         -webkit-text-fill-color: currentColor !important;
     }
 
@@ -4352,7 +4344,7 @@ tr:hover {
     .adviser-shell[data-theme="system"] [class*="rounded-full"][class*="bg-white"] *,
     .adviser-shell[data-theme="system"] [class*="bg-white"][class*="text-slate"] *,
     .adviser-shell[data-theme="system"] [class*="bg-slate-100"] * {
-        color: #0f172a !important;
+        color: var(--text) !important;
         -webkit-text-fill-color: currentColor !important;
     }
 }
@@ -4943,7 +4935,7 @@ tr:hover {
 }
 
 .adviser-shell[data-theme="dark"] .adviser-review-workspace iframe {
-    background: #ffffff !important;
+    background: var(--surface) !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -5784,19 +5776,7 @@ tr:hover {
 }
 
 .adviser-shell .adviser-global-navbar::before {
-    height: 3px !important;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(0, 58, 143, 0.2),
-            var(--primary, #003a8f) 18%,
-            var(--primary, #003a8f) 46%,
-            var(--secondary, #f6be00) 72%,
-            rgba(246, 190, 0, 0.45)
-        ) !important;
-    box-shadow:
-        0 0 10px rgba(0, 58, 143, 0.28),
-        0 0 12px rgba(246, 190, 0, 0.34) !important;
+    display: none !important;
 }
 
 .adviser-shell .adviser-shell-toggle {
@@ -5831,18 +5811,7 @@ tr:hover {
 }
 
 .adviser-shell[data-theme="dark"] .adviser-global-navbar::before {
-    background:
-        linear-gradient(
-            90deg,
-            rgba(37, 99, 235, 0.12),
-            rgba(37, 99, 235, 0.72) 18%,
-            rgba(37, 99, 235, 0.62) 48%,
-            rgba(246, 190, 0, 0.74) 74%,
-            rgba(246, 190, 0, 0.22)
-        ) !important;
-    box-shadow:
-        0 0 8px rgba(37, 99, 235, 0.18),
-        0 0 10px rgba(246, 190, 0, 0.2) !important;
+    display: none !important;
 }
 
 @media (min-width: 1101px) {
@@ -5872,7 +5841,7 @@ tr:hover {
     display: flex !important;
     min-height: 100vh !important;
     padding-top: var(--adviser-shell-topbar-height) !important;
-    background: #f8fafc !important;
+    background: var(--surface) !important;
 }
 
 .adviser-shell .adviser-global-navbar {
@@ -5897,25 +5866,7 @@ tr:hover {
 }
 
 .adviser-shell .adviser-global-navbar::before {
-    content: "" !important;
-    position: absolute !important;
-    right: 0 !important;
-    bottom: -1px !important;
-    left: 0 !important;
-    height: 3px !important;
-    pointer-events: none !important;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(0, 58, 143, 0.2),
-            #003a8f 18%,
-            #003a8f 46%,
-            #f6be00 72%,
-            rgba(246, 190, 0, 0.45)
-        ) !important;
-    box-shadow:
-        0 0 10px rgba(0, 58, 143, 0.28),
-        0 0 12px rgba(246, 190, 0, 0.34) !important;
+    display: none !important;
 }
 
 .adviser-shell .adviser-global-navbar::after {
@@ -6117,7 +6068,7 @@ tr:hover {
     justify-content: center !important;
     min-width: 0 !important;
     padding: 0.85rem 1rem 2.5rem !important;
-    background: #f8fafc !important;
+    background: var(--surface) !important;
     transition: margin-left 0.2s ease !important;
 }
 
@@ -6125,6 +6076,12 @@ tr:hover {
     width: 100% !important;
     max-width: 1600px !important;
     min-width: 0 !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 1.45rem !important;
+    box-shadow: 0 16px 34px rgba(31, 41, 55, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) !important;
+    padding: 1.5rem !important;
+    min-height: calc(100vh - 6rem) !important;
 }
 
 .adviser-shell .adviser-global-content > .dashboard-wrapper {
@@ -6222,18 +6179,7 @@ tr:hover {
 }
 
 .adviser-shell[data-theme="dark"] .adviser-global-navbar::before {
-    background:
-        linear-gradient(
-            90deg,
-            rgba(37, 99, 235, 0.12),
-            rgba(37, 99, 235, 0.72) 18%,
-            rgba(37, 99, 235, 0.62) 48%,
-            rgba(246, 190, 0, 0.74) 74%,
-            rgba(246, 190, 0, 0.22)
-        ) !important;
-    box-shadow:
-        0 0 8px rgba(37, 99, 235, 0.18),
-        0 0 10px rgba(246, 190, 0, 0.2) !important;
+    display: none !important;
 }
 
 /* Adviser stylesheet loads last, so keep its shell on the shared student geometry. */
@@ -6283,19 +6229,7 @@ tr:hover {
 .adviser-shell .adviser-global-navbar::before,
 .adviser-shell[data-theme="dark"] .adviser-global-navbar::before,
 .adviser-shell[data-theme="system"] .adviser-global-navbar::before {
-    height: 3px !important;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(0, 58, 143, 0.2),
-            #003a8f 18%,
-            #003a8f 46%,
-            #f6be00 72%,
-            rgba(246, 190, 0, 0.45)
-        ) !important;
-    box-shadow:
-        0 0 10px rgba(0, 58, 143, 0.28),
-        0 0 12px rgba(246, 190, 0, 0.34) !important;
+    display: none !important;
 }
 
 .adviser-shell .adviser-global-navbar::after,
@@ -6411,7 +6345,7 @@ tr:hover {
 
 .adviser-page-header .page-title h1,
 .adviser-command-copy h2 {
-    color: #0f172a !important;
+    color: var(--text) !important;
     font-size: clamp(1.55rem, 2.4vw, 2.45rem) !important;
     font-weight: 900 !important;
     letter-spacing: 0 !important;
@@ -6419,7 +6353,7 @@ tr:hover {
 
 .adviser-page-header .page-title p,
 .adviser-command-copy p {
-    color: #64748b !important;
+    color: var(--text) !important;
     font-size: 0.96rem !important;
 }
 
@@ -6495,7 +6429,7 @@ tr:hover {
 .adviser-command-actions a.is-secondary {
     border: 1px solid rgba(0, 58, 143, 0.12);
     background: rgba(255, 255, 255, 0.78);
-    color: #0f172a;
+    color: var(--text);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
 }
 
@@ -6541,14 +6475,14 @@ tr:hover {
 
 .adviser-health-ring span {
     margin-top: -0.35rem;
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.75rem;
     font-weight: 950;
 }
 
 .adviser-health-ring small {
     margin-top: 2.1rem;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.72rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -6566,13 +6500,13 @@ tr:hover {
     padding: 0.7rem 0.8rem;
     border-radius: 16px;
     background: rgba(15, 23, 42, 0.04);
-    color: #64748b;
+    color: var(--text);
     font-size: 0.74rem;
     font-weight: 800;
 }
 
 .adviser-health-stats strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.2rem;
     font-weight: 950;
 }
@@ -6778,7 +6712,7 @@ tr:hover {
 
 .adviser-review-card h3 {
     margin: 0.15rem 0 0;
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.98rem;
     font-weight: 950;
     line-height: 1.25;
@@ -6786,7 +6720,7 @@ tr:hover {
 
 .adviser-review-card p {
     margin: 0.2rem 0 0;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.45;
 }
@@ -6807,7 +6741,7 @@ tr:hover {
 
 .adviser-review-meta-grid small {
     display: block;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.68rem;
     font-weight: 850;
 }
@@ -6815,7 +6749,7 @@ tr:hover {
 .adviser-review-meta-grid strong {
     display: block;
     overflow: hidden;
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 950;
     text-overflow: ellipsis;
@@ -6827,7 +6761,7 @@ tr:hover {
     align-items: center;
     gap: 0.52rem;
     margin-top: 0.65rem;
-    color: #475569;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 750;
 }
@@ -6890,7 +6824,7 @@ tr:hover {
     padding: 0.72rem 0.8rem;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.62);
-    color: #475569;
+    color: var(--text);
     font-size: 0.78rem;
     font-weight: 800;
 }
@@ -7086,7 +7020,7 @@ tr:hover {
 .adviser-dashboard-workspace .adviser-progress-card {
     border-radius: 8px !important;
     border-color: #dbe3ef !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
     backdrop-filter: none !important;
 }
@@ -7136,7 +7070,7 @@ tr:hover {
 }
 
 .adviser-dashboard-workspace .adviser-command-actions a.is-secondary {
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: none;
 }
 
@@ -7156,7 +7090,7 @@ tr:hover {
     border: 1px solid #e2e8f0;
     border-left-width: 3px;
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .adviser-focus-card.is-warning { border-left-color: #f59e0b; }
@@ -7186,7 +7120,7 @@ tr:hover {
 .adviser-focus-card-copy small,
 .adviser-next-action-head span,
 .adviser-health-header span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.68rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -7194,7 +7128,7 @@ tr:hover {
 }
 
 .adviser-focus-card-copy strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.25rem;
     font-weight: 850;
     line-height: 1.12;
@@ -7202,7 +7136,7 @@ tr:hover {
 
 .adviser-focus-card-copy span {
     overflow: hidden;
-    color: #64748b;
+    color: var(--text);
     font-size: 0.74rem;
     font-weight: 650;
     line-height: 1.35;
@@ -7218,7 +7152,7 @@ tr:hover {
     padding: 1rem;
     border: 1px solid #dbe3ef;
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--surface);
     box-shadow: none;
 }
 
@@ -7263,14 +7197,14 @@ tr:hover {
 }
 
 .adviser-health-score strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.75rem;
     font-weight: 850;
     line-height: 1;
 }
 
 .adviser-health-score span {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.5;
 }
@@ -7285,8 +7219,8 @@ tr:hover {
     padding: 0.65rem;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    background: #ffffff;
-    color: #64748b;
+    background: var(--surface);
+    color: var(--text);
     font-size: 0.72rem;
 }
 
@@ -7301,7 +7235,7 @@ tr:hover {
 }
 
 .adviser-next-action-head small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.75rem;
     font-weight: 700;
 }
@@ -7314,7 +7248,7 @@ tr:hover {
     padding: 0.72rem;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--surface);
     color: inherit;
     text-decoration: none;
     transition: border-color 0.16s ease, background 0.16s ease;
@@ -7350,14 +7284,14 @@ tr:hover {
 }
 
 .adviser-next-action-list strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 0.84rem;
     font-weight: 800;
 }
 
 .adviser-next-action-list small,
 .adviser-next-action-list p {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.75rem;
     font-weight: 600;
 }
@@ -7383,7 +7317,7 @@ tr:hover {
 }
 
 .adviser-dashboard-workspace .adviser-premium-section-head {
-    background: #ffffff;
+    background: var(--surface);
 }
 
 .adviser-dashboard-workspace .adviser-timeline-item,
@@ -7396,7 +7330,7 @@ tr:hover {
 .adviser-dashboard-workspace .adviser-feedback-preview,
 .adviser-dashboard-workspace .adviser-intervention-hint {
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .adviser-dashboard-workspace .adviser-review-actions {
@@ -7563,7 +7497,7 @@ tr:hover {
     border: 0 !important;
     border-radius: 0 !important;
     border-top: 3px solid #003a8f !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
     padding: 1rem !important;
 }
@@ -7779,8 +7713,8 @@ tr:hover {
 
 .adviser-dashboard-workspace .adviser-command-actions a.is-secondary {
     border: 1px solid var(--adviser-card-border) !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.055) !important;
 }
 
@@ -7796,7 +7730,7 @@ tr:hover {
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-left: 3px solid #003a8f !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
 }
 
@@ -7815,7 +7749,7 @@ tr:hover {
 }
 
 .adviser-focus-card-copy strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.28rem;
 }
 
@@ -7831,7 +7765,7 @@ tr:hover {
     padding: 1rem !important;
     border: 1px solid var(--adviser-card-border) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: var(--adviser-card-shadow-soft) !important;
 }
 
@@ -7865,7 +7799,7 @@ tr:hover {
     padding: 0.76rem !important;
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
 }
 
@@ -7889,25 +7823,25 @@ tr:hover {
     overflow: hidden;
     border: 1px solid var(--adviser-card-border) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: var(--adviser-card-shadow-soft) !important;
 }
 
 .adviser-dashboard-workspace .adviser-premium-section-head {
     padding: 1rem 1.1rem 0.9rem !important;
     border-bottom: 1px solid var(--adviser-card-border-soft) !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
 }
 
 .adviser-dashboard-workspace .adviser-premium-section-head h2 {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1rem;
     font-weight: 850;
     letter-spacing: 0;
 }
 
 .adviser-dashboard-workspace .adviser-premium-section-head p {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.82rem;
     line-height: 1.5;
 }
@@ -7924,7 +7858,7 @@ tr:hover {
     padding: 1rem 1rem 1rem 1.15rem !important;
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055) !important;
 }
 
@@ -7998,7 +7932,7 @@ tr:hover {
     padding: 1rem 1rem 1rem 1.15rem !important;
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
 }
 
@@ -8035,7 +7969,7 @@ tr:hover {
     padding: 0.9rem !important;
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
 }
 
@@ -8070,7 +8004,7 @@ tr:hover {
     justify-content: flex-start;
     padding: 0.65rem 0.5rem;
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .adviser-dashboard-workspace .adviser-schedule-card {
@@ -8078,7 +8012,7 @@ tr:hover {
     padding: 0.88rem 1rem 0.88rem 1.65rem !important;
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
 }
 
@@ -8103,17 +8037,17 @@ tr:hover {
     padding: 0.75rem;
     border: 1px solid var(--adviser-card-border-soft);
     border-radius: 8px;
-    background: #f8fafc;
+    background: var(--surface);
 }
 
 .adviser-progress-summary-grid strong {
-    color: #0f172a;
+    color: var(--text);
     font-size: 1.1rem;
     font-weight: 850;
 }
 
 .adviser-progress-summary-grid small {
-    color: #64748b;
+    color: var(--text);
     font-size: 0.68rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -8124,7 +8058,7 @@ tr:hover {
     padding: 0.95rem !important;
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
 }
 
@@ -8142,7 +8076,7 @@ tr:hover {
     padding: 0.95rem !important;
     border: 1px solid var(--adviser-card-border-soft) !important;
     border-radius: 8px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     box-shadow: none !important;
 }
 
@@ -8251,21 +8185,13 @@ tr:hover {
     display: flex !important;
     align-items: stretch !important;
     border: 0 !important;
-    border-bottom: 1px solid rgba(246, 190, 0, 0.9) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
     background: linear-gradient(90deg, #003a8f 0%, #0f4fb5 50%, #1e40af 100%) !important;
     box-shadow: 0 16px 32px rgba(15, 23, 42, 0.16) !important;
 }
 
 .adviser-shell .adviser-global-navbar::before {
-    content: "" !important;
-    position: absolute !important;
-    right: 0 !important;
-    bottom: -2px !important;
-    left: 0 !important;
-    height: 3px !important;
-    pointer-events: none !important;
-    background: linear-gradient(90deg, rgba(246, 190, 0, 0.55), #f6be00 22%, #f6be00 78%, rgba(246, 190, 0, 0.55)) !important;
-    box-shadow: none !important;
+    display: none !important;
 }
 
 .adviser-shell .adviser-global-navbar::after {
@@ -8566,6 +8492,12 @@ tr:hover {
     width: 100% !important;
     max-width: 1600px !important;
     min-width: 0 !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 1.45rem !important;
+    box-shadow: 0 16px 34px rgba(31, 41, 55, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) !important;
+    padding: 1.5rem !important;
+    min-height: calc(100vh - 6rem) !important;
 }
 
 .adviser-shell .adviser-navbar-title strong {

@@ -384,7 +384,7 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
       <div className="page-body">
         <section className="student-profile-page">
           <div className="profile-grid">
-            <article className="relative bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group">
+            <article className="relative bg-[var(--surface)] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[var(--border)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group">
               {/* Cover Image */}
               <div className="h-36 w-full bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
@@ -393,7 +393,7 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                 {/* Quick action floating on cover */}
                 <button 
                   onClick={openEditModal}
-                  className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 p-2.5 rounded-full transition-all flex items-center justify-center shadow-lg hover:scale-105"
+                  className="absolute top-4 right-4 bg-[var(--surface)] hover:bg-[var(--surface)] backdrop-blur-md text-white border border-[var(--border)] p-2.5 rounded-full transition-all flex items-center justify-center shadow-lg hover:scale-105"
                   title="Edit Profile"
                 >
                   <i className="fas fa-pen-to-square"></i>
@@ -403,51 +403,51 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
               {/* Avatar */}
               <div className="relative -mt-16 flex justify-center z-10 px-6">
                 <div className="relative group/avatar">
-                  <div className="h-32 w-32 rounded-full border-[5px] border-white shadow-xl flex items-center justify-center bg-white overflow-hidden relative">
+                  <div className="h-32 w-32 rounded-full border-[5px] border-[var(--border)] shadow-xl flex items-center justify-center bg-[var(--surface)] overflow-hidden relative">
                     {profile.profileImage ? (
                       <img className="h-full w-full object-cover transition-transform duration-500 group-hover/avatar:scale-105" src={profile.profileImage} alt={profile.fullName} />
                     ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-400">
+                      <div className="h-full w-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-[var(--text-meta)]">
                          <i className="fas fa-user-circle text-5xl"></i>
                       </div>
                     )}
                   </div>
                   
                   {/* Online/Status Badge */}
-                  <div className="absolute bottom-2 right-2 h-6 w-6 rounded-full border-[3px] border-white bg-emerald-500 shadow-sm" title="Active"></div>
+                  <div className="absolute bottom-2 right-2 h-6 w-6 rounded-full border-[3px] border-[var(--border)] bg-emerald-500 shadow-sm" title="Active"></div>
                 </div>
               </div>
 
               {/* Content */}
               <div className="px-6 pb-6 pt-5 text-center">
-                <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{profile.displayName || displayName}</h2>
+                <h2 className="text-2xl font-bold text-[var(--text)] tracking-tight">{profile.displayName || displayName}</h2>
                 
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold tracking-wide border border-blue-100/50">
                     <i className="fas fa-building-columns opacity-70"></i> {departmentBadge}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-xs font-bold tracking-wide border border-slate-200/50">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--surface-alt)] text-[var(--muted)] text-xs font-bold tracking-wide border border-[var(--border)]">
                     <i className="fas fa-user-graduate opacity-70"></i> {profile.yearLevel || 'Student'}
                   </span>
                 </div>
 
-                <p className="mt-4 text-sm font-medium text-slate-500 flex items-center justify-center gap-2 bg-slate-50/50 py-2 rounded-lg border border-slate-100/50">
+                <p className="mt-4 text-sm font-medium text-[var(--muted)] flex items-center justify-center gap-2 bg-[var(--surface-alt)] py-2 rounded-lg border border-[var(--border)]/50">
                   <i className="fas fa-users text-blue-400"></i> Section {profile.section || 'Unassigned'}
                 </p>
 
                 {/* Stats Grid */}
-                <div className="mt-6 grid grid-cols-3 gap-4 border-t border-b border-slate-100 py-5 bg-gradient-to-b from-transparent to-slate-50/30">
+                <div className="mt-6 grid grid-cols-3 gap-4 border-t border-b border-[var(--border)] py-5 bg-gradient-to-b from-transparent to-slate-50/30">
                   <div className="flex flex-col transition-transform hover:-translate-y-1">
                     <span className="text-2xl font-black text-blue-600 tracking-tight">{yearMetric}</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Year</span>
+                    <span className="text-[10px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Year</span>
                   </div>
-                  <div className="flex flex-col border-l border-r border-slate-100 transition-transform hover:-translate-y-1">
+                  <div className="flex flex-col border-l border-r border-[var(--border)] transition-transform hover:-translate-y-1">
                     <span className="text-2xl font-black text-blue-600 tracking-tight">{totalUploads}</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Uploads</span>
+                    <span className="text-[10px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Uploads</span>
                   </div>
                   <div className="flex flex-col transition-transform hover:-translate-y-1">
                     <span className="text-2xl font-black text-amber-500 tracking-tight">{unreadNotifications}</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Alerts</span>
+                    <span className="text-[10px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Alerts</span>
                   </div>
                 </div>
 
@@ -461,14 +461,14 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                   </button>
                   <Link prefetch={false} 
                     href="/students/project-overview"
-                    className="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm transition-all hover:-translate-y-0.5 px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+                    className="flex-1 bg-[var(--surface)] hover:bg-[var(--surface-alt)] text-[var(--text)] border border-[var(--border)] shadow-sm transition-all hover:-translate-y-0.5 px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                   >
                     <i className="fas fa-folder-open"></i> Open Project
                   </Link>
                 </div>
 
                 {/* Footer */}
-                <div className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-slate-400 bg-slate-50 py-2 rounded-lg">
+                <div className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-[var(--text-meta)] bg-[var(--surface-alt)] py-2 rounded-lg">
                   <i className="fas fa-clock"></i>
                   <span>{updatedLabel}</span>
                 </div>
@@ -597,12 +597,12 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-700/10 whitespace-nowrap shadow-sm">
                       <i className="fas fa-user text-indigo-500" aria-hidden="true" /> {profile.groupRole}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-inset ring-slate-600/10 whitespace-nowrap shadow-sm">
-                      <i className="fas fa-id-card text-slate-400" aria-hidden="true" /> {profile.studentId}
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-2.5 py-1 text-xs font-semibold text-[var(--text)] ring-1 ring-inset ring-slate-600/10 whitespace-nowrap shadow-sm">
+                      <i className="fas fa-id-card text-[var(--text-meta)]" aria-hidden="true" /> {profile.studentId}
                     </span>
                   </div>
                   <button 
-                    className="text-slate-400 hover:text-slate-600 transition-colors p-1 -mt-1 -mr-2" 
+                    className="text-[var(--text-meta)] hover:text-[var(--muted)] transition-colors p-1 -mt-1 -mr-2" 
                     type="button" 
                     aria-label="Close profile editor" 
                     onClick={closeEditModal}
@@ -624,22 +624,22 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-center gap-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm mt-4">
-                    <div className="relative flex h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-md bg-slate-100 items-center justify-center">
+                  <div className="flex flex-col sm:flex-row items-center gap-6 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm mt-4">
+                    <div className="relative flex h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-[var(--border)] shadow-md bg-[var(--surface-alt)] items-center justify-center">
                       {draft.profileImage ? (
                         <img className="h-full w-full object-cover" src={draft.profileImage} alt={draft.fullName} />
                       ) : (
-                        <i className="fas fa-user text-4xl text-slate-300" aria-hidden="true" />
+                        <i className="fas fa-user text-4xl text-[var(--muted)]" aria-hidden="true" />
                       )}
                     </div>
 
                     <div className="flex-1 space-y-3 text-center sm:text-left">
                       <div>
-                        <strong className="block text-slate-800 text-sm">{draft.profileImage ? 'Profile photo is ready' : 'No photo uploaded yet'}</strong>
-                        <span className="text-xs text-slate-500">JPG, PNG, or WEBP up to 2MB.</span>
+                        <strong className="block text-[var(--text)] text-sm">{draft.profileImage ? 'Profile photo is ready' : 'No photo uploaded yet'}</strong>
+                        <span className="text-xs text-[var(--muted)]">JPG, PNG, or WEBP up to 2MB.</span>
                       </div>
                       <div className="flex flex-wrap justify-center sm:justify-start gap-3 items-center">
-                        <label className="btn !border !border-slate-300 !bg-white !text-slate-700 hover:!bg-blue-50 hover:!text-blue-700 hover:!border-blue-300 cursor-pointer !m-0 !px-4 !py-2 transition-all !shadow-sm rounded-lg text-sm font-medium">
+                        <label className="btn !border !border-[var(--border-strong)] !bg-[var(--surface)] !text-[var(--text)] hover:!bg-blue-50 hover:!text-blue-700 hover:!border-blue-300 cursor-pointer !m-0 !px-4 !py-2 transition-all !shadow-sm rounded-lg text-sm font-medium">
                           <i className="fas fa-upload mr-1.5" aria-hidden="true" /> {draft.profileImage ? 'Change Photo' : 'Choose Photo'}
                           <input type="file" className="hidden" accept="image/*" onChange={handleDraftPhotoChange} />
                         </label>
@@ -667,42 +667,42 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
 
                   <div className="form-grid student-profile-modal-grid !gap-y-5 !gap-x-6">
                     <div className="form-field full">
-                      <label htmlFor="student-profile-display-name" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Display Name</label>
-                      <input id="student-profile-display-name" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.displayName || ''} onChange={(event) => updateDraftField('displayName', event.target.value)} placeholder="e.g. Full Name" />
-                      <p className="text-xs text-slate-400 mt-1.5">This name will be displayed on your profile card.</p>
+                      <label htmlFor="student-profile-display-name" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Display Name</label>
+                      <input id="student-profile-display-name" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.displayName || ''} onChange={(event) => updateDraftField('displayName', event.target.value)} placeholder="e.g. Full Name" />
+                      <p className="text-xs text-[var(--text-meta)] mt-1.5">This name will be displayed on your profile card.</p>
                     </div>
                     <div className="form-field full">
-                      <label htmlFor="student-profile-full-name" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Full Name</label>
-                      <input id="student-profile-full-name" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.fullName} onChange={(event) => updateDraftField('fullName', event.target.value)} />
+                      <label htmlFor="student-profile-full-name" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Full Name</label>
+                      <input id="student-profile-full-name" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.fullName} onChange={(event) => updateDraftField('fullName', event.target.value)} />
                     </div>
                     <div className="form-field">
-                      <label htmlFor="student-profile-email" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Email</label>
-                      <input id="student-profile-email" type="email" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.email || ''} onChange={(event) => updateDraftField('email', event.target.value)} title="Your academic email address." />
-                      <p className="text-xs text-slate-400 mt-1.5"><i className="fas fa-circle-info mr-1"></i> Your email address is set during registration.</p>
+                      <label htmlFor="student-profile-email" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Email</label>
+                      <input id="student-profile-email" type="email" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.email || ''} onChange={(event) => updateDraftField('email', event.target.value)} title="Your academic email address." />
+                      <p className="text-xs text-[var(--text-meta)] mt-1.5"><i className="fas fa-circle-info mr-1"></i> Your email address is set during registration.</p>
                     </div>
                     <div className="form-field">
-                      <label htmlFor="student-profile-contact" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Contact Number</label>
-                      <input id="student-profile-contact" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.contactNumber || ''} onChange={(event) => updateDraftField('contactNumber', event.target.value)} />
+                      <label htmlFor="student-profile-contact" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Contact Number</label>
+                      <input id="student-profile-contact" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.contactNumber || ''} onChange={(event) => updateDraftField('contactNumber', event.target.value)} />
                     </div>
                     <div className="form-field">
-                      <label htmlFor="student-profile-birth-date" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Birth Date</label>
-                      <input id="student-profile-birth-date" type="date" className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.birthDate || ''} onChange={(event) => updateDraftField('birthDate', event.target.value)} />
+                      <label htmlFor="student-profile-birth-date" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Birth Date</label>
+                      <input id="student-profile-birth-date" type="date" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.birthDate || ''} onChange={(event) => updateDraftField('birthDate', event.target.value)} />
                     </div>
                     <div className="form-field full mt-2">
-                      <label htmlFor="student-profile-address" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Address</label>
-                      <textarea id="student-profile-address" rows={3} className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.address || ''} onChange={(event) => updateDraftField('address', event.target.value)} />
+                      <label htmlFor="student-profile-address" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Address</label>
+                      <textarea id="student-profile-address" rows={3} className="w-full resize-y rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-3 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.address || ''} onChange={(event) => updateDraftField('address', event.target.value)} />
                     </div>
                     <div className="form-field full mt-2">
-                      <label htmlFor="student-profile-summary" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Account Summary</label>
-                      <textarea id="student-profile-summary" rows={3} className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.accountSummary || ''} onChange={(event) => updateDraftField('accountSummary', event.target.value)} placeholder="Write a short summary about your academic goals..." />
+                      <label htmlFor="student-profile-summary" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Account Summary</label>
+                      <textarea id="student-profile-summary" rows={3} className="w-full resize-y rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-3 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.accountSummary || ''} onChange={(event) => updateDraftField('accountSummary', event.target.value)} placeholder="Write a short summary about your academic goals..." />
                     </div>
                   </div>
                 </section>
 
 
 
-                <div className="form-actions !flex !items-center !justify-end !gap-3 !border-t !border-slate-200/80 !p-6 !bg-slate-50/50">
-                  <button className="btn !border !border-slate-300 !bg-white !text-slate-700 hover:!bg-slate-50 !shadow-sm !px-5" type="button" onClick={closeEditModal}>
+                <div className="form-actions !flex !items-center !justify-end !gap-3 !border-t !border-[var(--border)] !p-6 !bg-[var(--surface-alt)]">
+                  <button className="btn !border !border-[var(--border-strong)] !bg-[var(--surface)] !text-[var(--text)] hover:!bg-[var(--surface-alt)] !shadow-sm !px-5" type="button" onClick={closeEditModal}>
                     Cancel
                   </button>
                   <button className="btn btn-primary !px-6" type="submit" disabled={!hasDraftChanges || isSaving}>
