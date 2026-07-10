@@ -512,42 +512,47 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
           </section>
 
           {workspaceMode === 'adviser' ? (
-            <section className="overflow-hidden rounded-[1.15rem] border border-slate-200/80 bg-white shadow-sm">
+            <section className="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
               <form
-                className="grid lg:grid-cols-[minmax(0,1fr)_300px]"
+                className="grid lg:grid-cols-[minmax(0,1fr)_320px]"
                 onSubmit={(event) => {
                   event.preventDefault();
                   void saveScheduleItem();
                 }}
               >
-                <div className="p-5">
-                  <div className="flex flex-col gap-3 border-b border-slate-200/80 pb-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
-                        <i className="fas fa-calendar-plus text-sm" aria-hidden="true" />
+                <div className="p-6 md:p-8">
+                  <div className="flex flex-col gap-4 border-b border-slate-200/60 pb-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-4">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 text-[var(--primary)] shadow-sm ring-1 ring-blue-100/50">
+                        <i className="fas fa-calendar-plus text-base" aria-hidden="true" />
                       </span>
                       <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Create Schedule</p>
-                        <h2 className="truncate text-xl font-semibold tracking-tight text-slate-900">New adviser schedule item</h2>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Create Schedule</p>
+                        <h2 className="truncate text-2xl font-bold tracking-tight text-slate-800">New adviser schedule item</h2>
                       </div>
                     </div>
-                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                    <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200/60 bg-white/50 px-4 py-1.5 text-xs font-bold tracking-wide text-slate-600 shadow-sm backdrop-blur-md">
                       <i className="fas fa-users text-[10px]" aria-hidden="true" />
                       Student schedule
                     </span>
                   </div>
 
-                  <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(260px,0.95fr)_minmax(360px,1.05fr)]">
+                  <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(260px,0.95fr)_minmax(360px,1.05fr)]">
                     <label className="block">
-                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Group / Project</span>
-                      <div className="relative">
-                        <i className="fas fa-layer-group pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400" aria-hidden="true" />
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Group / Project</span>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                          <i className="fas fa-layer-group text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]" aria-hidden="true" />
+                        </div>
                         <select
-                          className="min-h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-blue-900/10"
+                          className="min-h-[3.25rem] w-full appearance-none rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-10 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm transition-all hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10 outline-none"
                           value={scheduleForm.projectId}
                           onChange={(event) => updateScheduleForm('projectId', event.target.value)}
                           disabled={isLoadingSchedule || !scheduleProjects.length}
                         >
+                          {scheduleProjects.length > 1 && (
+                            <option value="ALL">All My Groups ({scheduleProjects.length})</option>
+                          )}
                           {scheduleProjects.length ? (
                             scheduleProjects.map((project) => (
                               <option key={project.id} value={project.id}>
@@ -558,12 +563,15 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                             <option value="">No assigned project found</option>
                           )}
                         </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                          <i className="fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true" />
+                        </div>
                       </div>
                     </label>
 
                     <fieldset>
-                      <legend className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Type</legend>
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      <legend className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Type</legend>
+                      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                         {SCHEDULE_TYPE_OPTIONS.map((option) => {
                           const active = scheduleForm.type === option.value;
 
@@ -573,13 +581,13 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                               type="button"
                               aria-pressed={active}
                               onClick={() => updateScheduleForm('type', option.value)}
-                              className={`flex min-h-11 items-center gap-2 rounded-xl border px-3 text-left text-sm font-semibold transition ${
+                              className={`flex min-h-[3.25rem] items-center gap-2.5 rounded-2xl border px-3.5 text-left text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
                                 active
-                                  ? 'border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm'
-                                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900'
+                                  ? 'border-transparent bg-gradient-to-br from-[var(--primary)] to-blue-700 text-white shadow-md ring-1 ring-blue-900/20'
+                                  : 'border-slate-200/60 bg-white/50 text-slate-600 shadow-sm backdrop-blur-sm hover:border-slate-300/80 hover:bg-white hover:text-slate-900 hover:shadow'
                               }`}
                             >
-                              <i className={`fas ${option.icon} w-4 text-xs ${active ? 'text-white' : 'text-slate-400'}`} aria-hidden="true" />
+                              <i className={`fas ${option.icon} w-4 text-xs transition-colors ${active ? 'text-blue-100' : 'text-slate-400'}`} aria-hidden="true" />
                               <span className="truncate">{option.label}</span>
                             </button>
                           );
@@ -588,11 +596,11 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                     </fieldset>
                   </div>
 
-                  <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(260px,1fr)_150px_130px]">
+                  <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(260px,1fr)_160px_140px]">
                     <label className="block">
-                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Title</span>
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Title</span>
                       <input
-                        className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-blue-900/10"
+                        className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 px-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all placeholder:text-slate-400 hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                         value={scheduleForm.title}
                         onChange={(event) => updateScheduleForm('title', event.target.value)}
                         placeholder={`${selectedScheduleTypeOption.label} title`}
@@ -600,9 +608,9 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                     </label>
 
                     <label className="block">
-                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Date</span>
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Date</span>
                       <input
-                        className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-blue-900/10"
+                        className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 px-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                         type="date"
                         value={scheduleForm.date}
                         onChange={(event) => updateScheduleForm('date', event.target.value)}
@@ -611,9 +619,9 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                     </label>
 
                     <label className="block">
-                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Time</span>
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Time</span>
                       <input
-                        className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-blue-900/10"
+                        className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 px-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                         type="time"
                         value={scheduleForm.time}
                         onChange={(event) => updateScheduleForm('time', event.target.value)}
@@ -622,13 +630,15 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                     </label>
                   </div>
 
-                  <div className="mt-4 grid gap-4 xl:grid-cols-2">
+                  <div className="mt-5 grid gap-5 xl:grid-cols-2">
                     <label className="block">
-                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Location / Link</span>
-                      <div className="relative">
-                        <i className="fas fa-location-dot pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400" aria-hidden="true" />
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Location / Link</span>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                          <i className="fas fa-location-dot text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]" aria-hidden="true" />
+                        </div>
                         <input
-                          className="min-h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-blue-900/10"
+                          className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all placeholder:text-slate-400 hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                           value={scheduleForm.location}
                           onChange={(event) => updateScheduleForm('location', event.target.value)}
                           placeholder="Room, classroom, or meeting link"
@@ -637,11 +647,13 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                     </label>
 
                     <label className="block">
-                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Notes</span>
-                      <div className="relative">
-                        <i className="fas fa-clipboard-list pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400" aria-hidden="true" />
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Notes</span>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                          <i className="fas fa-clipboard-list text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]" aria-hidden="true" />
+                        </div>
                         <input
-                          className="min-h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:ring-4 focus:ring-blue-900/10"
+                          className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all placeholder:text-slate-400 hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                           value={scheduleForm.notes}
                           onChange={(event) => updateScheduleForm('notes', event.target.value)}
                           placeholder="Student preparation"
@@ -651,43 +663,51 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                   </div>
 
                   {scheduleError ? (
-                    <p className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{scheduleError}</p>
+                    <div className="mt-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-sm font-medium text-rose-800 shadow-sm backdrop-blur-sm">
+                      <i className="fas fa-circle-exclamation mt-0.5 shrink-0" aria-hidden="true" />
+                      <p>{scheduleError}</p>
+                    </div>
                   ) : null}
                   {scheduleNotice ? (
-                    <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{scheduleNotice}</p>
+                    <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-sm font-medium text-emerald-800 shadow-sm backdrop-blur-sm">
+                      <i className="fas fa-circle-check mt-0.5 shrink-0" aria-hidden="true" />
+                      <p>{scheduleNotice}</p>
+                    </div>
                   ) : null}
                 </div>
 
-                <aside className="border-t border-slate-200 bg-slate-50/80 p-5 lg:border-l lg:border-t-0">
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(0,58,143,0.08)] text-[var(--primary)]">
-                        <i className={`fas ${selectedScheduleTypeOption.icon} text-sm`} aria-hidden="true" />
+                <aside className="border-t border-slate-200/60 bg-gradient-to-b from-slate-50/50 to-slate-100/50 p-6 md:p-8 lg:border-l lg:border-t-0">
+                  <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-md">
+                    <div className="flex items-center gap-4">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 text-[var(--primary)] shadow-inner ring-1 ring-blue-100/50">
+                        <i className={`fas ${selectedScheduleTypeOption.icon} text-base`} aria-hidden="true" />
                       </span>
                       <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Preview</p>
-                        <h3 className="truncate text-sm font-semibold text-slate-900">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Preview</p>
+                        <h3 className="truncate text-base font-bold tracking-tight text-slate-800">
                           {scheduleForm.title || selectedScheduleTypeOption.label}
                         </h3>
                       </div>
                     </div>
 
-                    <div className="mt-4 space-y-3 text-sm">
-                      <div className="flex items-start gap-3">
-                        <i className="fas fa-layer-group mt-1 w-4 text-xs text-slate-400" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 break-words font-semibold text-slate-700">
-                          {selectedScheduleProject
+                    <div className="mt-5 space-y-3.5 text-sm">
+                      <div className="flex items-start gap-3.5">
+                        <i className="fas fa-layer-group mt-1 w-4 shrink-0 text-center text-xs text-slate-400" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 break-words font-medium text-slate-700">
+                          {scheduleForm.projectId === 'ALL'
+                            ? `All My Groups (${scheduleProjects.length})`
+                            : selectedScheduleProject
                             ? `${selectedScheduleProject.groupCode ? `${selectedScheduleProject.groupCode} - ` : ''}${selectedScheduleProject.groupTitle}`
                             : 'No group selected'}
                         </span>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <i className="fas fa-clock mt-1 w-4 text-xs text-slate-400" aria-hidden="true" />
-                        <span className="font-semibold text-slate-700">{scheduleForm.date} at {scheduleForm.time}</span>
+                      <div className="flex items-start gap-3.5">
+                        <i className="fas fa-clock mt-1 w-4 shrink-0 text-center text-xs text-slate-400" aria-hidden="true" />
+                        <span className="font-medium text-slate-700">{scheduleForm.date} at {scheduleForm.time}</span>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <i className="fas fa-location-dot mt-1 w-4 text-xs text-slate-400" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 break-words text-slate-600">{scheduleForm.location || 'Location not set'}</span>
+                      <div className="flex items-start gap-3.5">
+                        <i className="fas fa-location-dot mt-1 w-4 shrink-0 text-center text-xs text-slate-400" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 break-words text-slate-500">{scheduleForm.location || 'Location not set'}</span>
                       </div>
                     </div>
                   </div>
@@ -696,35 +716,35 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                     type="button"
                     aria-pressed={scheduleForm.notifyStudents}
                     onClick={() => updateScheduleForm('notifyStudents', !scheduleForm.notifyStudents)}
-                    className={`mt-4 flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border px-4 text-sm font-semibold transition ${
+                    className={`mt-6 flex min-h-[3.25rem] w-full items-center justify-between gap-3 rounded-2xl border px-5 text-sm font-semibold transition-all duration-300 ${
                       scheduleForm.notifyStudents
-                        ? 'border-blue-100 bg-blue-50 text-[var(--primary)]'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'border-blue-200/60 bg-blue-50 text-[var(--primary)] shadow-sm'
+                        : 'border-slate-200/60 bg-white/50 text-slate-500 hover:bg-white hover:text-slate-700'
                     }`}
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <i className="fas fa-bell text-xs" aria-hidden="true" />
+                    <span className="inline-flex items-center gap-2.5">
+                      <i className={`fas fa-bell text-sm transition-colors ${scheduleForm.notifyStudents ? 'text-[var(--primary)]' : 'text-slate-400'}`} aria-hidden="true" />
                       Notify students
                     </span>
-                    <span className={`flex h-6 w-11 items-center rounded-full p-0.5 transition ${scheduleForm.notifyStudents ? 'bg-[var(--primary)]' : 'bg-slate-300'}`}>
-                      <span className={`h-5 w-5 rounded-full bg-white shadow-sm transition ${scheduleForm.notifyStudents ? 'translate-x-5' : 'translate-x-0'}`} />
+                    <span className={`relative inline-flex h-6 w-11 items-center rounded-full p-0.5 transition-colors duration-300 ease-in-out ${scheduleForm.notifyStudents ? 'bg-[var(--primary)]' : 'bg-slate-300'}`}>
+                      <span className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out ${scheduleForm.notifyStudents ? 'translate-x-5' : 'translate-x-0'}`} />
                     </span>
                   </button>
 
                   <button
-                    className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                    className="mt-4 flex min-h-[3.25rem] w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[var(--primary)] to-blue-700 px-5 text-sm font-bold tracking-wide text-white shadow-md ring-1 ring-blue-900/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-900/20 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-md"
                     type="submit"
                     disabled={isSavingSchedule || isLoadingSchedule || !scheduleForm.projectId}
                   >
-                    <i className={`fas ${isSavingSchedule ? 'fa-spinner fa-spin' : 'fa-check'} text-xs`} aria-hidden="true" />
-                    {isSavingSchedule ? 'Saving' : 'Save Schedule'}
+                    <i className={`fas ${isSavingSchedule ? 'fa-spinner fa-spin' : 'fa-check'} text-sm`} aria-hidden="true" />
+                    {isSavingSchedule ? 'Saving...' : 'Save Schedule'}
                   </button>
                 </aside>
               </form>
             </section>
           ) : null}
 
-          <section className="rounded-[1.75rem] border border-slate-200/80 bg-white shadow-sm">
+          <section className="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300">
             <SectionHeader
               eyebrow="Planner"
               title="Weekly supervision planner"
@@ -733,7 +753,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                 <>
                   <Link
                     href={primaryActionHref}
-                    className="inline-flex min-h-[42px] items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
+                    className="inline-flex min-h-[42px] items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-white shadow-md ring-1 ring-blue-900/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                     style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}
                   >
                     <i className="fas fa-arrow-up-right-from-square text-xs"></i>
@@ -741,7 +761,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                   </Link>
                   <Link
                     href={secondaryActionHref}
-                    className="inline-flex min-h-[42px] items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                    className="inline-flex min-h-[42px] items-center gap-2 rounded-2xl border border-slate-200/60 bg-white/50 px-4 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-slate-900"
                   >
                     <i className="fas fa-layer-group text-xs"></i>
                     {secondaryActionLabel}
@@ -750,7 +770,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
               }
             />
 
-            <div className="grid gap-3 border-b border-slate-200/80 px-6 py-5 lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)] lg:items-center">
+            <div className="grid gap-4 border-b border-slate-200/60 px-6 py-5 lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)] lg:items-center">
               <div className="flex flex-wrap gap-2">
                 {[
                   { id: 'all' as const, label: 'All Sessions' },
@@ -767,10 +787,10 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                       key={option.id}
                       type="button"
                       onClick={() => setActiveFilter(option.id)}
-                      className={`inline-flex min-h-[40px] items-center gap-2 rounded-[0.9rem] border px-4 text-sm font-semibold transition ${
+                      className={`inline-flex min-h-[2.5rem] items-center gap-2 rounded-2xl border px-4 text-sm font-semibold transition-all duration-300 ${
                         active
-                          ? 'border-transparent bg-[var(--primary)] text-white shadow-sm'
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'
+                          ? 'border-transparent bg-gradient-to-r from-[var(--primary)] to-blue-700 text-white shadow-md ring-1 ring-blue-900/20'
+                          : 'border-slate-200/60 bg-white/50 text-slate-600 shadow-sm backdrop-blur-sm hover:-translate-y-0.5 hover:border-slate-300/80 hover:bg-white hover:text-slate-900'
                       }`}
                     >
                       {option.label}
@@ -779,24 +799,26 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                 })}
               </div>
 
-              <div className="relative">
-                <i className="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                  <i className="fas fa-search text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]"></i>
+                </div>
                 <input
                   type="text"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search by group, event, room, or date..."
-                  className="min-h-[48px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                  className="min-h-[3rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-4 text-sm text-slate-700 shadow-sm backdrop-blur-sm outline-none transition-all placeholder:text-slate-400 hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                 />
               </div>
             </div>
 
             <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,0.95fr)]">
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {groupedItems.length ? (
                   groupedItems.map((group) => (
-                    <section key={group.dateLabel} className="rounded-[1.5rem] border border-slate-200 bg-slate-50/60 p-5">
-                      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200/80 pb-4">
+                    <section key={group.dateLabel} className="rounded-3xl border border-white/60 bg-gradient-to-b from-slate-50/50 to-white/30 p-6 shadow-sm backdrop-blur-sm transition-all hover:shadow-md">
+                      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200/60 pb-5">
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Day Agenda</p>
                           <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">

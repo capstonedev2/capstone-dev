@@ -185,6 +185,35 @@ export async function POST(request: Request) {
       );
     }
 
+    const matchedUsers = await prisma.user.findMany({
+      where: { 
+        role: 'STUDENT',
+        groupMembers: { none: {} } 
+      },
+      select: { id: true, name: true, displayName: true, firstName: true, lastName: true }
+    });
+
+    const membersToCreate: any[] = [];
+    for (const studentName of parsedStudents) {
+      const normalizedQuery = normalizeStudentName(studentName);
+      const matchedUser = matchedUsers.find(u => {
+        const candidateNames = [
+          u.name,
+          u.displayName,
+          [u.firstName, u.lastName].filter(Boolean).join(' ')
+        ].map(normalizeStudentName).filter(Boolean);
+        return candidateNames.includes(normalizedQuery);
+      });
+
+      if (matchedUser) {
+        membersToCreate.push({
+          userId: matchedUser.id,
+          isActive: true,
+          role: normalizeStudentName(leader) === normalizedQuery ? 'LEADER' : 'MEMBER'
+        });
+      }
+    }
+
     const newGroup = await prisma.group.create({
       data: {
         userId,
@@ -198,7 +227,12 @@ export async function POST(request: Request) {
         leader,
         statusLabel,
         statusClass,
-        projectId
+        projectId,
+        ...(membersToCreate.length > 0 && {
+          groupMembers: {
+            create: membersToCreate
+          }
+        })
       }
     });
     
@@ -251,6 +285,56 @@ export async function PUT(request: Request) {
     }
     if (body.allowMemberSubmission !== undefined) {
       updateData.allowMemberSubmission = body.allowMemberSubmission;
+    }
+
+    if (updateData.students) {
+      const matchedUsers = await prisma.user.findMany({
+        where: { 
+          role: 'STUDENT',
+          groupMembers: { none: { groupId: { not: id } } }
+        },
+        select: { id: true, name: true, displayName: true, firstName: true, lastName: true }
+      });
+
+      const leaderQuery = normalizeStudentName(updateData.leader || body.leader || '');
+      
+      const newMembers = updateData.students.map(studentName => {
+        const normalizedQuery = normalizeStudentName(studentName);
+        const matchedUser = matchedUsers.find(u => {
+          const candidateNames = [
+            u.name,
+            u.displayName,
+            [u.firstName, u.lastName].filter(Boolean).join(' ')
+          ].map(normalizeStudentName).filter(Boolean);
+          return candidateNames.includes(normalizedQuery);
+        });
+
+        if (matchedUser) {
+          return {
+            userId: matchedUser.id,
+            isActive: true,
+            role: leaderQuery === normalizedQuery ? 'LEADER' : 'MEMBER'
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      const updatedGroup = await prisma.$transaction(async (tx) => {
+        await tx.groupMember.deleteMany({ where: { groupId: id } });
+        
+        return tx.group.update({
+          where: { id },
+          data: {
+            ...updateData,
+            ...(newMembers.length > 0 && {
+              groupMembers: {
+                create: newMembers
+              }
+            })
+          }
+        });
+      });
+      return NextResponse.json(updatedGroup);
     }
 
     const updatedGroup = await prisma.group.update({

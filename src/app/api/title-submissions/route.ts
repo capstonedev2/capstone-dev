@@ -509,6 +509,7 @@ export async function PATCH(request: Request) {
       UserRole.ADVISER,
       UserRole.PANEL,
       UserRole.RESEARCH_HEAD,
+      UserRole.PROGRAM_HEAD,
       UserRole.SYSTEM_ADMIN,
       UserRole.ADMIN
     ]);
@@ -550,7 +551,7 @@ export async function PATCH(request: Request) {
     }
 
     const isAssignedAdviser = project.adviserId === user.id;
-    const isAdmin = user.role === UserRole.ADMIN || user.role === UserRole.SYSTEM_ADMIN || user.role === UserRole.RESEARCH_HEAD;
+    const isAdmin = user.role === UserRole.ADMIN || user.role === UserRole.SYSTEM_ADMIN || user.role === UserRole.RESEARCH_HEAD || user.role === UserRole.PROGRAM_HEAD;
 
     if (!isAssignedAdviser && !isAdmin) {
       return Response.json(

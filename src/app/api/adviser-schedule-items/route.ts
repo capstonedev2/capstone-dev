@@ -13,11 +13,15 @@ import {
   successResponse
 } from '@/lib/utils';
 import { recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
+import { sendScheduleNotificationEmail } from '@/lib/mailer';
 
 export const runtime = 'nodejs';
 
 const ADVISER_SCHEDULE_ROLES = [
   UserRole.ADVISER,
+  UserRole.PANEL,
+  UserRole.PROGRAM_HEAD,
+  UserRole.RESEARCH_HEAD,
   UserRole.ADMIN,
   UserRole.SYSTEM_ADMIN
 ];
@@ -97,11 +101,36 @@ function getProjectAccessWhere(user: Awaited<ReturnType<typeof requireAuthentica
     return {};
   }
 
+  if ((user.role === UserRole.PROGRAM_HEAD || user.role === UserRole.RESEARCH_HEAD) && user.department) {
+    return {
+      OR: [
+        { departmentId: user.department },
+        { group: { department: user.department } }
+      ]
+    };
+  }
+
   return {
     OR: [
       { adviserId: user.id },
       { group: { userId: user.id } }
     ]
+  };
+}
+
+function getGroupAccessWhere(user: Awaited<ReturnType<typeof requireAuthenticatedUser>>) {
+  if (user.role === UserRole.ADMIN || user.role === UserRole.SYSTEM_ADMIN) {
+    return {};
+  }
+
+  if ((user.role === UserRole.PROGRAM_HEAD || user.role === UserRole.RESEARCH_HEAD) && user.department) {
+    return {
+      department: user.department
+    };
+  }
+
+  return {
+    userId: user.id
   };
 }
 
@@ -158,37 +187,34 @@ function formatScheduleItem(item: {
   };
 }
 
-function formatProjectOption(project: {
+function formatGroupOption(group: {
   id: string;
+  code: string;
   title: string;
-  group: {
-    code: string;
-    title: string;
-    students: string[];
-    leader: string | null;
-    groupMembers: Array<{
-      userId: string;
-      isActive: boolean;
-      role: string;
-      user: {
-        id: string;
-        name: string;
-        firstName: string | null;
-        lastName: string | null;
-        displayName: string | null;
-        email: string;
-      };
-    }>;
-  } | null;
+  projectTitle: string;
+  leader: string | null;
+  groupMembers: Array<{
+    userId: string;
+    isActive: boolean;
+    role: string;
+    user: {
+      id: string;
+      name: string;
+      firstName: string | null;
+      lastName: string | null;
+      displayName: string | null;
+      email: string;
+    };
+  }>;
 }) {
-  const activeMembers = project.group?.groupMembers.filter((member) => member.isActive) || [];
+  const activeMembers = group.groupMembers.filter((member) => member.isActive) || [];
 
   return {
-    id: project.id,
-    title: project.title,
-    groupCode: project.group?.code || '',
-    groupTitle: project.group?.title || project.title,
-    leaderName: project.group?.leader || activeMembers.find((member) => member.role === 'LEADER')?.user.name || '',
+    id: group.id, // We use groupId here!
+    title: group.projectTitle || group.title || 'Pending Title',
+    groupCode: group.code,
+    groupTitle: group.title,
+    leaderName: group.leader || activeMembers.find((member) => member.role === 'LEADER')?.user.name || '',
     members: activeMembers.map((member) => ({
       userId: member.userId,
       name: formatPersonName(member.user),
@@ -197,27 +223,24 @@ function formatProjectOption(project: {
   };
 }
 
-async function getProjectForSchedule(projectId: string, user: Awaited<ReturnType<typeof requireAuthenticatedUser>>) {
-  return prisma.project.findFirst({
+async function getGroupForSchedule(groupId: string, user: Awaited<ReturnType<typeof requireAuthenticatedUser>>) {
+  return prisma.group.findFirst({
     where: {
-      id: projectId,
-      ...getProjectAccessWhere(user)
+      id: groupId,
+      ...getGroupAccessWhere(user)
     },
     include: {
-      group: {
+      projects: true,
+      groupMembers: {
         include: {
-          groupMembers: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  firstName: true,
-                  lastName: true,
-                  displayName: true,
-                  email: true
-                }
-              }
+          user: {
+            select: {
+              id: true,
+              name: true,
+              firstName: true,
+              lastName: true,
+              displayName: true,
+              email: true
             }
           }
         }
@@ -226,26 +249,30 @@ async function getProjectForSchedule(projectId: string, user: Awaited<ReturnType
   });
 }
 
-async function notifyProjectStudents({
-  project,
+async function notifyGroupStudents({
+  group,
   itemId,
   type,
   title,
-  scheduledAt
+  scheduledAt,
+  location,
+  notes
 }: {
-  project: Awaited<ReturnType<typeof getProjectForSchedule>>;
+  group: Awaited<ReturnType<typeof getGroupForSchedule>>;
   itemId: string;
   type: AdviserScheduleItemType;
   title: string;
   scheduledAt: Date;
+  location: string | null;
+  notes: string | null;
 }) {
-  if (!project?.group) {
+  if (!group) {
     return;
   }
 
+  const activeMembers = group.groupMembers.filter((member) => member.isActive);
   const recipientIds = Array.from(new Set(
-    project.group.groupMembers
-      .filter((member) => member.isActive)
+    activeMembers
       .map((member) => member.userId)
       .filter(Boolean)
   ));
@@ -271,17 +298,40 @@ async function notifyProjectStudents({
       entityId: itemId
     }))
   });
+
+  // Send email notifications
+  
+  const emailPromises = activeMembers.map(async (member) => {
+    if (!member.user.email) return;
+    try {
+      await sendScheduleNotificationEmail({
+        to: member.user.email,
+        name: member.user.firstName || member.user.name,
+        typeLabel: scheduleTypeLabels[type],
+        title,
+        dateLabel,
+        location,
+        notes
+      });
+      console.log(`[Schedule Email] Successfully sent to ${member.user.email}`);
+    } catch (error) {
+      console.error(`[Schedule Email] Failed to send to ${member.user.email}:`, error);
+    }
+  });
+
+  await Promise.allSettled(emailPromises);
 }
 
 export async function GET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, ADVISER_SCHEDULE_ROLES);
     const accessWhere = getProjectAccessWhere(user);
+    const groupWhere = getGroupAccessWhere(user);
     const url = new URL(request.url);
     const itemLimit = parsePositiveInteger(url.searchParams.get('limit'), DEFAULT_SCHEDULE_LIMIT, MAX_SCHEDULE_LIMIT);
     const projectLimit = parsePositiveInteger(url.searchParams.get('projectLimit'), DEFAULT_SCHEDULE_PROJECT_LIMIT, MAX_SCHEDULE_LIMIT);
 
-    const [items, projects] = await Promise.all([
+    const [items, groups] = await Promise.all([
       prisma.adviserScheduleItem.findMany({
         where: {
           project: { is: accessWhere }
@@ -302,33 +352,28 @@ export async function GET(request: Request) {
         orderBy: { scheduledAt: 'asc' },
         take: itemLimit
       }),
-      prisma.project.findMany({
-        where: accessWhere,
+      prisma.group.findMany({
+        where: groupWhere,
         select: {
           id: true,
+          code: true,
           title: true,
-          group: {
+          projectTitle: true,
+          leader: true,
+          groupMembers: {
+            where: { isActive: true },
             select: {
-              code: true,
-              title: true,
-              students: true,
-              leader: true,
-              groupMembers: {
-                where: { isActive: true },
+              userId: true,
+              isActive: true,
+              role: true,
+              user: {
                 select: {
-                  userId: true,
-                  isActive: true,
-                  role: true,
-                  user: {
-                    select: {
-                      id: true,
-                      name: true,
-                      firstName: true,
-                      lastName: true,
-                      displayName: true,
-                      email: true
-                    }
-                  }
+                  id: true,
+                  name: true,
+                  firstName: true,
+                  lastName: true,
+                  displayName: true,
+                  email: true
                 }
               }
             }
@@ -341,7 +386,7 @@ export async function GET(request: Request) {
 
     return successResponse({
       items: items.map(formatScheduleItem),
-      projects: projects.map(formatProjectOption)
+      projects: groups.map(formatGroupOption)
     });
   } catch (error) {
     return handleApiError(error);
@@ -362,28 +407,138 @@ export async function POST(request: Request) {
       notifyStudents?: unknown;
     }>(request);
 
-    const projectId = normalizeText(body.projectId);
+    const groupId = normalizeText(body.projectId); // UI sends groupId as projectId
     const type = parseScheduleType(body.type);
     const scheduledAt = parseScheduleDate(body.date, body.time);
     const location = normalizeText(body.location);
     const notes = normalizeText(body.notes);
     const title = normalizeText(body.title) || `${scheduleTypeLabels[type]} schedule`;
 
-    if (!projectId) {
+    if (!groupId) {
       throw new HttpError('Choose a project or group for this schedule.', 400, {
         projectId: 'Choose a project or group.'
       });
     }
 
-    const project = await getProjectForSchedule(projectId, user);
+    if (groupId === 'ALL') {
+      const allGroups = await prisma.group.findMany({
+        where: getGroupAccessWhere(user),
+        include: {
+          projects: true,
+          groupMembers: {
+            include: {
+              user: {
+                select: { id: true, name: true, firstName: true, lastName: true, displayName: true, email: true }
+              }
+            }
+          }
+        }
+      });
 
-    if (!project) {
-      throw new HttpError('Project was not found or is not assigned to this adviser.', 404);
+      if (allGroups.length === 0) {
+        throw new HttpError('No groups found.', 404);
+      }
+
+      let firstItem = null;
+
+      for (const group of allGroups) {
+        let activeProjectId = group.projectId;
+        if (!activeProjectId || group.projects.length === 0) {
+          const draftProject = await prisma.project.create({
+            data: {
+              title: group.projectTitle || group.title || 'Pending Project',
+              status: 'SUBMITTED',
+              groupId: group.id,
+              ownerId: group.leader ? await prisma.user.findFirst({ where: { name: group.leader } }).then(u => u?.id) : undefined,
+              adviserId: group.userId,
+              departmentId: group.department
+            }
+          });
+          activeProjectId = draftProject.id;
+          
+          await prisma.group.update({
+            where: { id: group.id },
+            data: { projectId: activeProjectId }
+          });
+        }
+
+        const item = await prisma.adviserScheduleItem.create({
+          data: {
+            projectId: activeProjectId,
+            scheduledById: user.id,
+            type,
+            title,
+            scheduledAt,
+            location: location || null,
+            notes: notes || null
+          },
+          include: {
+            project: {
+              select: {
+                title: true,
+                group: { select: { code: true, title: true } }
+              }
+            }
+          }
+        });
+
+        if (!firstItem) firstItem = item;
+
+        await recordCheckpointSchedule(prisma, {
+          projectId: activeProjectId,
+          title,
+          scheduledAt
+        });
+
+        if (body.notifyStudents !== false) {
+          await notifyGroupStudents({
+            group,
+            itemId: item.id,
+            type,
+            title,
+            scheduledAt,
+            location: location || null,
+            notes: notes || null
+          });
+        }
+      }
+
+      return successResponse({
+        item: formatScheduleItem(firstItem!),
+        message: `Mass schedule saved for all groups.`
+      }, 201);
+    }
+
+    const group = await getGroupForSchedule(groupId, user);
+
+    if (!group) {
+      throw new HttpError('Group was not found or is not assigned to this adviser.', 404);
+    }
+
+    // Auto-create a Draft Project if this group doesn't have one yet
+    let activeProjectId = group.projectId;
+    if (!activeProjectId || group.projects.length === 0) {
+      const draftProject = await prisma.project.create({
+        data: {
+          title: group.projectTitle || group.title || 'Pending Project',
+          status: 'SUBMITTED', // Or DRAFT
+          groupId: group.id,
+          ownerId: group.leader ? await prisma.user.findFirst({ where: { name: group.leader } }).then(u => u?.id) : undefined,
+          adviserId: group.userId,
+          departmentId: group.department
+        }
+      });
+      activeProjectId = draftProject.id;
+      
+      await prisma.group.update({
+        where: { id: group.id },
+        data: { projectId: activeProjectId }
+      });
     }
 
     const item = await prisma.adviserScheduleItem.create({
       data: {
-        projectId,
+        projectId: activeProjectId,
         scheduledById: user.id,
         type,
         title,
@@ -407,18 +562,20 @@ export async function POST(request: Request) {
     });
 
     await recordCheckpointSchedule(prisma, {
-      projectId,
+      projectId: activeProjectId,
       title,
       scheduledAt
     });
 
     if (body.notifyStudents !== false) {
-      await notifyProjectStudents({
-        project,
+      await notifyGroupStudents({
+        group,
         itemId: item.id,
         type,
         title,
-        scheduledAt
+        scheduledAt,
+        location: location || null,
+        notes: notes || null
       });
     }
 

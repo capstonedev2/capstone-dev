@@ -5,6 +5,7 @@ import { LandingFooter } from '@/components/public/landing-footer';
 import { LandingNavigation } from '@/components/public/landing-navigation';
 import { LandingRevealController } from '@/components/public/landing-reveal-controller';
 import { PublicLayout } from '@/components/layouts/public-layout';
+import { TeamSocialLinks } from '@/components/public/team-social-links';
 import { getDepartmentBranding } from '@/config/department-branding';
 import { teamMembers } from '@/lib/landing/team-members';
 
@@ -561,6 +562,8 @@ export default function AboutPage() {
                     <p className="text-[0.85rem] text-slate-400 leading-[1.65] font-medium">
                       {member.shortBio}
                     </p>
+
+                    <TeamSocialLinks member={member} />
                   </article>
                 ))}
               </div>
