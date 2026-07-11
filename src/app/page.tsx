@@ -76,7 +76,7 @@ const workflowSteps = [
   },
   {
     icon: 'fas fa-chalkboard-user',
-    title: 'Mock Defense',
+    title: 'Pre-Final Defense',
     description: 'Present a practice defense, gather feedback, and refine the study.',
     artifact: 'Panel feedback',
     theme: 'gold'

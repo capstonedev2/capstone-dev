@@ -196,19 +196,19 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
   },
   {
     key: 'mock-defense',
-    title: 'Mock Defense',
+    title: 'Pre-Final Defense',
     summary: 'Present a practice defense, gather early feedback, and complete revisions.',
-    defaultTarget: 'Mock defense target pending',
+    defaultTarget: 'Pre-final defense target pending',
     route: '/students/schedule',
     actionLabel: 'Open Schedule',
     icon: 'fa-microphone-lines',
-    evidenceCategories: ['presentation-files', 'mock-defense', 'revisions'],
-    evidenceKeywords: ['presentation', 'mock', 'defense', 'revision'],
-    scheduleKeywords: ['mock', 'practice', 'dry run', 'defense'],
-    feedbackKeywords: ['mock', 'defense', 'revision', 'panel'],
+    evidenceCategories: ['presentation-files', 'mock-defense', 'pre-final-defense', 'revisions'],
+    evidenceKeywords: ['presentation', 'mock', 'pre-final', 'defense', 'revision'],
+    scheduleKeywords: ['mock', 'pre-final', 'practice', 'dry run', 'defense'],
+    feedbackKeywords: ['mock', 'pre-final', 'defense', 'revision', 'panel'],
     checkpoints: [
       { id: 'mock-presentation', label: 'Presentation uploaded', kind: 'presentation-uploaded' },
-      { id: 'mock-defense-scheduled', label: 'Mock defense scheduled', kind: 'mock-defense-scheduled' },
+      { id: 'mock-defense-scheduled', label: 'Pre-final defense scheduled', kind: 'mock-defense-scheduled' },
       { id: 'mock-panel-comments', label: 'Panel comments received', kind: 'panel-comments' },
       { id: 'mock-revisions-completed', label: 'Revisions completed', kind: 'revisions-completed' }
     ]
@@ -665,13 +665,13 @@ function getCheckpointStatus(
     case 'mock-defense-scheduled':
       return schedules.length
         ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }
-        : { ...checkpoint, status: 'pending', note: 'Mock defense is not scheduled.' };
+        : { ...checkpoint, status: 'pending', note: 'Pre-final defense is not scheduled.' };
     case 'panel-comments':
       return panelFeedback
         ? { ...checkpoint, status: 'completed', note: 'Panel comments have been received.' }
         : schedules.length
           ? { ...checkpoint, status: 'in-review', note: 'Waiting for panel comments.' }
-          : { ...checkpoint, status: 'pending', note: 'Requires mock defense schedule.' };
+          : { ...checkpoint, status: 'pending', note: 'Requires pre-final defense schedule.' };
     case 'revisions-completed':
       if (revisionFeedback) return { ...checkpoint, status: 'needs-revision', note: 'Revisions are still open.' };
       return approvedFeedback

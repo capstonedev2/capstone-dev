@@ -562,8 +562,9 @@ button {
     background: rgba(30, 41, 59, 0.75);
     backdrop-filter: blur(14px);
     box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
-    position: relative;
-    z-index: 20;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .top-nav-leading {
@@ -27200,4 +27201,6 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .workspace-mode-item.is-active { background: rgba(0, 58, 143, 0.08); color: #003a8f; }
 .workspace-mode-item.is-active .workspace-mode-item-left i { color: #003a8f; }
 .workspace-mode-item.is-active .fa-circle-check { color: #003a8f; }
+
+
 

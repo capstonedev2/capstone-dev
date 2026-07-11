@@ -174,21 +174,21 @@ export async function POST(request: Request) {
       passwordHash = await hashPassword(crypto.randomBytes(32).toString('hex'));
       supabaseId = googleRegistrationContext?.sub || null;
     } else {
-      const supabase = await createClient();
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { createServiceClient } = require('@/lib/supabase/service');
+      const supabaseAdmin = createServiceClient();
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        options: {
-          data: {
+        email_confirm: true,
+        user_metadata: {
+          firstName,
+          lastName,
+          name: buildDisplayName({
+            name: normalizeText(body.name),
             firstName,
             lastName,
-            name: buildDisplayName({
-              name: normalizeText(body.name),
-              firstName,
-              lastName,
-              email
-            })
-          }
+            email
+          })
         }
       });
 

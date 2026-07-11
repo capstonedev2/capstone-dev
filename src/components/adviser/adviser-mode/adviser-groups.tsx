@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
 import {
@@ -614,22 +615,21 @@ function GroupDetailsModal({
   onRemoveStudent?: (groupId: string, student: string) => void;
   onApproveTitle?: (groupId: string, projectTitle: string) => void;
 }) {
-  if (!open || !group) return null;
+  if (!open || !group || typeof document === 'undefined') return null;
 
   const completed = group.status === 'completed';
 
-  return (
+  return createPortal(
     <div
-      className="modal show"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm sm:p-6"
       aria-hidden="false"
       aria-modal="true"
       role="dialog"
-      style={{ display: 'flex', background: 'rgba(15, 23, 42, 0.52)' }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="modal-content !max-w-3xl">
+      <div className="modal-content !max-w-3xl flex max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-0 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         <div className="modal-header !items-start">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -675,21 +675,21 @@ function GroupDetailsModal({
           {completed ? (
             <>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Members</p>
                   <p className="mt-2 text-2xl font-bold text-slate-900">{group.members}</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Final Score</p>
                   <p className="mt-2 text-2xl font-bold text-slate-900">
                     {group.finalScore !== null ? `${group.finalScore}%` : 'N/A'}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Completed Date</p>
                   <p className="mt-2 text-sm font-semibold text-slate-700">{formatCompletedDate(group.completedAt)}</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Final Defense</p>
                   <p className="mt-2 text-sm font-semibold text-slate-700">{group.finalDefenseResult}</p>
                 </div>
@@ -734,25 +734,25 @@ function GroupDetailsModal({
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Members</p>
                   <p className="mt-2 text-2xl font-bold text-slate-900">{group.members}</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Progress</p>
                   <p className="mt-2 text-2xl font-bold text-slate-900">{group.progress}%</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Milestone</p>
                   <p className="mt-2 text-sm font-semibold text-slate-700">{group.milestone}</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Leader</p>
                   <p className="mt-2 text-sm font-semibold text-slate-700">{group.leader ?? 'Not assigned'}</p>
                 </div>
               </div>
 
-              <div className="rounded-[1.25rem] border border-slate-200 bg-white p-5">
+              <div className="rounded-[1.25rem] border border-[var(--border)] bg-white/40 p-5 shadow-sm backdrop-blur-sm">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Progress Track</p>
@@ -767,7 +767,7 @@ function GroupDetailsModal({
             </>
           )}
 
-          <div className="rounded-[1.25rem] border border-slate-200 bg-white p-5">
+          <div className="rounded-[1.25rem] border border-[var(--border)] bg-white/40 p-5 shadow-sm backdrop-blur-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Student Roster</p>
@@ -782,13 +782,13 @@ function GroupDetailsModal({
               ) : null}
             </div>
 
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="mt-4 grid gap-3 grid-cols-1">
               {group.students.map((student) => (
-                <div key={student} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700">
-                  <span>{student}</span>
-                  <div className="flex items-center gap-2">
+                <div key={student} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100/80">
+                  <span className="truncate flex-1" title={student}>{student}</span>
+                  <div className="flex shrink-0 items-center gap-2">
                     {group.leader === student ? (
-                      <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">
+                      <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-700 ring-1 ring-amber-200/50">
                         Leader
                       </span>
                     ) : completed ? null : (
@@ -796,7 +796,7 @@ function GroupDetailsModal({
                         <button
                           type="button"
                           onClick={() => onAssignLeader(group.id, student)}
-                          className="inline-flex min-h-[32px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-700 transition hover:bg-amber-100"
+                          className="inline-flex min-h-[32px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 hover:text-amber-800"
                         >
                           <i className="fas fa-crown text-[10px]"></i>
                           Set as Leader
@@ -805,7 +805,7 @@ function GroupDetailsModal({
                           <button
                             type="button"
                             onClick={() => onRemoveStudent(group.id, student)}
-                            className="inline-flex min-h-[32px] items-center justify-center w-8 rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
+                            className="inline-flex min-h-[32px] w-8 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:text-red-700"
                             title="Remove student from group"
                           >
                             <i className="fas fa-user-minus text-xs"></i>
@@ -841,7 +841,8 @@ function GroupDetailsModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -866,7 +867,7 @@ function AddStudentToGroupModal({
     }
   }, [open]);
 
-  if (!open || !group) return null;
+  if (!open || !group || typeof document === 'undefined') return null;
 
   const groupStudentKeys = new Set(group.students.map(normalizeStudentRosterName));
   const searchQuery = studentSearch.trim().toLowerCase();
@@ -876,13 +877,12 @@ function AddStudentToGroupModal({
       student.toLowerCase().includes(searchQuery)
   );
 
-  return (
+  return createPortal(
     <div
-      className="modal show"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm sm:p-6"
       aria-hidden="false"
       aria-modal="true"
       role="dialog"
-      style={{ display: 'flex', background: 'rgba(15, 23, 42, 0.52)' }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -1055,15 +1055,14 @@ function CreateGroupModal({
 
   const isReadyToCreate = draft.code.trim().length > 0 && draft.students.length > 0 && Boolean(draft.leader);
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <div
-      className="modal show z-[100]"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm sm:p-6"
       aria-hidden="false"
       aria-modal="true"
       role="dialog"
-      style={{ display: 'flex', background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)' }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -1301,7 +1300,8 @@ function CreateGroupModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

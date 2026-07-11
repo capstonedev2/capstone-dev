@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import {
   LIBRARY_DOCUMENTS,
@@ -539,8 +540,8 @@ export function StudentRepository({ data: _data }: { data: StudentDashboardData 
         </section>
       </div>
 
-      {activeProject ? (
-        <div className="modal-shell is-open">
+      {activeProject && typeof document !== 'undefined' ? createPortal(
+        <div className="modal-shell is-open" style={{ zIndex: 9999 }}>
           <button className="modal-backdrop" type="button" aria-label="Close study details" onClick={closeProjectModal} />
           <div className="modal-card student-repository-modal-card" role="dialog" aria-modal="true" aria-labelledby="student-repository-modal-title">
             <button className="modal-close" type="button" aria-label="Close study details" onClick={closeProjectModal}>
@@ -661,7 +662,8 @@ export function StudentRepository({ data: _data }: { data: StudentDashboardData 
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </div>
   );

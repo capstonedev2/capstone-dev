@@ -322,6 +322,7 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
           profileImage: nextProfile.profileImage || '',
           section: nextProfile.section || '',
           accountSummary: nextProfile.accountSummary || '',
+          yearLevel: nextProfile.yearLevel || ''
         })
       });
 
@@ -666,41 +667,54 @@ export function StudentProfile({ data }: { data: StudentDashboardData }) {
                   </div>
 
                   <div className="form-grid student-profile-modal-grid !gap-y-5 !gap-x-6">
-                    <div className="form-field full">
-                      <label htmlFor="student-profile-display-name" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Display Name</label>
-                      <input id="student-profile-display-name" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.displayName || ''} onChange={(event) => updateDraftField('displayName', event.target.value)} placeholder="e.g. Full Name" />
-                      <p className="text-xs text-[var(--text-meta)] mt-1.5">This name will be displayed on your profile card.</p>
-                    </div>
-                    <div className="form-field full">
-                      <label htmlFor="student-profile-full-name" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Full Name</label>
-                      <input id="student-profile-full-name" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.fullName} onChange={(event) => updateDraftField('fullName', event.target.value)} />
-                    </div>
-                    <div className="form-field">
-                      <label htmlFor="student-profile-email" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Email</label>
-                      <input id="student-profile-email" type="email" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.email || ''} onChange={(event) => updateDraftField('email', event.target.value)} title="Your academic email address." />
-                      <p className="text-xs text-[var(--text-meta)] mt-1.5"><i className="fas fa-circle-info mr-1"></i> Your email address is set during registration.</p>
-                    </div>
-                    <div className="form-field">
-                      <label htmlFor="student-profile-contact" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Contact Number</label>
-                      <input id="student-profile-contact" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.contactNumber || ''} onChange={(event) => updateDraftField('contactNumber', event.target.value)} />
-                    </div>
-                    <div className="form-field">
-                      <label htmlFor="student-profile-birth-date" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Birth Date</label>
-                      <input id="student-profile-birth-date" type="date" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.birthDate || ''} onChange={(event) => updateDraftField('birthDate', event.target.value)} />
-                    </div>
-                    <div className="form-field full mt-2">
-                      <label htmlFor="student-profile-address" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Address</label>
-                      <textarea id="student-profile-address" rows={3} className="w-full resize-y rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-3 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.address || ''} onChange={(event) => updateDraftField('address', event.target.value)} />
-                    </div>
-                    <div className="form-field full mt-2">
-                      <label htmlFor="student-profile-summary" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Account Summary</label>
-                      <textarea id="student-profile-summary" rows={3} className="w-full resize-y rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-3 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.accountSummary || ''} onChange={(event) => updateDraftField('accountSummary', event.target.value)} placeholder="Write a short summary about your academic goals..." />
-                    </div>
+                  <div className="form-field full">
+                    <label htmlFor="student-profile-display-name" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Display Name</label>
+                    <input id="student-profile-display-name" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.displayName || ''} onChange={(event) => updateDraftField('displayName', event.target.value)} placeholder="e.g. Full Name" />
+                    <p className="text-xs text-[var(--text-meta)] mt-1.5">This name will be displayed on your profile card.</p>
                   </div>
-                </section>
-
-
-
+                  <div className="form-field full">
+                    <label htmlFor="student-profile-full-name" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Full Name</label>
+                    <input id="student-profile-full-name" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.fullName} onChange={(event) => updateDraftField('fullName', event.target.value)} />
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="student-profile-email" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Email</label>
+                    <input id="student-profile-email" type="email" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.email || ''} onChange={(event) => updateDraftField('email', event.target.value)} title="Your academic email address." />
+                    <p className="text-xs text-[var(--text-meta)] mt-1.5"><i className="fas fa-circle-info mr-1"></i> Your email address is set during registration.</p>
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="student-profile-contact" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Contact Number</label>
+                    <input id="student-profile-contact" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.contactNumber || ''} onChange={(event) => updateDraftField('contactNumber', event.target.value)} />
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="student-profile-birth-date" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Birth Date</label>
+                    <input id="student-profile-birth-date" type="date" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.birthDate || ''} onChange={(event) => updateDraftField('birthDate', event.target.value)} />
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="student-profile-year-level" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Year Level</label>
+                    <select id="student-profile-year-level" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.yearLevel || ''} onChange={(event) => updateDraftField('yearLevel', event.target.value)}>
+                      <option value="">Select Year Level</option>
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
+                      <option value="4th Year">4th Year</option>
+                      <option value="5th Year">5th Year</option>
+                      <option value="Irregular">Irregular</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label htmlFor="student-profile-section" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Section</label>
+                    <input id="student-profile-section" className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.section || ''} onChange={(event) => updateDraftField('section', event.target.value)} placeholder="e.g. A, B, C, or Block 1" />
+                  </div>
+                  <div className="form-field full mt-2">
+                    <label htmlFor="student-profile-address" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Address</label>
+                    <textarea id="student-profile-address" rows={3} className="w-full resize-y rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-3 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.address || ''} onChange={(event) => updateDraftField('address', event.target.value)} />
+                  </div>
+                  <div className="form-field full mt-2">
+                    <label htmlFor="student-profile-summary" className="!mb-1.5 !text-sm !font-semibold !text-[var(--text)]">Account Summary</label>
+                    <textarea id="student-profile-summary" rows={3} className="w-full resize-y rounded-lg border border-[var(--border-strong)] bg-[var(--surface)] px-4 py-3 text-[var(--text)] shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.accountSummary || ''} onChange={(event) => updateDraftField('accountSummary', event.target.value)} placeholder="Write a short summary about your academic goals..." />
+                  </div>
+                </div>
+              </section>
                 <div className="form-actions !flex !items-center !justify-end !gap-3 !border-t !border-[var(--border)] !p-6 !bg-[var(--surface-alt)]">
                   <button className="btn !border !border-[var(--border-strong)] !bg-[var(--surface)] !text-[var(--text)] hover:!bg-[var(--surface-alt)] !shadow-sm !px-5" type="button" onClick={closeEditModal}>
                     Cancel

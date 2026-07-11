@@ -122,9 +122,10 @@
             border-radius: 1.45rem;
             box-shadow: 0 16px 34px rgba(31, 41, 55, 0.06);
             backdrop-filter: blur(14px);
-            position: relative;
+            position: sticky;
+            top: 0;
             overflow: visible;
-            z-index: 30;
+            z-index: 100;
         }
 
         .page-title {
@@ -1071,7 +1072,7 @@
             .sidebar {
                 transform: translateX(-100%);
                 position: fixed;
-                z-index: 1000;
+                z-index: 30;
             }
             
             .sidebar.open {
@@ -8527,4 +8528,7 @@ tr:hover {
 
 .profile-dropdown .dashboard-mode-switch { flex-direction: column !important; }
 .profile-dropdown .dashboard-mode-switch button { justify-content: flex-start !important; white-space: nowrap !important; }
+
+
+
 

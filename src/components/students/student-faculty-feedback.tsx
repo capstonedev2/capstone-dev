@@ -134,6 +134,8 @@ function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: BadgeT
 
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none ${toneClassName}`}>
+
+
       {icon ? <i className={`fas ${icon}`} aria-hidden="true" /> : null}
       {label}
     </span>
@@ -169,7 +171,7 @@ function inferFeedbackContext(item: StudentDashboardData['feedback'][number], da
   if (haystack.includes('pilot') || haystack.includes('beneficiary')) {
     return {
       relatedChapter: 'Implementation Notes',
-      relatedMilestone: 'Mock Defense',
+      relatedMilestone: 'Pre-Final Defense',
       relatedFile: findLatestDocumentByCategory(data, ['system-files']) || 'System-Prototype-v0.9.zip'
     };
   }

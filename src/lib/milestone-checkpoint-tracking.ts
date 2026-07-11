@@ -83,14 +83,14 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
   },
   {
     key: 'mock-defense',
-    title: 'Mock Defense',
+    title: 'Pre-Final Defense',
     description: 'Present a practice defense, gather early feedback, and complete revisions.',
     sequence: 4,
     checkpoints: [
-      { key: 'mock-presentation', title: 'Presentation uploaded', description: 'Mock defense presentation file was uploaded.', sequence: 1, panelRequired: false },
-      { key: 'mock-defense-scheduled', title: 'Mock defense scheduled', description: 'Mock defense schedule is recorded.', sequence: 2, panelRequired: false },
-      { key: 'mock-panel-comments', title: 'Panel comments received', description: 'Panel comments were received after mock defense.', sequence: 3 },
-      { key: 'mock-revisions-completed', title: 'Revisions completed', description: 'Mock defense revisions were submitted and cleared.', sequence: 4 }
+      { key: 'mock-presentation', title: 'Presentation uploaded', description: 'Pre-final defense presentation file was uploaded.', sequence: 1, panelRequired: false },
+      { key: 'mock-defense-scheduled', title: 'Pre-final defense scheduled', description: 'Pre-final defense schedule is recorded.', sequence: 2, panelRequired: false },
+      { key: 'mock-panel-comments', title: 'Panel comments received', description: 'Panel comments were received after pre-final defense.', sequence: 3 },
+      { key: 'mock-revisions-completed', title: 'Revisions completed', description: 'Pre-final defense revisions were submitted and cleared.', sequence: 4 }
     ]
   },
   {
@@ -138,8 +138,8 @@ const CHECKPOINT_MATCHERS = [
   { checkpointKey: 'development-progress-report', keywords: ['progress report', 'progress'] },
   { checkpointKey: 'development-testing-evidence', keywords: ['testing', 'test evidence', 'qa', 'validation', 'evaluation evidence'] },
   { checkpointKey: 'development-prototype', keywords: ['prototype', 'system file', 'system-files', 'development', 'source code', 'build'] },
-  { checkpointKey: 'mock-presentation', keywords: ['mock presentation', 'mock defense presentation', 'presentation', 'slides', 'deck'] },
-  { checkpointKey: 'mock-revisions-completed', keywords: ['mock revision', 'revised mock', 'mock defense revision'] },
+  { checkpointKey: 'mock-presentation', keywords: ['mock presentation', 'pre-final presentation', 'mock defense presentation', 'pre-final defense presentation', 'presentation', 'slides', 'deck'] },
+  { checkpointKey: 'mock-revisions-completed', keywords: ['mock revision', 'pre-final revision', 'revised mock', 'revised pre-final', 'mock defense revision', 'pre-final defense revision'] },
   { checkpointKey: 'final-manuscript', keywords: ['final manuscript', 'final paper', 'final document'] },
   { checkpointKey: 'final-revisions-submitted', keywords: ['final revision', 'revised final', 'final revisions'] },
   { checkpointKey: 'completion-approved-manuscript', keywords: ['approved manuscript', 'approved final'] },
@@ -701,7 +701,7 @@ function getCheckpointKeyForSchedule(title: string) {
     return 'proposal-defense-scheduled';
   }
 
-  if (normalized.includes('mock') || normalized.includes('practice') || normalized.includes('dry run')) {
+  if (normalized.includes('mock') || normalized.includes('pre-final') || normalized.includes('practice') || normalized.includes('dry run')) {
     return 'mock-defense-scheduled';
   }
 

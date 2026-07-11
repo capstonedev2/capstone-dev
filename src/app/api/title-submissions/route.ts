@@ -636,7 +636,7 @@ export async function PATCH(request: Request) {
           data: {
             projectId: project.id,
             projectTitle: project.title,
-            title: (project.group?.title && project.group.title !== 'Pending Student Submission') ? project.group.title : project.title
+            title: project.title
           }
         });
 

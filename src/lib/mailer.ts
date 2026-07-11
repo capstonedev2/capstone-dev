@@ -72,6 +72,7 @@ type SendEmailInput = {
   subject: string;
   html?: string;
   text: string;
+  attachments?: any[];
 };
 
 type PasswordResetCodeEmailInput = {
@@ -98,6 +99,9 @@ type ScheduleNotificationEmailInput = {
   dateLabel: string;
   location?: string | null;
   notes?: string | null;
+  group?: string | null;
+  adviserName?: string | null;
+  loginUrl?: string;
 };
 
 export async function sendPasswordResetCodeEmail({ to, code }: PasswordResetCodeEmailInput) {
@@ -184,28 +188,82 @@ export async function sendScheduleNotificationEmail({
   title,
   dateLabel,
   location,
-  notes
+  notes,
+  group,
+  adviserName,
+  loginUrl
 }: ScheduleNotificationEmailInput) {
   const displayName = name?.trim() || 'Student';
-  const subject = `New ${typeLabel} Scheduled: ${title}`;
+  const adviserText = adviserName ? ` by your adviser, ${adviserName},` : ` by your adviser`;
+  const subject = `New ${typeLabel} Scheduled`;
   
-  let text = `Hello ${displayName},\n\nA new ${typeLabel.toLowerCase()} has been scheduled by your adviser:\n\nTitle: ${title}\nDate & Time: ${dateLabel}\n`;
+  let text = `Hello ${displayName},\n\nA new ${typeLabel.toLowerCase()} has been scheduled${adviserText}:\n\nAgenda: ${title}\nDate & Time: ${dateLabel}\n`;
+  if (group) text += `Group: ${group}\n`;
   if (location) text += `Location/Link: ${location}\n`;
   if (notes) text += `Notes: ${notes}\n`;
   text += `\nPlease check your ThesisTrack portal for more details.\n\nThank you,\nThesisTrack System`;
 
   const html = `
-    <div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.6; color: #111827; max-width: 600px;">
-      <p>Hello ${displayName},</p>
-      <p>A new <strong>${typeLabel.toLowerCase()}</strong> has been scheduled by your adviser:</p>
-      <ul style="list-style-type: none; padding: 0; margin: 16px 0; background: #f9fafb; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px;">
-        <li style="margin-bottom: 8px;"><strong>Title:</strong> ${title}</li>
-        <li style="margin-bottom: 8px;"><strong>Date & Time:</strong> ${dateLabel}</li>
-        ${location ? `<li style="margin-bottom: 8px;"><strong>Location/Link:</strong> ${location}</li>` : ''}
-        ${notes ? `<li style="margin-bottom: 8px;"><strong>Notes:</strong> ${notes}</li>` : ''}
-      </ul>
-      <p>Please log in to your ThesisTrack portal for more details.</p>
-      <p>Thank you,<br><strong>ThesisTrack System</strong></p>
+    <div style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; padding: 40px 20px; color: #334155; line-height: 1.5;">
+      
+      <!-- Logo Header -->
+      <div style="max-width: 600px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+        <img src="https://res.cloudinary.com/dqlajypop/image/upload/v1783766611/thesistrack_system_1_logo.png" alt="ThesisTrack Logo" style="height: 60px; margin-right: 16px; display: block;" />
+        <span style="font-size: 24px; color: #0f4c81; font-weight: 800; letter-spacing: -0.02em;">ThesisTrack</span>
+      </div>
+
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        
+        <!-- Top Accent Border -->
+        <div style="height: 6px; background-color: #0f4c81; border-top-left-radius: 12px; border-top-right-radius: 12px;"></div>
+        
+        <!-- Body -->
+        <div style="padding: 40px 32px; text-align: center;">
+          
+          <!-- Avatar -->
+          <div style="width: 64px; height: 64px; margin: 0 auto 16px; background-color: #0f4c81; border-radius: 50%; color: #ffffff; font-size: 24px; font-weight: bold; line-height: 64px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            ${adviserName ? adviserName.charAt(0).toUpperCase() : 'A'}
+          </div>
+          
+          <h2 style="margin: 0 0 4px; font-size: 22px; color: #0f172a; font-weight: 700; letter-spacing: -0.01em;">
+            ${adviserName || 'Your Adviser'}
+          </h2>
+          <p style="margin: 0 0 32px; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+            Adviser via ThesisTrack
+          </p>
+          
+          <!-- Event Focus Box -->
+          <div style="background-color: #f8fafc; border-radius: 8px; padding: 24px; margin-bottom: 32px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0 0 8px; font-size: 14px; color: #475569; font-weight: 500;">Scheduled a new ${typeLabel}:</p>
+            <p style="margin: 0; font-size: 20px; color: #0f4c81; font-weight: 800; line-height: 1.4; letter-spacing: -0.01em;">${title}</p>
+          </div>
+          
+          <!-- Details Grid -->
+          <div style="text-align: left; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; font-size: 14px; color: #334155; margin-bottom: 32px;">
+            <div style="margin-bottom: 16px;">
+              <strong style="display: block; font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.02em;">Date & Time</strong> 
+              <span style="color: #0f172a; font-weight: 600; font-size: 15px;">${dateLabel}</span>
+            </div>
+            ${group ? `<div style="margin-bottom: 16px;"><strong style="display: block; font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.02em;">Group</strong> <span style="color: #0f172a; font-weight: 600; font-size: 15px;">${group}</span></div>` : ''}
+            ${location ? `<div style="margin-bottom: 16px;"><strong style="display: block; font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.02em;">Location / Link</strong> <span style="color: #0f172a; font-weight: 600; font-size: 15px;">${location}</span></div>` : ''}
+            ${notes ? `<div><strong style="display: block; font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.02em;">Notes</strong> <span style="color: #475569; font-weight: 500; font-size: 14px; line-height: 1.6;">${notes}</span></div>` : ''}
+          </div>
+          
+          <!-- Action Button -->
+          <div style="margin-bottom: 16px;">
+            ${loginUrl 
+              ? `<a href="${loginUrl}" style="display: inline-block; padding: 14px 36px; background-color: #0f4c81; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(15, 76, 129, 0.2);">Open in ThesisTrack</a>` 
+              : `<span style="display: inline-block; padding: 14px 36px; background-color: #0f4c81; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">Open in ThesisTrack</span>`}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div style="max-width: 600px; margin: 32px auto 0; text-align: center; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+        <p style="margin: 0 0 12px;">This is an automated schedule notification from the ThesisTrack system.</p>
+        <p style="margin: 0;">Please do not forward this email to anyone outside your project group.<br>Only authorized members can access the workspace.</p>
+      </div>
+      
     </div>
   `;
 

@@ -213,7 +213,7 @@ function formatGroupOption(group: {
     id: group.id, // We use groupId here!
     title: group.projectTitle || group.title || 'Pending Title',
     groupCode: group.code,
-    groupTitle: group.title,
+    groupTitle: group.title || group.projectTitle || 'Pending Title',
     leaderName: group.leader || activeMembers.find((member) => member.role === 'LEADER')?.user.name || '',
     members: activeMembers.map((member) => ({
       userId: member.userId,
@@ -251,7 +251,9 @@ async function getGroupForSchedule(groupId: string, user: Awaited<ReturnType<typ
 
 async function notifyGroupStudents({
   group,
+  adviser,
   itemId,
+  loginUrl,
   type,
   title,
   scheduledAt,
@@ -259,7 +261,9 @@ async function notifyGroupStudents({
   notes
 }: {
   group: Awaited<ReturnType<typeof getGroupForSchedule>>;
+  adviser: Awaited<ReturnType<typeof requireAuthenticatedUser>>;
   itemId: string;
+  loginUrl: string;
   type: AdviserScheduleItemType;
   title: string;
   scheduledAt: Date;
@@ -311,7 +315,10 @@ async function notifyGroupStudents({
         title,
         dateLabel,
         location,
-        notes
+        notes,
+        group: group.title || group.projectTitle || group.code,
+        adviserName: formatPersonName(adviser),
+        loginUrl
       });
       console.log(`[Schedule Email] Successfully sent to ${member.user.email}`);
     } catch (error) {
@@ -450,8 +457,7 @@ export async function POST(request: Request) {
               status: 'SUBMITTED',
               groupId: group.id,
               ownerId: group.leader ? await prisma.user.findFirst({ where: { name: group.leader } }).then(u => u?.id) : undefined,
-              adviserId: group.userId,
-              departmentId: group.department
+              adviserId: group.userId
             }
           });
           activeProjectId = draftProject.id;
@@ -491,9 +497,13 @@ export async function POST(request: Request) {
         });
 
         if (body.notifyStudents !== false) {
+          const host = request.headers.get('host') || 'localhost:3000';
+          const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
           await notifyGroupStudents({
             group,
+            adviser: user,
             itemId: item.id,
+            loginUrl: `${protocol}://${host}/login`,
             type,
             title,
             scheduledAt,
@@ -524,8 +534,7 @@ export async function POST(request: Request) {
           status: 'SUBMITTED', // Or DRAFT
           groupId: group.id,
           ownerId: group.leader ? await prisma.user.findFirst({ where: { name: group.leader } }).then(u => u?.id) : undefined,
-          adviserId: group.userId,
-          departmentId: group.department
+          adviserId: group.userId
         }
       });
       activeProjectId = draftProject.id;
@@ -568,9 +577,13 @@ export async function POST(request: Request) {
     });
 
     if (body.notifyStudents !== false) {
+      const host = request.headers.get('host') || 'localhost:3000';
+      const protocol = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
       await notifyGroupStudents({
         group,
+        adviser: user,
         itemId: item.id,
+        loginUrl: `${protocol}://${host}/login`,
         type,
         title,
         scheduledAt,

@@ -57,7 +57,7 @@ function parsePositiveInteger(value: string | null, fallback: number, max: numbe
 const SCHEDULE_TYPES = [
   'Concept Presentation',
   'Proposal Defense',
-  'Mock Defense',
+  'Pre-Final Defense',
   'Final Defense'
 ] as const;
 const APPROVED_TITLE_PROJECT_STATUSES = new Set<ProjectStatus>([
@@ -242,13 +242,14 @@ function inferScheduleStage(project: ScheduleTitleProjectRecord | null, group?: 
 
   if (
     reference.includes('mock') ||
+    reference.includes('pre-final') ||
     reference.includes('development') ||
     reference.includes('prototype') ||
     reference.includes('testing') ||
     reference.includes('chapter 3') ||
     reference.includes('data analysis')
   ) {
-    return 'Mock Defense';
+    return 'Pre-Final Defense';
   }
 
   if (

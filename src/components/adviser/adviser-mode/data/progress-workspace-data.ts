@@ -4,7 +4,7 @@ export const IT_PROGRESS_MILESTONES = [
   'Concept',
   'Proposal',
   'Development',
-  'Mock Defense',
+  'Pre-Final Defense',
   'Final Defense',
   'Completion'
 ] as const;
@@ -43,7 +43,7 @@ export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
     projectTitle: 'Smart Queue Analytics Dashboard',
     department: 'IT',
     progress: 82,
-    currentMilestone: 'Mock Defense',
+    currentMilestone: 'Pre-Final Defense',
     status: 'on-track',
     deadline: '2026-04-18T00:00:00.000Z',
     lastUpdate: '2026-04-13T10:15:00.000Z',
@@ -103,7 +103,7 @@ export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
     projectTitle: 'Internship Partner Matching Assistant',
     department: 'IT',
     progress: 46,
-    currentMilestone: 'Mock Defense',
+    currentMilestone: 'Pre-Final Defense',
     status: 'delayed',
     deadline: '2026-04-13T00:00:00.000Z',
     lastUpdate: '2026-04-04T11:05:00.000Z',

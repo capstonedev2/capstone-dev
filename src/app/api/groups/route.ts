@@ -188,12 +188,13 @@ export async function POST(request: Request) {
     const matchedUsers = await prisma.user.findMany({
       where: { 
         role: 'STUDENT',
-        groupMembers: { none: {} } 
+        groupMemberships: { none: {} } 
       },
-      select: { id: true, name: true, displayName: true, firstName: true, lastName: true }
+      select: { id: true, name: true, displayName: true, firstName: true, lastName: true, yearLevel: true }
     });
 
     const membersToCreate: any[] = [];
+    const verifiedUsers = [];
     for (const studentName of parsedStudents) {
       const normalizedQuery = normalizeStudentName(studentName);
       const matchedUser = matchedUsers.find(u => {
@@ -206,6 +207,7 @@ export async function POST(request: Request) {
       });
 
       if (matchedUser) {
+        verifiedUsers.push(matchedUser);
         membersToCreate.push({
           userId: matchedUser.id,
           isActive: true,
@@ -213,6 +215,17 @@ export async function POST(request: Request) {
         });
       }
     }
+
+    // TEMPORARILY DISABLED: Strict Year-Level Grouping Validation
+    // if (verifiedUsers.length > 0) {
+    //   const firstYearLevel = verifiedUsers[0].yearLevel;
+    //   const mismatchedStudent = verifiedUsers.find(u => u.yearLevel !== firstYearLevel);
+    //   if (mismatchedStudent) {
+    //     return NextResponse.json({ 
+    //       error: `Notice: ${mismatchedStudent.name} cannot be added because all members must be in the same year level.` 
+    //     }, { status: 400 });
+    //   }
+    // }
 
     const newGroup = await prisma.group.create({
       data: {
@@ -291,13 +304,14 @@ export async function PUT(request: Request) {
       const matchedUsers = await prisma.user.findMany({
         where: { 
           role: 'STUDENT',
-          groupMembers: { none: { groupId: { not: id } } }
+          groupMemberships: { none: { groupId: { not: id } } }
         },
-        select: { id: true, name: true, displayName: true, firstName: true, lastName: true }
+        select: { id: true, name: true, displayName: true, firstName: true, lastName: true, yearLevel: true }
       });
 
       const leaderQuery = normalizeStudentName(updateData.leader || body.leader || '');
       
+      const verifiedUsers = [];
       const newMembers = updateData.students.map(studentName => {
         const normalizedQuery = normalizeStudentName(studentName);
         const matchedUser = matchedUsers.find(u => {
@@ -310,6 +324,7 @@ export async function PUT(request: Request) {
         });
 
         if (matchedUser) {
+          verifiedUsers.push(matchedUser);
           return {
             userId: matchedUser.id,
             isActive: true,
@@ -318,6 +333,17 @@ export async function PUT(request: Request) {
         }
         return null;
       }).filter(Boolean);
+
+      // TEMPORARILY DISABLED: Strict Year-Level Grouping Validation
+      // if (verifiedUsers.length > 0) {
+      //   const firstYearLevel = verifiedUsers[0].yearLevel;
+      //   const mismatchedStudent = verifiedUsers.find(u => u.yearLevel !== firstYearLevel);
+      //   if (mismatchedStudent) {
+      //     return NextResponse.json({ 
+      //       error: `Notice: ${mismatchedStudent.name} cannot be added because all members must be in the same year level.` 
+      //     }, { status: 400 });
+      //   }
+      // }
 
       const updatedGroup = await prisma.$transaction(async (tx) => {
         await tx.groupMember.deleteMany({ where: { groupId: id } });

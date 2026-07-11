@@ -6,7 +6,7 @@ const ROOMS = ['Room 401', 'Room 402', 'Room 403', 'Conference Room A', 'Virtual
 const SCHEDULE_STAGES = [
   { type: 'Concept Presentation', icon: 'fa-lightbulb', helper: 'First validation of problem, scope, and feasibility.', tone: 'from-blue-600 to-indigo-700' },
   { type: 'Proposal Defense', icon: 'fa-file-signature', helper: 'Formal proposal panel review before development.', tone: 'from-[#003a8f] to-[#002c6b]' },
-  { type: 'Mock Defense', icon: 'fa-chalkboard-user', helper: 'Practice defense for readiness and delivery checks.', tone: 'from-amber-500 to-orange-600' },
+  { type: 'Pre-Final Defense', icon: 'fa-chalkboard-user', helper: 'Practice defense for readiness and delivery checks.', tone: 'from-amber-500 to-orange-600' },
   { type: 'Final Defense', icon: 'fa-gavel', helper: 'Final evaluation session for completion decision.', tone: 'from-emerald-600 to-teal-700' }
 ] as const;
 const STAGE_FILTERS = ['All Stages', ...SCHEDULE_STAGES.map((stage) => stage.type)] as const;

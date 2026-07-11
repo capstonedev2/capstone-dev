@@ -569,42 +569,45 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                       </div>
                     </label>
 
-                    <fieldset>
-                      <legend className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Type</legend>
-                      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-                        {SCHEDULE_TYPE_OPTIONS.map((option) => {
-                          const active = scheduleForm.type === option.value;
-
-                          return (
-                            <button
-                              key={option.value}
-                              type="button"
-                              aria-pressed={active}
-                              onClick={() => updateScheduleForm('type', option.value)}
-                              className={`flex min-h-[3.25rem] items-center gap-2.5 rounded-2xl border px-3.5 text-left text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
-                                active
-                                  ? 'border-transparent bg-gradient-to-br from-[var(--primary)] to-blue-700 text-white shadow-md ring-1 ring-blue-900/20'
-                                  : 'border-slate-200/60 bg-white/50 text-slate-600 shadow-sm backdrop-blur-sm hover:border-slate-300/80 hover:bg-white hover:text-slate-900 hover:shadow'
-                              }`}
-                            >
-                              <i className={`fas ${option.icon} w-4 text-xs transition-colors ${active ? 'text-blue-100' : 'text-slate-400'}`} aria-hidden="true" />
-                              <span className="truncate">{option.label}</span>
-                            </button>
-                          );
-                        })}
+                    <label className="block">
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Type</span>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                          <i className={`fas ${SCHEDULE_TYPE_OPTIONS.find(o => o.value === scheduleForm.type)?.icon || 'fa-tag'} text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]`} aria-hidden="true" />
+                        </div>
+                        <select
+                          className="min-h-[3.25rem] w-full appearance-none rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-10 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm transition-all hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10 outline-none"
+                          value={scheduleForm.type}
+                          onChange={(event) => updateScheduleForm('type', event.target.value as any)}
+                          disabled={isLoadingSchedule}
+                        >
+                          {SCHEDULE_TYPE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                          <i className="fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true" />
+                        </div>
                       </div>
-                    </fieldset>
+                    </label>
                   </div>
 
                   <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(260px,1fr)_160px_140px]">
                     <label className="block">
-                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Title</span>
-                      <input
-                        className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 px-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all placeholder:text-slate-400 hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
-                        value={scheduleForm.title}
-                        onChange={(event) => updateScheduleForm('title', event.target.value)}
-                        placeholder={`${selectedScheduleTypeOption.label} title`}
-                      />
+                      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Agenda</span>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                          <i className="fas fa-align-left text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]" aria-hidden="true" />
+                        </div>
+                        <input
+                          className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all placeholder:text-slate-400 hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
+                          value={scheduleForm.title}
+                          onChange={(event) => updateScheduleForm('title', event.target.value)}
+                          placeholder={`${selectedScheduleTypeOption.label} agenda`}
+                        />
+                      </div>
                     </label>
 
                     <label className="block">

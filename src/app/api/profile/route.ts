@@ -41,6 +41,7 @@ type UpdateProfileBody = {
   section?: unknown;
   accountSummary?: unknown;
   office?: unknown;
+  yearLevel?: unknown;
 };
 
 /**
@@ -64,6 +65,7 @@ export async function PATCH(request: Request) {
     const section = body.section !== undefined ? normalizeText(body.section) : undefined;
     const accountSummary = body.accountSummary !== undefined ? normalizeText(body.accountSummary) : undefined;
     const office = body.office !== undefined ? normalizeText(body.office) : undefined;
+    const yearLevel = body.yearLevel !== undefined ? normalizeText(body.yearLevel) : undefined;
 
     // Build data object with only the fields that were actually sent
     const data: Record<string, string | null> = {};
@@ -112,6 +114,7 @@ export async function PATCH(request: Request) {
     if (section !== undefined) data.section = section || null;
     if (accountSummary !== undefined) data.accountSummary = accountSummary || null;
     if (office !== undefined) data.office = office || null;
+    if (yearLevel !== undefined) data.yearLevel = yearLevel || null;
 
     if (!Object.keys(data).length) {
       throw new HttpError('No profile fields were provided to update.', 400);

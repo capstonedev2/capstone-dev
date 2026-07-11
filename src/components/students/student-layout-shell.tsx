@@ -1084,6 +1084,27 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
   const [layoutDebug, setLayoutDebug] = useState('Fetching...');
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [themeMode, setThemeMode] = useState<StudentThemeMode>('light');
+  const [showYearVerification, setShowYearVerification] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Check if the student has verified their profile for this academic year
+    const currentYear = new Date().getFullYear().toString();
+    const verifiedYear = window.localStorage.getItem('verifiedProfileForYear');
+    
+    // If not verified, show the prompt
+    if (verifiedYear !== currentYear && !workspaceAccess.isLimited) {
+      setShowYearVerification(true);
+    }
+  }, [workspaceAccess.isLimited]);
+
+  const handleVerifyProfile = () => {
+    const currentYear = new Date().getFullYear().toString();
+    window.localStorage.setItem('verifiedProfileForYear', currentYear);
+    setShowYearVerification(false);
+    router.push('/students/profile');
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -1935,7 +1956,33 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
           )}
         </div>
       </main>
-</div>
+
+      {showYearVerification && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" style={{ position: 'fixed' }}>
+          <div className="w-full max-w-md rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-400" />
+            
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-50 text-[var(--student-primary,#0f4c81)] shadow-sm mb-6">
+              <i className="fas fa-calendar-star text-2xl" aria-hidden="true" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-[var(--text)] mb-3">Welcome to a New Academic Year!</h2>
+            <p className="text-lg text-[var(--muted)] leading-relaxed mb-8">
+              To keep your workspace up-to-date, please quickly verify your current <strong>Section</strong> and <strong>Year Level</strong> before proceeding to your capstone tools.
+            </p>
+            
+            <button 
+              onClick={handleVerifyProfile}
+              className="w-full inline-flex justify-center items-center gap-2 rounded-xl bg-[var(--student-primary,#0f4c81)] px-5 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95 hover:bg-sky-800"
+            >
+              <i className="fas fa-user-edit" aria-hidden="true" /> Update My Profile
+            </button>
+            <p className="mt-4 text-center text-xs text-[var(--text-meta)]">
+              This helps us ensure your capstone assignments are routed accurately.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
-
