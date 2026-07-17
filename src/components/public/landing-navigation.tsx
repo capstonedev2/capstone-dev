@@ -13,7 +13,6 @@ export function LandingNavigation() {
   const { branding } = useBranding();
   const [isOpen, setIsOpen] = useState(false);
   const [activeHref, setActiveHref] = useState('/#home');
-  const [darkMode, setDarkMode] = useState(false);
   const pathname = usePathname();
   const navigation = branding.navigation;
   const visibleLinks = useMemo(
@@ -25,19 +24,7 @@ export function LandingNavigation() {
     setIsOpen(false);
   }, [pathname]);
 
-  useEffect(() => {
-    const storedTheme = window.localStorage.getItem('thesistrackLandingTheme');
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    const nextDarkMode = storedTheme ? storedTheme === 'dark' : Boolean(prefersDark);
 
-    setDarkMode(nextDarkMode);
-    document.documentElement.dataset.landingTheme = nextDarkMode ? 'dark' : 'light';
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.dataset.landingTheme = darkMode ? 'dark' : 'light';
-    window.localStorage.setItem('thesistrackLandingTheme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
 
   useEffect(() => {
     if (pathname !== '/') {

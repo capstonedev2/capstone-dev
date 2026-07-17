@@ -744,58 +744,54 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
 
       data.profile.notificationCount = unreadNotificationCount;
       
-      if (groups.length > 0) {
-        data.groups = groups.map((group) => ({
-          id: group.id,
-          user_id: group.userId,
-          project_id: group.projectId || '',
-          status: group.status,
-          created_at: toIsoString(group.createdAt),
-          updated_at: toIsoString(group.updatedAt),
-          code: group.code,
-          title: group.title,
-          projectTitle: group.projectTitle,
-          dept: group.dept,
-          department: group.department,
-          members: group.members,
-          students: group.students,
-          progress: group.progress,
-          statusLabel: group.statusLabel,
-          statusClass: group.statusClass,
-          milestone: group.milestone,
-          currentMilestone: group.currentMilestone,
-          finalDefenseResult: toFinalDefenseResult(group.finalDefenseResult),
-          finalManuscriptApproved: group.finalManuscriptApproved,
-          allRequiredMilestonesCompleted: group.allRequiredMilestonesCompleted,
-          completedAt: group.completedAt ? toIsoString(group.completedAt) : null,
-          finalScore: group.finalScore,
-          finalRecommendation: group.finalRecommendation,
-          leader: group.leader
-        }));
-      }
+      data.groups = groups.map((group) => ({
+        id: group.id,
+        user_id: group.userId,
+        project_id: group.projectId || '',
+        status: group.status,
+        created_at: toIsoString(group.createdAt),
+        updated_at: toIsoString(group.updatedAt),
+        code: group.code,
+        title: group.title,
+        projectTitle: group.projectTitle,
+        dept: group.dept,
+        department: group.department,
+        members: group.members,
+        students: group.students,
+        progress: group.progress,
+        statusLabel: group.statusLabel,
+        statusClass: group.statusClass,
+        milestone: group.milestone,
+        currentMilestone: group.currentMilestone,
+        finalDefenseResult: toFinalDefenseResult(group.finalDefenseResult),
+        finalManuscriptApproved: group.finalManuscriptApproved,
+        allRequiredMilestonesCompleted: group.allRequiredMilestonesCompleted,
+        completedAt: group.completedAt ? toIsoString(group.completedAt) : null,
+        finalScore: group.finalScore,
+        finalRecommendation: group.finalRecommendation,
+        leader: group.leader
+      }));
 
-      if (panelEvaluations.length > 0) {
-        data.panelProjects = panelEvaluations.map((evaluation) => {
-          const project = evaluation.project;
-          const group = project.group;
-          const statusValue = evaluation.defenseSchedule?.status || evaluation.recommendation || project.status;
+      data.panelProjects = panelEvaluations.map((evaluation) => {
+        const project = evaluation.project;
+        const group = project.group;
+        const statusValue = evaluation.defenseSchedule?.status || evaluation.recommendation || project.status;
 
-          return {
-            id: evaluation.id,
-            user_id: dbUser.id,
-            project_id: project.id,
-            status: String(statusValue || '').toLowerCase(),
-            created_at: toIsoString(evaluation.createdAt),
-            updated_at: toIsoString(evaluation.updatedAt),
-            title: project.title,
-            dept: group?.dept || group?.department || dbUser.department || '',
-            students: group?.students?.length ? group.students.join(', ') : 'No students assigned',
-            defenseDate: formatDefenseDate(evaluation.defenseSchedule?.scheduledAt),
-            statusLabel: toTitleCase(statusValue),
-            statusClass: getStatusClass(statusValue)
-          };
-        });
-      }
+        return {
+          id: evaluation.id,
+          user_id: dbUser.id,
+          project_id: project.id,
+          status: String(statusValue || '').toLowerCase(),
+          created_at: toIsoString(evaluation.createdAt),
+          updated_at: toIsoString(evaluation.updatedAt),
+          title: project.title,
+          dept: group?.dept || group?.department || dbUser.department || '',
+          students: group?.students?.length ? group.students.join(', ') : 'No students assigned',
+          defenseDate: formatDefenseDate(evaluation.defenseSchedule?.scheduledAt),
+          statusLabel: toTitleCase(statusValue),
+          statusClass: getStatusClass(statusValue)
+        };
+      });
     } catch {
       // Fallback to mock data if database fails
     }

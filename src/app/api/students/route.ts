@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerAuthenticatedUser } from '@/lib/auth';
 
 const DEFAULT_STUDENT_LIMIT = 100;
 const MAX_STUDENT_LIMIT = 200;
@@ -42,8 +43,18 @@ function parsePositiveInteger(value: string | null, fallback: number, max: numbe
 
 export async function GET(request: Request) {
   try {
+    const user = await getServerAuthenticatedUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const department = searchParams.get('department');
+    const requestedDepartment = searchParams.get('department');
+    const isGlobalAdmin = ['ADMIN', 'SYSTEM_ADMIN', 'RESEARCH_HEAD', 'TECH_TRANSFER', 'LIBRARY'].includes(user.role);
+    
+    // Enforce department boundary unless global admin
+    const userDeptClean = user.department ? user.department.replace(/\s+(Department|Office)$/i, '').trim() : null;
+    const department = isGlobalAdmin ? requestedDepartment : (userDeptClean || requestedDepartment);
     const departmentTerms = getDepartmentSearchTerms(department);
     const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_STUDENT_LIMIT, MAX_STUDENT_LIMIT);
     const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);

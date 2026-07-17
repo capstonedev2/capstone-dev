@@ -1111,7 +1111,7 @@ function CreateGroupModal({
                     id="group-code"
                     ref={groupCodeInputRef}
                     type="text"
-                    placeholder="e.g. IT-2024-05"
+                    placeholder={`e.g. ${department.replace(/ Office| Department/i, '').trim().toUpperCase()}-2024-05`}
                     value={draft.code}
                     onChange={(event) => onDraftChange({ ...draft, code: event.target.value })}
                     className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-[var(--student-primary,#0f4c81)] focus:bg-white focus:ring-4 focus:ring-[var(--student-primary,#0f4c81)]/10"

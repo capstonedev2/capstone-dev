@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerAuthenticatedUser } from '@/lib/auth';
 
 const DEFAULT_GROUP_LIMIT = 100;
 const MAX_GROUP_LIMIT = 200;
@@ -33,6 +34,32 @@ const groupListSelect = {
   finalRecommendation: true,
   allowMemberSubmission: true
 } as const;
+
+const departmentAliases: Record<string, string[]> = {
+  ict: ['ICT', 'IT', 'BSIT', 'Information Technology'],
+  it: ['ICT', 'IT', 'BSIT', 'Information Technology'],
+  bsit: ['ICT', 'IT', 'BSIT', 'Information Technology'],
+  'information technology': ['ICT', 'IT', 'BSIT', 'Information Technology'],
+  met: ['MET', 'BSMET', 'Mechanical Engineering Technology', 'Manufacturing Eng. Tech.'],
+  bsmet: ['MET', 'BSMET', 'Mechanical Engineering Technology', 'Manufacturing Eng. Tech.'],
+  tcm: ['TCM', 'BSTCM', 'Technology Communication Management'],
+  bstcm: ['TCM', 'BSTCM', 'Technology Communication Management'],
+  esm: ['ESM', 'BSESM', 'Environmental and Safety Management', 'Energy Systems & Mgmt.'],
+  bsesm: ['ESM', 'BSESM', 'Environmental and Safety Management', 'Energy Systems & Mgmt.'],
+  name: ['NAME', 'BSNAME', 'Naval Architecture and Marine Engineering'],
+  bsname: ['NAME', 'BSNAME', 'Naval Architecture and Marine Engineering']
+};
+
+function getDepartmentSearchTerms(value: string | null) {
+  const normalized = String(value || '').trim();
+
+  if (!normalized) {
+    return [];
+  }
+
+  const key = normalized.toLowerCase();
+  return Array.from(new Set([normalized, ...(departmentAliases[key] || [])]));
+}
 
 function parsePositiveInteger(value: string | null, fallback: number, max: number) {
   const parsed = Number(value);
@@ -100,16 +127,22 @@ async function findAssignedStudents(students: string[], excludeGroupId?: string)
 
 export async function GET(request: Request) {
   try {
+    const user = await getServerAuthenticatedUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const studentName = searchParams.get('studentName');
-    const department = searchParams.get('department');
+    const requestedDepartment = searchParams.get('department');
     const fields = searchParams.get('fields');
     const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_GROUP_LIMIT, MAX_GROUP_LIMIT);
     const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
     const skip = (page - 1) * limit;
 
     const select = fields === 'students' ? { students: true } : groupListSelect;
+    const isGlobalAdmin = ['ADMIN', 'SYSTEM_ADMIN', 'RESEARCH_HEAD', 'TECH_TRANSFER', 'LIBRARY'].includes(user.role);
     
     let groups;
     if (userId) {
@@ -132,21 +165,35 @@ export async function GET(request: Request) {
         take: limit,
         select
       });
-    } else if (department) {
-      groups = await prisma.group.findMany({
-        where: { department },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        select
-      });
     } else {
-      groups = await prisma.group.findMany({
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        select
-      });
+      // Enforce department boundary unless global admin
+      const userDeptClean = user.department ? user.department.replace(/\s+(Department|Office)$/i, '').trim() : null;
+      const department = isGlobalAdmin ? requestedDepartment : (userDeptClean || requestedDepartment);
+      
+      if (department) {
+        const departmentTerms = getDepartmentSearchTerms(department);
+        groups = await prisma.group.findMany({
+          where: {
+            OR: departmentTerms.map((term) => ({
+              department: {
+                contains: term,
+                mode: 'insensitive'
+              }
+            }))
+          },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+          select
+        });
+      } else {
+        groups = await prisma.group.findMany({
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+          select
+        });
+      }
     }
     return NextResponse.json(groups);
   } catch (error) {
