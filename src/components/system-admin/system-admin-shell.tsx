@@ -9,16 +9,38 @@ import { useBranding } from '@/components/branding/branding-provider';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
-const SYSTEM_ADMIN_NAV_ITEMS = [
-  { key: 'dashboard', href: '/system-admin/dashboard', label: 'Dashboard', icon: 'fa-gauge-high' },
-  { key: 'users', href: '/system-admin/users', label: 'User Management', icon: 'fa-users-gear' },
-  { key: 'roles', href: '/system-admin/roles', label: 'Roles & Permissions', icon: 'fa-shield-halved' },
-  { key: 'branding', href: '/system-admin/branding', label: 'Theme & Branding', icon: 'fa-palette' },
-  { key: 'settings', href: '/system-admin/settings', label: 'System Settings', icon: 'fa-sliders' },
-  { key: 'logs', href: '/system-admin/logs', label: 'Logs & Security', icon: 'fa-file-shield' },
-  { key: 'backups', href: '/system-admin/backups', label: 'Backup & Restore', icon: 'fa-database' },
-  { key: 'maintenance', href: '/system-admin/maintenance', label: 'Maintenance Mode', icon: 'fa-screwdriver-wrench' }
+const SYSTEM_ADMIN_NAV_GROUPS = [
+  {
+    label: 'Overview',
+    items: [
+      { key: 'dashboard', href: '/system-admin/dashboard', label: 'Dashboard', icon: 'fa-gauge-high' }
+    ]
+  },
+  {
+    label: 'Access Control',
+    items: [
+      { key: 'users', href: '/system-admin/users', label: 'User Management', icon: 'fa-users-gear' },
+      { key: 'roles', href: '/system-admin/roles', label: 'Roles & Permissions', icon: 'fa-shield-halved' }
+    ]
+  },
+  {
+    label: 'Configuration',
+    items: [
+      { key: 'branding', href: '/system-admin/branding', label: 'Theme & Branding', icon: 'fa-palette' },
+      { key: 'settings', href: '/system-admin/settings', label: 'System Settings', icon: 'fa-sliders' }
+    ]
+  },
+  {
+    label: 'System Health',
+    items: [
+      { key: 'logs', href: '/system-admin/logs', label: 'Logs & Security', icon: 'fa-file-shield' },
+      { key: 'backups', href: '/system-admin/backups', label: 'Backup & Restore', icon: 'fa-database' },
+      { key: 'maintenance', href: '/system-admin/maintenance', label: 'Maintenance Mode', icon: 'fa-screwdriver-wrench' }
+    ]
+  }
 ] as const;
+
+const SYSTEM_ADMIN_NAV_ITEMS = SYSTEM_ADMIN_NAV_GROUPS.flatMap((group) => group.items);
 
 export type SystemAdminNavKey = (typeof SYSTEM_ADMIN_NAV_ITEMS)[number]['key'];
 
@@ -28,6 +50,7 @@ const BRANDING_SUBMENU_ITEMS = [
   { key: 'colors', href: '/system-admin/branding?section=colors', label: 'Color Theme', icon: 'fa-droplet' },
   { key: 'auth', href: '/system-admin/branding?section=auth', label: 'Login & Register', icon: 'fa-right-to-bracket' },
   { key: 'landing', href: '/system-admin/branding?section=landing', label: 'Landing Page', icon: 'fa-globe' },
+  { key: 'programs', href: '/system-admin/branding?section=programs', label: 'Programs Content', icon: 'fa-layer-group' },
   { key: 'backup', href: '/system-admin/branding?section=backup', label: 'Backup & Restore Branding', icon: 'fa-file-export' }
 ] as const;
 const SYSTEM_ADMIN_PREFETCH_ROUTES = [
@@ -205,81 +228,83 @@ export function SystemAdminShell({
         </div>
 
         <nav className="student-role-sidebar-nav" aria-label="System admin workspace navigation">
-          <div className="sidebar-nav-group">
-            <span className="sidebar-nav-heading">Management Tools</span>
-            <div className="sidebar-nav-links">
-              {SYSTEM_ADMIN_NAV_ITEMS.map((item) => {
-                if (item.key === 'branding') {
-                  return (
-                    <div
-                      key={item.key}
-                      className={`sidebar-nav-dropdown${brandingMenuOpen ? ' is-open' : ''}${activeNav === 'branding' ? ' is-active' : ''}`}
-                    >
-                      <button
-                        aria-controls="system-admin-branding-submenu"
-                        aria-expanded={brandingMenuOpen}
-                        className={`sidebar-link${activeNav === 'branding' || brandingMenuOpen ? ' is-active' : ''}`}
-                        title={sidebarCollapsed ? item.label : undefined}
-                        type="button"
-                        onFocus={() => prefetchRoute(item.href)}
-                        onMouseEnter={() => prefetchRoute(item.href)}
-                        onClick={() => {
-                          setBrandingMenuOpen((current) => !current);
-                          if (!isBrandingPath) {
-                            router.push(item.href);
-                          }
-                        }}
-                      >
-                        <span className="sidebar-link-icon">
-                          <i aria-hidden="true" className={`fas ${item.icon}`}></i>
-                        </span>
-                        <span className="sidebar-link-label">{item.label}</span>
-                        <i className="fas fa-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
-                      </button>
+          {SYSTEM_ADMIN_NAV_GROUPS.map((group) => (
+            <div key={group.label} className="sidebar-nav-group">
+              <span className="sidebar-nav-heading">{group.label}</span>
+              <div className="sidebar-nav-links">
+                {group.items.map((item) => {
+                  if (item.key === 'branding') {
+                    return (
                       <div
-                        id="system-admin-branding-submenu"
-                        className="sidebar-submenu"
-                        aria-label="Theme and Branding sections"
+                        key={item.key}
+                        className={`sidebar-nav-dropdown${brandingMenuOpen ? ' is-open' : ''}${activeNav === 'branding' ? ' is-active' : ''}`}
                       >
-                        {BRANDING_SUBMENU_ITEMS.map((subItem) => (
-                          <Link
-                            key={subItem.key}
-                            className={`sidebar-link ${activeBrandingSection === subItem.key ? 'is-active' : ''}`}
-                            href={subItem.href}
-                            title={sidebarCollapsed ? subItem.label : undefined}
-                            onClick={closeSidebar}
-                            onFocus={() => prefetchRoute(subItem.href)}
-                            onMouseEnter={() => prefetchRoute(subItem.href)}
-                          >
-                            <span className="sidebar-link-icon">
-                              <i aria-hidden="true" className={`fas ${subItem.icon}`}></i>
-                            </span>
-                            <span className="sidebar-link-label">{subItem.label}</span>
-                          </Link>
-                        ))}
+                        <button
+                          aria-controls="system-admin-branding-submenu"
+                          aria-expanded={brandingMenuOpen}
+                          className={`sidebar-link${activeNav === 'branding' || brandingMenuOpen ? ' is-active' : ''}`}
+                          title={sidebarCollapsed ? item.label : undefined}
+                          type="button"
+                          onFocus={() => prefetchRoute(item.href)}
+                          onMouseEnter={() => prefetchRoute(item.href)}
+                          onClick={() => {
+                            setBrandingMenuOpen((current) => !current);
+                            if (!isBrandingPath) {
+                              router.push(item.href);
+                            }
+                          }}
+                        >
+                          <span className="sidebar-link-icon">
+                            <i aria-hidden="true" className={`fas ${item.icon}`}></i>
+                          </span>
+                          <span className="sidebar-link-label">{item.label}</span>
+                          <i className="fas fa-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div
+                          id="system-admin-branding-submenu"
+                          className="sidebar-submenu"
+                          aria-label="Theme and Branding sections"
+                        >
+                          {BRANDING_SUBMENU_ITEMS.map((subItem) => (
+                            <Link
+                              key={subItem.key}
+                              className={`sidebar-link ${activeBrandingSection === subItem.key ? 'is-active' : ''}`}
+                              href={subItem.href}
+                              title={sidebarCollapsed ? subItem.label : undefined}
+                              onClick={closeSidebar}
+                              onFocus={() => prefetchRoute(subItem.href)}
+                              onMouseEnter={() => prefetchRoute(subItem.href)}
+                            >
+                              <span className="sidebar-link-icon">
+                                <i aria-hidden="true" className={`fas ${subItem.icon}`}></i>
+                              </span>
+                              <span className="sidebar-link-label">{subItem.label}</span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                }
+                    );
+                  }
 
-                return (
-                  <Link
-                    key={item.key}
-                    className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
-                    href={item.href}
-                    title={sidebarCollapsed ? item.label : undefined}
-                    onFocus={() => prefetchRoute(item.href)}
-                    onMouseEnter={() => prefetchRoute(item.href)}
-                  >
-                    <span className="sidebar-link-icon">
-                      <i aria-hidden="true" className={`fas ${item.icon}`}></i>
-                    </span>
-                    <span className="sidebar-link-label">{item.label}</span>
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={item.key}
+                      className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
+                      href={item.href}
+                      title={sidebarCollapsed ? item.label : undefined}
+                      onFocus={() => prefetchRoute(item.href)}
+                      onMouseEnter={() => prefetchRoute(item.href)}
+                    >
+                      <span className="sidebar-link-icon">
+                        <i aria-hidden="true" className={`fas ${item.icon}`}></i>
+                      </span>
+                      <span className="sidebar-link-label">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          ))}
         </nav>
       </aside>
 

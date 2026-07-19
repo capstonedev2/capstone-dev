@@ -8,6 +8,8 @@ import { PublicLayout } from '@/components/layouts/public-layout';
 import { TeamSocialLinks } from '@/components/public/team-social-links';
 import { getDepartmentBranding } from '@/config/department-branding';
 import { teamMembers } from '@/lib/landing/team-members';
+import { prisma } from '@/lib/prisma';
+import { adjustColor, sanitizeBrandingSettings, DEFAULT_BRANDING } from '@/lib/branding';
 
 import styles from '../page.module.css';
 
@@ -130,7 +132,7 @@ const capabilityGroups = [
   }
 ];
 
-const departments = [
+const staticDepartments = [
   {
     code: 'IT',
     focus: 'Software, networks, databases, and applied computing solutions.',
@@ -173,11 +175,7 @@ const departments = [
   }
 ];
 
-const departmentHighlights = [
-  { value: '5', label: 'Academic programs' },
-  { value: '1', label: 'Shared capstone workflow' },
-  { value: 'Role-based', label: 'Department visibility' }
-];
+
 
 const operatingRules = [
   {
@@ -217,7 +215,15 @@ function getTeamRoleIcon(role: string) {
   return 'fas fa-user-graduate';
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const setting = await prisma.systemSetting.findUnique({
+    where: { id: 'branding' }
+  });
+  const branding = setting?.value 
+    ? sanitizeBrandingSettings(setting.value as any) 
+    : sanitizeBrandingSettings(DEFAULT_BRANDING);
+    
+  const activeDepartments = branding.departments.filter(d => d.active);
   return (
     <PublicLayout>
       <div className={styles.landingPage}>
@@ -408,16 +414,16 @@ export default function AboutPage() {
                 <div className={styles.departmentSystemIntro} data-reveal="fade-right">
                   <span className={styles.sectionKicker}>About Departments</span>
                   <h2>
-                    Built for <span>multi-program coordination</span>
+                    {branding.programsContent.title.split(' ').map((word, i, arr) => 
+                      i === arr.length - 1 ? <span key={i}>{word}</span> : `${word} `
+                    )}
                   </h2>
                   <p>
-                    Each department keeps its own program identity, research focus, and capstone
-                    records while ThesisTrack gives research leaders one connected view of
-                    institutional progress.
+                    {branding.programsContent.description}
                   </p>
 
                   <div className={styles.departmentInsightGrid} aria-label="Department coverage summary">
-                    {departmentHighlights.map(highlight => (
+                    {branding.programsContent.highlights.filter(h => h.visible).map(highlight => (
                       <div key={highlight.label} className={styles.departmentInsightCard}>
                         <strong>{highlight.value}</strong>
                         <span>{highlight.label}</span>
@@ -432,37 +438,49 @@ export default function AboutPage() {
                 </div>
 
                 <div className={styles.departmentLogoGrid} data-reveal="fade-left">
-                  {departments.map(department => {
-                    const branding = getDepartmentBranding(department.code);
+                  {activeDepartments.map(department => {
+                    const fallbackData = staticDepartments.find(d => d.code === department.id);
+                    const isDefault = !!fallbackData;
+                    const originalBranding = isDefault ? getDepartmentBranding(department.id) : null;
+                    
+                    const focusText = isDefault ? fallbackData!.focus : department.description;
+                    const codeLabel = isDefault ? originalBranding!.code : (department.shortName || department.id);
+                    const isOriginalColor = originalBranding && (department.color === originalBranding.primaryColor || department.color === '#3B82F6' || department.color === '#EF4444' || department.color === '#F59E0B' || department.color === '#8B5CF6' || department.color === '#06B6D4');
+                    
+                    const primaryColor = isOriginalColor ? originalBranding!.primaryColor : department.color;
+                    
+                    const secondaryColor = isOriginalColor ? originalBranding!.secondaryColor : adjustColor(primaryColor, { lightness: -15, saturation: 10 });
+                    const highlightColor = isOriginalColor ? originalBranding!.highlightColor : adjustColor(primaryColor, { lightness: 20 });
+                    const accentColor = isOriginalColor ? originalBranding!.accentColor : adjustColor(primaryColor, { hue: 20, saturation: 20 });
 
                     return (
                       <Link
-                        key={department.code}
-                        href={`/departments/${department.code}`}
+                        key={department.id}
+                        href={`/departments/${department.id}`}
                         className={styles.departmentLogoCard}
                         style={{
-                          '--department-primary': branding.primaryColor,
-                          '--department-secondary': branding.secondaryColor,
-                          '--department-accent': branding.accentColor,
-                          '--department-highlight': branding.highlightColor,
-                          '--department-text': branding.textColor
+                          '--department-primary': primaryColor,
+                          '--department-secondary': secondaryColor,
+                          '--department-accent': accentColor,
+                          '--department-highlight': highlightColor,
+                          '--department-text': '#FFFFFF'
                         } as CSSProperties}
                       >
                         <div className={styles.departmentLogoMark}>
                           <img
-                            src={department.logo}
-                            alt={`${branding.departmentName} logo`}
+                            src={department.logo || (fallbackData ? fallbackData.logo : '')}
+                            alt={`${department.name} logo`}
                             loading="lazy"
                             decoding="async"
                           />
                         </div>
                         <div className={styles.departmentCardBody}>
                           <div className={styles.departmentCardTopline}>
-                            <span>{branding.code}</span>
-                            <i className={department.icon} aria-hidden="true" />
+                            <span>{codeLabel}</span>
+                            <i className={department.icon || (fallbackData ? fallbackData.icon : 'fas fa-building')} aria-hidden="true" />
                           </div>
-                          <strong>{branding.departmentName}</strong>
-                          <p>{department.focus}</p>
+                          <strong>{department.name}</strong>
+                          <p>{focusText}</p>
                           <div className={styles.departmentCardFooter}>
                             <em>
                               View Department

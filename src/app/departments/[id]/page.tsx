@@ -165,36 +165,6 @@ export default async function DepartmentPage(props: { params: Promise<{ id: stri
             </div>
           </section>
 
-          {/* ── MISSION & VISION ── */}
-          <section className="pb-16 sm:pb-20">
-            <div className={styles.container}>
-              <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto" data-reveal="fade-up" style={{ '--reveal-delay': '0.1s' } as any}>
-                {/* Mission Card */}
-                <div className="group relative overflow-hidden bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,58,143,0.08)] transition-all duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-transparent pointer-events-none" />
-                  <div className="relative z-10">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-brand mb-5 shadow-inner ring-1 ring-blue-100/50">
-                      <i className="fas fa-crosshairs text-xl" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-4">Our Mission</h2>
-                    <p className="text-gray-600 leading-relaxed text-[0.95rem]">{department.mission}</p>
-                  </div>
-                </div>
-
-                {/* Vision Card */}
-                <div className="group relative overflow-hidden bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(0,58,143,0.08)] transition-all duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 via-transparent to-transparent pointer-events-none" />
-                  <div className="relative z-10">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-500 mb-5 shadow-inner ring-1 ring-amber-100/50">
-                      <i className="fas fa-eye text-xl" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-4">Our Vision</h2>
-                    <p className="text-gray-600 leading-relaxed text-[0.95rem]">{department.vision}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* ── KEY RESEARCH AREAS ── */}
           <section id="research-focus" className={`${styles.departmentAnchorSection} pb-16 sm:pb-20`}>

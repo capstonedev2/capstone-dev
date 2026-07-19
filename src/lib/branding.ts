@@ -130,6 +130,9 @@ export type BrandingDepartmentSettings = {
   color: string;
   logo: string;
   active: boolean;
+  keyAreas?: { title: string; description: string; icon: string }[];
+  facilities?: string[];
+  programHighlights?: string[];
 };
 
 export type BrandingDerivedColors = {
@@ -152,6 +155,7 @@ export type BrandingSettings = {
   derivedColors: BrandingDerivedColors;
   assets: BrandingAssets;
   landing: BrandingLandingSettings;
+  programsContent: BrandingProgramsSettings;
   auth: BrandingAuthSettings;
   navigation: BrandingNavigationSettings;
   shell: BrandingShellSettings;
@@ -402,6 +406,15 @@ export const DEFAULT_BRANDING: BrandingSettings = {
   derivedColors: FALLBACK_DERIVED_COLORS,
   assets: DEFAULT_ASSETS,
   landing: DEFAULT_LANDING,
+  programsContent: {
+    title: 'Built for multi-program coordination',
+    description: 'Each department keeps its own program identity, research focus, and capstone records while ThesisTrack gives research leaders one connected view of institutional progress.',
+    highlights: [
+      { id: 'prog1', value: '5', label: 'Academic programs', visible: true },
+      { id: 'prog2', value: '1', label: 'Shared capstone workflow', visible: true },
+      { id: 'prog3', value: 'Role-based', label: 'Department visibility', visible: true }
+    ]
+  },
   auth: DEFAULT_AUTH,
   navigation: DEFAULT_NAVIGATION,
   shell: DEFAULT_SHELL,
@@ -763,7 +776,14 @@ function sanitizeDepartmentSettings(value: unknown, fallback: BrandingDepartment
       icon: readStringValue(record.icon, fallbackItem.icon),
       color,
       logo: readStringValue(record.logo, fallbackItem.logo),
-      active: readBooleanValue(record.active, fallbackItem.active)
+      active: readBooleanValue(record.active, fallbackItem.active),
+      keyAreas: Array.isArray(record.keyAreas) ? record.keyAreas.map((k: any) => ({
+        title: readStringValue(k.title, ''),
+        description: readStringValue(k.description, ''),
+        icon: readStringValue(k.icon, '')
+      })) : fallbackItem.keyAreas,
+      facilities: Array.isArray(record.facilities) ? record.facilities.map((f: any) => readStringValue(f, '')) : fallbackItem.facilities,
+      programHighlights: Array.isArray(record.programHighlights) ? record.programHighlights.map((h: any) => readStringValue(h, '')) : fallbackItem.programHighlights
     };
   });
 }
@@ -1005,6 +1025,30 @@ export function createBrandingFromPreset(presetId: string, current: BrandingSett
   };
 }
 
+function sanitizeProgramsSettings(value: any): BrandingProgramsSettings {
+  if (!value || typeof value !== 'object') {
+    return DEFAULT_BRANDING.programsContent;
+  }
+
+  const defaultStats = DEFAULT_BRANDING.programsContent.highlights;
+
+  return {
+    title: String(value.title ?? DEFAULT_BRANDING.programsContent.title).trim() || DEFAULT_BRANDING.programsContent.title,
+    description: String(value.description ?? DEFAULT_BRANDING.programsContent.description).trim() || DEFAULT_BRANDING.programsContent.description,
+    highlights: Array.isArray(value.highlights)
+      ? value.highlights.map((stat: any, index: number) => {
+          const defaultStat = defaultStats[index] || { id: `prog${index}`, value: '', label: '', visible: false };
+          return {
+            id: String(stat?.id ?? defaultStat.id),
+            value: String(stat?.value ?? defaultStat.value).trim(),
+            label: String(stat?.label ?? defaultStat.label).trim(),
+            visible: stat?.visible !== undefined ? Boolean(stat.visible) : defaultStat.visible
+          };
+        })
+      : defaultStats
+  };
+}
+
 export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
   if (!isRecord(value)) {
     return cloneBranding(DEFAULT_BRANDING);
@@ -1047,6 +1091,7 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
     derivedColors,
     assets,
     landing: sanitizeLandingSettings(value.landing),
+    programsContent: sanitizeProgramsSettings(value.programsContent),
     auth: sanitizeAuthSettings(value.auth),
     navigation: sanitizeNavigationSettings(value.navigation),
     shell: sanitizeShellSettings(value.shell),
@@ -1065,6 +1110,10 @@ export function cloneBranding(value: BrandingSettings) {
       ...value.landing,
       features: value.landing.features.map((feature) => ({ ...feature })),
       statistics: value.landing.statistics.map((statistic) => ({ ...statistic }))
+    },
+    programsContent: {
+      ...value.programsContent,
+      highlights: value.programsContent.highlights.map((statistic) => ({ ...statistic }))
     },
     auth: {
       login: { ...value.auth.login },

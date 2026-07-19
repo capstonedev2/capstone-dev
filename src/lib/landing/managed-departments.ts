@@ -89,7 +89,10 @@ export function mergeDepartmentBranding(
         vision: branding.vision || department.vision,
         icon: branding.icon || department.icon,
         color: branding.color || department.color,
-        logo: branding.logo || department.logo
+        logo: branding.logo || department.logo,
+        keyAreas: branding.keyAreas?.length ? branding.keyAreas : department.keyAreas,
+        facilities: branding.facilities?.length ? branding.facilities : department.facilities,
+        programHighlights: branding.programHighlights?.length ? branding.programHighlights : department.programHighlights
       };
     })
     .filter((department): department is DepartmentData => Boolean(department));

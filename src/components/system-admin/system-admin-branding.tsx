@@ -59,8 +59,8 @@ type BannerState = {
 };
 
 type BrandingAssetKey = keyof BrandingAssets;
-type BrandingPreviewMode = 'dashboard' | 'login' | 'landing' | 'portal';
-type BrandingSectionKey = 'overview' | 'logos' | 'colors' | 'auth' | 'landing' | 'backup';
+type BrandingPreviewMode = 'dashboard' | 'login' | 'landing' | 'portal' | 'programs';
+type BrandingSectionKey = 'overview' | 'logos' | 'colors' | 'auth' | 'landing' | 'programs' | 'backup';
 
 const COLOR_FIELDS: Array<{
   key: BrandingColorKey;
@@ -186,6 +186,7 @@ const PREVIEW_MODES: Array<{
   { key: 'dashboard', label: 'Dashboard', icon: 'fa-table-columns' },
   { key: 'login', label: 'Login', icon: 'fa-right-to-bracket' },
   { key: 'landing', label: 'Landing', icon: 'fa-globe' },
+  { key: 'programs', label: 'Programs', icon: 'fa-layer-group' },
   { key: 'portal', label: 'Role Portal', icon: 'fa-users-gear' }
 ];
 
@@ -195,7 +196,16 @@ const BRANDING_SECTION_PREVIEW: Record<BrandingSectionKey, BrandingPreviewMode> 
   colors: 'portal',
   auth: 'login',
   landing: 'landing',
+  programs: 'programs',
   backup: 'dashboard'
+};
+
+const PREVIEW_ROUTES: Record<BrandingPreviewMode, string> = {
+  portal: '/system-admin/dashboard?brandingPreview=1',
+  dashboard: '/system-admin/dashboard?brandingPreview=1',
+  login: '/login?brandingPreview=1',
+  landing: '/?brandingPreview=1',
+  programs: '/about?brandingPreview=1#about-departments'
 };
 
 const BRANDING_SECTION_PREVIEW_COPY: Record<BrandingSectionKey, { title: string; body: string }> = {
@@ -219,6 +229,10 @@ const BRANDING_SECTION_PREVIEW_COPY: Record<BrandingSectionKey, { title: string;
     title: 'Landing Page Preview',
     body: 'Preview the public hero, navigation, call-to-action buttons, feature row, and sections.'
   },
+  programs: {
+    title: 'Programs Content Preview',
+    body: 'Preview the About Departments section title, description, and dynamic statistics.'
+  },
   backup: {
     title: 'Branding Backup Preview',
     body: 'Preview the currently staged branding while exporting, importing, saving, or restoring.'
@@ -231,6 +245,7 @@ function getBrandingSection(value: string | null): BrandingSectionKey {
     value === 'colors' ||
     value === 'auth' ||
     value === 'landing' ||
+    value === 'programs' ||
     value === 'backup'
   ) {
     return value;
@@ -290,7 +305,7 @@ function getSuggestedColors(value: string) {
   return Array.from(new Set(suggestions));
 }
 
-function getAssetPreviewLabel(key: BrandingAssetKey) {
+function getAssetPreviewLabel(key: string) {
   if (key === 'favicon') return 'Icon';
   if (key === 'loginBackground' || key === 'registerBackground') return 'Background';
   return 'Logo';
@@ -474,7 +489,7 @@ function AssetUploadControl({
   onSave,
   isSaving
 }: {
-  assetKey: BrandingAssetKey;
+  assetKey: string | BrandingAssetKey;
   description: string;
   label: string;
   accept: string;
@@ -706,17 +721,11 @@ function RolePortalBrandingPreview({ branding }: { branding: BrandingSettings })
 }
 
 function ActualRouteBrandingPreview({ mode }: { mode: Exclude<BrandingPreviewMode, 'portal'> }) {
-  const previewRouteByMode: Record<Exclude<BrandingPreviewMode, 'portal'>, string> = {
-    dashboard: '/system-admin/dashboard?brandingPreview=1',
-    login: '/login?brandingPreview=1',
-    landing: '/?brandingPreview=1'
-  };
-
   return (
     <iframe
       key={mode}
       className="branding-preview-route-frame"
-      src={previewRouteByMode[mode]}
+      src={PREVIEW_ROUTES[mode]}
       title={`${mode} actual branding preview`}
     />
   );
@@ -755,7 +764,7 @@ function LiveSystemPreview({ branding, mode }: { branding: BrandingSettings; mod
     );
   }
 
-  if (mode === 'dashboard' || mode === 'login' || mode === 'landing') {
+  if (mode === 'dashboard' || mode === 'login' || mode === 'landing' || mode === 'programs') {
     return (
       <div className="branding-preview-frame is-route" style={previewStyle}>
         <ActualRouteBrandingPreview mode={mode} />
@@ -888,10 +897,12 @@ export function SystemAdminBranding() {
   const [savedBranding, setSavedBranding] = useState<BrandingSettings>(() => sanitizeBrandingSettings(activeBranding));
   const [draft, setDraft] = useState<BrandingSettings>(() => sanitizeBrandingSettings(activeBranding));
   const [pendingFiles, setPendingFiles] = useState<Partial<Record<BrandingAssetKey, File>>>({});
+  const [pendingDepartmentFiles, setPendingDepartmentFiles] = useState<Record<string, File>>({});
   const [banner, setBanner] = useState<BannerState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
+  const [editingDepartmentIndex, setEditingDepartmentIndex] = useState<number | null>(null);
+
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const savedBrandingRef = useRef(savedBranding);
   const activeSection = getBrandingSection(searchParams.get('section'));
@@ -1164,9 +1175,19 @@ export function SystemAdminBranding() {
         departmentIndex === index ? { ...department, [field]: value } : department
       ))
     }));
+
+  };
+
+  const handleDepartmentFile = (index: number, departmentId: string, file: File, previewUrl: string) => {
+    setPendingDepartmentFiles((current) => ({
+      ...current,
+      [departmentId]: file
+    }));
+    updateDepartmentField(index, 'logo', previewUrl);
   };
 
   const addDepartment = () => {
+    const nextIndex = draft.departments.length;
     updateDraft((current) => ({
       ...current,
       departments: [
@@ -1174,6 +1195,7 @@ export function SystemAdminBranding() {
         createDepartmentDraft(current.departments)
       ]
     }));
+    setEditingDepartmentIndex(nextIndex);
     setBanner({
       tone: 'info',
       title: 'Department added',
@@ -1298,6 +1320,38 @@ export function SystemAdminBranding() {
       }
     }
 
+    for (const [deptId, file] of Object.entries(pendingDepartmentFiles)) {
+      if (!file) {
+        continue;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.set('file', file);
+        formData.set('type', 'SCHOOL_LOGO');
+        formData.set('label', `dept-${deptId}`);
+
+        const response = await fetch('/api/admin/media/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin'
+        });
+        const payload = await response.json();
+
+        if (!response.ok || !payload?.success || !payload.data?.secure_url) {
+          throw new Error(payload?.error || payload?.message || 'Upload failed.');
+        }
+
+        const deptIndex = nextBranding.departments.findIndex(d => d.id === deptId);
+        if (deptIndex !== -1) {
+          nextBranding.departments[deptIndex].logo = payload.data.secure_url;
+        }
+      } catch (err: any) {
+        console.error(`Upload failed for department ${deptId}:`, err);
+        throw err;
+      }
+    }
+
     return {
       branding: nextBranding,
       usedInlineAssets
@@ -1332,6 +1386,7 @@ export function SystemAdminBranding() {
       const saved = sanitizeBrandingSettings(payload.branding);
 
       setPendingFiles({});
+      setPendingDepartmentFiles({});
       setSavedBranding(saved);
       setDraft(saved);
       setBranding(saved);
@@ -1375,6 +1430,7 @@ export function SystemAdminBranding() {
       const restoredBranding = sanitizeBrandingSettings(payload.branding);
 
       setPendingFiles({});
+      setPendingDepartmentFiles({});
       setSavedBranding(restoredBranding);
       setDraft(restoredBranding);
       setBranding(restoredBranding);
@@ -1408,6 +1464,29 @@ export function SystemAdminBranding() {
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
+  };
+
+  const updateProgramsContentField = (key: keyof BrandingSettings['programsContent'], value: string) => {
+    setDraft((current) => ({
+      ...current,
+      programsContent: {
+        ...current.programsContent,
+        [key]: value
+      }
+    }));
+  };
+
+  const updateProgramsContentHighlight = (index: number, key: 'value' | 'label' | 'visible', value: string | boolean) => {
+    setDraft((current) => {
+      const next = { ...current };
+      next.programsContent = { ...next.programsContent };
+      next.programsContent.highlights = [...next.programsContent.highlights];
+      next.programsContent.highlights[index] = {
+        ...next.programsContent.highlights[index],
+        [key]: value
+      };
+      return next;
+    });
   };
 
   const importThemeJson = (event: ChangeEvent<HTMLInputElement>) => {
@@ -1614,7 +1693,7 @@ export function SystemAdminBranding() {
           </button>
         </section>
 
-        <div className={`branding-layout ${isPreviewExpanded ? 'is-preview-expanded' : ''}`}>
+        <div className="branding-layout">
           <div className="branding-controls-column">
             <section className={`admin-section-card ${isSectionActive('overview') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
@@ -2055,7 +2134,7 @@ export function SystemAdminBranding() {
               </div>
             </section>
 
-            <section className={`admin-section-card ${isSectionActive('overview') ? '' : 'branding-section-hidden'}`}>
+            <section className={`admin-section-card ${isSectionActive('programs') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
                   <h3>Departments</h3>
@@ -2083,70 +2162,375 @@ export function SystemAdminBranding() {
                             {isDefaultDepartment ? (
                               <span className="admin-inline-badge">Default</span>
                             ) : (
-                              <button className="btn btn-outline small" type="button" onClick={() => removeDepartment(index)}>
+                              <button className="btn btn-outline small" title="Remove" type="button" onClick={() => removeDepartment(index)}>
                                 <i className="fas fa-trash"></i>
-                                Remove
                               </button>
                             )}
+                            <button className="btn btn-outline small" type="button" onClick={() => setEditingDepartmentIndex(index)}>
+                              <i className="fas fa-pen"></i>
+                              Edit
+                            </button>
                             <label className="branding-toggle-line">
                               <input checked={department.active} type="checkbox" onChange={(event) => updateDepartmentField(index, 'active', event.target.checked)} />
                               Active
                             </label>
                           </div>
                         </div>
-                        <div className="branding-mini-editor-grid">
-                          <div className="form-field">
-                            <label htmlFor={`branding-dept-id-${department.id}`}>Department Code</label>
-                            <input
-                              disabled={isDefaultDepartment}
-                              id={`branding-dept-id-${department.id}`}
-                              value={department.id}
-                              onChange={(event) => updateDepartmentField(index, 'id', normalizeDepartmentDraftId(event.target.value))}
-                            />
-                            <span className="branding-field-note">
-                              {isDefaultDepartment ? 'Default department code is locked.' : 'Used in the public URL, for example /departments/NEW-6.'}
-                            </span>
-                          </div>
-                          <div className="form-field">
-                            <label htmlFor={`branding-dept-short-${department.id}`}>Short Name</label>
-                            <input id={`branding-dept-short-${department.id}`} value={department.shortName} onChange={(event) => updateDepartmentField(index, 'shortName', event.target.value)} />
-                          </div>
-                          <div className="form-field">
-                            <label htmlFor={`branding-dept-color-${department.id}`}>Color</label>
-                            <input id={`branding-dept-color-${department.id}`} value={department.color} onChange={(event) => updateDepartmentField(index, 'color', event.target.value)} />
-                          </div>
-                          <div className="form-field branding-span-full">
-                            <label htmlFor={`branding-dept-name-${department.id}`}>Full Name</label>
-                            <input id={`branding-dept-name-${department.id}`} value={department.name} onChange={(event) => updateDepartmentField(index, 'name', event.target.value)} />
-                          </div>
-                          <div className="form-field branding-span-full">
-                            <label htmlFor={`branding-dept-label-${department.id}`}>Register Dropdown Label</label>
-                            <input id={`branding-dept-label-${department.id}`} value={department.label} onChange={(event) => updateDepartmentField(index, 'label', event.target.value)} />
-                          </div>
-                          <div className="form-field">
-                            <label htmlFor={`branding-dept-icon-${department.id}`}>Icon Class</label>
-                            <input id={`branding-dept-icon-${department.id}`} value={department.icon} onChange={(event) => updateDepartmentField(index, 'icon', event.target.value)} />
-                          </div>
-                          <div className="form-field">
-                            <label htmlFor={`branding-dept-logo-${department.id}`}>Logo URL</label>
-                            <input id={`branding-dept-logo-${department.id}`} value={department.logo} onChange={(event) => updateDepartmentField(index, 'logo', event.target.value)} />
-                          </div>
-                          <div className="form-field branding-span-full">
-                            <label htmlFor={`branding-dept-description-${department.id}`}>Public Description</label>
-                            <textarea id={`branding-dept-description-${department.id}`} value={department.description} onChange={(event) => updateDepartmentField(index, 'description', event.target.value)} />
-                          </div>
-                          <div className="form-field branding-span-full">
-                            <label htmlFor={`branding-dept-mission-${department.id}`}>Mission</label>
-                            <textarea id={`branding-dept-mission-${department.id}`} value={department.mission} onChange={(event) => updateDepartmentField(index, 'mission', event.target.value)} />
-                          </div>
-                          <div className="form-field branding-span-full">
-                            <label htmlFor={`branding-dept-vision-${department.id}`}>Vision</label>
-                            <textarea id={`branding-dept-vision-${department.id}`} value={department.vision} onChange={(event) => updateDepartmentField(index, 'vision', event.target.value)} />
-                          </div>
-                        </div>
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            </section>
+
+            {editingDepartmentIndex !== null && draft.departments[editingDepartmentIndex] && (
+              <div className="modal show" style={{ padding: 0, background: '#f8fafc' }}>
+                <div className="modal-content" style={{ width: '100%', height: '100%', maxHeight: '100%', borderRadius: 0, border: 'none', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: 'none' }}>
+                  <div className="modal-header" style={{ flexShrink: 0, borderBottom: '1px solid rgba(0,0,0,0.05)', padding: '1.25rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <button className="btn btn-outline small" style={{ border: 'none', background: 'transparent', boxShadow: 'none' }} onClick={() => setEditingDepartmentIndex(null)} type="button">
+                        <i className="fas fa-arrow-left"></i> Back
+                      </button>
+                      <div style={{ width: '1px', height: '24px', background: 'rgba(0,0,0,0.1)' }}></div>
+                      <div>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, lineHeight: 1 }}>{draft.departments[editingDepartmentIndex].name || draft.departments[editingDepartmentIndex].shortName || 'New Program'}</h3>
+                        <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: 'var(--muted)' }}>Program Configuration & Identity</p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <button className="btn btn-outline" type="button" onClick={() => window.open(`/departments/${draft.departments[editingDepartmentIndex].id}?brandingPreview=1`, '_blank', 'noopener,noreferrer')}>
+                        <i className="fas fa-arrow-up-right-from-square"></i> Pop Out Preview
+                      </button>
+                      <button className="btn btn-primary" type="button" onClick={() => setEditingDepartmentIndex(null)} style={{ background: draft.departments[editingDepartmentIndex].color || 'var(--primary)', borderColor: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}>
+                        <i className="fas fa-check"></i> Save & Close
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '0', flex: '1 1 auto', minHeight: 0, padding: 0, background: '#f8fafc' }}>
+                    <div style={{ overflowY: 'auto', padding: '2.5rem', minHeight: 0 }}>
+                      <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        
+                        <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
+                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                             <i className="fas fa-id-card" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Core Identity
+                          </h4>
+                          <div className="branding-mini-editor-grid">
+                            <div className="form-field">
+                              <label htmlFor={`branding-dept-id-${draft.departments[editingDepartmentIndex].id}`}>Department Code</label>
+                              <input
+                                disabled={DEFAULT_DEPARTMENT_IDS.has(draft.departments[editingDepartmentIndex].id.toUpperCase())}
+                                id={`branding-dept-id-${draft.departments[editingDepartmentIndex].id}`}
+                                value={draft.departments[editingDepartmentIndex].id}
+                                onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'id', normalizeDepartmentDraftId(event.target.value))}
+                              />
+                              <span className="branding-field-note">
+                                {DEFAULT_DEPARTMENT_IDS.has(draft.departments[editingDepartmentIndex].id.toUpperCase()) ? 'Default department code is locked.' : 'Used in URL: /departments/CODE'}
+                              </span>
+                            </div>
+                            <div className="form-field">
+                              <label htmlFor={`branding-dept-short-${draft.departments[editingDepartmentIndex].id}`}>Short Name</label>
+                              <input id={`branding-dept-short-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].shortName} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'shortName', event.target.value)} />
+                            </div>
+                            <div className="form-field branding-span-full">
+                              <label htmlFor={`branding-dept-name-${draft.departments[editingDepartmentIndex].id}`}>Full Name</label>
+                              <input id={`branding-dept-name-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].name} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'name', event.target.value)} />
+                            </div>
+                            <div className="form-field branding-span-full">
+                              <label htmlFor={`branding-dept-label-${draft.departments[editingDepartmentIndex].id}`}>Register Dropdown Label</label>
+                              <input id={`branding-dept-label-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].label} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'label', event.target.value)} />
+                            </div>
+                            <div className="form-field">
+                              <label htmlFor={`branding-dept-color-${draft.departments[editingDepartmentIndex].id}`}>Theme Color</label>
+                              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                <div style={{ position: 'relative', width: '3rem', height: '3rem', borderRadius: '0.95rem', overflow: 'hidden', border: '2px solid var(--border)', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                                  <input 
+                                    type="color" 
+                                    id={`branding-dept-color-picker-${draft.departments[editingDepartmentIndex].id}`} 
+                                    value={draft.departments[editingDepartmentIndex].color.startsWith('#') ? draft.departments[editingDepartmentIndex].color : '#003A8F'} 
+                                    onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'color', event.target.value)}
+                                    style={{ position: 'absolute', top: '-10px', left: '-10px', width: '200%', height: '200%', cursor: 'pointer', border: 'none', padding: 0, background: 'none' }}
+                                  />
+                                </div>
+                                <input 
+                                  id={`branding-dept-color-${draft.departments[editingDepartmentIndex].id}`} 
+                                  value={draft.departments[editingDepartmentIndex].color} 
+                                  onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'color', event.target.value)} 
+                                  placeholder="#000000"
+                                  style={{ flex: 1, fontFamily: 'monospace', letterSpacing: '0.05em', fontWeight: 600 }}
+                                />
+                              </div>
+                              <div style={{ display: 'flex', gap: '0.65rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                                {[
+                                  { label: 'IT', color: '#262626' },
+                                  { label: 'MET', color: '#B91C1C' },
+                                  { label: 'TCM', color: '#7E22CE' },
+                                  { label: 'ESM', color: '#15803D' },
+                                  { label: 'NAME', color: '#0369A1' },
+                                  { label: 'Orange', color: '#EA580C' },
+                                  { label: 'Teal', color: '#0F766E' },
+                                  { label: 'Rose', color: '#BE123C' }
+                                ].map(preset => (
+                                  <button
+                                    key={preset.color}
+                                    type="button"
+                                    onClick={() => updateDepartmentField(editingDepartmentIndex, 'color', preset.color)}
+                                    title={preset.label}
+                                    style={{
+                                      width: '1.8rem',
+                                      height: '1.8rem',
+                                      borderRadius: '0.5rem',
+                                      background: preset.color,
+                                      border: draft.departments[editingDepartmentIndex].color.toUpperCase() === preset.color.toUpperCase() ? '2px solid var(--primary-dark)' : '2px solid transparent',
+                                      cursor: 'pointer',
+                                      boxShadow: draft.departments[editingDepartmentIndex].color.toUpperCase() === preset.color.toUpperCase() ? '0 0 0 2px #fff inset' : '0 2px 4px rgba(0,0,0,0.1)',
+                                      padding: 0,
+                                      transition: 'all 0.2s'
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <div className="form-field">
+                              <label htmlFor={`branding-dept-icon-${draft.departments[editingDepartmentIndex].id}`}>Icon Class</label>
+                              <input id={`branding-dept-icon-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].icon} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'icon', event.target.value)} />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
+                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                             <i className="fas fa-image" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Brand Assets
+                          </h4>
+                          <AssetUploadControl
+                            accept="image/png,image/jpeg,image/svg+xml"
+                            assetKey={`department-logo-${draft.departments[editingDepartmentIndex].id}`}
+                            description={`Upload a specific logo for ${draft.departments[editingDepartmentIndex].shortName || 'this department'}.`}
+                            label={`${draft.departments[editingDepartmentIndex].shortName || 'Department'} Logo`}
+                            maxBytes={5_000_000}
+                            pendingFile={pendingDepartmentFiles[draft.departments[editingDepartmentIndex].id]}
+                            value={draft.departments[editingDepartmentIndex].logo}
+                            onChange={(value) => updateDepartmentField(editingDepartmentIndex, 'logo', value)}
+                            onFile={(file, previewUrl) => handleDepartmentFile(editingDepartmentIndex, draft.departments[editingDepartmentIndex].id, file, previewUrl)}
+                            onReset={() => updateDepartmentField(editingDepartmentIndex, 'logo', '')}
+                            onWarning={(message) => setBanner({ tone: 'warning', title: 'Asset not accepted', body: message })}
+                            isSaving={isSaving}
+                          />
+                        </div>
+
+                        <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
+                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                             <i className="fas fa-align-left" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Public Profile
+                          </h4>
+                          <div className="form-field">
+                            <label htmlFor={`branding-dept-description-${draft.departments[editingDepartmentIndex].id}`}>Public Description</label>
+                            <textarea id={`branding-dept-description-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].description} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'description', event.target.value)} style={{ minHeight: '120px' }} />
+                          </div>
+                        </div>
+
+                        <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
+                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                             <i className="fas fa-graduation-cap" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Academic Configuration
+                          </h4>
+                          
+                          <div className="form-field">
+                            <label>Facilities & Labs</label>
+                            <span className="branding-field-note" style={{ marginBottom: '0.5rem' }}>Enter one facility per line. Shown as a list on the public page.</span>
+                            <textarea 
+                              value={(draft.departments[editingDepartmentIndex].facilities || []).join('\n')} 
+                              onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'facilities', e.target.value.split('\n'))} 
+                              style={{ minHeight: '120px', lineHeight: 1.6 }} 
+                              placeholder="Advanced Computer Laboratories...&#10;Networking & Cybersecurity Laboratory...&#10;Software Development Hub..."
+                            />
+                          </div>
+
+                          <div className="form-field" style={{ marginTop: '1.5rem' }}>
+                            <label>Program Highlights</label>
+                            <span className="branding-field-note" style={{ marginBottom: '0.5rem' }}>Enter one highlight per line. Shown as bullet points.</span>
+                            <textarea 
+                              value={(draft.departments[editingDepartmentIndex].programHighlights || []).join('\n')} 
+                              onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'programHighlights', e.target.value.split('\n'))} 
+                              style={{ minHeight: '120px', lineHeight: 1.6 }} 
+                              placeholder="Three specialized tracks...&#10;Industry certification programs...&#10;Hands-on training..."
+                            />
+                          </div>
+                          
+                          <div style={{ marginTop: '2.5rem' }}>
+                            <div className="branding-management-heading" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <strong>Key Research & Focus Areas</strong>
+                                <span className="branding-field-note" style={{ display: 'block' }}>Add the core competency tracks for this program.</span>
+                              </div>
+                              <button 
+                                type="button" 
+                                className="btn btn-outline small"
+                                onClick={() => {
+                                  const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                  areas.push({ title: 'New Focus Area', description: '', icon: 'fas fa-star' });
+                                  updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                }}
+                              >
+                                <i className="fas fa-plus"></i> Add Area
+                              </button>
+                            </div>
+                            
+                            {(draft.departments[editingDepartmentIndex].keyAreas || []).length === 0 && (
+                              <div style={{ padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: '0.75rem', border: '1px dashed rgba(0,0,0,0.1)', color: 'var(--muted)', fontSize: '0.85rem' }}>
+                                No focus areas added yet.
+                              </div>
+                            )}
+                            
+                            {(draft.departments[editingDepartmentIndex].keyAreas || []).map((area, areaIdx) => (
+                              <div key={areaIdx} className="branding-repeater-card" style={{ marginBottom: '1rem', background: '#f8fafc', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '0.75rem', padding: '1.25rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                                  <button 
+                                    type="button" 
+                                    style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                                    onClick={() => {
+                                      const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                      areas.splice(areaIdx, 1);
+                                      updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                    }}
+                                  >
+                                    <i className="fas fa-trash"></i> Remove
+                                  </button>
+                                </div>
+                                <div className="branding-mini-editor-grid">
+                                  <div className="form-field">
+                                    <label>Area Title</label>
+                                    <input 
+                                      value={area.title} 
+                                      onChange={(e) => {
+                                        const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                        areas[areaIdx] = { ...area, title: e.target.value };
+                                        updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                      }} 
+                                    />
+                                  </div>
+                                  <div className="form-field">
+                                    <label>Icon Class</label>
+                                    <input 
+                                      value={area.icon} 
+                                      onChange={(e) => {
+                                        const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                        areas[areaIdx] = { ...area, icon: e.target.value };
+                                        updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                      }} 
+                                    />
+                                  </div>
+                                  <div className="form-field branding-span-full">
+                                    <label>Description</label>
+                                    <textarea 
+                                      value={area.description} 
+                                      onChange={(e) => {
+                                        const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                        areas[areaIdx] = { ...area, description: e.target.value };
+                                        updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                      }} 
+                                      style={{ minHeight: '70px', lineHeight: 1.5 }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '2.5rem 2.5rem 2.5rem 0', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ borderRadius: '0.85rem', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.08)', background: '#fff', display: 'flex', flexDirection: 'column', flex: 1, boxShadow: '0 24px 48px rgba(15,23,42,0.12)' }}>
+                        <div style={{ height: '2.4rem', background: '#f8fafc', borderBottom: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', padding: '0 1rem', gap: '0.45rem' }}>
+                          <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#ef4444' }}></div>
+                          <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#f59e0b' }}></div>
+                          <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#10b981' }}></div>
+                          <div style={{ margin: '0 auto', background: '#fff', padding: '0.15rem 1.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', color: '#94a3b8', border: '1px solid rgba(0,0,0,0.06)' }}>
+                            <i className="fas fa-lock" style={{ marginRight: '0.4rem', fontSize: '0.6rem' }}></i>
+                            thesistrack.edu/departments/{draft.departments[editingDepartmentIndex].id.toLowerCase()}
+                          </div>
+                          <div style={{ width: '42px' }}></div>
+                        </div>
+                        <div style={{ position: 'relative', flex: 1, background: '#f8fafc', overflow: 'hidden' }}>
+                          <div style={{ width: '200%', height: '200%', transform: 'scale(0.5)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
+                            <iframe
+                              key={`dept-preview-${draft.departments[editingDepartmentIndex].id}`}
+                              src={`/departments/${draft.departments[editingDepartmentIndex].id}?brandingPreview=1`}
+                              title={`Department ${draft.departments[editingDepartmentIndex].shortName} preview`}
+                              style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <section className={`admin-section-card ${isSectionActive('programs') ? '' : 'branding-section-hidden'}`}>
+              <div className="admin-section-head">
+                <div>
+                  <h3>Programs Content</h3>
+                  <p>Manage the About Departments section text and highlights.</p>
+                </div>
+              </div>
+              <div className="admin-section-body">
+                <div className="admin-form-grid">
+                  <div className="form-field">
+                    <label htmlFor="branding-programs-title">Section Title</label>
+                    <input
+                      id="branding-programs-title"
+                      value={draft.programsContent.title}
+                      onChange={(event) => updateProgramsContentField('title', event.target.value)}
+                    />
+                  </div>
+                  <div className="form-field branding-span-full">
+                    <label htmlFor="branding-programs-description">Section Description</label>
+                    <textarea
+                      id="branding-programs-description"
+                      value={draft.programsContent.description}
+                      onChange={(event) => updateProgramsContentField('description', event.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="branding-management-list">
+                  <div className="branding-management-heading">
+                    <strong>Department Highlights</strong>
+                    <span>Edit the 3 statistics shown above the department list.</span>
+                  </div>
+                  {draft.programsContent.highlights.map((highlight, index) => (
+                    <div key={highlight.id} className="branding-repeater-card">
+                      <label className="branding-toggle-line">
+                        <input
+                          checked={highlight.visible}
+                          type="checkbox"
+                          onChange={(event) => updateProgramsContentHighlight(index, 'visible', event.target.checked)}
+                        />
+                        Visible
+                      </label>
+                      <div className="branding-mini-editor-grid">
+                        <div className="form-field">
+                          <label htmlFor={`branding-programs-highlight-value-${highlight.id}`}>Highlight {index + 1} Value</label>
+                          <input
+                            id={`branding-programs-highlight-value-${highlight.id}`}
+                            value={highlight.value}
+                            onChange={(event) => updateProgramsContentHighlight(index, 'value', event.target.value)}
+                          />
+                        </div>
+                        <div className="form-field">
+                          <label htmlFor={`branding-programs-highlight-label-${highlight.id}`}>Highlight {index + 1} Label</label>
+                          <input
+                            id={`branding-programs-highlight-label-${highlight.id}`}
+                            value={highlight.label}
+                            onChange={(event) => updateProgramsContentHighlight(index, 'label', event.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </section>
@@ -2323,10 +2707,10 @@ export function SystemAdminBranding() {
                   <button
                     className="btn btn-outline small branding-preview-expand-btn"
                     type="button"
-                    onClick={() => setIsPreviewExpanded((current) => !current)}
+                    onClick={() => window.open(PREVIEW_ROUTES[previewMode], '_blank', 'noopener,noreferrer')}
                   >
-                    <i className={`fas ${isPreviewExpanded ? 'fa-down-left-and-up-right-to-center' : 'fa-up-right-and-down-left-from-center'}`}></i>
-                    {isPreviewExpanded ? 'Compact Preview' : 'Expand Preview'}
+                    <i className="fas fa-arrow-up-right-from-square"></i>
+                    Pop Out Preview
                   </button>
                 </div>
               </div>
