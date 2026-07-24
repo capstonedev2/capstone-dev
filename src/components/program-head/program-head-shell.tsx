@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser, logout } from '@/lib/mock/auth';
 import {
-  PROGRAM_HEAD_NAV_ITEMS,
+  PROGRAM_HEAD_NAV_GROUPS,
   type ProgramHeadNavKey
 } from '@/components/program-head/program-head-data';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
 
-const PROGRAM_HEAD_PREFETCH_ROUTES = PROGRAM_HEAD_NAV_ITEMS.map((item) => item.href);
+const PROGRAM_HEAD_PREFETCH_ROUTES = PROGRAM_HEAD_NAV_GROUPS.flatMap((group) => group.items.map((item) => item.href));
 
 type ProgramHeadShellProps = {
   activeNav: ProgramHeadNavKey;
@@ -217,28 +217,30 @@ export function ProgramHeadShell({
           </span>
         </div>
 
-        <nav className="student-role-sidebar-nav" aria-label="Program head navigation">
-          <div className="sidebar-nav-group">
-            <span className="sidebar-nav-heading">Academic Unit</span>
-            <div className="sidebar-nav-links">
-              {PROGRAM_HEAD_NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.key}
-                  aria-current={item.key === activeNav ? 'page' : undefined}
-                  className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
-                  href={item.href}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  onFocus={() => prefetchRoute(item.href)}
-                  onMouseEnter={() => prefetchRoute(item.href)}
-                >
-                  <span className="sidebar-link-icon">
-                    <i aria-hidden="true" className={`fas ${item.icon}`} />
-                  </span>
-                  <span className="sidebar-link-label">{item.label}</span>
-                </Link>
-              ))}
+        <nav className="sidebar-nav" aria-label="Program head navigation">
+          {PROGRAM_HEAD_NAV_GROUPS.map((group) => (
+            <div key={group.heading} className="sidebar-nav-group">
+              <span className="sidebar-nav-heading">{group.heading}</span>
+              <div className="sidebar-nav-links">
+                {group.items.map((item) => (
+                  <Link
+                    key={item.key}
+                    aria-current={item.key === activeNav ? 'page' : undefined}
+                    className={`sidebar-link ${item.key === activeNav ? 'is-active' : ''}`}
+                    href={item.href}
+                    title={sidebarCollapsed ? item.label : undefined}
+                    onFocus={() => prefetchRoute(item.href)}
+                    onMouseEnter={() => prefetchRoute(item.href)}
+                  >
+                    <span className="sidebar-link-icon">
+                      <i aria-hidden="true" className={`fas ${item.icon}`} />
+                    </span>
+                    <span className="sidebar-link-label">{item.label}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          ))}
         </nav>
       </aside>
 

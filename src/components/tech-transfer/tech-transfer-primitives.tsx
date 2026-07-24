@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { TechTransferStatusTone } from '@/components/tech-transfer/tech-transfer-data';
 
 export function TechTransferStatCard({
@@ -91,7 +92,28 @@ export function TechTransferModal({
   children: ReactNode;
   footer?: ReactNode;
 }) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
+  if (!open || !mounted) {
+    return null;
+  }
+
+  return createPortal(
     <div
       className={`modal${open ? ' show' : ''}`}
       onClick={(event) => {
@@ -110,6 +132,7 @@ export function TechTransferModal({
         <div className="modal-body">{children}</div>
         {footer ? <div className="modal-footer">{footer}</div> : null}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

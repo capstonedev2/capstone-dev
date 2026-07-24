@@ -73,7 +73,7 @@ export function ProgramHeadTransfer() {
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#0F3DDE]/5 to-[#081B4B]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="flex flex-wrap items-end gap-5 relative z-10">
           <div className="flex-1 min-w-[160px] group">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Cluster</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Cluster</label>
             <div className="relative">
               <i className="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
               <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="BSIT Cluster A">
@@ -83,7 +83,7 @@ export function ProgramHeadTransfer() {
             </div>
           </div>
           <div className="flex-1 min-w-[160px] group">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Transfer Status</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Transfer Status</label>
             <div className="relative">
               <i className="fas fa-exchange-alt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
               <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
@@ -97,7 +97,7 @@ export function ProgramHeadTransfer() {
             </div>
           </div>
           <div className="flex-1 min-w-[160px] group">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Beneficiary</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Beneficiary</label>
             <div className="relative">
               <i className="fas fa-hands-helping absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
               <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="All">
@@ -106,7 +106,7 @@ export function ProgramHeadTransfer() {
               <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
             </div>
           </div>
-          <button onClick={() => setImpactOpen(true)} className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-black shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0">
+          <button onClick={() => setImpactOpen(true)} className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-bold shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
             <i className="fas fa-chart-line group-hover:scale-110 transition-transform"></i> Impact Report
           </button>
@@ -127,7 +127,7 @@ export function ProgramHeadTransfer() {
         <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 flex flex-col relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="p-5 border-b border-slate-100/80 flex justify-between items-center relative z-10">
-            <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+            <h3 className="font-bold text-[#081B4B] text-base flex items-center gap-2">
               <i className="fas fa-chart-pie text-[#0F3DDE]/70"></i> Transfer Pipeline
             </h3>
             <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Distribution</p>
@@ -149,7 +149,7 @@ export function ProgramHeadTransfer() {
                 <div key={item.name} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50/80 ring-1 ring-slate-100 group/item hover:bg-white hover:ring-slate-200 hover:shadow-sm transition-all duration-300">
                   <span className="w-3.5 h-3.5 rounded-full ring-2 ring-offset-1 ring-white shadow-sm" style={{ backgroundColor: item.color }}></span>
                   <span className="text-xs font-bold text-slate-600 group-hover/item:text-[#081B4B] transition-colors">{item.name}</span>
-                  <span className="ml-auto font-black text-base" style={{ color: item.color }}>{item.value}</span>
+                  <span className="ml-auto font-bold text-base" style={{ color: item.color }}>{item.value}</span>
                 </div>
               ))}
             </div>
@@ -161,7 +161,7 @@ export function ProgramHeadTransfer() {
           <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
-              <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+              <h3 className="font-bold text-[#081B4B] text-base flex items-center gap-2">
                 <i className="fas fa-clipboard-check text-emerald-500/90"></i> Oversight Checklist
               </h3>
             </div>
@@ -174,7 +174,7 @@ export function ProgramHeadTransfer() {
                   <div className="flex-1">
                     <div className="flex justify-between text-sm mb-1.5">
                       <span className="font-bold text-slate-700 group-hover/list:text-[#081B4B] transition-colors">{item.label}</span>
-                      <span className="font-black text-[#081B4B]">{item.value}</span>
+                      <span className="font-bold text-[#081B4B]">{item.value}</span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 shadow-inner rounded-full overflow-hidden ring-1 ring-inset ring-slate-200/50">
                       <div className={`h-full rounded-full transition-all duration-1000 ${item.pct === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : item.pct >= 75 ? 'bg-gradient-to-r from-[#0F3DDE] to-blue-500' : 'bg-gradient-to-r from-amber-500 to-amber-400'}`} style={{ width: `${item.pct}%` }} />
@@ -187,7 +187,7 @@ export function ProgramHeadTransfer() {
           <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
-              <h3 className="font-black text-[#081B4B] text-base flex items-center gap-2">
+              <h3 className="font-bold text-[#081B4B] text-base flex items-center gap-2">
                 <i className="fas fa-map-marked-alt text-[#0F3DDE]/90"></i> Implementation Footprint
               </h3>
             </div>

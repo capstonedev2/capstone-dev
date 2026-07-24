@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type {
   EvaluationDateFilter,
   EvaluationRecommendation,
@@ -579,7 +580,24 @@ export function EvaluationModal({
   onRecommendationChange,
   onSubmit
 }: EvaluationModalProps) {
-  if (!draft) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (draft) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [!!draft]);
+
+  if (!draft || !mounted) {
     return null;
   }
 
@@ -599,7 +617,7 @@ export function EvaluationModal({
     : 0;
   const submissionLabel = draft.submittedAt ? formatEvaluationDateTime(draft.submittedAt) : 'Not yet submitted';
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[1300] flex items-start justify-center bg-slate-950/30 p-4 sm:p-6" onClick={onClose}>
       <div
         aria-label="Evaluation form"
@@ -1024,7 +1042,8 @@ export function EvaluationModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

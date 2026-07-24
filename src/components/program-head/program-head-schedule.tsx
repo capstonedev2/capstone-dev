@@ -584,12 +584,12 @@ export function ProgramHeadSchedule() {
           <div className="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Published Sessions</span>
-              <span className="text-xl font-black text-slate-800">{enrichedGroups.filter(g => g.scheduleStatus === 'Scheduled').length}</span>
+              <span className="text-xl font-bold text-slate-800">{enrichedGroups.filter(g => g.scheduleStatus === 'Scheduled').length}</span>
             </div>
             <div className="w-px h-10 bg-slate-200 mx-2" />
             <div className="flex flex-col">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Conflicts Detected</span>
-              <span className={`text-xl font-black flex items-center gap-1.5 ${scheduleConflicts.length ? 'text-rose-600' : 'text-emerald-600'}`}>
+              <span className={`text-xl font-bold flex items-center gap-1.5 ${scheduleConflicts.length ? 'text-rose-600' : 'text-emerald-600'}`}>
                 <i className={`fas ${scheduleConflicts.length ? 'fa-triangle-exclamation' : 'fa-check-circle'} text-[14px]`}></i>
                 {scheduleConflicts.length}
               </span>
@@ -780,7 +780,7 @@ export function ProgramHeadSchedule() {
                             <i className={`fas ${group.approvedTitle ? 'fa-circle-check' : 'fa-lock'} text-[12px]`} aria-hidden="true"></i>
                           </span>
                           <div className="min-w-0">
-                            <p className="text-[11px] font-black uppercase tracking-wider">
+                            <p className="text-[11px] font-bold uppercase tracking-wider">
                               {group.approvedTitle ? 'Approved Title' : 'Not Eligible'}
                             </p>
                             <p className="mt-0.5 text-[13px] font-bold leading-snug">
@@ -792,7 +792,7 @@ export function ProgramHeadSchedule() {
 
                       <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
                         <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Title Proposals</span>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Title Proposals</span>
                           <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">
                             {group.titles.length} submitted
                           </span>
@@ -802,7 +802,7 @@ export function ProgramHeadSchedule() {
                             {visibleTitles.map((title) => (
                               <div key={title.id} className="flex items-start justify-between gap-3 rounded-lg bg-white px-3 py-2 text-[12px] ring-1 ring-slate-100">
                                 <span className="min-w-0 truncate font-semibold text-slate-700">{title.title}</span>
-                                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
+                                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                   title.isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                                 }`}>
                                   {title.isApproved ? 'Approved' : formatTitleStatus(title.status)}
@@ -1096,7 +1096,7 @@ export function ProgramHeadSchedule() {
 
               {presentationOrder.length > 0 && scheduleConflicts.length > 0 && (
                 <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-[11px] font-semibold text-rose-800">
-                  <div className="mb-2 flex items-center gap-2 text-[12px] font-black">
+                  <div className="mb-2 flex items-center gap-2 text-[12px] font-bold">
                     <i className="fas fa-triangle-exclamation text-rose-500" aria-hidden="true"></i>
                     Resolve conflicts before publishing
                   </div>
@@ -1120,15 +1120,15 @@ export function ProgramHeadSchedule() {
                 <div className="grid grid-cols-3 gap-3">
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Queue</span>
-                    <strong className="mt-0.5 block text-[14px] font-black text-slate-900">{presentationOrder.length} Groups</strong>
+                    <strong className="mt-0.5 block text-[14px] font-bold text-slate-900">{presentationOrder.length} Groups</strong>
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Duration</span>
-                    <strong className="mt-0.5 block text-[14px] font-black text-blue-600">{getTotalDurationStr()}</strong>
+                    <strong className="mt-0.5 block text-[14px] font-bold text-blue-600">{getTotalDurationStr()}</strong>
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Conflicts</span>
-                    <strong className={`mt-0.5 block text-[14px] font-black ${scheduleConflicts.length ? 'text-rose-600' : 'text-emerald-600'}`}>{scheduleConflicts.length}</strong>
+                    <strong className={`mt-0.5 block text-[14px] font-bold ${scheduleConflicts.length ? 'text-rose-600' : 'text-emerald-600'}`}>{scheduleConflicts.length}</strong>
                   </div>
                 </div>
 
@@ -1136,7 +1136,7 @@ export function ProgramHeadSchedule() {
                   <button onClick={handleDraft} disabled={isSaving || presentationOrder.length === 0} className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 disabled:opacity-50">
                     Save Draft
                   </button>
-                  <button onClick={handlePublish} disabled={isSaving || presentationOrder.length === 0 || scheduleConflicts.length > 0 || !selectedScheduleStage} className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F6BE00] to-yellow-500 px-4 text-[13px] font-black text-white shadow-md transition-all hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:grayscale-[0.5]">
+                  <button onClick={handlePublish} disabled={isSaving || presentationOrder.length === 0 || scheduleConflicts.length > 0 || !selectedScheduleStage} className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#F6BE00] to-yellow-500 px-4 text-[13px] font-bold text-white shadow-md transition-all hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:grayscale-[0.5]">
                     <i className={`fas ${isSaving ? 'fa-spinner fa-spin' : 'fa-paper-plane'}`}></i>
                     {isSaving ? 'Publishing...' : 'Publish'}
                   </button>

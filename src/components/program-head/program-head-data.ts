@@ -68,20 +68,38 @@ export type ProgramHeadNotification = {
   actionLabel?: string;
 };
 
-export const PROGRAM_HEAD_NAV_ITEMS = [
-  { key: 'dashboard', href: '/program-head/dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
-  { key: 'projects', href: '/program-head/projects', label: 'Project Overview', icon: 'fa-chart-pie' },
-  { key: 'progress', href: '/program-head/progress', label: 'Progress Monitoring', icon: 'fa-chart-line' },
-  { key: 'transfer', href: '/program-head/transfer', label: 'Technology Transfer', icon: 'fa-exchange-alt' },
-  { key: 'evidence', href: '/program-head/evidence', label: 'Evidence / Accreditation', icon: 'fa-award' },
-  { key: 'performance', href: '/program-head/performance', label: 'Adviser Performance', icon: 'fa-chalkboard-teacher' },
-  { key: 'schedule', href: '/program-head/schedule', label: 'Defense Schedule', icon: 'fa-calendar-days' },
-  { key: 'reports', href: '/program-head/reports', label: 'Reports & Analytics', icon: 'fa-chart-bar' },
+export const PROGRAM_HEAD_NAV_GROUPS = [
+  {
+    heading: 'Core Workspace',
+    items: [
+      { key: 'dashboard', href: '/program-head/dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
+      { key: 'projects', href: '/program-head/projects', label: 'Project Overview', icon: 'fa-chart-pie' },
+      { key: 'progress', href: '/program-head/progress', label: 'Progress Monitoring', icon: 'fa-chart-line' },
+    ]
+  },
+  {
+    heading: 'Management & Evaluation',
+    items: [
+      { key: 'performance', href: '/program-head/performance', label: 'Adviser Performance', icon: 'fa-chalkboard-teacher' },
+      { key: 'schedule', href: '/program-head/schedule', label: 'Defense Schedule', icon: 'fa-calendar-days' },
+    ]
+  },
+  {
+    heading: 'Accreditation & Analytics',
+    items: [
+      { key: 'transfer', href: '/program-head/transfer', label: 'Technology Transfer', icon: 'fa-exchange-alt' },
+      { key: 'evidence', href: '/program-head/evidence', label: 'Evidence / Accreditation', icon: 'fa-award' },
+      { key: 'reports', href: '/program-head/reports', label: 'Reports & Analytics', icon: 'fa-chart-bar' },
+    ]
+  }
 ] as const satisfies ReadonlyArray<{
-  key: ProgramHeadNavKey;
-  href: string;
-  label: string;
-  icon: string;
+  heading: string;
+  items: ReadonlyArray<{
+    key: ProgramHeadNavKey;
+    href: string;
+    label: string;
+    icon: string;
+  }>;
 }>;
 
 export const PROGRAM_HEAD_DEPARTMENTS = [

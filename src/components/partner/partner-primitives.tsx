@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { PartnerStatusTone } from '@/components/partner/partner-data';
 
 export function PartnerStatCard({
@@ -89,9 +90,28 @@ export function PartnerModal({
   children: ReactNode;
   footer?: ReactNode;
 }) {
-  if (!open) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
+  if (!open || !mounted) {
+    return null;
+  }
+
+  return createPortal(
     <div
       style={{
         position: 'fixed',
@@ -144,6 +164,7 @@ export function PartnerModal({
           </div>
         ) : null}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

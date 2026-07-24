@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type {
   AdviserTitleRecord,
   SimilarTitleRecord,
@@ -418,6 +419,14 @@ export function TitleDetailsDrawer({
   onRequestRevision,
   onReject
 }: TitleDetailsDrawerProps) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
+  useEffect(() => {
+    if (record) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [!!record]);
+
   const [selectedPreviewId, setSelectedPreviewId] = useState<string>(GENERATED_PREVIEW_ID);
   const [signedPreviewUrls, setSignedPreviewUrls] = useState<Record<string, string>>({});
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -484,7 +493,7 @@ export function TitleDetailsDrawer({
     };
   }, [selectedUploadedFile?.id, selectedFileIsOffice, selectedSignedUrl]);
 
-  if (!record || !documentData) {
+  if (!record || !documentData || !isMounted) {
     return null;
   }
 
@@ -495,7 +504,7 @@ export function TitleDetailsDrawer({
     ? getTitleFilePreviewUrl(selectedUploadedFile, selectedSignedUrl)
     : null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6" onClick={onClose}>
       <div
         aria-label="Title details modal"
@@ -948,7 +957,8 @@ export function TitleDetailsDrawer({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

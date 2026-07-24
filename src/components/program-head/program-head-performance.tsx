@@ -16,12 +16,9 @@ import { ProgramHeadShell } from '@/components/program-head/program-head-shell';
 export function ProgramHeadPerformance() {
   const [evaluationOpen, setEvaluationOpen] = useState(false);
   const [selectedAdviser, setSelectedAdviser] = useState<string | null>(null);
-  const [deptFilter, setDeptFilter] = useState('All');
-
   const filtered = useMemo(() => {
-    if (deptFilter === 'All') return PROGRAM_HEAD_ADVISERS;
-    return PROGRAM_HEAD_ADVISERS.filter(a => a.department === deptFilter);
-  }, [deptFilter]);
+    return PROGRAM_HEAD_ADVISERS.filter(a => a.department === 'IT');
+  }, []);
 
   const avgScore = Math.round(filtered.reduce((s, a) => s + a.overallScore, 0) / (filtered.length || 1));
   const topPerformer = [...filtered].sort((a, b) => b.overallScore - a.overallScore)[0];
@@ -43,18 +40,7 @@ export function ProgramHeadPerformance() {
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#0F3DDE]/5 to-[#081B4B]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="flex flex-wrap items-end gap-5 relative z-10">
           <div className="flex-1 min-w-[180px] group">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Department</label>
-            <div className="relative">
-              <i className="fas fa-building absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
-              <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" value={deptFilter} onChange={e => setDeptFilter(e.target.value)}>
-                <option value="All">All Departments</option>
-                <option value="IT">IT</option><option value="MET">MET</option><option value="TCM">TCM</option><option value="ESM">ESM</option><option value="NAME">NAME</option>
-              </select>
-              <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
-            </div>
-          </div>
-          <div className="flex-1 min-w-[180px] group">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Period</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 pl-1 group-focus-within:text-[#0F3DDE] transition-colors">Period</label>
             <div className="relative">
               <i className="fas fa-calendar-alt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F3DDE] transition-colors"></i>
               <select className="w-full h-12 pl-11 pr-10 rounded-xl bg-slate-50/80 ring-1 ring-slate-200/60 text-sm font-bold text-slate-700 outline-none cursor-pointer hover:bg-white hover:ring-slate-300 focus:ring-2 focus:ring-[#0F3DDE] focus:bg-white transition-all appearance-none shadow-inner" defaultValue="AY 2023-2024">
@@ -63,7 +49,7 @@ export function ProgramHeadPerformance() {
               <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
             </div>
           </div>
-          <button onClick={() => setEvaluationOpen(true)} className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-black shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0">
+          <button onClick={() => setEvaluationOpen(true)} className="group relative overflow-hidden h-12 px-7 bg-gradient-to-r from-[#0F3DDE] to-[#081B4B] text-white rounded-xl text-sm font-bold shadow-[0_8px_20px_rgba(15,61,222,0.25)] hover:shadow-[0_12px_25px_rgba(15,61,222,0.35)] hover:-translate-y-0.5 transition-all flex items-center gap-2.5 shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
             <i className="fas fa-star group-hover:scale-110 transition-transform text-amber-400"></i> Conduct Evaluation
           </button>
@@ -72,7 +58,7 @@ export function ProgramHeadPerformance() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <ProgramHeadStatCard title="Total Advisers" value={filtered.length} note={`${deptFilter === 'All' ? 'All departments' : deptFilter}`} icon="fas fa-chalkboard-teacher" />
+        <ProgramHeadStatCard title="Total Advisers" value={filtered.length} note={`IT department`} icon="fas fa-chalkboard-teacher" />
         <ProgramHeadStatCard title="Average Performance" value={`${avgScore}%`} note="Department average" icon="fas fa-chart-line">
           <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mt-1">
             <div className={`h-full rounded-full ${avgScore >= 85 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${avgScore}%` }} />
@@ -87,7 +73,7 @@ export function ProgramHeadPerformance() {
         <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
-            <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-chart-bar text-[#0F3DDE]/70"></i> Performance Scores</h3>
+            <h3 className="text-lg font-bold text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-chart-bar text-[#0F3DDE]/70"></i> Performance Scores</h3>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0 mt-1">Overall scores ranked by adviser.</p>
           </div>
           <div className="p-6 h-72 min-w-0 relative z-10">
@@ -109,7 +95,7 @@ export function ProgramHeadPerformance() {
           <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.06)] transition-all duration-300 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="px-6 py-5 border-b border-slate-100/80 relative z-10">
-              <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-medal text-amber-500"></i> Top Performers</h3>
+              <h3 className="text-lg font-bold text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-medal text-amber-500"></i> Top Performers</h3>
             </div>
             <div className="p-6 space-y-3 relative z-10">
               {[...filtered].sort((a, b) => b.overallScore - a.overallScore).slice(0, 4).map((a, i) => (
@@ -123,7 +109,7 @@ export function ProgramHeadPerformance() {
                     <p className="text-sm font-bold text-[#081B4B] m-0 group-hover/item:text-[#0F3DDE] transition-colors">{a.name}</p>
                     <span className="text-[11px] font-bold text-slate-400">{a.department} · {a.projectsSupervised} projects</span>
                   </div>
-                  <span className={`text-lg font-black relative z-10 ${a.overallScore >= 90 ? 'text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'text-[#0F3DDE]'}`}>{a.overallScore}%</span>
+                  <span className={`text-lg font-bold relative z-10 ${a.overallScore >= 90 ? 'text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'text-[#0F3DDE]'}`}>{a.overallScore}%</span>
                 </div>
               ))}
             </div>
@@ -133,7 +119,7 @@ export function ProgramHeadPerformance() {
           <div className="group bg-gradient-to-b from-amber-50/90 to-amber-50/50 backdrop-blur-xl ring-1 ring-amber-200/60 rounded-2xl shadow-[0_8px_30px_rgb(245,158,11,0.04)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.08)] transition-all duration-300 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="px-6 py-5 border-b border-amber-200/60 bg-amber-100/30 relative z-10">
-              <h3 className="text-lg font-black text-amber-900 m-0 flex items-center gap-2"><i className="fas fa-lightbulb text-amber-500"></i> Areas for Development</h3>
+              <h3 className="text-lg font-bold text-amber-900 m-0 flex items-center gap-2"><i className="fas fa-lightbulb text-amber-500"></i> Areas for Development</h3>
             </div>
             <div className="p-6 space-y-3 relative z-10">
               {[
@@ -159,7 +145,7 @@ export function ProgramHeadPerformance() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100/80 relative z-10">
           <div>
-            <h3 className="text-lg font-black text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-table text-[#0F3DDE]/70"></i> Performance Metrics</h3>
+            <h3 className="text-lg font-bold text-[#081B4B] m-0 flex items-center gap-2"><i className="fas fa-table text-[#0F3DDE]/70"></i> Performance Metrics</h3>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest m-0 mt-1">{filtered.length} advisers displayed.</p>
           </div>
         </div>

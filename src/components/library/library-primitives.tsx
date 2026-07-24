@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 type LibraryCardSectionProps = {
   title: string;
@@ -83,11 +84,28 @@ export function LibraryModal({
   maxWidth = 720,
   footer
 }: LibraryModalProps) {
-  if (!open) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
+  if (!open || !mounted) {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed',
@@ -140,6 +158,7 @@ export function LibraryModal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
