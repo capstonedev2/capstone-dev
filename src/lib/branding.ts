@@ -582,9 +582,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function readStringValue(value: unknown, fallback: string) {
-  const normalized = String(value ?? fallback).trim();
-
-  return normalized || fallback;
+  return String(value ?? fallback);
 }
 
 function readBooleanValue(value: unknown, fallback: boolean) {
@@ -599,7 +597,7 @@ function sanitizeDepartmentId(value: unknown, fallback: string) {
     .replace(/-{2,}/g, '-')
     .replace(/^-|-$/g, '');
 
-  return normalized || fallback;
+  return normalized;
 }
 
 function sanitizeTextAlignment(value: unknown, fallback: BrandingLandingSettings['textAlignment']) {
@@ -1081,12 +1079,12 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
 
   return {
     version: BRANDING_VERSION,
-    systemName: String(value.systemName ?? DEFAULT_BRANDING.systemName).trim() || DEFAULT_BRANDING.systemName,
-    systemShortName: String(value.systemShortName ?? DEFAULT_BRANDING.systemShortName).trim() || DEFAULT_BRANDING.systemShortName,
+    systemName: String(value.systemName ?? DEFAULT_BRANDING.systemName),
+    systemShortName: String(value.systemShortName ?? DEFAULT_BRANDING.systemShortName),
     tagline: value.tagline !== undefined ? String(value.tagline) : DEFAULT_BRANDING.tagline,
-    institutionName: String(value.institutionName ?? DEFAULT_BRANDING.institutionName).trim() || DEFAULT_BRANDING.institutionName,
+    institutionName: String(value.institutionName ?? DEFAULT_BRANDING.institutionName),
     institutionTagline: value.institutionTagline !== undefined ? String(value.institutionTagline) : DEFAULT_BRANDING.institutionTagline,
-    themePreset: String(value.themePreset ?? DEFAULT_BRANDING.themePreset).trim() || DEFAULT_BRANDING.themePreset,
+    themePreset: String(value.themePreset ?? DEFAULT_BRANDING.themePreset),
     colors,
     derivedColors,
     assets,

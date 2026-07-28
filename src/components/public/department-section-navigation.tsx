@@ -60,9 +60,9 @@ export function DepartmentSectionNavigation() {
 
   return (
     <div className={styles.departmentPageNavControls} aria-label="Department page navigation">
-      <Link href="/#about" className={styles.departmentBackLink}>
+      <Link href="/about#about-departments" className={styles.departmentBackLink}>
         <i className="fas fa-arrow-left" aria-hidden="true" />
-        <span>Back to Home</span>
+        <span>Back to Programs</span>
       </Link>
 
       <nav className={styles.departmentSectionNav} aria-label="Department sections">

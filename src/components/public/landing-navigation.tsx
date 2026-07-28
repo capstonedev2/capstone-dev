@@ -152,6 +152,14 @@ export function LandingNavigation() {
           </div>
 
           <div className={styles.navActions}>
+            {navigation.showRegister ? (
+              <Link href="/register" className={`${styles.buttonSecondary} ${styles.navActionButton} hidden sm:flex`}>
+                <span className={styles.buttonText}>{navigation.registerLabel}</span>
+                <span className={styles.buttonIcon} aria-hidden="true">
+                  <i className="fas fa-user-plus" />
+                </span>
+              </Link>
+            ) : null}
 
             {navigation.showLogin ? (
               <Link href="/login" className={`${styles.buttonPrimary} ${styles.navActionButton}`}>

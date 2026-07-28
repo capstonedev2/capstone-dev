@@ -2,17 +2,17 @@ import { type BrandingDepartmentSettings } from '@/lib/branding';
 import { type DepartmentData } from '@/lib/landing/departments-data';
 
 function createManagedDepartmentFromBranding(department: BrandingDepartmentSettings): DepartmentData {
-  const shortName = department.shortName || department.id;
-  const name = department.name || `${shortName} Department`;
+  const shortName = department.shortName ?? department.id;
+  const name = department.name ?? `${shortName} Department`;
 
   return {
     id: department.id,
     name,
-    description: department.description || `${name} is configured as an active department in ThesisTrack.`,
-    mission: department.mission || `To support student research, capstone development, and academic project completion for ${name}.`,
-    vision: department.vision || `A department recognized for relevant student research, innovation, and community impact.`,
-    icon: department.icon || 'fas fa-building-columns',
-    color: department.color || '#2563EB',
+    description: department.description ?? `${name} is configured as an active department in ThesisTrack.`,
+    mission: department.mission ?? `To support student research, capstone development, and academic project completion for ${name}.`,
+    vision: department.vision ?? `A department recognized for relevant student research, innovation, and community impact.`,
+    icon: department.icon ?? 'fas fa-building-columns',
+    color: department.color ?? '#2563EB',
     logo: department.logo,
     keyAreas: [
       {
@@ -83,13 +83,13 @@ export function mergeDepartmentBranding(
 
       return {
         ...department,
-        name: branding.name || department.name,
-        description: branding.description || department.description,
-        mission: branding.mission || department.mission,
-        vision: branding.vision || department.vision,
-        icon: branding.icon || department.icon,
-        color: branding.color || department.color,
-        logo: branding.logo || department.logo,
+        name: branding.name ?? department.name,
+        description: branding.description ?? department.description,
+        mission: branding.mission ?? department.mission,
+        vision: branding.vision ?? department.vision,
+        icon: branding.icon ?? department.icon,
+        color: branding.color ?? department.color,
+        logo: branding.logo ?? department.logo,
         keyAreas: branding.keyAreas?.length ? branding.keyAreas : department.keyAreas,
         facilities: branding.facilities?.length ? branding.facilities : department.facilities,
         programHighlights: branding.programHighlights?.length ? branding.programHighlights : department.programHighlights

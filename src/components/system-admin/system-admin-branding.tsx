@@ -2198,7 +2198,7 @@ export function SystemAdminBranding() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
-                      <button className="btn btn-outline" type="button" onClick={() => window.open(`/departments/${draft.departments[editingDepartmentIndex].id}?brandingPreview=1`, '_blank', 'noopener,noreferrer')}>
+                      <button className="btn btn-outline" type="button" onClick={() => window.open(`/departments/${savedBranding.departments[editingDepartmentIndex]?.id || 'PREVIEW'}?brandingPreview=1&previewIndex=${editingDepartmentIndex}`, '_blank', 'noopener,noreferrer')}>
                         <i className="fas fa-arrow-up-right-from-square"></i> Pop Out Preview
                       </button>
                       <button className="btn btn-primary" type="button" onClick={() => setEditingDepartmentIndex(null)} style={{ background: draft.departments[editingDepartmentIndex].color || 'var(--primary)', borderColor: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}>
@@ -2217,10 +2217,10 @@ export function SystemAdminBranding() {
                           </h4>
                           <div className="branding-mini-editor-grid">
                             <div className="form-field">
-                              <label htmlFor={`branding-dept-id-${draft.departments[editingDepartmentIndex].id}`}>Department Code</label>
+                              <label htmlFor={`branding-dept-id-${editingDepartmentIndex}`}>Department Code</label>
                               <input
                                 disabled={DEFAULT_DEPARTMENT_IDS.has(draft.departments[editingDepartmentIndex].id.toUpperCase())}
-                                id={`branding-dept-id-${draft.departments[editingDepartmentIndex].id}`}
+                                id={`branding-dept-id-${editingDepartmentIndex}`}
                                 value={draft.departments[editingDepartmentIndex].id}
                                 onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'id', normalizeDepartmentDraftId(event.target.value))}
                               />
@@ -2229,31 +2229,31 @@ export function SystemAdminBranding() {
                               </span>
                             </div>
                             <div className="form-field">
-                              <label htmlFor={`branding-dept-short-${draft.departments[editingDepartmentIndex].id}`}>Short Name</label>
-                              <input id={`branding-dept-short-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].shortName} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'shortName', event.target.value)} />
+                              <label htmlFor={`branding-dept-short-${editingDepartmentIndex}`}>Short Name</label>
+                              <input id={`branding-dept-short-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].shortName} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'shortName', event.target.value)} />
                             </div>
                             <div className="form-field branding-span-full">
-                              <label htmlFor={`branding-dept-name-${draft.departments[editingDepartmentIndex].id}`}>Full Name</label>
-                              <input id={`branding-dept-name-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].name} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'name', event.target.value)} />
+                              <label htmlFor={`branding-dept-name-${editingDepartmentIndex}`}>Full Name</label>
+                              <input id={`branding-dept-name-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].name} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'name', event.target.value)} />
                             </div>
                             <div className="form-field branding-span-full">
-                              <label htmlFor={`branding-dept-label-${draft.departments[editingDepartmentIndex].id}`}>Register Dropdown Label</label>
-                              <input id={`branding-dept-label-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].label} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'label', event.target.value)} />
+                              <label htmlFor={`branding-dept-label-${editingDepartmentIndex}`}>Register Dropdown Label</label>
+                              <input id={`branding-dept-label-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].label} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'label', event.target.value)} />
                             </div>
                             <div className="form-field">
-                              <label htmlFor={`branding-dept-color-${draft.departments[editingDepartmentIndex].id}`}>Theme Color</label>
+                              <label htmlFor={`branding-dept-color-${editingDepartmentIndex}`}>Theme Color</label>
                               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                                 <div style={{ position: 'relative', width: '3rem', height: '3rem', borderRadius: '0.95rem', overflow: 'hidden', border: '2px solid var(--border)', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                                   <input 
                                     type="color" 
-                                    id={`branding-dept-color-picker-${draft.departments[editingDepartmentIndex].id}`} 
+                                    id={`branding-dept-color-picker-${editingDepartmentIndex}`} 
                                     value={draft.departments[editingDepartmentIndex].color.startsWith('#') ? draft.departments[editingDepartmentIndex].color : '#003A8F'} 
                                     onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'color', event.target.value)}
                                     style={{ position: 'absolute', top: '-10px', left: '-10px', width: '200%', height: '200%', cursor: 'pointer', border: 'none', padding: 0, background: 'none' }}
                                   />
                                 </div>
                                 <input 
-                                  id={`branding-dept-color-${draft.departments[editingDepartmentIndex].id}`} 
+                                  id={`branding-dept-color-${editingDepartmentIndex}`} 
                                   value={draft.departments[editingDepartmentIndex].color} 
                                   onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'color', event.target.value)} 
                                   placeholder="#000000"
@@ -2292,8 +2292,8 @@ export function SystemAdminBranding() {
                               </div>
                             </div>
                             <div className="form-field">
-                              <label htmlFor={`branding-dept-icon-${draft.departments[editingDepartmentIndex].id}`}>Icon Class</label>
-                              <input id={`branding-dept-icon-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].icon} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'icon', event.target.value)} />
+                              <label htmlFor={`branding-dept-icon-${editingDepartmentIndex}`}>Icon Class</label>
+                              <input id={`branding-dept-icon-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].icon} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'icon', event.target.value)} />
                             </div>
                           </div>
                         </div>
@@ -2323,8 +2323,8 @@ export function SystemAdminBranding() {
                              <i className="fas fa-align-left" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Public Profile
                           </h4>
                           <div className="form-field">
-                            <label htmlFor={`branding-dept-description-${draft.departments[editingDepartmentIndex].id}`}>Public Description</label>
-                            <textarea id={`branding-dept-description-${draft.departments[editingDepartmentIndex].id}`} value={draft.departments[editingDepartmentIndex].description} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'description', event.target.value)} style={{ minHeight: '120px' }} />
+                            <label htmlFor={`branding-dept-description-${editingDepartmentIndex}`}>Public Description</label>
+                            <textarea id={`branding-dept-description-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].description} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'description', event.target.value)} style={{ minHeight: '120px' }} />
                           </div>
                         </div>
 
@@ -2448,16 +2448,16 @@ export function SystemAdminBranding() {
                           <div style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#10b981' }}></div>
                           <div style={{ margin: '0 auto', background: '#fff', padding: '0.15rem 1.8rem', borderRadius: '0.4rem', fontSize: '0.7rem', color: '#94a3b8', border: '1px solid rgba(0,0,0,0.06)' }}>
                             <i className="fas fa-lock" style={{ marginRight: '0.4rem', fontSize: '0.6rem' }}></i>
-                            thesistrack.edu/departments/{draft.departments[editingDepartmentIndex].id.toLowerCase()}
+                            thesistrack.edu/departments/{savedBranding.departments[editingDepartmentIndex]?.id?.toLowerCase() || 'preview'}
                           </div>
                           <div style={{ width: '42px' }}></div>
                         </div>
                         <div style={{ position: 'relative', flex: 1, background: '#f8fafc', overflow: 'hidden' }}>
                           <div style={{ width: '200%', height: '200%', transform: 'scale(0.5)', transformOrigin: 'top left', position: 'absolute', top: 0, left: 0 }}>
                             <iframe
-                              key={`dept-preview-${draft.departments[editingDepartmentIndex].id}`}
-                              src={`/departments/${draft.departments[editingDepartmentIndex].id}?brandingPreview=1`}
-                              title={`Department ${draft.departments[editingDepartmentIndex].shortName} preview`}
+                              key={`dept-preview-${editingDepartmentIndex}`}
+                              src={`/departments/${savedBranding.departments[editingDepartmentIndex]?.id || 'PREVIEW'}?brandingPreview=1&previewIndex=${editingDepartmentIndex}`}
+                              title={`Department preview`}
                               style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
                             />
                           </div>
