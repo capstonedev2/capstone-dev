@@ -9,9 +9,11 @@ import { TeamSocialLinks } from '@/components/public/team-social-links';
 import { getDepartmentBranding } from '@/config/department-branding';
 import { teamMembers } from '@/lib/landing/team-members';
 import { prisma } from '@/lib/prisma';
-import { adjustColor, sanitizeBrandingSettings, DEFAULT_BRANDING } from '@/lib/branding';
+import { adjustColor, sanitizeBrandingSettings, DEFAULT_BRANDING, BRANDING_SETTING_KEY } from '@/lib/branding';
 
 import styles from '../page.module.css';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'About ThesisTrack | Thesis and Capstone Project Management System'
@@ -217,7 +219,7 @@ function getTeamRoleIcon(role: string) {
 
 export default async function AboutPage() {
   const setting = await prisma.systemSetting.findUnique({
-    where: { id: 'branding' }
+    where: { key: BRANDING_SETTING_KEY }
   });
   const branding = setting?.value 
     ? sanitizeBrandingSettings(setting.value as any) 
@@ -445,13 +447,10 @@ export default async function AboutPage() {
                     
                     const focusText = isDefault ? fallbackData!.focus : department.description;
                     const codeLabel = isDefault ? originalBranding!.code : (department.shortName || department.id);
-                    const isOriginalColor = originalBranding && (department.color === originalBranding.primaryColor || department.color === '#3B82F6' || department.color === '#EF4444' || department.color === '#F59E0B' || department.color === '#8B5CF6' || department.color === '#06B6D4');
-                    
-                    const primaryColor = isOriginalColor ? originalBranding!.primaryColor : department.color;
-                    
-                    const secondaryColor = isOriginalColor ? originalBranding!.secondaryColor : adjustColor(primaryColor, { lightness: -15, saturation: 10 });
-                    const highlightColor = isOriginalColor ? originalBranding!.highlightColor : adjustColor(primaryColor, { lightness: 20 });
-                    const accentColor = isOriginalColor ? originalBranding!.accentColor : adjustColor(primaryColor, { hue: 20, saturation: 20 });
+                    const primaryColor = department.color;
+                    const secondaryColor = department.secondaryColor || adjustColor(primaryColor, { lightness: -15, saturation: 10 });
+                    const highlightColor = adjustColor(primaryColor, { lightness: 20 });
+                    const accentColor = adjustColor(primaryColor, { hue: 20, saturation: 20 });
 
                     return (
                       <Link
@@ -462,8 +461,7 @@ export default async function AboutPage() {
                           '--department-primary': primaryColor,
                           '--department-secondary': secondaryColor,
                           '--department-accent': accentColor,
-                          '--department-highlight': highlightColor,
-                          '--department-text': '#FFFFFF'
+                          '--department-highlight': highlightColor
                         } as CSSProperties}
                       >
                         <div className={styles.departmentLogoMark}>
@@ -475,15 +473,16 @@ export default async function AboutPage() {
                           />
                         </div>
                         <div className={styles.departmentCardBody}>
-                          <div className={styles.departmentCardTopline}>
-                            <span>{codeLabel}</span>
-                            <i className={department.icon || (fallbackData ? fallbackData.icon : 'fas fa-building')} aria-hidden="true" />
+                          <div className={styles.departmentCardContent}>
+                            <div className={styles.departmentCardTopline}>
+                              <span>{codeLabel}</span>
+                            </div>
+                            <strong>{department.name}</strong>
+                            <p>{focusText}</p>
                           </div>
-                          <strong>{department.name}</strong>
-                          <p>{focusText}</p>
                           <div className={styles.departmentCardFooter}>
                             <em>
-                              View Department
+                              Explore
                               <i className="fas fa-arrow-right" aria-hidden="true" />
                             </em>
                           </div>

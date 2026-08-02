@@ -40,7 +40,7 @@ export function DepartmentClientContent({
 
   const branding = getDepartmentBranding(department.id);
   const primaryColor = department.color ?? branding.primaryColor;
-  const secondaryColor = adjustColor(primaryColor, { lightness: -15, saturation: 10 });
+  const secondaryColor = department.secondaryColor || adjustColor(primaryColor, { lightness: -15, saturation: 10 });
   const highlightColor = adjustColor(primaryColor, { lightness: 20 });
   const accentColor = adjustColor(primaryColor, { hue: 20, saturation: 20 });
 
@@ -108,23 +108,34 @@ export function DepartmentClientContent({
                     )}
                   </div>
                   <div>
-                    <span>Program Profile</span>
+                    <span>{department.profileCard?.heading || 'PROGRAM PROFILE'}</span>
                     <strong>{department.shortName ?? branding.code}</strong>
                   </div>
                 </div>
 
                 <div className={styles.departmentProfileFocus}>
-                  {featuredAreas.map((area: any) => (
-                    <div key={area.title}>
-                      <i className={area.icon} aria-hidden="true" />
-                      <span>{area.title}</span>
-                    </div>
-                  ))}
+                  {(() => {
+                    const profileFeatures = department.profileCard?.features?.filter((f: string) => f) || [];
+                    if (profileFeatures.length > 0) {
+                      return profileFeatures.map((feature: string, idx: number) => (
+                        <div key={idx}>
+                          <i className="fas fa-check-circle" aria-hidden="true" style={{ color: 'var(--department-primary)' }} />
+                          <span>{feature}</span>
+                        </div>
+                      ));
+                    }
+                    return featuredAreas.map((area: any) => (
+                      <div key={area.title}>
+                        <i className={area.icon} aria-hidden="true" />
+                        <span>{area.title}</span>
+                      </div>
+                    ));
+                  })()}
                 </div>
 
                 <div className={styles.departmentProfileRoute}>
-                  <span>Workflow coverage</span>
-                  <strong>Register, review, defend, archive</strong>
+                  <span>{department.profileCard?.workflowHeading || 'WORKFLOW COVERAGE'}</span>
+                  <strong>{department.profileCard?.workflowText || 'Register, review, defend, archive'}</strong>
                 </div>
               </aside>
             </div>
@@ -167,8 +178,8 @@ export function DepartmentClientContent({
         <section id="research-focus" className={`${styles.departmentAnchorSection} pb-16 sm:pb-20`}>
           <div className={styles.container}>
             <div className="text-center mb-12 max-w-3xl mx-auto" data-reveal="fade-up" style={{ '--reveal-delay': '0.15s' } as any}>
-              <h2 className="text-sm font-bold uppercase tracking-widest text-brand mb-3">Areas of Excellence</h2>
-              <p className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Key Research & Focus Areas</p>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-brand mb-3">{department.keyAreasSubheading || 'Areas of Excellence'}</h2>
+              <p className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">{department.keyAreasHeading || 'Key Research & Focus Areas'}</p>
             </div>
             <div className="grid sm:grid-cols-2 gap-6 max-w-5xl mx-auto" data-reveal="fade-up" style={{ '--reveal-delay': '0.2s' } as any}>
               {(department.keyAreas || []).map((area: any) => (
@@ -186,7 +197,11 @@ export function DepartmentClientContent({
                         borderColor: `color-mix(in srgb, ${branding.secondaryColor} 18%, white)`,
                       }}
                     >
-                      <i className={`${area.icon} text-lg`} />
+                      {area.icon && (area.icon.startsWith('http') || area.icon.startsWith('data:')) ? (
+                        <img src={area.icon} alt={area.title} className="w-6 h-6 object-contain" />
+                      ) : (
+                        <i className={`${area.icon} text-lg`} />
+                      )}
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-3">{area.title}</h3>
                     <p className="text-gray-600 leading-relaxed text-[0.9rem]">{area.description}</p>

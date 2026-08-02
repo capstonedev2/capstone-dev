@@ -12,6 +12,7 @@ export interface DepartmentData {
   stats: { label: string; value: string }[];
   chartData: { year: string; completed: number; ongoing: number }[];
   logo?: string;
+  secondaryColor?: string;
 }
 
 export const departmentsData: DepartmentData[] = [

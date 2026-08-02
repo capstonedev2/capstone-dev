@@ -487,7 +487,8 @@ function AssetUploadControl({
   onReset,
   onWarning,
   onSave,
-  isSaving
+  isSaving,
+  hideUrlInput
 }: {
   assetKey: string | BrandingAssetKey;
   description: string;
@@ -502,6 +503,7 @@ function AssetUploadControl({
   onWarning: (message: string) => void;
   onSave?: () => void;
   isSaving?: boolean;
+  hideUrlInput?: boolean;
 }) {
   const inputId = `branding-asset-${assetKey}`;
   const isBackground = assetKey === 'loginBackground' || assetKey === 'registerBackground';
@@ -581,15 +583,17 @@ function AssetUploadControl({
           </button>
         )}
       </div>
-      <div className="form-field branding-asset-url">
-        <label htmlFor={`${inputId}-url`}>Asset URL</label>
-        <input
-          id={`${inputId}-url`}
-          placeholder="/logo.png or https://..."
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-        />
-      </div>
+      {!hideUrlInput && (
+        <div className="form-field branding-asset-url">
+          <label htmlFor={`${inputId}-url`}>Asset URL</label>
+          <input
+            id={`${inputId}-url`}
+            placeholder="/logo.png or https://..."
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -1178,12 +1182,22 @@ export function SystemAdminBranding() {
 
   };
 
-  const handleDepartmentFile = (index: number, departmentId: string, file: File, previewUrl: string) => {
+  const handleDepartmentFile = (index: number, departmentId: string, file: File, previewUrl: string, type: 'logo' | 'keyArea' = 'logo', areaIndex?: number) => {
+    const fileKey = type === 'logo' ? `${departmentId}|logo` : `${departmentId}|keyArea|${areaIndex}`;
     setPendingDepartmentFiles((current) => ({
       ...current,
-      [departmentId]: file
+      [fileKey]: file
     }));
-    updateDepartmentField(index, 'logo', previewUrl);
+    
+    if (type === 'logo') {
+      updateDepartmentField(index, 'logo', previewUrl);
+    } else if (type === 'keyArea' && typeof areaIndex === 'number') {
+      const areas = [...(draft.departments[index].keyAreas || [])];
+      if (areas[areaIndex]) {
+        areas[areaIndex] = { ...areas[areaIndex], icon: previewUrl };
+        updateDepartmentField(index, 'keyAreas', areas);
+      }
+    }
   };
 
   const addDepartment = () => {
@@ -1320,16 +1334,22 @@ export function SystemAdminBranding() {
       }
     }
 
-    for (const [deptId, file] of Object.entries(pendingDepartmentFiles)) {
+    for (const [fileKey, file] of Object.entries(pendingDepartmentFiles)) {
       if (!file) {
         continue;
       }
 
+      // fileKey format: "deptId|logo" or "deptId|keyArea|0" or just "deptId" for legacy
+      const parts = fileKey.split('|');
+      const deptId = parts[0];
+      const type = parts[1] || 'logo';
+      const areaIndex = parts[2] ? parseInt(parts[2], 10) : 0;
+
       try {
         const formData = new FormData();
         formData.set('file', file);
-        formData.set('type', 'SCHOOL_LOGO');
-        formData.set('label', `dept-${deptId}`);
+        formData.set('type', type === 'logo' ? 'SCHOOL_LOGO' : 'OTHER');
+        formData.set('label', fileKey);
 
         const response = await fetch('/api/admin/media/upload', {
           method: 'POST',
@@ -1344,10 +1364,14 @@ export function SystemAdminBranding() {
 
         const deptIndex = nextBranding.departments.findIndex(d => d.id === deptId);
         if (deptIndex !== -1) {
-          nextBranding.departments[deptIndex].logo = payload.data.secure_url;
+          if (type === 'logo') {
+            nextBranding.departments[deptIndex].logo = payload.data.secure_url;
+          } else if (type === 'keyArea' && nextBranding.departments[deptIndex].keyAreas?.[areaIndex]) {
+            nextBranding.departments[deptIndex].keyAreas[areaIndex].icon = payload.data.secure_url;
+          }
         }
       } catch (err: any) {
-        console.error(`Upload failed for department ${deptId}:`, err);
+        console.error(`Upload failed for department ${deptId} (${type}):`, err);
         throw err;
       }
     }
@@ -2212,7 +2236,7 @@ export function SystemAdminBranding() {
                       <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         
                         <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
-                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <h4 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '2rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                              <i className="fas fa-id-card" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Core Identity
                           </h4>
                           <div className="branding-mini-editor-grid">
@@ -2241,7 +2265,7 @@ export function SystemAdminBranding() {
                               <input id={`branding-dept-label-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].label} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'label', event.target.value)} />
                             </div>
                             <div className="form-field">
-                              <label htmlFor={`branding-dept-color-${editingDepartmentIndex}`}>Theme Color</label>
+                              <label htmlFor={`branding-dept-color-${editingDepartmentIndex}`}>Primary Color</label>
                               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                                 <div style={{ position: 'relative', width: '3rem', height: '3rem', borderRadius: '0.95rem', overflow: 'hidden', border: '2px solid var(--border)', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                                   <input 
@@ -2292,14 +2316,146 @@ export function SystemAdminBranding() {
                               </div>
                             </div>
                             <div className="form-field">
+                              <label htmlFor={`branding-dept-color-secondary-${editingDepartmentIndex}`}>Secondary Color (Optional)</label>
+                              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                <div style={{ position: 'relative', width: '3rem', height: '3rem', borderRadius: '0.95rem', overflow: 'hidden', border: '2px solid var(--border)', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                                  <input 
+                                    type="color" 
+                                    id={`branding-dept-color-secondary-picker-${editingDepartmentIndex}`} 
+                                    value={draft.departments[editingDepartmentIndex].secondaryColor?.startsWith('#') ? draft.departments[editingDepartmentIndex].secondaryColor : '#000000'} 
+                                    onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'secondaryColor', event.target.value)}
+                                    style={{ position: 'absolute', top: '-10px', left: '-10px', width: '200%', height: '200%', cursor: 'pointer', border: 'none', padding: 0, background: 'none' }}
+                                  />
+                                </div>
+                                <input 
+                                  id={`branding-dept-color-secondary-${editingDepartmentIndex}`} 
+                                  value={draft.departments[editingDepartmentIndex].secondaryColor || ''} 
+                                  onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'secondaryColor', event.target.value)} 
+                                  placeholder="Auto-generated"
+                                  style={{ flex: 1, fontFamily: 'monospace', letterSpacing: '0.05em', fontWeight: 600 }}
+                                />
+                                {draft.departments[editingDepartmentIndex].secondaryColor && (
+                                  <button type="button" onClick={() => updateDepartmentField(editingDepartmentIndex, 'secondaryColor', '')} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Reset to auto-generated">
+                                    <i className="fas fa-xmark text-lg"></i>
+                                  </button>
+                                )}
+                              </div>
+                              <span className="branding-field-note" style={{ marginTop: '0.75rem' }}>Leave blank to automatically calculate the secondary gradient based on the primary color.</span>
+                            </div>
+                            <div className="form-field">
                               <label htmlFor={`branding-dept-icon-${editingDepartmentIndex}`}>Icon Class</label>
                               <input id={`branding-dept-icon-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].icon} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'icon', event.target.value)} />
+                            </div>
+                            <div className="form-field branding-span-full" style={{ marginTop: '1rem' }}>
+                              <label htmlFor={`branding-dept-description-${editingDepartmentIndex}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <i className="fas fa-quote-left text-brand-primary"></i> Public Description
+                              </label>
+                              <textarea 
+                                id={`branding-dept-description-${editingDepartmentIndex}`} 
+                                value={draft.departments[editingDepartmentIndex].description} 
+                                onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'description', event.target.value)} 
+                                style={{ minHeight: '120px', lineHeight: 1.6, border: '1px solid rgba(0,0,0,0.08)', borderRadius: '0.5rem', padding: '1rem', width: '100%' }} 
+                                placeholder="Describe the vision, mission, and scope of this department..."
+                              />
+                            </div>
+                          </div>
+
+                          <div className="branding-form-section branding-form-section-highlighted" style={{ marginTop: '2.5rem' }}>
+                            <div className="branding-section-header-compact">
+                              <h4><i className="fas fa-address-card"></i> Program Profile Card</h4>
+                            </div>
+                            <div className="branding-mini-editor-grid">
+                              <div className="form-field">
+                                <label>Card Heading (e.g. PROGRAM PROFILE)</label>
+                                <input 
+                                  value={draft.departments[editingDepartmentIndex].profileCard?.heading || 'PROGRAM PROFILE'} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...draft.departments[editingDepartmentIndex].profileCard, heading: e.target.value })} 
+                                />
+                              </div>
+                              <div className="form-field branding-span-full">
+                                <label>Custom Bullet Points (Optional)</label>
+                                
+                                <div className="branding-repeater-container" style={{ background: '#fafafa', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '0.75rem', overflow: 'hidden' }}>
+                                  <div className="branding-repeater-actions" style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.05)', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)' }}>Points List</span>
+                                    <button 
+                                      type="button" 
+                                      className="btn btn-outline"
+                                      style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', height: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '0.5rem', background: '#fff' }}
+                                      onClick={() => {
+                                        const currentCard = draft.departments[editingDepartmentIndex].profileCard || {};
+                                        const features = [...(currentCard.features || [])];
+                                        features.push('New Bullet Point');
+                                        updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...currentCard, features });
+                                      }}
+                                    >
+                                      <i className="fas fa-plus text-brand-primary"></i> Add Bullet Point
+                                    </button>
+                                  </div>
+                                  
+                                  {(!draft.departments[editingDepartmentIndex].profileCard?.features || draft.departments[editingDepartmentIndex].profileCard.features.length === 0) && (
+                                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.85rem', background: '#fff', margin: '1rem', borderRadius: '0.5rem', border: '1px dashed rgba(0,0,0,0.1)' }}>
+                                      <i className="fas fa-list-ul" style={{ display: 'block', fontSize: '1.25rem', marginBottom: '0.5rem', opacity: 0.5 }}></i>
+                                      No custom bullet points. Falling back to Key Research Areas.
+                                    </div>
+                                  )}
+
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem' }}>
+                                    {(draft.departments[editingDepartmentIndex].profileCard?.features || []).map((feature, i) => (
+                                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid rgba(0,0,0,0.04)' }}>
+                                        <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: '0.35rem', color: 'var(--muted)', fontSize: '0.7rem', flexShrink: 0, border: '1px solid rgba(0,0,0,0.05)' }}>
+                                          {i + 1}
+                                        </div>
+                                        <input 
+                                          placeholder="e.g. Network Administration"
+                                          value={feature}
+                                          onChange={(e) => {
+                                            const currentCard = draft.departments[editingDepartmentIndex].profileCard || {};
+                                            const features = [...(currentCard.features || [])];
+                                            features[i] = e.target.value;
+                                            updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...currentCard, features });
+                                          }}
+                                          style={{ flex: 1, border: 'none', background: 'transparent', boxShadow: 'none', padding: '0.25rem' }}
+                                        />
+                                        <button 
+                                          type="button"
+                                          style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', padding: '0.4rem', opacity: 0.6, transition: 'opacity 0.2s' }}
+                                          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                                          onClick={() => {
+                                            const currentCard = draft.departments[editingDepartmentIndex].profileCard || {};
+                                            const features = [...(currentCard.features || [])];
+                                            features.splice(i, 1);
+                                            updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...currentCard, features });
+                                          }}
+                                        >
+                                          <i className="fas fa-times"></i>
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="form-field">
+                                <label>Workflow Heading (e.g. WORKFLOW COVERAGE)</label>
+                                <input 
+                                  value={draft.departments[editingDepartmentIndex].profileCard?.workflowHeading || 'WORKFLOW COVERAGE'} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...draft.departments[editingDepartmentIndex].profileCard, workflowHeading: e.target.value })} 
+                                />
+                              </div>
+                              <div className="form-field">
+                                <label>Workflow Text</label>
+                                <input 
+                                  value={draft.departments[editingDepartmentIndex].profileCard?.workflowText || 'Register, review, defend, archive'} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...draft.departments[editingDepartmentIndex].profileCard, workflowText: e.target.value })} 
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
 
                         <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
-                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <h4 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '2rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                              <i className="fas fa-image" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Brand Assets
                           </h4>
                           <AssetUploadControl
@@ -2308,7 +2464,7 @@ export function SystemAdminBranding() {
                             description={`Upload a specific logo for ${draft.departments[editingDepartmentIndex].shortName || 'this department'}.`}
                             label={`${draft.departments[editingDepartmentIndex].shortName || 'Department'} Logo`}
                             maxBytes={5_000_000}
-                            pendingFile={pendingDepartmentFiles[draft.departments[editingDepartmentIndex].id]}
+                            pendingFile={pendingDepartmentFiles[`${draft.departments[editingDepartmentIndex].id}|logo`] || pendingDepartmentFiles[draft.departments[editingDepartmentIndex].id]}
                             value={draft.departments[editingDepartmentIndex].logo}
                             onChange={(value) => updateDepartmentField(editingDepartmentIndex, 'logo', value)}
                             onFile={(file, previewUrl) => handleDepartmentFile(editingDepartmentIndex, draft.departments[editingDepartmentIndex].id, file, previewUrl)}
@@ -2319,123 +2475,173 @@ export function SystemAdminBranding() {
                         </div>
 
                         <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
-                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                             <i className="fas fa-align-left" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Public Profile
-                          </h4>
-                          <div className="form-field">
-                            <label htmlFor={`branding-dept-description-${editingDepartmentIndex}`}>Public Description</label>
-                            <textarea id={`branding-dept-description-${editingDepartmentIndex}`} value={draft.departments[editingDepartmentIndex].description} onChange={(event) => updateDepartmentField(editingDepartmentIndex, 'description', event.target.value)} style={{ minHeight: '120px' }} />
-                          </div>
-                        </div>
-
-                        <div style={{ background: '#fff', borderRadius: '1.25rem', padding: '1.75rem', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderTop: `4px solid ${draft.departments[editingDepartmentIndex].color || 'var(--border)'}` }}>
-                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <h4 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '2rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                              <i className="fas fa-graduation-cap" style={{ color: draft.departments[editingDepartmentIndex].color || 'var(--primary)' }}></i> Academic Configuration
                           </h4>
                           
-                          <div className="form-field">
-                            <label>Facilities & Labs</label>
-                            <span className="branding-field-note" style={{ marginBottom: '0.5rem' }}>Enter one facility per line. Shown as a list on the public page.</span>
-                            <textarea 
-                              value={(draft.departments[editingDepartmentIndex].facilities || []).join('\n')} 
-                              onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'facilities', e.target.value.split('\n'))} 
-                              style={{ minHeight: '120px', lineHeight: 1.6 }} 
-                              placeholder="Advanced Computer Laboratories...&#10;Networking & Cybersecurity Laboratory...&#10;Software Development Hub..."
-                            />
+                          <div className="branding-form-section branding-form-section-highlighted" style={{ marginBottom: '2rem' }}>
+                            <div className="branding-section-header-compact">
+                              <h4><i className="fas fa-flask"></i> Facilities & Labs</h4>
+                            </div>
+                            <div className="form-field">
+                              <textarea 
+                                value={(draft.departments[editingDepartmentIndex].facilities || []).join('\n')} 
+                                onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'facilities', e.target.value.split('\n'))} 
+                                style={{ minHeight: '120px', lineHeight: 1.6, border: '1px solid rgba(0,0,0,0.08)', borderRadius: '0.5rem', padding: '1rem' }} 
+                                placeholder="Advanced Computer Laboratories...&#10;Networking & Cybersecurity Laboratory...&#10;Software Development Hub..."
+                              />
+                            </div>
                           </div>
 
-                          <div className="form-field" style={{ marginTop: '1.5rem' }}>
-                            <label>Program Highlights</label>
-                            <span className="branding-field-note" style={{ marginBottom: '0.5rem' }}>Enter one highlight per line. Shown as bullet points.</span>
-                            <textarea 
-                              value={(draft.departments[editingDepartmentIndex].programHighlights || []).join('\n')} 
-                              onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'programHighlights', e.target.value.split('\n'))} 
-                              style={{ minHeight: '120px', lineHeight: 1.6 }} 
-                              placeholder="Three specialized tracks...&#10;Industry certification programs...&#10;Hands-on training..."
-                            />
+                          <div className="branding-form-section branding-form-section-highlighted" style={{ marginBottom: '2.5rem' }}>
+                            <div className="branding-section-header-compact">
+                              <h4><i className="fas fa-star"></i> Program Highlights</h4>
+                            </div>
+                            <div className="form-field">
+                              <textarea 
+                                value={(draft.departments[editingDepartmentIndex].programHighlights || []).join('\n')} 
+                                onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'programHighlights', e.target.value.split('\n'))} 
+                                style={{ minHeight: '120px', lineHeight: 1.6, border: '1px solid rgba(0,0,0,0.08)', borderRadius: '0.5rem', padding: '1rem' }} 
+                                placeholder="Three specialized tracks...&#10;Industry certification programs...&#10;Hands-on training..."
+                              />
+                            </div>
                           </div>
                           
-                          <div style={{ marginTop: '2.5rem' }}>
-                            <div className="branding-management-heading" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div>
-                                <strong>Key Research & Focus Areas</strong>
-                                <span className="branding-field-note" style={{ display: 'block' }}>Add the core competency tracks for this program.</span>
-                              </div>
-                              <button 
-                                type="button" 
-                                className="btn btn-outline small"
-                                onClick={() => {
-                                  const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
-                                  areas.push({ title: 'New Focus Area', description: '', icon: 'fas fa-star' });
-                                  updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
-                                }}
-                              >
-                                <i className="fas fa-plus"></i> Add Area
-                              </button>
+                          <div className="branding-form-section branding-form-section-highlighted">
+                            <div className="branding-section-header-compact">
+                              <h4><i className="fas fa-microscope"></i> Key Research & Focus Areas</h4>
                             </div>
                             
-                            {(draft.departments[editingDepartmentIndex].keyAreas || []).length === 0 && (
-                              <div style={{ padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: '0.75rem', border: '1px dashed rgba(0,0,0,0.1)', color: 'var(--muted)', fontSize: '0.85rem' }}>
-                                No focus areas added yet.
+                            <div className="branding-mini-editor-grid" style={{ marginBottom: '1.25rem' }}>
+                              <div className="form-field">
+                                <label>Section Heading</label>
+                                <input 
+                                  value={draft.departments[editingDepartmentIndex].keyAreasHeading || 'Key Research & Focus Areas'} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'keyAreasHeading', e.target.value)} 
+                                />
                               </div>
-                            )}
+                              <div className="form-field">
+                                <label>Section Subheading</label>
+                                <input 
+                                  value={draft.departments[editingDepartmentIndex].keyAreasSubheading || 'Areas of Excellence'} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'keyAreasSubheading', e.target.value)} 
+                                />
+                              </div>
+                            </div>
                             
-                            {(draft.departments[editingDepartmentIndex].keyAreas || []).map((area, areaIdx) => (
-                              <div key={areaIdx} className="branding-repeater-card" style={{ marginBottom: '1rem', background: '#f8fafc', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '0.75rem', padding: '1.25rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-                                  <button 
-                                    type="button" 
-                                    style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                                    onClick={() => {
-                                      const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
-                                      areas.splice(areaIdx, 1);
-                                      updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
-                                    }}
-                                  >
-                                    <i className="fas fa-trash"></i> Remove
-                                  </button>
-                                </div>
-                                <div className="branding-mini-editor-grid">
-                                  <div className="form-field">
-                                    <label>Area Title</label>
-                                    <input 
-                                      value={area.title} 
-                                      onChange={(e) => {
-                                        const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
-                                        areas[areaIdx] = { ...area, title: e.target.value };
-                                        updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
-                                      }} 
-                                    />
-                                  </div>
-                                  <div className="form-field">
-                                    <label>Icon Class</label>
-                                    <input 
-                                      value={area.icon} 
-                                      onChange={(e) => {
-                                        const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
-                                        areas[areaIdx] = { ...area, icon: e.target.value };
-                                        updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
-                                      }} 
-                                    />
-                                  </div>
-                                  <div className="form-field branding-span-full">
-                                    <label>Description</label>
-                                    <textarea 
-                                      value={area.description} 
-                                      onChange={(e) => {
-                                        const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
-                                        areas[areaIdx] = { ...area, description: e.target.value };
-                                        updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
-                                      }} 
-                                      style={{ minHeight: '70px', lineHeight: 1.5 }}
-                                    />
-                                  </div>
-                                </div>
+                            <div className="branding-repeater-container" style={{ background: '#fafafa', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '0.75rem', overflow: 'hidden' }}>
+                              <div className="branding-repeater-actions" style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.05)', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)' }}>Research Areas List</span>
+                                <button 
+                                  type="button" 
+                                  className="btn btn-outline"
+                                  style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', height: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '0.5rem', background: '#fff' }}
+                                  onClick={() => {
+                                    const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                    areas.push({ title: 'New Focus Area', description: '', icon: 'fas fa-star' });
+                                    updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                  }}
+                                >
+                                  <i className="fas fa-plus text-brand-primary"></i> Add Area
+                                </button>
                               </div>
-                            ))}
+                              
+                              {(draft.departments[editingDepartmentIndex].keyAreas || []).length === 0 && (
+                                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.85rem', background: '#fff', margin: '1rem', borderRadius: '0.5rem', border: '1px dashed rgba(0,0,0,0.1)' }}>
+                                  <i className="fas fa-microscope" style={{ display: 'block', fontSize: '1.25rem', marginBottom: '0.5rem', opacity: 0.5 }}></i>
+                                  No focus areas added yet.
+                                </div>
+                              )}
+                              
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+                                {(draft.departments[editingDepartmentIndex].keyAreas || []).map((area, areaIdx) => (
+                                  <div key={areaIdx} className="branding-repeater-card" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '0.85rem', padding: '1.25rem', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.75rem' }}>
+                                      <strong style={{ fontSize: '0.85rem', color: 'var(--brand-primary)' }}>Focus Area {areaIdx + 1}</strong>
+                                      <button 
+                                        type="button" 
+                                        style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                                        onClick={() => {
+                                          const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                          areas.splice(areaIdx, 1);
+                                          updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                        }}
+                                      >
+                                        <i className="fas fa-trash"></i>
+                                      </button>
+                                    </div>
+                                    <div className="branding-mini-editor-grid" style={{ gridTemplateColumns: '1fr', gap: '1rem' }}>
+                                      <div className="form-field">
+                                        <label>Area Title</label>
+                                        <input 
+                                          value={area.title} 
+                                          onChange={(e) => {
+                                            const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                            areas[areaIdx] = { ...area, title: e.target.value };
+                                            updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                          }} 
+                                          style={{ fontWeight: 'bold' }}
+                                        />
+                                      </div>
+                                      <div className="form-field">
+                                        <label>Icon (Class, URL, or Upload)</label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                          <div>
+                                            <input 
+                                              placeholder="Class (fas fa-star) or https://..."
+                                              value={area.icon} 
+                                              onChange={(e) => {
+                                                const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                                areas[areaIdx] = { ...area, icon: e.target.value };
+                                                updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                              }} 
+                                            />
+                                          </div>
+                                          <div>
+                                            <AssetUploadControl
+                                              accept="image/png,image/jpeg,image/svg+xml"
+                                              assetKey={`dept-${draft.departments[editingDepartmentIndex].id}-keyarea-${areaIdx}`}
+                                              label="Upload Icon Image"
+                                              description=""
+                                              maxBytes={2_000_000}
+                                              pendingFile={pendingDepartmentFiles[`${draft.departments[editingDepartmentIndex].id}|keyArea|${areaIdx}`]}
+                                              value={area.icon.startsWith('http') || area.icon.startsWith('data:') ? area.icon : ''}
+                                              onChange={(value) => {
+                                                const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                                areas[areaIdx] = { ...area, icon: value };
+                                                updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                              }}
+                                              onFile={(file, previewUrl) => handleDepartmentFile(editingDepartmentIndex, draft.departments[editingDepartmentIndex].id, file, previewUrl, 'keyArea', areaIdx)}
+                                              onReset={() => {
+                                                const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                                areas[areaIdx] = { ...area, icon: 'fas fa-star' };
+                                                updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                              }}
+                                              isSaving={isSaving}
+                                              hideUrlInput={true}
+                                            />
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="form-field">
+                                        <label>Description</label>
+                                        <textarea 
+                                          value={area.description} 
+                                          onChange={(e) => {
+                                            const areas = [...(draft.departments[editingDepartmentIndex].keyAreas || [])];
+                                            areas[areaIdx] = { ...area, description: e.target.value };
+                                            updateDepartmentField(editingDepartmentIndex, 'keyAreas', areas);
+                                          }} 
+                                          style={{ minHeight: '90px', lineHeight: 1.5 }}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                         </div>
-
 
                       </div>
                     </div>
@@ -2472,65 +2678,82 @@ export function SystemAdminBranding() {
             <section className={`admin-section-card ${isSectionActive('programs') ? '' : 'branding-section-hidden'}`}>
               <div className="admin-section-head">
                 <div>
-                  <h3>Programs Content</h3>
-                  <p>Manage the About Departments section text and highlights.</p>
+                  <h3><i className="fas fa-layer-group" style={{ marginRight: '0.75rem', color: 'var(--brand-primary)' }}></i> Programs Content</h3>
                 </div>
               </div>
               <div className="admin-section-body">
-                <div className="admin-form-grid">
-                  <div className="form-field">
-                    <label htmlFor="branding-programs-title">Section Title</label>
-                    <input
-                      id="branding-programs-title"
-                      value={draft.programsContent.title}
-                      onChange={(event) => updateProgramsContentField('title', event.target.value)}
-                    />
+                <div className="branding-form-section">
+                  <div className="branding-section-header-compact" style={{ marginBottom: '1.25rem' }}>
+                    <h4><i className="fas fa-heading"></i> Global Header</h4>
                   </div>
-                  <div className="form-field branding-span-full">
-                    <label htmlFor="branding-programs-description">Section Description</label>
-                    <textarea
-                      id="branding-programs-description"
-                      value={draft.programsContent.description}
-                      onChange={(event) => updateProgramsContentField('description', event.target.value)}
-                    />
+                  <div className="branding-mini-editor-grid">
+                    <div className="form-field branding-span-full">
+                      <label htmlFor="branding-programs-title">Section Title</label>
+                      <input
+                        id="branding-programs-title"
+                        value={draft.programsContent.title}
+                        onChange={(event) => updateProgramsContentField('title', event.target.value)}
+                        placeholder="e.g. Academic Departments & Programs"
+                        style={{ fontSize: '1.1rem', fontWeight: 'bold' }}
+                      />
+                    </div>
+                    <div className="form-field branding-span-full">
+                      <label htmlFor="branding-programs-description">Section Description</label>
+                      <textarea
+                        id="branding-programs-description"
+                        value={draft.programsContent.description}
+                        onChange={(event) => updateProgramsContentField('description', event.target.value)}
+                        placeholder="Provide a short description of the programs offered..."
+                        style={{ minHeight: '100px', lineHeight: '1.6' }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="branding-management-list">
-                  <div className="branding-management-heading">
-                    <strong>Department Highlights</strong>
-                    <span>Edit the 3 statistics shown above the department list.</span>
+                <div className="branding-form-section branding-form-section-highlighted" style={{ marginTop: '2rem' }}>
+                  <div className="branding-section-header-compact" style={{ marginBottom: '1.25rem' }}>
+                    <h4><i className="fas fa-star"></i> Global Highlights</h4>
                   </div>
-                  {draft.programsContent.highlights.map((highlight, index) => (
-                    <div key={highlight.id} className="branding-repeater-card">
-                      <label className="branding-toggle-line">
-                        <input
-                          checked={highlight.visible}
-                          type="checkbox"
-                          onChange={(event) => updateProgramsContentHighlight(index, 'visible', event.target.checked)}
-                        />
-                        Visible
-                      </label>
-                      <div className="branding-mini-editor-grid">
-                        <div className="form-field">
-                          <label htmlFor={`branding-programs-highlight-value-${highlight.id}`}>Highlight {index + 1} Value</label>
-                          <input
-                            id={`branding-programs-highlight-value-${highlight.id}`}
-                            value={highlight.value}
-                            onChange={(event) => updateProgramsContentHighlight(index, 'value', event.target.value)}
-                          />
+                  
+                  <div className="branding-repeater-container">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+                      {draft.programsContent.highlights.map((highlight, index) => (
+                        <div key={highlight.id} className="branding-repeater-card" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '0.85rem', padding: '1.25rem', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.75rem' }}>
+                            <strong style={{ fontSize: '0.85rem', color: 'var(--brand-primary)' }}>Highlight {index + 1}</strong>
+                            <label className="branding-toggle-line" style={{ margin: 0 }}>
+                              <input
+                                checked={highlight.visible}
+                                type="checkbox"
+                                onChange={(event) => updateProgramsContentHighlight(index, 'visible', event.target.checked)}
+                              />
+                              <span style={{ fontSize: '0.8rem' }}>Visible</span>
+                            </label>
+                          </div>
+                          <div className="branding-mini-editor-grid" style={{ gridTemplateColumns: '1fr', gap: '1rem' }}>
+                            <div className="form-field">
+                              <label htmlFor={`branding-programs-highlight-value-${highlight.id}`}>Value (e.g. 50+)</label>
+                              <input
+                                id={`branding-programs-highlight-value-${highlight.id}`}
+                                value={highlight.value}
+                                onChange={(event) => updateProgramsContentHighlight(index, 'value', event.target.value)}
+                                style={{ fontSize: '1.25rem', fontWeight: 'bold', textAlign: 'center', color: 'var(--brand-primary)' }}
+                              />
+                            </div>
+                            <div className="form-field">
+                              <label htmlFor={`branding-programs-highlight-label-${highlight.id}`}>Label (e.g. Certified Programs)</label>
+                              <input
+                                id={`branding-programs-highlight-label-${highlight.id}`}
+                                value={highlight.label}
+                                onChange={(event) => updateProgramsContentHighlight(index, 'label', event.target.value)}
+                                style={{ textAlign: 'center' }}
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="form-field">
-                          <label htmlFor={`branding-programs-highlight-label-${highlight.id}`}>Highlight {index + 1} Label</label>
-                          <input
-                            id={`branding-programs-highlight-label-${highlight.id}`}
-                            value={highlight.label}
-                            onChange={(event) => updateProgramsContentHighlight(index, 'label', event.target.value)}
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             </section>

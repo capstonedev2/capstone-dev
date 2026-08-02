@@ -13,6 +13,7 @@ function createManagedDepartmentFromBranding(department: BrandingDepartmentSetti
     vision: department.vision ?? `A department recognized for relevant student research, innovation, and community impact.`,
     icon: department.icon ?? 'fas fa-building-columns',
     color: department.color ?? '#2563EB',
+    secondaryColor: department.secondaryColor,
     logo: department.logo,
     keyAreas: [
       {
@@ -36,23 +37,23 @@ function createManagedDepartmentFromBranding(department: BrandingDepartmentSetti
         icon: 'fas fa-handshake-angle'
       }
     ],
-    facilities: [
+    facilities: department.facilities?.length ? department.facilities : [
       `${shortName} consultation and advisement workspace`,
       `${shortName} research documentation resources`,
       `${shortName} project review and monitoring support`
     ],
-    programHighlights: [
+    programHighlights: department.programHighlights?.length ? department.programHighlights : [
       `${shortName} is available in student registration and department routing`,
       'Department profile content is managed from System Admin branding',
       'Capstone progress, review, and repository workflows are supported'
     ],
-    stats: [
+    stats: department.stats?.length ? department.stats : [
       { label: 'Active Students', value: 'New' },
       { label: 'Faculty Members', value: 'New' },
       { label: 'Capstones Completed', value: '0' },
       { label: 'Program Status', value: 'Active' }
     ],
-    chartData: [
+    chartData: department.chartData?.length ? department.chartData : [
       { year: '2023', completed: 0, ongoing: 0 },
       { year: '2024', completed: 0, ongoing: 0 },
       { year: '2025', completed: 0, ongoing: 0 },
@@ -89,10 +90,13 @@ export function mergeDepartmentBranding(
         vision: branding.vision ?? department.vision,
         icon: branding.icon ?? department.icon,
         color: branding.color ?? department.color,
+        secondaryColor: branding.secondaryColor ?? department.secondaryColor,
         logo: branding.logo ?? department.logo,
         keyAreas: branding.keyAreas?.length ? branding.keyAreas : department.keyAreas,
         facilities: branding.facilities?.length ? branding.facilities : department.facilities,
-        programHighlights: branding.programHighlights?.length ? branding.programHighlights : department.programHighlights
+        programHighlights: branding.programHighlights?.length ? branding.programHighlights : department.programHighlights,
+        stats: branding.stats?.length ? branding.stats : department.stats,
+        chartData: branding.chartData?.length ? branding.chartData : department.chartData
       };
     })
     .filter((department): department is DepartmentData => Boolean(department));

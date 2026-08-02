@@ -128,11 +128,22 @@ export type BrandingDepartmentSettings = {
   vision: string;
   icon: string;
   color: string;
+  secondaryColor?: string;
   logo: string;
   active: boolean;
   keyAreas?: { title: string; description: string; icon: string }[];
   facilities?: string[];
   programHighlights?: string[];
+  stats?: { label: string; value: string }[];
+  chartData?: { year: string; completed: number; ongoing: number }[];
+  profileCard?: {
+    heading: string;
+    features: string[];
+    workflowHeading: string;
+    workflowText: string;
+  };
+  keyAreasHeading?: string;
+  keyAreasSubheading?: string;
 };
 
 export type BrandingDerivedColors = {
@@ -762,6 +773,7 @@ function sanitizeDepartmentSettings(value: unknown, fallback: BrandingDepartment
 
     const fallbackItem = fallbackById.get(id) ?? fallback[index] ?? fallback[0];
     const color = normalizeHexColor(record.color, fallbackItem.color);
+    const secondaryColor = record.secondaryColor ? normalizeHexColor(record.secondaryColor, undefined) : undefined;
 
     return {
       id,
@@ -773,6 +785,7 @@ function sanitizeDepartmentSettings(value: unknown, fallback: BrandingDepartment
       vision: readStringValue(record.vision, fallbackItem.vision),
       icon: readStringValue(record.icon, fallbackItem.icon),
       color,
+      secondaryColor,
       logo: readStringValue(record.logo, fallbackItem.logo),
       active: readBooleanValue(record.active, fallbackItem.active),
       keyAreas: Array.isArray(record.keyAreas) ? record.keyAreas.map((k: any) => ({
@@ -781,7 +794,24 @@ function sanitizeDepartmentSettings(value: unknown, fallback: BrandingDepartment
         icon: readStringValue(k.icon, '')
       })) : fallbackItem.keyAreas,
       facilities: Array.isArray(record.facilities) ? record.facilities.map((f: any) => readStringValue(f, '')) : fallbackItem.facilities,
-      programHighlights: Array.isArray(record.programHighlights) ? record.programHighlights.map((h: any) => readStringValue(h, '')) : fallbackItem.programHighlights
+      programHighlights: Array.isArray(record.programHighlights) ? record.programHighlights.map((h: any) => readStringValue(h, '')) : fallbackItem.programHighlights,
+      stats: Array.isArray(record.stats) ? record.stats.map((s: any) => ({
+        label: String(s.label || '').trim(),
+        value: String(s.value || '').trim()
+      })) : (fallbackItem.stats || []),
+      chartData: Array.isArray(record.chartData) ? record.chartData.map((c: any) => ({
+        year: String(c.year || '').trim(),
+        completed: Number(c.completed || 0),
+        ongoing: Number(c.ongoing || 0)
+      })) : (fallbackItem.chartData || []),
+      profileCard: {
+        heading: readStringValue(record.profileCard?.heading, fallbackItem.profileCard?.heading || 'PROGRAM PROFILE'),
+        features: Array.isArray(record.profileCard?.features) ? record.profileCard.features.map((f: any) => readStringValue(f, '')) : (fallbackItem.profileCard?.features || []),
+        workflowHeading: readStringValue(record.profileCard?.workflowHeading, fallbackItem.profileCard?.workflowHeading || 'WORKFLOW COVERAGE'),
+        workflowText: readStringValue(record.profileCard?.workflowText, fallbackItem.profileCard?.workflowText || 'Register, review, defend, archive')
+      },
+      keyAreasHeading: readStringValue(record.keyAreasHeading, fallbackItem.keyAreasHeading || 'Key Research & Focus Areas'),
+      keyAreasSubheading: readStringValue(record.keyAreasSubheading, fallbackItem.keyAreasSubheading || 'Areas of Excellence')
     };
   });
 }
