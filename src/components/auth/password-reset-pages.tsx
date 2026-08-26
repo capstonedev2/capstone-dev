@@ -125,7 +125,7 @@ function PasswordResetShell({
     : undefined;
 
   return (
-    <main className={authUi.page} style={loginBackgroundStyle}>
+    <main className={cx(authUi.page, "!h-[100dvh] !overflow-hidden")} style={loginBackgroundStyle}>
       {isVideoBackground && (
         <>
           <video
@@ -141,38 +141,32 @@ function PasswordResetShell({
       )}
       <div className={authUi.pageWash} aria-hidden="true" />
       <div className={authUi.pagePattern} aria-hidden="true" />
-      <div className={authUi.topStripe} aria-hidden="true" />
 
       <Link href="/login" className={authUi.backLink}>
         <i className="fas fa-arrow-left" aria-hidden="true" />
         Back to Login
       </Link>
 
-      <section className={authUi.shell} aria-labelledby={titleId}>
-        <div className="w-full max-w-[560px] overflow-hidden bg-transparent">
-          <div className="flex min-w-0 flex-col justify-center px-4 py-5 sm:py-7">
-            <div className="w-full flex justify-center relative">
-              {/* Decorative background glow behind the modal */}
-              <div className="absolute top-1/2 left-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-[#003A8F]/20 to-[#f6be00]/10 blur-[80px] pointer-events-none" />
+      <section className={cx(authUi.shell, "!min-h-0 !h-full !py-2 sm:!py-4")} aria-labelledby={titleId}>
+        <div className="w-full max-w-[520px] overflow-hidden bg-transparent transform scale-[0.95] sm:scale-100 origin-center">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-2 sm:py-4">
+            <div className="w-full flex justify-center">
               
-              <div className="relative w-full max-w-[500px] rounded-[2.5rem] border border-slate-100 bg-white p-8 shadow-[0_30px_60px_-15px_rgba(0,10,40,0.3)] sm:p-12">
-                <div className="mb-10 flex flex-col items-center text-center">
-                  <div className="mb-6 relative group inline-flex items-center justify-center h-16 w-16 rounded-[1.25rem] border border-slate-100 bg-slate-50 shadow-[0_8px_20px_rgba(0,58,143,0.08)] ring-4 ring-slate-50/50">
-                    <div className="absolute inset-0 rounded-[1.25rem] bg-[#003A8F]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <i className={cx(icon, "text-2xl text-[#003A8F] drop-shadow-sm transition-transform duration-500 group-hover:scale-110")} aria-hidden="true" />
-                  </div>
-                  <span className="mb-3 inline-flex items-center gap-2 text-[0.75rem] font-extrabold uppercase tracking-[0.15em] text-[#003A8F]">
+              <div className="w-full max-w-[500px] rounded-[24px] border border-white/50 bg-white/[0.30] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-7">
+                <div className="mb-6 flex flex-col items-center text-center">
+                  <span className="mb-2 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
+                    <i className={icon} aria-hidden="true" />
                     {label}
                   </span>
-                  <h2 className="m-0 text-3xl font-extrabold leading-tight tracking-tight text-slate-800" id={titleId}>
+                  <h2 className="m-0 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-slate-800" id={titleId}>
                     {title}
                   </h2>
-                  <p className="mt-3 max-w-sm text-[0.95rem] font-semibold leading-relaxed text-slate-800 drop-shadow-sm">{description}</p>
+                  <p className="mt-2 max-w-sm text-sm font-semibold leading-relaxed text-slate-700">{description}</p>
                 </div>
 
                 {children}
 
-                <div className="mt-5 border-t border-slate-100 pt-4 text-center">
+                <div className="mt-4 border-t border-white/70 pt-4 text-center">
                   <p className="text-sm font-semibold leading-6 text-slate-700">
                     Remember your password?{' '}
                     <Link href="/login" className={authUi.bookLink}>
@@ -449,10 +443,10 @@ export function VerifyResetCodePage() {
                     codeInputRefs.current[index] = element;
                   }}
                   className={cx(
-                    "h-14 sm:h-16 min-w-0 rounded-2xl border-2 text-center text-3xl font-black shadow-sm outline-none transition-all duration-300 ease-out focus:outline-none disabled:opacity-50",
+                    "h-14 sm:h-16 min-w-0 rounded-2xl border-2 text-center text-3xl font-black shadow-sm outline-none transition-all duration-300 ease-out focus:outline-none disabled:opacity-50 backdrop-blur-md",
                     hasValue 
-                      ? "border-[#003A8F]/30 bg-white text-[#003A8F] shadow-[0_8px_20px_rgba(0,58,143,0.15)] scale-105" 
-                      : "border-slate-200 bg-slate-50 text-slate-900 focus:-translate-y-1 focus:scale-105 focus:border-[#003A8F] focus:bg-white focus:text-[#003A8F] focus:shadow-[0_12px_30px_rgba(0,58,143,0.2)] focus:ring-4 focus:ring-[#003A8F]/20"
+                      ? "border-white/60 bg-white/[0.45] text-[#003A8F] shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_14px_32px_rgba(15,23,42,0.08)] scale-[1.03]" 
+                      : "border-white/45 bg-white/[0.18] text-slate-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] focus:-translate-y-[1px] focus:scale-[1.03] focus:border-white/60 focus:bg-white/[0.45] focus:text-[#003A8F] focus:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_14px_32px_rgba(15,23,42,0.08)] focus:ring-4 focus:ring-white/10"
                   )}
                   type="text"
                   inputMode="numeric"
@@ -494,11 +488,8 @@ export function VerifyResetCodePage() {
           </div>
         ) : null}
 
-        <div className="grid gap-4 sm:grid-cols-2 mt-6">
-          <button type="submit" className="group relative overflow-hidden flex items-center justify-center gap-2 rounded-2xl h-14 text-base font-extrabold bg-gradient-to-r from-[#003A8F] to-[#0052cc] text-white shadow-[0_10px_30px_rgba(0,58,143,0.3)] hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,58,143,0.4)] transition-all duration-300 disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-[0_10px_30px_rgba(0,58,143,0.3)] disabled:cursor-not-allowed" disabled={isSubmitting || timeLeft <= 0}>
-            <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-150%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(150%)]">
-              <div className="relative h-full w-8 bg-white/20" />
-            </div>
+        <div className="grid gap-3 sm:grid-cols-2 mt-5">
+          <button type="submit" className={authUi.submitButton} disabled={isSubmitting || timeLeft <= 0}>
             {isSubmitting ? (
               <>
                 <span className={authUi.spinner} aria-hidden="true" />
@@ -512,14 +503,14 @@ export function VerifyResetCodePage() {
             <button
               type="button"
               disabled
-              className="group flex h-14 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-5 text-[0.95rem] font-extrabold text-slate-500 shadow-sm transition-all duration-300 cursor-not-allowed opacity-70"
+              className="group flex h-11 sm:h-12 w-full items-center justify-center rounded-xl border border-white/45 bg-white/[0.18] px-5 text-sm font-bold text-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-md transition-all duration-300 cursor-not-allowed opacity-75"
             >
               Resend code in {formatTime(timeLeft)}
             </button>
           ) : (
             <Link
               href="/forgot-password"
-              className="group flex h-14 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-[0.95rem] font-extrabold text-[#003A8F] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_10px_30px_rgba(0,58,143,0.10)] active:scale-[0.98] animate-in zoom-in-95"
+              className="group flex h-11 sm:h-12 w-full items-center justify-center rounded-xl border border-white/70 bg-white/80 px-5 text-sm font-bold text-slate-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[14px] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] active:scale-[0.98]"
             >
               Send new code
             </Link>

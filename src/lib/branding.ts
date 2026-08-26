@@ -316,7 +316,7 @@ const DEFAULT_NAVIGATION: BrandingNavigationSettings = {
     { id: 'home', href: '/#home', label: 'Home', visible: true },
     { id: 'modules', href: '/#modules', label: 'Modules', visible: true },
     { id: 'workflow', href: '/#workflow', label: 'Workflow', visible: true },
-    { id: 'about', href: '/about', label: 'About', visible: true }
+    { id: 'about', href: '/#about', label: 'About', visible: true }
   ]
 };
 

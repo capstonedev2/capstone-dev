@@ -346,7 +346,7 @@ export function LoginPage() {
   };
 
   return (
-    <main className={authUi.page} style={loginBackgroundStyle}>
+    <main className={cx(authUi.page, "!h-[100dvh] !overflow-hidden")} style={loginBackgroundStyle}>
       {isVideoBackground && (
         <>
           <video
@@ -362,7 +362,6 @@ export function LoginPage() {
       )}
       <div className={authUi.pageWash} aria-hidden="true" />
       <div className={authUi.pagePattern} aria-hidden="true" />
-      <div className={authUi.topStripe} aria-hidden="true" />
 
       {/* Floating 3D Depth Elements Removed */}
 
@@ -371,11 +370,11 @@ export function LoginPage() {
         Back to Home
       </Link>
 
-      <section className={authUi.shell} aria-labelledby="login-title">
-        <div className="w-full max-w-[520px] overflow-hidden bg-transparent">
+      <section className={cx(authUi.shell, "!min-h-0 !h-full !py-2 sm:!py-4")} aria-labelledby="login-title">
+        <div className="w-full max-w-[520px] overflow-hidden bg-transparent transform scale-[0.95] sm:scale-100 origin-center">
 
-          <div className="flex min-w-0 flex-col justify-center px-4 py-5 sm:py-7">
-            <div className="mb-6 border-b border-white/20 pb-6">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-2 sm:py-4">
+            <div className="mb-4 border-b border-white/20 pb-4">
               <div className="flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
                 <div className="flex min-w-[180px] items-center gap-2 drop-shadow-md">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm">
@@ -427,9 +426,9 @@ export function LoginPage() {
             </div>
 
             <div className="w-full flex justify-center">
-              <div className="w-full max-w-[500px] rounded-[24px] border border-white/50 bg-white/[0.30] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-8">
-                <div className="mb-8 flex flex-col items-center text-center">
-                  <span className="mb-3 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
+              <div className="w-full max-w-[500px] rounded-[24px] border border-white/50 bg-white/[0.30] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-7">
+                <div className="mb-5 flex flex-col items-center text-center">
+                  <span className="mb-2 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
                     <i className="fas fa-right-to-bracket" aria-hidden="true" />
                     {loginBranding.pill}
                   </span>
@@ -438,7 +437,7 @@ export function LoginPage() {
                   </h2>
                 </div>
 
-                <form className="space-y-4" aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
+                <form className="space-y-3.5" aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
               <div className={authUi.formGroup}>
                 <label className={authUi.label} htmlFor="identifier">
                   {loginBranding.identifierLabel}
@@ -587,7 +586,7 @@ export function LoginPage() {
               </button>
                 </form>
 
-                <div className="mt-3 text-center">
+                <div className="mt-2 text-center">
                   <p className="text-sm font-semibold leading-6 text-slate-700">
                     {loginBranding.alternatePrompt}{' '}
                     <Link
@@ -599,7 +598,7 @@ export function LoginPage() {
                     </Link>
                   </p>
                 </div>
-                <div className="mt-4 border-t border-white/70 pt-4 text-center text-xs font-bold text-slate-700">
+                <div className="mt-3 border-t border-white/70 pt-3 text-center text-xs font-bold text-slate-700">
                   <i className="fas fa-shield-halved mr-2 text-slate-700" aria-hidden="true" />
                   Secure access for ThesisTrack users only.
                 </div>

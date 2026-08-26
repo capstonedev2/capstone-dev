@@ -423,7 +423,7 @@ export default function Page() {
                   </div>
                   
                   <div className="flex flex-wrap items-center justify-center gap-4">
-                    <Link href="/about#system-model" className="group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#0d61cf]/20 bg-gradient-to-br from-[#0d61cf] via-[#003a8f] to-[#082a67] px-8 py-3 text-[0.95rem] font-black text-white shadow-[0_12px_25px_rgba(0,58,143,0.25)] transition-shadow duration-200 hover:shadow-[0_14px_28px_rgba(0,58,143,0.28)]">
+                    <Link href="/about" className="group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#0d61cf]/20 bg-gradient-to-br from-[#0d61cf] via-[#003a8f] to-[#082a67] px-8 py-3 text-[0.95rem] font-black text-white shadow-[0_12px_25px_rgba(0,58,143,0.25)] transition-shadow duration-200 hover:shadow-[0_14px_28px_rgba(0,58,143,0.28)]">
                       <span>Explore the System</span>
                       <i className="fas fa-arrow-right" />
                     </Link>

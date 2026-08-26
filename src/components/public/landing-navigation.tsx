@@ -16,7 +16,7 @@ export function LandingNavigation() {
   const pathname = usePathname();
   const navigation = branding.navigation;
   const visibleLinks = useMemo(
-    () => navigation.links.filter((link) => link.visible),
+    () => navigation.links.map(link => link.id === 'about' ? { ...link, href: '/#about' } : link).filter((link) => link.visible),
     [navigation.links]
   );
 

@@ -214,21 +214,23 @@ export function AdminDashboard() {
         description="Monitor academic project performance, review pipeline health, and manage institutional reporting from one official oversight workspace."
       >
         <div className="admin-page-stack">
-          <section className="dashboard-command-panel" aria-label="Research head operational snapshot">
-            <div className="dashboard-command-main">
-              <span className="kicker">
+          <section className="dashboard-command-panel" aria-label="Research head operational snapshot" style={{ background: 'linear-gradient(135deg, #003A8F, #1A1851)', color: 'white', borderRadius: '1.5rem', padding: '2.5rem', boxShadow: '0 20px 40px rgba(0, 58, 143, 0.15)', position: 'relative', overflow: 'hidden', display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '50%', background: 'radial-gradient(circle at top right, rgba(246, 190, 0, 0.15), transparent 70%)', pointerEvents: 'none' }}></div>
+            
+            <div className="dashboard-command-main" style={{ position: 'relative', zIndex: 1, flex: '1 1 500px' }}>
+              <span className="kicker" style={{ color: '#F6BE00', background: 'rgba(246, 190, 0, 0.1)', padding: '0.4rem 0.8rem', borderRadius: '2rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>
                 <i className="fas fa-building-columns" aria-hidden="true"></i>
                 Oversight Snapshot
               </span>
-              <h2>{scopeLabel}</h2>
-              <p>
-                {formatAcademicYear(yearFilter)} shows {scopedTotalProjects} project records, {reviewLoad} review flags,
-                and {scopedDeployed} deployment-ready outputs across the current research oversight scope.
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', lineHeight: 1.1, color: 'white' }}>{scopeLabel}</h2>
+              <p style={{ color: '#DBEAFE', fontSize: '1.05rem', maxWidth: '600px', lineHeight: 1.6, marginBottom: '2rem' }}>
+                {formatAcademicYear(yearFilter)} shows <strong>{scopedTotalProjects}</strong> project records, <strong>{reviewLoad}</strong> review flags,
+                and <strong>{scopedDeployed}</strong> deployment-ready outputs across the current research oversight scope.
               </p>
-              <div className="dashboard-scope-pills" aria-label="Department scope">
+              <div className="dashboard-scope-pills" aria-label="Department scope" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <button
                   aria-pressed={deptFilter === 'all'}
-                  className={`dashboard-scope-pill${deptFilter === 'all' ? ' is-active' : ''}`}
+                  style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem', fontSize: '0.85rem', fontWeight: 700, border: '1px solid', transition: 'all 0.2s', cursor: 'pointer', ...(deptFilter === 'all' ? { background: '#F6BE00', color: '#1A1851', borderColor: '#F6BE00' } : { background: 'rgba(255,255,255,0.1)', color: 'white', borderColor: 'rgba(255,255,255,0.2)' }) }}
                   type="button"
                   onClick={() => {
                     setDeptFilter('all');
@@ -241,7 +243,7 @@ export function AdminDashboard() {
                   <button
                     key={department.id}
                     aria-pressed={deptFilter === department.id}
-                    className={`dashboard-scope-pill${deptFilter === department.id ? ' is-active' : ''}`}
+                    style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem', fontSize: '0.85rem', fontWeight: 700, border: '1px solid', transition: 'all 0.2s', cursor: 'pointer', ...(deptFilter === department.id ? { background: '#F6BE00', color: '#1A1851', borderColor: '#F6BE00' } : { background: 'rgba(255,255,255,0.1)', color: 'white', borderColor: 'rgba(255,255,255,0.2)' }) }}
                     type="button"
                     onClick={() => {
                       setDeptFilter(department.id);
@@ -253,27 +255,28 @@ export function AdminDashboard() {
                 ))}
               </div>
             </div>
-            <div className="dashboard-command-aside">
-              <div className="dashboard-command-actions" aria-label="Primary dashboard actions">
-                <button className="btn btn-primary" type="button" onClick={() => setModalOpen(true)}>
+            
+            <div className="dashboard-command-aside" style={{ position: 'relative', zIndex: 1, flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div className="dashboard-command-actions" aria-label="Primary dashboard actions" style={{ display: 'flex', gap: '1rem' }}>
+                <button className="btn" type="button" onClick={() => setModalOpen(true)} style={{ flex: 1, background: '#F6BE00', color: '#1A1851', border: 'none', padding: '0.75rem', borderRadius: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(246, 190, 0, 0.3)', cursor: 'pointer' }}>
                   <i className="fas fa-chart-line" aria-hidden="true"></i>
                   Generate Report
                 </button>
-                <Link className="btn btn-outline" href="/admin/approvals">
+                <Link className="btn" href="/admin/approvals" style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '0.75rem', borderRadius: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', backdropFilter: 'blur(10px)', textDecoration: 'none' }}>
                   <i className="fas fa-list-check" aria-hidden="true"></i>
                   Review Queue
                 </Link>
               </div>
-              <div className="dashboard-command-metrics" aria-label="Scope health metrics">
+              <div className="dashboard-command-metrics" aria-label="Scope health metrics" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {commandMetrics.map((metric) => (
-                  <article key={metric.label} className={`dashboard-command-metric ${metric.tone}`}>
-                    <span className="dashboard-command-metric-icon">
+                  <article key={metric.label} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '3rem', height: '3rem', background: 'rgba(255,255,255,0.1)', borderRadius: '0.75rem', color: metric.tone === 'is-warning' ? '#F6BE00' : metric.tone === 'is-success' ? '#4ADE80' : '#60A5FA', fontSize: '1.25rem' }}>
                       <i className={`fas ${metric.icon}`} aria-hidden="true"></i>
                     </span>
-                    <div>
-                      <span>{metric.label}</span>
-                      <strong>{metric.value}</strong>
-                      <small>{metric.detail}</small>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#DBEAFE', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{metric.label}</span>
+                      <strong style={{ fontSize: '1.25rem', color: 'white', lineHeight: 1.2 }}>{metric.value}</strong>
+                      <small style={{ fontSize: '0.75rem', color: '#93C5FD' }}>{metric.detail}</small>
                     </div>
                   </article>
                 ))}
@@ -281,21 +284,23 @@ export function AdminDashboard() {
             </div>
           </section>
 
-          <section className="dashboard-kpi-grid" aria-label="Research head summary metrics">
+          <section className="dashboard-kpi-grid admin-grid-3" aria-label="Research head summary metrics" style={{ gap: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
             {kpiCards.map((card) => (
-              <article key={card.title} className="stat-card dashboard-kpi-card">
-                <div className="stat-card-head">
+              <article key={card.title} className="stat-card dashboard-kpi-card" style={{ background: 'linear-gradient(135deg, #ffffff, #f8fafc)', border: '1px solid rgba(0, 58, 143, 0.1)', boxShadow: '0 12px 24px rgba(0, 58, 143, 0.04)', borderRadius: '1.25rem', overflow: 'hidden', padding: 0 }}>
+                <div className="stat-card-head" style={{ padding: '1.5rem 1.5rem 0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div className="stat-card-title">
-                    <span>{card.title}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748B' }}>{card.title}</span>
                   </div>
-                  <div className="stat-icon">
+                  <div className="stat-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '3rem', height: '3rem', background: 'rgba(0, 58, 143, 0.05)', color: '#003A8F', borderRadius: '1rem', fontSize: '1.25rem' }}>
                     <i className={`fas ${card.icon}`}></i>
                   </div>
                 </div>
-                <div className="stat-card-value">{card.value}</div>
-                <div className="stat-card-footer">
-                  <span className="stat-card-subtitle">{card.subtitle}</span>
-                  <span className="trend-up">{card.trend}</span>
+                <div className="stat-card-value" style={{ padding: '0 1.5rem', fontSize: '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>{card.value}</div>
+                <div className="stat-card-footer" style={{ padding: '1rem 1.5rem 1.5rem', marginTop: '0.5rem' }}>
+                  <span className="stat-card-subtitle" style={{ display: 'block', fontSize: '0.9rem', color: '#64748B', lineHeight: 1.5, marginBottom: '0.75rem' }}>{card.subtitle}</span>
+                  <span className="trend-up" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.35rem 0.75rem', background: '#F0FDF4', color: '#16A34A', fontSize: '0.8rem', fontWeight: 700, borderRadius: '2rem' }}>
+                    <i className="fas fa-arrow-trend-up"></i> {card.trend}
+                  </span>
                 </div>
               </article>
             ))}

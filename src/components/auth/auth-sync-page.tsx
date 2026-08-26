@@ -74,7 +74,6 @@ export function AuthSyncPage() {
     <main className={authUi.page}>
       <div className={authUi.pageWash} aria-hidden="true" />
       <div className={authUi.pagePattern} aria-hidden="true" />
-      <div className={authUi.topStripe} aria-hidden="true" />
 
       <section className={authUi.shell} aria-labelledby="google-sync-title">
         <div className={authUi.authFrame}>

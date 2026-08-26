@@ -47,6 +47,16 @@ function splitDisplayName(value: string) {
   };
 }
 
+function calculatePasswordStrength(password: string): number {
+  let score = 0;
+  if (!password) return 0;
+  if (password.length >= 6) score += 1;
+  if (password.length >= 10) score += 1;
+  if (/[A-Z]/.test(password)) score += 1;
+  if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score += 1;
+  return Math.min(score, 4);
+}
+
 type RegisterFieldErrors = Partial<
   Record<
     | 'firstName'
@@ -104,6 +114,29 @@ export function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleRegistration, setIsGoogleRegistration] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const passwordStrength = calculatePasswordStrength(password);
+
+  useEffect(() => {
+    if (Object.keys(touched).length > 0) {
+      const errs = validateRegisterFields();
+      setFieldErrors((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        Object.keys(touched).forEach((k) => {
+          const key = k as keyof RegisterFieldErrors;
+          if (errs[key] !== prev[key]) {
+            if (errs[key]) next[key] = errs[key];
+            else delete next[key];
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstName, lastName, studentId, email, department, yearLevel, password, confirmPassword, touched]);
 
   useEffect(() => {
     try {
@@ -265,7 +298,7 @@ export function RegisterPage() {
   };
 
   return (
-    <main className={authUi.page} style={registerBackgroundStyle}>
+    <main className={cx(authUi.page, "!h-[100dvh] !overflow-hidden")} style={registerBackgroundStyle}>
       {isVideoBackground && (
         <>
           <video
@@ -281,7 +314,6 @@ export function RegisterPage() {
       )}
       <div className={authUi.pageWash} aria-hidden="true" />
       <div className={authUi.pagePattern} aria-hidden="true" />
-      <div className={authUi.topStripe} aria-hidden="true" />
 
       {/* Floating 3D Depth Elements Removed */}
 
@@ -290,11 +322,11 @@ export function RegisterPage() {
         Back to Home
       </Link>
 
-      <section className={authUi.shell} aria-labelledby="register-title">
-        <div className="w-full max-w-[620px] overflow-hidden bg-transparent">
+      <section className={cx(authUi.shell, "!min-h-0 !h-full !py-2 sm:!py-4")} aria-labelledby="register-title">
+        <div className="w-full max-w-[620px] overflow-hidden bg-transparent transform scale-[0.95] sm:scale-100 origin-center">
 
-          <div className="flex min-w-0 flex-col justify-center px-4 py-3 sm:px-6 sm:py-4">
-            <div className="mb-4 border-b border-white/20 pb-4">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-2 sm:px-6 sm:py-3">
+            <div className="mb-3 border-b border-white/20 pb-3">
               <div className="flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
                 <div className="flex min-w-[180px] items-center gap-2.5 drop-shadow-md">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm">
@@ -346,8 +378,8 @@ export function RegisterPage() {
             </div>
 
             <div className="w-full flex justify-center">
-              <div className="w-full max-w-[620px] rounded-[24px] border border-white/50 bg-white/[0.30] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-7 lg:p-8">
-                <div className="mb-6 flex flex-col items-center text-center">
+              <div className="w-full max-w-[620px] rounded-[24px] border border-white/50 bg-white/[0.30] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-5 lg:p-6">
+                <div className="mb-4 flex flex-col items-center text-center">
                   <span className="mb-2 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
                     <i className="fas fa-user-plus" aria-hidden="true" />
                     {registerBranding.pill}
@@ -363,9 +395,9 @@ export function RegisterPage() {
                   </div>
                 ) : null}
 
-                <form className="space-y-3.5" aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
-                  <div className="rounded-xl border border-white/45 bg-white/[0.18] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-md sm:p-4">
-                    <div className="mb-3 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
+                <form className="space-y-2.5" aria-busy={isSubmitting} onSubmit={handleSubmit} noValidate>
+                  <div className="rounded-xl border border-white/45 bg-white/[0.18] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-md sm:p-3.5">
+                    <div className="mb-2.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
                       <i className="fas fa-user" aria-hidden="true" />
                       Personal details
                     </div>
@@ -386,6 +418,7 @@ export function RegisterPage() {
                             setError('');
                             clearFieldError('firstName');
                           }}
+                          onBlur={() => setTouched((t) => ({ ...t, firstName: true }))}
                           aria-describedby={fieldErrors.firstName ? 'register-first-name-error' : undefined}
                           aria-invalid={fieldErrors.firstName ? 'true' : 'false'}
                           disabled={isSubmitting}
@@ -414,6 +447,7 @@ export function RegisterPage() {
                             setError('');
                             clearFieldError('lastName');
                           }}
+                          onBlur={() => setTouched((t) => ({ ...t, lastName: true }))}
                           aria-describedby={fieldErrors.lastName ? 'register-last-name-error' : undefined}
                           aria-invalid={fieldErrors.lastName ? 'true' : 'false'}
                           disabled={isSubmitting}
@@ -428,8 +462,8 @@ export function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-white/45 bg-white/[0.18] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-md sm:p-4">
-                    <div className="mb-3 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
+                  <div className="rounded-xl border border-white/45 bg-white/[0.18] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-md sm:p-3.5">
+                    <div className="mb-2.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
                       <i className="fas fa-building-columns" aria-hidden="true" />
                       Academic details
                     </div>
@@ -450,6 +484,7 @@ export function RegisterPage() {
                               setError('');
                               clearFieldError('studentId');
                             }}
+                            onBlur={() => setTouched((t) => ({ ...t, studentId: true }))}
                             aria-describedby={fieldErrors.studentId ? 'register-student-id-error' : undefined}
                             aria-invalid={fieldErrors.studentId ? 'true' : 'false'}
                             disabled={isSubmitting}
@@ -482,6 +517,7 @@ export function RegisterPage() {
                               setError('');
                               clearFieldError('email');
                             }}
+                            onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                             aria-describedby={fieldErrors.email ? 'register-email-error' : undefined}
                             aria-invalid={fieldErrors.email ? 'true' : 'false'}
                             disabled={isSubmitting}
@@ -515,6 +551,7 @@ export function RegisterPage() {
                                 setError('');
                                 clearFieldError('department');
                               }}
+                              onBlur={() => setTouched((t) => ({ ...t, department: true }))}
                               aria-describedby={fieldErrors.department ? 'register-department-error' : undefined}
                               aria-invalid={fieldErrors.department ? 'true' : 'false'}
                               disabled={isSubmitting}
@@ -549,6 +586,7 @@ export function RegisterPage() {
                                 setError('');
                                 clearFieldError('yearLevel');
                               }}
+                              onBlur={() => setTouched((t) => ({ ...t, yearLevel: true }))}
                               aria-describedby={fieldErrors.yearLevel ? 'register-year-level-error' : undefined}
                               aria-invalid={fieldErrors.yearLevel ? 'true' : 'false'}
                               disabled={isSubmitting}
@@ -573,12 +611,12 @@ export function RegisterPage() {
                   </div>
 
                   {isGoogleRegistration ? (
-                    <div className="rounded-md border border-[#003A8F]/15 bg-[#003A8F]/8 px-3 py-1.5 text-sm font-semibold leading-5 text-slate-700">
-                      <span className={authUi.noteStrong}>Google sign-in enabled.</span> Your verified Google account will be linked after you complete the required student details.
+                    <div className="rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold leading-5 text-slate-100">
+                      <span className="font-extrabold text-white">Google sign-in enabled.</span> Your verified Google account will be linked after you complete the required student details.
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-white/45 bg-white/[0.18] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-md sm:p-4">
-                      <div className="mb-3 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
+                    <div className="rounded-xl border border-white/45 bg-white/[0.18] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-md sm:p-3.5">
+                      <div className="mb-2.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
                         <i className="fas fa-lock" aria-hidden="true" />
                         Account security
                       </div>
@@ -600,6 +638,7 @@ export function RegisterPage() {
                                 setError('');
                                 clearFieldError('password');
                               }}
+                              onBlur={() => setTouched((t) => ({ ...t, password: true }))}
                               aria-describedby={fieldErrors.password ? 'register-password-error' : 'register-password-help'}
                               aria-invalid={fieldErrors.password ? 'true' : 'false'}
                               disabled={isSubmitting}
@@ -629,6 +668,24 @@ export function RegisterPage() {
                               Use at least 6 characters.
                             </span>
                           )}
+                          {!isGoogleRegistration && password.length > 0 && (
+                            <div className="mt-2 flex gap-1 h-1.5 w-full">
+                              {[1, 2, 3, 4].map((level) => (
+                                <div
+                                  key={level}
+                                  className={`h-full flex-1 rounded-full transition-colors ${
+                                    passwordStrength >= level
+                                      ? passwordStrength < 2
+                                        ? 'bg-red-400'
+                                        : passwordStrength < 3
+                                        ? 'bg-amber-400'
+                                        : 'bg-emerald-400'
+                                      : 'bg-white/20'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         <div className={authUi.formGroup}>
@@ -648,6 +705,7 @@ export function RegisterPage() {
                                 setError('');
                                 clearFieldError('confirmPassword');
                               }}
+                              onBlur={() => setTouched((t) => ({ ...t, confirmPassword: true }))}
                               aria-describedby={
                                 fieldErrors.confirmPassword ? 'register-confirm-password-error' : undefined
                               }
@@ -680,8 +738,8 @@ export function RegisterPage() {
                     </div>
                   )}
 
-                  <div className="rounded-md border border-[#003A8F]/15 bg-[#003A8F]/8 px-3 py-1.5 text-sm font-semibold leading-5 text-slate-700">
-                    <span className={authUi.noteStrong}>{registerBranding.academicNote}</span> {registerBranding.staffNote}
+                  <div className="rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold leading-5 text-slate-100">
+                    <span className="font-extrabold text-white">{registerBranding.academicNote}</span> {registerBranding.staffNote}
                   </div>
 
                   {error ? (
@@ -702,8 +760,8 @@ export function RegisterPage() {
                   </button>
                 </form>
 
-                <div className="mt-1.5 text-center">
-                  <p className="text-sm font-semibold leading-6 text-slate-700">
+                <div className="mt-1 text-center">
+                  <p className="text-sm font-semibold leading-6 text-slate-200">
                     {registerBranding.alternatePrompt}{' '}
                     <Link
                       href="/login"
@@ -714,8 +772,8 @@ export function RegisterPage() {
                     </Link>
                   </p>
                 </div>
-                <div className="mt-3 border-t border-white/70 pt-3 text-center text-xs font-bold text-slate-700">
-                  <i className="fas fa-shield-halved mr-2 text-slate-700" aria-hidden="true" />
+                <div className="mt-2 border-t border-white/30 pt-2 text-center text-xs font-bold text-slate-200">
+                  <i className="fas fa-shield-halved mr-2 text-slate-300" aria-hidden="true" />
                   Secure registration for ThesisTrack users only.
                 </div>
               </div>

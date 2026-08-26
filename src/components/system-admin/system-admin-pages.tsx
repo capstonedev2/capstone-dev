@@ -298,12 +298,12 @@ function SystemAdminKpi({
   meta: string;
 }) {
   return (
-    <article className="admin-kpi-card">
-      <span className="admin-kpi-label">
-        <i className={`fas ${icon}`}></i> {label}
+    <article className="admin-kpi-card" style={{ background: 'linear-gradient(135deg, #003A8F, #1A1851)', color: 'white', borderColor: 'rgba(255, 255, 255, 0.15)', boxShadow: '0 12px 24px rgba(0, 58, 143, 0.15)', padding: '1.5rem', borderRadius: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+      <span className="admin-kpi-label" style={{ color: '#DBEAFE', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <i className={`fas ${icon}`} style={{ color: '#F6BE00', fontSize: '1.1rem' }}></i> {label}
       </span>
-      <strong className="admin-kpi-value">{value}</strong>
-      <span className="admin-kpi-meta">{meta}</span>
+      <strong className="admin-kpi-value" style={{ color: 'white', fontSize: '2.5rem', fontWeight: 900, marginTop: '0.5rem', lineHeight: 1 }}>{value}</strong>
+      <span className="admin-kpi-meta" style={{ color: '#93C5FD', fontSize: '0.85rem', marginTop: '0.5rem' }}>{meta}</span>
     </article>
   );
 }
