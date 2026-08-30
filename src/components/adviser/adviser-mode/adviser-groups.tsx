@@ -149,13 +149,14 @@ function SummaryCard({
         : { background: 'rgba(0, 58, 143, 0.08)', color: 'var(--primary)' };
 
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-slate-500">{label}</p>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">{value}</h2>
+    <div className="group relative overflow-hidden rounded-[1.5rem] border border-slate-200/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
+      <div className="absolute inset-0 bg-gradient-to-br from-white to-slate-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="space-y-1.5">
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">{label}</p>
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 drop-shadow-sm">{value}</h2>
         </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg shadow-sm" style={toneStyles}>
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-inner ring-1 ring-inset ring-slate-100/50 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" style={toneStyles}>
           <i className={`fas ${icon}`}></i>
         </div>
       </div>
@@ -173,10 +174,10 @@ function SectionHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 border-b border-slate-200/80 px-6 py-5 lg:flex-row lg:items-start lg:justify-between">
+    <div className="flex flex-col gap-4 border-b border-slate-100 px-8 py-6 lg:flex-row lg:items-center lg:justify-between bg-gradient-to-r from-slate-50/50 to-transparent">
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-        <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900">{title}</h2>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--primary)]">{eyebrow}</p>
+        <h2 className="mt-1.5 text-2xl font-black tracking-tight text-slate-900">{title}</h2>
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
     </div>
@@ -196,7 +197,7 @@ function ViewToggle({
   ];
 
   return (
-    <div className="inline-flex min-h-[46px] items-center rounded-2xl border border-slate-200 bg-slate-100 p-1 shadow-sm">
+    <div className="inline-flex min-h-[46px] items-center rounded-2xl border border-slate-200/60 bg-slate-50/50 p-1 shadow-inner">
       {options.map((option) => {
         const active = viewMode === option.mode;
         return (
@@ -204,8 +205,8 @@ function ViewToggle({
             key={option.mode}
             type="button"
             onClick={() => onChange(option.mode)}
-            className={`inline-flex min-h-[38px] items-center gap-2 rounded-[0.9rem] px-4 text-sm font-semibold transition ${
-              active ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            className={`inline-flex min-h-[38px] items-center gap-2 rounded-[0.9rem] px-4 text-sm font-bold transition-all duration-200 ${
+              active ? 'bg-white text-[var(--primary)] shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
             }`}
           >
             <i className={`fas ${option.icon}`}></i>
@@ -250,8 +251,8 @@ function GroupLifecycleTabs({
   ];
 
   return (
-    <div className="px-6 pt-5">
-      <div className="inline-flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 p-1 shadow-sm">
+    <div className="px-8 pt-6">
+      <div className="inline-flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/60 bg-slate-50/50 p-1.5 shadow-inner">
         {tabs.map((tab) => {
           const active = tab.id === activeTab;
           return (
@@ -259,13 +260,13 @@ function GroupLifecycleTabs({
               key={tab.id}
               type="button"
               onClick={() => onChange(tab.id)}
-              className={`inline-flex min-h-[40px] items-center gap-2 rounded-[0.9rem] px-4 text-sm font-semibold transition ${
-                active ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`inline-flex min-h-[40px] items-center gap-2.5 rounded-[0.9rem] px-5 text-sm font-bold transition-all duration-200 ${
+                active ? 'bg-white text-[var(--primary)] shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
               }`}
             >
-              <i className={`fas ${tab.icon} text-xs`}></i>
+              <i className={`fas ${tab.icon} text-xs ${active ? 'text-[var(--primary)]' : 'text-slate-400'}`}></i>
               <span>{tab.label}</span>
-              <span className="inline-flex min-w-[1.75rem] items-center justify-center rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+              <span className={`inline-flex min-w-[1.75rem] items-center justify-center rounded-full px-2 py-0.5 text-xs transition-colors ${active ? 'bg-[rgba(0,58,143,0.06)] text-[var(--primary)]' : 'bg-slate-200/60 text-slate-600'}`}>
                 {tab.count}
               </span>
             </button>
@@ -291,55 +292,61 @@ function GroupTable({
     <div className="overflow-x-auto">
       <table className="min-w-full border-separate border-spacing-0">
         <thead>
-          <tr className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-            <th className="px-6 py-4">Group</th>
-            <th className="px-6 py-4">Project</th>
-            <th className="px-6 py-4">Members</th>
-            <th className="px-6 py-4">Milestone</th>
-            <th className="px-6 py-4">Progress</th>
-            <th className="px-6 py-4">Status</th>
-            <th className="px-6 py-4 text-right text-slate-700">Actions</th>
+          <tr className="bg-slate-50 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500 shadow-[inset_0_-1px_0_rgba(226,232,240,0.8)]">
+            <th className="px-8 py-5">Group</th>
+            <th className="px-6 py-5">Project</th>
+            <th className="px-6 py-5">Members</th>
+            <th className="px-6 py-5">Milestone</th>
+            <th className="px-6 py-5">Progress</th>
+            <th className="px-6 py-5">Status</th>
+            <th className="px-8 py-5 text-right text-slate-700">Actions</th>
           </tr>
         </thead>
         <tbody>
           {groups.map((group) => (
-            <tr key={group.id} className="transition hover:bg-slate-50/80">
-              <td className="border-t border-slate-100 px-6 py-5 align-top">
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-slate-900">{group.code}</p>
+            <tr key={group.id} className="transition-colors hover:bg-slate-50/50">
+              <td className="border-t border-slate-100 px-8 py-6 align-top">
+                <div className="space-y-1.5">
+                  <p className="whitespace-nowrap text-sm font-bold text-slate-900">{group.code}</p>
                   <span className="dept-badge">{group.dept}</span>
                 </div>
               </td>
-              <td className="border-t border-slate-100 px-6 py-5 align-top">
-                <p className="font-semibold text-slate-900">{group.title}</p>
-                <p className="mt-1 text-sm text-slate-500">Updated milestone monitoring for this group.</p>
-              </td>
-              <td className="border-t border-slate-100 px-6 py-5 align-top">
-                <p className="text-sm font-semibold text-slate-900">{group.members} students</p>
-                <p className="mt-1 max-w-xs text-sm text-slate-500">{group.students.join(', ')}</p>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  Leader: <span className="tracking-normal text-slate-600">{group.leader ?? 'Not assigned'}</span>
+              <td className="border-t border-slate-100 px-6 py-6 align-top">
+                <p className="font-bold text-slate-900">{group.title}</p>
+                <p className="mt-1.5 text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                  {group.title === 'Pending Title Approval' && group.projectTitle
+                    ? `Proposed Title: "${group.projectTitle}"`
+                    : 'Active milestone tracking and project documentation.'}
                 </p>
               </td>
-              <td className="border-t border-slate-100 px-6 py-5 align-top text-sm text-slate-600">{group.milestone}</td>
-              <td className="border-t border-slate-100 px-6 py-5 align-top">
+              <td className="border-t border-slate-100 px-6 py-6 align-top">
+                <p className="text-sm font-bold text-slate-900">{group.members} students</p>
+                <p className="mt-1.5 text-sm text-slate-500 leading-relaxed line-clamp-2">{group.students.join(', ')}</p>
+                <p className="mt-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                  Leader: <span className="tracking-normal font-semibold text-slate-700">{group.leader ?? 'Not assigned'}</span>
+                </p>
+              </td>
+              <td className="border-t border-slate-100 px-6 py-6 align-top">
+                <p className="text-sm font-medium text-slate-600 line-clamp-2 max-w-[220px] leading-relaxed">{group.milestone}</p>
+              </td>
+              <td className="border-t border-slate-100 px-6 py-6 align-top">
                 <div className="space-y-2">
-                  <div className="progress-container">
-                    <div className="progress-fill" style={{ width: `${group.progress}%` }}></div>
+                  <div className="progress-container h-2 rounded-full bg-slate-100">
+                    <div className="progress-fill h-full rounded-full transition-all duration-500" style={{ width: `${group.progress}%` }}></div>
                   </div>
-                  <span className="text-sm font-semibold text-slate-600">{group.progress}% complete</span>
+                  <span className="text-xs font-bold text-slate-500">{group.progress}% complete</span>
                 </div>
               </td>
-              <td className="border-t border-slate-100 px-6 py-5 align-top">
+              <td className="border-t border-slate-100 px-6 py-6 align-top">
                 <span className={`status-badge ${group.statusClass}`}>{group.statusLabel}</span>
               </td>
-              <td className="border-t border-slate-100 px-6 py-5 align-top">
+              <td className="border-t border-slate-100 px-8 py-6 align-top">
                 <div className="flex justify-end">
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => onOpenAddStudent(group.id)}
-                      className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-[rgba(0,58,143,0.16)] bg-[rgba(0,58,143,0.06)] px-3 text-sm font-semibold text-[var(--primary)] shadow-sm transition hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.1)]"
+                      className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-slate-200/60 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.06)] hover:text-[var(--primary)]"
                     >
                       <i className="fas fa-user-plus text-xs"></i>
                       Add Student
@@ -347,7 +354,7 @@ function GroupTable({
                     <button
                       type="button"
                       onClick={() => onOpenDetails(group.id)}
-                      className="inline-flex min-h-[38px] items-center gap-2 rounded-xl px-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(0,58,143,0.2)] transition hover:-translate-y-0.5"
+                      className="inline-flex min-h-[40px] items-center gap-2 rounded-xl px-4 text-xs font-bold text-white shadow-md shadow-[rgba(0,58,143,0.2)] transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[rgba(0,58,143,0.3)]"
                       style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}
                     >
                       <i className="fas fa-eye text-xs"></i>
@@ -382,7 +389,7 @@ function GroupCards({
         return (
           <article
             key={group.id}
-            className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="group relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50"
             style={{ borderLeftWidth: '4px', borderLeftColor: tone.borderColor }}
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -424,11 +431,11 @@ function GroupCards({
               </div>
             </div>
 
-            <div className="mt-5 flex gap-2">
+            <div className="mt-6 flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => onOpenAddStudent(group.id)}
-                className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-2 rounded-xl border border-[rgba(0,58,143,0.16)] bg-[rgba(0,58,143,0.06)] px-4 text-sm font-semibold text-[var(--primary)] shadow-sm transition hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.1)]"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/60 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.06)] hover:text-[var(--primary)]"
               >
                 <i className="fas fa-user-plus text-xs"></i>
                 Add Student
@@ -436,11 +443,11 @@ function GroupCards({
               <button
                 type="button"
                 onClick={() => onOpenDetails(group.id)}
-                className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(0,58,143,0.2)] transition hover:-translate-y-0.5"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold text-white shadow-md shadow-[rgba(0,58,143,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[rgba(0,58,143,0.3)]"
                 style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}
               >
                 <i className="fas fa-eye text-xs"></i>
-                View Details
+                Details
               </button>
             </div>
           </article>
@@ -615,7 +622,22 @@ function GroupDetailsModal({
   onRemoveStudent?: (groupId: string, student: string) => void;
   onApproveTitle?: (groupId: string, projectTitle: string) => void;
 }) {
-  if (!open || !group || typeof document === 'undefined') return null;
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(group?.title || '');
+
+  useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
+
+  useEffect(() => {
+    if (group?.title) {
+      setDraftTitle(group.title);
+      setEditingTitle(false);
+    }
+  }, [group?.title]);
+
+  if (!open || !group || !portalContainer) return null;
 
   const completed = group.status === 'completed';
 
@@ -629,40 +651,52 @@ function GroupDetailsModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="modal-content !max-w-3xl flex max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-0 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        <div className="modal-header !items-start">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="dept-badge">{group.dept}</span>
-              <span className={`status-badge ${group.statusClass}`}>{group.statusLabel}</span>
+      <div className="modal-content !max-w-[800px] flex max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-slate-200/60 bg-white p-0 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Premium Header */}
+        <div className="relative flex items-start justify-between border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
+          <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: 'linear-gradient(to right, var(--primary), var(--primary-dark))' }} />
+          <div className="flex items-center gap-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)] shadow-inner ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
+              <i className="fas fa-folder-open text-2xl"></i>
             </div>
             <div>
-              <h3>{group.title}</h3>
-              <p className="mt-1 text-sm text-slate-500">{group.code}</p>
+              <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                <span className="dept-badge">{group.dept}</span>
+                <span className={`status-badge ${group.statusClass}`}>{group.statusLabel}</span>
+              </div>
+              <h3 className="text-xl font-bold tracking-tight text-slate-900">{group.title}</h3>
+              <p className="mt-1 text-sm font-medium text-slate-500">{group.code}</p>
             </div>
           </div>
-          <button type="button" className="close-modal" onClick={onClose}>
-            &times;
+          <button
+            type="button"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            onClick={onClose}
+          >
+            <i className="fas fa-xmark"></i>
           </button>
         </div>
 
+        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50/30">
         {group.title === 'Pending Title Approval' && onApproveTitle && (
-          <div className="mx-6 mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="rounded-[1.25rem] border border-amber-200/60 bg-amber-50/80 p-5 shadow-sm">
             <div className="flex gap-4 items-start">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
-                <i className="fas fa-clipboard-check"></i>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-inner ring-1 ring-inset ring-amber-200/50">
+                <i className="fas fa-clipboard-check text-xl"></i>
               </div>
               <div className="flex-1">
-                <h4 className="text-sm font-semibold text-amber-900">Title Submitted for Approval</h4>
-                <p className="mt-1 text-sm text-amber-800">
+                <h4 className="text-sm font-bold text-amber-900">Title Submitted for Approval</h4>
+                <p className="mt-1.5 text-sm font-medium text-amber-800">
                   The students have proposed the following project title: <br/>
                   <strong className="text-amber-900">"{group.projectTitle}"</strong>
                 </p>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-4">
                   <button 
                     onClick={() => onApproveTitle(group.id, group.projectTitle)}
-                    className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-amber-600"
+                    className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-amber-500 px-5 text-xs font-bold text-white shadow-md shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30"
                   >
+                    <i className="fas fa-check"></i>
                     Approve Title
                   </button>
                 </div>
@@ -670,8 +704,6 @@ function GroupDetailsModal({
             </div>
           </div>
         )}
-
-        <div className="modal-body space-y-6">
           {completed ? (
             <>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -734,83 +766,87 @@ function GroupDetailsModal({
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Members</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">{group.members}</p>
+                <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Members</p>
+                  <p className="mt-2 text-3xl font-black text-slate-900">{group.members}</p>
                 </div>
-                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Progress</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">{group.progress}%</p>
+                <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Progress</p>
+                  <p className="mt-2 text-3xl font-black text-slate-900">{group.progress}%</p>
                 </div>
-                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Milestone</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-700">{group.milestone}</p>
+                <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Milestone</p>
+                  <p className="mt-2 text-sm font-bold text-slate-700">{group.milestone}</p>
                 </div>
-                <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-4 shadow-sm backdrop-blur-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Leader</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-700">{group.leader ?? 'Not assigned'}</p>
+                <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Leader</p>
+                  <p className="mt-2 text-sm font-bold text-slate-700">{group.leader ?? 'Not assigned'}</p>
                 </div>
               </div>
 
-              <div className="rounded-[1.25rem] border border-[var(--border)] bg-white/40 p-5 shadow-sm backdrop-blur-sm">
-                <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-6 shadow-sm">
+                <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Progress Track</p>
-                    <p className="mt-1 text-sm text-slate-500">Use this view to monitor readiness before review cycles.</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Progress Track</p>
+                    <p className="mt-1 text-sm font-medium text-slate-500">Use this view to monitor readiness before review cycles.</p>
                   </div>
-                  <span className="text-sm font-semibold text-slate-700">{group.progress}% complete</span>
+                  <span className="text-sm font-bold text-slate-700">{group.progress}% complete</span>
                 </div>
-                <div className="progress-container">
-                  <div className="progress-fill" style={{ width: `${group.progress}%` }}></div>
+                <div className="progress-container h-2.5 rounded-full bg-slate-100">
+                  <div className="progress-fill h-full rounded-full transition-all duration-500" style={{ width: `${group.progress}%` }}></div>
                 </div>
               </div>
             </>
           )}
 
-          <div className="rounded-[1.25rem] border border-[var(--border)] bg-white/40 p-5 shadow-sm backdrop-blur-sm">
+          <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Student Roster</p>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Student Roster</p>
+                <p className="mt-1 text-sm font-medium text-slate-500">
                   {completed ? 'Archive view is read-only for completed groups.' : 'Assign the lead student and manage the roster from here.'}
                 </p>
               </div>
               {completed ? (
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                <span className="inline-flex h-7 items-center rounded-full bg-slate-100 px-3 text-xs font-bold text-slate-600">
                   Read-only archive
                 </span>
               ) : null}
             </div>
 
-            <div className="mt-4 grid gap-3 grid-cols-1">
+            <div className="mt-5 grid gap-3 grid-cols-1">
               {group.students.map((student) => (
-                <div key={student} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100/80">
-                  <span className="truncate flex-1" title={student}>{student}</span>
+                <div key={student} className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/60 bg-white px-5 py-4 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.03)] hover:shadow-md">
+                  <span className="truncate flex-1 font-bold transition group-hover:text-[var(--primary)]" title={student}>{student}</span>
                   <div className="flex shrink-0 items-center gap-2">
-                    {group.leader === student ? (
-                      <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-700 ring-1 ring-amber-200/50">
+                    {group.leader === student && (
+                      <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-amber-700 ring-1 ring-amber-200/50">
                         Leader
                       </span>
-                    ) : completed ? null : (
+                    )}
+                    
+                    {!completed && (
                       <>
-                        <button
-                          type="button"
-                          onClick={() => onAssignLeader(group.id, student)}
-                          className="inline-flex min-h-[32px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 hover:text-amber-800"
-                        >
-                          <i className="fas fa-crown text-[10px]"></i>
-                          Set as Leader
-                        </button>
-                        {onRemoveStudent ? (
+                        {group.leader !== student && (
+                          <button
+                            type="button"
+                            onClick={() => onAssignLeader(group.id, student)}
+                            className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-xs font-bold text-amber-700 transition hover:-translate-y-0.5 hover:bg-amber-100 hover:text-amber-800 hover:shadow-sm"
+                          >
+                            <i className="fas fa-crown text-[10px]"></i>
+                            Set as Leader
+                          </button>
+                        )}
+                        {onRemoveStudent && (
                           <button
                             type="button"
                             onClick={() => onRemoveStudent(group.id, student)}
-                            className="inline-flex min-h-[32px] w-8 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:text-red-700"
+                            className="inline-flex min-h-[36px] w-9 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:-translate-y-0.5 hover:bg-red-100 hover:text-red-700 hover:shadow-sm"
                             title="Remove student from group"
                           >
                             <i className="fas fa-user-minus text-xs"></i>
                           </button>
-                        ) : null}
+                        )}
                       </>
                     )}
                   </div>
@@ -820,21 +856,29 @@ function GroupDetailsModal({
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button type="button" className="btn btn-outline" onClick={onClose}>
+        <div className="border-t border-slate-100 bg-slate-50 px-8 py-5 flex items-center justify-end gap-3">
+          <button 
+            type="button" 
+            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" 
+            onClick={onClose}
+          >
             Close
           </button>
           {completed ? null : (
             <>
               <button
                 type="button"
-                className="btn btn-outline"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-200/60 bg-white px-6 text-sm font-bold text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.06)] hover:text-[var(--primary)]"
                 onClick={() => onOpenAddStudent(group.id)}
               >
-                <i className="fas fa-user-plus"></i>
+                <i className="fas fa-user-plus text-xs"></i>
                 Add Student
               </button>
-              <Link className="btn btn-primary" href="/adviser/adviser-mode/submissions">
+              <Link 
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white shadow-md shadow-[rgba(0,58,143,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[rgba(0,58,143,0.3)]"
+                style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}
+                href="/adviser/adviser-mode/submissions"
+              >
                 Review Submissions
               </Link>
             </>
@@ -842,7 +886,7 @@ function GroupDetailsModal({
         </div>
       </div>
     </div>,
-    document.body
+    portalContainer
   );
 }
 
@@ -860,6 +904,11 @@ function AddStudentToGroupModal({
   onAddStudent: (groupId: string, student: string) => void;
 }) {
   const [studentSearch, setStudentSearch] = useState('');
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -867,7 +916,7 @@ function AddStudentToGroupModal({
     }
   }, [open]);
 
-  if (!open || !group || typeof document === 'undefined') return null;
+  if (!open || !group || !portalContainer) return null;
 
   const groupStudentKeys = new Set(group.students.map(normalizeStudentRosterName));
   const searchQuery = studentSearch.trim().toLowerCase();
@@ -887,96 +936,135 @@ function AddStudentToGroupModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="modal-content !max-w-2xl">
-        <div className="modal-header !items-start">
-          <div>
-            <h3>Add Student</h3>
-            <p className="mt-1 text-sm text-slate-500">Add a student who needs to catch up or join this group.</p>
+      <div className="modal-content !max-w-[700px] flex max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-slate-200/60 bg-white p-0 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Premium Header */}
+        <div className="relative flex items-start justify-between border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
+          <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: 'linear-gradient(to right, var(--primary), var(--primary-dark))' }} />
+          <div className="flex items-center gap-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)] shadow-inner ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
+              <i className="fas fa-user-plus text-2xl"></i>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold tracking-tight text-slate-900">Add Student</h3>
+              <p className="mt-1.5 text-sm font-medium text-slate-500">
+                Search and assign an available student to this group.
+              </p>
+            </div>
           </div>
-          <button type="button" className="close-modal" onClick={onClose}>
-            &times;
+          <button
+            type="button"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            onClick={onClose}
+          >
+            <i className="fas fa-xmark"></i>
           </button>
         </div>
 
-        <div className="modal-body space-y-5">
-          <div className="rounded-[1.15rem] border border-slate-200 bg-slate-50/80 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Target Group</p>
-            <p className="mt-2 text-base font-semibold text-slate-900">{group.title}</p>
-            <p className="mt-1 text-sm text-slate-500">{group.code}</p>
+        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50/30">
+          <div className="relative overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+            <div className="absolute left-0 top-0 h-full w-1.5 bg-slate-200" />
+            <div className="px-6 py-5 pl-7">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Target Group</p>
+              <p className="mt-2 text-lg font-bold text-slate-900">{group.title}</p>
+              <p className="mt-1 text-sm font-medium text-slate-500">{group.code}</p>
+            </div>
           </div>
 
-          <div className="rounded-[1.25rem] border border-slate-200 bg-white p-5">
+          <div className="rounded-[1.25rem] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <label htmlFor="existing-group-student-search" className="block text-sm font-semibold text-slate-900">
-                  Available Students
+                <label htmlFor="existing-group-student-search" className="block text-sm font-bold text-slate-900">
+                  Available Roster
                 </label>
-                <p className="mt-1 text-sm text-slate-500">Search the roster and add a student to the selected group.</p>
+                <p className="mt-1 text-sm font-medium text-slate-500">Find students who aren't currently assigned to a group.</p>
               </div>
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+              <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
                 {group.members} current members
               </span>
             </div>
 
-            <div className="relative mt-4">
+            <div className="relative mt-5">
               <i className="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
               <input
                 id="existing-group-student-search"
                 type="text"
-                placeholder="Search students..."
+                placeholder="Search by name..."
                 value={studentSearch}
                 onChange={(event) => setStudentSearch(event.target.value)}
-                className="min-h-[46px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                className="min-h-[48px] w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-[rgba(0,58,143,0.1)]"
               />
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {group.students.map((student) => (
-                <span
-                  key={student}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700"
-                >
-                  {student}
-                  {group.leader === student ? (
-                    <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">
-                      Leader
-                    </span>
-                  ) : null}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-4 max-h-64 space-y-2 overflow-y-auto pr-1">
-              {filteredStudents.length ? (
-                filteredStudents.map((student) => (
-                  <div key={student} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                    <span className="text-sm font-medium text-slate-700">{student}</span>
-                    <button
-                      type="button"
-                      onClick={() => onAddStudent(group.id, student)}
-                      className="inline-flex min-h-[34px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            {group.students.length > 0 && (
+              <div className="mt-5 border-t border-slate-100 pt-5">
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Currently Assigned</p>
+                <div className="flex flex-wrap gap-2">
+                  {group.students.map((student) => (
+                    <span
+                      key={student}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm"
                     >
-                      <i className="fas fa-user-plus text-xs"></i>
-                      Add to Group
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-5 text-center text-sm text-slate-500">
-                  No students found for the current search.
+                      {student}
+                      {group.leader === student && (
+                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">
+                          Leader
+                        </span>
+                      )}
+                    </span>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
+
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Search Results</p>
+              <div className="max-h-[280px] space-y-2.5 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200">
+                {filteredStudents.length ? (
+                  filteredStudents.map((student) => (
+                    <div key={student} className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.06)] hover:shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 transition group-hover:bg-[rgba(0,58,143,0.1)] group-hover:text-[var(--primary)]">
+                          {student.charAt(0)}
+                        </div>
+                        <span className="text-sm font-semibold text-slate-700 transition group-hover:text-[var(--primary-dark)]">{student}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onAddStudent(group.id, student)}
+                        className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-[rgba(0,58,143,0.16)] bg-white px-4 text-xs font-bold text-[var(--primary)] shadow-sm transition hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.3)] hover:bg-[var(--primary)] hover:text-white hover:shadow-md"
+                      >
+                        <i className="fas fa-plus"></i>
+                        Assign
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-8 text-center">
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <i className="fas fa-users-slash text-xl"></i>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-700">No students available</p>
+                    <p className="mt-1 text-xs text-slate-500">Try a different search term or check roster.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button type="button" className="btn btn-outline" onClick={onClose}>
-            Close
+        <div className="border-t border-slate-100 bg-slate-50 px-8 py-5 flex items-center justify-end">
+          <button 
+            type="button" 
+            className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" 
+            onClick={onClose}
+          >
+            Cancel
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    portalContainer
   );
 }
 
@@ -998,7 +1086,12 @@ function CreateGroupModal({
   onSubmit: () => void;
 }) {
   const [studentSearch, setStudentSearch] = useState('');
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const groupCodeInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -1036,7 +1129,7 @@ function CreateGroupModal({
     onDraftChange({
       ...draft,
       students: [...draft.students, student],
-      leader: draft.leader || student
+      leader: draft.leader
     });
   };
 
@@ -1055,7 +1148,7 @@ function CreateGroupModal({
 
   const isReadyToCreate = draft.code.trim().length > 0 && draft.students.length > 0 && Boolean(draft.leader);
 
-  if (!open || typeof document === 'undefined') return null;
+  if (!open || !portalContainer) return null;
 
   return createPortal(
     <div
@@ -1067,14 +1160,14 @@ function CreateGroupModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="modal-content !max-w-[1000px] flex max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-white/20 shadow-[0_32px_120px_rgba(0,0,0,0.3)] bg-white animate-in fade-in zoom-in-95 duration-200">
+      <div className="modal-content !max-w-[900px] flex max-h-[90vh] flex-col overflow-hidden rounded-3xl border border-slate-200/60 bg-white p-0 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         
         {/* Premium Header */}
         <div className="relative flex items-start justify-between border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-8 py-6">
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-400" />
+          <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: 'linear-gradient(to right, var(--primary), var(--primary-dark))' }} />
           <div className="flex items-center gap-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-[var(--student-primary,#0f4c81)] shadow-inner ring-1 ring-inset ring-sky-100/50">
-              <i className="fas fa-users-medical text-2xl"></i>
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)] shadow-inner ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
+              <i className="fas fa-users text-2xl"></i>
             </div>
             <div>
               <div className="flex items-center gap-3">
@@ -1083,28 +1176,28 @@ function CreateGroupModal({
                   {department}
                 </span>
               </div>
-              <p className="mt-1.5 text-sm text-slate-500 font-medium">Configure group identity and assign student members to start tracking progress.</p>
+              <p className="mt-1 text-sm font-medium text-slate-500">Configure group identity and assign student members to start tracking progress.</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-600 active:scale-95">
-            <i className="fas fa-times text-lg"></i>
+          <button type="button" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-600 active:scale-95">
+            <i className="fas fa-times"></i>
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr]">
+        <div className="flex-1 overflow-y-auto bg-slate-50/30 p-8">
+          <div className="grid gap-6 lg:grid-cols-2">
             
             {/* Left Column: Config & Search */}
-            <div className="flex flex-col space-y-8">
+            <div className="flex flex-col space-y-6">
               
               {/* Group Code */}
-              <div className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+              <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
                 <label htmlFor="group-code" className="mb-3 flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">Group Code</span>
-                  <span className="text-[10px] font-medium text-slate-400">Required</span>
+                  <span className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Group Code</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-amber-500">Required</span>
                 </label>
                 <div className="relative group">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-[var(--student-primary,#0f4c81)] transition-colors">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 transition-colors group-focus-within:text-[var(--primary)]">
                     <i className="fas fa-hashtag"></i>
                   </div>
                   <input
@@ -1114,47 +1207,47 @@ function CreateGroupModal({
                     placeholder={`e.g. ${department.replace(/ Office| Department/i, '').trim().toUpperCase()}-2024-05`}
                     value={draft.code}
                     onChange={(event) => onDraftChange({ ...draft, code: event.target.value })}
-                    className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-sm font-semibold text-slate-900 transition-all placeholder:text-slate-400 focus:border-[var(--student-primary,#0f4c81)] focus:bg-white focus:ring-4 focus:ring-[var(--student-primary,#0f4c81)]/10"
+                    className="block min-h-[48px] w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-[rgba(0,58,143,0.1)]"
                   />
                 </div>
               </div>
 
               {/* Available Students */}
-              <div className="flex flex-col flex-1 rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden flex-shrink-0 min-h-[360px]">
-                <div className="border-b border-slate-100 p-5 bg-slate-50/30">
+              <div className="flex flex-col flex-1 rounded-[1.25rem] border border-slate-200/60 bg-white shadow-sm overflow-hidden min-h-[360px]">
+                <div className="border-b border-slate-100 p-5 bg-gradient-to-b from-slate-50 to-white">
                   <label className="mb-3 flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">Available Roster</span>
-                    <span className="text-[10px] font-medium text-slate-400">{filteredStudents.length} Students</span>
+                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Available Roster</span>
+                    <span className="inline-flex h-6 items-center rounded-full bg-slate-100 px-2 text-[10px] font-bold text-slate-500">{filteredStudents.length} Students</span>
                   </label>
-                  <div className="relative group">
-                    <i className="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[var(--student-primary,#0f4c81)] transition-colors text-sm"></i>
+                  <div className="relative group mt-2">
+                    <i className="fas fa-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]"></i>
                     <input
                       type="text"
                       placeholder="Search students by name..."
                       value={studentSearch}
                       onChange={(event) => setStudentSearch(event.target.value)}
-                      className="block w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-medium text-slate-900 transition-all placeholder:text-slate-400 focus:border-[var(--student-primary,#0f4c81)] focus:bg-white focus:ring-4 focus:ring-[var(--student-primary,#0f4c81)]/10"
+                      className="block min-h-[48px] w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-[rgba(0,58,143,0.1)]"
                     />
                   </div>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto p-3 bg-slate-50/50">
+                <div className="flex-1 overflow-y-auto p-3 bg-slate-50/30 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200">
                   {filteredStudents.length > 0 ? (
                     <div className="space-y-2">
                       {filteredStudents.map((student) => {
                         const initials = student.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                         return (
-                          <div key={student} className="group flex items-center justify-between rounded-xl p-2.5 bg-white border border-slate-100 hover:border-sky-200 hover:shadow-md transition-all duration-300">
+                          <div key={student} className="group flex items-center justify-between rounded-2xl p-3 bg-white border border-slate-100 hover:border-[rgba(0,58,143,0.24)] hover:shadow-md transition-all duration-300">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-50 text-[11px] font-bold text-[var(--student-primary,#0f4c81)] ring-1 ring-inset ring-sky-100/50 transition-colors group-hover:bg-[var(--student-primary,#0f4c81)] group-hover:text-white">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(0,58,143,0.06)] text-[11px] font-bold text-[var(--primary)] transition-colors group-hover:bg-[var(--primary)] group-hover:text-white">
                                 {initials}
                               </div>
-                              <span className="truncate text-sm font-semibold text-slate-700 group-hover:text-slate-900 transition-colors">{student}</span>
+                              <span className="truncate text-sm font-semibold text-slate-700 transition-colors group-hover:text-[var(--primary-dark)]">{student}</span>
                             </div>
                             <button
                               type="button"
                               onClick={() => addStudentToDraft(student)}
-                              className="shrink-0 rounded-lg bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200 transition-all hover:bg-[var(--student-primary,#0f4c81)] hover:text-white hover:ring-[var(--student-primary,#0f4c81)] opacity-0 sm:opacity-100 md:opacity-0 group-hover:opacity-100"
+                              className="shrink-0 rounded-xl bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-inset ring-slate-200 transition-all hover:bg-[var(--primary)] hover:text-white hover:ring-[var(--primary)] opacity-0 md:opacity-0 group-hover:opacity-100"
                             >
                               Add
                             </button>
@@ -1163,12 +1256,12 @@ function CreateGroupModal({
                       })}
                     </div>
                   ) : (
-                    <div className="flex h-full flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 rounded-xl bg-white m-2">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-300 mb-4">
+                    <div className="flex h-full flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-white m-2">
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
                         <i className="fas fa-user-slash text-xl"></i>
                       </div>
                       <p className="text-sm font-bold text-slate-700">No students found</p>
-                      <p className="mt-1.5 text-xs text-slate-500 max-w-[200px] leading-relaxed">Check your spelling or confirm if all matching students are already in the group.</p>
+                      <p className="mt-1 text-xs text-slate-500 max-w-[200px] leading-relaxed">Check your spelling or confirm if all matching students are already in the group.</p>
                     </div>
                   )}
                 </div>
@@ -1177,20 +1270,20 @@ function CreateGroupModal({
             </div>
 
             {/* Right Column: Selected Roster */}
-            <div className="flex flex-col h-full rounded-2xl border border-slate-200/60 bg-white shadow-sm overflow-hidden min-h-[460px]">
+            <div className="flex flex-col h-full rounded-[1.25rem] border border-slate-200/60 bg-white shadow-sm overflow-hidden min-h-[460px]">
               <div className="border-b border-slate-100 p-5 bg-gradient-to-b from-slate-50 to-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500 mb-1">Selected Team</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 mb-1">Selected Team</h4>
                     <p className="text-sm font-bold text-slate-900">Review & Assign Leader</p>
                   </div>
-                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[var(--student-primary,#0f4c81)] text-white shadow-sm font-bold text-sm">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[rgba(0,58,143,0.1)] text-[var(--primary)] font-bold text-sm">
                     {draft.students.length}
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 bg-slate-50/30">
+              <div className="flex-1 overflow-y-auto p-4 bg-slate-50/30 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200">
                 {draft.students.length > 0 ? (
                   <div className="space-y-3">
                     {draft.students.map((student) => {
@@ -1200,23 +1293,23 @@ function CreateGroupModal({
                       return (
                         <div
                           key={student}
-                          className={`group flex items-center justify-between gap-3 rounded-xl border p-3.5 transition-all duration-300 ${
+                          className={`group flex items-center justify-between gap-3 rounded-2xl border p-3.5 transition-all duration-300 ${
                             isLeader 
-                              ? 'border-[var(--student-primary,#0f4c81)]/30 bg-[var(--student-primary,#0f4c81)]/5 shadow-md shadow-[var(--student-primary,#0f4c81)]/10 ring-1 ring-[var(--student-primary,#0f4c81)]/20' 
-                              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+                              ? 'border-[var(--primary)]/30 bg-[rgba(0,58,143,0.06)] shadow-sm ring-1 ring-[rgba(0,58,143,0.1)]' 
+                              : 'border-slate-200 bg-white hover:border-[rgba(0,58,143,0.24)] hover:shadow-sm'
                           }`}
                         >
                           <div className="flex items-center gap-4 min-w-0">
                             <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-sm transition-colors ${
-                              isLeader ? 'bg-gradient-to-br from-[var(--student-primary,#0f4c81)] to-sky-600 text-white' : 'bg-slate-100 text-slate-600'
+                              isLeader ? 'bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] text-white' : 'bg-slate-100 text-slate-600'
                             }`}>
                               {initials}
                             </div>
                             <div className="min-w-0">
-                              <p className={`truncate text-sm font-bold ${isLeader ? 'text-slate-900' : 'text-slate-700'}`}>{student}</p>
+                              <p className={`truncate text-sm font-bold ${isLeader ? 'text-[var(--primary)]' : 'text-slate-700'}`}>{student}</p>
                               {isLeader ? (
-                                <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--student-primary,#0f4c81)] flex items-center gap-1.5">
-                                  <i className="fas fa-crown text-amber-500"></i> Group Leader
+                                <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-600 flex items-center gap-1.5">
+                                  <i className="fas fa-crown"></i> Group Leader
                                 </p>
                               ) : (
                                 <p className="mt-0.5 text-xs text-slate-400 font-medium">Group Member</p>
@@ -1229,7 +1322,7 @@ function CreateGroupModal({
                               <button
                                 type="button"
                                 onClick={() => assignLeader(student)}
-                                className="flex h-8 items-center rounded-lg px-3 text-xs font-bold text-slate-500 bg-slate-50 ring-1 ring-inset ring-slate-200 hover:bg-[var(--student-primary,#0f4c81)] hover:text-white hover:ring-[var(--student-primary,#0f4c81)] transition-all opacity-0 sm:opacity-100 md:opacity-0 group-hover:opacity-100"
+                                className="flex min-h-[36px] items-center rounded-xl px-4 text-xs font-bold text-slate-600 bg-slate-50 ring-1 ring-inset ring-slate-200 hover:bg-[var(--primary)] hover:text-white hover:ring-[var(--primary)] transition-all opacity-0 md:opacity-0 group-hover:opacity-100 shadow-sm"
                               >
                                 Make Leader
                               </button>
@@ -1237,7 +1330,7 @@ function CreateGroupModal({
                             <button
                               type="button"
                               onClick={() => removeStudentFromDraft(student)}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 bg-white ring-1 ring-inset ring-slate-200 hover:bg-red-500 hover:text-white hover:ring-red-500 transition-all shadow-sm"
+                              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 bg-white ring-1 ring-inset ring-slate-200 hover:bg-red-50 hover:text-red-600 hover:ring-red-200 transition-all shadow-sm"
                               title="Remove"
                             >
                               <i className="fas fa-trash-alt text-[11px]"></i>
@@ -1248,9 +1341,9 @@ function CreateGroupModal({
                     })}
                   </div>
                 ) : (
-                  <div className="flex h-full flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-xl bg-white m-1 relative overflow-hidden">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-sky-50 rounded-full blur-3xl opacity-50"></div>
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 text-slate-300 shadow-sm border border-slate-100 mb-5 relative z-10">
+                  <div className="flex h-full flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-[1.25rem] bg-white m-1 relative overflow-hidden">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[rgba(0,58,143,0.03)] rounded-full blur-3xl"></div>
+                    <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 text-slate-300 shadow-sm border border-slate-100 relative z-10">
                       <i className="fas fa-user-plus text-2xl"></i>
                     </div>
                     <p className="text-base font-bold text-slate-800 relative z-10">Your roster is empty</p>
@@ -1288,11 +1381,12 @@ function CreateGroupModal({
               type="button"
               onClick={onSubmit}
               disabled={!isReadyToCreate}
-              className={`flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-bold text-white shadow-lg transition-all duration-300 ${
+              className={`flex min-h-[48px] items-center gap-2 rounded-xl px-8 text-sm font-bold text-white shadow-lg transition-all duration-300 ${
                 isReadyToCreate 
-                  ? 'bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-600 hover:shadow-xl hover:scale-105 active:scale-95' 
-                  : 'bg-slate-300 shadow-none cursor-not-allowed'
+                  ? 'hover:shadow-xl hover:scale-[1.02] active:scale-95' 
+                  : 'bg-slate-300 shadow-none cursor-not-allowed opacity-80'
               }`}
+              style={isReadyToCreate ? { background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' } : undefined}
             >
               <i className="fas fa-folder-plus"></i>
               Create Group
@@ -1301,7 +1395,7 @@ function CreateGroupModal({
         </div>
       </div>
     </div>,
-    document.body
+    portalContainer
   );
 }
 
@@ -1528,6 +1622,8 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
       );
       setAssignedStudentKeys((currentKeys) => mergeStudentKeys(currentKeys, updatedStudents));
       setAddStudentModalOpen(false);
+      
+      alert(`${student} has been successfully added to the group.`);
     } catch (e) {
       console.error('Failed to update group students on server', e);
       alert('An error occurred while adding the student.');
@@ -1581,6 +1677,8 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
       
       const removedKey = normalizeStudentRosterName(student);
       setAssignedStudentKeys((currentKeys) => currentKeys.filter(k => k !== removedKey));
+      
+      alert(`${student} has been successfully removed from the group.`);
     } catch (e) {
       console.error('Failed to remove group student on server', e);
       alert('An error occurred while removing the student.');
@@ -1699,7 +1797,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
             <SummaryCard icon="fa-box-archive" label="Completed Groups" value={completedGroups.length} helper="Groups moved into the completed archive" tone="success" />
           </section>
 
-          <section className="rounded-[1.75rem] border border-slate-200/80 bg-white shadow-sm">
+          <section className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl ring-1 ring-slate-900/5">
             <SectionHeader
               eyebrow="Group Management"
               title="Supervision workspace"
@@ -1729,12 +1827,12 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
               }}
             />
 
-            <div className="grid gap-3 px-6 py-5 lg:grid-cols-[220px_minmax(0,1fr)_auto]">
+            <div className="grid gap-3 px-8 py-6 lg:grid-cols-[220px_minmax(0,1fr)_auto]">
               {activeTab === 'active' ? (
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value as GroupFilterStatus)}
-                  className="min-h-[48px] rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                  className="min-h-[48px] rounded-2xl border border-slate-200/60 bg-white/50 px-4 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm outline-none transition-all hover:bg-white focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                 >
                   <option value="all">All Statuses</option>
                   <option value="attention">Needs Attention</option>
@@ -1747,7 +1845,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
                 <select
                   value="completed"
                   disabled
-                  className="min-h-[48px] rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 shadow-sm outline-none"
+                  className="min-h-[48px] rounded-2xl border border-slate-200/60 bg-slate-50/50 px-4 text-sm font-semibold text-slate-700 shadow-sm outline-none opacity-80"
                 >
                   <option value="completed">Completed</option>
                 </select>
@@ -1759,7 +1857,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
                   placeholder="Search groups or titles..."
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  className="min-h-[48px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
+                  className="min-h-[48px] w-full rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm outline-none transition-all hover:bg-white focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                 />
               </div>
               <button
@@ -1768,15 +1866,15 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
                   setStatusFilter(activeTab === 'completed' ? 'completed' : 'all');
                   setSearch('');
                 }}
-                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl border border-slate-200/60 bg-white/50 px-5 text-sm font-bold text-slate-600 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:text-slate-900"
               >
                 <i className="fas fa-undo text-xs"></i>
-                Clear
+                Clear Filters
               </button>
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-sm">
+          <section className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl ring-1 ring-slate-900/5">
             <SectionHeader
               eyebrow="Directory"
               title={`${filteredGroups.length} ${filteredGroups.length === 1 ? (activeTab === 'completed' ? 'record' : 'group') : activeTab === 'completed' ? 'records' : 'groups'} in view`}

@@ -567,8 +567,8 @@ function toIsoString(value: Date | string | null | undefined, fallback = now) {
   return value || fallback;
 }
 
-function getDisplayName(user: { name?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null }) {
-  return [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.name || user.email || 'Adviser';
+function getDisplayName(user: { name?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; displayName?: string | null }) {
+  return user.displayName || [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.name || user.email || 'Adviser';
 }
 
 function getFacultyRoleLabel(role: unknown) {

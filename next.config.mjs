@@ -78,10 +78,10 @@ const legacyRoutes = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ['localhost', '10.60.192.222'],
+  allowedDevOrigins: ['localhost', '16.165.11.0'],
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', '10.60.192.222:3000']
+      allowedOrigins: ['localhost:3000', '16.165.11.0:3000']
     }
   },
   async rewrites() {

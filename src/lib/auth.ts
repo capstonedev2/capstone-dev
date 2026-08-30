@@ -190,14 +190,16 @@ export function buildDisplayName({
   name,
   firstName,
   lastName,
-  email
+  email,
+  displayName
 }: {
   name?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   email: string | null;
+  displayName?: string | null;
 }) {
-  return normalizeText(name || '') || normalizeText(`${firstName || ''} ${lastName || ''}`) || (email || '');
+  return normalizeText(displayName || '') || normalizeText(name || '') || normalizeText(`${firstName || ''} ${lastName || ''}`) || (email || '');
 }
 
 export async function hashPassword(password: string) {

@@ -738,8 +738,8 @@ export function RegisterPage() {
                     </div>
                   )}
 
-                  <div className="rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold leading-5 text-slate-100">
-                    <span className="font-extrabold text-white">{registerBranding.academicNote}</span> {registerBranding.staffNote}
+                  <div className="rounded-md border border-slate-400/20 bg-black/5 px-3 py-1.5 text-sm font-semibold leading-5 text-slate-700">
+                    <span className="font-extrabold text-slate-900">{registerBranding.academicNote}</span> {registerBranding.staffNote}
                   </div>
 
                   {error ? (
@@ -761,7 +761,7 @@ export function RegisterPage() {
                 </form>
 
                 <div className="mt-1 text-center">
-                  <p className="text-sm font-semibold leading-6 text-slate-200">
+                  <p className="text-sm font-semibold leading-6 text-slate-700">
                     {registerBranding.alternatePrompt}{' '}
                     <Link
                       href="/login"
@@ -772,8 +772,8 @@ export function RegisterPage() {
                     </Link>
                   </p>
                 </div>
-                <div className="mt-2 border-t border-white/30 pt-2 text-center text-xs font-bold text-slate-200">
-                  <i className="fas fa-shield-halved mr-2 text-slate-300" aria-hidden="true" />
+                <div className="mt-2 border-t border-slate-400/30 pt-2 text-center text-xs font-bold text-slate-700">
+                  <i className="fas fa-shield-halved mr-2 text-slate-500" aria-hidden="true" />
                   Secure registration for ThesisTrack users only.
                 </div>
               </div>

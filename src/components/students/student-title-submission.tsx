@@ -1360,176 +1360,102 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         </div>
       )}
       
-      <section className="title-review-progress-card" style={titleProgressStyle}>
-        <header className="title-review-progress-header">
-          <div className="title-review-progress-heading">
-            <span className="title-review-progress-icon" aria-hidden="true">
-              <i className="fas fa-file-shield" />
-            </span>
+      {/* Unified Premium Status Card */}
+      <div className="mb-8 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] shadow-md overflow-hidden flex flex-col">
+        
+        {/* Top: Glassmorphic Hero Banner */}
+        <div className="relative flex flex-col justify-between p-8 text-white shadow-inner md:flex-row group overflow-hidden"
+             style={{ background: 'linear-gradient(to bottom right, var(--primary), var(--primary-deep))' }}>
+          <div className="absolute -right-20 -top-20 z-0 h-96 w-96 rounded-full bg-white/5 blur-[80px]"></div>
+          <div className="absolute right-10 bottom-0 z-0 opacity-10 translate-x-1/4 translate-y-1/4 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+            <i className="fas fa-graduation-cap text-[14rem]"></i>
+          </div>
+
+          <div className="z-10 flex w-full flex-col justify-between md:w-1/2">
             <div>
-              <div className="title-review-progress-kicker">
-                <span>{activeSubmission.proposalLabel}</span>
-                <Badge label={activeSubmission.registrationStatus} tone={titleStatusTone} />
+              <div className="mb-2 flex items-center gap-3">
+                <span className="text-sm font-bold tracking-wide text-white/80 uppercase">Proposal {String(activeSubmission.proposalNumber).padStart(2, '0')}</span>
+                <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md ${titleStatusTone === 'success' ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30' : titleStatusTone === 'warning' ? 'bg-amber-500/20 text-amber-100 border border-amber-500/30' : 'bg-white/10 text-white border border-white/20'}`}>
+                  {activeSubmission.registrationStatus}
+                </span>
               </div>
-              <h2>Title Review Progress</h2>
-              <p>Track your thesis title proposal through upload, adviser validation, and final approval.</p>
+              <h2 className="mb-8 mt-2 text-3xl font-black tracking-tight leading-tight text-white drop-shadow-md">
+                {activeSubmission.proposedTitle || 'Untitled Proposal'}
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-x-12 gap-y-4">
+              <div className="bg-white/5 rounded-xl px-4 py-2 border border-white/10 backdrop-blur-sm">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-white/60">Adviser</p>
+                <p className="flex items-center gap-2 text-sm font-bold text-white"><i className="fas fa-user-tie text-white/50"></i> {activeSubmission.adviser}</p>
+              </div>
+              <div className="bg-white/5 rounded-xl px-4 py-2 border border-white/10 backdrop-blur-sm">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-white/60">Department</p>
+                <p className="flex items-center gap-2 text-sm font-bold text-white"><i className="fas fa-building text-white/50"></i> {data.profile.department || 'Computer Science'}</p>
+              </div>
             </div>
           </div>
 
-          <div className="title-review-progress-actions">
-            <span className={`title-review-progress-pill ${reviewProgressTone}`}>
-              <i className="fas fa-circle" aria-hidden="true" />
-              {reviewProgressLabel}
-            </span>
-            <button type="button" className="title-review-overview-button" onClick={handleViewOverview}>
-              <i className="fas fa-list-ul" aria-hidden="true" />
-              View Overview
-            </button>
-          </div>
-        </header>
-
-        <section className={`title-submission-workflow-strip ${normalizedRegistrationStatus === 'rejected' ? 'is-danger-workflow' : ''}`} aria-label="Title submission workflow">
-          {TIMELINE_STEPS.map((step, idx) => {
-            const isCompleted = idx < currentStepIndex || (isApprovedTimeline && idx <= currentStepIndex);
-            const isCurrent = idx === currentStepIndex && !isApprovedTimeline;
-            const needsAttention = isCurrent && normalizedRegistrationStatus === 'needs revision';
-            const isDanger = isCurrent && normalizedRegistrationStatus === 'rejected';
-            const stateLabel = getTimelineStateLabel(step.id, isCompleted, isCurrent);
-            const isPending = !isCompleted && !isCurrent;
-            const showTimelineMeta = isCompleted || isCurrent;
-
-            return (
-              <div
-                key={step.id}
-                className={`${isCompleted ? 'is-complete' : ''} ${isDanger ? 'is-danger' : needsAttention ? 'is-attention' : isCurrent ? 'is-current' : ''} ${isPending ? 'is-pending' : ''}`}
-                aria-current={isCurrent ? 'step' : undefined}
-              >
-                <span className="title-submission-workflow-icon">
-                  <i className={`fas ${step.icon}`} aria-hidden="true" />
-                  {isCompleted ? (
-                    <span className="title-submission-workflow-check" aria-hidden="true">
-                      <i className="fas fa-check" />
-                    </span>
-                  ) : null}
-                </span>
-                <div className="title-submission-workflow-copy">
-                  <em>{String(idx + 1).padStart(2, '0')}</em>
-                  <strong>{step.label}</strong>
-                  <small className="title-submission-workflow-pill">
-                    <i className={`fas ${isCompleted ? 'fa-check' : needsAttention || isDanger ? 'fa-circle-exclamation' : 'fa-clock'}`} aria-hidden="true" />
-                    {stateLabel}
-                  </small>
-                  {needsAttention || isDanger ? (
-                    <p>Review adviser feedback and submit a revised title proposal.</p>
-                  ) : isPending && step.id === 4 ? (
-                    <p>Pending final review and approval.</p>
-                  ) : showTimelineMeta ? (
-                    <span className="title-submission-workflow-meta">
-                      <span><i className="fas fa-calendar-days" aria-hidden="true" /> {timelineDateLabel}</span>
-                      {timelineTimeLabel ? <span><i className="fas fa-clock" aria-hidden="true" /> {timelineTimeLabel}</span> : null}
-                    </span>
-                  ) : null}
-                  {needsAttention || isDanger ? (
-                    <button
-                      type="button"
-                      className="title-submission-workflow-action"
-                      onClick={handleViewFeedback}
-                    >
-                      <i className="fas fa-message" aria-hidden="true" />
-                      View Feedback
-                    </button>
-                  ) : null}
+          <div className="z-10 mt-8 flex flex-col items-start gap-10 md:mt-0 md:items-end">
+            <div className="flex flex-col gap-5 text-left md:text-right w-full">
+              <div className="bg-white/10 rounded-2xl p-5 border border-white/20 backdrop-blur-md shadow-inner w-full sm:w-[280px]">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-white/70">Current Workflow Step</p>
+                <p className="flex items-center gap-2 text-[15px] font-extrabold text-white mb-4">
+                  <span className="relative mr-1 flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
+                  </span>
+                  <i className={`fas ${currentStepIndex === 0 ? 'fa-file-arrow-up' : currentStepIndex === 1 ? 'fa-paper-plane' : currentStepIndex >= 4 ? 'fa-circle-check' : 'fa-magnifying-glass'} text-white/70 mr-1`}></i> 
+                  {currentStepIndex === 0 ? 'Upload Concept Paper' : currentStepIndex === 1 ? 'Submit for Adviser Review' : currentStepIndex === 2 ? 'Awaiting Adviser Review' : currentStepIndex === 3 ? 'Under Review' : 'Title Approved'}
+                </p>
+                
+                <div className="border-t border-white/10 pt-3 flex items-center justify-between">
+                  <p className="text-xs font-semibold text-white/60">Last Updated</p>
+                  <p className="flex items-center gap-1.5 text-xs font-bold text-white"><i className="fas fa-clock text-white/50"></i> {formatDateTimeLabel(activeSubmission.updated_at)}</p>
                 </div>
               </div>
-            );
-          })}
-        </section>
-
-
-        <p className="title-review-progress-tip">
-          <i className="fas fa-shield-halved" aria-hidden="true" />
-          Tip: Address adviser feedback early to move your title to the next stage faster.
-        </p>
-      </section>
-
-      {/* Hero Banner */}
-      <div className="legacy-title-hero hidden bg-gradient-to-br from-[#003A8F] via-[#0b2866] to-[#1E40AF] rounded-[1.5rem] p-8 text-white flex flex-col md:flex-row justify-between relative overflow-hidden shadow-2xl shadow-[#003A8F]/20 mb-8 border border-[var(--border)] group">
-        <div className="z-10 flex flex-col justify-between w-full md:w-1/2">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-sm font-semibold tracking-wide text-blue-100">Proposal {String(activeSubmission.proposalNumber).padStart(2, '0')}</span>
-              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${titleStatusTone === 'success' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-[var(--surface)] text-white'}`}>
-                {activeSubmission.registrationStatus}
-              </span>
-            </div>
-            <h2 className="text-3xl font-extrabold mb-8 mt-2 leading-tight">{activeSubmission.proposedTitle || 'Untitled Proposal'}</h2>
-          </div>
-          <div className="flex flex-wrap gap-x-12 gap-y-4">
-            <div>
-              <p className="text-xs text-blue-200 font-medium mb-1.5">Adviser</p>
-              <p className="text-sm font-semibold flex items-center gap-2"><i className="fas fa-user text-blue-300"></i> {activeSubmission.adviser}</p>
-            </div>
-            <div>
-              <p className="text-xs text-blue-200 font-medium mb-1.5">Department</p>
-              <p className="text-sm font-semibold flex items-center gap-2"><i className="fas fa-building text-blue-300"></i> {data.profile.department || 'Computer Science'}</p>
             </div>
           </div>
         </div>
 
-        <div className="z-10 flex flex-col md:flex-row items-center gap-10 mt-8 md:mt-0">
-          <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
-            <div>
-              <p className="text-xs text-blue-200 font-medium mb-1.5">Next Step</p>
-              <p className="text-sm font-bold flex items-center gap-2 text-white">
-                <span className="relative flex h-2 w-2 mr-1"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F6BE00] opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-[#F6BE00]"></span></span><i className={`fas ${currentStepIndex === 0 ? 'fa-file-arrow-up' : currentStepIndex === 1 ? 'fa-paper-plane' : currentStepIndex >= 4 ? 'fa-circle-check' : 'fa-magnifying-glass'} text-blue-200 mr-1`}></i> {currentStepIndex === 0 ? 'Upload Concept Paper' : currentStepIndex === 1 ? 'Submit for Adviser Review' : currentStepIndex === 2 ? 'Awaiting Adviser Review' : currentStepIndex === 3 ? 'Under Review' : 'Title Approved'} <i className="fas fa-arrow-right text-xs ml-1 group-hover:translate-x-1 transition-transform"></i>
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-blue-200 font-medium mb-1.5">Last Updated</p>
-              <p className="text-sm font-semibold flex items-center gap-2 text-blue-50"><i className="fas fa-calendar text-blue-300"></i> {formatDateTimeLabel(activeSubmission.updated_at)}</p>
+        {/* Bottom: Modern Premium Timeline Stepper */}
+        <div className="relative p-6 sm:p-8 bg-[var(--surface)]">
+          <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 pb-2">
+            <div className="relative mx-auto flex w-full min-w-[550px] max-w-[900px] items-center justify-between">
+              {/* Background Track */}
+              <div className="absolute top-6 left-[10%] right-[10%] -z-0 h-1.5 -translate-y-1/2 rounded-full bg-[var(--surface-alt)] shadow-inner"></div>
+              {/* Active Track */}
+              <div className="absolute top-6 left-[10%] -z-0 h-1.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-bright)] shadow-sm transition-all duration-1000 ease-out" style={{ width: `calc(${(currentStepIndex / 4) * 80}%)` }}></div>
+              
+              {TIMELINE_STEPS.map((step, idx) => {
+                 const isCompleted = idx <= currentStepIndex;
+                 const isCurrent = idx === currentStepIndex;
+                 const isApproved = step.label === 'Approved' && isCompleted;
+                 
+                 let circleClasses = "bg-[var(--surface-alt)] border-[var(--surface)] text-[var(--muted)] border-[6px] shadow-sm";
+                 if (isCompleted && !isApproved) circleClasses = "bg-[var(--surface)] border-[var(--primary)] text-[var(--primary)] border-4 shadow-sm";
+                 if (isCurrent && !isApproved) circleClasses = "bg-[var(--primary)] border-[var(--surface)] text-white border-[6px] shadow-lg shadow-[var(--primary)]/30 scale-110";
+                 if (isApproved) circleClasses = "bg-emerald-500 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-emerald-500/30 scale-110";
+                 
+                 return (
+                   <div key={idx} className="relative z-10 flex flex-1 flex-col items-center gap-3 bg-transparent">
+                      <div className="bg-[var(--surface)] rounded-full p-1">
+                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg transition-all duration-500 ${circleClasses}`}>
+                          <i className={`fas ${step.icon}`}></i>
+                        </div>
+                      </div>
+                      <div className="text-center w-full max-w-[120px]">
+                        <p className={`text-[11px] uppercase tracking-wider font-extrabold whitespace-nowrap ${isCompleted ? 'text-[var(--text)]' : 'text-[var(--text-meta)]'}`}>{step.label}</p>
+                      </div>
+                   </div>
+                 )
+              })}
             </div>
           </div>
-        </div>
-        
-        {/* Decorative elements */}
-        <div className="absolute right-0 bottom-0 opacity-[0.15] translate-x-1/4 translate-y-1/4">
-          <i className="fas fa-graduation-cap text-[14rem]"></i>
         </div>
       </div>
 
-            {/* Timeline Stepper */}
-      <div className="legacy-title-timeline hidden bg-[var(--surface)] rounded-[1.25rem] border border-[var(--border)] p-8 shadow-sm mb-8 relative overflow-hidden">
-        <div className="flex items-center justify-between relative max-w-[90%] mx-auto">
-          <div className="absolute left-10 right-10 top-6 -translate-y-1/2 h-1 bg-[var(--surface-alt)] z-0 rounded-full"></div>
-          <div className="absolute left-10 top-6 -translate-y-1/2 h-1 bg-blue-600 z-0 rounded-full transition-all duration-1000" style={{ width: `calc(${(currentStepIndex / 5) * 100}% - ${(currentStepIndex / 5) * 80}px)` }}></div>
-          
-          {TIMELINE_STEPS.map((step, idx) => {
-             const isCompleted = idx <= currentStepIndex;
-             const isCurrent = idx === currentStepIndex;
-             
-             let circleClasses = "bg-[var(--surface)] border-[var(--border)] text-[var(--muted)]";
-             if (isCompleted) circleClasses = "bg-[var(--surface)] border-blue-600 text-blue-600";
-             if (isCurrent) circleClasses = "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200/50";
-             if (step.label === 'Approved' && isCompleted) circleClasses = "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-200/50";
-             
-             return (
-               <div key={idx} className="relative z-10 flex flex-col items-center gap-3 bg-[var(--surface)] px-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg shadow-sm border-2 transition-all ${circleClasses}`}>
-                    <i className={`fas ${step.icon}`}></i>
-                  </div>
-                  <div className="text-center">
-                    <p className={`text-xs font-bold ${isCompleted ? 'text-[var(--text)]' : 'text-[var(--text-meta)]'}`}>{step.label}</p>
-                    {/* Removed hardcoded fake date */}
-                    {!isCompleted && step.label === 'Registered' && <p className="text-[10px] font-bold text-[var(--muted)] mt-0.5">-</p>}
-                  </div>
-               </div>
-             )
-          })}
-        </div>
-      </div>
-
-      {/* Modern Pill Tabs */}
-      <div className="title-submission-tabs flex items-center gap-2 bg-slate-200/40 p-1.5 rounded-2xl border border-[var(--border)] mb-8 w-fit shadow-inner">
+      {/* Modern Premium Pill Tabs */}
+      <div className="flex items-center gap-2 bg-[var(--surface)] p-1.5 rounded-2xl border border-[var(--border)] mb-8 w-fit shadow-sm">
         {titleSubmissionTabs.map((tab) => {
           const isDisabled = tab.id === 'Documents' && (!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim());
           const isActive = activeTab === tab.id;
@@ -1541,12 +1467,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               }}
               disabled={isDisabled}
               aria-pressed={isActive}
-              className={`px-6 py-2.5 text-[13px] font-extrabold rounded-xl transition-all duration-300 ${isActive ? 'bg-[var(--surface)] text-[var(--info)] shadow-[0_4px_12px_-4px_rgba(0,58,143,0.15)] ring-1 ring-slate-100 scale-105' : isDisabled ? 'text-[var(--text-meta)] cursor-not-allowed opacity-60 bg-[var(--surface-alt)]' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-alt)]'}`}
+              className={`px-7 py-2.5 text-[13px] font-extrabold rounded-xl transition-all duration-300 flex items-center gap-2.5 ${isActive ? 'bg-[var(--primary)] text-white shadow-[0_4px_12px_rgba(0,58,143,0.3)]' : isDisabled ? 'text-[var(--text-meta)] cursor-not-allowed opacity-50 bg-[var(--surface-alt)]' : 'text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-alt)]'}`}
             >
-              <div className="flex items-center gap-2">
-                <i className={`fas ${isDisabled ? 'fa-lock' : tab.icon} text-[11px]`} aria-hidden="true"></i>
-                {tab.id}
-              </div>
+              <i className={`fas ${isDisabled ? 'fa-lock text-[10px]' : tab.icon} ${isActive ? 'text-white/80' : ''}`} aria-hidden="true"></i>
+              {tab.id}
             </button>
           );
         })}
@@ -1705,24 +1629,24 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
           
           {activeTab === 'Details' && (
-            <div ref={detailsPanelRef} className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-8 flex flex-col relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+            <div ref={detailsPanelRef} className="bg-[var(--surface)] rounded-[1.5rem] border border-[var(--border)] shadow-md p-8 flex flex-col relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[var(--primary-soft)] to-transparent rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
               
               <div className="mb-8 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-blue-50 text-[var(--info)] flex items-center justify-center text-xl shadow-sm border border-blue-100"><i className="fas fa-file-signature"></i></div>
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-bright)] text-white flex items-center justify-center text-xl shadow-lg shadow-[var(--primary)]/20"><i className="fas fa-file-signature"></i></div>
                 <div>
-                  <h3 className="text-xl font-extrabold text-[var(--text)] tracking-tight">Proposal Details</h3>
-                  <p className="text-[13px] text-[var(--muted)] font-medium mt-1">Provide the official title and a brief note to your adviser.</p>
+                  <h3 className="text-2xl font-black text-[var(--text)] tracking-tight">Proposal Details</h3>
+                  <p className="text-sm text-[var(--muted)] font-medium mt-1">Provide the official title and a brief note to your adviser.</p>
                 </div>
               </div>
 
-              <div className="space-y-8">
-                <div>
-                  <label htmlFor="proposedTitle" className="block text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider mb-3">
-                    Proposed Title <span className="text-rose-500">*</span>
+              <div className="space-y-8 relative z-10">
+                <div className="group/field">
+                  <label htmlFor="proposedTitle" className="block text-[12px] font-black text-[var(--text)] uppercase tracking-widest mb-3">
+                    Proposed Title <span className="text-rose-500 ml-1">*</span>
                   </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-[var(--info)] transition-colors">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--muted)] group-focus-within/field:text-[var(--primary)] transition-colors">
                       <i className="fas fa-heading"></i>
                     </div>
                     <input
@@ -1731,21 +1655,21 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
                       placeholder="Enter the official, finalized title of your study"
-                      className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-11 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--text-meta)] focus:bg-[var(--surface)] focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-[var(--surface)] hover:border-[var(--border-strong)] text-sm font-bold outline-none disabled:opacity-60 disabled:bg-[var(--surface-alt)]"
+                      className="block w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--muted)] focus:bg-[var(--surface)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)] hover:border-[var(--border-strong)] text-[15px] font-bold outline-none disabled:opacity-60 disabled:bg-[var(--surface-alt)]"
                       disabled={!canUpload}
                     />
                   </div>
-                  <p className="text-[11px] font-bold text-[var(--muted)] mt-2.5 flex items-center gap-1.5">
-                    <i className="fas fa-exclamation-circle text-rose-400"></i> A proposed title is required before you can proceed to upload documents.
+                  <p className="text-[11px] font-bold text-[var(--muted)] mt-3 flex items-center gap-2">
+                    <i className="fas fa-circle-info text-[var(--info)]"></i> A proposed title is required before you can proceed to upload documents.
                   </p>
                 </div>
 
-                <div>
-                  <label htmlFor="briefDescription" className="block text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider mb-3 flex items-center gap-2">
-                    Note to Adviser <span className="text-[var(--text-meta)] font-bold text-[10px] px-2 py-0.5 bg-[var(--surface-alt)] rounded-md border border-[var(--border)]">OPTIONAL</span>
+                <div className="group/field">
+                  <label htmlFor="briefDescription" className="block text-[12px] font-black text-[var(--text)] uppercase tracking-widest mb-3 flex items-center gap-3">
+                    Note to Adviser <span className="text-[var(--text-meta)] font-bold text-[9px] px-2 py-0.5 bg-[var(--surface-alt)] rounded border border-[var(--border)]">OPTIONAL</span>
                   </label>
-                  <div className="relative group">
-                    <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-[var(--info)] transition-colors">
+                  <div className="relative">
+                    <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-[var(--muted)] group-focus-within/field:text-[var(--primary)] transition-colors">
                       <i className="fas fa-comment-dots"></i>
                     </div>
                     <textarea
@@ -1757,17 +1681,17 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       }
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
                       placeholder="Add specific questions, context, or areas you want your adviser to focus on..."
-                      className="block w-full rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-11 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--text-meta)] focus:bg-[var(--surface)] focus:border-[#003A8F] focus:ring-4 focus:ring-[#003A8F]/15 hover:bg-[var(--surface)] hover:border-[var(--border-strong)] text-sm font-medium outline-none min-h-[160px] resize-y disabled:opacity-60 disabled:bg-[var(--surface-alt)] leading-relaxed"
+                      className="block w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--muted)] focus:bg-[var(--surface)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)] hover:border-[var(--border-strong)] text-[14px] font-medium outline-none min-h-[160px] resize-y disabled:opacity-60 disabled:bg-[var(--surface-alt)] leading-relaxed"
                       disabled={!canUpload}
                     />
                   </div>
                 </div>
               </div>
               
-              <div className="mt-8 pt-6 border-t border-[var(--border)] flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <div className={`h-2.5 w-2.5 rounded-full ${!activeSubmission.proposedTitle.trim() ? 'bg-[#F6BE00] animate-pulse' : 'bg-[#003A8F]'}`}></div>
-                   <span className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)]">
+              <div className="mt-8 pt-8 border-t border-[var(--border)] flex items-center justify-between relative z-10">
+                 <div className="flex items-center gap-3 bg-[var(--surface-alt)] px-4 py-2 rounded-xl border border-[var(--border)]">
+                   <div className={`h-2.5 w-2.5 rounded-full ${!activeSubmission.proposedTitle.trim() ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`}></div>
+                   <span className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--text)]">
                      {!activeSubmission.proposedTitle.trim() ? 'Awaiting Title' : 'Details Complete'}
                    </span>
                  </div>
@@ -1778,7 +1702,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                      }
                    }}
                    disabled={!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()}
-                   className={`text-xs font-extrabold px-6 py-3 rounded-lg shadow-md transition-all flex items-center gap-2 ${(!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()) ? 'bg-slate-200 cursor-not-allowed text-[var(--text-meta)] shadow-none' : 'bg-slate-800 hover:bg-slate-900 text-white hover:shadow-lg hover:-translate-y-0.5'}`}
+                   className={`text-sm font-extrabold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-3 ${(!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()) ? 'bg-[var(--surface-alt)] cursor-not-allowed text-[var(--text-meta)] shadow-none border border-[var(--border)]' : 'bg-gradient-to-r from-[var(--primary)] to-[var(--primary-bright)] text-white hover:shadow-lg hover:-translate-y-0.5 border border-transparent'}`}
                  >
                    Continue to Documents <i className="fas fa-arrow-right"></i>
                  </button>
@@ -1868,27 +1792,38 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
         {/* Right Column - Made Sticky for Better UX */}
         <div className="title-submission-side-rail flex flex-col gap-6 sticky top-8 h-fit animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 ease-out fill-mode-both">
-           <div className="title-submission-side-card title-submission-progress-card bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6" style={titleProgressStyle}>
-             <div className="flex items-start justify-between gap-4 mb-5">
+           <div className="bg-[var(--surface)] rounded-[1.5rem] border border-[var(--border)] shadow-md p-6 relative overflow-hidden" style={titleProgressStyle}>
+             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary-soft)] rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+             
+             <div className="flex items-center justify-between gap-4 mb-8">
                <div>
-                 <h3 className="text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider">Workflow Progress</h3>
-                 <p className="mt-1 text-xs font-semibold text-[var(--muted)]">{nextActionLabel}</p>
+                 <h3 className="text-[12px] font-black text-[var(--text)] uppercase tracking-widest mb-1">Workflow Progress</h3>
+                 <p className="text-xs font-semibold text-[var(--muted)]">{nextActionLabel}</p>
                </div>
-               <div className="title-submission-progress-orb" aria-label={`Workflow progress ${submissionProgressPercent}%`}>
-                 <span>{submissionProgressPercent}%</span>
+               <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface-alt)] shadow-inner border border-[var(--border)]">
+                 <svg className="absolute inset-0 h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
+                   <path className="text-[var(--border)]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                   <path className="text-[var(--primary)] transition-all duration-1000 ease-out" strokeDasharray={`${submissionProgressPercent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                 </svg>
+                 <span className="text-[13px] font-black text-[var(--text)]">{submissionProgressPercent}%</span>
                </div>
              </div>
-             <div className="title-submission-progress-track" aria-hidden="true">
-               <span style={{ width: `${submissionProgressPercent}%` }} />
-             </div>
-             <div className="title-submission-side-readiness mt-5">
-               {readinessItems.map((item) => (
-                 <div key={item.id} className={item.complete ? 'is-complete' : ''}>
-                   <i className={`fas ${item.complete ? 'fa-circle-check' : 'fa-circle'}`} aria-hidden="true" />
-                   <span>
-                     <strong>{item.label}</strong>
-                     <small>{item.detail}</small>
-                   </span>
+             
+             <div className="flex flex-col gap-5">
+               {readinessItems.map((item, idx) => (
+                 <div key={item.id} className="flex gap-4 relative">
+                   {idx !== readinessItems.length - 1 && (
+                     <div className={`absolute top-8 left-3 w-0.5 h-full -ml-[1px] ${item.complete ? 'bg-[var(--primary)]' : 'bg-[var(--border)]'} transition-colors duration-500`}></div>
+                   )}
+                   <div className="relative z-10 shrink-0">
+                     <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors duration-500 ${item.complete ? 'border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--muted)]'}`}>
+                       <i className={`fas ${item.complete ? 'fa-check text-[10px]' : 'fa-circle text-[6px]'}`} aria-hidden="true" />
+                     </div>
+                   </div>
+                   <div className={`flex flex-col pb-2 ${!item.complete ? 'opacity-70' : ''}`}>
+                     <strong className={`text-[13px] font-extrabold ${item.complete ? 'text-[var(--text)]' : 'text-[var(--muted)]'}`}>{item.label}</strong>
+                     <small className="text-[11px] font-semibold text-[var(--text-meta)] mt-0.5">{item.detail}</small>
+                   </div>
                  </div>
                ))}
              </div>
