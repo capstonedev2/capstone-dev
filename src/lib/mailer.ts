@@ -269,3 +269,71 @@ export async function sendScheduleNotificationEmail({
 
   return sendEmail({ to, subject, html, text });
 }
+
+type GroupAssignmentEmailInput = {
+  to: string;
+  name?: string | null;
+  adviserName?: string | null;
+  groupCode?: string | null;
+  projectTitle?: string | null;
+  role?: string;
+  loginUrl?: string;
+};
+
+export async function sendGroupAssignmentEmail({
+  to,
+  name,
+  adviserName,
+  groupCode,
+  projectTitle,
+  role,
+  loginUrl
+}: GroupAssignmentEmailInput) {
+  const displayName = name?.trim() || 'Student';
+  const adviserText = adviserName ? ` by your adviser, ${adviserName}.` : ` by an adviser.`;
+  const subject = 'You have been assigned to a capstone group';
+  
+  let text = `Hello ${displayName},\n\nYou have been assigned to a new capstone group${adviserText}\n\n`;
+  if (groupCode) text += `Group Code: ${groupCode}\n`;
+  if (projectTitle) text += `Project Title: ${projectTitle}\n`;
+  if (role) text += `Your Role: ${role}\n`;
+  text += `\nPlease log in to the ThesisTrack portal to view your group details.\n\nThank you,\nThesisTrack System`;
+
+  const html = `
+    <div style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; padding: 40px 20px; color: #334155; line-height: 1.5;">
+      
+      <div style="max-width: 600px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+        <span style="font-size: 24px; color: #0f4c81; font-weight: 800; letter-spacing: -0.02em;">ThesisTrack</span>
+      </div>
+
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        
+        <div style="height: 6px; background-color: #0f4c81; border-top-left-radius: 12px; border-top-right-radius: 12px;"></div>
+        
+        <div style="padding: 40px 32px; text-align: center;">
+          <h2 style="margin: 0 0 16px; font-size: 22px; color: #0f172a; font-weight: 700;">
+            Group Assignment
+          </h2>
+          <p style="margin: 0 0 32px; font-size: 16px; color: #475569;">
+            Hello ${displayName},<br><br>You have been assigned to a capstone group${adviserText}
+          </p>
+          
+          <div style="text-align: left; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; font-size: 14px; color: #334155; margin-bottom: 32px;">
+            ${groupCode ? `<div style="margin-bottom: 16px;"><strong style="display: block; font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Group Code</strong> <span style="color: #0f172a; font-weight: 600; font-size: 15px;">${groupCode}</span></div>` : ''}
+            ${projectTitle ? `<div style="margin-bottom: 16px;"><strong style="display: block; font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Project Title</strong> <span style="color: #0f172a; font-weight: 600; font-size: 15px;">${projectTitle}</span></div>` : ''}
+            ${role ? `<div><strong style="display: block; font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Your Role</strong> <span style="color: #0f172a; font-weight: 600; font-size: 15px;">${role}</span></div>` : ''}
+          </div>
+          
+          <div style="margin-bottom: 16px;">
+            ${loginUrl 
+              ? `<a href="${loginUrl}" style="display: inline-block; padding: 14px 36px; background-color: #0f4c81; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">View Workspace</a>` 
+              : `<span style="display: inline-block; padding: 14px 36px; background-color: #0f4c81; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">Log in to ThesisTrack</span>`}
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  `;
+
+  return sendEmail({ to, subject, html, text });
+}

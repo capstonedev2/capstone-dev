@@ -1,7 +1,7 @@
 import { ProgramHeadTransfer } from '@/components/program-head/program-head-transfer';
 
 export const metadata = {
-  title: 'Technology Transfer - Department Chair'
+  title: 'Technology Transfer - Program Head'
 };
 
 export default function Page() {

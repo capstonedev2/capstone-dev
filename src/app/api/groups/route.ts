@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerAuthenticatedUser } from '@/lib/auth';
+import { sendGroupAssignmentEmail } from '@/lib/mailer';
 
 const DEFAULT_GROUP_LIMIT = 100;
 const MAX_GROUP_LIMIT = 200;
@@ -237,7 +238,7 @@ export async function POST(request: Request) {
         role: 'STUDENT',
         groupMemberships: { none: {} } 
       },
-      select: { id: true, name: true, displayName: true, firstName: true, lastName: true, yearLevel: true }
+      select: { id: true, name: true, displayName: true, firstName: true, lastName: true, yearLevel: true, email: true }
     });
 
     const membersToCreate: any[] = [];
@@ -295,6 +296,44 @@ export async function POST(request: Request) {
         })
       }
     });
+
+    if (verifiedUsers.length > 0) {
+      const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const loginUrl = `${origin}/login`;
+
+      let adviserName = 'an adviser';
+      if (userId) {
+        const adviser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, displayName: true } });
+        if (adviser) adviserName = adviser.displayName || adviser.name || 'an adviser';
+      }
+
+      await prisma.notification.createMany({
+        data: verifiedUsers.map((u) => {
+          const role = membersToCreate.find(m => m.userId === u.id)?.role === 'LEADER' ? 'the Group Leader' : 'a Member';
+          return {
+            userId: u.id,
+            title: 'New Group Assignment',
+            message: `You have been assigned to group ${code || 'Unknown'} as ${role} by ${adviserName}.`,
+            type: 'info'
+          };
+        })
+      });
+
+      for (const user of verifiedUsers) {
+        if (user.email) {
+          const role = membersToCreate.find(m => m.userId === user.id)?.role === 'LEADER' ? 'Group Leader' : 'Group Member';
+          await sendGroupAssignmentEmail({
+            to: user.email,
+            name: user.displayName || user.name,
+            adviserName: adviserName !== 'an adviser' ? adviserName : null,
+            groupCode: code,
+            projectTitle: title || projectTitle,
+            role,
+            loginUrl
+          }).catch(err => console.error('Failed to send group assignment email to', user.email, err));
+        }
+      }
+    }
     
     return NextResponse.json(newGroup, { status: 201 });
   } catch (error: any) {
@@ -348,15 +387,20 @@ export async function PUT(request: Request) {
     }
 
     if (updateData.students) {
+      const existingGroup = await prisma.group.findUnique({
+        where: { id },
+        select: { leader: true }
+      });
+
       const matchedUsers = await prisma.user.findMany({
         where: { 
           role: 'STUDENT',
           groupMemberships: { none: { groupId: { not: id } } }
         },
-        select: { id: true, name: true, displayName: true, firstName: true, lastName: true, yearLevel: true }
+        select: { id: true, name: true, displayName: true, firstName: true, lastName: true, yearLevel: true, email: true }
       });
 
-      const leaderQuery = normalizeStudentName(updateData.leader || body.leader || '');
+      const leaderQuery = normalizeStudentName(updateData.leader || body.leader || existingGroup?.leader || '');
       
       const verifiedUsers = [];
       const newMembers = updateData.students.map(studentName => {
@@ -392,6 +436,12 @@ export async function PUT(request: Request) {
       //   }
       // }
 
+      const previousGroupMembers = await prisma.groupMember.findMany({
+        where: { groupId: id },
+        select: { userId: true }
+      });
+      const previousUserIds = new Set(previousGroupMembers.map(gm => gm.userId));
+
       const updatedGroup = await prisma.$transaction(async (tx) => {
         await tx.groupMember.deleteMany({ where: { groupId: id } });
         
@@ -407,6 +457,49 @@ export async function PUT(request: Request) {
           }
         });
       });
+
+      if (verifiedUsers.length > 0) {
+        const newlyAddedUsers = verifiedUsers.filter(u => !previousUserIds.has(u.id));
+
+        if (newlyAddedUsers.length > 0) {
+          const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+          const loginUrl = `${origin}/login`;
+
+          let adviserName = 'an adviser';
+          if (updatedGroup.userId) {
+            const adviser = await prisma.user.findUnique({ where: { id: updatedGroup.userId }, select: { name: true, displayName: true } });
+            if (adviser) adviserName = adviser.displayName || adviser.name || 'an adviser';
+          }
+
+          await prisma.notification.createMany({
+            data: newlyAddedUsers.map((u) => {
+              const role = newMembers.find(m => m?.userId === u.id)?.role === 'LEADER' ? 'the Group Leader' : 'a Member';
+              return {
+                userId: u.id,
+                title: 'Group Assignment Updated',
+                message: `You are now assigned to group ${updatedGroup.code || 'Unknown'} as ${role} under ${adviserName}.`,
+                type: 'info'
+              };
+            })
+          });
+
+          for (const user of newlyAddedUsers) {
+            if (user.email) {
+              const role = newMembers.find(m => m?.userId === user.id)?.role === 'LEADER' ? 'Group Leader' : 'Group Member';
+              await sendGroupAssignmentEmail({
+                to: user.email,
+                name: user.displayName || user.name,
+                adviserName: adviserName !== 'an adviser' ? adviserName : null,
+                groupCode: updatedGroup.code,
+                projectTitle: updatedGroup.title || updatedGroup.projectTitle,
+                role,
+                loginUrl
+              }).catch(err => console.error('Failed to send group assignment email to', user.email, err));
+            }
+          }
+        }
+      }
+
       return NextResponse.json(updatedGroup);
     }
 
@@ -414,6 +507,68 @@ export async function PUT(request: Request) {
       where: { id },
       data: updateData
     });
+
+    if (body.leader && !updateData.students) {
+      // Find the new leader user
+      const leaderQuery = normalizeStudentName(body.leader);
+      const groupUsers = await prisma.user.findMany({
+        where: {
+          role: 'STUDENT',
+          groupMemberships: { some: { groupId: id } }
+        }
+      });
+
+      const matchedUser = groupUsers.find(u => {
+        const candidateNames = [
+          u.name,
+          u.displayName,
+          [u.firstName, u.lastName].filter(Boolean).join(' ')
+        ].map(normalizeStudentName).filter(Boolean);
+        return candidateNames.includes(leaderQuery);
+      });
+      
+      // Update their role in GroupMember
+      if (matchedUser) {
+        await prisma.groupMember.updateMany({
+          where: { groupId: id },
+          data: { role: 'MEMBER' }
+        });
+        await prisma.groupMember.updateMany({
+          where: { groupId: id, userId: matchedUser.id },
+          data: { role: 'LEADER' }
+        });
+
+        const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const loginUrl = `${origin}/login`;
+
+        let adviserName = 'an adviser';
+        if (updatedGroup.userId) {
+          const adviser = await prisma.user.findUnique({ where: { id: updatedGroup.userId }, select: { name: true, displayName: true } });
+          if (adviser) adviserName = adviser.displayName || adviser.name || 'an adviser';
+        }
+
+        await prisma.notification.create({
+          data: {
+            userId: matchedUser.id,
+            title: 'Group Leadership Assigned',
+            message: `You have been designated as the Group Leader for ${updatedGroup.code || 'Unknown'} by ${adviserName}.`,
+            type: 'info'
+          }
+        });
+        
+        if (matchedUser.email) {
+          await sendGroupAssignmentEmail({
+            to: matchedUser.email,
+            name: matchedUser.displayName || matchedUser.name,
+            adviserName: adviserName !== 'an adviser' ? adviserName : null,
+            groupCode: updatedGroup.code,
+            projectTitle: updatedGroup.title || updatedGroup.projectTitle,
+            role: 'Group Leader',
+            loginUrl
+          }).catch(err => console.error('Failed to send group assignment email to', matchedUser.email, err));
+        }
+      }
+    }
 
     return NextResponse.json(updatedGroup);
   } catch (error) {

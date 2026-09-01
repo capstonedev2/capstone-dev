@@ -157,7 +157,7 @@ export function ProgramHeadShell({
                   }
                 ]}
                 profileName={displayName}
-                profileSubtitle="Department Chair"
+                profileSubtitle="Program Head"
                 profileDetail={displayEmail}
                 profileBadges={[
                   { label: 'Program Head', icon: 'fa-user-tie', tone: 'primary' },

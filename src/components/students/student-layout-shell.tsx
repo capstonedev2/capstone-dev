@@ -1082,7 +1082,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [layoutDebug, setLayoutDebug] = useState('Fetching...');
-  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(false);
   const [themeMode, setThemeMode] = useState<StudentThemeMode>('light');
   const [showYearVerification, setShowYearVerification] = useState(false);
 
@@ -1231,73 +1231,10 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
   }, [pathname]);
 
   useEffect(() => {
-    if (data.group.id) {
-      setWorkspaceAccess((prev) => (prev.isLimited ? { ...prev, isLimited: false } : prev));
-      setLayoutDebug('Server group assignment loaded.');
-      setIsCheckingAccess(false);
-      return;
+    if (data.group.id && workspaceAccess.isLimited) {
+      setWorkspaceAccess((prev) => ({ ...prev, isLimited: false }));
     }
-
-    if (!workspaceAccess.isLimited) {
-      setLayoutDebug('Workspace access loaded from server.');
-      setIsCheckingAccess(false);
-      return;
-    }
-
-    let cancelled = false;
-    const controller = new AbortController();
-
-    async function checkRealGroupAccess() {
-      try {
-        const storedUser = readStoredJson<StoredAuthUser>(AUTH_USER_STORAGE_KEY);
-        const realStudentName = normalizeText(storedUser?.name) || data.profile.fullName;
-
-        if (!realStudentName) {
-          if (!cancelled) {
-            setLayoutDebug('Auth failed: No real or mock session found.');
-          }
-          return;
-        }
-
-        const res = await fetch(`/api/groups?studentName=${encodeURIComponent(realStudentName)}&limit=1&fields=students`, {
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        if (res.ok) {
-          const groups = await res.json();
-          if (cancelled) {
-            return;
-          }
-          setLayoutDebug(`Fetched groups for ${realStudentName}: found ${groups.length}`);
-          if (groups.length > 0) {
-            setWorkspaceAccess(prev => ({ ...prev, isLimited: false }));
-          }
-        } else {
-          if (!cancelled) {
-            setLayoutDebug(`Fetch failed with status ${res.status}`);
-          }
-        }
-      } catch (e: any) {
-        if (e instanceof DOMException && e.name === 'AbortError') {
-          return;
-        }
-        if (!cancelled) {
-          setLayoutDebug(`Fetch threw error: ${e.message}`);
-          console.error('Failed to check real group access', e);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsCheckingAccess(false);
-        }
-      }
-    }
-    
-    checkRealGroupAccess();
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [data.group.id, data.profile.fullName, workspaceAccess.isLimited]);
+  }, [data.group.id, workspaceAccess.isLimited]);
 
   const [dbProfile, setDbProfile] = useState<{ fullName: string; email: string; studentId: string; groupRole: string | null; projectCode: string | null; profileImage: string | null } | null>(() =>
     data.profile.user_id
@@ -1638,7 +1575,6 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                 <div className="notification-menu-hero-copy">
                   <span className="notification-menu-kicker">Inbox</span>
                   <strong>Notifications</strong>
-                  <small>Latest feedback, schedule updates, deadlines, and approvals for your workspace.</small>
                 </div>
                 <div className="notification-menu-actions">
                   {unreadNotificationsCount > 0 && (

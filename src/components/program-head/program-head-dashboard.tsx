@@ -68,7 +68,7 @@ export function ProgramHeadDashboard() {
   return (
     <ProgramHeadShell
       activeNav="dashboard"
-      title="Department Chair Dashboard"
+      title="Program Head Dashboard"
       description="IT Department | Monitoring and accreditation"
       notificationCount={3}
     >
