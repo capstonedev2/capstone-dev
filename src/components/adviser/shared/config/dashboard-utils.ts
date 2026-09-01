@@ -127,10 +127,9 @@ function formatSentenceCase(value: string) {
 }
 
 export function getGroupProjectTitle(group: AdviserDashboardData['groups'][number]) {
-  if (!group.project_id || group.milestone === 'Awaiting initial progress update' || (group.status === 'pending' && group.progress === 0)) {
-    return 'Pending Title Approval';
-  }
-  return group.projectTitle || group.title || 'Pending Title Approval';
+  if (group.projectTitle && group.projectTitle !== 'Pending Student Submission') return group.projectTitle;
+  if (group.title && group.title !== 'Pending Student Submission') return group.title;
+  return 'Pending Title Approval';
 }
 
 export function getGroupDepartmentLabel(group: AdviserDashboardData['groups'][number]) {
@@ -164,6 +163,10 @@ function normalizeLifecycleStatus(status: string, progress?: number): AdviserGro
 
   if (status === 'pending') {
     return 'pending';
+  }
+
+  if (status === 'active') {
+    return 'active';
   }
 
   if (typeof progress === 'number' && progress < 35) {

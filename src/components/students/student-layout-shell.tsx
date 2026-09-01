@@ -114,7 +114,14 @@ function getInitialWorkspaceAccess(data: StudentDashboardData): StudentWorkspace
     (typeof storedUser.id === 'number' && FULL_WORKSPACE_DEMO_STUDENT_IDS.has(storedUser.id)) ||
     FULL_WORKSPACE_DEMO_STUDENT_EMAILS.has(normalizedEmail);
 
-  if (hasFullDemoWorkspace) {
+  const hasActiveGroup = Boolean(
+    data.group && 
+    data.group.id && 
+    data.group.id !== '' && 
+    (data.group.status === 'active' || data.group.status === 'completed')
+  );
+
+  if (hasFullDemoWorkspace || hasActiveGroup) {
     return { isLimited: false, profile: null };
   }
 
@@ -126,11 +133,13 @@ function getInitialWorkspaceAccess(data: StudentDashboardData): StudentWorkspace
   };
 }
 
-function isLimitedStudentAllowedRoute(pathname: string) {
+function isLimitedStudentAllowedRoute(pathname: string, data?: StudentDashboardData) {
+  const hasGroup = Boolean(data?.group?.id && data.group.id !== '');
   return (
     matchesRoute(pathname, '/students/dashboard') ||
     matchesRoute(pathname, '/students/repository') ||
-    matchesRoute(pathname, '/students/profile')
+    matchesRoute(pathname, '/students/profile') ||
+    (hasGroup && matchesRoute(pathname, '/students/title-submission'))
   );
 }
 
@@ -288,15 +297,18 @@ function hasProfileValue(value: string) {
   return Boolean(normalized && !normalized.startsWith('pending '));
 }
 
-function getLimitedWorkspaceSetupState(profile: LimitedStudentProfile): LimitedWorkspaceSetupState {
+function getLimitedWorkspaceSetupState(profile: LimitedStudentProfile, data: StudentDashboardData): LimitedWorkspaceSetupState {
   const profileCompleted =
     hasProfileValue(profile.studentId) && hasProfileValue(profile.department) && hasProfileValue(profile.yearLevel);
+
+  const hasGroup = Boolean(data.group && data.group.id && data.group.id !== '');
+  const hasAdviser = Boolean(hasGroup && data.group.adviser && !data.group.adviser.includes('Not assigned'));
 
   return {
     accountActivated: true,
     profileCompleted,
-    groupAssigned: false,
-    adviserAssigned: false,
+    groupAssigned: hasGroup,
+    adviserAssigned: hasAdviser,
     workspaceUnlocked: false
   };
 }
@@ -378,20 +390,26 @@ function getLimitedWorkspaceStatusItems(setupState: LimitedWorkspaceSetupState):
   ];
 }
 
-function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfile }) {
-  const setupState = getLimitedWorkspaceSetupState(profile);
+function LimitedStudentWorkspaceHome({ profile, data }: { profile: LimitedStudentProfile; data: StudentDashboardData }) {
+  const setupState = getLimitedWorkspaceSetupState(profile, data);
   const setupSteps = getLimitedWorkspaceSetupSteps(setupState);
   const completedSteps = setupSteps.filter((step) => step.done).length;
   const progressPercent = Math.round((completedSteps / setupSteps.length) * 100);
   const statusItems = getLimitedWorkspaceStatusItems(setupState);
   const nextSteps = [
-    {
+    ...(setupState.groupAssigned ? [{
+      title: 'Submit your research title',
+      description: 'Your group is assigned. You must submit a concept proposal to unlock the full workspace.',
+      href: '/students/title-submission',
+      action: 'Submit Title',
+      icon: 'fa-pen-to-square'
+    }] : [{
       title: 'Review your profile',
       description: 'Confirm your student ID, department, and year level so the assignment can match your record.',
       href: '/students/profile',
       action: 'Review Profile',
       icon: 'fa-user'
-    },
+    }]),
     {
       title: 'Browse the repository',
       description: 'Read completed studies and sample outputs while you wait for your capstone workspace.',
@@ -718,8 +736,8 @@ function LimitedStudentWorkspaceHome({ profile }: { profile: LimitedStudentProfi
   );
 }
 
-function LimitedStudentProfileView({ profile }: { profile: LimitedStudentProfile }) {
-  const setupState = getLimitedWorkspaceSetupState(profile);
+function LimitedStudentProfileView({ profile, data }: { profile: LimitedStudentProfile; data: StudentDashboardData }) {
+  const setupState = getLimitedWorkspaceSetupState(profile, data);
   const setupSteps = getLimitedWorkspaceSetupSteps(setupState);
   const statusItems = getLimitedWorkspaceStatusItems(setupState);
   const completedSteps = setupSteps.filter((step) => step.done).length;
@@ -1434,8 +1452,10 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
           if (!isLimitedWorkspace) {
             return true;
           }
+          
+          const hasGroup = Boolean(data?.group?.id && data.group.id !== '');
 
-          return item.key === 'dashboard' || item.key === 'repository';
+          return item.key === 'dashboard' || item.key === 'repository' || (hasGroup && item.key === 'title-submission');
         })
       })).filter((section) => section.items.length),
     [isLimitedWorkspace]
@@ -1445,11 +1465,15 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     [navigationSections]
   );
   const prefetchRoute = useRoutePrefetch(sidebarRoutes);
+  const isDashboardHome = matchesRoute(pathname, '/students/dashboard');
+  const isProfileRoute = matchesRoute(pathname, '/students/profile');
   const limitedMainContent =
     isLimitedWorkspace && limitedProfile
-      ? matchesRoute(pathname, '/students/dashboard')
-        ? <LimitedStudentWorkspaceHome profile={limitedProfile} />
-        : !isLimitedStudentAllowedRoute(pathname)
+      ? isDashboardHome
+        ? <LimitedStudentWorkspaceHome profile={limitedProfile} data={data} />
+        : isProfileRoute
+        ? <LimitedStudentProfileView profile={limitedProfile} data={data} />
+        : !isLimitedStudentAllowedRoute(pathname, data)
             ? <LimitedStudentLockedFeature featureLabel={getLimitedRouteLabel(pathname)} profile={limitedProfile} />
             : null
       : null;

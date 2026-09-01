@@ -45,9 +45,10 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Perform redirect outside of try/catch so Next.js handles the NEXT_REDIRECT error properly
-  // This is required for Next.js to properly preserve cookies set by Supabase (e.g. PKCE verifier)
+  // Return NextResponse.redirect to preserve cookies set by Supabase (e.g. PKCE verifier)
   if (redirectUrl) {
-    redirect(redirectUrl);
+    return NextResponse.redirect(redirectUrl);
   }
+
+  return NextResponse.json({ error: 'Failed to generate redirect URL' }, { status: 500 });
 }

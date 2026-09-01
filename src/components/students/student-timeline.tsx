@@ -1097,7 +1097,14 @@ export function StudentTimeline({ data }: { data: StudentDashboardData }) {
   const completedStages = stages.filter((stage) => stage.status === 'completed').length;
   const lockedStages = stages.filter((stage) => stage.status === 'locked').length;
   const inReviewStages = stages.filter((stage) => stage.status === 'in-review' || stage.status === 'needs-revision' || stage.status === 'pending').length;
-  const overallProgress = data.project.progressPercentage || clampPercent((completedStages / Math.max(stages.length, 1)) * 100);
+  
+  const totalCheckpoints = data.milestoneCheckpoints?.length || 0;
+  const completedCheckpoints = data.milestoneCheckpoints?.filter(cp => cp.status === 'COMPLETED').length || 0;
+  const calculatedProgress = totalCheckpoints > 0 
+    ? Math.round((completedCheckpoints / totalCheckpoints) * 100)
+    : clampPercent((completedStages / Math.max(stages.length, 1)) * 100);
+    
+  const overallProgress = data.project.progressPercentage || calculatedProgress;
   const recentActivities = useMemo(() => buildRecentActivities(data, stages), [data, stages]);
   const upcomingDeadlines = useMemo(() => buildUpcomingDeadlines(data, stages), [data, stages]);
   const [expandedStages, setExpandedStages] = useState<Set<string>>(() => new Set(activeStage ? [activeStage.key] : ['concept']));

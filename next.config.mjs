@@ -83,12 +83,6 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000', '16.165.11.0:3000']
     }
-  },
-  async rewrites() {
-    return legacyRoutes.map(([destination, source]) => ({
-      source,
-      destination
-    }));
   }
 };
 

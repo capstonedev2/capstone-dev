@@ -780,39 +780,45 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               }
             });
 
-            // 2. Ensure workflow exists, then fetch milestones & checkpoints
-            const milestoneWorkflowPromise = ensureProjectMilestoneWorkflow(prisma, activeProject.id).then(() => {
-              return Promise.all([
-                prisma.milestone.findMany({
-                  where: { projectId: activeProject.id },
-                  orderBy: { sequence: 'asc' },
-                  take: 20,
-                  select: {
-                    id: true, status: true, createdAt: true, updatedAt: true,
-                    title: true, dueAt: true, description: true
-                  }
-                }),
-                prisma.milestoneCheckpoint.findMany({
-                  where: { projectId: activeProject.id },
-                  include: {
-                    milestone: { select: { id: true, title: true, sequence: true } },
-                    submissions: {
-                      orderBy: { submittedAt: 'desc' },
-                      take: 10,
-                      include: {
-                        files: { take: 5, include: { submission: { select: { status: true } } }, orderBy: { createdAt: 'desc' } },
-                        comments: { orderBy: { createdAt: 'desc' }, take: 5, include: { author: { select: { name: true, role: true } } } }
-                      }
-                    },
-                    files: {
-                      take: 10,
-                      include: { submission: { select: { status: true } } },
-                      orderBy: { createdAt: 'desc' }
+            // 2. Fetch milestones & checkpoints, only running ensureProjectMilestoneWorkflow if data is missing
+            const fetchMilestonesAndCheckpoints = () => Promise.all([
+              prisma.milestone.findMany({
+                where: { projectId: activeProject.id },
+                orderBy: { sequence: 'asc' },
+                take: 20,
+                select: {
+                  id: true, status: true, createdAt: true, updatedAt: true,
+                  title: true, dueAt: true, description: true
+                }
+              }),
+              prisma.milestoneCheckpoint.findMany({
+                where: { projectId: activeProject.id },
+                include: {
+                  milestone: { select: { id: true, title: true, sequence: true } },
+                  submissions: {
+                    orderBy: { submittedAt: 'desc' },
+                    take: 5,
+                    include: {
+                      files: { take: 3, include: { submission: { select: { status: true } } }, orderBy: { createdAt: 'desc' } },
+                      comments: { orderBy: { createdAt: 'desc' }, take: 3, include: { author: { select: { name: true, role: true } } } }
                     }
                   },
-                  take: 50
-                })
-              ]);
+                  files: {
+                    take: 5,
+                    include: { submission: { select: { status: true } } },
+                    orderBy: { createdAt: 'desc' }
+                  }
+                },
+                take: 50
+              })
+            ]);
+
+            const milestoneWorkflowPromise = fetchMilestonesAndCheckpoints().then(async ([milestones, checkpointRows]) => {
+              if (milestones.length < 6 || checkpointRows.length < 26) {
+                await ensureProjectMilestoneWorkflow(prisma, activeProject.id);
+                return fetchMilestonesAndCheckpoints();
+              }
+              return [milestones, checkpointRows];
             });
 
             const formatDate = (date: Date) =>

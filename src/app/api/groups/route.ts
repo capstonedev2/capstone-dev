@@ -351,6 +351,22 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Missing group id' }, { status: 400 });
     }
 
+    const existingGroupBeforeUpdate = await prisma.group.findUnique({
+      where: { id },
+      include: {
+        groupMembers: {
+          include: {
+            user: true
+          }
+        },
+        user: true // The adviser
+      }
+    });
+
+    if (!existingGroupBeforeUpdate) {
+      return NextResponse.json({ error: 'Group not found' }, { status: 404 });
+    }
+
     const updateData: {
       students?: string[];
       members?: number;
@@ -358,6 +374,11 @@ export async function PUT(request: Request) {
       projectTitle?: string;
       allowMemberSubmission?: boolean;
       leader?: string;
+      status?: string;
+      statusLabel?: string;
+      statusClass?: string;
+      milestone?: string;
+      currentMilestone?: string;
     } = {};
     if (body.leader !== undefined) {
       updateData.leader = body.leader;
@@ -381,6 +402,21 @@ export async function PUT(request: Request) {
     }
     if (body.projectTitle !== undefined) {
       updateData.projectTitle = body.projectTitle;
+    }
+    if (body.status !== undefined) {
+      updateData.status = body.status;
+    }
+    if (body.statusLabel !== undefined) {
+      updateData.statusLabel = body.statusLabel;
+    }
+    if (body.statusClass !== undefined) {
+      updateData.statusClass = body.statusClass;
+    }
+    if (body.milestone !== undefined) {
+      updateData.milestone = body.milestone;
+    }
+    if (body.currentMilestone !== undefined) {
+      updateData.currentMilestone = body.currentMilestone;
     }
     if (body.allowMemberSubmission !== undefined) {
       updateData.allowMemberSubmission = body.allowMemberSubmission;
@@ -567,6 +603,44 @@ export async function PUT(request: Request) {
             loginUrl
           }).catch(err => console.error('Failed to send group assignment email to', matchedUser.email, err));
         }
+      }
+    }
+    
+    // Check if the group was demoted (from active to pending)
+    if (
+      existingGroupBeforeUpdate.status === 'active' &&
+      updateData.status === 'pending'
+    ) {
+      const notifications = [];
+      const title = 'Project Milestone Reset';
+      const message = `The project for group ${updatedGroup.code} has been rejected in Stage 2. The milestone has been reset, and a new title proposal is required.`;
+      
+      // Notify Adviser
+      if (existingGroupBeforeUpdate.userId) {
+        notifications.push({
+          userId: existingGroupBeforeUpdate.userId,
+          title,
+          message,
+          type: 'warning'
+        });
+      }
+      
+      // Notify Students
+      for (const member of existingGroupBeforeUpdate.groupMembers) {
+        if (member.userId) {
+          notifications.push({
+            userId: member.userId,
+            title,
+            message,
+            type: 'warning'
+          });
+        }
+      }
+      
+      if (notifications.length > 0) {
+        await prisma.notification.createMany({
+          data: notifications
+        });
       }
     }
 

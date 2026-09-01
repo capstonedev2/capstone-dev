@@ -75,8 +75,21 @@ export async function DELETE(
 
     const bucketName = file.bucketName!;
     assertDocumentBucket(bucketName);
+
+    let submissionIdToDelete = null;
+    if (file.submissionId) {
+      const count = await prisma.uploadedFile.count({ where: { submissionId: file.submissionId } });
+      if (count <= 1) {
+        submissionIdToDelete = file.submissionId;
+      }
+    }
+
     await deleteFile(bucketName, file.filePath!);
-    await prisma.uploadedFile.delete({ where: { id: file.id } });
+    await prisma.uploadedFile.deleteMany({ where: { id: file.id } });
+
+    if (submissionIdToDelete) {
+      await prisma.submission.deleteMany({ where: { id: submissionIdToDelete } });
+    }
 
     return successResponse({ message: 'Document deleted successfully.' });
   } catch (error) {

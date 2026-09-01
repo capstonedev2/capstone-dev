@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -571,12 +571,32 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
   const projectStatusTone = getStatusTone(data.project.status);
 
+  // Dynamic progress calculation using checkpoints for granular tracking, fallback to milestones
+  const totalCheckpoints = data.milestoneCheckpoints?.length || 0;
+  const completedCheckpoints = data.milestoneCheckpoints?.filter(cp => cp.status === 'COMPLETED').length || 0;
+  
+  const calculatedProgress = totalCheckpoints > 0 
+    ? Math.round((completedCheckpoints / totalCheckpoints) * 100)
+    : Math.round((completedWorkflowCount / Math.max(workflow.length, 1)) * 100);
+    
+  const displayProgress = data.project.progressPercentage || calculatedProgress;
+
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedProgress(displayProgress);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [displayProgress]);
+
   const summaryCards = [
     {
       id: 'progress',
       label: 'Overall progress',
-      value: `${data.project.progressPercentage}%`,
-      note: `${completedWorkflowCount} of ${workflow.length} phases completed`
+      value: `${displayProgress}%`,
+      note: totalCheckpoints > 0 
+        ? `${completedCheckpoints} of ${totalCheckpoints} checkpoints completed` 
+        : `${completedWorkflowCount} of ${workflow.length} phases completed`
     },
     {
       id: 'next-milestone',
@@ -1152,7 +1172,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                      {/* Progress */}
                      <path
                        className="transition-all duration-1000 ease-out"
-                       strokeDasharray={`${data.project.progressPercentage}, 100`}
+                       strokeDasharray={`${animatedProgress}, 100`}
                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                        fill="none"
                        stroke="url(#progressGradient)"
@@ -1163,7 +1183,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                    </svg>
                    <div className="absolute flex flex-col items-center justify-center z-20">
                      <span className="text-4xl font-black bg-gradient-to-br from-[#3B82F6] to-[#003A8F] bg-clip-text text-transparent drop-shadow-sm tracking-tighter">
-                       {data.project.progressPercentage}%
+                       {animatedProgress}%
                      </span>
                      <span className="text-[9px] font-extrabold text-[var(--muted)] uppercase tracking-[0.2em] mt-1">Completed</span>
                    </div>

@@ -612,7 +612,8 @@ function GroupDetailsModal({
   onAssignLeader,
   onOpenAddStudent,
   onRemoveStudent,
-  onApproveTitle
+  onApproveTitle,
+  onDemoteGroup
 }: {
   group: LifecycleGroup | null;
   open: boolean;
@@ -621,6 +622,7 @@ function GroupDetailsModal({
   onOpenAddStudent: (groupId: string) => void;
   onRemoveStudent?: (groupId: string, student: string) => void;
   onApproveTitle?: (groupId: string, projectTitle: string) => void;
+  onDemoteGroup?: (groupId: string) => void;
 }) {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -688,17 +690,49 @@ function GroupDetailsModal({
               <div className="flex-1">
                 <h4 className="text-sm font-bold text-amber-900">Title Submitted for Approval</h4>
                 <p className="mt-1.5 text-sm font-medium text-amber-800">
-                  The students have proposed the following project title: <br/>
+                  The students have proposed the following working title: <br/>
                   <strong className="text-amber-900">"{group.projectTitle}"</strong>
                 </p>
-                <div className="mt-4">
+                <div className="mt-4 flex items-center gap-3">
                   <button 
                     onClick={() => onApproveTitle(group.id, group.projectTitle)}
+                    title="Accept this working title and start the Concept phase"
                     className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-amber-500 px-5 text-xs font-bold text-white shadow-md shadow-amber-500/20 transition-all hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30"
                   >
                     <i className="fas fa-check"></i>
-                    Approve Title
+                    Accept Working Title
                   </button>
+                  <p className="text-[10px] text-amber-700/80 leading-tight max-w-[200px]">
+                    This accepts the proposal and unlocks the Concept phase. The title can still be revised if rejected by the Panel.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {group.status !== 'completed' && group.title !== 'Pending Title Approval' && group.title !== 'Pending Student Submission' && onDemoteGroup && (
+          <div className="rounded-[1.25rem] border border-rose-200/60 bg-rose-50/80 p-5 shadow-sm mt-4">
+            <div className="flex gap-4 items-start">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-700 shadow-inner ring-1 ring-inset ring-rose-200/50">
+                <i className="fas fa-arrow-rotate-left text-xl"></i>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-sm font-bold text-rose-900">Project Regression / Demotion</h4>
+                <p className="mt-1.5 text-sm font-medium text-rose-800">
+                  Did the panel reject the project in Stage 2? Use this to force the group to restart their title proposal.
+                </p>
+                <div className="mt-4 flex items-center gap-3">
+                  <button 
+                    onClick={() => onDemoteGroup(group.id)}
+                    title="Reject project and require a new title proposal"
+                    className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-rose-500 px-5 text-xs font-bold text-white shadow-md shadow-rose-500/20 transition-all hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30"
+                  >
+                    <i className="fas fa-rotate-left"></i>
+                    Reject & Request New Title
+                  </button>
+                  <p className="text-[10px] text-rose-700/80 leading-tight max-w-[200px]">
+                    This will reset their milestone to Concept Proposal and flag them as "At Risk".
+                  </p>
                 </div>
               </div>
             </div>
@@ -1686,15 +1720,67 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
   };
 
   const handleApproveTitle = async (groupId: string, newTitle: string) => {
-    setGroups(groups => groups.map(g => g.id === groupId ? { ...g, title: newTitle } : g));
+    setGroups(groups => groups.map(g => g.id === groupId ? { 
+      ...g, 
+      title: newTitle, 
+      projectTitle: newTitle,
+      status: 'active',
+      statusLabel: 'Active',
+      statusClass: 'status-active',
+      milestone: 'Concept Proposal',
+      currentMilestone: 'Concept Proposal'
+    } : g));
     try {
       await fetch('/api/groups', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: groupId, title: newTitle })
+        body: JSON.stringify({ 
+          id: groupId, 
+          title: newTitle, 
+          projectTitle: newTitle,
+          status: 'active',
+          statusLabel: 'Active',
+          statusClass: 'status-active',
+          milestone: 'Concept Proposal',
+          currentMilestone: 'Concept Proposal'
+        })
       });
     } catch (e) {
       console.error('Failed to approve title', e);
+    }
+  };
+
+  const handleDemoteGroup = async (groupId: string) => {
+    if (!confirm('Are you sure you want to demote this group? They will be forced to submit a completely new title.')) return;
+    
+    setGroups(groups => groups.map(g => g.id === groupId ? { 
+      ...g, 
+      title: 'Pending Title Approval', 
+      projectTitle: 'Pending Title Approval',
+      status: 'pending',
+      statusLabel: 'Pending',
+      statusClass: 'status-warning',
+      milestone: 'Concept Proposal',
+      currentMilestone: 'Concept Proposal'
+    } : g));
+    
+    try {
+      await fetch('/api/groups', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id: groupId, 
+          title: 'Pending Title Approval', 
+          projectTitle: 'Pending Title Approval',
+          status: 'pending',
+          statusLabel: 'Pending',
+          statusClass: 'status-warning',
+          milestone: 'Concept Proposal',
+          currentMilestone: 'Concept Proposal'
+        })
+      });
+    } catch (e) {
+      console.error('Failed to demote group', e);
     }
   };
 
@@ -1902,6 +1988,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
           onAssignLeader={assignLeaderToGroup}
           onApproveTitle={handleApproveTitle}
           onRemoveStudent={handleRemoveStudentFromGroup}
+          onDemoteGroup={handleDemoteGroup}
           onOpenAddStudent={(groupId) => {
             setDetailsOpen(false);
             openAddStudentModal(groupId);
