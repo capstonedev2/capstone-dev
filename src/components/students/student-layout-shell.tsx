@@ -1981,7 +1981,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                   }}
                   className="w-full h-14 rounded-xl bg-[var(--primary)] text-[15px] font-bold text-white shadow-md shadow-[var(--primary)]/30"
                 >
-                  <i className="fas fa-rocket text-sky-200" aria-hidden="true" /> Accept & Enter Workspace
+                  <i className="fas fa-rocket opacity-70" aria-hidden="true" /> Accept & Enter Workspace
                 </PremiumAnimatedButton>
                 <button 
                   onClick={() => setShowGroupInviteModal(false)}
@@ -1996,28 +1996,38 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       )}
 
       {showYearVerification && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" style={{ position: 'fixed' }}>
-          <div className="w-full max-w-md rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--primary)] to-sky-400" />
-            
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-50 text-[var(--primary)] shadow-sm mb-6">
-              <i className="fas fa-calendar-star text-2xl" aria-hidden="true" />
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300" style={{ position: 'fixed' }}>
+          <div className="w-full max-w-md rounded-[2rem] bg-[var(--surface)] border border-[var(--border-strong)] p-1 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
+            <div className="bg-[var(--surface-alt)]/30 rounded-[1.8rem] p-8 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] opacity-90" />
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-[var(--primary)]/5 rounded-full blur-2xl" />
+              <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-[var(--primary)]/5 rounded-full blur-xl" />
+
+              <div className="relative z-10">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] shadow-sm mb-6 border border-[var(--primary)]/20 rotate-3 transition-transform hover:rotate-6">
+                  <i className="fas fa-calendar-star text-2xl" aria-hidden="true" />
+                </div>
+                
+                <h2 className="text-2xl font-black text-[var(--text)] mb-3 tracking-tight">
+                  Welcome to a <span className="text-[var(--primary)]">New Year!</span>
+                </h2>
+                
+                <p className="text-[15px] text-[var(--muted)] leading-relaxed mb-8">
+                  To keep your workspace up-to-date, please quickly verify your current <strong className="text-[var(--text)] font-semibold">Section</strong> and <strong className="text-[var(--text)] font-semibold">Year Level</strong> before proceeding to your capstone tools.
+                </p>
+                
+                <PremiumAnimatedButton 
+                  onClick={handleVerifyProfile}
+                  className="w-full h-14 rounded-xl bg-[var(--primary)] text-[15px] font-bold text-white shadow-md shadow-[var(--primary)]/30"
+                >
+                  <i className="fas fa-user-edit opacity-80" aria-hidden="true" /> Update My Profile
+                </PremiumAnimatedButton>
+                
+                <p className="mt-5 text-center text-[13px] text-[var(--text-meta)]">
+                  This helps us ensure your capstone assignments are routed accurately.
+                </p>
+              </div>
             </div>
-            
-            <h2 className="text-2xl font-bold text-[var(--text)] mb-3">Welcome to a New Academic Year!</h2>
-            <p className="text-lg text-[var(--muted)] leading-relaxed mb-8">
-              To keep your workspace up-to-date, please quickly verify your current <strong>Section</strong> and <strong>Year Level</strong> before proceeding to your capstone tools.
-            </p>
-            
-            <button 
-              onClick={handleVerifyProfile}
-              className="w-full inline-flex justify-center items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95 hover:bg-sky-800"
-            >
-              <i className="fas fa-user-edit" aria-hidden="true" /> Update My Profile
-            </button>
-            <p className="mt-4 text-center text-xs text-[var(--text-meta)]">
-              This helps us ensure your capstone assignments are routed accurately.
-            </p>
           </div>
         </div>
       )}
