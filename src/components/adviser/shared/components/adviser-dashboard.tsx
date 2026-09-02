@@ -32,6 +32,7 @@ import {
   WORKSPACE_META
 } from '@/components/adviser/shared/config/dashboard-utils';
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
+import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
 type WorkspaceMode = keyof typeof WORKSPACE_META;
@@ -161,7 +162,7 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
     setActiveModal(null);
   }, []);
 
-  function submitReview() {
+  async function submitReview() {
     if (!reviewComments.trim() || !selectedReviewGroup) {
       showToast('Please provide feedback comments before submitting the review.', 'error');
       return;
@@ -205,6 +206,8 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
       },
       ...current
     ].slice(0, 6));
+
+    await new Promise(r => setTimeout(r, 600));
 
     closeModal();
     showToast(
@@ -559,7 +562,7 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
               ) : null}
             </div>
             <div className="modal-footer">
-              <button className="btn btn-primary" type="button" onClick={submitReview}><i className="fas fa-paper-plane" /> Submit Review</button>
+              <PremiumAnimatedButton className="btn btn-primary inline-flex items-center gap-2" onPress={submitReview}><i className="fas fa-paper-plane" /> Submit Review</PremiumAnimatedButton>
               <button className="btn btn-outline" type="button" onClick={closeModal}>Cancel</button>
             </div>
           </div>

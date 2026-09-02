@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { type CSSProperties, type ChangeEvent, type FormEvent, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { formatFileSizeLabel } from '@/components/students/student-project-files.shared';
+import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 import type {
   StudentDashboardData,
   StudentTitleAttachment,
@@ -1115,8 +1116,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     link.remove();
   };
 
-  const handleSubmitProposal = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmitProposal = async (event?: FormEvent<HTMLFormElement>) => {
+    if (event) event.preventDefault();
 
     if (!canUpload) {
       setNotice({
@@ -1424,17 +1425,26 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               {/* Background Track */}
               <div className="absolute top-6 left-[10%] right-[10%] -z-0 h-1.5 -translate-y-1/2 rounded-full bg-[var(--surface-alt)] shadow-inner"></div>
               {/* Active Track */}
-              <div className="absolute top-6 left-[10%] -z-0 h-1.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-bright)] shadow-sm transition-all duration-1000 ease-out" style={{ width: `calc(${(currentStepIndex / 4) * 80}%)` }}></div>
+              <div className={`absolute top-6 left-[10%] -z-0 h-1.5 -translate-y-1/2 rounded-full shadow-sm transition-all duration-1000 ease-out ${
+                activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-gradient-to-r from-[var(--primary)] to-rose-500' :
+                activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-gradient-to-r from-[var(--primary)] to-amber-500' :
+                activeSubmission.registrationStatus.toLowerCase() === 'approved' ? 'bg-gradient-to-r from-[var(--primary)] to-emerald-500' :
+                'bg-gradient-to-r from-[var(--primary)] to-[var(--primary-bright)]'
+              }`} style={{ width: `calc(${(currentStepIndex / 3) * 80}%)` }}></div>
               
               {TIMELINE_STEPS.map((step, idx) => {
                  const isCompleted = idx <= currentStepIndex;
                  const isCurrent = idx === currentStepIndex;
                  const isApproved = step.label === 'Approved' && isCompleted;
+                 const isRejected = step.label === 'Rejected' && isCurrent;
+                 const isRevision = step.label === 'Needs Revision' && isCurrent;
                  
                  let circleClasses = "bg-[var(--surface-alt)] border-[var(--surface)] text-[var(--muted)] border-[6px] shadow-sm";
-                 if (isCompleted && !isApproved) circleClasses = "bg-[var(--surface)] border-[var(--primary)] text-[var(--primary)] border-4 shadow-sm";
-                 if (isCurrent && !isApproved) circleClasses = "bg-[var(--primary)] border-[var(--surface)] text-white border-[6px] shadow-lg shadow-[var(--primary)]/30 scale-110";
+                 if (isCompleted && !isApproved && !isRejected && !isRevision) circleClasses = "bg-[var(--surface)] border-[var(--primary)] text-[var(--primary)] border-4 shadow-sm";
+                 if (isCurrent && !isApproved && !isRejected && !isRevision) circleClasses = "bg-[var(--primary)] border-[var(--surface)] text-white border-[6px] shadow-lg shadow-[var(--primary)]/30 scale-110";
                  if (isApproved) circleClasses = "bg-emerald-500 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-emerald-500/30 scale-110";
+                 if (isRejected) circleClasses = "bg-rose-500 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-rose-500/30 scale-110";
+                 if (isRevision) circleClasses = "bg-amber-500 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-amber-500/30 scale-110";
                  
                  return (
                    <div key={idx} className="relative z-10 flex flex-1 flex-col items-center gap-3 bg-transparent">
@@ -1777,15 +1787,19 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmitProposal} className="w-full sm:w-auto z-10">
-                 <button 
-                   type="submit"
+              <div className="w-full sm:w-auto z-10">
+                 <PremiumAnimatedButton 
+                   type="button"
+                   onPress={async () => {
+                     await handleSubmitProposal();
+                     await new Promise(r => setTimeout(r, 600)); // Minimum animation time
+                   }}
                    disabled={!canSubmitProposal}
                    className="w-full sm:w-auto bg-[#003A8F] hover:bg-[#1E40AF] text-white text-sm font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-[#003A8F]/30 transition-transform active:scale-95 flex items-center justify-center gap-3 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                  >
                    {isSubmittingTitle ? 'Submitting...' : 'Submit for Adviser Review'} <i className="fas fa-paper-plane text-xs"></i>
-                 </button>
-              </form>
+                 </PremiumAnimatedButton>
+              </div>
             )}
           </div>
         </div>
@@ -1803,7 +1817,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface-alt)] shadow-inner border border-[var(--border)]">
                  <svg className="absolute inset-0 h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
                    <path className="text-[var(--border)]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                   <path className="text-[var(--primary)] transition-all duration-1000 ease-out" strokeDasharray={`${submissionProgressPercent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                   <path className={`transition-all duration-1000 ease-out ${
+                     activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'text-rose-500' :
+                     activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'text-amber-500' :
+                     activeSubmission.registrationStatus.toLowerCase() === 'approved' ? 'text-emerald-500' :
+                     'text-[var(--primary)]'
+                   }`} strokeDasharray={`${submissionProgressPercent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                  </svg>
                  <span className="text-[13px] font-black text-[var(--text)]">{submissionProgressPercent}%</span>
                </div>

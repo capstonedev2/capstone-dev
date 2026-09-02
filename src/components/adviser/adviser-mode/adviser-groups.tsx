@@ -849,43 +849,53 @@ function GroupDetailsModal({
             </div>
 
             <div className="mt-5 grid gap-3 grid-cols-1">
-              {group.students.map((student) => (
-                <div key={student} className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/60 bg-white px-5 py-4 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.03)] hover:shadow-md">
-                  <span className="truncate flex-1 font-bold transition group-hover:text-[var(--primary)]" title={student}>{student}</span>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {group.leader === student && (
-                      <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-amber-700 ring-1 ring-amber-200/50">
-                        Leader
-                      </span>
-                    )}
-                    
-                    {!completed && (
-                      <>
-                        {group.leader !== student && (
-                          <button
-                            type="button"
-                            onClick={() => onAssignLeader(group.id, student)}
-                            className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-xs font-bold text-amber-700 transition hover:-translate-y-0.5 hover:bg-amber-100 hover:text-amber-800 hover:shadow-sm"
-                          >
-                            <i className="fas fa-crown text-[10px]"></i>
-                            Set as Leader
-                          </button>
-                        )}
-                        {onRemoveStudent && (
-                          <button
-                            type="button"
-                            onClick={() => onRemoveStudent(group.id, student)}
-                            className="inline-flex min-h-[36px] w-9 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:-translate-y-0.5 hover:bg-red-100 hover:text-red-700 hover:shadow-sm"
-                            title="Remove student from group"
-                          >
-                            <i className="fas fa-user-minus text-xs"></i>
-                          </button>
-                        )}
-                      </>
-                    )}
+              {group.students.map((student) => {
+                const isPending = group.pendingStudents?.includes(student);
+                return (
+                  <div key={student} className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/60 bg-white px-5 py-4 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.03)] hover:shadow-md">
+                    <div className="flex items-center gap-3 truncate flex-1">
+                      <span className="font-bold transition group-hover:text-[var(--primary)] truncate" title={student}>{student}</span>
+                      {isPending && (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 ring-1 ring-slate-200" title="This student has not yet accepted their group invitation.">
+                          <i className="fas fa-hourglass-half text-[9px]"></i> Pending Invite
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {group.leader === student && (
+                        <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-amber-700 ring-1 ring-amber-200/50">
+                          Leader
+                        </span>
+                      )}
+                      
+                      {!completed && (
+                        <>
+                          {group.leader !== student && (
+                            <button
+                              type="button"
+                              onClick={() => onAssignLeader(group.id, student)}
+                              className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 text-xs font-bold text-amber-700 transition hover:-translate-y-0.5 hover:bg-amber-100 hover:text-amber-800 hover:shadow-sm"
+                            >
+                              <i className="fas fa-crown text-[10px]"></i>
+                              Set as Leader
+                            </button>
+                          )}
+                          {onRemoveStudent && (
+                            <button
+                              type="button"
+                              onClick={() => onRemoveStudent(group.id, student)}
+                              className="inline-flex min-h-[36px] w-9 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:-translate-y-0.5 hover:bg-red-100 hover:text-red-700 hover:shadow-sm"
+                              title="Remove student from group"
+                            >
+                              <i className="fas fa-user-minus text-xs"></i>
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1604,10 +1614,28 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     setCreateGroupModalOpen(true);
   };
 
-  const assignLeaderToGroup = (groupId: string, leader: string) => {
+  const assignLeaderToGroup = async (groupId: string, leader: string) => {
+    // Optimistic UI update
     setGroups((currentGroups) =>
       currentGroups.map((group) => (group.id === groupId ? { ...group, leader } : group))
     );
+
+    try {
+      const response = await fetch('/api/groups', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: groupId, leader })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update leader');
+      }
+    } catch (e) {
+      console.error('Failed to update group leader on server', e);
+      alert('An error occurred while setting the leader. Please refresh and try again.');
+    }
   };
 
   const handleAddStudentToGroup = async (groupId: string, student: string) => {

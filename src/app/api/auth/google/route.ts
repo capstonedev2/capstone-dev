@@ -11,8 +11,12 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const protocol = request.headers.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+    const origin = host ? `${protocol}://${host}` : new URL(request.url).origin;
+    
     // We want to redirect back to our custom callback
-    const callbackUrl = new URL('/api/auth/google/callback', request.url).toString();
+    const callbackUrl = new URL('/api/auth/google/callback', origin).toString();
     console.log('[OAuth] Initiating with redirect URL:', callbackUrl);
     
     const { data, error } = await supabase.auth.signInWithOAuth({

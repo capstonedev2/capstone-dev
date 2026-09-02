@@ -14,9 +14,9 @@ export const ADVISER_NAV_ITEMS = {
   adviser: [
     { key: 'dashboard', label: 'Dashboard', href: '/adviser/adviser-mode/dashboard', icon: 'fa-gauge-high', section: 'workspace' },
     { key: 'groups', label: 'My Groups', href: '/adviser/adviser-mode/groups', icon: 'fa-users', section: 'workspace' },
-    { key: 'submissions', label: 'Submissions', href: '/adviser/adviser-mode/submissions', icon: 'fa-check-double', section: 'supervision' },
-    { key: 'progress', label: 'Progress Monitoring', href: '/adviser/adviser-mode/progress', icon: 'fa-chart-line', section: 'supervision' },
     { key: 'titles', label: 'Title Approvals', href: '/adviser/adviser-mode/title-approvals', icon: 'fa-file-signature', section: 'supervision' },
+    { key: 'submissions', label: 'Document Submissions', href: '/adviser/adviser-mode/submissions', icon: 'fa-check-double', section: 'supervision' },
+    { key: 'progress', label: 'Progress Monitoring', href: '/adviser/adviser-mode/progress', icon: 'fa-chart-line', section: 'supervision' },
     { key: 'evaluations', label: 'Evaluations', href: '/adviser/adviser-mode/evaluations', icon: 'fa-star', section: 'supervision' },
     { key: 'schedule', label: 'Schedule', href: '/adviser/adviser-mode/schedule', icon: 'fa-calendar', section: 'tools' },
     { key: 'reports', label: 'Reports & Analytics', href: '/adviser/adviser-mode/reports', icon: 'fa-chart-bar', section: 'tools' }

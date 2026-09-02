@@ -9,7 +9,7 @@ export const STUDENT_NAV_ITEMS = [
   { key: 'milestones', label: 'Milestones', href: '/students/milestones', icon: 'fa-timeline', section: 'workspace' },
   { key: 'schedule', label: 'Schedule', href: '/students/schedule', icon: 'fa-calendar-check', section: 'workspace' },
   { key: 'title-submission', label: 'Title Submission', href: '/students/title-submission', icon: 'fa-pen-to-square', section: 'submissions' },
-  { key: 'project-files', label: 'Project Files', href: '/students/project-files', icon: 'fa-book-open-reader', section: 'submissions' },
+  { key: 'project-files', label: 'Document Submissions', href: '/students/project-files', icon: 'fa-book-open-reader', section: 'submissions' },
   { key: 'repository', label: 'Repository', href: '/students/repository', icon: 'fa-book', section: 'submissions' },
   { key: 'progress-reports', label: 'Progress Reports', href: '/students/progress-reports', icon: 'fa-clipboard-list', section: 'submissions' },
   { key: 'faculty-feedback', label: 'Faculty Feedback', href: '/students/faculty-feedback', icon: 'fa-comments', section: 'submissions' },

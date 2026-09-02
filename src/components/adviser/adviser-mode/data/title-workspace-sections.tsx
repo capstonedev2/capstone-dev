@@ -18,6 +18,7 @@ import {
   openTitleSubmissionDocument,
   type TitleSubmissionDocumentData
 } from '@/lib/title-submission-document';
+import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 
 export type TitleSummaryMetric = {
   id: string;
@@ -54,9 +55,9 @@ type TitleDetailsDrawerProps = {
   remarksDraft: string;
   onRemarksChange: (value: string) => void;
   onClose: () => void;
-  onApprove: (record: AdviserTitleRecord) => void;
-  onRequestRevision: (record: AdviserTitleRecord) => void;
-  onReject: (record: AdviserTitleRecord) => void;
+  onApprove: (record: AdviserTitleRecord) => Promise<void> | void;
+  onRequestRevision: (record: AdviserTitleRecord) => Promise<void> | void;
+  onReject: (record: AdviserTitleRecord) => Promise<void> | void;
 };
 
 type TitleUploadedFile = AdviserTitleRecord['uploadedFiles'][number];
@@ -75,7 +76,7 @@ function WorkspaceSelect<TValue extends string>({
 }) {
   return (
     <select
-      className="min-h-12 rounded-2xl border border-[rgba(226,232,240,0.92)] bg-white px-4 text-sm font-medium text-[var(--text-dark)] shadow-sm outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)]"
+      className="min-h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-xs font-bold text-[var(--text)] shadow-sm outline-none transition-all hover:border-slate-300 focus:border-[#0F3DDE] focus:ring-4 focus:ring-[#0F3DDE]/10 appearance-none cursor-pointer"
       value={value}
       onChange={(event) => onChange(event.target.value as TValue)}
     >
@@ -267,23 +268,23 @@ export function TitleSummaryCards({ metrics }: { metrics: TitleSummaryMetric[] }
       {metrics.map((metric) => (
         <article
           key={metric.id}
-          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_56px_rgba(0,58,143,0.10)]"
+          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0F3DDE]/30 hover:shadow-lg hover:shadow-[#0F3DDE]/10"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-[#0F3DDE] to-blue-400 opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-[13px] font-bold uppercase tracking-[0.06em] text-[var(--text-light)]">{metric.label}</p>
-              <p className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-[var(--primary)] transition-colors group-hover:text-[#002C6B]">
+              <p className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">{metric.label}</p>
+              <p className="mt-2 text-4xl font-extrabold tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)]">
                 {metric.value}
               </p>
             </div>
             <span
-              className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
+              className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm ring-1 ring-inset ring-current/10 transition-transform duration-300 group-hover:scale-110 ${metric.iconClassName}`}
             >
               <i className={`fas ${metric.icon}`} />
             </span>
           </div>
-          <p className="mt-4 text-[13px] leading-[1.6] text-[var(--text-light)]">{metric.helperText}</p>
+          <p className="mt-4 text-xs font-medium leading-[1.6] text-[var(--muted)]">{metric.helperText}</p>
         </article>
       ))}
     </div>
@@ -304,14 +305,9 @@ export function TitleFilters({
   onSortChange
 }: TitleFiltersProps) {
   return (
-    <section className="relative overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[var(--primary)] via-[#1E40AF] to-[#F6BE00]" />
-      <div className="grid gap-3 xl:grid-cols-[minmax(170px,1fr)_minmax(150px,1fr)_minmax(190px,1fr)_minmax(170px,1fr)_minmax(320px,1.6fr)]">
-        <div className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-[rgba(0,58,143,0.07)] to-[rgba(0,58,143,0.03)] px-4 text-sm font-semibold text-[var(--primary)] ring-1 ring-inset ring-[rgba(0,58,143,0.12)]">
-          <i className="fas fa-lock text-xs opacity-60" />
-          IT Department
-        </div>
-
+    <section className="relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-blue-500 to-cyan-400 opacity-20" />
+      <div className="grid gap-3 xl:grid-cols-[minmax(150px,1fr)_minmax(190px,1fr)_minmax(170px,1fr)_minmax(320px,1.6fr)]">
         <WorkspaceSelect value={statusFilter} onChange={onStatusChange}>
           {statusOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -338,11 +334,11 @@ export function TitleFilters({
         </WorkspaceSelect>
 
         <label className="relative block">
-          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[var(--text-light)]">
+          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[var(--muted)]">
             <i className="fas fa-search text-sm" />
           </span>
           <input
-            className="min-h-12 w-full rounded-2xl border border-[rgba(226,232,240,0.92)] bg-white pl-11 pr-4 text-sm text-[var(--text-dark)] shadow-sm outline-none transition placeholder:text-[var(--text-light)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[rgba(0,58,143,0.10)]"
+            className="min-h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] pl-11 pr-4 text-sm font-bold text-[var(--text)] shadow-sm outline-none transition-all placeholder:font-medium placeholder:text-[var(--muted)] hover:border-slate-300 focus:border-[#0F3DDE] focus:ring-4 focus:ring-[#0F3DDE]/10"
             placeholder="Search title or group"
             type="search"
             value={searchValue}
@@ -364,15 +360,16 @@ export function TitleList({
   const completedCount = titles.filter((record) => ['approved', 'needs-revision', 'rejected'].includes(record.status)).length;
 
   return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[rgba(0,58,143,0.06)] text-[var(--primary)] ring-1 ring-inset ring-blue-100">
-            <i className="fas fa-file-signature" />
+    <section className="space-y-5">
+      <div className="flex flex-col gap-5 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="relative z-10 flex items-start gap-4">
+          <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0F3DDE]/10 to-[#0F3DDE]/5 text-[#0F3DDE] ring-1 ring-[#0F3DDE]/20 shadow-sm">
+            <i className="fas fa-file-signature text-lg" />
           </span>
           <div className="min-w-0">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[var(--text-dark)]">Title Review Queue</h2>
-            <p className="mt-0.5 text-sm text-[var(--text-light)]">
+            <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Title Review Queue</h2>
+            <p className="mt-1 text-sm font-medium text-[var(--muted)]">
               Scan proposed titles here, then open preview to record approval, revision, or rejection.
             </p>
           </div>
@@ -936,22 +933,22 @@ export function TitleDetailsDrawer({
                 >
                   Cancel
                 </button>
-                <button
-                  type="button"
+                <PremiumAnimatedButton
                   className={`rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm ${
                     confirmAction === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700' :
                     confirmAction === 'revise' ? 'bg-amber-600 hover:bg-amber-700' :
                     'bg-rose-600 hover:bg-rose-700'
                   }`}
-                  onClick={() => {
-                    if (confirmAction === 'approve') onApprove(record);
-                    if (confirmAction === 'revise') onRequestRevision(record);
-                    if (confirmAction === 'reject') onReject(record);
+                  onPress={async () => {
+                    if (confirmAction === 'approve') await onApprove(record);
+                    if (confirmAction === 'revise') await onRequestRevision(record);
+                    if (confirmAction === 'reject') await onReject(record);
+                    await new Promise(r => setTimeout(r, 600)); // Minimum animation time
                     setConfirmAction(null);
                   }}
                 >
                   Confirm Decision
-                </button>
+                </PremiumAnimatedButton>
               </div>
             </div>
           </div>
@@ -1035,14 +1032,14 @@ export function TitleCard({
   const firstFile = record.uploadedFiles[0] || null;
 
   return (
-    <article className="group relative overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_22px_48px_rgba(15,23,42,0.08)]">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-blue-600" />
+    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0F3DDE]/30 hover:shadow-lg hover:shadow-[#0F3DDE]/5">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#0F3DDE] to-blue-400 opacity-80 group-hover:opacity-100 transition-opacity" />
 
-      <div className="grid gap-5 p-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-slate-700 ring-1 ring-inset ring-slate-200">
-              <i className="fas fa-layer-group text-[10px] text-slate-400" /> IT
+      <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
+        <div className="min-w-0 pl-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)] shadow-sm">
+              <i className="fas fa-layer-group text-[10px]" /> IT
             </span>
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-sm ${statusMeta.badgeClassName}`}>
               {record.status === 'pending' ? (
@@ -1060,14 +1057,14 @@ export function TitleCard({
           </div>
 
           <h3
-            className="mt-4 text-[1.35rem] font-black leading-tight tracking-tight text-slate-950 transition-colors group-hover:text-blue-700 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[#0F3DDE] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.title}
           >
             {record.title}
           </h3>
 
           <p
-            className="mt-3 max-w-4xl text-sm leading-6 text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-3 max-w-4xl text-sm font-medium leading-relaxed text-[var(--muted)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.description}
           >
             {record.description}

@@ -196,7 +196,45 @@ export async function GET(request: Request) {
         });
       }
     }
-    return NextResponse.json(groups);
+
+    if (fields === 'students') {
+      return NextResponse.json(groups);
+    }
+
+    const mappedGroups = await Promise.all(groups.map(async (group) => {
+      const groupMembers = await prisma.groupMember.findMany({
+        where: { groupId: group.id },
+        include: {
+          user: {
+            include: {
+              notifications: {
+                where: {
+                  title: { in: ['Group Assignment Updated', 'New Group Assignment'] },
+                  status: 'UNREAD'
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const pendingUserNames = groupMembers
+        .filter((gm) => gm.user && gm.user.notifications && gm.user.notifications.length > 0)
+        .map((gm) => {
+          return [gm.user.name, gm.user.displayName, [gm.user.firstName, gm.user.lastName].filter(Boolean).join(' ')].map(normalizeStudentName).filter(Boolean);
+        }).flat();
+      
+      const pendingNamesInGroup = group.students.filter((studentName) => {
+         return pendingUserNames.includes(normalizeStudentName(studentName));
+      });
+
+      return {
+        ...group,
+        pendingStudents: pendingNamesInGroup
+      };
+    }));
+
+    return NextResponse.json(mappedGroups);
   } catch (error) {
     console.error('Error fetching groups:', error);
     return NextResponse.json({ error: 'Failed to fetch groups' }, { status: 500 });
@@ -358,8 +396,7 @@ export async function PUT(request: Request) {
           include: {
             user: true
           }
-        },
-        user: true // The adviser
+        }
       }
     });
 

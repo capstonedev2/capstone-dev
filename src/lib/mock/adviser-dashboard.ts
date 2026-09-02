@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { getServerAuthenticatedUser } from '@/lib/auth';
+import { getServerAuthenticatedUser, buildDisplayName } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NotificationStatus } from '@/generated/prisma/client';
 
@@ -81,6 +81,7 @@ export type AdviserDashboardData = {
     finalScore: number | null;
     finalRecommendation: string | null;
     leader: string | null;
+    pendingStudents?: string[];
   }>;
   panelProjects: Array<{
     id: string;
@@ -567,9 +568,6 @@ function toIsoString(value: Date | string | null | undefined, fallback = now) {
   return value || fallback;
 }
 
-function getDisplayName(user: { name?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; displayName?: string | null }) {
-  return user.displayName || [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.name || user.email || 'Adviser';
-}
 
 function getFacultyRoleLabel(role: unknown) {
   const normalized = String(role || '').toLowerCase();
@@ -691,7 +689,7 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
       return { data };
     }
 
-    const userName = getDisplayName(dbUser);
+    const userName = buildDisplayName(dbUser);
     const createdAt = toIsoString(dbUser.createdAt, data.profile.created_at);
     const updatedAt = toIsoString(dbUser.updatedAt, data.profile.updated_at);
 
@@ -744,7 +742,39 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
 
       data.profile.notificationCount = unreadNotificationCount;
       
-      data.groups = groups.map((group) => ({
+      const groupsWithPending = await Promise.all(groups.map(async (group) => {
+        const groupMembers = await prisma.groupMember.findMany({
+          where: { groupId: group.id },
+          include: {
+            user: {
+              include: {
+                notifications: {
+                  where: {
+                    title: { in: ['Group Assignment Updated', 'New Group Assignment'] },
+                    status: 'UNREAD'
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        const pendingUserNames = groupMembers
+          .filter((gm) => gm.user && gm.user.notifications && gm.user.notifications.length > 0)
+          .map((gm) => [gm.user.name, gm.user.displayName, [gm.user.firstName, gm.user.lastName].filter(Boolean).join(' ')].map(name => typeof name === 'string' ? name.trim().replace(/\s+/g, ' ').toLowerCase() : '').filter(Boolean)).flat();
+
+        const pendingNamesInGroup = group.students.filter((studentName) => {
+          const norm = typeof studentName === 'string' ? studentName.trim().replace(/\s+/g, ' ').toLowerCase() : '';
+          return pendingUserNames.includes(norm);
+        });
+
+        return {
+          ...group,
+          pendingStudents: pendingNamesInGroup
+        };
+      }));
+
+      data.groups = groupsWithPending.map((group) => ({
         id: group.id,
         user_id: group.userId,
         project_id: group.projectId || '',
@@ -769,7 +799,8 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
         completedAt: group.completedAt ? toIsoString(group.completedAt) : null,
         finalScore: group.finalScore,
         finalRecommendation: group.finalRecommendation,
-        leader: group.leader
+        leader: group.leader,
+        pendingStudents: group.pendingStudents
       }));
 
       data.panelProjects = panelEvaluations.map((evaluation) => {
@@ -792,7 +823,8 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
           statusClass: getStatusClass(statusValue)
         };
       });
-    } catch {
+    } catch (e) {
+      console.error('Failed to load real data in adviser dashboard:', e);
       // Fallback to mock data if database fails
     }
   } catch {

@@ -8,6 +8,7 @@ import { logoutWithApi } from '@/lib/client-auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { STUDENT_NAV_ITEMS, STUDENT_NAV_SECTIONS } from '@/components/students/student-navigation';
+import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 
 const SIDEBAR_STORAGE_KEY = 'studentShellSidebarCollapsed';
 const STUDENT_THEME_STORAGE_KEY = 'studentWorkspaceTheme';
@@ -103,16 +104,10 @@ function buildLimitedStudentProfile(
 }
 
 function getInitialWorkspaceAccess(data: StudentDashboardData): StudentWorkspaceAccess {
-  const storedUser = readStoredJson<StoredAuthUser>(AUTH_USER_STORAGE_KEY);
-
-  if (!storedUser || storedUser.role?.toLowerCase() !== 'student') {
-    return { isLimited: false, profile: null };
-  }
-
-  const normalizedEmail = normalizeText(storedUser.email).toLowerCase();
-  const hasFullDemoWorkspace =
-    (typeof storedUser.id === 'number' && FULL_WORKSPACE_DEMO_STUDENT_IDS.has(storedUser.id)) ||
-    FULL_WORKSPACE_DEMO_STUDENT_EMAILS.has(normalizedEmail);
+  // Use data from the server instead of localStorage to prevent SSR hydration mismatches
+  const normalizedEmail = normalizeText(data.profile.email).toLowerCase();
+  
+  const hasFullDemoWorkspace = FULL_WORKSPACE_DEMO_STUDENT_EMAILS.has(normalizedEmail);
 
   const hasActiveGroup = Boolean(
     data.group && 
@@ -125,7 +120,9 @@ function getInitialWorkspaceAccess(data: StudentDashboardData): StudentWorkspace
     return { isLimited: false, profile: null };
   }
 
-  const draft = readStoredJson<StoredProfileDraft>(PROFILE_DRAFT_STORAGE_KEY);
+  // Profile draft can still be read from localStorage on client-side (during hydration/subsequent renders)
+  const draft = typeof window !== 'undefined' ? readStoredJson<StoredProfileDraft>(PROFILE_DRAFT_STORAGE_KEY) : null;
+  const storedUser = typeof window !== 'undefined' ? readStoredJson<StoredAuthUser>(AUTH_USER_STORAGE_KEY) : null;
 
   return {
     isLimited: true,
@@ -464,7 +461,7 @@ function LimitedStudentWorkspaceHome({ profile, data }: { profile: LimitedStuden
       <section className="hero-card !mb-0 !grid !gap-5 relative">
         <div className="hero-card-main relative overflow-hidden rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-8 isolate transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
           {/* Subtle Decorative Accent */}
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-400" />
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--primary)] to-sky-400" />
           <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-sky-50 blur-3xl pointer-events-none" aria-hidden="true" />
 
           <div className="chip-row flex flex-wrap gap-3 relative z-10">
@@ -509,12 +506,28 @@ function LimitedStudentWorkspaceHome({ profile, data }: { profile: LimitedStuden
           </div>
 
           <div className="hero-actions !mt-2 flex flex-wrap gap-4 relative z-10">
-            <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl bg-[var(--student-primary,#0f4c81)] px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 hover:bg-sky-800" href="/students/repository">
+            <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 hover:bg-sky-800" href="/students/repository">
               <i className="fas fa-book" aria-hidden="true" /> Browse Repository
             </Link>
             <Link prefetch={false} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-sm font-bold text-[var(--text)] shadow-sm transition-all duration-300 hover:bg-[var(--surface-alt)] hover:scale-105 active:scale-95" href="/students/profile">
               <i className="fas fa-user text-[var(--text-meta)]" aria-hidden="true" /> Review Profile
             </Link>
+            {data?.profile?.pendingGroupInviteId && (
+              <button 
+                onClick={() => {
+                  fetch('/api/notifications', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notificationId: data.profile.pendingGroupInviteId, action: 'read' })
+                  }).then(() => {
+                    setTimeout(() => window.location.reload(), 300);
+                  });
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-bold text-white shadow-md shadow-[var(--primary)]/30 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[var(--primary)]/40 hover:brightness-110 active:scale-95 ml-auto"
+              >
+                <i className="fas fa-rocket text-sky-200" aria-hidden="true" /> Accept Pending Group Invite
+              </button>
+            )}
           </div>
         </div>
 
@@ -579,7 +592,7 @@ function LimitedStudentWorkspaceHome({ profile, data }: { profile: LimitedStuden
 
             <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--surface-alt)] shadow-inner">
               <div
-                className="h-full rounded-full bg-[var(--student-primary,#0f4c81)] transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(15,76,129,0.4)]"
+                className="h-full rounded-full bg-[var(--primary)] transition-all duration-1000 ease-out shadow-[0_0_10px_var(--primary-soft,0.4)]"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -634,14 +647,14 @@ function LimitedStudentWorkspaceHome({ profile, data }: { profile: LimitedStuden
               {nextSteps.map((item) => (
                 <div key={item.title} className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--border-strong)] hover:shadow-md">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-[var(--student-primary,#0f4c81)] shadow-sm transition-colors duration-300 group-hover:bg-[var(--student-primary,#0f4c81)] group-hover:text-white">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-[var(--primary)] shadow-sm transition-colors duration-300 group-hover:bg-[var(--primary)] group-hover:text-white">
                       <i className={`fas ${item.icon} text-lg`} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-[var(--text)]">{item.title}</p>
                       <p className="mt-1.5 text-sm text-[var(--muted)] leading-relaxed">{item.description}</p>
                       {item.href ? (
-                        <Link prefetch={false} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--student-primary,#0f4c81)] hover:text-sky-700 transition-colors" href={item.href}>
+                        <Link prefetch={false} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--primary)] hover:text-sky-700 transition-colors" href={item.href}>
                           {item.action}
                           <i className="fas fa-arrow-right text-xs transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
                         </Link>
@@ -922,7 +935,7 @@ function LimitedStudentProfileView({ profile, data }: { profile: LimitedStudentP
 
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
               <div
-                className="h-full rounded-full bg-[var(--student-primary,#0f4c81)] transition-all duration-300"
+                className="h-full rounded-full bg-[var(--primary)] transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -1012,7 +1025,7 @@ function LimitedStudentProfileView({ profile, data }: { profile: LimitedStudentP
             <div className="mt-4 space-y-3">
               {nextMilestones.map((item, index) => (
                 <div key={item} className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-sm font-semibold text-[var(--student-primary,#0f4c81)] shadow-sm">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-sm font-semibold text-[var(--primary)] shadow-sm">
                     {index + 1}
                   </div>
                   <p className="text-sm text-[var(--muted)]">{item}</p>
@@ -1348,8 +1361,13 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       : (isLimitedWorkspace ? 'No active project' : data.project.projectCode),
     profileImage: dbProfile?.profileImage || data.profile.profileImage || null
   };
+
   const [realNotifications, setRealNotifications] = useState<any[]>(() =>
     (data.notifications || []).map(toClientNotification)
+  );
+  
+  const [showGroupInviteModal, setShowGroupInviteModal] = useState(
+    Boolean(data?.profile?.pendingGroupInviteId)
   );
 
   const fetchShellNotifications = useCallback(
@@ -1650,6 +1668,9 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                           onClick={() => {
                             if (!notification.read) {
                               markNotificationRead(notification.id);
+                              if (notification.title === 'Group Assignment Updated' || notification.title === 'New Group Assignment' || notification.title === 'Group Leadership Assigned') {
+                                setTimeout(() => window.location.reload(), 300);
+                              }
                             }
                             setNotificationMenuOpen(false);
                           }}
@@ -1907,7 +1928,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
           {isCheckingAccess ? (
             <div className="flex min-h-[80vh] items-center justify-center">
               <div className="flex flex-col items-center gap-4">
-                <i className="fas fa-circle-notch fa-spin text-4xl text-[var(--student-primary,#0f4c81)]" />
+                <i className="fas fa-circle-notch fa-spin text-4xl text-[var(--primary)]" />
                 <p className="font-semibold animate-pulse text-gray-500">Loading workspace...</p>
               </div>
             </div>
@@ -1917,12 +1938,69 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
         </div>
       </main>
 
+      {showGroupInviteModal && data.profile.pendingGroupInviteId && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-md p-4 animate-in fade-in duration-500" style={{ position: 'fixed' }}>
+          <div className="w-full max-w-md rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] relative overflow-hidden animate-in zoom-in-95 duration-500">
+            {/* Ambient Glow */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden rounded-3xl">
+              <div className="absolute -top-[100px] -right-[100px] w-[300px] h-[300px] bg-[var(--primary)] opacity-10 blur-[80px] rounded-full"></div>
+              <div className="absolute -bottom-[100px] -left-[100px] w-[300px] h-[300px] bg-sky-500 opacity-10 blur-[80px] rounded-full"></div>
+            </div>
+
+
+            
+            <div className="relative z-10">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--primary)]/10 to-sky-500/10 text-[var(--primary)] shadow-inner ring-1 ring-inset ring-[var(--primary)]/20 mb-8 mx-auto">
+                <i className="fas fa-users-viewfinder text-3xl drop-shadow-sm" aria-hidden="true" />
+              </div>
+              
+              <h2 className="text-3xl font-extrabold text-[var(--text)] mb-4 text-center tracking-tight">Group Invitation</h2>
+              <div className="bg-[var(--bg)] p-5 rounded-2xl border border-[var(--border)] mb-8 text-center shadow-inner relative mt-6">
+                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--surface)] px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-meta)] rounded-full border border-[var(--border)] shadow-sm">
+                   Official Notice
+                 </div>
+                 <p className="text-[15px] text-[var(--text)] leading-relaxed font-medium italic mt-2 text-balance">
+                   "{data.profile.pendingGroupInviteMessage || 'You have been added to a group by an adviser.'}"
+                 </p>
+                 <div className="mt-4 pt-4 border-t border-[var(--border-strong)]/30">
+                   <p className="text-sm text-[var(--muted)] font-medium">
+                     Click below to sync your profile and access the workspace.
+                   </p>
+                 </div>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <PremiumAnimatedButton
+                  onPress={async () => {
+                    if (data.profile.pendingGroupInviteId) {
+                      markNotificationRead(data.profile.pendingGroupInviteId);
+                      await new Promise((r) => setTimeout(r, 600));
+                      setShowGroupInviteModal(false);
+                      setTimeout(() => window.location.reload(), 300);
+                    }
+                  }}
+                  className="w-full h-14 rounded-xl bg-[var(--primary)] text-[15px] font-bold text-white shadow-md shadow-[var(--primary)]/30"
+                >
+                  <i className="fas fa-rocket text-sky-200" aria-hidden="true" /> Accept & Enter Workspace
+                </PremiumAnimatedButton>
+                <button 
+                  onClick={() => setShowGroupInviteModal(false)}
+                  className="w-full inline-flex justify-center items-center gap-2 rounded-xl border border-[var(--border-strong)] bg-transparent px-5 py-3.5 text-[15px] font-bold text-[var(--muted)] transition-all duration-300 hover:bg-[var(--surface-alt)] hover:text-[var(--text)] active:scale-95"
+                >
+                  Skip for now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showYearVerification && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-300" style={{ position: 'fixed' }}>
           <div className="w-full max-w-md rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-8 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--student-primary,#0f4c81)] to-sky-400" />
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[var(--primary)] to-sky-400" />
             
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-50 text-[var(--student-primary,#0f4c81)] shadow-sm mb-6">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-50 text-[var(--primary)] shadow-sm mb-6">
               <i className="fas fa-calendar-star text-2xl" aria-hidden="true" />
             </div>
             
@@ -1933,7 +2011,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
             
             <button 
               onClick={handleVerifyProfile}
-              className="w-full inline-flex justify-center items-center gap-2 rounded-xl bg-[var(--student-primary,#0f4c81)] px-5 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95 hover:bg-sky-800"
+              className="w-full inline-flex justify-center items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-95 hover:bg-sky-800"
             >
               <i className="fas fa-user-edit" aria-hidden="true" /> Update My Profile
             </button>

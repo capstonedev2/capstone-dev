@@ -149,6 +149,8 @@ export type StudentDashboardData = {
     accountSummary?: string;
     birthDate?: string;
     profileImage?: string;
+    pendingGroupInviteId?: string;
+    pendingGroupInviteMessage?: string;
   };
   group: {
     id: string;
@@ -571,7 +573,16 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
           actionLabel: 'Open center'
         }));
 
-        if (groups.length > 0) {
+        const pendingInvite = data.notifications.find(n => 
+          (n.title === 'Group Assignment Updated' || n.title === 'New Group Assignment') && !n.read
+        );
+
+        if (pendingInvite) {
+          data.profile.pendingGroupInviteId = pendingInvite.id;
+          data.profile.pendingGroupInviteMessage = pendingInvite.message;
+        }
+
+        if (groups.length > 0 && !pendingInvite) {
           const group = groups[0];
           
           const normalize = (s: string | null | undefined) => (s || '').replace(/\s+/g, '').toLowerCase();

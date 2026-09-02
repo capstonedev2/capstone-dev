@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { type ChangeEvent, type DragEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import {
   DOCUMENT_FILE_ACCEPT,
@@ -774,8 +775,8 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
   };
 
-  const handleUploadSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleUploadSubmit = async (event?: FormEvent<HTMLFormElement>) => {
+    if (event) event.preventDefault();
     setUploadError(null);
     setPageError(null);
 
@@ -1485,15 +1486,19 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                         <i className="fas fa-rotate-left text-[var(--text-meta)]" aria-hidden="true" /> Reset
                       </button>
 
-                      <button
+                      <PremiumAnimatedButton
                         className="group relative flex w-full sm:w-auto items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 px-8 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/30 transition-all hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                        type="submit"
+                        type="button"
+                        onPress={async () => {
+                          await handleUploadSubmit();
+                          await new Promise(r => setTimeout(r, 600)); // Minimum animation time
+                        }}
                         disabled={isUploading || !uploadDraft.file}
                       >
                         <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:translate-x-[50%] transition-transform duration-1000 ease-in-out"></div>
                         <span className="relative z-10">{isUploading ? 'Uploading...' : 'Submit to Adviser'}</span>
                         <i className={`fas fa-paper-plane relative z-10 transition-transform ${isUploading ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} aria-hidden="true" />
-                      </button>
+                      </PremiumAnimatedButton>
                     </div>
                   </section>
                 </div>
