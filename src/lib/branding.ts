@@ -154,6 +154,12 @@ export type BrandingDerivedColors = {
   backgroundSuggestion: string;
 };
 
+export type BrandingProgramsSettings = {
+  title: string;
+  description: string;
+  highlights: BrandingLandingStatistic[];
+};
+
 export type BrandingSettings = {
   version: number;
   systemName: string;
@@ -804,12 +810,15 @@ function sanitizeDepartmentSettings(value: unknown, fallback: BrandingDepartment
         completed: Number(c.completed || 0),
         ongoing: Number(c.ongoing || 0)
       })) : (fallbackItem.chartData || []),
-      profileCard: {
-        heading: readStringValue(record.profileCard?.heading, fallbackItem.profileCard?.heading || 'PROGRAM PROFILE'),
-        features: Array.isArray(record.profileCard?.features) ? record.profileCard.features.map((f: any) => readStringValue(f, '')) : (fallbackItem.profileCard?.features || []),
-        workflowHeading: readStringValue(record.profileCard?.workflowHeading, fallbackItem.profileCard?.workflowHeading || 'WORKFLOW COVERAGE'),
-        workflowText: readStringValue(record.profileCard?.workflowText, fallbackItem.profileCard?.workflowText || 'Register, review, defend, archive')
-      },
+      profileCard: (() => {
+        const pc = isRecord(record.profileCard) ? record.profileCard : {};
+        return {
+          heading: readStringValue(pc.heading, fallbackItem.profileCard?.heading || 'PROGRAM PROFILE'),
+          features: Array.isArray(pc.features) ? pc.features.map((f: any) => readStringValue(f, '')) : (fallbackItem.profileCard?.features || []),
+          workflowHeading: readStringValue(pc.workflowHeading, fallbackItem.profileCard?.workflowHeading || 'WORKFLOW COVERAGE'),
+          workflowText: readStringValue(pc.workflowText, fallbackItem.profileCard?.workflowText || 'Register, review, defend, archive')
+        };
+      })(),
       keyAreasHeading: readStringValue(record.keyAreasHeading, fallbackItem.keyAreasHeading || 'Key Research & Focus Areas'),
       keyAreasSubheading: readStringValue(record.keyAreasSubheading, fallbackItem.keyAreasSubheading || 'Areas of Excellence')
     };
@@ -1104,7 +1113,12 @@ export function sanitizeBrandingSettings(value: unknown): BrandingSettings {
     institutionLogo: readStringValue(assetValue.institutionLogo, DEFAULT_ASSETS.institutionLogo),
     favicon: String(assetValue.favicon ?? ''),
     loginBackground: readStringValue(assetValue.loginBackground, DEFAULT_ASSETS.loginBackground),
-    registerBackground: readStringValue(assetValue.registerBackground, DEFAULT_ASSETS.registerBackground)
+    registerBackground: readStringValue(assetValue.registerBackground, DEFAULT_ASSETS.registerBackground),
+    hallOfExcellence1: readStringValue(assetValue.hallOfExcellence1, DEFAULT_ASSETS.hallOfExcellence1),
+    hallOfExcellence2: readStringValue(assetValue.hallOfExcellence2, DEFAULT_ASSETS.hallOfExcellence2),
+    hallOfExcellence3: readStringValue(assetValue.hallOfExcellence3, DEFAULT_ASSETS.hallOfExcellence3),
+    hallOfExcellence4: readStringValue(assetValue.hallOfExcellence4, DEFAULT_ASSETS.hallOfExcellence4),
+    hallOfExcellence5: readStringValue(assetValue.hallOfExcellence5, DEFAULT_ASSETS.hallOfExcellence5)
   };
 
   return {

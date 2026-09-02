@@ -79,7 +79,7 @@ export function DepartmentClientContent({
             <div className={styles.departmentHeroGrid}>
               <div className={styles.departmentHeroCopy} data-reveal="fade-up">
                 <span className={styles.departmentHeroBadge}>
-                  <i className={department.icon ?? branding.icon} aria-hidden="true" />
+                  <i className={department.icon ?? 'fas fa-building'} aria-hidden="true" />
                   {department.shortName ?? branding.code} Program
                 </span>
 
@@ -104,7 +104,7 @@ export function DepartmentClientContent({
                     {department.logo ? (
                       <img src={department.logo} alt={`${departmentName} logo`} />
                     ) : (
-                      <i className={department.icon ?? branding.icon} aria-hidden="true" />
+                      <i className={department.icon ?? 'fas fa-building'} aria-hidden="true" />
                     )}
                   </div>
                   <div>

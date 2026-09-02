@@ -84,7 +84,7 @@ export function ProgramHeadProfile() {
   const initials = displayName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
 
   if (loading) {
-    return <ProgramHeadShell activeNav="profile" title="My Profile"><div className="p-8 text-center text-slate-500">Loading profile...</div></ProgramHeadShell>;
+    return <ProgramHeadShell activeNav="profile" title="My Profile" description="Department Chair"><div className="p-8 text-center text-slate-500">Loading profile...</div></ProgramHeadShell>;
   }
 
   return (

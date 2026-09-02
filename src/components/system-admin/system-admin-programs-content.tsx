@@ -12,7 +12,7 @@ type BannerState = {
 };
 
 export function SystemAdminProgramsContent() {
-  const { branding, isDirty } = useBranding();
+  const { branding } = useBranding();
   const [draftBranding, setDraftBranding] = useState(() => cloneBranding(branding));
   const [isSaving, setIsSaving] = useState(false);
   const [banner, setBanner] = useState<BannerState | null>(null);
@@ -22,12 +22,7 @@ export function SystemAdminProgramsContent() {
     publishBrandingPreview(draftBranding);
   }, [draftBranding]);
 
-  // If external changes happen to the branding (e.g. from server), update draft if clean
-  useEffect(() => {
-    if (!isDirty) {
-      setDraftBranding(cloneBranding(branding));
-    }
-  }, [branding, isDirty]);
+  // Component relies on local draft state, no external sync needed
 
   const commitUpdate = (newDraft: typeof draftBranding) => {
     setDraftBranding(newDraft);
@@ -77,7 +72,7 @@ export function SystemAdminProgramsContent() {
   };
 
   return (
-    <SystemAdminShell activeNav="programs-content" title="Programs Content" description="Manage the content for the About Departments section.">
+    <SystemAdminShell activeNav="branding" title="Programs Content" description="Manage the content for the About Departments section.">
       <div className="admin-page-stack branding-page">
         {banner && (
           <section className={`admin-result-banner is-${banner.tone}`}>

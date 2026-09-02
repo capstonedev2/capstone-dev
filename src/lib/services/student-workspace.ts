@@ -827,9 +827,10 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             const milestoneWorkflowPromise = fetchMilestonesAndCheckpoints().then(async ([milestones, checkpointRows]) => {
               if (milestones.length < 6 || checkpointRows.length < 26) {
                 await ensureProjectMilestoneWorkflow(prisma, activeProject.id);
-                return fetchMilestonesAndCheckpoints();
+                const nextData = await fetchMilestonesAndCheckpoints();
+                return [nextData[0], nextData[1]] as const;
               }
-              return [milestones, checkpointRows];
+              return [milestones, checkpointRows] as const;
             });
 
             const formatDate = (date: Date) =>

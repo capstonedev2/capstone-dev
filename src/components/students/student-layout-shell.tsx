@@ -88,15 +88,15 @@ function getFirstName(value: string) {
 
 function buildLimitedStudentProfile(
   data: StudentDashboardData,
-  storedUser: StoredAuthUser,
+  storedUser: StoredAuthUser | null,
   draft: StoredProfileDraft | null
 ): LimitedStudentProfile {
   const draftName = normalizeText(`${draft?.firstName || ''} ${draft?.lastName || ''}`);
-  const fullName = normalizeText(storedUser.name) || draftName || data.profile.fullName;
+  const fullName = normalizeText(storedUser?.name) || draftName || data.profile.fullName;
 
   return {
     fullName,
-    email: normalizeText(storedUser.email) || normalizeText(draft?.email) || data.profile.email,
+    email: normalizeText(storedUser?.email) || normalizeText(draft?.email) || data.profile.email,
     studentId: normalizeText(draft?.studentId) || 'Pending student ID',
     department: normalizeText(draft?.department) || 'Pending department',
     yearLevel: normalizeText(draft?.yearLevel) || 'Pending year level'
@@ -299,7 +299,7 @@ function getLimitedWorkspaceSetupState(profile: LimitedStudentProfile, data: Stu
     hasProfileValue(profile.studentId) && hasProfileValue(profile.department) && hasProfileValue(profile.yearLevel);
 
   const hasGroup = Boolean(data.group && data.group.id && data.group.id !== '');
-  const hasAdviser = Boolean(hasGroup && data.group.adviser && !data.group.adviser.includes('Not assigned'));
+  const hasAdviser = Boolean(hasGroup && data.project.adviser && !data.project.adviser.includes('Not assigned'));
 
   return {
     accountActivated: true,

@@ -416,7 +416,7 @@ export default async function AboutPage() {
                 <div className={styles.departmentSystemIntro} data-reveal="fade-right">
                   <span className={styles.sectionKicker}>About Departments</span>
                   <h2>
-                    {branding.programsContent.title.split(' ').map((word, i, arr) => 
+                    {branding.programsContent.title.split(' ').map((word: string, i: number, arr: string[]) => 
                       i === arr.length - 1 ? <span key={i}>{word}</span> : `${word} `
                     )}
                   </h2>
@@ -425,7 +425,7 @@ export default async function AboutPage() {
                   </p>
 
                   <div className={styles.departmentInsightGrid} aria-label="Department coverage summary">
-                    {branding.programsContent.highlights.filter(h => h.visible).map(highlight => (
+                    {branding.programsContent.highlights.filter((h: any) => h.visible).map((highlight: any) => (
                       <div key={highlight.label} className={styles.departmentInsightCard}>
                         <strong>{highlight.value}</strong>
                         <span>{highlight.label}</span>

@@ -201,7 +201,7 @@ export async function GET(request: Request) {
       return NextResponse.json(groups);
     }
 
-    const mappedGroups = await Promise.all(groups.map(async (group) => {
+    const mappedGroups = await Promise.all(groups.map(async (group: any) => {
       const groupMembers = await prisma.groupMember.findMany({
         where: { groupId: group.id },
         include: {
@@ -224,7 +224,7 @@ export async function GET(request: Request) {
           return [gm.user.name, gm.user.displayName, [gm.user.firstName, gm.user.lastName].filter(Boolean).join(' ')].map(normalizeStudentName).filter(Boolean);
         }).flat();
       
-      const pendingNamesInGroup = group.students.filter((studentName) => {
+      const pendingNamesInGroup = group.students.filter((studentName: string) => {
          return pendingUserNames.includes(normalizeStudentName(studentName));
       });
 
@@ -280,7 +280,7 @@ export async function POST(request: Request) {
     });
 
     const membersToCreate: any[] = [];
-    const verifiedUsers = [];
+    const verifiedUsers: any[] = [];
     for (const studentName of parsedStudents) {
       const normalizedQuery = normalizeStudentName(studentName);
       const matchedUser = matchedUsers.find(u => {
@@ -475,7 +475,7 @@ export async function PUT(request: Request) {
 
       const leaderQuery = normalizeStudentName(updateData.leader || body.leader || existingGroup?.leader || '');
       
-      const verifiedUsers = [];
+      const verifiedUsers: any[] = [];
       const newMembers = updateData.students.map(studentName => {
         const normalizedQuery = normalizeStudentName(studentName);
         const matchedUser = matchedUsers.find(u => {
@@ -496,7 +496,7 @@ export async function PUT(request: Request) {
           };
         }
         return null;
-      }).filter(Boolean);
+      }).filter(Boolean) as any[];
 
       // TEMPORARILY DISABLED: Strict Year-Level Grouping Validation
       // if (verifiedUsers.length > 0) {

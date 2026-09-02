@@ -40,9 +40,9 @@ const SYSTEM_ADMIN_NAV_GROUPS = [
   }
 ] as const;
 
-const SYSTEM_ADMIN_NAV_ITEMS = SYSTEM_ADMIN_NAV_GROUPS.flatMap((group) => group.items);
+const SYSTEM_ADMIN_NAV_ITEMS = SYSTEM_ADMIN_NAV_GROUPS.flatMap((group) => group.items as unknown as (typeof SYSTEM_ADMIN_NAV_GROUPS)[number]['items'][number][]);
 
-export type SystemAdminNavKey = (typeof SYSTEM_ADMIN_NAV_ITEMS)[number]['key'];
+export type SystemAdminNavKey = (typeof SYSTEM_ADMIN_NAV_GROUPS)[number]['items'][number]['key'];
 
 const BRANDING_SUBMENU_ITEMS = [
   { key: 'overview', href: '/system-admin/branding?section=overview', label: 'Brand Overview', icon: 'fa-building-columns' },

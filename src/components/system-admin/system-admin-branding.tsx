@@ -2369,7 +2369,7 @@ export function SystemAdminBranding() {
                                 <label>Card Heading (e.g. PROGRAM PROFILE)</label>
                                 <input 
                                   value={draft.departments[editingDepartmentIndex].profileCard?.heading || 'PROGRAM PROFILE'} 
-                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...draft.departments[editingDepartmentIndex].profileCard, heading: e.target.value })} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { heading: e.target.value, features: draft.departments[editingDepartmentIndex].profileCard?.features || [], workflowHeading: draft.departments[editingDepartmentIndex].profileCard?.workflowHeading || 'WORKFLOW COVERAGE', workflowText: draft.departments[editingDepartmentIndex].profileCard?.workflowText || 'Register, review, defend, archive' })} 
                                 />
                               </div>
                               <div className="form-field branding-span-full">
@@ -2383,7 +2383,7 @@ export function SystemAdminBranding() {
                                       className="btn btn-outline"
                                       style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', height: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '0.5rem', background: '#fff' }}
                                       onClick={() => {
-                                        const currentCard = draft.departments[editingDepartmentIndex].profileCard || {};
+                                        const currentCard = draft.departments[editingDepartmentIndex].profileCard || { heading: 'PROGRAM PROFILE', features: [], workflowHeading: 'WORKFLOW COVERAGE', workflowText: 'Register, review, defend, archive' };
                                         const features = [...(currentCard.features || [])];
                                         features.push('New Bullet Point');
                                         updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...currentCard, features });
@@ -2410,7 +2410,7 @@ export function SystemAdminBranding() {
                                           placeholder="e.g. Network Administration"
                                           value={feature}
                                           onChange={(e) => {
-                                            const currentCard = draft.departments[editingDepartmentIndex].profileCard || {};
+                                            const currentCard = draft.departments[editingDepartmentIndex].profileCard || { heading: 'PROGRAM PROFILE', features: [], workflowHeading: 'WORKFLOW COVERAGE', workflowText: 'Register, review, defend, archive' };
                                             const features = [...(currentCard.features || [])];
                                             features[i] = e.target.value;
                                             updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...currentCard, features });
@@ -2423,7 +2423,7 @@ export function SystemAdminBranding() {
                                           onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                                           onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
                                           onClick={() => {
-                                            const currentCard = draft.departments[editingDepartmentIndex].profileCard || {};
+                                            const currentCard = draft.departments[editingDepartmentIndex].profileCard || { heading: 'PROGRAM PROFILE', features: [], workflowHeading: 'WORKFLOW COVERAGE', workflowText: 'Register, review, defend, archive' };
                                             const features = [...(currentCard.features || [])];
                                             features.splice(i, 1);
                                             updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...currentCard, features });
@@ -2440,14 +2440,14 @@ export function SystemAdminBranding() {
                                 <label>Workflow Heading (e.g. WORKFLOW COVERAGE)</label>
                                 <input 
                                   value={draft.departments[editingDepartmentIndex].profileCard?.workflowHeading || 'WORKFLOW COVERAGE'} 
-                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...draft.departments[editingDepartmentIndex].profileCard, workflowHeading: e.target.value })} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { heading: draft.departments[editingDepartmentIndex].profileCard?.heading || 'PROGRAM PROFILE', features: draft.departments[editingDepartmentIndex].profileCard?.features || [], workflowHeading: e.target.value, workflowText: draft.departments[editingDepartmentIndex].profileCard?.workflowText || 'Register, review, defend, archive' })} 
                                 />
                               </div>
                               <div className="form-field">
                                 <label>Workflow Text</label>
                                 <input 
                                   value={draft.departments[editingDepartmentIndex].profileCard?.workflowText || 'Register, review, defend, archive'} 
-                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { ...draft.departments[editingDepartmentIndex].profileCard, workflowText: e.target.value })} 
+                                  onChange={(e) => updateDepartmentField(editingDepartmentIndex, 'profileCard', { heading: draft.departments[editingDepartmentIndex].profileCard?.heading || 'PROGRAM PROFILE', features: draft.departments[editingDepartmentIndex].profileCard?.features || [], workflowHeading: draft.departments[editingDepartmentIndex].profileCard?.workflowHeading || 'WORKFLOW COVERAGE', workflowText: e.target.value })} 
                                 />
                               </div>
                             </div>
@@ -2619,6 +2619,7 @@ export function SystemAdminBranding() {
                                               }}
                                               isSaving={isSaving}
                                               hideUrlInput={true}
+                                              onWarning={(message) => setBanner({ tone: 'warning', title: 'Asset not accepted', body: message })}
                                             />
                                           </div>
                                         </div>
