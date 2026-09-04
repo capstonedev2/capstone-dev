@@ -582,7 +582,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
           data.profile.pendingGroupInviteMessage = pendingInvite.message;
         }
 
-        if (groups.length > 0 && !pendingInvite) {
+        if (groups.length > 0) {
           const group = groups[0];
           
           const normalize = (s: string | null | undefined) => (s || '').replace(/\s+/g, '').toLowerCase();
