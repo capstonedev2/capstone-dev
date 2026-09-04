@@ -474,8 +474,7 @@ function buildHistoryEntries(data: StudentDashboardData): StudentHistoryEntry[] 
     ...reportEntries,
     ...scheduleEntries,
     ...notificationEntries,
-    ...presentationEntries,
-    ...technologyTransferEntries
+    ...presentationEntries
   ].sort((left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime());
 }
 
