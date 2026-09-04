@@ -27098,7 +27098,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     );
     background-repeat: no-repeat;
     background-size: 800px 100%; 
-    animation: shimmer 1.5s infinite linear forwards;
+    animation: shimmer 0.5s infinite linear forwards;
 }
 
 @keyframes shimmer {
