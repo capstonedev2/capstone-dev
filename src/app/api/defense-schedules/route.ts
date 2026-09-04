@@ -20,6 +20,7 @@ import { recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
 export const runtime = 'nodejs';
 
 const SCHEDULE_VIEWER_ROLES: UserRole[] = [
+  UserRole.STUDENT,
   UserRole.ADVISER,
   UserRole.PANEL,
   UserRole.PROGRAM_HEAD,

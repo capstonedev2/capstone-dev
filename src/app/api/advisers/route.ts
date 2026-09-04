@@ -29,6 +29,7 @@ export async function GET(request: Request) {
     const limit = parsePositiveInteger(url.searchParams.get('limit'), DEFAULT_ADVISER_LIMIT, MAX_ADVISER_LIMIT);
 
     await requireAuthenticatedUser(request, [
+      UserRole.STUDENT,
       UserRole.ADVISER,
       UserRole.PANEL,
       UserRole.PROGRAM_HEAD,

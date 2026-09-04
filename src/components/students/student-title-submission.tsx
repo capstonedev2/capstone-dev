@@ -1747,14 +1747,20 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           <div className="title-submission-cta-panel bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-10 -translate-y-10"></div>
             <div className="flex items-center gap-5 z-10">
-              <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm relative">
-                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm border-2 border-[var(--border)]"><i className="fas fa-info text-[10px]"></i></div>
-                <i className="fas fa-clipboard-check text-2xl"></i>
+              <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm relative border ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-rose-50 text-rose-600 border-rose-100' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                <div className={`absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-white shadow-sm border-2 border-[var(--border)] ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-rose-600' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-amber-600' : 'bg-blue-600'}`}>
+                  <i className={`fas ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' : 'fa-info'} text-[10px]`}></i>
+                </div>
+                <i className={`fas ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-circle-xmark' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-file-pen' : 'fa-clipboard-check'} text-2xl`}></i>
               </div>
               <div>
                 <h4 className="text-base font-extrabold text-[var(--text)] mb-1">
                    {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
                      ? 'Your proposal has been approved!' 
+                     : activeSubmission.registrationStatus.toLowerCase() === 'rejected'
+                     ? 'Your proposal was rejected'
+                     : activeSubmission.registrationStatus.toLowerCase() === 'needs revision'
+                     ? 'Your proposal needs revision'
                      : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
                      ? 'Proposal submitted successfully' 
                      : 'Ready to submit your proposal?'}
@@ -1762,6 +1768,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 <p className="text-[13px] text-[var(--muted)] font-medium">
                    {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
                      ? 'Please proceed to the official title registration to complete the process.' 
+                     : activeSubmission.registrationStatus.toLowerCase() === 'rejected'
+                     ? 'Please review the adviser feedback and submit a new title proposal.'
+                     : activeSubmission.registrationStatus.toLowerCase() === 'needs revision'
+                     ? 'Please revise your concept paper based on feedback and resubmit.'
                      : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
                      ? 'Your adviser has been notified and is currently reviewing your concept paper.' 
                      : 'Ensure your concept paper is fully uploaded before submitting.'}
@@ -1786,9 +1796,9 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
                 <button 
                   disabled
-                  className="w-full sm:w-auto bg-[var(--surface-alt)] text-[var(--text-meta)] text-sm font-extrabold px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 whitespace-nowrap cursor-not-allowed"
+                  className={`w-full sm:w-auto text-sm font-extrabold px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 whitespace-nowrap cursor-not-allowed ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-rose-50 text-rose-600 border border-rose-200' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-[var(--surface-alt)] text-[var(--text-meta)]'}`}
                 >
-                  Proposal Under Review <i className="fas fa-clock text-xs"></i>
+                  {activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'Proposal Rejected' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'Revision Required' : 'Proposal Under Review'} <i className={`fas ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' : 'fa-clock'} text-xs`}></i>
                 </button>
                 <button 
                   type="button"
