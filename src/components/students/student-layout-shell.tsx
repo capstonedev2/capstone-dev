@@ -1549,6 +1549,13 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
       data-sidebar-collapsed={sidebarCollapsed ? 'true' : 'false'}
       data-theme={themeMode}
     >
+      {/* Decorative Light Background for Glassmorphism */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#0F3DDE]/[0.05] to-indigo-500/[0.03] blur-[80px]"></div>
+        <div className="absolute top-[20%] -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-500/[0.03] to-[#0F3DDE]/[0.03] blur-[80px]"></div>
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-overlay"></div>
+      </div>
       <header className="student-global-navbar">
         <div className="student-global-navbar-main">
           <button
@@ -1897,14 +1904,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
         onClick={() => setSidebarOpen(false)}
       />
 
-      <main className="student-global-main relative">
-        {/* Decorative Light Background for Glassmorphism */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#0F3DDE]/[0.03] via-[#0F3DDE]/[0.01] to-transparent"></div>
-          <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#0F3DDE]/[0.05] to-indigo-500/[0.03] blur-[80px]"></div>
-          <div className="absolute top-[20%] -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-emerald-500/[0.03] to-[#0F3DDE]/[0.03] blur-[80px]"></div>
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-overlay"></div>
-        </div>
+      <main className="student-global-main relative z-10">
         <div className="student-global-content relative z-10">
           {isCheckingAccess ? (
             <div className="flex min-h-[80vh] items-center justify-center">
