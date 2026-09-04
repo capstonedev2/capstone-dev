@@ -126,25 +126,21 @@ function getStatusTone(status: string): BadgeTone {
   const normalized = status.toLowerCase();
 
   if (
-    ['approved', 'completed', 'resolved', 'confirmed', 'ready', 'ready for final library endorsement'].includes(
-      normalized
-    )
+    ['approved', 'completed', 'resolved', 'confirmed', 'ready', 'success'].some(kw => normalized.includes(kw))
   ) {
     return 'success';
   }
 
   if (
-    ['current', 'ongoing', 'in development', 'under review', 'upcoming', 'pending endorsement'].includes(
-      normalized
-    )
+    ['needs revision', 'revision', 'delayed', 'high priority', 'overdue', 'needs action', 're-defense', 're-defend', 'rejected', 'failed'].some(kw => normalized.includes(kw))
   ) {
-    return 'warning';
+    return 'danger';
   }
 
   if (
-    ['needs revision', 'revision', 'delayed', 'high priority', 'overdue', 'needs action'].includes(normalized)
+    ['current', 'ongoing', 'in development', 'under review', 'upcoming', 'pending endorsement'].some(kw => normalized.includes(kw))
   ) {
-    return 'danger';
+    return 'warning';
   }
 
   if (['pending', 'submitted', 'normal', 'event schedule', 'consultation'].includes(normalized)) {
