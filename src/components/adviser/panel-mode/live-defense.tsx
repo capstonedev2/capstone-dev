@@ -89,16 +89,17 @@ function getIdentityKey(user: UserIdentity) {
 function isSameIdentity(left: UserIdentity | null | undefined, right: UserIdentity | null | undefined) {
   const leftId = normalizeIdentityValue(left?.id);
   const rightId = normalizeIdentityValue(right?.id);
+  if (leftId && rightId && leftId === rightId) return true;
+
   const leftEmail = normalizeIdentityValue(left?.email);
   const rightEmail = normalizeIdentityValue(right?.email);
-
-  if (leftId && rightId) return leftId === rightId;
-  if (leftEmail && rightEmail) return leftEmail === rightEmail;
-  if (leftId || rightId || leftEmail || rightEmail) return false;
+  if (leftEmail && rightEmail && leftEmail === rightEmail) return true;
 
   const leftName = normalizeIdentityValue(getIdentityDisplayName(left));
   const rightName = normalizeIdentityValue(getIdentityDisplayName(right));
-  return Boolean(leftName && leftName === rightName);
+  if (leftName && rightName && leftName === rightName) return true;
+
+  return false;
 }
 
 function isPanelAccount(user: UserIdentity) {
