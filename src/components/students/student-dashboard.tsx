@@ -998,18 +998,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       </header>
 
       <div className="page-body student-dashboard-page">
-        <div className="mb-5 flex flex-col gap-1 pt-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-[var(--muted)] uppercase tracking-widest">Active Session</span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-[#003A8F] tracking-tight flex items-center gap-2">
-            {data.profile.fullName ? `${data.profile.fullName}'s Workspace` : 'Student Workspace'}
-          </h1>
-          <p className="text-sm text-[var(--muted)] font-medium max-w-2xl mt-0.5">
-            Monitor project progress, adviser feedback, milestones, and submission readiness from your centralized command center.
-          </p>
-        </div>
+
 
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
