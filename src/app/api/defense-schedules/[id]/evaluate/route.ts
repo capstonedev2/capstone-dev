@@ -82,9 +82,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     // 5. If Chair is finalizing the defense
     if (isChairSubmit) {
-      // Chair decides to finalize and complete the session.
-      // E.g. Check all votes to determine final project status.
-      // For now, we'll just mark the defense as COMPLETED.
+      // Mark the defense as COMPLETED.
       await prisma.defenseSchedule.update({
         where: { id: schedule.id },
         data: {
@@ -92,8 +90,39 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         }
       });
 
-      // Optionally, update project/group status if necessary.
-      // If majority voted yes, project is COMPLETED or APPROVED
+      // Calculate majority vote
+      const allEvaluations = await prisma.evaluation.findMany({
+        where: { defenseScheduleId: schedule.id }
+      });
+
+      let yesVotes = 0;
+      let noVotes = 0;
+      
+      for (const ev of allEvaluations) {
+        if (['PASSED', 'PASSED_MINOR', 'PASSED_MAJOR'].includes(ev.recommendation)) {
+          yesVotes++;
+        } else if (['REDEFENSE', 'FAILED'].includes(ev.recommendation)) {
+          noVotes++;
+        }
+      }
+
+      // If majority voted YES, approve the project
+      if (yesVotes > noVotes) {
+        const isFinal = schedule.title.toLowerCase().includes('final');
+        await prisma.project.update({
+          where: { id: schedule.projectId },
+          data: {
+            status: isFinal ? ProjectStatus.COMPLETED : ProjectStatus.APPROVED
+          }
+        });
+      } else if (noVotes > yesVotes) {
+        await prisma.project.update({
+          where: { id: schedule.projectId },
+          data: {
+            status: ProjectStatus.NEEDS_REVISION
+          }
+        });
+      }
     }
 
     return successResponse({
