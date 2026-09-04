@@ -308,6 +308,7 @@ export function DefenseEvalPanel({
             </div>
           </div>
         ) : (
+          <div className={`space-y-4 ${submitted ? 'opacity-70 grayscale-[0.2]' : ''}`}>
             <div className="rounded-xl border border-white bg-white/70 p-4 shadow-[0_2px_10px_rgba(0,58,143,0.03)] backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <div>
