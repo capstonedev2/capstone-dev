@@ -412,7 +412,7 @@ export const AdviserDashboard = memo(function AdviserDashboard({ data }: { data:
                 {workspaceMode === 'adviser' ? 'Adviser workbench' : 'Panel workbench'}
               </span>
               <h2 id="adviser-command-center-title">
-                Welcome back
+                {workspaceMode === 'adviser' ? 'Adviser Overview' : 'Panel Overview'}
               </h2>
               <p>
                 {workspaceMode === 'adviser'
