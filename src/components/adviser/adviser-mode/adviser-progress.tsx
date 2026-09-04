@@ -16,7 +16,6 @@ import {
   type ProgressSummaryMetric
 } from '@/components/adviser/adviser-mode/data/progress-workspace-sections';
 import {
-  IT_ADVISER_PROGRESS_RECORDS,
   IT_PROGRESS_MILESTONES,
   PROGRESS_SORT_OPTIONS,
   PROGRESS_STATUS_FILTER_OPTIONS,
@@ -26,7 +25,9 @@ import {
   sortProgressRecords,
   type ProgressMilestone,
   type ProgressSortOption,
-  type ProgressStatus
+  type ProgressStatus,
+  type AdviserActionStatus,
+  type AdviserProgressRecord
 } from '@/components/adviser/adviser-mode/data/progress-workspace-data';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
@@ -50,7 +51,42 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
   }, []);
 
   const adviserMeta = WORKSPACE_META[workspaceMode];
-  const progressRecords = IT_ADVISER_PROGRESS_RECORDS;
+
+  const progressRecords = useMemo<AdviserProgressRecord[]>(() => {
+    return data.groups.map(g => {
+      let mappedStatus: ProgressStatus = 'on-track';
+      if (g.statusClass === 'status-warning' || g.statusLabel.toLowerCase().includes('risk')) mappedStatus = 'at-risk';
+      else if (g.statusClass === 'status-revise' || g.statusLabel.toLowerCase().includes('delay')) mappedStatus = 'delayed';
+      else if (g.statusClass === 'status-approved' || g.progress === 100) mappedStatus = 'completed';
+
+      let mappedMilestone: ProgressMilestone = 'Proposal';
+      const validMilestones = [...IT_PROGRESS_MILESTONES] as string[];
+      if (validMilestones.includes(g.currentMilestone)) {
+        mappedMilestone = g.currentMilestone as ProgressMilestone;
+      } else if (g.progress > 80) {
+        mappedMilestone = 'Final Defense';
+      } else if (g.progress > 40) {
+        mappedMilestone = 'Development';
+      }
+
+      let action: AdviserActionStatus = 'Waiting for submission';
+      if (mappedStatus === 'at-risk' || mappedStatus === 'delayed') action = 'Needs review';
+      else if (mappedStatus === 'completed') action = 'Ready for defense';
+
+      return {
+        id: g.id,
+        groupId: g.code as \`IT-2024-\${string}\`,
+        projectTitle: g.projectTitle || g.title,
+        department: (g.department || g.dept || 'IT') as 'IT',
+        progress: g.progress || 0,
+        currentMilestone: mappedMilestone,
+        status: mappedStatus,
+        deadline: g.completedAt || new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+        lastUpdate: g.updated_at || new Date().toISOString(),
+        adviserAction: action
+      };
+    });
+  }, [data.groups]);
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
