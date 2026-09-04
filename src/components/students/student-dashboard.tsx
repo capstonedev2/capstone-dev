@@ -1018,36 +1018,38 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               </div>
 
               {/* Title Block */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-3">
-                    {(!realGroup?.projectTitle || realGroup.projectTitle === 'Awaiting Project Assignment' || realGroup.projectTitle === 'Pending Student Submission' || realGroup.projectTitle === 'Awaiting Adviser Approval') ? (
-                      <>
+              <div>
+                {projectStatusTone !== 'success' || (realGroup && (realGroup.title === 'Pending Student Submission' || realGroup.title === 'Awaiting Adviser Approval' || realGroup.title === 'Pending Concept Presentation')) ? (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h2 className="text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-3">
                         <i className="fas fa-lock text-[var(--text-meta)]" aria-hidden="true"></i>
                         Project title pending approval
-                      </>
-                    ) : (
-                      realGroup.projectTitle || data.project.title
-                    )}
-                  </h2>
-                  
-                  {/* Status Badge */}
-                  {(realGroup?.title === 'Pending Student Submission' || realGroup?.title === 'Awaiting Adviser Approval' || realGroup?.title === 'Pending Concept Presentation') && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700 align-middle">
-                      <i className="fas fa-clock"></i>
-                      {realGroup?.title === 'Pending Student Submission'
-                        ? 'Awaiting Title Submission'
-                        : realGroup?.title === 'Pending Concept Presentation'
-                          ? 'Pending Concept Presentation'
-                          : 'Awaiting Adviser Approval'}
-                    </span>
-                  )}
-                </div>
-                <p className="text-base text-[var(--muted)] max-w-3xl leading-relaxed">
-                  {(!realGroup?.projectTitle || realGroup.projectTitle === 'Awaiting Project Assignment' || realGroup.projectTitle === 'Pending Student Submission' || realGroup.projectTitle === 'Awaiting Adviser Approval')
-                    ? 'Your project title will appear here once the concept proposal has been submitted and approved by your adviser.'
-                    : data.project.description || 'Track academic progress, active deliverables, faculty guidance, and the next capstone commitments from one focused workspace.'}
-                </p>
+                      </h2>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700 align-middle">
+                        <i className="fas fa-clock"></i>
+                        {realGroup?.title === 'Pending Student Submission'
+                          ? 'Awaiting Title Submission'
+                          : realGroup?.title === 'Pending Concept Presentation'
+                            ? 'Pending Concept Presentation'
+                            : 'Awaiting Adviser Approval'}
+                      </span>
+                    </div>
+                    <p className="text-base text-[var(--muted)] max-w-2xl leading-relaxed">
+                      Your project title will appear here once the concept proposal has been submitted and approved by your adviser and panel.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <h2 className="text-2xl font-bold tracking-tight text-[var(--text)]">
+                      {realGroup ? realGroup.projectTitle || realGroup.title : data.project.title}
+                    </h2>
+                    <p className="text-base text-[var(--muted)] max-w-3xl leading-relaxed">
+                      {data.project.description ||
+                        'Track academic progress, active deliverables, faculty guidance, and the next capstone commitments from one focused workspace.'}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Meta Info */}
