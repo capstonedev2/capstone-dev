@@ -41,12 +41,7 @@ export async function GET(request: Request) {
     const panelists = await prisma.user.findMany({
       where: {
         role: {
-          in: [
-            UserRole.ADVISER, 
-            UserRole.PANEL, 
-            UserRole.PROGRAM_HEAD, 
-            UserRole.RESEARCH_HEAD
-          ],
+          in: [UserRole.ADVISER, UserRole.PANEL],
         },
       },
       select: {

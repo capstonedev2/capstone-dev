@@ -516,7 +516,7 @@ export async function POST(request: Request) {
     const panelUsers = await prisma.user.findMany({
       where: {
         id: { in: uniquePanelIds },
-        role: { in: [UserRole.ADVISER, UserRole.PANEL, UserRole.PROGRAM_HEAD, UserRole.RESEARCH_HEAD] },
+        role: { in: [UserRole.ADVISER, UserRole.PANEL] },
         isSuspended: false
       }
     });
