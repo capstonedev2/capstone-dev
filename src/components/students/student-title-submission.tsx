@@ -488,6 +488,7 @@ function Badge({
 
 export function StudentTitleSubmission({ data }: { data: StudentDashboardData }) {
   if (!data.group?.id) {
+    const hasPendingInvite = !!data.profile.pendingGroupInviteId;
     return (
       <div className="student-title-registration-page">
         <header className="top-nav">
@@ -509,12 +510,23 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         <div className="page-body p-6">
           <div className="mx-auto mt-12 max-w-2xl rounded-[1.25rem] border border-[var(--border)] bg-[var(--surface)] p-12 text-center shadow-sm">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--surface-alt)] text-[var(--text-meta)] shadow-sm">
-              <i className="fas fa-users-slash text-3xl" aria-hidden="true" />
+              <i className={`fas ${hasPendingInvite ? 'fa-envelope-open-text text-blue-500' : 'fa-users-slash'} text-3xl`} aria-hidden="true" />
             </div>
-            <h3 className="mt-6 text-2xl font-bold tracking-tight text-[var(--text)]">Group Assignment Required</h3>
+            <h3 className="mt-6 text-2xl font-bold tracking-tight text-[var(--text)]">
+              {hasPendingInvite ? 'Action Required: Group Invitation' : 'Group Assignment Required'}
+            </h3>
             <p className="mx-auto mt-4 max-w-lg text-[var(--muted)] leading-relaxed">
-              You must be assigned to a project group before you can access the Title Submission workspace and submit proposals. Please contact your coordinator to be added to a group.
+              {hasPendingInvite
+                ? 'You have a pending group invitation. You must accept the assignment before you can access the Title Submission workspace and submit proposals.'
+                : 'You must be assigned to a project group before you can access the Title Submission workspace and submit proposals. Please contact your coordinator to be added to a group.'}
             </p>
+            {hasPendingInvite && (
+              <div className="mt-8">
+                <Link prefetch={false} href="/students/notifications" className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5">
+                  <i className="fas fa-bell" aria-hidden="true" /> Review Invitation
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -194,7 +194,7 @@ function hasCompletedConceptStage(data: StudentDashboardData) {
   return Boolean(conceptMilestone && isCompletedStageStatus(conceptMilestone.status));
 }
 
-function GroupAssignmentRequired() {
+function GroupAssignmentRequired({ hasPendingInvite }: { hasPendingInvite?: boolean }) {
   return (
     <div className="student-project-files-page">
       <header className="top-nav">
@@ -220,12 +220,23 @@ function GroupAssignmentRequired() {
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-700 -z-10"></div>
 
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-[var(--muted)] shadow-inner mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 ring-4 ring-white">
-            <i className="fas fa-users-slash text-4xl" aria-hidden="true" />
+            <i className={`fas ${hasPendingInvite ? 'fa-envelope-open-text text-blue-500' : 'fa-users-slash'} text-4xl`} aria-hidden="true" />
           </div>
-          <h3 className="text-3xl font-extrabold tracking-tight text-[var(--text)]">Group Assignment Required</h3>
+          <h3 className="text-3xl font-extrabold tracking-tight text-[var(--text)]">
+            {hasPendingInvite ? 'Action Required: Group Invitation' : 'Group Assignment Required'}
+          </h3>
           <p className="mx-auto mt-5 max-w-lg text-base font-medium text-[var(--muted)] leading-relaxed">
-            You must be assigned to a project group before you can access the project files repository and begin uploading chapters or documents. Please contact your coordinator.
+            {hasPendingInvite 
+              ? 'You have a pending group invitation. You must accept the assignment before you can access the project files repository.'
+              : 'You must be assigned to a project group before you can access the project files repository and begin uploading chapters or documents. Please contact your coordinator.'}
           </p>
+          {hasPendingInvite && (
+            <div className="mt-8">
+              <Link prefetch={false} href="/students/notifications" className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5">
+                <i className="fas fa-bell" aria-hidden="true" /> Review Invitation
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1062,7 +1073,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       : 'fa-circle-info';
 
   if (!data.group?.id) {
-    return <GroupAssignmentRequired />;
+    return <GroupAssignmentRequired hasPendingInvite={!!data.profile.pendingGroupInviteId} />;
   }
 
   // Project Files workspace stays visible, but uploads open only after Stage 1: Concept is complete.
