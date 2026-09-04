@@ -308,7 +308,6 @@ export function DefenseEvalPanel({
             </div>
           </div>
         ) : (
-          <div className={`space-y-4 ${submitted ? 'opacity-70 grayscale-[0.2]' : ''}`}>
             <div className="rounded-xl border border-white bg-white/70 p-4 shadow-[0_2px_10px_rgba(0,58,143,0.03)] backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -422,6 +421,40 @@ export function DefenseEvalPanel({
       </div>
 
       <div className="shrink-0 border-t border-slate-200 p-4">
+        {!submitted && (
+          <div className="mb-4 rounded-[1rem] border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[0.6rem] font-black uppercase tracking-widest text-slate-400">Your Final Vote</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPanelistVote(currentPanelistName, 'yes')}
+                className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-[0.85rem] font-black transition-all ${
+                  panelistVotes[currentPanelistName] === 'yes'
+                    ? 'bg-emerald-500 text-white shadow-md ring-2 ring-emerald-500 ring-offset-2'
+                    : 'border border-slate-200 bg-white text-slate-500 hover:border-emerald-300 hover:text-emerald-600'
+                }`}
+              >
+                <i className="fas fa-thumbs-up" />
+                Approve (Pass)
+              </button>
+              <button
+                type="button"
+                onClick={() => setPanelistVote(currentPanelistName, 'no')}
+                className={`flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-[0.85rem] font-black transition-all ${
+                  panelistVotes[currentPanelistName] === 'no'
+                    ? 'bg-rose-500 text-white shadow-md ring-2 ring-rose-500 ring-offset-2'
+                    : 'border border-slate-200 bg-white text-slate-500 hover:border-rose-300 hover:text-rose-600'
+                }`}
+              >
+                <i className="fas fa-thumbs-down" />
+                Reject (Re-Defense)
+              </button>
+            </div>
+          </div>
+        )}
+
         {submitted ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5">
@@ -438,7 +471,7 @@ export function DefenseEvalPanel({
               </button>
             </div>
 
-            {/* Per-Panelist Vote */}
+            {/* Per-Panelist Vote Status */}
             {(() => {
               const yesCount = Object.values(panelistVotes).filter((v) => v === 'yes').length;
               const noCount = Object.values(panelistVotes).filter((v) => v === 'no').length;
@@ -449,7 +482,7 @@ export function DefenseEvalPanel({
               return (
                 <div className="rounded-[1rem] border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[0.6rem] font-black uppercase tracking-widest text-slate-400">Panel Vote</p>
+                    <p className="text-[0.6rem] font-black uppercase tracking-widest text-slate-400">Panel Vote Summary</p>
                     <span className="text-[0.65rem] font-black text-slate-500">{totalVoted}/{panelistNames.length} voted</span>
                   </div>
 
@@ -457,7 +490,6 @@ export function DefenseEvalPanel({
                     {panelistNames.map((name) => {
                       const vote = panelistVotes[name];
                       const isMe = name === currentPanelistName;
-                      // Chair sees everyone's votes; members only see their own
                       const canSeeVote = isChair || isMe;
                       return (
                         <div key={name} className={`flex items-center gap-2 rounded-lg p-1.5 transition-colors ${isMe ? 'bg-blue-50/50 ring-1 ring-blue-100' : ''}`}>
@@ -469,35 +501,7 @@ export function DefenseEvalPanel({
                             {isMe && <span className="text-[0.55rem] font-black text-[#003a8f] uppercase tracking-wider">You</span>}
                           </div>
                           <div className="flex gap-1">
-                            {isMe ? (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => setPanelistVote(name, 'yes')}
-                                  className={`flex h-7 w-14 items-center justify-center rounded-md text-[0.65rem] font-black transition-all ${
-                                    vote === 'yes'
-                                      ? 'bg-emerald-500 text-white shadow-sm'
-                                      : 'border border-slate-200 bg-white text-slate-400 hover:border-emerald-300 hover:text-emerald-600'
-                                  }`}
-                                >
-                                  <i className="fas fa-thumbs-up mr-1 text-[0.55rem]" />
-                                  Yes
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setPanelistVote(name, 'no')}
-                                  className={`flex h-7 w-14 items-center justify-center rounded-md text-[0.65rem] font-black transition-all ${
-                                    vote === 'no'
-                                      ? 'bg-rose-500 text-white shadow-sm'
-                                      : 'border border-slate-200 bg-white text-slate-400 hover:border-rose-300 hover:text-rose-600'
-                                  }`}
-                                >
-                                  <i className="fas fa-thumbs-down mr-1 text-[0.55rem]" />
-                                  No
-                                </button>
-                              </>
-                            ) : canSeeVote ? (
-                              /* Chair sees the actual vote */
+                            {canSeeVote ? (
                               <span className={`flex h-7 items-center justify-center rounded-md px-3 text-[0.65rem] font-black ${
                                 vote === 'yes'
                                   ? 'bg-emerald-100 text-emerald-700'
@@ -508,7 +512,6 @@ export function DefenseEvalPanel({
                                 {vote === 'yes' ? <><i className="fas fa-thumbs-up mr-1" />Yes</> : vote === 'no' ? <><i className="fas fa-thumbs-down mr-1" />No</> : 'Pending'}
                               </span>
                             ) : (
-                              /* Members only see Voted or Pending */
                               <span className={`flex h-7 items-center justify-center rounded-md px-3 text-[0.65rem] font-black ${
                                 vote ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-400'
                               }`}>
@@ -581,14 +584,14 @@ export function DefenseEvalPanel({
             <button
               type="button"
               onClick={onSubmit}
-              disabled={!groupComplete}
+              disabled={!groupComplete || !panelistVotes[currentPanelistName]}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-3 text-sm font-black text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
             >
               <i className={`fas ${isChair ? 'fa-flag-checkered' : 'fa-paper-plane'}`} />
-              {isChair ? 'End & Submit' : 'Submit Score'}
+              {isChair ? 'End & Submit Session' : 'Submit Rating & Vote'}
             </button>
             <p className="text-center text-xs font-semibold text-slate-500">
-              {groupComplete ? 'Ready for final submission.' : `${groupRubric.length - scored} rubric item${groupRubric.length - scored === 1 ? '' : 's'} remaining.`}
+              {groupComplete && panelistVotes[currentPanelistName] ? 'Ready for final submission.' : !panelistVotes[currentPanelistName] ? 'Please cast your final vote above.' : `${groupRubric.length - scored} rubric item${groupRubric.length - scored === 1 ? '' : 's'} remaining.`}
             </p>
           </div>
         )}
