@@ -57,6 +57,9 @@ function calculatePasswordStrength(password: string): number {
   return Math.min(score, 4);
 }
 
+const passwordStrengthLabels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
+const passwordStrengthColors = ['text-slate-500', 'text-red-600', 'text-amber-600', 'text-amber-600', 'text-emerald-600'];
+
 type RegisterFieldErrors = Partial<
   Record<
     | 'firstName'
@@ -117,6 +120,14 @@ export function RegisterPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const passwordStrength = calculatePasswordStrength(password);
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+
+  const personalSectionComplete = firstName.trim().length >= 2 && lastName.trim().length >= 2;
+  const academicSectionComplete =
+    studentId.trim().length > 0 && emailPattern.test(email.trim()) && Boolean(department) && Boolean(yearLevel);
+  const securitySectionComplete =
+    isGoogleRegistration || (password.trim().length >= 6 && passwordsMatch);
 
   useEffect(() => {
     if (Object.keys(touched).length > 0) {
@@ -298,7 +309,7 @@ export function RegisterPage() {
   };
 
   return (
-    <main className={cx(authUi.page, "!h-[100dvh] !overflow-hidden")} style={registerBackgroundStyle}>
+    <main className={cx(authUi.page, "!h-[100dvh] overflow-y-auto")} style={registerBackgroundStyle}>
       {isVideoBackground && (
         <>
           <video
@@ -400,6 +411,9 @@ export function RegisterPage() {
                     <div className="mb-2.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
                       <i className="fas fa-user" aria-hidden="true" />
                       Personal details
+                      {personalSectionComplete ? (
+                        <i className="fas fa-circle-check ml-auto text-emerald-500" aria-label="Section complete" />
+                      ) : null}
                     </div>
                     <div className={authUi.formRow}>
                       <div className={authUi.formGroup}>
@@ -412,6 +426,7 @@ export function RegisterPage() {
                           type="text"
                           placeholder="Juan"
                           autoComplete="given-name"
+                          autoFocus
                           value={firstName}
                           onChange={(event) => {
                             setFirstName(event.target.value);
@@ -466,6 +481,9 @@ export function RegisterPage() {
                     <div className="mb-2.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
                       <i className="fas fa-building-columns" aria-hidden="true" />
                       Academic details
+                      {academicSectionComplete ? (
+                        <i className="fas fa-circle-check ml-auto text-emerald-500" aria-label="Section complete" />
+                      ) : null}
                     </div>
                     <div className="grid gap-2.5">
                       <div className={authUi.formRow}>
@@ -619,6 +637,9 @@ export function RegisterPage() {
                       <div className="mb-2.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0F5DB8] drop-shadow-[0_1px_1px_rgba(255,255,255,0.35)]">
                         <i className="fas fa-lock" aria-hidden="true" />
                         Account security
+                        {securitySectionComplete ? (
+                          <i className="fas fa-circle-check ml-auto text-emerald-500" aria-label="Section complete" />
+                        ) : null}
                       </div>
                       <div className={authUi.formRow}>
                         <div className={authUi.formGroup}>
@@ -669,21 +690,29 @@ export function RegisterPage() {
                             </span>
                           )}
                           {!isGoogleRegistration && password.length > 0 && (
-                            <div className="mt-2 flex gap-1 h-1.5 w-full">
-                              {[1, 2, 3, 4].map((level) => (
-                                <div
-                                  key={level}
-                                  className={`h-full flex-1 rounded-full transition-colors ${
-                                    passwordStrength >= level
-                                      ? passwordStrength < 2
-                                        ? 'bg-red-400'
-                                        : passwordStrength < 3
-                                        ? 'bg-amber-400'
-                                        : 'bg-emerald-400'
-                                      : 'bg-white/20'
-                                  }`}
-                                />
-                              ))}
+                            <div className="mt-2">
+                              <div className="flex gap-1 h-1.5 w-full">
+                                {[1, 2, 3, 4].map((level) => (
+                                  <div
+                                    key={level}
+                                    className={`h-full flex-1 rounded-full transition-colors ${
+                                      passwordStrength >= level
+                                        ? passwordStrength < 2
+                                          ? 'bg-red-400'
+                                          : passwordStrength < 3
+                                          ? 'bg-amber-400'
+                                          : 'bg-emerald-400'
+                                        : 'bg-white/20'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span
+                                className={cx('mt-1 block text-xs font-bold', passwordStrengthColors[passwordStrength])}
+                                aria-live="polite"
+                              >
+                                {passwordStrengthLabels[passwordStrength]}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -731,6 +760,16 @@ export function RegisterPage() {
                           {fieldErrors.confirmPassword ? (
                             <span className={authUi.fieldError} id="register-confirm-password-error">
                               {fieldErrors.confirmPassword}
+                            </span>
+                          ) : passwordsMatch ? (
+                            <span className="mt-2 flex items-center gap-1.5 text-xs font-bold text-emerald-600" aria-live="polite">
+                              <i className="fas fa-circle-check" aria-hidden="true" />
+                              Passwords match
+                            </span>
+                          ) : passwordsMismatch ? (
+                            <span className="mt-2 flex items-center gap-1.5 text-xs font-bold text-red-600" aria-live="polite">
+                              <i className="fas fa-circle-exclamation" aria-hidden="true" />
+                              Passwords do not match
                             </span>
                           ) : null}
                         </div>

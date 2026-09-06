@@ -49,14 +49,18 @@ export function ProgramHeadShell({
   });
 
   useEffect(() => {
-    const storedUser = getStoredUser();
-    if (storedUser?.name) {
-      setDisplayName(storedUser.name);
-    }
+    const syncStoredUser = () => {
+      const storedUser = getStoredUser();
+      if (storedUser?.name) {
+        setDisplayName(storedUser.name);
+      }
 
-    if (storedUser?.email) {
-      setDisplayEmail(storedUser.email);
-    }
+      if (storedUser?.email) {
+        setDisplayEmail(storedUser.email);
+      }
+    };
+
+    syncStoredUser();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -65,9 +69,13 @@ export function ProgramHeadShell({
     };
 
     document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('thesistrack:user-updated', syncStoredUser);
+    window.addEventListener('storage', syncStoredUser);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('thesistrack:user-updated', syncStoredUser);
+      window.removeEventListener('storage', syncStoredUser);
     };
   }, [closeSidebar]);
 
@@ -242,7 +250,12 @@ export function ProgramHeadShell({
                     <span className="sidebar-link-icon">
                       <i aria-hidden="true" className={`fas ${item.icon}`} />
                     </span>
-                    <span className="sidebar-link-label">{item.label}</span>
+                    <span
+                      className="sidebar-link-label"
+                      style={{ whiteSpace: 'normal', overflow: 'visible', wordBreak: 'break-word', lineHeight: 1.25 }}
+                    >
+                      {item.label}
+                    </span>
                   </Link>
                 ))}
               </div>

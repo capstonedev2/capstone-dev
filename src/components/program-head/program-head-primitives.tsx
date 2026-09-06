@@ -102,19 +102,22 @@ export function ProgramHeadButton({
   type = 'button',
   variant = 'outline',
   className,
-  onClick
+  onClick,
+  disabled
 }: {
   children: ReactNode;
   type?: 'button' | 'submit' | 'reset';
   variant?: 'primary' | 'outline' | 'warning' | 'danger';
   className?: string;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       className={`ph-btn is-${variant}${className ? ` ${className}` : ''}`}
       type={type}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </button>

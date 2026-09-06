@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { type ChangeEvent, type FormEvent, useEffect, useMemo, useState } from 'react';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
-import { NAV_ITEMS, WORKSPACE_META, isNavItemActive } from '@/components/adviser/shared/config/dashboard-utils';
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
 const PROFILE_STORAGE_PREFIX = 'adviserProfileDraft';
 const MAX_PROFILE_IMAGE_SIZE = 2 * 1024 * 1024;
+const BIO_MAX_LENGTH = 300;
 
 // Extending the base profile for local editing
 type EditableProfile = AdviserDashboardData['profile'] & {
@@ -105,8 +105,7 @@ async function getProfileImageData(file: File) {
 }
 
 export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
-  const { workspaceMode, switchWorkspace, pathname, basePath } = useWorkspaceMode();
-  const meta = WORKSPACE_META[workspaceMode];
+  const { workspaceMode, switchWorkspace, basePath } = useWorkspaceMode();
 
   const initialProfile = useMemo(() => sanitizeProfile(data.profile as EditableProfile), [data.profile]);
   const storageKey = useMemo(() => buildProfileStorageKey(data.profile.id), [data.profile.id]);
@@ -177,6 +176,20 @@ export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
       document.body.style.overflow = '';
     };
   }, [isEditModalOpen]);
+
+  useEffect(() => {
+    if (!isEditModalOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDraft(profile);
+        setIsEditModalOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isEditModalOpen, profile]);
 
   useEffect(() => {
     if (!toast) return;
@@ -289,50 +302,23 @@ export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
   const toastIcon = toast?.tone === 'success' ? 'fa-circle-check' : toast?.tone === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
 
   return (
-    <div className="dashboard-wrapper">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-copy">
-            <span className="sidebar-context-kicker">{meta.headerLabel}</span>
-            <div className="brand-mark">
-              <i aria-hidden="true" className={`fas ${workspaceMode === 'adviser' ? 'fa-chalkboard-user' : 'fa-scale-balanced'}`} />
-              <span>{workspaceMode === 'adviser' ? 'Adviser' : 'Panel'}</span>
-              <strong>Workspace</strong>
-            </div>
-            <p>Manage account settings and academic qualifications.</p>
-          </div>
-          <span className="user-badge">
-            <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
-            <span>{meta.badgeLabel}</span>
-          </span>
-        </div>
-        <nav className="sidebar-nav">
-          {NAV_ITEMS[workspaceMode].map((item) => (
-            <Link key={item.href} href={item.href} prefetch={false} className={isNavItemActive(pathname, item.href) ? 'active' : ''}>
-              <i className={`fas ${item.icon}`}></i> {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
+    <>
+      <AdviserPageHeader
+        title="User Profile"
+        description="Manage account settings and academic qualifications."
+        actions={
+          <AdviserShellActions
+            basePath={basePath}
+            fullName={profile.fullName}
+            notificationCount={profile.notificationCount}
+            workspaceMode={workspaceMode}
+            onSwitchWorkspace={switchWorkspace}
+          />
+        }
+      />
 
-      <main className="main-content flex flex-col min-h-0">
-        <AdviserPageHeader
-          title="User Profile"
-          description="Manage account settings and academic qualifications."
-          actions={
-            <AdviserShellActions
-              basePath={basePath}
-              fullName={profile.fullName}
-              notificationCount={profile.notificationCount}
-              workspaceMode={workspaceMode}
-              onSwitchWorkspace={switchWorkspace}
-            />
-          }
-        />
-
-        <div className="flex-1 mt-6">
-          <section className="adviser-profile-page">
-            <div className="profile-grid">
+      <section className="adviser-profile-page">
+        <div className="profile-grid">
               <article className="relative bg-white rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group">
                 {/* Cover Image */}
                 <div className="h-36 w-full bg-gradient-to-br from-indigo-600 via-blue-600 to-indigo-900 relative overflow-hidden">
@@ -500,9 +486,7 @@ export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
                 </article>
               </div>
             </div>
-          </section>
-        </div>
-      </main>
+      </section>
 
       {isEditModalOpen && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -600,7 +584,16 @@ export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
                     </div>
                     <div className="form-group !mb-0 md:col-span-2">
                       <label htmlFor="profile-summary" className="!mb-1.5 !text-sm !font-semibold !text-slate-700">Account Summary</label>
-                      <textarea id="profile-summary" rows={3} className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" value={draft.accountSummary || ''} onChange={(event) => updateDraftField('accountSummary', event.target.value)} placeholder="Write a short summary about your academic goals..." />
+                      <textarea
+                        id="profile-summary"
+                        rows={3}
+                        maxLength={BIO_MAX_LENGTH}
+                        className="w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm transition-shadow focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        value={draft.accountSummary || ''}
+                        onChange={(event) => updateDraftField('accountSummary', event.target.value.slice(0, BIO_MAX_LENGTH))}
+                        placeholder="Write a short summary about your academic goals..."
+                      />
+                      <span className="mt-1.5 block text-right text-xs font-semibold text-slate-400">{(draft.accountSummary || '').length}/{BIO_MAX_LENGTH}</span>
                     </div>
                   </div>
                 </section>
@@ -627,6 +620,6 @@ export function AdviserProfile({ data }: { data: AdviserDashboardData }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

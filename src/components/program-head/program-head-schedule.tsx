@@ -160,6 +160,7 @@ const TABS: Array<{ label: ScheduleStatus; colorClass: string; activeClass: stri
 
 export function ProgramHeadSchedule() {
   const [activeTab, setActiveTab] = useState<ScheduleStatus>('Ready First Schedule');
+  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const [stageFilter, setStageFilter] = useState<StageFilter>('All Stages');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -194,6 +195,19 @@ export function ProgramHeadSchedule() {
   }, [assignments]);
 
   const enrichedGroups = useMemo(() => enrichProjects(scheduleProjects, assignmentsByCode), [assignmentsByCode, scheduleProjects]);
+  const tabCounts = useMemo(() => {
+    const counts: Record<ScheduleStatus, number> = {
+      'Ready First Schedule': 0,
+      'Ready for Reschedule': 0,
+      'Scheduled': 0,
+      'Revision Required': 0,
+      'Not Eligible': 0
+    };
+    enrichedGroups.forEach((group) => {
+      counts[group.scheduleStatus] = (counts[group.scheduleStatus] ?? 0) + 1;
+    });
+    return counts;
+  }, [enrichedGroups]);
   const selectedScheduleStage = useMemo(
     () => (isScheduleStageType(stageFilter) ? getStageVisual(stageFilter) : null),
     [stageFilter]
@@ -215,6 +229,9 @@ export function ProgramHeadSchedule() {
       p.titles.some((title) => title.title.toLowerCase().includes(q))
     ));
   }, [activeList, searchQuery]);
+
+  const isActionableTabStatus = activeTab === 'Ready First Schedule' || activeTab === 'Ready for Reschedule';
+  const hasSelectableGroupsInView = isActionableTabStatus && filteredList.some((group) => group.isEligible);
 
   useEffect(() => {
     let cancelled = false;
@@ -259,13 +276,29 @@ export function ProgramHeadSchedule() {
     return () => { cancelled = true; };
   }, []);
 
+  // Default to the first tab that actually has records, instead of always
+  // landing on "Ready First Schedule" even when it's empty. Only runs once,
+  // and never overrides a tab the user (or a restored draft) already picked.
+  useEffect(() => {
+    if (isLoadingProjects || hasUserSelectedTab) return;
+
+    const firstNonEmptyTab = TABS.find((tab) => tabCounts[tab.label] > 0);
+    if (firstNonEmptyTab && firstNonEmptyTab.label !== activeTab) {
+      setActiveTab(firstNonEmptyTab.label);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoadingProjects]);
+
   useEffect(() => {
     try {
       const rawDraft = window.localStorage.getItem(DRAFT_STORAGE_KEY);
       if (!rawDraft) return;
 
       const draft = JSON.parse(rawDraft) as Partial<ScheduleDraft>;
-      if (draft.activeTab && TABS.some((tab) => tab.label === draft.activeTab)) setActiveTab(draft.activeTab);
+      if (draft.activeTab && TABS.some((tab) => tab.label === draft.activeTab)) {
+        setActiveTab(draft.activeTab);
+        setHasUserSelectedTab(true);
+      }
       if (draft.stageFilter && STAGE_FILTERS.includes(draft.stageFilter)) setStageFilter(draft.stageFilter);
       if (Array.isArray(draft.selectedGroupCodes)) setSelectedGroupCodes(draft.selectedGroupCodes);
       if (Array.isArray(draft.presentationOrder)) setPresentationOrder(draft.presentationOrder);
@@ -548,94 +581,49 @@ export function ProgramHeadSchedule() {
     return `${h > 0 ? `${h}h ` : ''}${m}m`;
   };
 
-  const getCardToneClasses = (status: ScheduleStatus) => {
-    switch (status) {
-      case 'Ready First Schedule': return 'from-blue-50 to-indigo-50 border-blue-200 text-blue-700';
-      case 'Ready for Reschedule': return 'from-purple-50 to-fuchsia-50 border-purple-200 text-purple-700';
-      case 'Scheduled': return 'from-emerald-50 to-teal-50 border-emerald-200 text-emerald-700';
-      case 'Revision Required': return 'from-orange-50 to-amber-50 border-orange-200 text-orange-700';
-      case 'Not Eligible': return 'from-rose-50 to-red-50 border-rose-200 text-rose-700';
-      default: return 'from-slate-50 to-slate-100 border-slate-200 text-slate-700';
-    }
-  };
-
-  const getStatusIconColor = (status: ScheduleStatus) => {
-    switch (status) {
-      case 'Ready First Schedule': return 'text-blue-500 bg-blue-100';
-      case 'Ready for Reschedule': return 'text-purple-500 bg-purple-100';
-      case 'Scheduled': return 'text-emerald-500 bg-emerald-100';
-      case 'Revision Required': return 'text-orange-500 bg-orange-100';
-      case 'Not Eligible': return 'text-rose-500 bg-rose-100';
-      default: return 'text-slate-500 bg-slate-100';
-    }
-  };
 
   return (
-    <div className="space-y-8 pb-8">
-      {/* HEADER SECTION */}
-      <section className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden p-8">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-[#0F3DDE]/5 to-[#081B4B]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Defense Scheduler</h1>
-            <p className="mt-1.5 text-[15px] text-slate-500">Group-based presentation scheduling using approved title proposals.</p>
-          </div>
-          <div className="flex items-center gap-4 bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Published Sessions</span>
-              <span className="text-xl font-bold text-slate-800">{enrichedGroups.filter(g => g.scheduleStatus === 'Scheduled').length}</span>
-            </div>
-            <div className="w-px h-10 bg-slate-200 mx-2" />
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Conflicts Detected</span>
-              <span className={`text-xl font-bold flex items-center gap-1.5 ${scheduleConflicts.length ? 'text-rose-600' : 'text-emerald-600'}`}>
-                <i className={`fas ${scheduleConflicts.length ? 'fa-triangle-exclamation' : 'fa-check-circle'} text-[14px]`}></i>
-                {scheduleConflicts.length}
-              </span>
-            </div>
-          </div>
+    <div className="space-y-6 pb-8">
+      {/* CONTEXT BAR: subtitle + inline stats (the page title itself lives in the shell's top bar) */}
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[13px] text-slate-500">Group-based presentation scheduling using approved title proposals.</p>
+        <div className="flex items-center gap-5 text-[13px]">
+          <span className="flex items-center gap-1.5 text-slate-500">
+            Published
+            <span className={enrichedGroups.filter(g => g.scheduleStatus === 'Scheduled').length ? 'font-bold text-slate-900' : 'font-normal text-slate-400'}>
+              {enrichedGroups.filter(g => g.scheduleStatus === 'Scheduled').length}
+            </span>
+          </span>
+          <div className="h-4 w-px bg-slate-200" />
+          <span className="flex items-center gap-1.5 text-slate-500">
+            Conflicts
+            <span className={`flex items-center gap-1 ${scheduleConflicts.length ? 'font-bold text-rose-600' : 'font-normal text-slate-400'}`}>
+              <i className={`fas ${scheduleConflicts.length ? 'fa-triangle-exclamation' : 'fa-check-circle'} text-[11px]`}></i>
+              {scheduleConflicts.length}
+            </span>
+          </span>
         </div>
-
-        {/* KPI SUMMARY CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
-          {TABS.map((tab) => {
-            const count = enrichedGroups.filter(g => g.scheduleStatus === tab.label).length;
-            return (
-              <div key={tab.label} className="group relative bg-white border border-slate-200 hover:border-slate-300 rounded-[16px] p-4 transition-all duration-300 hover:shadow-md cursor-pointer overflow-hidden">
-                <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${getCardToneClasses(tab.label).split(' ')[0]} ${getCardToneClasses(tab.label).split(' ')[1]}`} />
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getStatusIconColor(tab.label)}`}>
-                    <i className={`fas ${tab.icon} text-lg`}></i>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-slate-900">{count}</div>
-                    <div className="text-[11px] font-semibold text-slate-500 leading-tight">{tab.label}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      </div>
 
       {/* STATUS TABS (Segmented Navigation) */}
       <div className="border-b border-slate-200">
         <nav className="-mb-px flex gap-6 overflow-x-auto scrollbar-hide">
           {TABS.map((tab) => {
-            const count = enrichedGroups.filter(g => g.scheduleStatus === tab.label).length;
+            const count = tabCounts[tab.label];
             const isActive = activeTab === tab.label;
             return (
               <button
                 key={tab.label}
-                onClick={() => { setActiveTab(tab.label); clearSelection(); }}
+                onClick={() => { setActiveTab(tab.label); setHasUserSelectedTab(true); clearSelection(); }}
                 className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-[14px] transition-colors flex items-center gap-2 ${
                   isActive ? tab.activeClass : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                 }`}
               >
                 {tab.label}
-                <span className={`ml-1.5 py-0.5 px-2.5 rounded-full text-[11px] font-bold ${
-                  isActive ? tab.colorClass : 'bg-slate-100 text-slate-600'
+                <span className={`ml-1.5 py-0.5 px-2.5 rounded-full text-[11px] ${
+                  count === 0
+                    ? 'bg-slate-50 font-normal text-slate-400'
+                    : isActive ? `${tab.colorClass} font-bold` : 'bg-slate-100 font-bold text-slate-600'
                 }`}>
                   {count}
                 </span>
@@ -645,44 +633,37 @@ export function ProgramHeadSchedule() {
         </nav>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {STAGE_FILTERS.map((filter) => {
-          const isActive = stageFilter === filter;
-          const visual = filter === 'All Stages' ? null : getStageVisual(filter);
-          return (
-            <button
-              key={filter}
-              type="button"
-              onClick={() => { setStageFilter(filter); clearSelection(); }}
-              className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-[12px] font-extrabold transition-all ${
-                isActive
-                  ? 'border-[#003a8f] bg-[#003a8f] text-white shadow-sm'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-[#003a8f]'
-              }`}
-            >
-              <i className={`fas ${visual?.icon ?? 'fa-layer-group'}`} aria-hidden="true"></i>
-              {filter}
-            </button>
-          );
-        })}
-      </div>
-
       {/* WORKSPACE AREA */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 items-start">
-        
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-8 items-start">
+
         {/* ELIGIBLE GROUPS PANEL */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[15px] font-bold text-slate-800">{activeTab} Groups</h3>
-            <div className="relative w-72">
-              <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-              <input
-                className="w-full h-9 pl-9 pr-4 rounded-lg bg-white border border-slate-200 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
-                placeholder="Search groups, titles, or advisers..."
-                type="search"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-              />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-[15px] font-bold text-slate-800 shrink-0">{activeTab} Groups</h3>
+            <div className="flex flex-1 items-center gap-2.5 sm:justify-end">
+              <div className="relative w-full sm:max-w-[200px]">
+                <i className="fas fa-layer-group absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <select
+                  value={stageFilter}
+                  onChange={(e) => { setStageFilter(e.target.value as StageFilter); clearSelection(); }}
+                  className="w-full h-9 pl-8 pr-7 rounded-lg bg-white border border-slate-200 text-[13px] font-semibold text-slate-600 outline-none appearance-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                >
+                  {STAGE_FILTERS.map((filter) => (
+                    <option key={filter} value={filter}>{filter}</option>
+                  ))}
+                </select>
+                <i className="fas fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[9px]"></i>
+              </div>
+              <div className="relative w-full sm:max-w-[220px]">
+                <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input
+                  className="w-full h-9 pl-9 pr-4 rounded-lg bg-white border border-slate-200 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  placeholder="Search groups, titles, or advisers..."
+                  type="search"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
@@ -699,8 +680,54 @@ export function ProgramHeadSchedule() {
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-200">
                 <i className="fas fa-folder-open text-2xl text-slate-400"></i>
               </div>
-              <h3 className="text-[15px] font-bold text-slate-700 mb-1">No groups found</h3>
-              <p className="text-[13px] text-slate-500 font-medium">No groups match this status and presentation stage.</p>
+              {searchQuery.trim() && activeList.length > 0 ? (
+                <>
+                  <h3 className="text-[15px] font-bold text-slate-700 mb-1">No matches for &ldquo;{searchQuery.trim()}&rdquo;</h3>
+                  <p className="text-[13px] text-slate-500 font-medium mb-4">Try a different search term, or clear it to see all {activeList.length} {activeTab.toLowerCase()} group{activeList.length === 1 ? '' : 's'}.</p>
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="inline-flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-[13px] font-bold text-slate-700 shadow-sm hover:bg-slate-100 transition-colors"
+                  >
+                    Clear search
+                  </button>
+                </>
+              ) : stageFilter !== 'All Stages' && tabCounts[activeTab] > 0 ? (
+                <>
+                  <h3 className="text-[15px] font-bold text-slate-700 mb-1">No {activeTab} groups in {stageFilter}</h3>
+                  <p className="text-[13px] text-slate-500 font-medium mb-4">{tabCounts[activeTab]} {activeTab.toLowerCase()} group{tabCounts[activeTab] === 1 ? '' : 's'} exist in other stages.</p>
+                  <button
+                    type="button"
+                    onClick={() => { setStageFilter('All Stages'); clearSelection(); }}
+                    className="inline-flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-[13px] font-bold text-slate-700 shadow-sm hover:bg-slate-100 transition-colors"
+                  >
+                    View all stages
+                  </button>
+                </>
+              ) : (() => {
+                const nextNonEmptyTab = TABS.find((tab) => tab.label !== activeTab && tabCounts[tab.label] > 0);
+                return nextNonEmptyTab ? (
+                  <>
+                    <h3 className="text-[15px] font-bold text-slate-700 mb-1">No groups in {activeTab}</h3>
+                    <p className="text-[13px] text-slate-500 font-medium mb-4">
+                      {tabCounts[nextNonEmptyTab.label]} group{tabCounts[nextNonEmptyTab.label] === 1 ? '' : 's'} {tabCounts[nextNonEmptyTab.label] === 1 ? 'is' : 'are'} waiting in {nextNonEmptyTab.label}.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab(nextNonEmptyTab.label); setHasUserSelectedTab(true); clearSelection(); }}
+                      className="inline-flex items-center gap-2 rounded-lg bg-[#003a8f] px-4 py-2 text-[13px] font-bold text-white shadow-sm hover:bg-[#002c6b] transition-colors"
+                    >
+                      <i className={`fas ${nextNonEmptyTab.icon} text-xs`}></i>
+                      View {nextNonEmptyTab.label}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-[15px] font-bold text-slate-700 mb-1">No groups yet</h3>
+                    <p className="text-[13px] text-slate-500 font-medium">Groups will appear here once they're created and assigned an adviser.</p>
+                  </>
+                );
+              })()}
             </div>
           ) : (
             <div className="space-y-3">
@@ -751,7 +778,7 @@ export function ProgramHeadSchedule() {
                         )}
                       </div>
                       
-                      <h4 className="text-[15px] font-bold text-slate-900 leading-tight mb-2 pr-8">
+                      <h4 className="text-[15px] font-bold text-slate-900 leading-tight mb-2">
                         <i className="fas fa-users text-blue-500 mr-2" aria-hidden="true"></i>
                         {group.title || group.code}
                       </h4>
@@ -837,10 +864,6 @@ export function ProgramHeadSchedule() {
                         </div>
                       ) : null}
                     </div>
-
-                    <button className="absolute top-5 right-5 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
-                      <i className="fas fa-ellipsis-v"></i>
-                    </button>
                   </div>
                 );
               })}
@@ -852,9 +875,8 @@ export function ProgramHeadSchedule() {
         <div className="sticky top-6 flex flex-col gap-6">
           
           {/* QUEUE TIMELINE */}
-          <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden flex flex-col max-h-[500px]">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="p-5 border-b border-slate-100/80 relative z-10 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-2xl flex flex-col max-h-[520px]">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="text-[14px] font-bold text-slate-900">Presentation Queue</h3>
                 <p className="text-[12px] text-slate-500 font-medium mt-0.5">{presentationOrder.length} groups selected - {getTotalDurationStr()}</p>
@@ -873,7 +895,13 @@ export function ProgramHeadSchedule() {
                     <i className="fas fa-list-ol"></i>
                   </div>
                   <p className="text-[13px] font-bold text-slate-700">Queue is empty</p>
-                  <p className="text-[12px] text-slate-500 mt-1 max-w-[200px]">Select groups from the left panel to build the timeline.</p>
+                  <p className="text-[12px] text-slate-500 mt-1 max-w-[220px]">
+                    {hasSelectableGroupsInView
+                      ? 'Select groups from the left panel to build the timeline.'
+                      : isActionableTabStatus
+                        ? 'None of the groups here have an approved title yet, so there is nothing to select.'
+                        : `${activeTab} groups can't be added to a new schedule. Switch to Ready First Schedule or Ready for Reschedule to build a queue.`}
+                  </p>
                 </div>
               ) : (
                 <div className="relative pl-4 border-l-2 border-slate-100 space-y-6">
@@ -922,9 +950,8 @@ export function ProgramHeadSchedule() {
           </div>
 
           {/* SCHEDULE SETTINGS */}
-          <div className="group bg-gradient-to-b from-white/90 to-white/50 backdrop-blur-xl ring-1 ring-slate-200/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(15,61,222,0.06)] transition-all duration-300 relative overflow-hidden p-6">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#0F3DDE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative z-10">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <div>
             <h3 className="text-[14px] font-bold text-slate-900 mb-5 flex items-center gap-2">
               <i className="fas fa-sliders-h text-slate-400"></i> Schedule Parameters
             </h3>
