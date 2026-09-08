@@ -380,8 +380,15 @@ export async function POST(request: Request) {
   }
 }
 
+const GROUP_WRITE_ELEVATED_ROLES = new Set(['PROGRAM_HEAD', 'RESEARCH_HEAD', 'ADMIN', 'SYSTEM_ADMIN']);
+
 export async function PUT(request: Request) {
   try {
+    const authUser = await getServerAuthenticatedUser();
+    if (!authUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { id, students } = body;
 
@@ -402,6 +409,11 @@ export async function PUT(request: Request) {
 
     if (!existingGroupBeforeUpdate) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
+    }
+
+    const isOwningAdviser = existingGroupBeforeUpdate.userId === authUser.id;
+    if (!isOwningAdviser && !GROUP_WRITE_ELEVATED_ROLES.has(authUser.role)) {
+      return NextResponse.json({ error: 'You do not have permission to update this group.' }, { status: 403 });
     }
 
     const updateData: {

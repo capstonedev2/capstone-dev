@@ -25,7 +25,7 @@ export const ADVISER_NAV_ITEMS = {
     { key: 'dashboard', label: 'Dashboard', href: '/adviser/panel-mode/dashboard', icon: 'fa-gauge-high', section: 'workspace' },
     { key: 'evaluation-queue', label: 'Evaluation Queue', href: '/adviser/panel-mode/evaluation-queue', icon: 'fa-clipboard-check', section: 'evaluation' },
     { key: 'defense-schedule', label: 'Defense Schedule', href: '/adviser/panel-mode/defense-schedule', icon: 'fa-calendar-days', section: 'evaluation' },
-    { key: 'live-defense', label: 'Live Defense', href: '/adviser/panel-mode/live-defense', icon: 'fa-tower-broadcast', section: 'evaluation' },
+    { key: 'defense-voting', label: 'Defense Voting', href: '/adviser/panel-mode/defense-voting', icon: 'fa-check-to-slot', section: 'evaluation' },
     { key: 'review-history', label: 'Review History', href: '/adviser/panel-mode/review-history', icon: 'fa-folder-open', section: 'evaluation' }
   ]
 } as const;

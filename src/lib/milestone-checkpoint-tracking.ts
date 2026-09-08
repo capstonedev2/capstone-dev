@@ -13,6 +13,7 @@ type DbClient = {
   milestoneCheckpoint: any;
   submission: any;
   uploadedFile: any;
+  group: any;
 };
 
 type WorkflowStage = {
@@ -762,6 +763,188 @@ export async function recordCheckpointSchedule(
   await updateMilestoneRollup(db, updatedCheckpoint.milestoneId);
 
   return updatedCheckpoint;
+}
+
+function getCheckpointKeysForDefenseOutcome(title: string, outcome: 'passed' | 'redefense') {
+  const normalized = normalize(title);
+
+  if (normalized.includes('concept')) {
+    return ['concept-panel-approval'];
+  }
+
+  if (normalized.includes('proposal')) {
+    return outcome === 'passed'
+      ? ['proposal-panel-evaluation', 'proposal-final-approval']
+      : ['proposal-panel-evaluation'];
+  }
+
+  if (normalized.includes('mock') || normalized.includes('pre-final') || normalized.includes('practice') || normalized.includes('dry run')) {
+    return outcome === 'passed'
+      ? ['mock-panel-comments', 'mock-revisions-completed']
+      : ['mock-panel-comments'];
+  }
+
+  if (normalized.includes('final')) {
+    return outcome === 'passed'
+      ? ['final-panel-approval', 'final-revisions-submitted']
+      : ['final-panel-approval'];
+  }
+
+  return [];
+}
+
+/**
+ * Marks the stage's panel-approval checkpoint(s) done when a defense vote is
+ * finalized, so the student-facing milestone rollup (which requires every
+ * checkpoint in a stage to be done) can actually reach COMPLETED. Without
+ * this, a panel-approved defense updates Project.status but the matching
+ * "Stage N" never clears, since nothing else marks its panel checkpoint.
+ */
+export async function recordDefenseVoteOutcome(
+  db: DbClient,
+  {
+    projectId,
+    scheduleTitle,
+    outcome,
+    feedback,
+    reviewerName
+  }: {
+    projectId: string;
+    scheduleTitle: string;
+    outcome: 'passed' | 'redefense';
+    feedback?: string | null;
+    reviewerName?: string | null;
+  }
+) {
+  await ensureProjectMilestoneWorkflow(db, projectId);
+  const checkpointKeys = getCheckpointKeysForDefenseOutcome(scheduleTitle, outcome);
+
+  if (!checkpointKeys.length) {
+    return;
+  }
+
+  const nextStatus = outcome === 'passed' ? MilestoneCheckpointStatus.COMPLETED : MilestoneCheckpointStatus.NEEDS_REVISION;
+  const nextReviewStatus = outcome === 'passed' ? MilestoneCheckpointReviewStatus.APPROVED : MilestoneCheckpointReviewStatus.NEEDS_REVISION;
+  const trimmedFeedback = String(feedback ?? '').trim();
+  const now = new Date();
+  const updatedMilestoneIds = new Set<string>();
+
+  for (const key of checkpointKeys) {
+    const checkpoint = await db.milestoneCheckpoint.findUnique({
+      where: { projectId_key: { projectId, key } }
+    });
+
+    if (!checkpoint) {
+      continue;
+    }
+
+    const updated = await db.milestoneCheckpoint.update({
+      where: { id: checkpoint.id },
+      data: {
+        status: nextStatus,
+        panelReviewStatus: nextReviewStatus,
+        submittedAt: checkpoint.submittedAt ?? now,
+        reviewedAt: now,
+        completedAt: nextStatus === MilestoneCheckpointStatus.COMPLETED ? now : null,
+        latestFeedback: trimmedFeedback || undefined,
+        latestFeedbackBy: trimmedFeedback ? (reviewerName || 'Defense Panel') : undefined,
+        latestFeedbackAt: trimmedFeedback ? now : undefined
+      }
+    });
+
+    updatedMilestoneIds.add(updated.milestoneId);
+  }
+
+  await Promise.all(Array.from(updatedMilestoneIds).map((milestoneId) => updateMilestoneRollup(db, milestoneId)));
+}
+
+/**
+ * Attaches the panel chair's rationale to the stage's panel checkpoint after
+ * a "redefense" decision, without touching its status — recordDefenseVoteOutcome
+ * already set it to NEEDS_REVISION when the vote finalized. This is purely the
+ * "why" for the student, recorded separately since the chair's decision comes
+ * after the panel's own vote/remarks are already submitted.
+ */
+export async function attachDefenseDecisionFeedback(
+  db: DbClient,
+  {
+    projectId,
+    scheduleTitle,
+    remarks,
+    reviewerName
+  }: {
+    projectId: string;
+    scheduleTitle: string;
+    remarks?: string | null;
+    reviewerName?: string | null;
+  }
+) {
+  const trimmedRemarks = String(remarks ?? '').trim();
+
+  if (!trimmedRemarks) {
+    return;
+  }
+
+  const checkpointKeys = getCheckpointKeysForDefenseOutcome(scheduleTitle, 'redefense');
+
+  if (!checkpointKeys.length) {
+    return;
+  }
+
+  const now = new Date();
+
+  for (const key of checkpointKeys) {
+    const checkpoint = await db.milestoneCheckpoint.findUnique({
+      where: { projectId_key: { projectId, key } }
+    });
+
+    if (!checkpoint) {
+      continue;
+    }
+
+    await db.milestoneCheckpoint.update({
+      where: { id: checkpoint.id },
+      data: {
+        latestFeedback: trimmedRemarks,
+        latestFeedbackBy: reviewerName || 'Defense Panel Chair',
+        latestFeedbackAt: now
+      }
+    });
+  }
+}
+
+/**
+ * Archives a rejected project and resets its group back to a clean "needs a new title"
+ * state — both the real linkage fields (projectId) and the denormalized display fields
+ * (status/statusLabel/milestone/etc.) that group-list/card UIs read directly, so the two
+ * never drift out of sync. Shared by the chair-decision flow and the adviser's manual
+ * "reject & request new title" action — previously each had its own partial version of
+ * this reset, touching different fields.
+ */
+export async function resetGroupForNewTitle(
+  db: DbClient,
+  { groupId, projectId }: { groupId: string; projectId?: string | null }
+) {
+  if (projectId) {
+    await db.project.update({
+      where: { id: projectId },
+      data: { status: ProjectStatus.ARCHIVED }
+    });
+  }
+
+  await db.group.update({
+    where: { id: groupId },
+    data: {
+      projectId: null,
+      projectTitle: 'Pending Student Submission',
+      title: 'Pending Student Submission',
+      status: 'pending',
+      statusLabel: 'Pending',
+      statusClass: 'status-warning',
+      milestone: 'Awaiting initial progress update',
+      currentMilestone: 'Awaiting initial progress update'
+    }
+  });
 }
 
 function getReviewFieldForRole(role: UserRole) {

@@ -613,7 +613,8 @@ function GroupDetailsModal({
   onOpenAddStudent,
   onRemoveStudent,
   onApproveTitle,
-  onDemoteGroup
+  onDemoteGroup,
+  isPendingDemotion
 }: {
   group: LifecycleGroup | null;
   open: boolean;
@@ -623,6 +624,7 @@ function GroupDetailsModal({
   onRemoveStudent?: (groupId: string, student: string) => void;
   onApproveTitle?: (groupId: string, projectTitle: string) => void;
   onDemoteGroup?: (groupId: string) => void;
+  isPendingDemotion?: boolean;
 }) {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -719,19 +721,22 @@ function GroupDetailsModal({
               <div className="flex-1">
                 <h4 className="text-sm font-bold text-rose-900">Project Regression / Demotion</h4>
                 <p className="mt-1.5 text-sm font-medium text-rose-800">
-                  Did the panel reject the project in Stage 2? Use this to force the group to restart their title proposal.
+                  Did the panel reject the project at the {group.milestone || 'current'} stage? Use this to force the group to restart their title proposal.
                 </p>
                 <div className="mt-4 flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={() => onDemoteGroup(group.id)}
-                    title="Reject project and require a new title proposal"
-                    className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-rose-500 px-5 text-xs font-bold text-white shadow-md shadow-rose-500/20 transition-all hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30"
+                    disabled={isPendingDemotion}
+                    title={isPendingDemotion ? 'Awaiting program head approval' : 'Request the group be reset to require a new title proposal'}
+                    className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-rose-500 px-5 text-xs font-bold text-white shadow-md shadow-rose-500/20 transition-all hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-md"
                   >
-                    <i className="fas fa-rotate-left"></i>
-                    Reject & Request New Title
+                    <i className={`fas ${isPendingDemotion ? 'fa-hourglass-half' : 'fa-rotate-left'}`}></i>
+                    {isPendingDemotion ? 'Pending Program Head Approval' : 'Reject & Request New Title'}
                   </button>
                   <p className="text-[10px] text-rose-700/80 leading-tight max-w-[200px]">
-                    This will reset their milestone to Concept Proposal and flag them as "At Risk".
+                    {isPendingDemotion
+                      ? 'A program head must approve this before the group is reset.'
+                      : 'Sent to the program head for approval before the group is reset and flagged as "At Risk".'}
                   </p>
                 </div>
               </div>
@@ -1451,7 +1456,8 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     [data.groups, data.profile.user_id]
   );
   const [groups, setGroups] = useState<ManagedAdviserGroup[]>(() => initialAdviserGroups);
-  
+  const [pendingDemotionGroupIds, setPendingDemotionGroupIds] = useState<Set<string>>(() => new Set());
+
   const [activeTab, setActiveTab] = useState<GroupLifecycleTab>('active');
   const [viewMode, setViewMode] = useState<GroupViewMode>('table');
   const [statusFilter, setStatusFilter] = useState<GroupFilterStatus>('all');
@@ -1779,36 +1785,45 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
   };
 
   const handleDemoteGroup = async (groupId: string) => {
-    if (!confirm('Are you sure you want to demote this group? They will be forced to submit a completely new title.')) return;
-    
-    setGroups(groups => groups.map(g => g.id === groupId ? { 
-      ...g, 
-      title: 'Pending Title Approval', 
-      projectTitle: 'Pending Title Approval',
-      status: 'pending',
-      statusLabel: 'Pending',
-      statusClass: 'status-warning',
-      milestone: 'Concept Proposal',
-      currentMilestone: 'Concept Proposal'
-    } : g));
-    
+    const reason = prompt(
+      'Why is this group being demoted? This request is sent to the program head for approval before anything changes.'
+    );
+    const trimmedReason = reason?.trim();
+    if (!trimmedReason) return;
+
     try {
-      await fetch('/api/groups', {
-        method: 'PUT',
+      const response = await fetch(`/api/groups/${groupId}/demote`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          id: groupId, 
-          title: 'Pending Title Approval', 
-          projectTitle: 'Pending Title Approval',
+        body: JSON.stringify({ reason: trimmedReason })
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Unable to demote this group.');
+      }
+
+      if (payload?.pending) {
+        // Adviser-initiated: nothing changed yet — this just marks it locally as
+        // awaiting program head approval so the button can't be clicked again.
+        setPendingDemotionGroupIds((current) => new Set(current).add(groupId));
+        alert('Request sent — pending program head approval before the group is reset.');
+      } else {
+        // Elevated role acting directly: takes effect immediately, same as before.
+        const resetFields = {
+          title: 'Pending Student Submission',
+          projectTitle: 'Pending Student Submission',
           status: 'pending',
           statusLabel: 'Pending',
           statusClass: 'status-warning',
-          milestone: 'Concept Proposal',
-          currentMilestone: 'Concept Proposal'
-        })
-      });
+          milestone: 'Awaiting initial progress update',
+          currentMilestone: 'Awaiting initial progress update'
+        };
+        setGroups(groups => groups.map(g => g.id === groupId ? { ...g, ...resetFields } : g));
+      }
     } catch (e) {
       console.error('Failed to demote group', e);
+      alert(e instanceof Error ? e.message : 'Unable to demote this group.');
     }
   };
 
@@ -2017,6 +2032,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
           onApproveTitle={handleApproveTitle}
           onRemoveStudent={handleRemoveStudentFromGroup}
           onDemoteGroup={handleDemoteGroup}
+          isPendingDemotion={Boolean(selectedGroup && pendingDemotionGroupIds.has(selectedGroup.id))}
           onOpenAddStudent={(groupId) => {
             setDetailsOpen(false);
             openAddStudentModal(groupId);

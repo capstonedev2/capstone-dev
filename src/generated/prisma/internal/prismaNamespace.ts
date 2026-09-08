@@ -389,6 +389,7 @@ export const ModelName = {
   PasswordResetCode: 'PasswordResetCode',
   UploadedFile: 'UploadedFile',
   Group: 'Group',
+  GroupDemotionRequest: 'GroupDemotionRequest',
   Department: 'Department',
   AcademicYear: 'AcademicYear',
   SystemSetting: 'SystemSetting',
@@ -422,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
+    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "groupDemotionRequest" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -793,6 +794,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.GroupCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.GroupCountAggregateOutputType> | number
+        }
+      }
+    }
+    GroupDemotionRequest: {
+      payload: Prisma.$GroupDemotionRequestPayload<ExtArgs>
+      fields: Prisma.GroupDemotionRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GroupDemotionRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GroupDemotionRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.GroupDemotionRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GroupDemotionRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>
+        }
+        findMany: {
+          args: Prisma.GroupDemotionRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>[]
+        }
+        create: {
+          args: Prisma.GroupDemotionRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>
+        }
+        createMany: {
+          args: Prisma.GroupDemotionRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GroupDemotionRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.GroupDemotionRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>
+        }
+        update: {
+          args: Prisma.GroupDemotionRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.GroupDemotionRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GroupDemotionRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GroupDemotionRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.GroupDemotionRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupDemotionRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.GroupDemotionRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGroupDemotionRequest>
+        }
+        groupBy: {
+          args: Prisma.GroupDemotionRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GroupDemotionRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GroupDemotionRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GroupDemotionRequestCountAggregateOutputType> | number
         }
       }
     }
@@ -2283,6 +2358,23 @@ export const GroupScalarFieldEnum = {
 export type GroupScalarFieldEnum = (typeof GroupScalarFieldEnum)[keyof typeof GroupScalarFieldEnum]
 
 
+export const GroupDemotionRequestScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  projectId: 'projectId',
+  requestedById: 'requestedById',
+  reason: 'reason',
+  status: 'status',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNotes: 'reviewNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GroupDemotionRequestScalarFieldEnum = (typeof GroupDemotionRequestScalarFieldEnum)[keyof typeof GroupDemotionRequestScalarFieldEnum]
+
+
 export const DepartmentScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -2451,6 +2543,9 @@ export const DefenseScheduleScalarFieldEnum = {
   meetingUrl: 'meetingUrl',
   status: 'status',
   notes: 'notes',
+  chairDecision: 'chairDecision',
+  chairDecisionAt: 'chairDecisionAt',
+  chairDecisionRemarks: 'chairDecisionRemarks',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2717,6 +2812,20 @@ export type ListEnumGroupLifecycleStatusFieldRefInput<$PrismaModel> = FieldRefIn
 
 
 /**
+ * Reference to a field of type 'GroupDemotionRequestStatus'
+ */
+export type EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GroupDemotionRequestStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'GroupDemotionRequestStatus[]'
+ */
+export type ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GroupDemotionRequestStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -2839,6 +2948,20 @@ export type EnumDefenseStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'DefenseStatus[]'
  */
 export type ListEnumDefenseStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DefenseStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DefenseChairDecision'
+ */
+export type EnumDefenseChairDecisionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DefenseChairDecision'>
+    
+
+
+/**
+ * Reference to a field of type 'DefenseChairDecision[]'
+ */
+export type ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DefenseChairDecision[]'>
     
 
 
@@ -3068,6 +3191,7 @@ export type GlobalOmitConfig = {
   passwordResetCode?: Prisma.PasswordResetCodeOmit
   uploadedFile?: Prisma.UploadedFileOmit
   group?: Prisma.GroupOmit
+  groupDemotionRequest?: Prisma.GroupDemotionRequestOmit
   department?: Prisma.DepartmentOmit
   academicYear?: Prisma.AcademicYearOmit
   systemSetting?: Prisma.SystemSettingOmit

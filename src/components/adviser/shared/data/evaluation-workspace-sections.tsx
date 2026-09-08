@@ -447,7 +447,7 @@ export function EvaluationRow({
         </span>
       </td>
       <td className={`px-4 py-4 align-top transition-colors duration-200 ${statusMeta.rowClassName}`}>
-        {record.status === 'completed' && record.score !== null && record.recommendation ? (
+        {record.status === 'completed' && record.recommendation ? (
           <ScoreBadge
             detail={`${reviewedStudentCount}/${record.studentEvaluations.length} students reviewed`}
             recommendation={record.recommendation}
@@ -481,25 +481,35 @@ export function ScoreBadge({
   recommendation,
   detail
 }: {
-  score: number;
+  score: number | null;
   recommendation: EvaluationRecommendation;
   detail?: string;
 }) {
   const recommendationMeta = getRecommendationMeta(recommendation);
   const badgeClassName = recommendationMeta?.className ?? 'bg-slate-100 text-slate-700 ring-1 ring-inset ring-slate-200';
-  const circumference = 2 * Math.PI * 16;
-  const offset = circumference - (score / 100) * circumference;
-  const scoreColor = score >= 90 ? '#059669' : score >= 75 ? '#0369a1' : '#d97706';
 
   return (
     <div className="flex items-center gap-3">
-      <div className="relative h-11 w-11 shrink-0">
-        <svg className="-rotate-90" viewBox="0 0 36 36" width="44" height="44">
-          <circle cx="18" cy="18" r="16" fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
-          <circle cx="18" cy="18" r="16" fill="none" stroke={scoreColor} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.7s ease' }} />
-        </svg>
-        <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-[var(--text-dark)]">{score}%</span>
-      </div>
+      {score !== null ? (
+        (() => {
+          const circumference = 2 * Math.PI * 16;
+          const offset = circumference - (score / 100) * circumference;
+          const scoreColor = score >= 90 ? '#059669' : score >= 75 ? '#0369a1' : '#d97706';
+          return (
+            <div className="relative h-11 w-11 shrink-0">
+              <svg className="-rotate-90" viewBox="0 0 36 36" width="44" height="44">
+                <circle cx="18" cy="18" r="16" fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
+                <circle cx="18" cy="18" r="16" fill="none" stroke={scoreColor} strokeWidth="2.5" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.7s ease' }} />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-[var(--text-dark)]">{score}%</span>
+            </div>
+          );
+        })()
+      ) : (
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${badgeClassName}`}>
+          <i className="fas fa-gavel text-sm" />
+        </div>
+      )}
       <div className="flex min-w-0 flex-col gap-1">
         <span className={`inline-flex w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${badgeClassName}`}>
           {recommendation}

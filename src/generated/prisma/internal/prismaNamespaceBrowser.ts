@@ -56,6 +56,7 @@ export const ModelName = {
   PasswordResetCode: 'PasswordResetCode',
   UploadedFile: 'UploadedFile',
   Group: 'Group',
+  GroupDemotionRequest: 'GroupDemotionRequest',
   Department: 'Department',
   AcademicYear: 'AcademicYear',
   SystemSetting: 'SystemSetting',
@@ -206,6 +207,23 @@ export const GroupScalarFieldEnum = {
 } as const
 
 export type GroupScalarFieldEnum = (typeof GroupScalarFieldEnum)[keyof typeof GroupScalarFieldEnum]
+
+
+export const GroupDemotionRequestScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  projectId: 'projectId',
+  requestedById: 'requestedById',
+  reason: 'reason',
+  status: 'status',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNotes: 'reviewNotes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GroupDemotionRequestScalarFieldEnum = (typeof GroupDemotionRequestScalarFieldEnum)[keyof typeof GroupDemotionRequestScalarFieldEnum]
 
 
 export const DepartmentScalarFieldEnum = {
@@ -376,6 +394,9 @@ export const DefenseScheduleScalarFieldEnum = {
   meetingUrl: 'meetingUrl',
   status: 'status',
   notes: 'notes',
+  chairDecision: 'chairDecision',
+  chairDecisionAt: 'chairDecisionAt',
+  chairDecisionRemarks: 'chairDecisionRemarks',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

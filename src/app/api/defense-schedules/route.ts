@@ -367,7 +367,9 @@ function formatAssignment(schedule: DefenseAssignmentRecord) {
       name: evaluation.evaluator?.displayName || evaluation.evaluator?.name || evaluation.evaluator?.email || 'Panelist',
       department: evaluation.evaluator?.department || '',
       role: evaluation.evaluator?.role,
-      panelRole: evaluation.panelRole
+      panelRole: evaluation.panelRole,
+      recommendation: evaluation.recommendation,
+      submittedAt: evaluation.submittedAt ? evaluation.submittedAt.toISOString() : null
     }));
   const chair = panelists.find((panelist) => panelist.panelRole === DefensePanelRole.CHAIR) || null;
 
@@ -389,7 +391,10 @@ function formatAssignment(schedule: DefenseAssignmentRecord) {
     status: schedule.status,
     chairId: chair?.id || '',
     memberIds: panelists.filter((panelist) => panelist.panelRole === DefensePanelRole.MEMBER).map((panelist) => panelist.id),
-    panelists
+    panelists,
+    chairDecision: schedule.chairDecision,
+    chairDecisionAt: schedule.chairDecisionAt ? schedule.chairDecisionAt.toISOString() : null,
+    chairDecisionRemarks: schedule.chairDecisionRemarks
   };
 }
 
@@ -409,8 +414,13 @@ export async function GET(request: Request) {
     const projectLimit = parsePositiveInteger(searchParams.get('projectLimit'), DEFAULT_DEFENSE_PROJECT_LIMIT, MAX_DEFENSE_LIMIT);
     const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
 
+    const statusParam = searchParams.get('status');
+    const requestedStatus = statusParam && statusParam.toUpperCase() in DefenseStatus
+      ? (statusParam.toUpperCase() as keyof typeof DefenseStatus)
+      : null;
+
     const where: Prisma.DefenseScheduleWhereInput = {
-      status: DefenseStatus.SCHEDULED
+      status: requestedStatus ? DefenseStatus[requestedStatus] : DefenseStatus.SCHEDULED
     };
 
     if (groupCode) {

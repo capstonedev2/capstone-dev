@@ -2,17 +2,72 @@ import { DefensePanelRole, DefenseStatus, ProjectStatus } from '@/generated/pris
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, parseJsonBody, successResponse } from '@/lib/utils';
+import { recordDefenseVoteOutcome } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
 type EvaluateBody = {
-  scores: Record<string, number>;
-  individualScores: Record<string, number>;
-  notes: Record<string, string>;
   feedback: string;
   vote?: 'yes' | 'no';
   isChairSubmit?: boolean;
 };
+
+async function finalizeDefenseSchedule(
+  scheduleId: string,
+  projectId: string,
+  scheduleTitle: string,
+  evaluations: Array<{ recommendation: string }>
+) {
+  await prisma.defenseSchedule.update({
+    where: { id: scheduleId },
+    data: { status: DefenseStatus.COMPLETED }
+  });
+
+  let yesVotes = 0;
+  let noVotes = 0;
+
+  for (const ev of evaluations) {
+    if (['PASSED', 'PASSED_MINOR', 'PASSED_MAJOR'].includes(ev.recommendation)) {
+      yesVotes++;
+    } else if (['REDEFENSE', 'FAILED'].includes(ev.recommendation)) {
+      noVotes++;
+    }
+  }
+
+  if (yesVotes > noVotes) {
+    const normalizedTitle = scheduleTitle.toLowerCase();
+    const isFinal = normalizedTitle.includes('final') && !normalizedTitle.includes('pre-final');
+    await prisma.project.update({
+      where: { id: projectId },
+      data: {
+        status: isFinal ? ProjectStatus.COMPLETED : ProjectStatus.APPROVED
+      }
+    });
+
+    // Mark the stage's panel-approval checkpoint(s) done so the student
+    // milestone tracker's rollup can actually reach COMPLETED — updating
+    // Project.status alone never touched this, which is why "Stage N"
+    // stayed stuck even after the panel approved.
+    await recordDefenseVoteOutcome(prisma, {
+      projectId,
+      scheduleTitle,
+      outcome: 'passed'
+    });
+  } else if (noVotes > yesVotes) {
+    await prisma.project.update({
+      where: { id: projectId },
+      data: {
+        status: ProjectStatus.NEEDS_REVISION
+      }
+    });
+
+    await recordDefenseVoteOutcome(prisma, {
+      projectId,
+      scheduleTitle,
+      outcome: 'redefense'
+    });
+  }
+}
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -44,21 +99,13 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     }
 
     const isChair = evaluation.panelRole === DefensePanelRole.CHAIR;
-    const isChairSubmit = isChair && body.isChairSubmit;
 
-    // 3. Calculate total score and construct rubric data
-    let totalScore = 0;
-    for (const score of Object.values(body.scores || {})) {
-      totalScore += typeof score === 'number' ? score : 0;
-    }
-
-    // We can infer recommendation from vote and score (e.g. "yes" = PASSED)
-    // You can customize this business logic.
+    // 3. There is no scoring in this workflow — the panelist's vote alone decides the recommendation.
     let recommendation = evaluation.recommendation;
     if (body.vote === 'yes') {
-      recommendation = totalScore >= 70 ? 'PASSED' : 'PASSED_MINOR';
+      recommendation = 'PASSED';
     } else if (body.vote === 'no') {
-      recommendation = totalScore < 50 ? 'FAILED' : 'REDEFENSE';
+      recommendation = 'REDEFENSE';
     } else {
       recommendation = 'PENDING';
     }
@@ -67,66 +114,30 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     await prisma.evaluation.update({
       where: { id: evaluation.id },
       data: {
-        score: totalScore,
         rubricData: {
-          scores: body.scores,
-          notes: body.notes,
           vote: body.vote
         },
-        studentEvaluations: body.individualScores,
         remarks: body.feedback,
         recommendation: recommendation,
         submittedAt: new Date()
       }
     });
 
-    // 5. If Chair is finalizing the defense
-    if (isChairSubmit) {
-      // Mark the defense as COMPLETED.
-      await prisma.defenseSchedule.update({
-        where: { id: schedule.id },
-        data: {
-          status: DefenseStatus.COMPLETED
-        }
-      });
+    // 5. Finalize automatically once every assigned panelist has voted — completion no longer
+    // depends on a "live session" chair action. `isChairSubmit` is still honored as a manual
+    // override (e.g. a chair closing out a defense early) for backward compatibility.
+    const allEvaluations = await prisma.evaluation.findMany({
+      where: { defenseScheduleId: schedule.id }
+    });
+    const allVoted = allEvaluations.length > 0 && allEvaluations.every((ev) => ev.submittedAt !== null);
+    const shouldFinalize = schedule.status !== DefenseStatus.COMPLETED && (allVoted || (isChair && body.isChairSubmit));
 
-      // Calculate majority vote
-      const allEvaluations = await prisma.evaluation.findMany({
-        where: { defenseScheduleId: schedule.id }
-      });
-
-      let yesVotes = 0;
-      let noVotes = 0;
-      
-      for (const ev of allEvaluations) {
-        if (['PASSED', 'PASSED_MINOR', 'PASSED_MAJOR'].includes(ev.recommendation)) {
-          yesVotes++;
-        } else if (['REDEFENSE', 'FAILED'].includes(ev.recommendation)) {
-          noVotes++;
-        }
-      }
-
-      // If majority voted YES, approve the project
-      if (yesVotes > noVotes) {
-        const isFinal = schedule.title.toLowerCase().includes('final');
-        await prisma.project.update({
-          where: { id: schedule.projectId },
-          data: {
-            status: isFinal ? ProjectStatus.COMPLETED : ProjectStatus.APPROVED
-          }
-        });
-      } else if (noVotes > yesVotes) {
-        await prisma.project.update({
-          where: { id: schedule.projectId },
-          data: {
-            status: ProjectStatus.NEEDS_REVISION
-          }
-        });
-      }
+    if (shouldFinalize) {
+      await finalizeDefenseSchedule(schedule.id, schedule.projectId, schedule.title, allEvaluations);
     }
 
     return successResponse({
-      message: isChairSubmit ? 'Defense session completed successfully.' : 'Evaluation submitted successfully.'
+      message: shouldFinalize ? 'Defense session completed successfully.' : 'Vote submitted successfully.'
     });
   } catch (error) {
     return handleApiError(error);

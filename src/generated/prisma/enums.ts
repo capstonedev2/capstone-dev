@@ -180,6 +180,14 @@ export const DefensePanelRole = {
 export type DefensePanelRole = (typeof DefensePanelRole)[keyof typeof DefensePanelRole]
 
 
+export const DefenseChairDecision = {
+  REDEFENSE: 'REDEFENSE',
+  NEW_TITLE: 'NEW_TITLE'
+} as const
+
+export type DefenseChairDecision = (typeof DefenseChairDecision)[keyof typeof DefenseChairDecision]
+
+
 export const NotificationStatus = {
   UNREAD: 'UNREAD',
   READ: 'READ',
@@ -187,6 +195,15 @@ export const NotificationStatus = {
 } as const
 
 export type NotificationStatus = (typeof NotificationStatus)[keyof typeof NotificationStatus]
+
+
+export const GroupDemotionRequestStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type GroupDemotionRequestStatus = (typeof GroupDemotionRequestStatus)[keyof typeof GroupDemotionRequestStatus]
 
 
 export const IndustryProjectStatus = {

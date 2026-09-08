@@ -236,6 +236,23 @@ export type EnumGroupLifecycleStatusWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumGroupLifecycleStatusFilter<$PrismaModel>
 }
 
+export type EnumGroupDemotionRequestStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
+}
+
+export type EnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
+}
+
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -413,6 +430,13 @@ export type EnumDefenseStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel> | $Enums.DefenseStatus
 }
 
+export type EnumDefenseChairDecisionNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DefenseChairDecision | Prisma.EnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDefenseChairDecisionNullableFilter<$PrismaModel> | $Enums.DefenseChairDecision | null
+}
+
 export type EnumDefenseStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.DefenseStatus | Prisma.EnumDefenseStatusFieldRefInput<$PrismaModel>
   in?: $Enums.DefenseStatus[] | Prisma.ListEnumDefenseStatusFieldRefInput<$PrismaModel>
@@ -421,6 +445,16 @@ export type EnumDefenseStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel>
+}
+
+export type EnumDefenseChairDecisionNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DefenseChairDecision | Prisma.EnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDefenseChairDecisionNullableWithAggregatesFilter<$PrismaModel> | $Enums.DefenseChairDecision | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDefenseChairDecisionNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDefenseChairDecisionNullableFilter<$PrismaModel>
 }
 
 export type EnumAdviserScheduleItemTypeFilter<$PrismaModel = never> = {
@@ -828,6 +862,23 @@ export type NestedEnumGroupLifecycleStatusWithAggregatesFilter<$PrismaModel = ne
   _max?: Prisma.NestedEnumGroupLifecycleStatusFilter<$PrismaModel>
 }
 
+export type NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
+}
+
+export type NestedEnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
+}
+
 export type NestedJsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -978,6 +1029,13 @@ export type NestedEnumDefenseStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel> | $Enums.DefenseStatus
 }
 
+export type NestedEnumDefenseChairDecisionNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DefenseChairDecision | Prisma.EnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDefenseChairDecisionNullableFilter<$PrismaModel> | $Enums.DefenseChairDecision | null
+}
+
 export type NestedEnumDefenseStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.DefenseStatus | Prisma.EnumDefenseStatusFieldRefInput<$PrismaModel>
   in?: $Enums.DefenseStatus[] | Prisma.ListEnumDefenseStatusFieldRefInput<$PrismaModel>
@@ -986,6 +1044,16 @@ export type NestedEnumDefenseStatusWithAggregatesFilter<$PrismaModel = never> = 
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDefenseStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumDefenseChairDecisionNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DefenseChairDecision | Prisma.EnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DefenseChairDecision[] | Prisma.ListEnumDefenseChairDecisionFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDefenseChairDecisionNullableWithAggregatesFilter<$PrismaModel> | $Enums.DefenseChairDecision | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDefenseChairDecisionNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDefenseChairDecisionNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumAdviserScheduleItemTypeFilter<$PrismaModel = never> = {

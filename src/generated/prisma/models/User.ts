@@ -357,6 +357,8 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   brandingAssets?: Prisma.BrandingAssetListRelationFilter
+  requestedDemotions?: Prisma.GroupDemotionRequestListRelationFilter
+  reviewedDemotions?: Prisma.GroupDemotionRequestListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -400,6 +402,8 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   brandingAssets?: Prisma.BrandingAssetOrderByRelationAggregateInput
+  requestedDemotions?: Prisma.GroupDemotionRequestOrderByRelationAggregateInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -446,6 +450,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   brandingAssets?: Prisma.BrandingAssetListRelationFilter
+  requestedDemotions?: Prisma.GroupDemotionRequestListRelationFilter
+  reviewedDemotions?: Prisma.GroupDemotionRequestListRelationFilter
 }, "id" | "email" | "supabaseId" | "googleSub" | "studentId">
 
 export type UserOrderByWithAggregationInput = {
@@ -551,6 +557,8 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -594,6 +602,8 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUpdateInput = {
@@ -637,6 +647,8 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -680,6 +692,8 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -926,6 +940,38 @@ export type UserUpdateOneRequiredWithoutUploadedFilesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUploadedFilesInput, Prisma.UserUpdateWithoutUploadedFilesInput>, Prisma.UserUncheckedUpdateWithoutUploadedFilesInput>
 }
 
+export type UserCreateNestedOneWithoutRequestedDemotionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRequestedDemotionsInput, Prisma.UserUncheckedCreateWithoutRequestedDemotionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRequestedDemotionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReviewedDemotionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedDemotionsInput, Prisma.UserUncheckedCreateWithoutReviewedDemotionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedDemotionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutRequestedDemotionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRequestedDemotionsInput, Prisma.UserUncheckedCreateWithoutRequestedDemotionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRequestedDemotionsInput
+  upsert?: Prisma.UserUpsertWithoutRequestedDemotionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRequestedDemotionsInput, Prisma.UserUpdateWithoutRequestedDemotionsInput>, Prisma.UserUncheckedUpdateWithoutRequestedDemotionsInput>
+}
+
+export type UserUpdateOneWithoutReviewedDemotionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedDemotionsInput, Prisma.UserUncheckedCreateWithoutReviewedDemotionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedDemotionsInput
+  upsert?: Prisma.UserUpsertWithoutReviewedDemotionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedDemotionsInput, Prisma.UserUpdateWithoutReviewedDemotionsInput>, Prisma.UserUncheckedUpdateWithoutReviewedDemotionsInput>
+}
+
 export type UserCreateNestedOneWithoutGroupMembershipsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutGroupMembershipsInput, Prisma.UserUncheckedCreateWithoutGroupMembershipsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutGroupMembershipsInput
@@ -1154,6 +1200,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -1196,6 +1244,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -1254,6 +1304,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -1296,6 +1348,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutPasswordResetCodesInput = {
@@ -1338,6 +1392,8 @@ export type UserCreateWithoutPasswordResetCodesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetCodesInput = {
@@ -1380,6 +1436,8 @@ export type UserUncheckedCreateWithoutPasswordResetCodesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetCodesInput = {
@@ -1438,6 +1496,8 @@ export type UserUpdateWithoutPasswordResetCodesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetCodesInput = {
@@ -1480,6 +1540,8 @@ export type UserUncheckedUpdateWithoutPasswordResetCodesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutUploadedFilesInput = {
@@ -1522,6 +1584,8 @@ export type UserCreateWithoutUploadedFilesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutUploadedFilesInput = {
@@ -1564,6 +1628,8 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutUploadedFilesInput = {
@@ -1622,6 +1688,8 @@ export type UserUpdateWithoutUploadedFilesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedFilesInput = {
@@ -1664,6 +1732,392 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+}
+
+export type UserCreateWithoutRequestedDemotionsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  supabaseId?: string | null
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
+}
+
+export type UserUncheckedCreateWithoutRequestedDemotionsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  supabaseId?: string | null
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
+}
+
+export type UserCreateOrConnectWithoutRequestedDemotionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRequestedDemotionsInput, Prisma.UserUncheckedCreateWithoutRequestedDemotionsInput>
+}
+
+export type UserCreateWithoutReviewedDemotionsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  supabaseId?: string | null
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+}
+
+export type UserUncheckedCreateWithoutReviewedDemotionsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  supabaseId?: string | null
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+}
+
+export type UserCreateOrConnectWithoutReviewedDemotionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedDemotionsInput, Prisma.UserUncheckedCreateWithoutReviewedDemotionsInput>
+}
+
+export type UserUpsertWithoutRequestedDemotionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRequestedDemotionsInput, Prisma.UserUncheckedUpdateWithoutRequestedDemotionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRequestedDemotionsInput, Prisma.UserUncheckedCreateWithoutRequestedDemotionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRequestedDemotionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRequestedDemotionsInput, Prisma.UserUncheckedUpdateWithoutRequestedDemotionsInput>
+}
+
+export type UserUpdateWithoutRequestedDemotionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supabaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRequestedDemotionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supabaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUncheckedUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+}
+
+export type UserUpsertWithoutReviewedDemotionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewedDemotionsInput, Prisma.UserUncheckedUpdateWithoutReviewedDemotionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedDemotionsInput, Prisma.UserUncheckedCreateWithoutReviewedDemotionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewedDemotionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewedDemotionsInput, Prisma.UserUncheckedUpdateWithoutReviewedDemotionsInput>
+}
+
+export type UserUpdateWithoutReviewedDemotionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supabaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewedDemotionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supabaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUncheckedUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutGroupMembershipsInput = {
@@ -1706,6 +2160,8 @@ export type UserCreateWithoutGroupMembershipsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutGroupMembershipsInput = {
@@ -1748,6 +2204,8 @@ export type UserUncheckedCreateWithoutGroupMembershipsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutGroupMembershipsInput = {
@@ -1806,6 +2264,8 @@ export type UserUpdateWithoutGroupMembershipsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGroupMembershipsInput = {
@@ -1848,6 +2308,8 @@ export type UserUncheckedUpdateWithoutGroupMembershipsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutOwnedProjectsInput = {
@@ -1890,6 +2352,8 @@ export type UserCreateWithoutOwnedProjectsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutOwnedProjectsInput = {
@@ -1932,6 +2396,8 @@ export type UserUncheckedCreateWithoutOwnedProjectsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutOwnedProjectsInput = {
@@ -1979,6 +2445,8 @@ export type UserCreateWithoutAdvisedProjectsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutAdvisedProjectsInput = {
@@ -2021,6 +2489,8 @@ export type UserUncheckedCreateWithoutAdvisedProjectsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutAdvisedProjectsInput = {
@@ -2079,6 +2549,8 @@ export type UserUpdateWithoutOwnedProjectsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
@@ -2121,6 +2593,8 @@ export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUpsertWithoutAdvisedProjectsInput = {
@@ -2174,6 +2648,8 @@ export type UserUpdateWithoutAdvisedProjectsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdvisedProjectsInput = {
@@ -2216,6 +2692,8 @@ export type UserUncheckedUpdateWithoutAdvisedProjectsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutSubmissionsInput = {
@@ -2258,6 +2736,8 @@ export type UserCreateWithoutSubmissionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutSubmissionsInput = {
@@ -2300,6 +2780,8 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutSubmissionsInput = {
@@ -2358,6 +2840,8 @@ export type UserUpdateWithoutSubmissionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmissionsInput = {
@@ -2400,6 +2884,8 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutReviewCommentsInput = {
@@ -2442,6 +2928,8 @@ export type UserCreateWithoutReviewCommentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutReviewCommentsInput = {
@@ -2484,6 +2972,8 @@ export type UserUncheckedCreateWithoutReviewCommentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutReviewCommentsInput = {
@@ -2531,6 +3021,8 @@ export type UserCreateWithoutResolvedCommentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutResolvedCommentsInput = {
@@ -2573,6 +3065,8 @@ export type UserUncheckedCreateWithoutResolvedCommentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutResolvedCommentsInput = {
@@ -2631,6 +3125,8 @@ export type UserUpdateWithoutReviewCommentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewCommentsInput = {
@@ -2673,6 +3169,8 @@ export type UserUncheckedUpdateWithoutReviewCommentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUpsertWithoutResolvedCommentsInput = {
@@ -2726,6 +3224,8 @@ export type UserUpdateWithoutResolvedCommentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResolvedCommentsInput = {
@@ -2768,6 +3268,8 @@ export type UserUncheckedUpdateWithoutResolvedCommentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutScheduledDefensesInput = {
@@ -2810,6 +3312,8 @@ export type UserCreateWithoutScheduledDefensesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutScheduledDefensesInput = {
@@ -2852,6 +3356,8 @@ export type UserUncheckedCreateWithoutScheduledDefensesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutScheduledDefensesInput = {
@@ -2910,6 +3416,8 @@ export type UserUpdateWithoutScheduledDefensesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutScheduledDefensesInput = {
@@ -2952,6 +3460,8 @@ export type UserUncheckedUpdateWithoutScheduledDefensesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutAdviserScheduleItemsInput = {
@@ -2994,6 +3504,8 @@ export type UserCreateWithoutAdviserScheduleItemsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutAdviserScheduleItemsInput = {
@@ -3036,6 +3548,8 @@ export type UserUncheckedCreateWithoutAdviserScheduleItemsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutAdviserScheduleItemsInput = {
@@ -3094,6 +3608,8 @@ export type UserUpdateWithoutAdviserScheduleItemsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdviserScheduleItemsInput = {
@@ -3136,6 +3652,8 @@ export type UserUncheckedUpdateWithoutAdviserScheduleItemsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutEvaluationsInput = {
@@ -3178,6 +3696,8 @@ export type UserCreateWithoutEvaluationsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutEvaluationsInput = {
@@ -3220,6 +3740,8 @@ export type UserUncheckedCreateWithoutEvaluationsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutEvaluationsInput = {
@@ -3278,6 +3800,8 @@ export type UserUpdateWithoutEvaluationsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEvaluationsInput = {
@@ -3320,6 +3844,8 @@ export type UserUncheckedUpdateWithoutEvaluationsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -3362,6 +3888,8 @@ export type UserCreateWithoutNotificationsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -3404,6 +3932,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -3462,6 +3992,8 @@ export type UserUpdateWithoutNotificationsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -3504,6 +4036,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -3546,6 +4080,8 @@ export type UserCreateWithoutAuditLogsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -3588,6 +4124,8 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -3646,6 +4184,8 @@ export type UserUpdateWithoutAuditLogsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -3688,6 +4228,8 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateWithoutBrandingAssetsInput = {
@@ -3730,6 +4272,8 @@ export type UserCreateWithoutBrandingAssetsInput = {
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  requestedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserUncheckedCreateWithoutBrandingAssetsInput = {
@@ -3772,6 +4316,8 @@ export type UserUncheckedCreateWithoutBrandingAssetsInput = {
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutRequestedByInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
 export type UserCreateOrConnectWithoutBrandingAssetsInput = {
@@ -3830,6 +4376,8 @@ export type UserUpdateWithoutBrandingAssetsInput = {
   evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBrandingAssetsInput = {
@@ -3872,6 +4420,8 @@ export type UserUncheckedUpdateWithoutBrandingAssetsInput = {
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  requestedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+  reviewedDemotions?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 
@@ -3895,6 +4445,8 @@ export type UserCountOutputType = {
   notifications: number
   auditLogs: number
   brandingAssets: number
+  requestedDemotions: number
+  reviewedDemotions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3913,6 +4465,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
   brandingAssets?: boolean | UserCountOutputTypeCountBrandingAssetsArgs
+  requestedDemotions?: boolean | UserCountOutputTypeCountRequestedDemotionsArgs
+  reviewedDemotions?: boolean | UserCountOutputTypeCountReviewedDemotionsArgs
 }
 
 /**
@@ -4030,6 +4584,20 @@ export type UserCountOutputTypeCountBrandingAssetsArgs<ExtArgs extends runtime.T
   where?: Prisma.BrandingAssetWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRequestedDemotionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GroupDemotionRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewedDemotionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GroupDemotionRequestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4072,6 +4640,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   brandingAssets?: boolean | Prisma.User$brandingAssetsArgs<ExtArgs>
+  requestedDemotions?: boolean | Prisma.User$requestedDemotionsArgs<ExtArgs>
+  reviewedDemotions?: boolean | Prisma.User$reviewedDemotionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4176,6 +4746,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   brandingAssets?: boolean | Prisma.User$brandingAssetsArgs<ExtArgs>
+  requestedDemotions?: boolean | Prisma.User$requestedDemotionsArgs<ExtArgs>
+  reviewedDemotions?: boolean | Prisma.User$reviewedDemotionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4199,6 +4771,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     brandingAssets: Prisma.$BrandingAssetPayload<ExtArgs>[]
+    requestedDemotions: Prisma.$GroupDemotionRequestPayload<ExtArgs>[]
+    reviewedDemotions: Prisma.$GroupDemotionRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4635,6 +5209,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   brandingAssets<T extends Prisma.User$brandingAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$brandingAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BrandingAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  requestedDemotions<T extends Prisma.User$requestedDemotionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$requestedDemotionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupDemotionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewedDemotions<T extends Prisma.User$reviewedDemotionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedDemotionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupDemotionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5439,6 +6015,54 @@ export type User$brandingAssetsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.BrandingAssetScalarFieldEnum | Prisma.BrandingAssetScalarFieldEnum[]
+}
+
+/**
+ * User.requestedDemotions
+ */
+export type User$requestedDemotionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GroupDemotionRequest
+   */
+  select?: Prisma.GroupDemotionRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GroupDemotionRequest
+   */
+  omit?: Prisma.GroupDemotionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupDemotionRequestInclude<ExtArgs> | null
+  where?: Prisma.GroupDemotionRequestWhereInput
+  orderBy?: Prisma.GroupDemotionRequestOrderByWithRelationInput | Prisma.GroupDemotionRequestOrderByWithRelationInput[]
+  cursor?: Prisma.GroupDemotionRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GroupDemotionRequestScalarFieldEnum | Prisma.GroupDemotionRequestScalarFieldEnum[]
+}
+
+/**
+ * User.reviewedDemotions
+ */
+export type User$reviewedDemotionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GroupDemotionRequest
+   */
+  select?: Prisma.GroupDemotionRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GroupDemotionRequest
+   */
+  omit?: Prisma.GroupDemotionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupDemotionRequestInclude<ExtArgs> | null
+  where?: Prisma.GroupDemotionRequestWhereInput
+  orderBy?: Prisma.GroupDemotionRequestOrderByWithRelationInput | Prisma.GroupDemotionRequestOrderByWithRelationInput[]
+  cursor?: Prisma.GroupDemotionRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GroupDemotionRequestScalarFieldEnum | Prisma.GroupDemotionRequestScalarFieldEnum[]
 }
 
 /**

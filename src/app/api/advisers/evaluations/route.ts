@@ -75,6 +75,8 @@ export async function GET(request: NextRequest) {
 
     const formattedEvaluations = evaluations.map(ev => {
       const students = ev.project.group?.groupMembers.map(gm => gm.user.name) || [];
+      const rawRubric = ev.rubricData ? (typeof ev.rubricData === 'string' ? JSON.parse(ev.rubricData) : ev.rubricData) : [];
+      const rawStudentEvaluations = ev.studentEvaluations ? (typeof ev.studentEvaluations === 'string' ? JSON.parse(ev.studentEvaluations) : ev.studentEvaluations) : [];
       return {
         id: ev.id,
         projectTitle: ev.project.title,
@@ -87,8 +89,10 @@ export async function GET(request: NextRequest) {
         recommendation: ev.recommendation,
         evaluatorId: ev.evaluatorId,
         overallComments: ev.remarks || '',
-        rubric: ev.rubricData ? (typeof ev.rubricData === 'string' ? JSON.parse(ev.rubricData) : ev.rubricData) : [],
-        studentEvaluations: ev.studentEvaluations ? (typeof ev.studentEvaluations === 'string' ? JSON.parse(ev.studentEvaluations) : ev.studentEvaluations) : [],
+        // rubricData is a plain vote object ({ vote: 'yes' | 'no' }) for panel-vote defenses rather than
+        // an array of scored criteria — only expose it here when it's actually the rubric-array shape.
+        rubric: Array.isArray(rawRubric) ? rawRubric : [],
+        studentEvaluations: Array.isArray(rawStudentEvaluations) ? rawStudentEvaluations : [],
         submittedAt: ev.submittedAt?.toISOString() || null
       }
     });

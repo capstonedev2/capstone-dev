@@ -189,6 +189,20 @@ export async function PATCH(
       );
     }
 
+    // Approving a title-proposal file here would leave Project.status/Group.title behind —
+    // only the dedicated Title Approvals flow (/api/title-submissions) completes that
+    // transition, so route reviewers there instead of silently approving half the workflow.
+    const documentCategory = normalizeText(file.documentCategory || file.category).toLowerCase();
+    if (nextStatus === SubmissionStatus.APPROVED && documentCategory === 'title proposal') {
+      return Response.json(
+        {
+          success: false,
+          message: 'Title proposals must be approved from Title Approvals, not from the document review screen.'
+        },
+        { status: 400 }
+      );
+    }
+
     if (!canAccessDocument(user, file)) {
       return Response.json(
         {

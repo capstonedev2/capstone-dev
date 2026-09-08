@@ -133,6 +133,11 @@ enum DefensePanelRole {
   MEMBER @map("member")
 }
 
+enum DefenseChairDecision {
+  REDEFENSE @map("redefense")
+  NEW_TITLE @map("new_title")
+}
+
 enum NotificationStatus {
   UNREAD   @map("unread")
   READ     @map("read")
@@ -178,6 +183,8 @@ model User {
   notifications        Notification[]
   auditLogs            AuditLog[]            @relation("AuditActor")
   brandingAssets       BrandingAsset[]       @relation("UserBrandingAssets")
+  requestedDemotions   GroupDemotionRequest[] @relation("GroupDemotionRequester")
+  reviewedDemotions    GroupDemotionRequest[] @relation("GroupDemotionReviewer")
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
@@ -283,14 +290,41 @@ model Group {
   finalRecommendation            String?
   allowMemberSubmission          Boolean   @default(false)
 
-  groupMembers GroupMember[]
-  projects     Project[]
+  groupMembers      GroupMember[]
+  projects          Project[]
+  demotionRequests  GroupDemotionRequest[]
 
   @@index([userId])
   @@index([department])
   @@index([status])
   @@index([lifecycleStatus])
   @@index([createdAt])
+}
+
+enum GroupDemotionRequestStatus {
+  PENDING  @map("pending")
+  APPROVED @map("approved")
+  REJECTED @map("rejected")
+}
+
+model GroupDemotionRequest {
+  id            String                     @id @default(cuid())
+  groupId       String
+  group         Group                      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  projectId     String?
+  requestedById String?
+  requestedBy   User?                      @relation("GroupDemotionRequester", fields: [requestedById], references: [id], onDelete: SetNull)
+  reason        String
+  status        GroupDemotionRequestStatus @default(PENDING)
+  reviewedById  String?
+  reviewedBy    User?                      @relation("GroupDemotionReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt    DateTime?
+  reviewNotes   String?
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+
+  @@index([groupId])
+  @@index([status])
 }
 
 model Department {
@@ -506,19 +540,22 @@ model ReviewComment {
 }
 
 model DefenseSchedule {
-  id            String        @id @default(cuid())
-  projectId     String
-  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  scheduledById String?
-  scheduledBy   User?         @relation("DefenseScheduler", fields: [scheduledById], references: [id], onDelete: SetNull)
-  title         String        @default("Final Defense")
-  scheduledAt   DateTime
-  location      String?
-  meetingUrl    String?
-  status        DefenseStatus @default(SCHEDULED)
-  notes         String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                    String                @id @default(cuid())
+  projectId             String
+  project               Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scheduledById         String?
+  scheduledBy           User?                 @relation("DefenseScheduler", fields: [scheduledById], references: [id], onDelete: SetNull)
+  title                 String                @default("Final Defense")
+  scheduledAt           DateTime
+  location              String?
+  meetingUrl            String?
+  status                DefenseStatus         @default(SCHEDULED)
+  notes                 String?
+  chairDecision         DefenseChairDecision?
+  chairDecisionAt       DateTime?
+  chairDecisionRemarks  String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 
   evaluations Evaluation[]
 
