@@ -236,23 +236,6 @@ export type EnumGroupLifecycleStatusWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumGroupLifecycleStatusFilter<$PrismaModel>
 }
 
-export type EnumGroupDemotionRequestStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
-}
-
-export type EnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
-}
-
 export type JsonFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
@@ -860,23 +843,6 @@ export type NestedEnumGroupLifecycleStatusWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumGroupLifecycleStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumGroupLifecycleStatusFilter<$PrismaModel>
-}
-
-export type NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
-}
-
-export type NestedEnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.GroupDemotionRequestStatus | Prisma.EnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GroupDemotionRequestStatus[] | Prisma.ListEnumGroupDemotionRequestStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGroupDemotionRequestStatusWithAggregatesFilter<$PrismaModel> | $Enums.GroupDemotionRequestStatus
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumGroupDemotionRequestStatusFilter<$PrismaModel>
 }
 
 export type NestedJsonFilter<$PrismaModel = never> =

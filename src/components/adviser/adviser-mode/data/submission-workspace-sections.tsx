@@ -493,9 +493,9 @@ export function SubmissionList({
     <section className="space-y-4">
       <div className="flex flex-col gap-3 px-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Assigned Document Reviews</h2>
+          <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Assigned Document &amp; Title Reviews</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Real student uploads from assigned projects, sorted by review priority, upload date, and current version.
+            Student uploads and title proposals from assigned projects, sorted by review priority, upload date, and current version.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
@@ -563,7 +563,9 @@ function SubmissionItem({
   const currentWorkflowStep = REVIEW_WORKFLOW_STEPS[submission.workflowStepIndex] || REVIEW_WORKFLOW_STEPS[0];
   const latestTimelineEvent = [...submission.timeline].reverse().find((event) => event.isComplete) || submission.timeline[0];
   const latestNote = submission.latestReviewComment?.body || 'No adviser notes yet. Open the review workspace to add comments.';
-  const primaryActionLabel = submission.status === 'approved' ? 'View Summary' : 'Open Review';
+  const primaryActionLabel = submission.type === 'Title'
+    ? 'Open Title Approvals'
+    : submission.status === 'approved' ? 'View Summary' : 'Open Review';
 
   return (
     <article className={`adviser-submission-card group overflow-hidden rounded-2xl border border-l-4 border-slate-100 ${statusVisual.borderClassName} bg-white shadow-[0_12px_30px_rgba(15,23,42,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(0,58,143,0.10)]`}>
@@ -760,12 +762,14 @@ function SubmissionItem({
               <i className="fas fa-up-right-from-square text-xs" aria-hidden="true" />
               {primaryActionLabel}
             </Link>
-            <button className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-[#003A8F] transition hover:bg-blue-50" type="button" onClick={() => onDownloadSubmission?.(submission)}>
-              <i className="fas fa-download text-[10px]" aria-hidden="true" />
-              Download
-            </button>
+            {submission.fileUrl ? (
+              <button className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-[#003A8F] transition hover:bg-blue-50" type="button" onClick={() => onDownloadSubmission?.(submission)}>
+                <i className="fas fa-download text-[10px]" aria-hidden="true" />
+                Download
+              </button>
+            ) : null}
             <p className="text-center text-[11px] font-bold leading-4 text-slate-500">
-              Review actions are inside the workspace.
+              {submission.type === 'Title' ? 'Approve/reject from Title Approvals.' : 'Review actions are inside the workspace.'}
             </p>
           </div>
         </aside>

@@ -133,13 +133,17 @@ function SummaryCard({
   label,
   value,
   helper,
-  tone = 'neutral'
+  tone = 'neutral',
+  onClick,
+  active = false
 }: {
   icon: string;
   label: string;
   value: string | number;
   helper: string;
   tone?: 'neutral' | 'warning' | 'success';
+  onClick?: () => void;
+  active?: boolean;
 }) {
   const toneStyles =
     tone === 'warning'
@@ -148,19 +152,35 @@ function SummaryCard({
         ? { background: 'rgba(16, 185, 129, 0.12)', color: 'var(--success)' }
         : { background: 'rgba(0, 58, 143, 0.08)', color: 'var(--primary)' };
 
+  const interactive = Boolean(onClick);
+  const Wrapper = interactive ? 'button' : 'div';
+
   return (
-    <div className="group relative overflow-hidden rounded-[1.5rem] border border-slate-200/60 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
+    <Wrapper
+      type={interactive ? 'button' : undefined}
+      onClick={onClick}
+      title={interactive ? helper : undefined}
+      className={`group relative overflow-hidden rounded-[1.5rem] border bg-white p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50 ${
+        active ? 'border-[var(--primary)] ring-2 ring-[rgba(0,58,143,0.15)]' : 'border-slate-200/60'
+      } ${interactive ? 'cursor-pointer' : ''}`}
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-white to-slate-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="relative flex items-start justify-between gap-4">
         <div className="space-y-1.5">
           <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">{label}</p>
           <h2 className="text-3xl font-black tracking-tight text-slate-900 drop-shadow-sm">{value}</h2>
+          <p className="text-xs font-medium text-slate-400 line-clamp-1">{helper}</p>
         </div>
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg shadow-inner ring-1 ring-inset ring-slate-100/50 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" style={toneStyles}>
           <i className={`fas ${icon}`}></i>
         </div>
       </div>
-    </div>
+      {interactive && (
+        <p className="relative mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-[var(--primary)] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          View groups <i className="fas fa-arrow-right text-[10px]"></i>
+        </p>
+      )}
+    </Wrapper>
   );
 }
 
@@ -214,6 +234,170 @@ function ViewToggle({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+type RowActionItem = {
+  label: string;
+  icon: string;
+  onClick: () => void;
+  tone?: 'default' | 'danger';
+};
+
+function RowActionsMenu({ items }: { items: RowActionItem[] }) {
+  const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const MENU_WIDTH = 192;
+
+    const updatePosition = () => {
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setPosition({
+        top: rect.bottom + 8,
+        left: Math.max(8, rect.right - MENU_WIDTH)
+      });
+    };
+
+    updatePosition();
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      // The menu itself renders through a portal to document.body, so it's never a
+      // DOM descendant of buttonRef — checking only buttonRef here treated every
+      // click on a menu item as an "outside" click, closing the menu on mousedown
+      // before the item's own onClick had a chance to fire. Nothing in the menu
+      // was clickable as a result.
+      if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        title="More actions"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border text-slate-500 shadow-sm transition hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.06)] hover:text-[var(--primary)] ${
+          open ? 'border-[rgba(0,58,143,0.24)] bg-[rgba(0,58,143,0.06)] text-[var(--primary)]' : 'border-slate-200/60 bg-white'
+        }`}
+      >
+        <i className="fas fa-ellipsis-vertical"></i>
+      </button>
+      {open && portalContainer && position
+        ? createPortal(
+            <div
+              ref={menuRef}
+              role="menu"
+              style={{ position: 'fixed', top: position.top, left: position.left, width: 192 }}
+              className="z-[9999] overflow-hidden rounded-2xl border border-slate-200/70 bg-white py-1.5 shadow-xl shadow-slate-900/10 animate-in fade-in zoom-in-95 duration-150"
+            >
+              {items.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setOpen(false);
+                    item.onClick();
+                  }}
+                  className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold transition ${
+                    item.tone === 'danger' ? 'text-rose-600 hover:bg-rose-50' : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <i className={`fas ${item.icon} w-4 text-xs`}></i>
+                  {item.label}
+                </button>
+              ))}
+            </div>,
+            portalContainer
+          )
+        : null}
+    </>
+  );
+}
+
+function DefenseOutcomeBadge({
+  tag,
+  compact = false
+}: {
+  tag: { label: string; tone: 'success' | 'danger' };
+  compact?: boolean;
+}) {
+  // 'danger' (rose) is deliberately a different hue from the amber lifecycle status
+  // badge it sits next to — otherwise a routine "Pending" pill and an urgent
+  // "Rejected" alert both read as the same shade of orange and blend together.
+  const toneClasses =
+    tag.tone === 'success'
+      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200'
+      : 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200';
+
+  // Compact table cells can't fit the full sentence-length label without wrapping
+  // awkwardly, so shorten it there and rely on the title tooltip for the rest.
+  const displayLabel = compact ? tag.label.split(' — ')[0].split(' Required')[0] : tag.label;
+
+  return (
+    <span
+      title={tag.label}
+      className={`inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${toneClasses}`}
+    >
+      <i className={`fas ${tag.tone === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} shrink-0 text-[10px]`}></i>
+      <span className="truncate">{displayLabel}</span>
+    </span>
+  );
+}
+
+// Cumulative checkpoint boundaries for the 6 real thesis stages (Concept 5, Proposal 5,
+// Development 4, Pre-Final 4, Final Defense 4, Completion 4 — 26 total), expressed as
+// percentages so the bar can show where each stage actually starts, not just an even split.
+const PROGRESS_STAGE_BOUNDARIES = [5, 10, 14, 18, 22].map((checkpoints) => (checkpoints / 26) * 100);
+
+function ProgressBar({ percent, height = 'h-2' }: { percent: number; height?: string }) {
+  const fillWidth = Math.max(percent, percent > 0 ? 4 : 0);
+
+  return (
+    <div className={`progress-container relative overflow-hidden rounded-full border border-slate-200 bg-slate-100 ${height}`}>
+      <div
+        className="h-full rounded-full transition-all duration-500"
+        style={{ width: `${fillWidth}%`, background: 'var(--primary)' }}
+      ></div>
+      {PROGRESS_STAGE_BOUNDARIES.map((boundary) => (
+        <span
+          key={boundary}
+          className="absolute inset-y-0 w-px bg-white/80"
+          style={{ left: `${boundary}%` }}
+        ></span>
+      ))}
     </div>
   );
 }
@@ -297,6 +481,7 @@ function GroupTable({
             <th className="px-6 py-5">Project</th>
             <th className="px-6 py-5">Members</th>
             <th className="px-6 py-5">Milestone</th>
+            <th className="px-6 py-5">Defense Result</th>
             <th className="px-6 py-5">Progress</th>
             <th className="px-6 py-5">Status</th>
             <th className="px-8 py-5 text-right text-slate-700">Actions</th>
@@ -304,7 +489,17 @@ function GroupTable({
         </thead>
         <tbody>
           {groups.map((group) => (
-            <tr key={group.id} className="transition-colors hover:bg-slate-50/50">
+            <tr
+              key={group.id}
+              className="transition-colors hover:bg-slate-50/50"
+              style={
+                group.defenseOutcomeTag
+                  ? {
+                      boxShadow: `inset 3px 0 0 0 ${group.defenseOutcomeTag.tone === 'danger' ? '#fb7185' : '#34d399'}`
+                    }
+                  : undefined
+              }
+            >
               <td className="border-t border-slate-100 px-8 py-6 align-top">
                 <div className="space-y-1.5">
                   <p className="whitespace-nowrap text-sm font-bold text-slate-900">{group.code}</p>
@@ -313,28 +508,64 @@ function GroupTable({
               </td>
               <td className="border-t border-slate-100 px-6 py-6 align-top">
                 <p className="font-bold text-slate-900">{group.title}</p>
-                <p className="mt-1.5 text-sm text-slate-500 line-clamp-2 leading-relaxed">
-                  {group.title === 'Pending Title Approval' && group.projectTitle
-                    ? `Proposed Title: "${group.projectTitle}"`
-                    : 'Active milestone tracking and project documentation.'}
-                </p>
+                {group.title === 'Pending Title Approval' && group.projectTitle && (
+                  <p
+                    className="mt-1.5 text-sm text-slate-500 line-clamp-2 leading-relaxed"
+                    title={`Proposed Title: "${group.projectTitle}"`}
+                  >
+                    {`Proposed Title: "${group.projectTitle}"`}
+                  </p>
+                )}
               </td>
               <td className="border-t border-slate-100 px-6 py-6 align-top">
                 <p className="text-sm font-bold text-slate-900">{group.members} students</p>
-                <p className="mt-1.5 text-sm text-slate-500 leading-relaxed line-clamp-2">{group.students.join(', ')}</p>
+                <p
+                  className="mt-1.5 text-sm text-slate-500 leading-relaxed line-clamp-2"
+                  title={group.students.join(', ')}
+                >
+                  {group.students.join(', ')}
+                </p>
                 <p className="mt-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
                   Leader: <span className="tracking-normal font-semibold text-slate-700">{group.leader ?? 'Not assigned'}</span>
                 </p>
               </td>
               <td className="border-t border-slate-100 px-6 py-6 align-top">
-                <p className="text-sm font-medium text-slate-600 line-clamp-2 max-w-[220px] leading-relaxed">{group.milestone}</p>
+                <p
+                  className="text-sm font-medium text-slate-600 line-clamp-2 max-w-[220px] leading-relaxed"
+                  title={group.milestone}
+                >
+                  {group.milestone}
+                </p>
               </td>
               <td className="border-t border-slate-100 px-6 py-6 align-top">
-                <div className="space-y-2">
-                  <div className="progress-container h-2 rounded-full bg-slate-100">
-                    <div className="progress-fill h-full rounded-full transition-all duration-500" style={{ width: `${group.progress}%` }}></div>
-                  </div>
-                  <span className="text-xs font-bold text-slate-500">{group.progress}% complete</span>
+                {group.defenseOutcomeTag ? (
+                  group.defenseOutcomeTag.tone === 'danger' ? (
+                    <button
+                      type="button"
+                      onClick={() => onOpenDetails(group.id)}
+                      title="Click to open and resolve"
+                      className="cursor-pointer transition hover:-translate-y-px"
+                    >
+                      <DefenseOutcomeBadge tag={group.defenseOutcomeTag} />
+                    </button>
+                  ) : (
+                    <DefenseOutcomeBadge tag={group.defenseOutcomeTag} />
+                  )
+                ) : (
+                  <span className="text-sm font-medium text-slate-400">No defense yet</span>
+                )}
+              </td>
+              <td className="border-t border-slate-100 px-6 py-6 align-top">
+                <div className="w-[140px] space-y-2" title={group.progressDetail ?? undefined}>
+                  <ProgressBar percent={group.progress} />
+                  <span className="text-xs font-bold text-slate-500">
+                    {group.progress > 0 ? `${group.progress}% complete` : 'Not started yet'}
+                  </span>
+                  {group.progressStage && (
+                    <p className="text-[11px] font-medium leading-tight text-slate-400 line-clamp-1">
+                      In {group.progressStage}
+                    </p>
+                  )}
                 </div>
               </td>
               <td className="border-t border-slate-100 px-6 py-6 align-top">
@@ -342,25 +573,12 @@ function GroupTable({
               </td>
               <td className="border-t border-slate-100 px-8 py-6 align-top">
                 <div className="flex justify-end">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onOpenAddStudent(group.id)}
-                      className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-slate-200/60 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-[rgba(0,58,143,0.24)] hover:bg-[rgba(0,58,143,0.06)] hover:text-[var(--primary)]"
-                    >
-                      <i className="fas fa-user-plus text-xs"></i>
-                      Add Student
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onOpenDetails(group.id)}
-                      className="inline-flex min-h-[40px] items-center gap-2 rounded-xl px-4 text-xs font-bold text-white shadow-md shadow-[rgba(0,58,143,0.2)] transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[rgba(0,58,143,0.3)]"
-                      style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}
-                    >
-                      <i className="fas fa-eye text-xs"></i>
-                      Details
-                    </button>
-                  </div>
+                  <RowActionsMenu
+                    items={[
+                      { label: 'View Details', icon: 'fa-eye', onClick: () => onOpenDetails(group.id) },
+                      { label: 'Add Student', icon: 'fa-user-plus', onClick: () => onOpenAddStudent(group.id) }
+                    ]}
+                  />
                 </div>
               </td>
             </tr>
@@ -397,7 +615,10 @@ function GroupCards({
                 <p className="text-sm font-semibold text-slate-500">{group.code}</p>
                 <h3 className="mt-1 text-lg font-semibold tracking-tight text-slate-900">{group.title}</h3>
               </div>
-              <span className={`status-badge ${group.statusClass}`}>{group.statusLabel}</span>
+              <div className="flex flex-col items-end gap-1.5">
+                <span className={`status-badge ${group.statusClass}`}>{group.statusLabel}</span>
+                {group.defenseOutcomeTag && <DefenseOutcomeBadge tag={group.defenseOutcomeTag} />}
+              </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -418,11 +639,17 @@ function GroupCards({
               <div>
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="font-medium text-slate-500">Progress</span>
-                  <span className="font-semibold text-slate-700">{group.progress}%</span>
+                  <span className="font-semibold text-slate-700">
+                    {group.progress > 0 ? `${group.progress}%` : 'Not started yet'}
+                  </span>
                 </div>
-                <div className="progress-container">
-                  <div className="progress-fill" style={{ width: `${group.progress}%` }}></div>
-                </div>
+                <ProgressBar percent={group.progress} />
+                {group.progressStage && (
+                  <p className="mt-1.5 text-xs font-medium text-slate-400">
+                    Currently in {group.progressStage}
+                    {group.progressDetail ? ` · ${group.progressDetail}` : ''}
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Students</p>
@@ -613,8 +840,7 @@ function GroupDetailsModal({
   onOpenAddStudent,
   onRemoveStudent,
   onApproveTitle,
-  onDemoteGroup,
-  isPendingDemotion
+  onDemoteGroup
 }: {
   group: LifecycleGroup | null;
   open: boolean;
@@ -623,12 +849,16 @@ function GroupDetailsModal({
   onOpenAddStudent: (groupId: string) => void;
   onRemoveStudent?: (groupId: string, student: string) => void;
   onApproveTitle?: (groupId: string, projectTitle: string) => void;
-  onDemoteGroup?: (groupId: string) => void;
-  isPendingDemotion?: boolean;
+  onDemoteGroup?: (groupId: string, reason: string) => Promise<void>;
 }) {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const [editingTitle, setEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(group?.title || '');
+  const [confirmingDemote, setConfirmingDemote] = useState(false);
+  const [demoteReason, setDemoteReason] = useState('');
+  const [demoteSubmitting, setDemoteSubmitting] = useState(false);
+  const [demoteError, setDemoteError] = useState<string | null>(null);
+  const [demoteJustSucceeded, setDemoteJustSucceeded] = useState(false);
 
   useEffect(() => {
     setPortalContainer(document.body);
@@ -640,6 +870,14 @@ function GroupDetailsModal({
       setEditingTitle(false);
     }
   }, [group?.title]);
+
+  useEffect(() => {
+    setConfirmingDemote(false);
+    setDemoteReason('');
+    setDemoteSubmitting(false);
+    setDemoteError(null);
+    setDemoteJustSucceeded(false);
+  }, [group?.id]);
 
   if (!open || !group || !portalContainer) return null;
 
@@ -668,6 +906,7 @@ function GroupDetailsModal({
               <div className="mb-1.5 flex flex-wrap items-center gap-2">
                 <span className="dept-badge">{group.dept}</span>
                 <span className={`status-badge ${group.statusClass}`}>{group.statusLabel}</span>
+                {group.defenseOutcomeTag && <DefenseOutcomeBadge tag={group.defenseOutcomeTag} />}
               </div>
               <h3 className="text-xl font-bold tracking-tight text-slate-900">{group.title}</h3>
               <p className="mt-1 text-sm font-medium text-slate-500">{group.code}</p>
@@ -712,37 +951,148 @@ function GroupDetailsModal({
             </div>
           </div>
         )}
-        {group.status !== 'completed' && group.title !== 'Pending Title Approval' && group.title !== 'Pending Student Submission' && onDemoteGroup && (
-          <div className="rounded-[1.25rem] border border-rose-200/60 bg-rose-50/80 p-5 shadow-sm mt-4">
-            <div className="flex gap-4 items-start">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-700 shadow-inner ring-1 ring-inset ring-rose-200/50">
-                <i className="fas fa-arrow-rotate-left text-xl"></i>
-              </div>
-              <div className="flex-1">
-                <h4 className="text-sm font-bold text-rose-900">Project Regression / Demotion</h4>
-                <p className="mt-1.5 text-sm font-medium text-rose-800">
-                  Did the panel reject the project at the {group.milestone || 'current'} stage? Use this to force the group to restart their title proposal.
-                </p>
-                <div className="mt-4 flex items-center gap-3">
-                  <button
-                    onClick={() => onDemoteGroup(group.id)}
-                    disabled={isPendingDemotion}
-                    title={isPendingDemotion ? 'Awaiting program head approval' : 'Request the group be reset to require a new title proposal'}
-                    className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-rose-500 px-5 text-xs font-bold text-white shadow-md shadow-rose-500/20 transition-all hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-md"
-                  >
-                    <i className={`fas ${isPendingDemotion ? 'fa-hourglass-half' : 'fa-rotate-left'}`}></i>
-                    {isPendingDemotion ? 'Pending Program Head Approval' : 'Reject & Request New Title'}
-                  </button>
-                  <p className="text-[10px] text-rose-700/80 leading-tight max-w-[200px]">
-                    {isPendingDemotion
-                      ? 'A program head must approve this before the group is reset.'
-                      : 'Sent to the program head for approval before the group is reset and flagged as "At Risk".'}
-                  </p>
-                </div>
-              </div>
+        {demoteJustSucceeded && (
+          <div className="mt-4 flex items-center gap-3 rounded-[1.25rem] border border-emerald-200/60 bg-emerald-50/80 p-5 shadow-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 shadow-inner ring-1 ring-inset ring-emerald-200/50">
+              <i className="fas fa-circle-check"></i>
             </div>
+            <p className="text-sm font-semibold text-emerald-800">
+              Group reset — the student can now submit a new title.
+            </p>
           </div>
         )}
+        {!demoteJustSucceeded
+          && group.status !== 'completed'
+          && group.title !== 'Pending Title Approval'
+          && group.title !== 'Pending Student Submission'
+          && onDemoteGroup && (() => {
+            // Flagged groups (a rejected defense, or otherwise already marked at-risk) get
+            // the loud red alert — that's the "you should look at this" case. A routine
+            // active/pending group still gets the same action (this is the adviser's own
+            // independent call, not gated behind the system already having flagged
+            // something — see the earlier decision that removed the program-head approval
+            // requirement), just presented as a low-key, unobtrusive control instead of
+            // a panel that cries wolf on every normal group.
+            const isFlagged = group.status === 'needs-revision' || group.status === 'at-risk';
+
+            return (
+              <div className={`mt-4 rounded-[1.25rem] border p-5 shadow-sm ${isFlagged ? 'border-rose-200/60 bg-rose-50/80' : 'border-slate-200/60 bg-slate-50/60'}`}>
+                <div className="flex gap-4 items-start">
+                  <div className={`flex shrink-0 items-center justify-center rounded-2xl shadow-inner ring-1 ring-inset ${
+                    isFlagged
+                      ? 'h-12 w-12 bg-rose-100 text-rose-700 ring-rose-200/50'
+                      : 'h-10 w-10 bg-slate-100 text-slate-500 ring-slate-200/50'
+                  }`}>
+                    <i className={`fas fa-arrow-rotate-left ${isFlagged ? 'text-xl' : 'text-sm'}`}></i>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className={`text-sm font-bold ${isFlagged ? 'text-rose-900' : 'text-slate-700'}`}>
+                      {isFlagged ? 'Project Regression / Demotion' : 'Reject Title (Adviser Discretion)'}
+                    </h4>
+                    <p className={`mt-1.5 text-sm font-medium ${isFlagged ? 'text-rose-800' : 'text-slate-500'}`}>
+                      {isFlagged
+                        ? (group.defenseOutcomeTag
+                          ? `The panel's latest defense vote came back as "${group.defenseOutcomeTag.label}". Use this to force the group to restart their title proposal.`
+                          : `Did the panel reject the project at the ${group.milestone || 'current'} stage? Use this to force the group to restart their title proposal.`)
+                        : 'This group isn’t flagged, but you can still reject the current title and force a new proposal on your own judgment — no panel decision or approval required.'}
+                    </p>
+
+                    {!confirmingDemote ? (
+                      <div className="mt-4 flex items-center gap-3">
+                        <button
+                          onClick={() => setConfirmingDemote(true)}
+                          title="Reject project and require a new title proposal"
+                          className={isFlagged
+                            ? 'inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-rose-500 px-5 text-xs font-bold text-white shadow-md shadow-rose-500/20 transition-all hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30'
+                            : 'inline-flex min-h-[34px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-rose-200 hover:text-rose-600'}
+                        >
+                          <i className="fas fa-rotate-left"></i>
+                          Reject & Request New Title
+                        </button>
+                        {isFlagged && (
+                          <p className="text-[10px] text-rose-700/80 leading-tight max-w-[200px]">
+                            This will reset their milestone and progress to 0%, set their status back to "Pending", and archive the current project. The student will be notified immediately.
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-4 space-y-3">
+                        <label htmlFor="demote-reason" className={`block text-[11px] font-bold uppercase tracking-[0.14em] ${isFlagged ? 'text-rose-800' : 'text-slate-500'}`}>
+                          Reason (required — the student will see this)
+                        </label>
+                        <textarea
+                          id="demote-reason"
+                          value={demoteReason}
+                          onChange={(event) => setDemoteReason(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Escape') {
+                              setConfirmingDemote(false);
+                              setDemoteReason('');
+                              setDemoteError(null);
+                            }
+                          }}
+                          rows={3}
+                          autoFocus
+                          disabled={demoteSubmitting}
+                          placeholder="e.g. Panel rejected the concept defense; scope needs to be redefined."
+                          className={`w-full rounded-xl border bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition disabled:opacity-60 ${
+                            isFlagged ? 'border-rose-200 focus:border-rose-400 focus:ring-4 focus:ring-rose-100' : 'border-slate-200 focus:border-slate-400 focus:ring-4 focus:ring-slate-100'
+                          }`}
+                        />
+                        {demoteError && (
+                          <p className="flex items-center gap-1.5 text-xs font-semibold text-rose-700">
+                            <i className="fas fa-circle-exclamation"></i>
+                            {demoteError}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={demoteSubmitting}
+                            onClick={async () => {
+                              const trimmedReason = demoteReason.trim();
+                              if (!trimmedReason) {
+                                setDemoteError('A reason is required.');
+                                return;
+                              }
+                              setDemoteSubmitting(true);
+                              setDemoteError(null);
+                              try {
+                                await onDemoteGroup(group.id, trimmedReason);
+                                setConfirmingDemote(false);
+                                setDemoteReason('');
+                                setDemoteJustSucceeded(true);
+                              } catch (e) {
+                                setDemoteError(e instanceof Error ? e.message : 'Unable to demote this group.');
+                              } finally {
+                                setDemoteSubmitting(false);
+                              }
+                            }}
+                            className="inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-rose-500 px-5 text-xs font-bold text-white shadow-md shadow-rose-500/20 transition-all hover:-translate-y-0.5 hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                          >
+                            <i className={`fas ${demoteSubmitting ? 'fa-spinner fa-spin' : 'fa-check'}`}></i>
+                            {demoteSubmitting ? 'Resetting…' : 'Confirm Reset'}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={demoteSubmitting}
+                            onClick={() => {
+                              setConfirmingDemote(false);
+                              setDemoteReason('');
+                              setDemoteError(null);
+                            }}
+                            className="inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-rose-200 bg-white px-4 text-xs font-bold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
           {completed ? (
             <>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -827,13 +1177,16 @@ function GroupDetailsModal({
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Progress Track</p>
-                    <p className="mt-1 text-sm font-medium text-slate-500">Use this view to monitor readiness before review cycles.</p>
+                    <p className="mt-1 text-sm font-medium text-slate-500">
+                      {group.progressStage ? `Currently in ${group.progressStage}.` : 'No workflow started yet.'}
+                      {group.progressDetail ? ` ${group.progressDetail}.` : ''}
+                    </p>
                   </div>
-                  <span className="text-sm font-bold text-slate-700">{group.progress}% complete</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    {group.progress > 0 ? `${group.progress}% complete` : 'Not started yet'}
+                  </span>
                 </div>
-                <div className="progress-container h-2.5 rounded-full bg-slate-100">
-                  <div className="progress-fill h-full rounded-full transition-all duration-500" style={{ width: `${group.progress}%` }}></div>
-                </div>
+                <ProgressBar percent={group.progress} height="h-2.5" />
               </div>
             </>
           )}
@@ -1456,7 +1809,6 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     [data.groups, data.profile.user_id]
   );
   const [groups, setGroups] = useState<ManagedAdviserGroup[]>(() => initialAdviserGroups);
-  const [pendingDemotionGroupIds, setPendingDemotionGroupIds] = useState<Set<string>>(() => new Set());
 
   const [activeTab, setActiveTab] = useState<GroupLifecycleTab>('active');
   const [viewMode, setViewMode] = useState<GroupViewMode>('table');
@@ -1784,46 +2136,31 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
     }
   };
 
-  const handleDemoteGroup = async (groupId: string) => {
-    const reason = prompt(
-      'Why is this group being demoted? This request is sent to the program head for approval before anything changes.'
-    );
-    const trimmedReason = reason?.trim();
-    if (!trimmedReason) return;
+  const handleDemoteGroup = async (groupId: string, reason: string) => {
+    const resetFields = {
+      title: 'Pending Student Submission',
+      projectTitle: 'Pending Student Submission',
+      status: 'pending',
+      statusLabel: 'Pending',
+      statusClass: 'status-warning',
+      milestone: 'Awaiting initial progress update',
+      currentMilestone: 'Awaiting initial progress update'
+    };
 
     try {
       const response = await fetch(`/api/groups/${groupId}/demote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: trimmedReason })
+        body: JSON.stringify({ reason })
       });
-      const payload = await response.json().catch(() => null);
-
       if (!response.ok) {
+        const payload = await response.json().catch(() => null);
         throw new Error(payload?.error || 'Unable to demote this group.');
       }
-
-      if (payload?.pending) {
-        // Adviser-initiated: nothing changed yet — this just marks it locally as
-        // awaiting program head approval so the button can't be clicked again.
-        setPendingDemotionGroupIds((current) => new Set(current).add(groupId));
-        alert('Request sent — pending program head approval before the group is reset.');
-      } else {
-        // Elevated role acting directly: takes effect immediately, same as before.
-        const resetFields = {
-          title: 'Pending Student Submission',
-          projectTitle: 'Pending Student Submission',
-          status: 'pending',
-          statusLabel: 'Pending',
-          statusClass: 'status-warning',
-          milestone: 'Awaiting initial progress update',
-          currentMilestone: 'Awaiting initial progress update'
-        };
-        setGroups(groups => groups.map(g => g.id === groupId ? { ...g, ...resetFields } : g));
-      }
+      setGroups(groups => groups.map(g => g.id === groupId ? { ...g, ...resetFields } : g));
     } catch (e) {
       console.error('Failed to demote group', e);
-      alert(e instanceof Error ? e.message : 'Unable to demote this group.');
+      throw e;
     }
   };
 
@@ -1919,11 +2256,46 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
 
         <div className="space-y-6">
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <SummaryCard icon="fa-layer-group" label="Total Groups" value={lifecycleGroups.length} helper="All IT groups under adviser supervision" />
+            <SummaryCard
+              icon="fa-layer-group"
+              label="Total Groups"
+              value={lifecycleGroups.length}
+              helper="View every active group"
+              active={activeTab === 'active' && statusFilter === 'all'}
+              onClick={() => {
+                setActiveTab('active');
+                setStatusFilter('all');
+                setSearch('');
+              }}
+            />
             <SummaryCard icon="fa-user-graduate" label="Students" value={totalStudents} helper="Students across active and archived groups" />
-            <SummaryCard icon="fa-triangle-exclamation" label="Needs Attention" value={needsAttention} helper="Active groups pending review, revision, or recovery" tone="warning" />
+            <SummaryCard
+              icon="fa-triangle-exclamation"
+              label="Needs Attention"
+              value={needsAttention}
+              helper="Jump to groups pending review, revision, or recovery"
+              tone="warning"
+              active={activeTab === 'active' && statusFilter === 'attention'}
+              onClick={() => {
+                setActiveTab('active');
+                setStatusFilter('attention');
+                setSearch('');
+              }}
+            />
             <SummaryCard icon="fa-chart-line" label="Average Progress" value={`${averageProgress}%`} helper="Average completion across active IT groups" tone="success" />
-            <SummaryCard icon="fa-box-archive" label="Completed Groups" value={completedGroups.length} helper="Groups moved into the completed archive" tone="success" />
+            <SummaryCard
+              icon="fa-box-archive"
+              label="Completed Groups"
+              value={completedGroups.length}
+              helper="View the completed archive"
+              tone="success"
+              active={activeTab === 'completed'}
+              onClick={() => {
+                setActiveTab('completed');
+                setStatusFilter('completed');
+                setSearch('');
+              }}
+            />
           </section>
 
           <section className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl ring-1 ring-slate-900/5">
@@ -1961,6 +2333,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value as GroupFilterStatus)}
+                  aria-label="Filter groups by status"
                   className="min-h-[48px] rounded-2xl border border-slate-200/60 bg-white/50 px-4 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm outline-none transition-all hover:bg-white focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
                 >
                   <option value="all">All Statuses</option>
@@ -1984,6 +2357,7 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
                 <input
                   type="text"
                   placeholder="Search groups or titles..."
+                  aria-label="Search groups or titles"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   className="min-h-[48px] w-full rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm outline-none transition-all hover:bg-white focus:border-slate-300 focus:bg-white focus:ring-4 focus:ring-slate-100"
@@ -2032,7 +2406,6 @@ export function AdviserGroups({ data }: { data: AdviserDashboardData }) {
           onApproveTitle={handleApproveTitle}
           onRemoveStudent={handleRemoveStudentFromGroup}
           onDemoteGroup={handleDemoteGroup}
-          isPendingDemotion={Boolean(selectedGroup && pendingDemotionGroupIds.has(selectedGroup.id))}
           onOpenAddStudent={(groupId) => {
             setDetailsOpen(false);
             openAddStudentModal(groupId);

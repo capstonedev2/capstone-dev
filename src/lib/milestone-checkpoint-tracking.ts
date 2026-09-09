@@ -1,4 +1,6 @@
 import {
+  DefenseChairDecision,
+  DefenseStatus,
   MilestoneCheckpointReviewStatus,
   MilestoneCheckpointStatus,
   MilestoneStatus,
@@ -14,6 +16,7 @@ type DbClient = {
   submission: any;
   uploadedFile: any;
   group: any;
+  defenseSchedule: any;
 };
 
 type WorkflowStage = {
@@ -856,6 +859,120 @@ export async function recordDefenseVoteOutcome(
   }
 
   await Promise.all(Array.from(updatedMilestoneIds).map((milestoneId) => updateMilestoneRollup(db, milestoneId)));
+}
+
+const TOTAL_WORKFLOW_CHECKPOINTS = EXPECTED_WORKFLOW_CHECKPOINT_KEYS.length;
+
+export type ProjectProgressSummary = {
+  percent: number;
+  completedCheckpoints: number;
+  totalCheckpoints: number;
+  currentStageTitle: string | null;
+};
+
+/**
+ * Computes a group's real completion percentage from actual MilestoneCheckpoint
+ * rows instead of the stored Group.progress column, which no write path ever
+ * updates after creation. Counts completed checkpoints against the full 26-item
+ * workflow (THESIS_MILESTONE_WORKFLOW) rather than requiring the per-project
+ * checkpoint rows to already exist, so this stays a pure read with no side effects.
+ * Also reports which workflow stage the group is currently sitting in — the
+ * first stage (in sequence order) that isn't fully checked off yet — so UI can
+ * show more than a bare number.
+ */
+export async function getProjectProgressSummary(db: DbClient, projectId?: string | null): Promise<ProjectProgressSummary> {
+  if (!projectId) {
+    return {
+      percent: 0,
+      completedCheckpoints: 0,
+      totalCheckpoints: TOTAL_WORKFLOW_CHECKPOINTS,
+      currentStageTitle: null
+    };
+  }
+
+  const checkpoints = await db.milestoneCheckpoint.findMany({
+    where: { projectId, status: MilestoneCheckpointStatus.COMPLETED },
+    select: { key: true }
+  });
+
+  const completedKeys = new Set(checkpoints.map((checkpoint: { key: string }) => checkpoint.key));
+  const completedCheckpoints = completedKeys.size;
+  const percent = Math.round((completedCheckpoints / TOTAL_WORKFLOW_CHECKPOINTS) * 100);
+
+  const activeStage = THESIS_MILESTONE_WORKFLOW.find((stage) =>
+    stage.checkpoints.some((checkpoint) => !completedKeys.has(checkpoint.key))
+  );
+  const currentStageTitle = activeStage
+    ? activeStage.title
+    : THESIS_MILESTONE_WORKFLOW[THESIS_MILESTONE_WORKFLOW.length - 1].title;
+
+  return {
+    percent,
+    completedCheckpoints,
+    totalCheckpoints: TOTAL_WORKFLOW_CHECKPOINTS,
+    currentStageTitle
+  };
+}
+
+export type DefenseOutcomeTag = {
+  label: string;
+  // 'danger' marks outcomes that need the adviser's action (rejected/redefense/new
+  // title) — kept visually distinct from the group's routine lifecycle status badge,
+  // which is amber for merely "pending" states too and would otherwise blend in.
+  tone: 'success' | 'danger';
+};
+
+/**
+ * Surfaces the outcome of a group's most recently completed defense as a small
+ * tag for group-list UIs, so an adviser can tell at a glance whether their
+ * students passed without opening each group. Tallies votes the same way
+ * finalizeDefenseSchedule does, since the schedule itself doesn't store a
+ * denormalized pass/fail result.
+ */
+export async function getLatestDefenseOutcomeTag(db: DbClient, projectId?: string | null): Promise<DefenseOutcomeTag | null> {
+  if (!projectId) {
+    return null;
+  }
+
+  const schedule = await db.defenseSchedule.findFirst({
+    where: { projectId, status: DefenseStatus.COMPLETED },
+    orderBy: { scheduledAt: 'desc' },
+    include: { evaluations: true }
+  });
+
+  if (!schedule) {
+    return null;
+  }
+
+  let yesVotes = 0;
+  let noVotes = 0;
+
+  for (const ev of schedule.evaluations as Array<{ recommendation: string }>) {
+    if (['PASSED', 'PASSED_MINOR', 'PASSED_MAJOR'].includes(ev.recommendation)) {
+      yesVotes++;
+    } else if (['REDEFENSE', 'FAILED'].includes(ev.recommendation)) {
+      noVotes++;
+    }
+  }
+
+  if (yesVotes > noVotes) {
+    return { label: `Passed ${schedule.title}`, tone: 'success' };
+  }
+
+  if (noVotes > yesVotes) {
+    if (schedule.chairDecision === DefenseChairDecision.NEW_TITLE) {
+      return { label: 'New Title Required', tone: 'danger' };
+    }
+    if (schedule.chairDecision === DefenseChairDecision.REDEFENSE) {
+      return { label: 'Redefense Required', tone: 'danger' };
+    }
+    // The panel already decided this — that's the majority vote, final. What's actually
+    // pending is the chair's separate follow-up call (redefense vs. new title), so don't
+    // word this like the rejection itself is unresolved.
+    return { label: `Rejected — ${schedule.title}`, tone: 'danger' };
+  }
+
+  return null;
 }
 
 /**

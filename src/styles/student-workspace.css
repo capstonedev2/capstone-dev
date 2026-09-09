@@ -24579,9 +24579,17 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 @media (min-width: 1180px) {
+    /* display: grid removed here — this legacy page-level grid (paired with
+       display: contents below) was written for an older version of this page
+       using different className conventions (title-submission-command-panel,
+       title-submission-workflow-strip, title-submission-tabs). The current
+       component's actual elements don't match those selectors, so they fell
+       through to unpredictable grid auto-placement — including flattening the
+       component's own intended two-column layout via display: contents — while
+       the sidebar's explicit grid-row: 1 / span 5 forced it to visually pin to
+       the top of the page regardless of DOM order. Left the rest of this block
+       in place since it's otherwise inert without display: grid active. */
     .student-title-submission-page {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(330px, 380px);
         gap: 1rem 1.25rem;
         align-items: start;
     }
@@ -24592,17 +24600,7 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
         grid-column: 1;
     }
 
-    .student-title-submission-page > .title-submission-main-grid {
-        display: contents !important;
-    }
-
-    .student-title-submission-page .title-submission-main-stack {
-        grid-column: 1;
-    }
-
     .student-title-submission-page .title-submission-side-rail {
-        grid-column: 2;
-        grid-row: 1 / span 5;
         position: sticky !important;
         top: 5rem !important;
     }
@@ -25085,35 +25083,17 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 }
 
 @media (min-width: 1180px) {
+    /* Same legacy page-level grid system as the block above (targets className
+       conventions the current component doesn't use) — display: grid,
+       display: contents, and the position: static override removed for the
+       same reason: they don't apply to this component's actual elements and
+       were only breaking layout, not fixing anything for it. */
     .student-title-submission-page {
-        grid-template-columns: minmax(0, 1fr) minmax(380px, 420px) !important;
         gap: 0.95rem 1rem !important;
         align-items: start;
     }
 
-    .student-title-submission-page > .title-submission-command-panel,
-    .student-title-submission-page > .title-submission-workflow-strip,
-    .student-title-submission-page > .title-review-progress-card {
-        grid-column: 1 / -1 !important;
-    }
-
-    .student-title-submission-page > .title-submission-tabs {
-        grid-column: 1 !important;
-    }
-
-    .student-title-submission-page > .title-submission-main-grid {
-        display: contents !important;
-    }
-
-    .student-title-submission-page .title-submission-main-stack {
-        grid-column: 1 !important;
-        grid-row: 4 !important;
-    }
-
     .student-title-submission-page .title-submission-side-rail {
-        grid-column: 2 !important;
-        grid-row: 4 !important;
-        position: static !important;
         max-height: none !important;
         overflow: visible !important;
         padding-right: 0 !important;

@@ -43,11 +43,6 @@ export type UploadedFile = Prisma.UploadedFileModel
  */
 export type Group = Prisma.GroupModel
 /**
- * Model GroupDemotionRequest
- * 
- */
-export type GroupDemotionRequest = Prisma.GroupDemotionRequestModel
-/**
  * Model Department
  * 
  */

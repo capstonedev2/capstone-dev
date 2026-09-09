@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerAuthenticatedUser } from '@/lib/auth';
 import { sendGroupAssignmentEmail } from '@/lib/mailer';
+import { getLatestDefenseOutcomeTag, getProjectProgressSummary } from '@/lib/milestone-checkpoint-tracking';
 
 const DEFAULT_GROUP_LIMIT = 100;
 const MAX_GROUP_LIMIT = 200;
@@ -228,9 +229,18 @@ export async function GET(request: Request) {
          return pendingUserNames.includes(normalizeStudentName(studentName));
       });
 
+      const [defenseOutcomeTag, progressSummary] = await Promise.all([
+        getLatestDefenseOutcomeTag(prisma, group.projectId),
+        getProjectProgressSummary(prisma, group.projectId)
+      ]);
+
       return {
         ...group,
-        pendingStudents: pendingNamesInGroup
+        progress: progressSummary.percent,
+        progressDetail: `${progressSummary.completedCheckpoints} of ${progressSummary.totalCheckpoints} checkpoints complete`,
+        progressStage: progressSummary.currentStageTitle,
+        pendingStudents: pendingNamesInGroup,
+        defenseOutcomeTag
       };
     }));
 

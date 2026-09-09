@@ -8,7 +8,6 @@ export type ProgramHeadNavKey =
   | 'evidence'
   | 'performance'
   | 'schedule'
-  | 'group-demotions'
   | 'reports'
   | 'notifications'
   | 'profile'
@@ -83,7 +82,6 @@ export const PROGRAM_HEAD_NAV_GROUPS = [
     items: [
       { key: 'performance', href: '/program-head/performance', label: 'Adviser Performance', icon: 'fa-chalkboard-teacher' },
       { key: 'schedule', href: '/program-head/schedule', label: 'Defense Schedule', icon: 'fa-calendar-days' },
-      { key: 'group-demotions', href: '/program-head/group-demotions', label: 'Demotion Requests', icon: 'fa-rotate-left' },
     ]
   },
   {

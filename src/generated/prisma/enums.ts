@@ -197,15 +197,6 @@ export const NotificationStatus = {
 export type NotificationStatus = (typeof NotificationStatus)[keyof typeof NotificationStatus]
 
 
-export const GroupDemotionRequestStatus = {
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED'
-} as const
-
-export type GroupDemotionRequestStatus = (typeof GroupDemotionRequestStatus)[keyof typeof GroupDemotionRequestStatus]
-
-
 export const IndustryProjectStatus = {
   PROPOSED: 'PROPOSED',
   ACTIVE: 'ACTIVE',

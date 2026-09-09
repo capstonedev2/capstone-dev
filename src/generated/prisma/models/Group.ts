@@ -398,7 +398,6 @@ export type GroupWhereInput = {
   allowMemberSubmission?: Prisma.BoolFilter<"Group"> | boolean
   groupMembers?: Prisma.GroupMemberListRelationFilter
   projects?: Prisma.ProjectListRelationFilter
-  demotionRequests?: Prisma.GroupDemotionRequestListRelationFilter
 }
 
 export type GroupOrderByWithRelationInput = {
@@ -431,7 +430,6 @@ export type GroupOrderByWithRelationInput = {
   allowMemberSubmission?: Prisma.SortOrder
   groupMembers?: Prisma.GroupMemberOrderByRelationAggregateInput
   projects?: Prisma.ProjectOrderByRelationAggregateInput
-  demotionRequests?: Prisma.GroupDemotionRequestOrderByRelationAggregateInput
 }
 
 export type GroupWhereUniqueInput = Prisma.AtLeast<{
@@ -467,7 +465,6 @@ export type GroupWhereUniqueInput = Prisma.AtLeast<{
   allowMemberSubmission?: Prisma.BoolFilter<"Group"> | boolean
   groupMembers?: Prisma.GroupMemberListRelationFilter
   projects?: Prisma.ProjectListRelationFilter
-  demotionRequests?: Prisma.GroupDemotionRequestListRelationFilter
 }, "id" | "code">
 
 export type GroupOrderByWithAggregationInput = {
@@ -568,7 +565,6 @@ export type GroupCreateInput = {
   allowMemberSubmission?: boolean
   groupMembers?: Prisma.GroupMemberCreateNestedManyWithoutGroupInput
   projects?: Prisma.ProjectCreateNestedManyWithoutGroupInput
-  demotionRequests?: Prisma.GroupDemotionRequestCreateNestedManyWithoutGroupInput
 }
 
 export type GroupUncheckedCreateInput = {
@@ -601,7 +597,6 @@ export type GroupUncheckedCreateInput = {
   allowMemberSubmission?: boolean
   groupMembers?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutGroupInput
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutGroupInput
-  demotionRequests?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutGroupInput
 }
 
 export type GroupUpdateInput = {
@@ -634,7 +629,6 @@ export type GroupUpdateInput = {
   allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
   groupMembers?: Prisma.GroupMemberUpdateManyWithoutGroupNestedInput
   projects?: Prisma.ProjectUpdateManyWithoutGroupNestedInput
-  demotionRequests?: Prisma.GroupDemotionRequestUpdateManyWithoutGroupNestedInput
 }
 
 export type GroupUncheckedUpdateInput = {
@@ -667,7 +661,6 @@ export type GroupUncheckedUpdateInput = {
   allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
   groupMembers?: Prisma.GroupMemberUncheckedUpdateManyWithoutGroupNestedInput
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutGroupNestedInput
-  demotionRequests?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutGroupNestedInput
 }
 
 export type GroupCreateManyInput = {
@@ -891,20 +884,6 @@ export type EnumGroupLifecycleStatusFieldUpdateOperationsInput = {
   set?: $Enums.GroupLifecycleStatus
 }
 
-export type GroupCreateNestedOneWithoutDemotionRequestsInput = {
-  create?: Prisma.XOR<Prisma.GroupCreateWithoutDemotionRequestsInput, Prisma.GroupUncheckedCreateWithoutDemotionRequestsInput>
-  connectOrCreate?: Prisma.GroupCreateOrConnectWithoutDemotionRequestsInput
-  connect?: Prisma.GroupWhereUniqueInput
-}
-
-export type GroupUpdateOneRequiredWithoutDemotionRequestsNestedInput = {
-  create?: Prisma.XOR<Prisma.GroupCreateWithoutDemotionRequestsInput, Prisma.GroupUncheckedCreateWithoutDemotionRequestsInput>
-  connectOrCreate?: Prisma.GroupCreateOrConnectWithoutDemotionRequestsInput
-  upsert?: Prisma.GroupUpsertWithoutDemotionRequestsInput
-  connect?: Prisma.GroupWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.GroupUpdateToOneWithWhereWithoutDemotionRequestsInput, Prisma.GroupUpdateWithoutDemotionRequestsInput>, Prisma.GroupUncheckedUpdateWithoutDemotionRequestsInput>
-}
-
 export type GroupCreateNestedOneWithoutGroupMembersInput = {
   create?: Prisma.XOR<Prisma.GroupCreateWithoutGroupMembersInput, Prisma.GroupUncheckedCreateWithoutGroupMembersInput>
   connectOrCreate?: Prisma.GroupCreateOrConnectWithoutGroupMembersInput
@@ -933,150 +912,6 @@ export type GroupUpdateOneWithoutProjectsNestedInput = {
   delete?: Prisma.GroupWhereInput | boolean
   connect?: Prisma.GroupWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.GroupUpdateToOneWithWhereWithoutProjectsInput, Prisma.GroupUpdateWithoutProjectsInput>, Prisma.GroupUncheckedUpdateWithoutProjectsInput>
-}
-
-export type GroupCreateWithoutDemotionRequestsInput = {
-  id?: string
-  userId: string
-  projectId?: string | null
-  status?: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  code: string
-  title: string
-  projectTitle: string
-  dept: string
-  department: string
-  members?: number
-  students?: Prisma.GroupCreatestudentsInput | string[]
-  progress?: number
-  statusLabel: string
-  statusClass: string
-  lifecycleStatus?: $Enums.GroupLifecycleStatus
-  milestone?: string
-  currentMilestone?: string
-  leader?: string | null
-  finalDefenseResult?: string
-  finalManuscriptApproved?: boolean
-  allRequiredMilestonesCompleted?: boolean
-  completedAt?: Date | string | null
-  finalScore?: number | null
-  finalRecommendation?: string | null
-  allowMemberSubmission?: boolean
-  groupMembers?: Prisma.GroupMemberCreateNestedManyWithoutGroupInput
-  projects?: Prisma.ProjectCreateNestedManyWithoutGroupInput
-}
-
-export type GroupUncheckedCreateWithoutDemotionRequestsInput = {
-  id?: string
-  userId: string
-  projectId?: string | null
-  status?: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  code: string
-  title: string
-  projectTitle: string
-  dept: string
-  department: string
-  members?: number
-  students?: Prisma.GroupCreatestudentsInput | string[]
-  progress?: number
-  statusLabel: string
-  statusClass: string
-  lifecycleStatus?: $Enums.GroupLifecycleStatus
-  milestone?: string
-  currentMilestone?: string
-  leader?: string | null
-  finalDefenseResult?: string
-  finalManuscriptApproved?: boolean
-  allRequiredMilestonesCompleted?: boolean
-  completedAt?: Date | string | null
-  finalScore?: number | null
-  finalRecommendation?: string | null
-  allowMemberSubmission?: boolean
-  groupMembers?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutGroupInput
-  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutGroupInput
-}
-
-export type GroupCreateOrConnectWithoutDemotionRequestsInput = {
-  where: Prisma.GroupWhereUniqueInput
-  create: Prisma.XOR<Prisma.GroupCreateWithoutDemotionRequestsInput, Prisma.GroupUncheckedCreateWithoutDemotionRequestsInput>
-}
-
-export type GroupUpsertWithoutDemotionRequestsInput = {
-  update: Prisma.XOR<Prisma.GroupUpdateWithoutDemotionRequestsInput, Prisma.GroupUncheckedUpdateWithoutDemotionRequestsInput>
-  create: Prisma.XOR<Prisma.GroupCreateWithoutDemotionRequestsInput, Prisma.GroupUncheckedCreateWithoutDemotionRequestsInput>
-  where?: Prisma.GroupWhereInput
-}
-
-export type GroupUpdateToOneWithWhereWithoutDemotionRequestsInput = {
-  where?: Prisma.GroupWhereInput
-  data: Prisma.XOR<Prisma.GroupUpdateWithoutDemotionRequestsInput, Prisma.GroupUncheckedUpdateWithoutDemotionRequestsInput>
-}
-
-export type GroupUpdateWithoutDemotionRequestsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  projectTitle?: Prisma.StringFieldUpdateOperationsInput | string
-  dept?: Prisma.StringFieldUpdateOperationsInput | string
-  department?: Prisma.StringFieldUpdateOperationsInput | string
-  members?: Prisma.IntFieldUpdateOperationsInput | number
-  students?: Prisma.GroupUpdatestudentsInput | string[]
-  progress?: Prisma.IntFieldUpdateOperationsInput | number
-  statusLabel?: Prisma.StringFieldUpdateOperationsInput | string
-  statusClass?: Prisma.StringFieldUpdateOperationsInput | string
-  lifecycleStatus?: Prisma.EnumGroupLifecycleStatusFieldUpdateOperationsInput | $Enums.GroupLifecycleStatus
-  milestone?: Prisma.StringFieldUpdateOperationsInput | string
-  currentMilestone?: Prisma.StringFieldUpdateOperationsInput | string
-  leader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  finalDefenseResult?: Prisma.StringFieldUpdateOperationsInput | string
-  finalManuscriptApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  allRequiredMilestonesCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  finalScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  finalRecommendation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  groupMembers?: Prisma.GroupMemberUpdateManyWithoutGroupNestedInput
-  projects?: Prisma.ProjectUpdateManyWithoutGroupNestedInput
-}
-
-export type GroupUncheckedUpdateWithoutDemotionRequestsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  projectTitle?: Prisma.StringFieldUpdateOperationsInput | string
-  dept?: Prisma.StringFieldUpdateOperationsInput | string
-  department?: Prisma.StringFieldUpdateOperationsInput | string
-  members?: Prisma.IntFieldUpdateOperationsInput | number
-  students?: Prisma.GroupUpdatestudentsInput | string[]
-  progress?: Prisma.IntFieldUpdateOperationsInput | number
-  statusLabel?: Prisma.StringFieldUpdateOperationsInput | string
-  statusClass?: Prisma.StringFieldUpdateOperationsInput | string
-  lifecycleStatus?: Prisma.EnumGroupLifecycleStatusFieldUpdateOperationsInput | $Enums.GroupLifecycleStatus
-  milestone?: Prisma.StringFieldUpdateOperationsInput | string
-  currentMilestone?: Prisma.StringFieldUpdateOperationsInput | string
-  leader?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  finalDefenseResult?: Prisma.StringFieldUpdateOperationsInput | string
-  finalManuscriptApproved?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  allRequiredMilestonesCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  finalScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  finalRecommendation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  groupMembers?: Prisma.GroupMemberUncheckedUpdateManyWithoutGroupNestedInput
-  projects?: Prisma.ProjectUncheckedUpdateManyWithoutGroupNestedInput
 }
 
 export type GroupCreateWithoutGroupMembersInput = {
@@ -1108,7 +943,6 @@ export type GroupCreateWithoutGroupMembersInput = {
   finalRecommendation?: string | null
   allowMemberSubmission?: boolean
   projects?: Prisma.ProjectCreateNestedManyWithoutGroupInput
-  demotionRequests?: Prisma.GroupDemotionRequestCreateNestedManyWithoutGroupInput
 }
 
 export type GroupUncheckedCreateWithoutGroupMembersInput = {
@@ -1140,7 +974,6 @@ export type GroupUncheckedCreateWithoutGroupMembersInput = {
   finalRecommendation?: string | null
   allowMemberSubmission?: boolean
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutGroupInput
-  demotionRequests?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutGroupInput
 }
 
 export type GroupCreateOrConnectWithoutGroupMembersInput = {
@@ -1188,7 +1021,6 @@ export type GroupUpdateWithoutGroupMembersInput = {
   finalRecommendation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.ProjectUpdateManyWithoutGroupNestedInput
-  demotionRequests?: Prisma.GroupDemotionRequestUpdateManyWithoutGroupNestedInput
 }
 
 export type GroupUncheckedUpdateWithoutGroupMembersInput = {
@@ -1220,7 +1052,6 @@ export type GroupUncheckedUpdateWithoutGroupMembersInput = {
   finalRecommendation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutGroupNestedInput
-  demotionRequests?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutGroupNestedInput
 }
 
 export type GroupCreateWithoutProjectsInput = {
@@ -1252,7 +1083,6 @@ export type GroupCreateWithoutProjectsInput = {
   finalRecommendation?: string | null
   allowMemberSubmission?: boolean
   groupMembers?: Prisma.GroupMemberCreateNestedManyWithoutGroupInput
-  demotionRequests?: Prisma.GroupDemotionRequestCreateNestedManyWithoutGroupInput
 }
 
 export type GroupUncheckedCreateWithoutProjectsInput = {
@@ -1284,7 +1114,6 @@ export type GroupUncheckedCreateWithoutProjectsInput = {
   finalRecommendation?: string | null
   allowMemberSubmission?: boolean
   groupMembers?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutGroupInput
-  demotionRequests?: Prisma.GroupDemotionRequestUncheckedCreateNestedManyWithoutGroupInput
 }
 
 export type GroupCreateOrConnectWithoutProjectsInput = {
@@ -1332,7 +1161,6 @@ export type GroupUpdateWithoutProjectsInput = {
   finalRecommendation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
   groupMembers?: Prisma.GroupMemberUpdateManyWithoutGroupNestedInput
-  demotionRequests?: Prisma.GroupDemotionRequestUpdateManyWithoutGroupNestedInput
 }
 
 export type GroupUncheckedUpdateWithoutProjectsInput = {
@@ -1364,7 +1192,6 @@ export type GroupUncheckedUpdateWithoutProjectsInput = {
   finalRecommendation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   allowMemberSubmission?: Prisma.BoolFieldUpdateOperationsInput | boolean
   groupMembers?: Prisma.GroupMemberUncheckedUpdateManyWithoutGroupNestedInput
-  demotionRequests?: Prisma.GroupDemotionRequestUncheckedUpdateManyWithoutGroupNestedInput
 }
 
 
@@ -1375,13 +1202,11 @@ export type GroupUncheckedUpdateWithoutProjectsInput = {
 export type GroupCountOutputType = {
   groupMembers: number
   projects: number
-  demotionRequests: number
 }
 
 export type GroupCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   groupMembers?: boolean | GroupCountOutputTypeCountGroupMembersArgs
   projects?: boolean | GroupCountOutputTypeCountProjectsArgs
-  demotionRequests?: boolean | GroupCountOutputTypeCountDemotionRequestsArgs
 }
 
 /**
@@ -1406,13 +1231,6 @@ export type GroupCountOutputTypeCountGroupMembersArgs<ExtArgs extends runtime.Ty
  */
 export type GroupCountOutputTypeCountProjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ProjectWhereInput
-}
-
-/**
- * GroupCountOutputType without action
- */
-export type GroupCountOutputTypeCountDemotionRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.GroupDemotionRequestWhereInput
 }
 
 
@@ -1446,7 +1264,6 @@ export type GroupSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   allowMemberSubmission?: boolean
   groupMembers?: boolean | Prisma.Group$groupMembersArgs<ExtArgs>
   projects?: boolean | Prisma.Group$projectsArgs<ExtArgs>
-  demotionRequests?: boolean | Prisma.Group$demotionRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.GroupCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["group"]>
 
@@ -1544,7 +1361,6 @@ export type GroupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
 export type GroupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   groupMembers?: boolean | Prisma.Group$groupMembersArgs<ExtArgs>
   projects?: boolean | Prisma.Group$projectsArgs<ExtArgs>
-  demotionRequests?: boolean | Prisma.Group$demotionRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.GroupCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type GroupIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1555,7 +1371,6 @@ export type $GroupPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     groupMembers: Prisma.$GroupMemberPayload<ExtArgs>[]
     projects: Prisma.$ProjectPayload<ExtArgs>[]
-    demotionRequests: Prisma.$GroupDemotionRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1981,7 +1796,6 @@ export interface Prisma__GroupClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   groupMembers<T extends Prisma.Group$groupMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Group$groupMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   projects<T extends Prisma.Group$projectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Group$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  demotionRequests<T extends Prisma.Group$demotionRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Group$demotionRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupDemotionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2476,30 +2290,6 @@ export type Group$projectsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.ProjectScalarFieldEnum | Prisma.ProjectScalarFieldEnum[]
-}
-
-/**
- * Group.demotionRequests
- */
-export type Group$demotionRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the GroupDemotionRequest
-   */
-  select?: Prisma.GroupDemotionRequestSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the GroupDemotionRequest
-   */
-  omit?: Prisma.GroupDemotionRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.GroupDemotionRequestInclude<ExtArgs> | null
-  where?: Prisma.GroupDemotionRequestWhereInput
-  orderBy?: Prisma.GroupDemotionRequestOrderByWithRelationInput | Prisma.GroupDemotionRequestOrderByWithRelationInput[]
-  cursor?: Prisma.GroupDemotionRequestWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.GroupDemotionRequestScalarFieldEnum | Prisma.GroupDemotionRequestScalarFieldEnum[]
 }
 
 /**

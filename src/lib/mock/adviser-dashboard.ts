@@ -2,6 +2,7 @@ import { cache } from 'react';
 import { getServerAuthenticatedUser, buildDisplayName } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NotificationStatus } from '@/generated/prisma/client';
+import { getLatestDefenseOutcomeTag, getProjectProgressSummary } from '@/lib/milestone-checkpoint-tracking';
 
 const now = '2026-04-06T00:00:00.000Z';
 
@@ -82,6 +83,9 @@ export type AdviserDashboardData = {
     finalRecommendation: string | null;
     leader: string | null;
     pendingStudents?: string[];
+    defenseOutcomeTag?: { label: string; tone: 'success' | 'danger' } | null;
+    progressDetail?: string | null;
+    progressStage?: string | null;
   }>;
   panelProjects: Array<{
     id: string;
@@ -768,9 +772,18 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
           return pendingUserNames.includes(norm);
         });
 
+        const [defenseOutcomeTag, progressSummary] = await Promise.all([
+          getLatestDefenseOutcomeTag(prisma, group.projectId),
+          getProjectProgressSummary(prisma, group.projectId)
+        ]);
+
         return {
           ...group,
-          pendingStudents: pendingNamesInGroup
+          pendingStudents: pendingNamesInGroup,
+          defenseOutcomeTag,
+          liveProgress: progressSummary.percent,
+          progressStage: progressSummary.currentStageTitle,
+          progressDetail: `${progressSummary.completedCheckpoints} of ${progressSummary.totalCheckpoints} checkpoints complete`
         };
       }));
 
@@ -788,7 +801,7 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
         department: group.department,
         members: group.members,
         students: group.students,
-        progress: group.progress,
+        progress: group.liveProgress,
         statusLabel: group.statusLabel,
         statusClass: group.statusClass,
         milestone: group.milestone,
@@ -800,7 +813,10 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
         finalScore: group.finalScore,
         finalRecommendation: group.finalRecommendation,
         leader: group.leader,
-        pendingStudents: group.pendingStudents
+        pendingStudents: group.pendingStudents,
+        defenseOutcomeTag: group.defenseOutcomeTag,
+        progressDetail: group.progressDetail,
+        progressStage: group.progressStage
       }));
 
       data.panelProjects = panelEvaluations.map((evaluation) => {

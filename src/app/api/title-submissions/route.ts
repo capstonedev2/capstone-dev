@@ -9,6 +9,7 @@ import {
   recordCheckpointSubmission,
   syncCheckpointReview
 } from '@/lib/milestone-checkpoint-tracking';
+import { findSimilarTitles, type SimilarTitleMatch } from '@/lib/title-similarity';
 
 export const runtime = 'nodejs';
 
@@ -159,8 +160,8 @@ function toTitlePayload(project: any) {
     updatedAt: project.updatedAt,
     reviewedAt: latestSubmission?.reviewedAt || null,
     keywords: project.keywords || [],
-    similarityScore: 0,
-    similarTitles: [],
+    similarityScore: 0 as number,
+    similarTitles: [] as SimilarTitleMatch[],
     membersCount: groupMembers.length,
     memberPreview: groupMembers.map((member: any) => member.name).filter(Boolean),
     groupMembers,
@@ -270,6 +271,44 @@ const projectInclude = {
   }
 } satisfies Prisma.ProjectInclude;
 
+// Shared by GET (list view) and POST (immediately after a new submission) so a
+// student sees the duplicate-title warning right away, not only after the page
+// reloads. Mutates the already-built title payloads in place.
+async function enrichWithSimilarity(
+  titlePayloads: ReturnType<typeof toTitlePayload>[],
+  projectsToCheck: Array<{ id: string; title: string }>
+) {
+  if (projectsToCheck.length === 0) {
+    return;
+  }
+
+  const candidatePool = await prisma.project.findMany({
+    where: {
+      status: { notIn: [ProjectStatus.DRAFT, ProjectStatus.ARCHIVED] },
+      title: { not: '' }
+    },
+    select: { id: true, title: true, group: { select: { code: true } } },
+    take: 500
+  });
+
+  const candidates = candidatePool.map((candidate) => ({
+    id: candidate.id,
+    title: candidate.title,
+    groupCode: candidate.group?.code ?? null
+  }));
+
+  const payloadsById = new Map(titlePayloads.map((payload) => [payload.id, payload]));
+
+  for (const project of projectsToCheck) {
+    const payload = payloadsById.get(project.id);
+    if (!payload) continue;
+
+    const matches = findSimilarTitles(project.title, project.id, candidates);
+    payload.similarityScore = matches[0]?.score ?? 0;
+    payload.similarTitles = matches;
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, TITLE_ROLES);
@@ -310,8 +349,17 @@ export async function GET(request: Request) {
     });
 
     const titles = projects.map(toTitlePayload);
-    const filteredTitles = user.role === UserRole.STUDENT 
-      ? titles 
+
+    // Only titles still awaiting a decision are worth duplicate-checking — an
+    // approved or archived one doesn't need a fresh similarity read every time
+    // someone loads this list.
+    const projectsNeedingSimilarityCheck = projects.filter(
+      (project) => project.status === ProjectStatus.SUBMITTED || project.status === ProjectStatus.UNDER_REVIEW
+    );
+    await enrichWithSimilarity(titles, projectsNeedingSimilarityCheck);
+
+    const filteredTitles = user.role === UserRole.STUDENT
+      ? titles
       : titles.filter(t => t.status !== 'draft');
 
     return successResponse({ titles: filteredTitles });
@@ -497,7 +545,13 @@ export async function POST(request: Request) {
       }
     }
 
-    return successResponse({ title: toTitlePayload(project) }, 201);
+    // Check for duplicates immediately so the student sees the warning right on
+    // the submission response, instead of only finding out after reloading the
+    // page (which is when GET's version of this same check would otherwise run).
+    const titlePayload = toTitlePayload(project);
+    await enrichWithSimilarity([titlePayload], [{ id: project.id, title: project.title }]);
+
+    return successResponse({ title: titlePayload }, 201);
   } catch (error) {
     return handleApiError(error);
   }
@@ -631,12 +685,22 @@ export async function PATCH(request: Request) {
       });
 
       if (nextStatus === ProjectStatus.APPROVED && project.groupId) {
+        // Group.status/statusLabel/statusClass are separate stored columns from
+        // Project.status — this endpoint used to only sync the title fields, so an
+        // approved title left the group's own status badge stuck on "Pending"
+        // indefinitely. Set it the same way the adviser-groups quick-approve action
+        // already does, so both approval paths agree.
         await tx.group.update({
           where: { id: project.groupId },
           data: {
             projectId: project.id,
             projectTitle: project.title,
-            title: project.title
+            title: project.title,
+            status: 'active',
+            statusLabel: 'Active',
+            statusClass: 'status-active',
+            milestone: 'Concept Proposal',
+            currentMilestone: 'Concept Proposal'
           }
         });
 

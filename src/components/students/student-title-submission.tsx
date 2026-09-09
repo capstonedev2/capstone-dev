@@ -104,11 +104,34 @@ function getStatusTone(status: string): BadgeTone {
     return 'danger';
   }
 
-  if (['archived', 'member view', 'draft'].includes(normalized)) {
+  if (['archived', 'member view', 'draft', 'withdrawn'].includes(normalized)) {
     return 'neutral';
   }
 
   return 'neutral';
+}
+
+// Several panels on this page collapsed the full BadgeTone spectrum into a binary
+// success/not-success check, which is why a rejected proposal used to render with
+// the same amber "warning" styling as a routine pending one, and a withdrawn
+// proposal had no distinct look at all. One shared mapping keeps every panel that
+// reads `titleStatusTone` visually consistent with what actually happened.
+function getToneSurfaceClasses(tone: BadgeTone) {
+  switch (tone) {
+    case 'success':
+      return { soft: 'bg-[var(--info-soft)]', text: 'text-[var(--info)]', border: 'border-[var(--info)]' };
+    case 'info':
+      return { soft: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+    case 'accent':
+      return { soft: 'bg-[var(--warning-soft)]', text: 'text-[var(--warning)]', border: 'border-[var(--warning)]' };
+    case 'danger':
+      return { soft: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' };
+    case 'neutral':
+      return { soft: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' };
+    case 'warning':
+    default:
+      return { soft: 'bg-[var(--warning-soft)]', text: 'text-[var(--warning)]', border: 'border-[var(--warning)]' };
+  }
 }
 
 function getWorkflowStatusLabel(status: StudentTitleWorkflowStep['status']) {
@@ -368,14 +391,18 @@ function createAttachmentFromFile(file: File, uploadedBy: string, downloadUrl?: 
   };
 }
 
-function mapTitleStatusLabel(status: string) {
+function mapTitleStatusLabel(status: string, rejectionReason?: string | null) {
   switch (status) {
     case 'approved':
       return 'Approved';
     case 'needs-revision':
       return 'Needs Revision';
     case 'rejected':
-      return 'Rejected';
+      // The API maps both an adviser rejection and a student's own withdrawal
+      // (choosing a different candidate) onto the same underlying archived
+      // status — distinguish them here using the reason text so a withdrawn
+      // proposal doesn't read like the adviser turned it down.
+      return rejectionReason?.startsWith('Withdrawn') ? 'Withdrawn' : 'Rejected';
     case 'draft':
       return 'Draft';
     default:
@@ -383,8 +410,12 @@ function mapTitleStatusLabel(status: string) {
   }
 }
 
+function canChooseSubmission(submission: Pick<StudentTitleSubmissionRecord, 'registrationStatus'>) {
+  return submission.registrationStatus === 'Pending Review' || submission.registrationStatus === 'Needs Revision';
+}
+
 function mapApiTitleToSubmission(title: any, index: number, data: StudentDashboardData): StudentTitleSubmissionRecord {
-  const statusLabel = mapTitleStatusLabel(title.status);
+  const statusLabel = mapTitleStatusLabel(title.status, title.rejectionReason);
   const reviewedAt = title.reviewedAt || title.updatedAt || title.submittedAt;
   const latestComment = title.latestReviewComment;
 
@@ -451,11 +482,19 @@ function mapApiTitleToSubmission(title: any, index: number, data: StudentDashboa
         ]
       : [],
     validation: {
-      status: title.similarityScore ? 'Needs validation' : 'Pending validation',
+      status: title.similarityScore ? 'Possible match found' : 'No close matches found',
       checkedAt: title.updatedAt || title.submittedAt,
-      checkedAtLabel: 'Adviser validation',
-      note: 'Similarity checking can be recorded by the adviser during title review.',
-      matchedTitles: []
+      checkedAtLabel: 'Automatic similarity check',
+      note: title.similarityScore
+        ? 'This title shares significant wording with existing titles below. Review them before your adviser does.'
+        : 'No other submitted title currently shares enough wording with this one to flag.',
+      matchedTitles: ((title.similarTitles || []) as Array<{ id: string; title: string; groupCode: string | null; score: number }>).map(
+        (match) => ({
+          id: match.id,
+          title: match.title,
+          matchLabel: `${match.score}% similar${match.groupCode ? ` · ${match.groupCode}` : ''}`
+        })
+      )
     },
     attachments: (title.uploadedFiles || []).map((file: any) => ({
       id: file.id,
@@ -549,6 +588,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
   const [isSubmittingTitle, setIsSubmittingTitle] = useState(false);
   const [isFeedbackHighlighted, setIsFeedbackHighlighted] = useState(false);
+  const [insightsTab, setInsightsTab] = useState<'Overview' | 'Feedback' | 'History'>('Overview');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const detailsPanelRef = useRef<HTMLDivElement | null>(null);
   const adviserFeedbackRef = useRef<HTMLDivElement | null>(null);
@@ -695,6 +735,26 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   );
 
   const visibleSubmissions = submissions.filter(shouldShowProposalSubmission);
+  const choosablePendingCount = submissions.filter(canChooseSubmission).length;
+
+  // "Avg. Days" and "Approval" used to be permanently hardcoded to "N/A" — this
+  // computes them for real from submissions the adviser has actually decided on
+  // (Approved / Needs Revision / Rejected). Pending ones are excluded since their
+  // "reviewed at" date is really just a submitted-at fallback, not a real review.
+  const decidedSubmissions = submissions.filter((submission) =>
+    ['Approved', 'Needs Revision', 'Rejected'].includes(submission.registrationStatus)
+  );
+  const avgReviewDaysLabel = decidedSubmissions.length
+    ? `${Math.max(0, Math.round(
+        decidedSubmissions.reduce((sum, submission) => {
+          const days = (new Date(submission.lastReviewedAt).getTime() - new Date(submission.created_at).getTime()) / (1000 * 60 * 60 * 24);
+          return sum + Math.max(0, days);
+        }, 0) / decidedSubmissions.length
+      ))}`
+    : 'N/A';
+  const approvalRateLabel = decidedSubmissions.length
+    ? `${Math.round((decidedSubmissions.filter((submission) => submission.registrationStatus === 'Approved').length / decidedSubmissions.length) * 100)}%`
+    : 'N/A';
   const activeSubmission =
     visibleSubmissions.find((submission) => submission.id === activeSubmissionId) ??
     visibleSubmissions[0] ??
@@ -760,7 +820,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   )[0];
 
   const titleStatusTone = getStatusTone(activeSubmission.registrationStatus);
-  const validation = activeSubmission.validation ?? null;
+  const adviserStatusToneClasses = getToneSurfaceClasses(titleStatusTone);
   const lastReviewedLabel = revisionHistory[0]?.dateLabel ?? formatDateLabel(activeSubmission.lastReviewedAt);
   const latestReviewer =
     activeSubmission.reviewSummary?.lastReviewedBy ??
@@ -861,40 +921,6 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     { id: 'role', label: 'Access role', value: accessRoleLabel, note: accessNote }
   ];
 
-  const validationSnapshotItems = [
-    {
-      id: 'validation-status',
-      label: 'Validation',
-      value: validation?.status ?? 'Pending validation',
-      note:
-        validation?.note ??
-        'Similarity checking notes will appear here when the validation service is connected.'
-    },
-    {
-      id: 'validation-date',
-      label: 'Checked at',
-      value: validation?.checkedAtLabel ?? 'No validation date yet',
-      note: 'Use this checkpoint when finalizing the next revision.'
-    },
-    {
-      id: 'matched-titles',
-      label: 'Possible matches',
-      value: `${validation?.matchedTitles.length ?? 0}`,
-      note:
-        validation?.matchedTitles.length
-          ? 'Review listed titles before requesting final adviser endorsement.'
-          : 'No related titles are currently listed in the validation snapshot.'
-    },
-    {
-      id: 'documents',
-      label: 'Proposal files',
-      value: `${activeSubmission.attachments.length}`,
-      note:
-        activeSubmission.attachments.length
-          ? 'Each uploaded file is linked to this title record.'
-          : 'Upload the proposal document to complete the submission set.'
-    }
-  ];
 
   const updateActiveSubmission = (
     updater: (submission: StudentTitleSubmissionRecord) => StudentTitleSubmissionRecord
@@ -1007,6 +1033,56 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       tone: 'success',
       message: `${targetSubmission.proposalLabel} draft was deleted.`
     });
+  };
+
+  const [isChoosingTitle, setIsChoosingTitle] = useState(false);
+
+  const handleChooseTitle = async (submissionId: string) => {
+    const target = submissions.find((submission) => submission.id === submissionId);
+    if (!target || !canChooseSubmission(target) || isChoosingTitle) {
+      return;
+    }
+
+    const otherPendingCount = submissions.filter(
+      (submission) => submission.id !== submissionId && canChooseSubmission(submission)
+    ).length;
+
+    const confirmed = window.confirm(
+      otherPendingCount
+        ? `Choose "${target.proposedTitle || target.proposalLabel}" as your group's final title? Your other ${otherPendingCount} pending proposal${otherPendingCount === 1 ? '' : 's'} will be withdrawn.`
+        : `Choose "${target.proposedTitle || target.proposalLabel}" as your group's final title?`
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setIsChoosingTitle(true);
+
+    try {
+      const response = await fetch(`/api/title-submissions/${submissionId}/choose`, { method: 'POST' });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to choose this title.');
+      }
+
+      setSubmissions((current) =>
+        current.map((submission) => {
+          if (submission.id === submissionId || !canChooseSubmission(submission)) {
+            return submission;
+          }
+          return { ...submission, registrationStatus: 'Withdrawn' };
+        })
+      );
+      setNotice({
+        tone: 'success',
+        message: `${target.proposalLabel} is now your group's chosen title. Your adviser has been notified.`
+      });
+    } catch (error) {
+      setNotice({ tone: 'danger', message: error instanceof Error ? error.message : 'Unable to choose this title.' });
+    } finally {
+      setIsChoosingTitle(false);
+    }
   };
 
   const handleBrowseAttachments = () => {
@@ -1214,7 +1290,11 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     const status = submission.registrationStatus.toLowerCase();
     if (status === 'archived') return 4;
     if (status === 'approved') return 4;
-    if (status === 'under review' || status === 'needs revision' || status === 'rejected') return 3;
+    // Withdrawn lands on the same track position as rejected — it reached a
+    // terminal decision point, just one the student made rather than the
+    // adviser. Without this it fell through to "Uploaded," implying a
+    // withdrawn proposal was just sitting unsent, which it wasn't.
+    if (status === 'under review' || status === 'needs revision' || status === 'rejected' || status === 'withdrawn') return 3;
     if (['pending review', 'submitted', 'resubmitted'].includes(status)) return 2;
     if (submission.attachments.length > 0) return 1;
     return 0; // Draft
@@ -1226,12 +1306,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     { id: 0, label: 'Draft', icon: 'fa-pen-ruler' },
     { id: 1, label: 'Uploaded', icon: 'fa-file-arrow-up' },
     { id: 2, label: 'Submitted', icon: 'fa-paper-plane' },
-    { 
-      id: 3, 
-      label: activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'Rejected' : 
-             activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'Needs Revision' : 'Under Review', 
-      icon: activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' : 
-            activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' : 'fa-magnifying-glass' 
+    {
+      id: 3,
+      label: activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'Rejected' :
+             activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'Needs Revision' :
+             activeSubmission.registrationStatus.toLowerCase() === 'withdrawn' ? 'Withdrawn' : 'Under Review',
+      icon: activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' :
+            activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' :
+            activeSubmission.registrationStatus.toLowerCase() === 'withdrawn' ? 'fa-box-archive' : 'fa-magnifying-glass'
     },
     { id: 4, label: 'Approved', icon: 'fa-check-circle' }
   ];
@@ -1307,15 +1389,22 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       complete: normalizedRegistrationStatus !== 'draft'
     }
   ];
+  // Split into what's actually tracked (title text, a file present) versus what's
+  // just reference material — the old version showed all 8 as individual
+  // checkmarks that flipped together off one boolean, implying section-by-section
+  // tracking inside the uploaded file that doesn't exist.
   const documentChecklistItems = [
     { id: 'title', label: 'Title', complete: hasTitle },
-    { id: 'background', label: 'Background of the study', complete: hasDocuments },
-    { id: 'problem', label: 'Statement of the problem', complete: hasDocuments },
-    { id: 'objectives', label: 'Objectives of the study', complete: hasDocuments },
-    { id: 'significance', label: 'Significance of the study', complete: hasDocuments },
-    { id: 'scope', label: 'Scope and limitations', complete: hasDocuments },
-    { id: 'framework', label: 'Conceptual framework', complete: hasDocuments },
-    { id: 'references', label: 'References', complete: hasDocuments }
+    { id: 'concept-paper', label: 'Concept paper uploaded', complete: hasDocuments }
+  ];
+  const conceptPaperReferenceItems = [
+    'Background of the study',
+    'Statement of the problem',
+    'Objectives of the study',
+    'Significance of the study',
+    'Scope and limitations',
+    'Conceptual framework',
+    'References'
   ];
   const titleSubmissionTabs = [
     { id: 'Details', icon: 'fa-pen-to-square' },
@@ -1340,6 +1429,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   };
   const handleViewFeedback = () => {
     setActiveTab('Details');
+    setInsightsTab('Feedback');
     scrollIntoView(adviserFeedbackRef);
     window.setTimeout(() => adviserFeedbackRef.current?.focus({ preventScroll: true }), 180);
 
@@ -1374,7 +1464,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       )}
       
       {/* Unified Premium Status Card */}
-      <div className="mb-8 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] shadow-md overflow-hidden flex flex-col">
+      <div className="w-full mb-8 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] shadow-md overflow-hidden flex flex-col">
         
         {/* Top: Glassmorphic Hero Banner */}
         <div className="relative flex flex-col justify-between p-8 text-white shadow-inner md:flex-row group overflow-hidden"
@@ -1388,7 +1478,12 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             <div>
               <div className="mb-2 flex items-center gap-3">
                 <span className="text-sm font-bold tracking-wide text-white/80 uppercase">Proposal {String(activeSubmission.proposalNumber).padStart(2, '0')}</span>
-                <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md ${titleStatusTone === 'success' ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30' : titleStatusTone === 'warning' ? 'bg-amber-500/20 text-amber-100 border border-amber-500/30' : 'bg-white/10 text-white border border-white/20'}`}>
+                <span className={`rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md ${
+                  titleStatusTone === 'success' ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30' :
+                  titleStatusTone === 'warning' || titleStatusTone === 'accent' ? 'bg-amber-500/20 text-amber-100 border border-amber-500/30' :
+                  titleStatusTone === 'danger' ? 'bg-rose-500/20 text-rose-100 border border-rose-500/30' :
+                  'bg-white/10 text-white border border-white/20'
+                }`}>
                   {activeSubmission.registrationStatus}
                 </span>
               </div>
@@ -1408,25 +1503,21 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             </div>
           </div>
 
-          <div className="z-10 mt-8 flex flex-col items-start gap-10 md:mt-0 md:items-end">
-            <div className="flex flex-col gap-5 text-left md:text-right w-full">
-              <div className="bg-white/10 rounded-2xl p-5 border border-white/20 backdrop-blur-md shadow-inner w-full sm:w-[280px]">
-                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-white/70">Current Workflow Step</p>
-                <p className="flex items-center gap-2 text-[15px] font-extrabold text-white mb-4">
-                  <span className="relative mr-1 flex h-2.5 w-2.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
-                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
-                  </span>
-                  <i className={`fas ${currentStepIndex === 0 ? 'fa-file-arrow-up' : currentStepIndex === 1 ? 'fa-paper-plane' : currentStepIndex >= 4 ? 'fa-circle-check' : 'fa-magnifying-glass'} text-white/70 mr-1`}></i> 
-                  {currentStepIndex === 0 ? 'Upload Concept Paper' : currentStepIndex === 1 ? 'Submit for Adviser Review' : currentStepIndex === 2 ? 'Awaiting Adviser Review' : currentStepIndex === 3 ? 'Under Review' : 'Title Approved'}
-                </p>
-                
-                <div className="border-t border-white/10 pt-3 flex items-center justify-between">
-                  <p className="text-xs font-semibold text-white/60">Last Updated</p>
-                  <p className="flex items-center gap-1.5 text-xs font-bold text-white"><i className="fas fa-clock text-white/50"></i> {formatDateTimeLabel(activeSubmission.updated_at)}</p>
-                </div>
-              </div>
-            </div>
+          <div className="z-10 mt-8 flex flex-col items-start gap-3 md:mt-0 md:items-end">
+            {/* Next-step label lives once here; the exact same status is already
+                shown by the timeline right below and the Insights panel, so this
+                hero card no longer repeats it a third time as its own mini-card. */}
+            <p className="flex items-center gap-2 text-[15px] font-extrabold text-white">
+              <span className="relative mr-1 flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
+              </span>
+              <i className={`fas ${normalizedRegistrationStatus === 'withdrawn' ? 'fa-box-archive' : currentStepIndex === 0 ? 'fa-file-arrow-up' : currentStepIndex === 1 ? 'fa-paper-plane' : currentStepIndex >= 4 ? 'fa-circle-check' : 'fa-magnifying-glass'} text-white/70 mr-1`}></i>
+              {normalizedRegistrationStatus === 'withdrawn' ? 'Withdrawn' : currentStepIndex === 0 ? 'Upload Concept Paper' : currentStepIndex === 1 ? 'Submit for Adviser Review' : currentStepIndex === 2 ? 'Awaiting Adviser Review' : currentStepIndex === 3 ? 'Under Review' : 'Title Approved'}
+            </p>
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-white/60">
+              <i className="fas fa-clock text-white/50"></i> Updated {formatDateTimeLabel(activeSubmission.updated_at)}
+            </p>
           </div>
         </div>
 
@@ -1439,24 +1530,27 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               {/* Active Track */}
               <div className={`absolute top-6 left-[10%] -z-0 h-1.5 -translate-y-1/2 rounded-full shadow-sm transition-all duration-1000 ease-out ${
                 activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-gradient-to-r from-[var(--primary)] to-rose-500' :
+                activeSubmission.registrationStatus.toLowerCase() === 'withdrawn' ? 'bg-gradient-to-r from-[var(--primary)] to-slate-400' :
                 activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-gradient-to-r from-[var(--primary)] to-amber-500' :
                 activeSubmission.registrationStatus.toLowerCase() === 'approved' ? 'bg-gradient-to-r from-[var(--primary)] to-emerald-500' :
                 'bg-gradient-to-r from-[var(--primary)] to-[var(--primary-bright)]'
               }`} style={{ width: `calc(${(currentStepIndex / 3) * 80}%)` }}></div>
-              
+
               {TIMELINE_STEPS.map((step, idx) => {
                  const isCompleted = idx <= currentStepIndex;
                  const isCurrent = idx === currentStepIndex;
                  const isApproved = step.label === 'Approved' && isCompleted;
                  const isRejected = step.label === 'Rejected' && isCurrent;
                  const isRevision = step.label === 'Needs Revision' && isCurrent;
-                 
+                 const isWithdrawnStep = step.label === 'Withdrawn' && isCurrent;
+
                  let circleClasses = "bg-[var(--surface-alt)] border-[var(--surface)] text-[var(--muted)] border-[6px] shadow-sm";
-                 if (isCompleted && !isApproved && !isRejected && !isRevision) circleClasses = "bg-[var(--surface)] border-[var(--primary)] text-[var(--primary)] border-4 shadow-sm";
-                 if (isCurrent && !isApproved && !isRejected && !isRevision) circleClasses = "bg-[var(--primary)] border-[var(--surface)] text-white border-[6px] shadow-lg shadow-[var(--primary)]/30 scale-110";
+                 if (isCompleted && !isApproved && !isRejected && !isRevision && !isWithdrawnStep) circleClasses = "bg-[var(--surface)] border-[var(--primary)] text-[var(--primary)] border-4 shadow-sm";
+                 if (isCurrent && !isApproved && !isRejected && !isRevision && !isWithdrawnStep) circleClasses = "bg-[var(--primary)] border-[var(--surface)] text-white border-[6px] shadow-lg shadow-[var(--primary)]/30 scale-110";
                  if (isApproved) circleClasses = "bg-emerald-500 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-emerald-500/30 scale-110";
                  if (isRejected) circleClasses = "bg-rose-500 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-rose-500/30 scale-110";
                  if (isRevision) circleClasses = "bg-amber-500 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-amber-500/30 scale-110";
+                 if (isWithdrawnStep) circleClasses = "bg-slate-400 border-[var(--surface)] text-white border-[6px] shadow-lg shadow-slate-400/30 scale-110";
                  
                  return (
                    <div key={idx} className="relative z-10 flex flex-1 flex-col items-center gap-3 bg-transparent">
@@ -1477,7 +1571,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       </div>
 
       {/* Modern Premium Pill Tabs */}
-      <div className="flex items-center gap-2 bg-[var(--surface)] p-1.5 rounded-2xl border border-[var(--border)] mb-8 w-fit shadow-sm">
+      <div className="clear-both float-none flex w-full items-center gap-2 bg-[var(--surface)] p-1.5 rounded-2xl border border-[var(--border)] mb-8 max-w-fit shadow-sm">
         {titleSubmissionTabs.map((tab) => {
           const isDisabled = tab.id === 'Documents' && (!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim());
           const isActive = activeTab === tab.id;
@@ -1500,7 +1594,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
       {/* Main Grid */}
       <div className="title-submission-main-grid grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-        
+
         {/* Left Column (Documents View) */}
         <div className="title-submission-main-stack flex flex-col gap-6">
           {activeTab === 'Documents' && (
@@ -1613,6 +1707,46 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 </div>
               </div>
 
+              {/* Document Checklist — moved here from the sidebar since it's about
+                  what goes inside the file you're uploading right here, not a
+                  global status widget. */}
+              <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-[var(--surface-alt)] flex items-center justify-center shadow-sm border border-[var(--border)]">
+                      <i className="fas fa-list-check text-[var(--text-meta)] text-xs"></i>
+                    </div>
+                    <h3 className="text-sm font-bold text-[var(--text)]">Document Checklist</h3>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {documentChecklistItems.map((item) => (
+                      <span key={item.id} className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${item.complete ? 'bg-[var(--info-soft)] text-[var(--info)]' : 'bg-[var(--surface-alt)] text-[var(--text-meta)]'}`}>
+                        <i className={`fas ${item.complete ? 'fa-check' : 'fa-circle'} text-[7px]`}></i>
+                        {item.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-meta)] mb-3">
+                  Your concept paper should cover
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {conceptPaperReferenceItems.map((label) => (
+                    <span key={label} className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--muted)] bg-[var(--surface-alt)] border border-[var(--border)] rounded-full px-3 py-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--border-strong)] shrink-0"></span>
+                      {label}
+                    </span>
+                  ))}
+                  <span className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--muted)] bg-[var(--surface-alt)] border border-[var(--border)] rounded-full px-3 py-1.5">
+                    Appendices
+                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">Optional</span>
+                  </span>
+                </div>
+                <p className="text-[10px] font-medium text-[var(--text-meta)] mt-3 leading-relaxed">
+                  These aren't checked automatically — they're a reference for what to include inside your uploaded file.
+                </p>
+              </div>
+
               {/* Version History Quick View */}
               <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm">
                 <div className="p-6 border-b border-[var(--border)] flex justify-between items-center">
@@ -1674,7 +1808,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                     <input
                       id="proposedTitle"
                       type="text"
-                      value={activeSubmission.proposedTitle === 'basag' || activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
+                      value={activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
                       onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
                       placeholder="Enter the official, finalized title of your study"
                       className="block w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--muted)] focus:bg-[var(--surface)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)] hover:border-[var(--border-strong)] text-[15px] font-bold outline-none disabled:opacity-60 disabled:bg-[var(--surface-alt)]"
@@ -1747,44 +1881,48 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           <div className="title-submission-cta-panel bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-10 -translate-y-10"></div>
             <div className="flex items-center gap-5 z-10">
-              <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm relative border ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-rose-50 text-rose-600 border-rose-100' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
-                <div className={`absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-white shadow-sm border-2 border-[var(--border)] ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-rose-600' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-amber-600' : 'bg-blue-600'}`}>
-                  <i className={`fas ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' : 'fa-info'} text-[10px]`}></i>
+              <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm relative border ${normalizedRegistrationStatus === 'rejected' ? 'bg-rose-50 text-rose-600 border-rose-100' : normalizedRegistrationStatus === 'needs revision' ? 'bg-amber-50 text-amber-600 border-amber-100' : normalizedRegistrationStatus === 'withdrawn' ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                <div className={`absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-white shadow-sm border-2 border-[var(--border)] ${normalizedRegistrationStatus === 'rejected' ? 'bg-rose-600' : normalizedRegistrationStatus === 'needs revision' ? 'bg-amber-600' : normalizedRegistrationStatus === 'withdrawn' ? 'bg-slate-500' : 'bg-blue-600'}`}>
+                  <i className={`fas ${normalizedRegistrationStatus === 'rejected' ? 'fa-ban' : normalizedRegistrationStatus === 'needs revision' ? 'fa-rotate-left' : normalizedRegistrationStatus === 'withdrawn' ? 'fa-box-archive' : 'fa-info'} text-[10px]`}></i>
                 </div>
-                <i className={`fas ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-circle-xmark' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-file-pen' : 'fa-clipboard-check'} text-2xl`}></i>
+                <i className={`fas ${normalizedRegistrationStatus === 'rejected' ? 'fa-circle-xmark' : normalizedRegistrationStatus === 'needs revision' ? 'fa-file-pen' : normalizedRegistrationStatus === 'withdrawn' ? 'fa-box-archive' : 'fa-clipboard-check'} text-2xl`}></i>
               </div>
               <div>
                 <h4 className="text-base font-extrabold text-[var(--text)] mb-1">
-                   {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
-                     ? 'Your proposal has been approved!' 
-                     : activeSubmission.registrationStatus.toLowerCase() === 'rejected'
+                   {normalizedRegistrationStatus === 'approved'
+                     ? 'Your proposal has been approved!'
+                     : normalizedRegistrationStatus === 'rejected'
                      ? 'Your proposal was rejected'
-                     : activeSubmission.registrationStatus.toLowerCase() === 'needs revision'
+                     : normalizedRegistrationStatus === 'needs revision'
                      ? 'Your proposal needs revision'
-                     : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
-                     ? 'Proposal submitted successfully' 
+                     : normalizedRegistrationStatus === 'withdrawn'
+                     ? 'This proposal was withdrawn'
+                     : normalizedRegistrationStatus !== 'draft'
+                     ? 'Proposal submitted successfully'
                      : 'Ready to submit your proposal?'}
                 </h4>
                 <p className="text-[13px] text-[var(--muted)] font-medium">
-                   {activeSubmission.registrationStatus.toLowerCase() === 'approved' 
-                     ? 'Please proceed to the official title registration to complete the process.' 
-                     : activeSubmission.registrationStatus.toLowerCase() === 'rejected'
+                   {normalizedRegistrationStatus === 'approved'
+                     ? 'Please proceed to the official title registration to complete the process.'
+                     : normalizedRegistrationStatus === 'rejected'
                      ? 'Please review the adviser feedback and submit a new title proposal.'
-                     : activeSubmission.registrationStatus.toLowerCase() === 'needs revision'
+                     : normalizedRegistrationStatus === 'needs revision'
                      ? 'Please revise your concept paper based on feedback and resubmit.'
-                     : activeSubmission.registrationStatus.toLowerCase() !== 'draft' 
-                     ? 'Your adviser has been notified and is currently reviewing your concept paper.' 
+                     : normalizedRegistrationStatus === 'withdrawn'
+                     ? 'Your group chose a different title to move forward with — this one is no longer active.'
+                     : normalizedRegistrationStatus !== 'draft'
+                     ? 'Your adviser has been notified and is currently reviewing your concept paper.'
                      : 'Ensure your concept paper is fully uploaded before submitting.'}
                 </p>
               </div>
             </div>
-            
-            {activeSubmission.registrationStatus.toLowerCase() === 'approved' ? (
+
+            {normalizedRegistrationStatus === 'approved' ? (
               <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
                 <div className="w-full sm:w-auto bg-[var(--info-soft)] text-[var(--info)] text-sm font-extrabold px-6 py-3.5 rounded-xl border-2 border-[var(--info)] flex items-center justify-center gap-3 whitespace-nowrap">
                   <i className="fas fa-circle-check"></i> Title Approved
                 </div>
-                <button 
+                <button
                   type="button"
                   onClick={handleCreateSubmission}
                   className="w-full sm:w-auto bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[#003A8F] hover:text-[var(--info)] text-[var(--muted)] text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
@@ -1792,15 +1930,26 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                   <i className="fas fa-plus"></i> Submit Another Title
                 </button>
               </div>
-            ) : activeSubmission.registrationStatus.toLowerCase() !== 'draft' ? (
+            ) : normalizedRegistrationStatus !== 'draft' ? (
               <div className="flex flex-col sm:flex-row items-center gap-3 z-10 w-full sm:w-auto">
-                <button 
+                <button
                   disabled
-                  className={`w-full sm:w-auto text-sm font-extrabold px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 whitespace-nowrap cursor-not-allowed ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'bg-rose-50 text-rose-600 border border-rose-200' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-[var(--surface-alt)] text-[var(--text-meta)]'}`}
+                  className={`w-full sm:w-auto text-sm font-extrabold px-6 py-3.5 rounded-xl flex items-center justify-center gap-3 whitespace-nowrap cursor-not-allowed ${normalizedRegistrationStatus === 'rejected' ? 'bg-rose-50 text-rose-600 border border-rose-200' : normalizedRegistrationStatus === 'needs revision' ? 'bg-amber-50 text-amber-600 border border-amber-200' : normalizedRegistrationStatus === 'withdrawn' ? 'bg-slate-100 text-slate-500 border border-slate-200' : 'bg-[var(--surface-alt)] text-[var(--text-meta)]'}`}
                 >
-                  {activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'Proposal Rejected' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'Revision Required' : 'Proposal Under Review'} <i className={`fas ${activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'fa-ban' : activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'fa-rotate-left' : 'fa-clock'} text-xs`}></i>
+                  {normalizedRegistrationStatus === 'rejected' ? 'Proposal Rejected' : normalizedRegistrationStatus === 'needs revision' ? 'Revision Required' : normalizedRegistrationStatus === 'withdrawn' ? 'Withdrawn by Your Group' : 'Proposal Under Review'} <i className={`fas ${normalizedRegistrationStatus === 'rejected' ? 'fa-ban' : normalizedRegistrationStatus === 'needs revision' ? 'fa-rotate-left' : normalizedRegistrationStatus === 'withdrawn' ? 'fa-box-archive' : 'fa-clock'} text-xs`}></i>
                 </button>
-                <button 
+                {canChooseSubmission(activeSubmission) && choosablePendingCount > 1 && (
+                  <button
+                    type="button"
+                    disabled={isChoosingTitle}
+                    onClick={() => handleChooseTitle(activeSubmission.id)}
+                    title="Choose this as your group's final title and withdraw the others"
+                    className="w-full sm:w-auto bg-emerald-50 border-2 border-emerald-200 hover:bg-emerald-100 text-emerald-700 text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-60"
+                  >
+                    <i className="fas fa-circle-check"></i> Choose as Final Title
+                  </button>
+                )}
+                <button
                   type="button"
                   onClick={handleCreateSubmission}
                   className="w-full sm:w-auto bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[#003A8F] hover:text-[var(--info)] text-[var(--muted)] text-sm font-extrabold px-6 py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap"
@@ -1826,199 +1975,263 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           </div>
         </div>
 
-        {/* Right Column - Made Sticky for Better UX */}
-        <div className="title-submission-side-rail flex flex-col gap-6 sticky top-8 h-fit animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 ease-out fill-mode-both">
-           <div className="bg-[var(--surface)] rounded-[1.5rem] border border-[var(--border)] shadow-md p-6 relative overflow-hidden" style={titleProgressStyle}>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary-soft)] rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
-             
-             <div className="flex items-center justify-between gap-4 mb-8">
-               <div>
-                 <h3 className="text-[12px] font-black text-[var(--text)] uppercase tracking-widest mb-1">Workflow Progress</h3>
-                 <p className="text-xs font-semibold text-[var(--muted)]">{nextActionLabel}</p>
-               </div>
-               <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface-alt)] shadow-inner border border-[var(--border)]">
-                 <svg className="absolute inset-0 h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
-                   <path className="text-[var(--border)]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                   <path className={`transition-all duration-1000 ease-out ${
-                     activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'text-rose-500' :
-                     activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'text-amber-500' :
-                     activeSubmission.registrationStatus.toLowerCase() === 'approved' ? 'text-emerald-500' :
-                     'text-[var(--primary)]'
-                   }`} strokeDasharray={`${submissionProgressPercent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                 </svg>
-                 <span className="text-[13px] font-black text-[var(--text)]">{submissionProgressPercent}%</span>
-               </div>
-             </div>
-             
-             <div className="flex flex-col gap-5">
-               {readinessItems.map((item, idx) => (
-                 <div key={item.id} className="flex gap-4 relative">
-                   {idx !== readinessItems.length - 1 && (
-                     <div className={`absolute top-8 left-3 w-0.5 h-full -ml-[1px] ${item.complete ? 'bg-[var(--primary)]' : 'bg-[var(--border)]'} transition-colors duration-500`}></div>
-                   )}
-                   <div className="relative z-10 shrink-0">
-                     <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors duration-500 ${item.complete ? 'border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--muted)]'}`}>
-                       <i className={`fas ${item.complete ? 'fa-check text-[10px]' : 'fa-circle text-[6px]'}`} aria-hidden="true" />
-                     </div>
-                   </div>
-                   <div className={`flex flex-col pb-2 ${!item.complete ? 'opacity-70' : ''}`}>
-                     <strong className={`text-[13px] font-extrabold ${item.complete ? 'text-[var(--text)]' : 'text-[var(--muted)]'}`}>{item.label}</strong>
-                     <small className="text-[11px] font-semibold text-[var(--text-meta)] mt-0.5">{item.detail}</small>
-                   </div>
-                 </div>
-               ))}
-             </div>
-           </div>
-           
-           {/* Proposal Options Selector */}
-           {visibleSubmissions.length > 1 && (
-            <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 relative overflow-hidden">
-               <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-4 uppercase tracking-wider">Your Proposals</h3>
-               <div className="space-y-2">
-                 {visibleSubmissions.map((sub) => (
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      key={sub.id}
-                      onClick={() => handleSelectSubmission(sub.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleSelectSubmission(sub.id);
-                        }
-                      }}
-                      className={`w-full text-left p-3 rounded-xl text-sm font-bold border transition-all flex items-center justify-between gap-2 cursor-pointer ${
-                        activeSubmissionId === sub.id
-                        ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm'
-                        : 'bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)]'
+        {/* Right Column - Unified Insights Panel */}
+        <div className="title-submission-side-rail sticky top-8 h-fit animate-in fade-in slide-in-from-bottom-6 duration-700 delay-150 ease-out fill-mode-both">
+          <div className="bg-[var(--surface)] rounded-[1.5rem] border border-[var(--border)] shadow-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary-soft)] rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+
+            {/* Panel header: ring + segmented tabs — replaces 6 separately-scrolling
+                cards (Workflow Progress, Recent Activity, Your Proposals, Adviser
+                Review, Duplicate Check, Analytics) with one panel, since a student
+                only ever needs one of those views at a time, not all six stacked. */}
+            <div className="p-6 pb-0 relative z-10">
+              <div className="flex items-center justify-between gap-4 mb-5">
+                <div>
+                  <h3 className="text-[12px] font-black text-[var(--text)] uppercase tracking-widest mb-1">Insights</h3>
+                  <p className="text-xs font-semibold text-[var(--muted)]">{nextActionLabel}</p>
+                </div>
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface-alt)] shadow-inner border border-[var(--border)]">
+                  <svg className="absolute inset-0 h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
+                    <path className="text-[var(--border)]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                    <path className={`transition-all duration-1000 ease-out ${
+                      activeSubmission.registrationStatus.toLowerCase() === 'rejected' ? 'text-rose-500' :
+                      activeSubmission.registrationStatus.toLowerCase() === 'needs revision' ? 'text-amber-500' :
+                      activeSubmission.registrationStatus.toLowerCase() === 'approved' ? 'text-emerald-500' :
+                      'text-[var(--primary)]'
+                    }`} strokeDasharray={`${submissionProgressPercent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                  </svg>
+                  <span className="text-[13px] font-black text-[var(--text)]">{submissionProgressPercent}%</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 bg-[var(--surface-alt)] p-1 rounded-xl border border-[var(--border)] mb-6">
+                {(['Overview', 'Feedback', 'History'] as const).map((tab) => {
+                  const hasFeedbackFlag = tab === 'Feedback' && Boolean(activeSubmission.validation?.matchedTitles.length);
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setInsightsTab(tab)}
+                      className={`relative flex-1 min-h-[34px] rounded-lg text-[11px] font-extrabold uppercase tracking-wide transition-all ${
+                        insightsTab === tab ? 'bg-[var(--surface)] text-[var(--primary)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--text)]'
                       }`}
                     >
-                      <span className="truncate flex-1">{sub.proposalLabel}</span>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-[9px] px-2 py-0.5 rounded uppercase tracking-widest ${
-                           sub.registrationStatus.toLowerCase() === 'approved' ? 'bg-[var(--info-soft)] text-[var(--info)]' :
-                           sub.registrationStatus.toLowerCase() === 'draft' ? 'bg-slate-200 text-[var(--muted)]' :
-                           'bg-[var(--warning-soft)] text-[var(--warning)]'
-                        }`}>
-                          {sub.registrationStatus}
-                        </span>
-                        {canDeleteDraftSubmission(sub) && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteDraftSubmission(sub.id);
-                            }}
-                            className="text-[var(--text-meta)] hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 ml-1"
-                            aria-label={`Delete ${sub.proposalLabel} draft`}
-                            title="Delete Draft"
-                          >
-                            <i className="fas fa-trash-alt text-xs"></i>
-                          </button>
+                      {tab}
+                      {hasFeedbackFlag && (
+                        <span className="absolute top-1.5 right-2.5 h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="px-6 pb-6 relative z-10">
+              {insightsTab === 'Overview' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col gap-5">
+                    {readinessItems.map((item, idx) => (
+                      <div key={item.id} className="flex gap-4 relative">
+                        {idx !== readinessItems.length - 1 && (
+                          <div className={`absolute top-8 left-3 w-0.5 h-full -ml-[1px] ${item.complete ? 'bg-[var(--primary)]' : 'bg-[var(--border)]'} transition-colors duration-500`}></div>
                         )}
+                        <div className="relative z-10 shrink-0">
+                          <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors duration-500 ${item.complete ? 'border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm shadow-[var(--primary)]/30' : 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--muted)]'}`}>
+                            <i className={`fas ${item.complete ? 'fa-check text-[10px]' : 'fa-circle text-[6px]'}`} aria-hidden="true" />
+                          </div>
+                        </div>
+                        <div className={`flex flex-col pb-2 ${!item.complete ? 'opacity-70' : ''}`}>
+                          <strong className={`text-[13px] font-extrabold ${item.complete ? 'text-[var(--text)]' : 'text-[var(--muted)]'}`}>{item.label}</strong>
+                          <small className="text-[11px] font-semibold text-[var(--text-meta)] mt-0.5">{item.detail}</small>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-5 border-t border-[var(--border)]">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-meta)] mb-4">Recent Activity</p>
+                    {activeSubmission.revisionHistory.length > 0 ? (
+                      <div className="relative border-l-2 border-[var(--border)] ml-2 space-y-5">
+                        {activeSubmission.revisionHistory.slice(0, 4).map((hist, i) => (
+                          <div key={i} className="relative pl-5">
+                            <div className={`absolute -left-[9px] top-0.5 h-4 w-4 rounded-full border-[3px] border-[var(--border)] shadow-sm ${hist.status.toLowerCase().includes('approved') ? 'bg-[#003A8F]' : hist.status.toLowerCase().includes('submitted') ? 'bg-[#F6BE00]' : 'bg-[var(--border)]'}`}></div>
+                            <p className="text-xs font-bold text-[var(--text)] leading-snug">{hist.note}</p>
+                            <p className="text-[10px] font-bold text-[var(--text-meta)] mt-1.5 uppercase tracking-wide">{hist.dateLabel}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center text-center py-3">
+                        <div className="h-11 w-11 rounded-2xl bg-[var(--surface-alt)] flex items-center justify-center text-[var(--text-meta)] mb-3">
+                          <i className="fas fa-clock-rotate-left text-base"></i>
+                        </div>
+                        <p className="text-xs font-bold text-[var(--muted)]">No activity yet</p>
+                        <p className="text-[11px] font-medium text-[var(--text-meta)] mt-1 max-w-[200px] leading-relaxed">Submit this proposal to your adviser to start the activity log.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {insightsTab === 'Feedback' && (
+                <div ref={adviserFeedbackRef} tabIndex={-1} className={`space-y-6 ${isFeedbackHighlighted ? 'is-feedback-focused' : ''}`}>
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-meta)] mb-4">Adviser Review Status</p>
+                    <div className="flex items-center gap-4 mb-4">
+                      <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(activeSubmission.adviser)}&background=0D8ABC&color=fff`} alt={activeSubmission.adviser} className="h-12 w-12 rounded-full shadow-sm ring-2 ring-white" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-extrabold text-[var(--text)] flex items-center justify-between w-full">
+                          <span className="truncate">{activeSubmission.adviser}</span>
+                          <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-widest ${adviserStatusToneClasses.soft} ${adviserStatusToneClasses.text}`}>
+                            {activeSubmission.registrationStatus}
+                          </span>
+                        </p>
+                        <p className="text-[11px] text-[var(--text-meta)] font-bold mt-1.5 uppercase tracking-wide">Reviewed on {formatDateTimeLabel(activeSubmission.lastReviewedAt)}</p>
                       </div>
                     </div>
-                  ))}
-               </div>
-             </div>
-           )}
-           
-           {/* Adviser Review Status */}
-           <div
-             ref={adviserFeedbackRef}
-             tabIndex={-1}
-             className={`title-submission-adviser-feedback-card bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 relative overflow-hidden ${isFeedbackHighlighted ? 'is-feedback-focused' : ''}`}
-           >
-             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-2xl -z-10 translate-x-4 -translate-y-4"></div>
-             <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-6 uppercase tracking-wider">Adviser Review Status</h3>
-             <div className="flex items-center gap-4 mb-6 relative z-10">
-               <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(activeSubmission.adviser)}&background=0D8ABC&color=fff`} alt={activeSubmission.adviser} className="h-12 w-12 rounded-full shadow-sm ring-2 ring-white" />
-               <div className="flex-1 min-w-0">
-                 <p className="text-sm font-extrabold text-[var(--text)] flex items-center justify-between w-full">
-                    <span className="truncate">{activeSubmission.adviser}</span>
-                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-widest ${titleStatusTone === 'success' ? 'bg-[var(--info-soft)] text-[var(--info)]' : 'bg-[var(--warning-soft)] text-[var(--warning)]'}`}>
-                      {activeSubmission.registrationStatus}
-                    </span>
-                 </p>
-                 <p className="text-[11px] text-[var(--text-meta)] font-bold mt-1.5 uppercase tracking-wide">Reviewed on {formatDateTimeLabel(activeSubmission.lastReviewedAt)}</p>
-               </div>
-             </div>
-             <div className={`p-4 rounded-xl text-[13px] font-semibold leading-relaxed border ${titleStatusTone === 'success' ? 'bg-[var(--info-soft)] border-[var(--info)] text-[var(--info)]' : 'bg-[var(--warning-soft)] border-[var(--warning)] text-[var(--warning)]'}`}>
-               {activeSubmission.statusNote || 'Waiting for adviser review. Comments and remarks will appear here.'}
-             </div>
-           </div>
-           
-           {/* Document Checklist */}
-           <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6">
-             <div className="flex justify-between items-center mb-6">
-               <h3 className="text-[13px] font-extrabold text-[var(--text)] uppercase tracking-wider">Document Checklist</h3>
-               <div className="h-8 w-8 rounded-full bg-[var(--surface-alt)] flex items-center justify-center shadow-sm border border-[var(--border)]">
-                  <i className="fas fa-list-check text-[var(--text-meta)] text-xs"></i>
-               </div>
-             </div>
-             <ul className="space-y-4">
-               {documentChecklistItems.map((item) => (
-                 <li key={item.id} className="flex items-center gap-3 text-xs font-bold text-[var(--muted)]">
-                    <div className={`h-4 w-4 rounded-full flex items-center justify-center shrink-0 ${item.complete ? 'bg-[var(--info-soft)] text-[var(--info)]' : 'bg-[var(--surface-alt)] text-[var(--text-meta)]'}`}>
-                      <i className={`fas ${item.complete ? 'fa-check' : 'fa-circle'} text-[8px]`}></i>
+                    <div className={`p-4 rounded-xl text-[13px] font-semibold leading-relaxed border ${adviserStatusToneClasses.soft} ${adviserStatusToneClasses.border} ${adviserStatusToneClasses.text}`}>
+                      {activeSubmission.statusNote || 'Waiting for adviser review. Comments and remarks will appear here.'}
                     </div>
-                    {item.label}
-                 </li>
-               ))}
-               <li className="flex items-center justify-between text-xs font-bold text-[var(--muted)] mt-4 pt-4 border-t border-[var(--border)]">
-                  <div className="flex items-center gap-3">
-                    <div className="h-4 w-4 rounded-full bg-[var(--surface-alt)] text-[var(--text-meta)] flex items-center justify-center shrink-0"><i className="fas fa-asterisk text-[8px]"></i></div>
-                    Appendices (if applicable)
                   </div>
-                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-[var(--text-meta)] bg-[var(--surface-alt)] px-2 py-1 rounded-md">Optional</span>
-               </li>
-             </ul>
-           </div>
-           
-           {/* Submission Analytics */}
-           <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6">
-             <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-5 uppercase tracking-wider">Submission Analytics</h3>
-             <div className="grid grid-cols-4 gap-2">
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-file-lines text-xs"></i></div>
-                 <span className="text-sm font-extrabold text-[var(--text)]">{submissions.filter(s => !['draft', 'pending', 'awaiting title'].includes(s.registrationStatus?.toLowerCase())).length}</span>
-                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Submits</span>
-               </div>
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-[var(--surface-alt)] text-[var(--muted)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-clock text-xs"></i></div>
-                  <span className="text-sm font-extrabold text-[var(--text)]">N/A</span>
-                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Avg. Days</span>
-               </div>
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-[var(--warning-soft)] text-[var(--warning)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-shield-halved text-xs"></i></div>
-                  <span className="text-sm font-extrabold text-[var(--text)]">N/A</span>
-                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Approval</span>
-               </div>
-               <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors">
-                 <div className="h-7 w-7 rounded-lg bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-chart-pie text-xs"></i></div>
-                  <span className="text-sm font-extrabold text-[var(--text)]">{submissionProgressPercent}%</span>
-                 <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Complete</span>
-               </div>
-             </div>
-           </div>
-           
-           {/* Recent Activity */}
-           <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6">
-             <h3 className="text-[13px] font-extrabold text-[var(--text)] mb-6 uppercase tracking-wider">Recent Activity</h3>
-             <div className="relative border-l-2 border-[var(--border)] ml-2 space-y-6">
-               {activeSubmission.revisionHistory.slice(0, 4).map((hist, i) => (
-                 <div key={i} className="relative pl-5">
-                   <div className={`absolute -left-[9px] top-0.5 h-4 w-4 rounded-full border-[3px] border-[var(--border)] shadow-sm ${hist.status.toLowerCase().includes('approved') ? 'bg-[#003A8F]' : hist.status.toLowerCase().includes('submitted') ? 'bg-[#F6BE00]' : 'bg-[var(--border)]'}`}></div>
-                   <p className="text-xs font-bold text-[var(--text)] leading-snug">{hist.note}</p>
-                   <p className="text-[10px] font-bold text-[var(--text-meta)] mt-1.5 uppercase tracking-wide">{hist.dateLabel}</p>
-                 </div>
-               ))}
-               {activeSubmission.revisionHistory.length === 0 && (
-                 <div className="pl-5 text-xs font-medium text-[var(--text-meta)]">No recent activity on this proposal.</div>
-               )}
-             </div>
-           </div>
 
+                  {normalizedRegistrationStatus !== 'draft' && activeSubmission.validation && (
+                    <div className="pt-5 border-t border-[var(--border)]">
+                      <div className="flex justify-between items-center mb-4">
+                        <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">Duplicate Title Check</p>
+                        <div className={`h-7 w-7 rounded-full flex items-center justify-center shadow-sm border ${
+                          activeSubmission.validation.matchedTitles.length ? 'bg-amber-50 border-amber-200 text-amber-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                        }`}>
+                          <i className={`fas ${activeSubmission.validation.matchedTitles.length ? 'fa-triangle-exclamation' : 'fa-check'} text-xs`}></i>
+                        </div>
+                      </div>
+                      <p className="text-[13px] font-semibold text-[var(--text)] mb-1">{activeSubmission.validation.status}</p>
+                      <p className="text-[11px] text-[var(--text-meta)] font-medium leading-relaxed mb-4">{activeSubmission.validation.note}</p>
+                      {activeSubmission.validation.matchedTitles.length > 0 && (
+                        <ul className="space-y-2">
+                          {activeSubmission.validation.matchedTitles.map((match) => (
+                            <li key={match.id} className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                              <p className="text-[12px] font-bold text-amber-900 leading-snug">{match.title}</p>
+                              <p className="text-[10px] font-bold uppercase tracking-wide text-amber-700 mt-1">{match.matchLabel}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {insightsTab === 'History' && (
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-meta)] mb-2">Your Proposals</p>
+                    {visibleSubmissions.length > 1 ? (
+                      <>
+                        <p className="text-[11px] font-semibold text-[var(--text-meta)] mb-4 leading-relaxed">
+                          {choosablePendingCount > 1
+                            ? `You have ${choosablePendingCount} candidate titles waiting on a decision. Tap the checkmark on your favorite to make it your group's final pick — the rest will be withdrawn.`
+                            : 'Every title your group has submitted, including past ones. Tap a row to view its full details and feedback.'}
+                        </p>
+                        <div className="space-y-2">
+                          {visibleSubmissions.map((sub) => (
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              key={sub.id}
+                              onClick={() => handleSelectSubmission(sub.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleSelectSubmission(sub.id);
+                                }
+                              }}
+                              className={`w-full text-left p-3 rounded-xl text-sm font-bold border transition-all flex items-center justify-between gap-2 cursor-pointer ${
+                                activeSubmissionId === sub.id
+                                ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm'
+                                : 'bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)]'
+                              }`}
+                            >
+                              <span className="truncate flex-1">{sub.proposalLabel}</span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className={`text-[9px] px-2 py-0.5 rounded uppercase tracking-widest ${
+                                  sub.registrationStatus.toLowerCase() === 'approved' ? 'bg-[var(--info-soft)] text-[var(--info)]' :
+                                  sub.registrationStatus.toLowerCase() === 'draft' ? 'bg-slate-200 text-[var(--muted)]' :
+                                  sub.registrationStatus.toLowerCase() === 'withdrawn' ? 'bg-slate-100 text-[var(--text-meta)]' :
+                                  sub.registrationStatus.toLowerCase() === 'rejected' ? 'bg-rose-100 text-rose-700' :
+                                  'bg-[var(--warning-soft)] text-[var(--warning)]'
+                                }`}>
+                                  {sub.registrationStatus}
+                                </span>
+                                {canChooseSubmission(sub) && (
+                                  <button
+                                    type="button"
+                                    disabled={isChoosingTitle}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleChooseTitle(sub.id);
+                                    }}
+                                    className="text-[var(--text-meta)] hover:text-emerald-600 transition-colors p-1 rounded hover:bg-emerald-50 ml-1 disabled:opacity-50"
+                                    aria-label={`Choose ${sub.proposalLabel} as your final title`}
+                                    title="Choose as Final Title"
+                                  >
+                                    <i className="fas fa-circle-check text-xs"></i>
+                                  </button>
+                                )}
+                                {canDeleteDraftSubmission(sub) && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteDraftSubmission(sub.id);
+                                    }}
+                                    className="text-[var(--text-meta)] hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50 ml-1"
+                                    aria-label={`Delete ${sub.proposalLabel} draft`}
+                                    title="Delete Draft"
+                                  >
+                                    <i className="fas fa-trash-alt text-xs"></i>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-[11px] font-semibold text-[var(--text-meta)] leading-relaxed">
+                        You've only submitted one title so far. Once your group has more than one candidate, they'll all show up here so you can pick a favorite.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-5 border-t border-[var(--border)]">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--text-meta)] mb-4">Submission Analytics</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)]">
+                        <div className="h-7 w-7 rounded-lg bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-file-lines text-xs"></i></div>
+                        <span className="text-sm font-extrabold text-[var(--text)]">{submissions.filter(s => !['draft', 'pending', 'awaiting title'].includes(s.registrationStatus?.toLowerCase())).length}</span>
+                        <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Submits</span>
+                      </div>
+                      <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)]">
+                        <div className="h-7 w-7 rounded-lg bg-[var(--surface-alt)] text-[var(--muted)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-clock text-xs"></i></div>
+                        <span className="text-sm font-extrabold text-[var(--text)]">{avgReviewDaysLabel}</span>
+                        <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Avg. Days</span>
+                      </div>
+                      <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)]">
+                        <div className="h-7 w-7 rounded-lg bg-[var(--warning-soft)] text-[var(--warning)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-shield-halved text-xs"></i></div>
+                        <span className="text-sm font-extrabold text-[var(--text)]">{approvalRateLabel}</span>
+                        <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Approval</span>
+                      </div>
+                      <div className="flex flex-col items-center text-center p-3 rounded-[1rem] border border-[var(--border)] bg-[var(--surface-alt)]">
+                        <div className="h-7 w-7 rounded-lg bg-[var(--info-soft)] text-[var(--info)] flex items-center justify-center mb-2 shadow-sm"><i className="fas fa-chart-pie text-xs"></i></div>
+                        <span className="text-sm font-extrabold text-[var(--text)]">{submissionProgressPercent}%</span>
+                        <span className="text-[8px] font-bold text-[var(--text-meta)] uppercase tracking-widest mt-1">Complete</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

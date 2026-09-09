@@ -18,11 +18,13 @@ import {
   getSubmissionMilestoneOptions,
   getSubmissionTypeOptions,
   toAdviserSubmissionRecord,
+  toAdviserSubmissionRecordFromTitle,
   type AdviserSubmissionRecord,
   type SubmissionMilestone,
   type SubmissionSortOption,
   type SubmissionStatus,
-  type SubmissionType
+  type SubmissionType,
+  type TitleSubmissionSummary
 } from '@/components/adviser/adviser-mode/data/submission-workspace-data';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
@@ -35,13 +37,17 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
   const [sortBy, setSortBy] = useState<SubmissionSortOption>('deadline');
   const [searchValue, setSearchValue] = useState('');
   const [studentDocuments, setStudentDocuments] = useState<DocumentFileSummary[]>([]);
+  const [titleSubmissions, setTitleSubmissions] = useState<TitleSubmissionSummary[]>([]);
   const [studentDocumentError, setStudentDocumentError] = useState<string | null>(null);
   const [isLoadingStudentDocuments, setIsLoadingStudentDocuments] = useState(true);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const submissions = useMemo<AdviserSubmissionRecord[]>(
-    () => studentDocuments.map((file, index) => toAdviserSubmissionRecord(file, index)),
-    [studentDocuments]
+    () => [
+      ...studentDocuments.map((file, index) => toAdviserSubmissionRecord(file, index)),
+      ...titleSubmissions.map((title) => toAdviserSubmissionRecordFromTitle(title))
+    ],
+    [studentDocuments, titleSubmissions]
   );
 
   const typeOptions = useMemo(() => getSubmissionTypeOptions(submissions), [submissions]);
@@ -88,7 +94,22 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
       }
     };
 
+    const loadTitleSubmissions = async () => {
+      try {
+        const response = await fetch('/api/title-submissions?limit=50', { cache: 'no-store' });
+        const payload = await response.json().catch(() => null);
+
+        if (response.ok && !cancelled) {
+          setTitleSubmissions(payload?.titles || []);
+        }
+      } catch {
+        // Best-effort: titles are additive to this queue, not the primary data source,
+        // so a failure here shouldn't block or error out the document review list.
+      }
+    };
+
     loadStudentDocuments();
+    loadTitleSubmissions();
 
     return () => {
       cancelled = true;
@@ -162,6 +183,15 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
   }
 
   function downloadSubmissionDocument(submission: AdviserSubmissionRecord) {
+    // Title rows aren't backed by a document-files record — they carry the file's
+    // direct URL (if the student attached one) instead of an id this endpoint knows.
+    if (submission.type === 'Title') {
+      if (submission.fileUrl) {
+        window.open(submission.fileUrl, '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+
     window.open(`/api/document-files/${submission.id}/download`, '_blank', 'noopener,noreferrer');
   }
 

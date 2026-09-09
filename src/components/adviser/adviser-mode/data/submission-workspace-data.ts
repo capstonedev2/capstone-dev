@@ -5,8 +5,9 @@ export function getReviewReferenceDate() {
 }
 
 export type SubmissionStatus = 'pending-review' | 'under-review' | 'needs-revision' | 'approved';
-export type SubmissionType = 'Proposal' | 'Chapter' | 'Final';
+export type SubmissionType = 'Title' | 'Proposal' | 'Chapter' | 'Final';
 export type SubmissionMilestone =
+  | 'Title Screening'
   | 'Proposal Screening'
   | 'Chapter 1 Review'
   | 'Chapter 3 Review'
@@ -462,6 +463,106 @@ export function toAdviserSubmissionRecord(file: DocumentFileSummary, index = 0):
     comments: buildComments(status, version, milestone, file.reviewComments || [], latestReviewComment),
     versionHistory: buildVersionHistory(file, currentVersionNumber, submittedBy),
     timeline: buildTimeline({ file, status, submittedBy, adviserName, reviewedAt, currentVersionNumber })
+  };
+}
+
+export type TitleSubmissionSummary = {
+  id: string;
+  groupId: string;
+  groupTitle: string | null;
+  title: string;
+  status: 'draft' | 'pending' | 'approved' | 'needs-revision' | 'rejected';
+  submittedAt: string;
+  reviewedAt: string | null;
+  membersCount: number;
+  groupMembers: Array<{ name: string; role: string; isLeader: boolean }>;
+  latestReviewComment: {
+    id: string;
+    body: string;
+    decision: string;
+    createdAt: string;
+    authorName?: string | null;
+  } | null;
+  uploadedFiles: Array<{ id: string; name: string; url: string; fileType: string }>;
+};
+
+function mapTitleStatus(status: TitleSubmissionSummary['status']): SubmissionStatus {
+  switch (status) {
+    case 'approved':
+      return 'approved';
+    case 'needs-revision':
+    case 'rejected':
+      return 'needs-revision';
+    default:
+      return 'pending-review';
+  }
+}
+
+/**
+ * Surfaces title proposals inside the same Document Submissions list as chapters
+ * and manuscripts, read-only — the actual Approve/Reject actions still only live
+ * on the dedicated Title Approvals page, since that flow drives Group/Project
+ * status and shouldn't be duplicated here. This just makes titles visible and
+ * filterable alongside everything else an adviser has waiting on them.
+ */
+export function toAdviserSubmissionRecordFromTitle(title: TitleSubmissionSummary): AdviserSubmissionRecord {
+  const submittedAt = asIsoString(title.submittedAt) || getReviewReferenceDate();
+  const status = mapTitleStatus(title.status);
+  const milestone: SubmissionMilestone = 'Title Screening';
+  const submittedBy = title.groupMembers.find((member) => member.isLeader)?.name
+    || title.groupMembers[0]?.name
+    || 'Project Member';
+  const reviewedAt = asIsoString(title.reviewedAt);
+  const attachedFile = title.uploadedFiles[0] || null;
+  const commentCategories = inferCommentCategories(status, milestone, title.latestReviewComment);
+
+  return {
+    id: `title-${title.id}`,
+    groupId: title.groupId,
+    projectTitle: `${title.groupTitle || title.groupId} — Title Proposal`,
+    submissionTitle: title.title,
+    type: 'Title',
+    milestone,
+    status,
+    statusLabel: getSubmissionStatusMeta(status).label,
+    version: 'v1',
+    currentVersionNumber: 1,
+    submittedAt,
+    deadline: null,
+    submittedBy,
+    groupMembers: title.groupMembers,
+    latestReviewComment: title.latestReviewComment,
+    reviewedAt,
+    reviewFocus: `${submittedBy} proposed a title for adviser review under ${title.groupId}.`,
+    nextAction: 'Open Title Approvals to accept, request revision, or reject this proposed title.',
+    fileUrl: attachedFile?.url || '',
+    fileType: attachedFile?.fileType || 'title',
+    fileExtension: attachedFile ? getFileExtension(attachedFile.name) : 'title',
+    documentCategory: 'Title Proposal',
+    department: 'IT',
+    approvedAt: status === 'approved' ? reviewedAt || submittedAt : undefined,
+    workspaceHref: '/adviser/adviser-mode/title-approvals',
+    deadlineProgress: getDeadlineProgress(submittedAt, null, status),
+    workflowStepIndex: getWorkflowStepIndex(status, 1),
+    commentCategories,
+    comments: title.latestReviewComment
+      ? buildComments(status, 'v1', milestone, [], title.latestReviewComment)
+      : [],
+    versionHistory: [{
+      id: `title-${title.id}-v1`,
+      version: 'v1',
+      label: 'Title Proposal',
+      uploadedAt: submittedAt,
+      uploader: submittedBy,
+      isCurrent: true
+    }],
+    timeline: [
+      { id: 'submitted', label: 'Submitted by student', actor: submittedBy, occurredAt: submittedAt, isComplete: true },
+      { id: 'under-review', label: 'Adviser review pending', actor: 'Adviser', occurredAt: submittedAt, isComplete: status !== 'pending-review' },
+      { id: 'revision-requested', label: 'Revision requested', actor: 'Adviser', occurredAt: reviewedAt || submittedAt, isComplete: status === 'needs-revision' },
+      { id: 'resubmitted', label: 'Student resubmitted', actor: submittedBy, occurredAt: submittedAt, isComplete: false },
+      { id: 'approved', label: 'Approved by adviser', actor: 'Adviser', occurredAt: reviewedAt || submittedAt, isComplete: status === 'approved' }
+    ]
   };
 }
 

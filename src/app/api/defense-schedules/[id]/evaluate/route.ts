@@ -15,8 +15,11 @@ type EvaluateBody = {
 async function finalizeDefenseSchedule(
   scheduleId: string,
   projectId: string,
+  projectTitle: string,
   scheduleTitle: string,
-  evaluations: Array<{ recommendation: string }>
+  evaluations: Array<{ recommendation: string }>,
+  notifyUserIds: string[],
+  groupId: string | null
 ) {
   await prisma.defenseSchedule.update({
     where: { id: scheduleId },
@@ -53,6 +56,34 @@ async function finalizeDefenseSchedule(
       scheduleTitle,
       outcome: 'passed'
     });
+
+    // Clear the "Needs Revision" flag a prior rejected defense may have set — a
+    // group that just passed (including a redefense) isn't flagged anymore.
+    // Without this, a group that recovers from a rejection stays stuck showing
+    // "Needs Revision" and the loud demotion panel forever, even after passing.
+    if (groupId) {
+      await prisma.group.update({
+        where: { id: groupId },
+        data: {
+          status: 'active',
+          statusLabel: 'Active',
+          statusClass: 'status-active'
+        }
+      });
+    }
+
+    if (notifyUserIds.length) {
+      await prisma.notification.createMany({
+        data: notifyUserIds.map((userId) => ({
+          userId,
+          title: 'Defense Passed',
+          message: `"${projectTitle}" passed its ${scheduleTitle} defense.`,
+          type: 'success',
+          entityType: 'Project',
+          entityId: projectId
+        }))
+      });
+    }
   } else if (noVotes > yesVotes) {
     await prisma.project.update({
       where: { id: projectId },
@@ -66,6 +97,34 @@ async function finalizeDefenseSchedule(
       scheduleTitle,
       outcome: 'redefense'
     });
+
+    // Keep the group's lifecycle status badge in sync with the real defense
+    // outcome — without this, Group.status silently keeps whatever value it
+    // had before the vote (often still "Pending" or "Active"), so the group
+    // list shows a rejected group as if nothing happened.
+    if (groupId) {
+      await prisma.group.update({
+        where: { id: groupId },
+        data: {
+          status: 'needs-revision',
+          statusLabel: 'Needs Revision',
+          statusClass: 'status-revise'
+        }
+      });
+    }
+
+    if (notifyUserIds.length) {
+      await prisma.notification.createMany({
+        data: notifyUserIds.map((userId) => ({
+          userId,
+          title: 'Defense Not Passed',
+          message: `"${projectTitle}" did not pass its ${scheduleTitle} defense — awaiting the panel chair's decision on next steps.`,
+          type: 'warning',
+          entityType: 'Project',
+          entityId: projectId
+        }))
+      });
+    }
   }
 }
 
@@ -133,7 +192,18 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const shouldFinalize = schedule.status !== DefenseStatus.COMPLETED && (allVoted || (isChair && body.isChairSubmit));
 
     if (shouldFinalize) {
-      await finalizeDefenseSchedule(schedule.id, schedule.projectId, schedule.title, allEvaluations);
+      const notifyUserIds = Array.from(
+        new Set([schedule.project.ownerId, schedule.project.adviserId].filter((id): id is string => Boolean(id)))
+      );
+      await finalizeDefenseSchedule(
+        schedule.id,
+        schedule.projectId,
+        schedule.project.title,
+        schedule.title,
+        allEvaluations,
+        notifyUserIds,
+        schedule.project.group?.id ?? null
+      );
     }
 
     return successResponse({
