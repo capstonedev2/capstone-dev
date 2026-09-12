@@ -1,7 +1,7 @@
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { handleApiError, normalizeText, successResponse } from '@/lib/utils';
-import { UserRole } from '@/generated/prisma/client';
+import { HttpError, handleApiError, normalizeText, successResponse } from '@/lib/utils';
+import { ReviewDecision, UserRole } from '@/generated/prisma/client';
 
 export const runtime = 'nodejs';
 
@@ -17,6 +17,59 @@ function canManageComment(user: { id: string; role: UserRole }, authorId?: strin
   return authorId === user.id
     || user.role === UserRole.SYSTEM_ADMIN
     || user.role === UserRole.ADMIN;
+}
+
+export async function POST(request: Request) {
+  try {
+    const user = await requireAuthenticatedUser(request, REVIEW_COMMENT_MANAGER_ROLES);
+    const body = await request.json();
+    const submissionId = normalizeText(body?.submissionId);
+    const commentBody = normalizeText(body?.body);
+    const decision: ReviewDecision = Object.values(ReviewDecision).includes(body?.decision) ? body.decision : ReviewDecision.COMMENT;
+
+    if (!submissionId) {
+      throw new HttpError('Missing submissionId', 400);
+    }
+
+    if (!commentBody) {
+      throw new HttpError('Comment cannot be empty.', 400);
+    }
+
+    const submission = await prisma.submission.findUnique({
+      where: { id: submissionId },
+      select: { id: true, title: true, submittedById: true, project: { select: { title: true } } }
+    });
+
+    if (!submission) {
+      throw new HttpError('Submission not found', 404);
+    }
+
+    const comment = await prisma.reviewComment.create({
+      data: {
+        submissionId,
+        authorId: user.id,
+        body: commentBody,
+        decision
+      }
+    });
+
+    if (submission.submittedById) {
+      await prisma.notification.create({
+        data: {
+          userId: submission.submittedById,
+          title: 'Adviser Feedback Received',
+          message: `${user.name || 'Your adviser'} left feedback on "${submission.title}".`,
+          type: 'feedback',
+          entityType: 'review_comment',
+          entityId: comment.id
+        }
+      });
+    }
+
+    return successResponse({ comment }, 201);
+  } catch (error) {
+    return handleApiError(error);
+  }
 }
 
 export async function PATCH(request: Request) {

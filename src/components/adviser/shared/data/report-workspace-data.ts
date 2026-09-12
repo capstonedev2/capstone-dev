@@ -3,13 +3,15 @@ import { getComputedGroupStatus, getGroupProjectTitle, isGroupCompleted } from '
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
-export const REPORT_REFERENCE_DATE = '2026-04-06T00:00:00.000Z';
+// This used to be a hardcoded date, which silently broke every "last 30/90 days" and
+// "current cycle" filter once real time moved past it — always use the real current date.
+export function getReportReferenceDate() {
+  return new Date().toISOString();
+}
 
 export type ReportDateRange = 'current-cycle' | 'last-30-days' | 'last-90-days' | 'academic-year';
 export type ReportType = 'all' | 'evaluation' | 'progress' | 'completed-projects' | 'supervision';
 export type ReportStatusFilter = 'all' | 'open' | 'attention' | 'completed';
-export type ReportExportFormat = 'pdf' | 'csv' | 'excel';
-export type ReportSectionKey = 'evaluation' | 'progress' | 'completed-projects' | 'supervision';
 
 export type ReportSummaryMetric = {
   id: string;
@@ -22,6 +24,7 @@ export type ReportSummaryMetric = {
 
 export type EvaluationSummary = {
   averageScore: number;
+  scoredGroups: number;
   passedGroups: number;
   withRevision: number;
   failedGroups: number;
@@ -48,7 +51,7 @@ export type CompletedProjectRecord = {
   id: string;
   groupId: string;
   projectTitle: string;
-  finalScore: number;
+  finalScore: number | null;
   recommendation: string;
   completedAt: string;
 };
@@ -130,7 +133,7 @@ function dateToUtcDay(value: string | null | undefined) {
   return Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate());
 }
 
-function matchesDateRange(value: string | null | undefined, range: ReportDateRange, referenceDate = REPORT_REFERENCE_DATE) {
+function matchesDateRange(value: string | null | undefined, range: ReportDateRange, referenceDate = getReportReferenceDate()) {
   const reportDay = dateToUtcDay(value);
   if (reportDay === null) {
     return false;
@@ -213,50 +216,22 @@ function getPanelProjectReportDate(project: PanelProject) {
   return project.defenseDate || project.updated_at;
 }
 
-function deriveEvaluationScore(group: AdviserGroup) {
-  if (typeof group.finalScore === 'number') {
-    return group.finalScore;
-  }
-
-  const computedStatus = getComputedGroupStatus(group);
-  const baselineScore = Math.round(55 + group.progress * 0.4);
-
-  if (computedStatus === 'needs-revision') {
-    return Math.min(84, baselineScore);
-  }
-
-  if (computedStatus === 'at-risk') {
-    return Math.max(65, Math.min(74, baselineScore - 4));
-  }
-
-  if (computedStatus === 'pending') {
-    return Math.min(79, baselineScore);
-  }
-
-  return Math.min(92, baselineScore + 4);
+// Only a real, recorded finalScore counts — no more backfilling a fake number from a
+// formula when a group hasn't actually been scored yet.
+function getRealEvaluationScore(group: AdviserGroup): number | null {
+  return typeof group.finalScore === 'number' ? group.finalScore : null;
 }
 
 function isEvaluationReadyGroup(group: AdviserGroup) {
-  const computedStatus = getComputedGroupStatus(group);
-
-  return (
-    isGroupCompleted(group) ||
-    computedStatus === 'needs-revision' ||
-    computedStatus === 'at-risk' ||
-    typeof group.finalScore === 'number' ||
-    Boolean(group.finalRecommendation)
-  );
+  return isGroupCompleted(group) || typeof group.finalScore === 'number' || Boolean(group.finalDefenseResult);
 }
 
-function classifyEvaluationResult(group: AdviserGroup) {
-  const computedStatus = getComputedGroupStatus(group);
-  const score = deriveEvaluationScore(group);
-
-  if (isGroupCompleted(group) || group.finalDefenseResult === 'Passed') {
+function classifyEvaluationResult(group: AdviserGroup): 'passed' | 'revision' | 'failed' {
+  if (group.finalDefenseResult === 'Passed' || isGroupCompleted(group)) {
     return 'passed';
   }
 
-  if (group.finalDefenseResult === 'Failed' || score < 75 || computedStatus === 'at-risk') {
+  if (group.finalDefenseResult === 'Failed') {
     return 'failed';
   }
 
@@ -295,8 +270,9 @@ export function buildAdviserReportsModule(data: AdviserDashboardData, filters: R
   const pendingEvaluations = filteredPanelProjects.filter((project) => project.status !== 'completed').length;
 
   const evaluationGroups = filteredGroups.filter(isEvaluationReadyGroup);
-  const evaluationAverage = evaluationGroups.length
-    ? Math.round(evaluationGroups.reduce((sum, group) => sum + deriveEvaluationScore(group), 0) / evaluationGroups.length)
+  const scoredGroups = evaluationGroups.filter((group) => getRealEvaluationScore(group) !== null);
+  const evaluationAverage = scoredGroups.length
+    ? Math.round(scoredGroups.reduce((sum, group) => sum + (getRealEvaluationScore(group) as number), 0) / scoredGroups.length)
     : 0;
 
   const passedGroups = evaluationGroups.filter((group) => classifyEvaluationResult(group) === 'passed').length;
@@ -318,12 +294,12 @@ export function buildAdviserReportsModule(data: AdviserDashboardData, filters: R
       id: group.project_id,
       groupId: group.code,
       projectTitle: getGroupProjectTitle(group),
-      finalScore: deriveEvaluationScore(group),
+      finalScore: getRealEvaluationScore(group),
       recommendation: group.finalRecommendation ?? 'Completed and cleared for institutional archive.',
       completedAt: group.completedAt ?? group.updated_at
     }));
 
-  const referenceDay = startOfUtcDay(REPORT_REFERENCE_DATE);
+  const referenceDay = startOfUtcDay(getReportReferenceDate());
   const evaluationsThisWeek = filteredPanelProjects.filter((project) => {
     const defenseDay = dateToUtcDay(project.defenseDate);
     if (defenseDay === null) {
@@ -395,10 +371,19 @@ export function buildAdviserReportsModule(data: AdviserDashboardData, filters: R
         helperText: 'Evaluation packets still waiting for adviser-side action or confirmation.',
         icon: 'fa-clipboard-check',
         iconClassName: 'bg-amber-50 text-amber-600'
+      },
+      {
+        id: 'progress-reports-awaiting-feedback',
+        label: 'Awaiting Feedback',
+        value: String(data.progressReports.awaitingFeedback),
+        helperText: `${data.progressReports.filedThisWeek} progress report${data.progressReports.filedThisWeek === 1 ? '' : 's'} filed by your groups this week.`,
+        icon: 'fa-comment-medical',
+        iconClassName: 'bg-violet-50 text-violet-600'
       }
     ],
     evaluationSummary: {
       averageScore: evaluationAverage,
+      scoredGroups: scoredGroups.length,
       passedGroups,
       withRevision,
       failedGroups,
@@ -443,4 +428,76 @@ export function buildAdviserReportsModule(data: AdviserDashboardData, filters: R
       badgeClassName: supervisionMeta.badgeClassName
     }
   };
+}
+
+function csvCell(value: string | number) {
+  const text = String(value);
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function csvRow(values: Array<string | number>) {
+  return values.map(csvCell).join(',');
+}
+
+export function buildReportsCsv(module: AdviserReportsModule) {
+  const lines: string[] = [];
+
+  lines.push('Summary Metrics');
+  lines.push(csvRow(['Label', 'Value']));
+  module.summaryMetrics.forEach((metric) => lines.push(csvRow([metric.label, metric.value])));
+  lines.push('');
+
+  lines.push('Evaluation Summary');
+  lines.push(csvRow(['Average Score', 'Scored Groups', 'Total Reviewed', 'Passed', 'Revision', 'Failed']));
+  lines.push(
+    csvRow([
+      module.evaluationSummary.scoredGroups ? module.evaluationSummary.averageScore : 'N/A',
+      module.evaluationSummary.scoredGroups,
+      module.evaluationSummary.totalReviewedGroups,
+      module.evaluationSummary.passedGroups,
+      module.evaluationSummary.withRevision,
+      module.evaluationSummary.failedGroups
+    ])
+  );
+  lines.push('');
+
+  lines.push('Progress Summary');
+  lines.push(csvRow(['Average Completion', 'On Track', 'At Risk', 'Delayed']));
+  lines.push(
+    csvRow([
+      `${module.progressSummary.averageCompletion}%`,
+      module.progressSummary.onTrackGroups,
+      module.progressSummary.atRiskGroups,
+      module.progressSummary.delayedGroups
+    ])
+  );
+  lines.push('');
+
+  lines.push('Completed Projects');
+  lines.push(csvRow(['Group ID', 'Project Title', 'Final Score', 'Recommendation', 'Completed Date']));
+  module.completedProjects.forEach((project) =>
+    lines.push(
+      csvRow([
+        project.groupId,
+        project.projectTitle,
+        project.finalScore ?? 'Not yet scored',
+        project.recommendation,
+        formatReportDate(project.completedAt)
+      ])
+    )
+  );
+  lines.push('');
+
+  lines.push('Supervision Summary');
+  lines.push(csvRow(['Total Groups Handled', 'Upcoming Defenses', 'Evaluations This Week', 'Supervision Level']));
+  lines.push(
+    csvRow([
+      module.supervisionSummary.totalGroupsHandled,
+      module.supervisionSummary.upcomingDefenses,
+      module.supervisionSummary.evaluationsThisWeek,
+      module.supervisionSummary.supervisionLevel
+    ])
+  );
+
+  return lines.join('\n');
 }

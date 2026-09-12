@@ -644,11 +644,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       id: 'academic-year',
       label: 'Academic year',
       value: data.project.academicYear
-    },
-    {
-      id: 'category',
-      label: 'Category',
-      value: data.project.category
     }
   ];
 

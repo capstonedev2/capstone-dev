@@ -349,6 +349,7 @@ export type UserWhereInput = {
   ownedProjects?: Prisma.ProjectListRelationFilter
   advisedProjects?: Prisma.ProjectListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
+  progressReports?: Prisma.ProgressReportListRelationFilter
   reviewComments?: Prisma.ReviewCommentListRelationFilter
   resolvedComments?: Prisma.ReviewCommentListRelationFilter
   scheduledDefenses?: Prisma.DefenseScheduleListRelationFilter
@@ -392,6 +393,7 @@ export type UserOrderByWithRelationInput = {
   ownedProjects?: Prisma.ProjectOrderByRelationAggregateInput
   advisedProjects?: Prisma.ProjectOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
+  progressReports?: Prisma.ProgressReportOrderByRelationAggregateInput
   reviewComments?: Prisma.ReviewCommentOrderByRelationAggregateInput
   resolvedComments?: Prisma.ReviewCommentOrderByRelationAggregateInput
   scheduledDefenses?: Prisma.DefenseScheduleOrderByRelationAggregateInput
@@ -438,6 +440,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   ownedProjects?: Prisma.ProjectListRelationFilter
   advisedProjects?: Prisma.ProjectListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
+  progressReports?: Prisma.ProgressReportListRelationFilter
   reviewComments?: Prisma.ReviewCommentListRelationFilter
   resolvedComments?: Prisma.ReviewCommentListRelationFilter
   scheduledDefenses?: Prisma.DefenseScheduleListRelationFilter
@@ -543,6 +546,7 @@ export type UserCreateInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -586,6 +590,7 @@ export type UserUncheckedCreateInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -629,6 +634,7 @@ export type UserUpdateInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -672,6 +678,7 @@ export type UserUncheckedUpdateInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -988,6 +995,22 @@ export type UserUpdateOneWithoutSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.UserUpdateWithoutSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutSubmissionsInput>
 }
 
+export type UserCreateNestedOneWithoutProgressReportsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProgressReportsInput, Prisma.UserUncheckedCreateWithoutProgressReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProgressReportsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutProgressReportsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProgressReportsInput, Prisma.UserUncheckedCreateWithoutProgressReportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProgressReportsInput
+  upsert?: Prisma.UserUpsertWithoutProgressReportsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProgressReportsInput, Prisma.UserUpdateWithoutProgressReportsInput>, Prisma.UserUncheckedUpdateWithoutProgressReportsInput>
+}
+
 export type UserCreateNestedOneWithoutReviewCommentsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutReviewCommentsInput, Prisma.UserUncheckedCreateWithoutReviewCommentsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewCommentsInput
@@ -1146,6 +1169,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -1188,6 +1212,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -1246,6 +1271,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -1288,6 +1314,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -1330,6 +1357,7 @@ export type UserCreateWithoutPasswordResetCodesInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -1372,6 +1400,7 @@ export type UserUncheckedCreateWithoutPasswordResetCodesInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -1430,6 +1459,7 @@ export type UserUpdateWithoutPasswordResetCodesInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -1472,6 +1502,7 @@ export type UserUncheckedUpdateWithoutPasswordResetCodesInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -1514,6 +1545,7 @@ export type UserCreateWithoutUploadedFilesInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -1556,6 +1588,7 @@ export type UserUncheckedCreateWithoutUploadedFilesInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -1614,6 +1647,7 @@ export type UserUpdateWithoutUploadedFilesInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -1656,6 +1690,7 @@ export type UserUncheckedUpdateWithoutUploadedFilesInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -1698,6 +1733,7 @@ export type UserCreateWithoutGroupMembershipsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -1740,6 +1776,7 @@ export type UserUncheckedCreateWithoutGroupMembershipsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -1798,6 +1835,7 @@ export type UserUpdateWithoutGroupMembershipsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -1840,6 +1878,7 @@ export type UserUncheckedUpdateWithoutGroupMembershipsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -1882,6 +1921,7 @@ export type UserCreateWithoutOwnedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberCreateNestedManyWithoutUserInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -1924,6 +1964,7 @@ export type UserUncheckedCreateWithoutOwnedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutUserInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -1971,6 +2012,7 @@ export type UserCreateWithoutAdvisedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberCreateNestedManyWithoutUserInput
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -2013,6 +2055,7 @@ export type UserUncheckedCreateWithoutAdvisedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutUserInput
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -2071,6 +2114,7 @@ export type UserUpdateWithoutOwnedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberUpdateManyWithoutUserNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -2113,6 +2157,7 @@ export type UserUncheckedUpdateWithoutOwnedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberUncheckedUpdateManyWithoutUserNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -2166,6 +2211,7 @@ export type UserUpdateWithoutAdvisedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberUpdateManyWithoutUserNestedInput
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -2208,6 +2254,7 @@ export type UserUncheckedUpdateWithoutAdvisedProjectsInput = {
   groupMemberships?: Prisma.GroupMemberUncheckedUpdateManyWithoutUserNestedInput
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -2250,6 +2297,7 @@ export type UserCreateWithoutSubmissionsInput = {
   groupMemberships?: Prisma.GroupMemberCreateNestedManyWithoutUserInput
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -2292,6 +2340,7 @@ export type UserUncheckedCreateWithoutSubmissionsInput = {
   groupMemberships?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutUserInput
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -2350,6 +2399,7 @@ export type UserUpdateWithoutSubmissionsInput = {
   groupMemberships?: Prisma.GroupMemberUpdateManyWithoutUserNestedInput
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -2392,6 +2442,195 @@ export type UserUncheckedUpdateWithoutSubmissionsInput = {
   groupMemberships?: Prisma.GroupMemberUncheckedUpdateManyWithoutUserNestedInput
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedUpdateManyWithoutUploadedByNestedInput
+}
+
+export type UserCreateWithoutProgressReportsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  supabaseId?: string | null
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetCreateNestedManyWithoutUploadedByInput
+}
+
+export type UserUncheckedCreateWithoutProgressReportsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  supabaseId?: string | null
+  googleSub?: string | null
+  name: string
+  firstName?: string | null
+  lastName?: string | null
+  studentId?: string | null
+  department?: string | null
+  yearLevel?: string | null
+  role?: $Enums.UserRole
+  contactNumber?: string | null
+  address?: string | null
+  birthDate?: string | null
+  profileImage?: string | null
+  section?: string | null
+  accountSummary?: string | null
+  office?: string | null
+  displayName?: string | null
+  isSuspended?: boolean
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedCreateNestedManyWithoutUserInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutUserInput
+  groupMemberships?: Prisma.GroupMemberUncheckedCreateNestedManyWithoutUserInput
+  ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
+  advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
+  resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutScheduledByInput
+  evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluatorInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  brandingAssets?: Prisma.BrandingAssetUncheckedCreateNestedManyWithoutUploadedByInput
+}
+
+export type UserCreateOrConnectWithoutProgressReportsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProgressReportsInput, Prisma.UserUncheckedCreateWithoutProgressReportsInput>
+}
+
+export type UserUpsertWithoutProgressReportsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProgressReportsInput, Prisma.UserUncheckedUpdateWithoutProgressReportsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProgressReportsInput, Prisma.UserUncheckedCreateWithoutProgressReportsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProgressReportsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProgressReportsInput, Prisma.UserUncheckedUpdateWithoutProgressReportsInput>
+}
+
+export type UserUpdateWithoutProgressReportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supabaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
+  resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
+  scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutScheduledByNestedInput
+  evaluations?: Prisma.EvaluationUpdateManyWithoutEvaluatorNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  brandingAssets?: Prisma.BrandingAssetUpdateManyWithoutUploadedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProgressReportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supabaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  studentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  contactNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profileImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  section?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  office?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetCodes?: Prisma.PasswordResetCodeUncheckedUpdateManyWithoutUserNestedInput
+  uploadedFiles?: Prisma.UploadedFileUncheckedUpdateManyWithoutUserNestedInput
+  groupMemberships?: Prisma.GroupMemberUncheckedUpdateManyWithoutUserNestedInput
+  ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
+  advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -2435,6 +2674,7 @@ export type UserCreateWithoutReviewCommentsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutScheduledByInput
@@ -2477,6 +2717,7 @@ export type UserUncheckedCreateWithoutReviewCommentsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutScheduledByInput
@@ -2524,6 +2765,7 @@ export type UserCreateWithoutResolvedCommentsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutScheduledByInput
@@ -2566,6 +2808,7 @@ export type UserUncheckedCreateWithoutResolvedCommentsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutScheduledByInput
@@ -2624,6 +2867,7 @@ export type UserUpdateWithoutReviewCommentsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutScheduledByNestedInput
@@ -2666,6 +2910,7 @@ export type UserUncheckedUpdateWithoutReviewCommentsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -2719,6 +2964,7 @@ export type UserUpdateWithoutResolvedCommentsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutScheduledByNestedInput
@@ -2761,6 +3007,7 @@ export type UserUncheckedUpdateWithoutResolvedCommentsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -2803,6 +3050,7 @@ export type UserCreateWithoutScheduledDefensesInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutScheduledByInput
@@ -2845,6 +3093,7 @@ export type UserUncheckedCreateWithoutScheduledDefensesInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutScheduledByInput
@@ -2903,6 +3152,7 @@ export type UserUpdateWithoutScheduledDefensesInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutScheduledByNestedInput
@@ -2945,6 +3195,7 @@ export type UserUncheckedUpdateWithoutScheduledDefensesInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -2987,6 +3238,7 @@ export type UserCreateWithoutAdviserScheduleItemsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -3029,6 +3281,7 @@ export type UserUncheckedCreateWithoutAdviserScheduleItemsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -3087,6 +3340,7 @@ export type UserUpdateWithoutAdviserScheduleItemsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -3129,6 +3383,7 @@ export type UserUncheckedUpdateWithoutAdviserScheduleItemsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -3171,6 +3426,7 @@ export type UserCreateWithoutEvaluationsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -3213,6 +3469,7 @@ export type UserUncheckedCreateWithoutEvaluationsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -3271,6 +3528,7 @@ export type UserUpdateWithoutEvaluationsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -3313,6 +3571,7 @@ export type UserUncheckedUpdateWithoutEvaluationsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -3355,6 +3614,7 @@ export type UserCreateWithoutNotificationsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -3397,6 +3657,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -3455,6 +3716,7 @@ export type UserUpdateWithoutNotificationsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -3497,6 +3759,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -3539,6 +3802,7 @@ export type UserCreateWithoutAuditLogsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -3581,6 +3845,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -3639,6 +3904,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -3681,6 +3947,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -3723,6 +3990,7 @@ export type UserCreateWithoutBrandingAssetsInput = {
   ownedProjects?: Prisma.ProjectCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleCreateNestedManyWithoutScheduledByInput
@@ -3765,6 +4033,7 @@ export type UserUncheckedCreateWithoutBrandingAssetsInput = {
   ownedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutOwnerInput
   advisedProjects?: Prisma.ProjectUncheckedCreateNestedManyWithoutAdviserInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutSubmittedByInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutSubmittedByInput
   reviewComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutAuthorInput
   resolvedComments?: Prisma.ReviewCommentUncheckedCreateNestedManyWithoutResolvedByInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutScheduledByInput
@@ -3823,6 +4092,7 @@ export type UserUpdateWithoutBrandingAssetsInput = {
   ownedProjects?: Prisma.ProjectUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUpdateManyWithoutScheduledByNestedInput
@@ -3865,6 +4135,7 @@ export type UserUncheckedUpdateWithoutBrandingAssetsInput = {
   ownedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutOwnerNestedInput
   advisedProjects?: Prisma.ProjectUncheckedUpdateManyWithoutAdviserNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutSubmittedByNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutSubmittedByNestedInput
   reviewComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutAuthorNestedInput
   resolvedComments?: Prisma.ReviewCommentUncheckedUpdateManyWithoutResolvedByNestedInput
   scheduledDefenses?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutScheduledByNestedInput
@@ -3887,6 +4158,7 @@ export type UserCountOutputType = {
   ownedProjects: number
   advisedProjects: number
   submissions: number
+  progressReports: number
   reviewComments: number
   resolvedComments: number
   scheduledDefenses: number
@@ -3905,6 +4177,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   ownedProjects?: boolean | UserCountOutputTypeCountOwnedProjectsArgs
   advisedProjects?: boolean | UserCountOutputTypeCountAdvisedProjectsArgs
   submissions?: boolean | UserCountOutputTypeCountSubmissionsArgs
+  progressReports?: boolean | UserCountOutputTypeCountProgressReportsArgs
   reviewComments?: boolean | UserCountOutputTypeCountReviewCommentsArgs
   resolvedComments?: boolean | UserCountOutputTypeCountResolvedCommentsArgs
   scheduledDefenses?: boolean | UserCountOutputTypeCountScheduledDefensesArgs
@@ -3972,6 +4245,13 @@ export type UserCountOutputTypeCountAdvisedProjectsArgs<ExtArgs extends runtime.
  */
 export type UserCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SubmissionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProgressReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProgressReportWhereInput
 }
 
 /**
@@ -4064,6 +4344,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   ownedProjects?: boolean | Prisma.User$ownedProjectsArgs<ExtArgs>
   advisedProjects?: boolean | Prisma.User$advisedProjectsArgs<ExtArgs>
   submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
+  progressReports?: boolean | Prisma.User$progressReportsArgs<ExtArgs>
   reviewComments?: boolean | Prisma.User$reviewCommentsArgs<ExtArgs>
   resolvedComments?: boolean | Prisma.User$resolvedCommentsArgs<ExtArgs>
   scheduledDefenses?: boolean | Prisma.User$scheduledDefensesArgs<ExtArgs>
@@ -4168,6 +4449,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   ownedProjects?: boolean | Prisma.User$ownedProjectsArgs<ExtArgs>
   advisedProjects?: boolean | Prisma.User$advisedProjectsArgs<ExtArgs>
   submissions?: boolean | Prisma.User$submissionsArgs<ExtArgs>
+  progressReports?: boolean | Prisma.User$progressReportsArgs<ExtArgs>
   reviewComments?: boolean | Prisma.User$reviewCommentsArgs<ExtArgs>
   resolvedComments?: boolean | Prisma.User$resolvedCommentsArgs<ExtArgs>
   scheduledDefenses?: boolean | Prisma.User$scheduledDefensesArgs<ExtArgs>
@@ -4191,6 +4473,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     ownedProjects: Prisma.$ProjectPayload<ExtArgs>[]
     advisedProjects: Prisma.$ProjectPayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
+    progressReports: Prisma.$ProgressReportPayload<ExtArgs>[]
     reviewComments: Prisma.$ReviewCommentPayload<ExtArgs>[]
     resolvedComments: Prisma.$ReviewCommentPayload<ExtArgs>[]
     scheduledDefenses: Prisma.$DefenseSchedulePayload<ExtArgs>[]
@@ -4627,6 +4910,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   ownedProjects<T extends Prisma.User$ownedProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedProjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   advisedProjects<T extends Prisma.User$advisedProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$advisedProjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.User$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  progressReports<T extends Prisma.User$progressReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$progressReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProgressReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewComments<T extends Prisma.User$reviewCommentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewCommentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   resolvedComments<T extends Prisma.User$resolvedCommentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resolvedCommentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scheduledDefenses<T extends Prisma.User$scheduledDefensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$scheduledDefensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DefenseSchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5247,6 +5531,30 @@ export type User$submissionsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.SubmissionScalarFieldEnum | Prisma.SubmissionScalarFieldEnum[]
+}
+
+/**
+ * User.progressReports
+ */
+export type User$progressReportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProgressReport
+   */
+  select?: Prisma.ProgressReportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProgressReport
+   */
+  omit?: Prisma.ProgressReportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProgressReportInclude<ExtArgs> | null
+  where?: Prisma.ProgressReportWhereInput
+  orderBy?: Prisma.ProgressReportOrderByWithRelationInput | Prisma.ProgressReportOrderByWithRelationInput[]
+  cursor?: Prisma.ProgressReportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProgressReportScalarFieldEnum | Prisma.ProgressReportScalarFieldEnum[]
 }
 
 /**

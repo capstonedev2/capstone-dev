@@ -397,6 +397,7 @@ export const ModelName = {
   Milestone: 'Milestone',
   MilestoneCheckpoint: 'MilestoneCheckpoint',
   Submission: 'Submission',
+  ProgressReport: 'ProgressReport',
   ReviewComment: 'ReviewComment',
   DefenseSchedule: 'DefenseSchedule',
   AdviserScheduleItem: 'AdviserScheduleItem',
@@ -422,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
+    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "progressReport" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1385,6 +1386,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SubmissionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SubmissionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProgressReport: {
+      payload: Prisma.$ProgressReportPayload<ExtArgs>
+      fields: Prisma.ProgressReportFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProgressReportFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProgressReportFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>
+        }
+        findFirst: {
+          args: Prisma.ProgressReportFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProgressReportFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>
+        }
+        findMany: {
+          args: Prisma.ProgressReportFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>[]
+        }
+        create: {
+          args: Prisma.ProgressReportCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>
+        }
+        createMany: {
+          args: Prisma.ProgressReportCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProgressReportCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>[]
+        }
+        delete: {
+          args: Prisma.ProgressReportDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>
+        }
+        update: {
+          args: Prisma.ProgressReportUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProgressReportDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProgressReportUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProgressReportUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProgressReportUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProgressReportPayload>
+        }
+        aggregate: {
+          args: Prisma.ProgressReportAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProgressReport>
+        }
+        groupBy: {
+          args: Prisma.ProgressReportGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProgressReportGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProgressReportCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProgressReportCountAggregateOutputType> | number
         }
       }
     }
@@ -2425,6 +2500,23 @@ export const SubmissionScalarFieldEnum = {
 export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
 
 
+export const ProgressReportScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  submittedById: 'submittedById',
+  submissionId: 'submissionId',
+  progressNote: 'progressNote',
+  accomplishments: 'accomplishments',
+  problemsEncountered: 'problemsEncountered',
+  nextSteps: 'nextSteps',
+  percentageCompleted: 'percentageCompleted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProgressReportScalarFieldEnum = (typeof ProgressReportScalarFieldEnum)[keyof typeof ProgressReportScalarFieldEnum]
+
+
 export const ReviewCommentScalarFieldEnum = {
   id: 'id',
   submissionId: 'submissionId',
@@ -3093,6 +3185,7 @@ export type GlobalOmitConfig = {
   milestone?: Prisma.MilestoneOmit
   milestoneCheckpoint?: Prisma.MilestoneCheckpointOmit
   submission?: Prisma.SubmissionOmit
+  progressReport?: Prisma.ProgressReportOmit
   reviewComment?: Prisma.ReviewCommentOmit
   defenseSchedule?: Prisma.DefenseScheduleOmit
   adviserScheduleItem?: Prisma.AdviserScheduleItemOmit

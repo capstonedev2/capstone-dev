@@ -64,6 +64,7 @@ export const ModelName = {
   Milestone: 'Milestone',
   MilestoneCheckpoint: 'MilestoneCheckpoint',
   Submission: 'Submission',
+  ProgressReport: 'ProgressReport',
   ReviewComment: 'ReviewComment',
   DefenseSchedule: 'DefenseSchedule',
   AdviserScheduleItem: 'AdviserScheduleItem',
@@ -348,6 +349,23 @@ export const SubmissionScalarFieldEnum = {
 } as const
 
 export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
+
+
+export const ProgressReportScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  submittedById: 'submittedById',
+  submissionId: 'submissionId',
+  progressNote: 'progressNote',
+  accomplishments: 'accomplishments',
+  problemsEncountered: 'problemsEncountered',
+  nextSteps: 'nextSteps',
+  percentageCompleted: 'percentageCompleted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProgressReportScalarFieldEnum = (typeof ProgressReportScalarFieldEnum)[keyof typeof ProgressReportScalarFieldEnum]
 
 
 export const ReviewCommentScalarFieldEnum = {

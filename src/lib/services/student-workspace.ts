@@ -3,6 +3,12 @@ import { ensureProjectMilestoneWorkflow } from '@/lib/milestone-checkpoint-track
 
 const now = '2026-04-06T00:00:00.000Z';
 
+// Notification.type on the DB row is a mix of severity flags ('success' | 'warning' | 'info' | 'danger')
+// and semantic categories, depending on which API route created it. Only the semantic ones are real
+// filterable buckets in the UI — anything else (including plain severity) falls back to 'general' so it
+// stays reachable through a filter chip instead of only showing up under "All".
+const KNOWN_NOTIFICATION_FILTER_TYPES = new Set(['feedback', 'deadline', 'schedule', 'approval', 'transfer']);
+
 export type StudentTitleReviewSummary = {
   latestAction: string;
   nextStep: string;
@@ -198,10 +204,7 @@ export type StudentDashboardData = {
     program?: string;
     department?: string;
     academicYear?: string;
-    category?: string;
-    pilotTestingStatus?: string;
     technologyTransferStatus?: string;
-    implementationLocation?: string;
     keywords?: string[];
     panelMembers?: string[];
     transferabilityNote?: string;
@@ -385,6 +388,9 @@ export type StudentDashboardData = {
     nextSteps: string;
     percentageCompleted: number;
     statusDisplay?: string;
+    submittedByName: string;
+    submissionId?: string | null;
+    feedback: Array<{ id: string; body: string; authorName: string; createdAt: string }>;
   }>;
   titleRegistration: StudentTitleRegistration;
   technologyTransfer: {
@@ -563,7 +569,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
           status: String(notification.status),
           created_at: notification.createdAt.toISOString(),
           updated_at: (notification.readAt || notification.createdAt).toISOString(),
-          type: notification.type === 'info' ? 'general' : notification.type,
+          type: KNOWN_NOTIFICATION_FILTER_TYPES.has(notification.type) ? notification.type : 'general',
           title: notification.title,
           message: notification.message,
           dateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(notification.createdAt),
@@ -603,7 +609,9 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             title: true,
             abstract: true,
             status: true,
-            updatedAt: true
+            updatedAt: true,
+            repositoryPublishedAt: true,
+            academicYear: { select: { label: true } }
           } as const;
 
           const [
@@ -715,6 +723,10 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             adviser: adviserName !== 'Not assigned' ? adviserName : (data.profile.adviser || data.project.adviser),
             program: group.dept || data.project.program,
             department: group.department || data.project.department,
+            academicYear: approvedTitleProject?.academicYear?.label || activeProjectResult?.academicYear?.label || data.project.academicYear,
+            repositoryStatus: approvedTitleProject?.repositoryPublishedAt || activeProjectResult?.repositoryPublishedAt
+              ? 'Published'
+              : (approvedTitleProject || activeProjectResult) ? 'Not yet published' : data.project.repositoryStatus,
           };
 
           data.titleRegistration.proposedTitle = activeProject?.title || approvedTitleProject?.title || data.titleRegistration.proposedTitle;
@@ -791,6 +803,20 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               }
             });
 
+            const titleSubmissionEventsPromise = prisma.submission.findMany({
+              where: {
+                title: 'Title Proposal Submission',
+                project: { groupId: group.id }
+              },
+              orderBy: { submittedAt: 'desc' },
+              take: 20,
+              select: {
+                id: true, submittedAt: true, status: true,
+                submittedBy: { select: { name: true } },
+                project: { select: { title: true } }
+              }
+            });
+
             // 2. Fetch milestones & checkpoints, only running ensureProjectMilestoneWorkflow if data is missing
             const fetchMilestonesAndCheckpoints = () => Promise.all([
               prisma.milestone.findMany({
@@ -863,14 +889,25 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               schedules,
               adviserScheduleItems,
               submissions,
+              titleSubmissionEvents,
               [milestones, checkpointRows]
             ] = await Promise.all([
               filesPromise,
               schedulesPromise,
               adviserSchedulePromise,
               submissionsPromise,
+              titleSubmissionEventsPromise,
               milestoneWorkflowPromise
             ]);
+
+            data.titleRegistration.revisionHistory = titleSubmissionEvents.map((event) => ({
+              id: event.id,
+              status: 'Submitted',
+              date: event.submittedAt.toISOString(),
+              dateLabel: formatDate(event.submittedAt),
+              note: `"${event.project.title}" was submitted for adviser title review.`,
+              reviewedBy: event.submittedBy?.name || data.profile.fullName
+            }));
 
             data.documents = files.map(f => ({
               id: f.id,
@@ -1025,6 +1062,52 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               });
             });
             data.feedback = allFeedback.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+            const progressReportRows = await prisma.progressReport.findMany({
+              where: { projectId: activeProject.id },
+              orderBy: { createdAt: 'desc' },
+              take: 30,
+              select: {
+                id: true, submittedById: true, submissionId: true, progressNote: true, accomplishments: true,
+                problemsEncountered: true, nextSteps: true, percentageCompleted: true,
+                createdAt: true, updatedAt: true, submittedBy: { select: { name: true } }
+              }
+            });
+
+            const progressReportSubmissionIds = progressReportRows.map((r) => r.submissionId).filter((id): id is string => Boolean(id));
+            const progressReportComments = progressReportSubmissionIds.length
+              ? await prisma.reviewComment.findMany({
+                  where: { submissionId: { in: progressReportSubmissionIds } },
+                  orderBy: { createdAt: 'asc' },
+                  select: { id: true, body: true, createdAt: true, submissionId: true, author: { select: { name: true } } }
+                })
+              : [];
+            const progressReportFeedbackBySubmission = new Map<string, Array<{ id: string; body: string; authorName: string; createdAt: string }>>();
+            progressReportComments.forEach((comment) => {
+              const list = progressReportFeedbackBySubmission.get(comment.submissionId) || [];
+              list.push({ id: comment.id, body: comment.body, authorName: comment.author?.name || 'Adviser', createdAt: comment.createdAt.toISOString() });
+              progressReportFeedbackBySubmission.set(comment.submissionId, list);
+            });
+
+            data.progressReports = progressReportRows.map((report) => ({
+              id: report.id,
+              user_id: report.submittedById || dbUser.id,
+              project_id: activeProject.id,
+              submissionId: report.submissionId,
+              status: 'submitted',
+              created_at: report.createdAt.toISOString(),
+              updated_at: report.updatedAt.toISOString(),
+              title: `Progress Report — ${formatDate(report.createdAt)}`,
+              date: report.createdAt.toISOString(),
+              dateLabel: formatDate(report.createdAt),
+              progressDescription: report.progressNote,
+              accomplishments: report.accomplishments,
+              problemsEncountered: report.problemsEncountered || '',
+              nextSteps: report.nextSteps || '',
+              percentageCompleted: report.percentageCompleted,
+              feedback: report.submissionId ? progressReportFeedbackBySubmission.get(report.submissionId) || [] : [],
+              submittedByName: report.submittedBy?.name || data.profile.fullName
+            }));
           }
         }
       } catch (err) {

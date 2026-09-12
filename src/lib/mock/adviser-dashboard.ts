@@ -140,6 +140,11 @@ export type AdviserDashboardData = {
     dueLabel: string;
     approvedThisWeek: boolean;
   }>;
+  progressReports: {
+    totalFiled: number;
+    filedThisWeek: number;
+    awaitingFeedback: number;
+  };
 };
 
 const adviserDashboardData: AdviserDashboardData = {
@@ -553,7 +558,12 @@ const adviserDashboardData: AdviserDashboardData = {
         dueLabel: 'Approved this week',
         approvedThisWeek: true
     }
-  ]
+  ],
+  progressReports: {
+    totalFiled: 0,
+    filedThisWeek: 0,
+    awaitingFeedback: 0
+  }
 };
 
 function cloneAdviserDashboardData() {
@@ -818,6 +828,34 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
         progressDetail: group.progressDetail,
         progressStage: group.progressStage
       }));
+
+      const adviserProjectIds = groupsWithPending.map((group) => group.projectId).filter((id): id is string => Boolean(id));
+
+      if (adviserProjectIds.length) {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const progressReportRows = await prisma.progressReport.findMany({
+          where: { projectId: { in: adviserProjectIds } },
+          select: { id: true, submissionId: true, createdAt: true }
+        });
+
+        const progressReportSubmissionIds = progressReportRows.map((r) => r.submissionId).filter((id): id is string => Boolean(id));
+        const reviewedSubmissionIds = progressReportSubmissionIds.length
+          ? new Set(
+              (
+                await prisma.reviewComment.findMany({
+                  where: { submissionId: { in: progressReportSubmissionIds } },
+                  select: { submissionId: true }
+                })
+              ).map((comment) => comment.submissionId)
+            )
+          : new Set<string>();
+
+        data.progressReports = {
+          totalFiled: progressReportRows.length,
+          filedThisWeek: progressReportRows.filter((r) => r.createdAt >= sevenDaysAgo).length,
+          awaitingFeedback: progressReportRows.filter((r) => !r.submissionId || !reviewedSubmissionIds.has(r.submissionId)).length
+        };
+      }
 
       data.panelProjects = panelEvaluations.map((evaluation) => {
         const project = evaluation.project;

@@ -832,6 +832,153 @@ function CompletedGroupCards({
   );
 }
 
+type AdviserProgressReportComment = { id: string; body: string; authorName: string; createdAt: string };
+type AdviserProgressReport = {
+  id: string;
+  submissionId: string | null;
+  submittedByName: string;
+  dateLabel: string;
+  progressDescription: string;
+  percentageCompleted: number;
+  feedback: AdviserProgressReportComment[];
+};
+
+function AdviserProgressReportsPanel({ projectId }: { projectId: string }) {
+  const [reports, setReports] = useState<AdviserProgressReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!projectId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(null);
+
+    fetch(`/api/progress-reports?projectId=${encodeURIComponent(projectId)}`, { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((payload) => {
+        if (!cancelled) {
+          setReports(payload.reports || []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError('Failed to load progress reports.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  const handleSubmitFeedback = async (report: AdviserProgressReport) => {
+    const body = (commentDrafts[report.id] || '').trim();
+    if (!body || !report.submissionId) return;
+
+    setSubmittingId(report.id);
+    try {
+      const response = await fetch('/api/review-comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ submissionId: report.submissionId, body })
+      });
+      const payload = await response.json();
+
+      if (response.ok && payload.comment) {
+        setReports((current) =>
+          current.map((item) =>
+            item.id === report.id
+              ? { ...item, feedback: [...item.feedback, { id: payload.comment.id, body: payload.comment.body, authorName: 'You', createdAt: payload.comment.createdAt }] }
+              : item
+          )
+        );
+        setCommentDrafts((current) => ({ ...current, [report.id]: '' }));
+      }
+    } finally {
+      setSubmittingId(null);
+    }
+  };
+
+  if (!projectId) return null;
+
+  return (
+    <div className="rounded-[1.25rem] border border-slate-200/60 bg-white p-6 shadow-sm">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Progress Reports</p>
+        <p className="mt-1 text-sm font-medium text-slate-500">Weekly updates filed by the group — leave feedback so they know you've seen it.</p>
+      </div>
+
+      {loading ? (
+        <p className="mt-4 text-sm text-slate-500">Loading reports…</p>
+      ) : loadError ? (
+        <p className="mt-4 text-sm text-rose-600">{loadError}</p>
+      ) : reports.length ? (
+        <div className="mt-4 space-y-3">
+          {reports.map((report) => (
+            <div key={report.id} className="rounded-2xl border border-slate-200/60 bg-slate-50/60 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-bold text-slate-800">{report.submittedByName}</p>
+                  <p className="text-xs text-slate-500">{report.dateLabel}</p>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-[rgba(0,58,143,0.08)] px-3 py-1 text-xs font-bold text-[var(--primary)]">
+                  {report.percentageCompleted}% complete
+                </span>
+              </div>
+
+              <p className="mt-2 text-sm text-slate-700">{report.progressDescription}</p>
+
+              {report.feedback.length ? (
+                <div className="mt-3 space-y-2">
+                  {report.feedback.map((comment) => (
+                    <div key={comment.id} className="rounded-xl bg-white p-2.5 ring-1 ring-slate-200/60">
+                      <p className="text-[11px] font-bold text-slate-600">{comment.authorName}</p>
+                      <p className="mt-0.5 text-xs text-slate-600">{comment.body}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className="mt-3 flex gap-2">
+                <input
+                  className="min-h-9 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-xs outline-none transition focus:border-[var(--primary)]"
+                  placeholder="Leave feedback on this report..."
+                  value={commentDrafts[report.id] || ''}
+                  onChange={(event) => setCommentDrafts((current) => ({ ...current, [report.id]: event.target.value }))}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      handleSubmitFeedback(report);
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="inline-flex min-h-9 items-center justify-center rounded-xl bg-[var(--primary)] px-3 text-xs font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={submittingId === report.id || !(commentDrafts[report.id] || '').trim()}
+                  onClick={() => handleSubmitFeedback(report)}
+                >
+                  {submittingId === report.id ? <i className="fas fa-spinner fa-spin" aria-hidden="true" /> : 'Send'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-4 text-sm text-slate-500">No progress reports filed yet.</p>
+      )}
+    </div>
+  );
+}
+
 function GroupDetailsModal({
   group,
   open,
@@ -1256,12 +1403,14 @@ function GroupDetailsModal({
               })}
             </div>
           </div>
+
+          {group.project_id ? <AdviserProgressReportsPanel projectId={group.project_id} /> : null}
         </div>
 
         <div className="border-t border-slate-100 bg-slate-50 px-8 py-5 flex items-center justify-end gap-3">
-          <button 
-            type="button" 
-            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900" 
+          <button
+            type="button"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
             onClick={onClose}
           >
             Close

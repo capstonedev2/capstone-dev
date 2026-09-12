@@ -4,8 +4,6 @@ import type {
   AdviserReportsModule,
   CompletedProjectRecord,
   ReportDateRange,
-  ReportExportFormat,
-  ReportSectionKey,
   ReportStatusFilter,
   ReportSummaryMetric,
   ReportType
@@ -25,12 +23,6 @@ type ReportFiltersProps = {
   onReportTypeChange: (value: ReportType) => void;
   onStatusChange: (value: ReportStatusFilter) => void;
   onClearFilters: () => void;
-};
-
-type ExportButtonsProps = {
-  section: ReportSectionKey | 'all';
-  formats: ReportExportFormat[];
-  onExport: (section: ReportSectionKey | 'all', format: ReportExportFormat) => void;
 };
 
 function WorkspaceSelect<TValue extends string>({
@@ -137,30 +129,6 @@ function EmptySection({
   );
 }
 
-export function ExportButtons({ section, formats, onExport }: ExportButtonsProps) {
-  return (
-    <div className="inline-flex items-center gap-1.5 rounded-[1rem] border border-slate-200 bg-white p-1 shadow-sm">
-      {formats.map((format) => (
-        <button
-          key={`${section}-${format}`}
-          type="button"
-          title={`Export as ${format.toUpperCase()}`}
-          onClick={() => onExport(section, format)}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-[0.7rem] text-slate-500 transition hover:bg-slate-100 hover:text-[#003A8F]"
-        >
-          <i
-            aria-hidden="true"
-            className={`fas ${
-              format === 'pdf' ? 'fa-file-pdf' : format === 'csv' ? 'fa-file-csv' : 'fa-file-excel'
-            }`}
-          />
-        </button>
-      ))}
-    </div>
-  );
-}
-
-
 export function ReportSummaryCards({ metrics }: { metrics: ReportSummaryMetric[] }) {
   return (
     <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
@@ -184,7 +152,7 @@ export function ReportFilters({
   onStatusChange,
   onClearFilters,
   onGlobalExport
-}: ReportFiltersProps & { onGlobalExport: (format: ReportExportFormat) => void }) {
+}: ReportFiltersProps & { onGlobalExport: () => void }) {
   const activeFilterLabels = [
     dateOptions.find((option) => option.value === dateRange)?.label ?? dateRange,
     reportType !== 'all' ? reportTypeOptions.find((option) => option.value === reportType)?.label ?? reportType : null,
@@ -211,7 +179,14 @@ export function ReportFilters({
             </button>
           ) : null}
           <div className="ml-2 border-l border-slate-200 pl-4">
-            <ExportButtons section="all" formats={['pdf', 'csv', 'excel']} onExport={(_, format) => onGlobalExport(format)} />
+            <button
+              type="button"
+              onClick={onGlobalExport}
+              className="inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[#003A8F]/20 bg-[#003A8F]/5 px-4 text-sm font-bold text-[#003A8F] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#003A8F]/10"
+            >
+              <i className="fas fa-file-csv text-xs" />
+              Export CSV
+            </button>
           </div>
         </div>
       </div>
@@ -273,8 +248,12 @@ export function EvaluationSummaryCard({
           <div className="flex flex-col justify-center gap-4">
             <MetricTile
               label="Average Score"
-              value={summary.averageScore}
-              helperText="Average final or derived review score inside the current reporting scope."
+              value={summary.scoredGroups ? summary.averageScore : '—'}
+              helperText={
+                summary.scoredGroups
+                  ? `Based on ${summary.scoredGroups} of ${summary.totalReviewedGroups} reviewed group${summary.totalReviewedGroups === 1 ? '' : 's'} with a recorded final score.`
+                  : 'None of the reviewed groups have a recorded final score yet.'
+              }
               icon="fa-star"
               iconClassName="bg-blue-50 text-blue-600"
             />
@@ -417,9 +396,15 @@ function CompletedProjectRow({ project }: { project: CompletedProjectRecord }) {
         {project.projectTitle}
       </td>
       <td className="border-y border-slate-100 bg-slate-50 px-4 py-4 align-top text-sm transition group-hover:bg-white">
-        <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">
-          {project.finalScore}
-        </span>
+        {project.finalScore !== null ? (
+          <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+            {project.finalScore}
+          </span>
+        ) : (
+          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
+            Not yet scored
+          </span>
+        )}
       </td>
       <td className="border-y border-slate-100 bg-slate-50 px-4 py-4 align-top text-sm leading-6 text-[var(--text-light)] transition group-hover:bg-white">
         {project.recommendation}

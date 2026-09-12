@@ -7,7 +7,7 @@ import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { getProjectFileCategoryLabel } from '@/components/students/student-project-files.shared';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
-type HistoryFilterKey = 'all' | 'submissions' | 'feedback' | 'revisions' | 'approvals' | 'milestones' | 'files';
+type HistoryFilterKey = 'all' | 'submissions' | 'revisions' | 'approvals' | 'milestones' | 'files';
 type HistoryEventFilterKey = Exclude<HistoryFilterKey, 'all'>;
 type HistoryPriority = 'major' | 'minor';
 
@@ -49,14 +49,11 @@ type TimelineMonthGroup = {
 const HISTORY_FILTERS: Array<{ key: HistoryFilterKey; label: string; icon: string }> = [
   { key: 'all', label: 'All', icon: 'fa-layer-group' },
   { key: 'submissions', label: 'Submissions', icon: 'fa-paper-plane' },
-  { key: 'feedback', label: 'Feedback', icon: 'fa-comments' },
   { key: 'revisions', label: 'Revisions', icon: 'fa-rotate-right' },
   { key: 'approvals', label: 'Approvals', icon: 'fa-circle-check' },
   { key: 'milestones', label: 'Milestones', icon: 'fa-timeline' },
   { key: 'files', label: 'Files', icon: 'fa-folder-open' }
 ];
-
-const HISTORY_EVENT_FILTERS: HistoryEventFilterKey[] = ['submissions', 'feedback', 'revisions', 'approvals', 'milestones', 'files'];
 
 const BADGE_TONE_STYLES: Record<BadgeTone, string> = {
   neutral: 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)]',
@@ -74,18 +71,13 @@ const ICON_TONE_STYLES: Record<BadgeTone, string> = {
   info: 'bg-blue-100 text-[#003A8F]'
 };
 
-const SUMMARY_TONE_STYLES: Record<BadgeTone, string> = {
-  neutral: 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)]',
-  success: 'border-emerald-100 bg-emerald-50/80 text-emerald-700',
-  warning: 'border-amber-100 bg-amber-50/80 text-amber-700',
-  danger: 'border-rose-100 bg-rose-50/80 text-rose-700',
-  info: 'border-blue-100 bg-blue-50/80 text-[#003A8F]'
+const ACCENT_BORDER_STYLES: Record<BadgeTone, string> = {
+  neutral: 'border-l-slate-300',
+  success: 'border-l-emerald-400',
+  warning: 'border-l-amber-400',
+  danger: 'border-l-rose-400',
+  info: 'border-l-blue-400'
 };
-
-const PRIMARY_LINK_CLASS =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#002c6b] bg-[#003A8F] px-4 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(0,58,143,0.18)] transition duration-150 hover:-translate-y-px hover:bg-[#002c6b] hover:shadow-[0_18px_36px_rgba(0,58,143,0.22)]';
-const SECONDARY_LINK_CLASS =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--text)] shadow-sm transition duration-150 hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)] hover:text-[var(--text)]';
 
 function getInitials(value: string) {
   return value
@@ -102,16 +94,6 @@ function formatDisplayLabel(value: string) {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
     .join(' ');
-}
-
-function formatHistoryDateTime(value: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  }).format(new Date(value));
 }
 
 function formatHistoryMonth(value: string) {
@@ -198,39 +180,30 @@ function buildHistoryEntries(data: StudentDashboardData): StudentHistoryEntry[] 
           }
         ];
   const titleEntries: StudentHistoryEntry[] = titleSubmissions.flatMap((submission) =>
-    submission.revisionHistory.map((entry) => {
-      const normalizedStatus = entry.status.toLowerCase();
-      const isApproval = normalizedStatus.includes('approved');
-      const isRevision = normalizedStatus.includes('revision') || normalizedStatus.includes('resubmit');
-      const isSubmission = normalizedStatus.includes('submit');
-
-      return {
+    submission.revisionHistory
+      .filter((entry) => entry.status.toLowerCase().includes('submit'))
+      .map((entry) => ({
         id: `history-title-${submission.id}-${entry.id}`,
         timestamp: entry.date,
-        title: `${submission.proposalLabel} ${entry.status.toLowerCase()}`,
+        title: `${submission.proposalLabel} submitted`,
         description: entry.note,
         actor: entry.reviewedBy,
         sourceLabel: 'Title Submission',
-        eventLabel: isApproval ? 'Approval' : isRevision ? 'Revision' : 'Submission',
+        eventLabel: 'Submission',
         statusLabel: entry.status,
         statusTone: getStatusTone(entry.status),
         route: '/students/title-submission',
         actionLabel: 'Open Title Submission',
-        icon: isApproval ? 'fa-circle-check' : isRevision ? 'fa-rotate-right' : 'fa-paper-plane',
-        tone: isApproval ? 'success' : isRevision ? 'warning' : 'info',
+        icon: 'fa-paper-plane',
+        tone: 'info' as BadgeTone,
         details: compactDetails([
           submission.registrationStatus,
           submission.category,
           submission.proposedTitle
         ]),
-        filters: uniqueHistoryFilters([
-          isSubmission ? 'submissions' : undefined,
-          isRevision ? 'revisions' : undefined,
-          isApproval ? 'approvals' : undefined
-        ]),
-        priority: 'major'
-      };
-    })
+        filters: uniqueHistoryFilters(['submissions']),
+        priority: 'major' as HistoryPriority
+      }))
   );
 
   const majorFileCategories = new Set(['proposal', 'chapter-3', 'system-files', 'presentation-files', 'certificates']);
@@ -262,59 +235,6 @@ function buildHistoryEntries(data: StudentDashboardData): StudentHistoryEntry[] 
     };
   });
 
-  const feedbackEntries: StudentHistoryEntry[] = data.feedback.map((entry) => {
-    const normalizedStatus = entry.status.toLowerCase();
-    const isResolved = normalizedStatus.includes('resolved');
-    const isRevision = normalizedStatus.includes('revised');
-    const statusLabel = entry.unread ? 'Unread' : formatDisplayLabel(entry.status);
-
-    return {
-      id: `history-feedback-${entry.id}`,
-      timestamp: entry.created_at,
-      title: entry.title,
-      description: entry.content,
-      actor: entry.facultyName,
-      sourceLabel: 'Faculty Feedback',
-      eventLabel: isResolved ? 'Approval' : isRevision ? 'Revision' : 'Feedback',
-      statusLabel,
-      statusTone: entry.unread ? 'warning' : getStatusTone(entry.status),
-      route: '/students/faculty-feedback',
-      actionLabel: 'Review Feedback',
-      icon: entry.mode === 'Adviser' ? 'fa-user-graduate' : 'fa-users',
-      tone: entry.unread ? 'warning' : isResolved ? 'success' : isRevision ? 'warning' : 'info',
-      details: compactDetails([entry.mode, entry.unread ? 'Needs acknowledgment' : 'Reviewed']),
-      filters: uniqueHistoryFilters(['feedback', isRevision ? 'revisions' : undefined, isResolved ? 'approvals' : undefined]),
-      priority: entry.unread || !isResolved ? 'major' : 'minor'
-    };
-  });
-
-  const milestoneEntries: StudentHistoryEntry[] = data.milestones.map((entry) => {
-    const normalizedStatus = entry.status.toLowerCase();
-    const normalizedTitle = entry.title.toLowerCase();
-    const relatedPhase = entry.relatedPhase || '';
-    const isApproval = normalizedTitle.includes('approval') || relatedPhase.toLowerCase().includes('approval');
-    const isDefense = normalizedTitle.includes('defense');
-
-    return {
-      id: `history-milestone-${entry.id}`,
-      timestamp: entry.updated_at,
-      title: entry.title,
-      description: entry.summary,
-      actor: 'Project Roadmap',
-      sourceLabel: 'Milestones',
-      eventLabel: isDefense ? 'Defense' : 'Milestone',
-      statusLabel: formatDisplayLabel(entry.status),
-      statusTone: getStatusTone(entry.status),
-      route: entry.route || '/students/milestones',
-      actionLabel: entry.actionLabel || 'Open Milestones',
-      icon: isDefense ? 'fa-person-chalkboard' : 'fa-timeline',
-      tone: isApproval ? 'success' : normalizedStatus === 'completed' ? 'info' : 'warning',
-      details: compactDetails([relatedPhase, entry.dateLabel, entry.priority ? `${formatDisplayLabel(entry.priority)} priority` : undefined]),
-      filters: uniqueHistoryFilters(['milestones', isApproval ? 'approvals' : undefined]),
-      priority: entry.priority === 'high' || normalizedStatus !== 'completed' ? 'major' : 'minor'
-    };
-  });
-
   const reportEntries: StudentHistoryEntry[] = data.progressReports.map((entry) => {
     const reportStatus = entry.statusDisplay || entry.status;
     const normalizedStatus = reportStatus.toLowerCase();
@@ -338,86 +258,6 @@ function buildHistoryEntries(data: StudentDashboardData): StudentHistoryEntry[] 
       details: compactDetails([`${entry.percentageCompleted}% complete`, reportStatus]),
       filters: uniqueHistoryFilters(['submissions', isRevision ? 'revisions' : undefined, isApproval ? 'approvals' : undefined]),
       priority: 'major'
-    };
-  });
-
-  const scheduleEntries: StudentHistoryEntry[] = data.schedules.map((entry) => {
-    const titleStack = `${entry.title} ${entry.type}`.toLowerCase();
-    const isDefense = titleStack.includes('defense');
-    const isDeadline = titleStack.includes('deadline');
-    const isConsultation = titleStack.includes('consultation') || titleStack.includes('meeting');
-
-    return {
-      id: `history-schedule-${entry.id}`,
-      timestamp: entry.created_at,
-      title: entry.title,
-      description: `${entry.type} scheduled at ${entry.location}. ${entry.description}`,
-      actor: 'Student Calendar',
-      sourceLabel: 'Schedule',
-      eventLabel: isDefense ? 'Defense' : isDeadline ? 'Revision' : 'Milestone',
-      statusLabel: formatDisplayLabel(entry.status),
-      statusTone: getStatusTone(entry.status),
-      route: '/students/schedule',
-      actionLabel: 'Open Schedule',
-      icon: isDefense ? 'fa-person-chalkboard' : isDeadline ? 'fa-hourglass-half' : 'fa-calendar-check',
-      tone: isDefense || isDeadline ? 'warning' : getStatusTone(entry.status),
-      details: compactDetails([entry.type, entry.time, entry.location]),
-      filters: uniqueHistoryFilters([
-        isDeadline ? 'submissions' : undefined,
-        isDeadline ? 'revisions' : undefined,
-        isConsultation ? 'feedback' : undefined,
-        'milestones'
-      ]),
-      priority: entry.priority === 'high' || isDefense || isDeadline ? 'major' : 'minor'
-    };
-  });
-
-  const notificationEntries: StudentHistoryEntry[] = data.notifications.map((entry) => {
-    const typeLabel = formatDisplayLabel(entry.type);
-    const normalizedType = entry.type.toLowerCase();
-
-    return {
-      id: `history-notification-${entry.id}`,
-      timestamp: entry.created_at,
-      title: entry.title,
-      description: entry.message,
-      actor: 'System Notification',
-      sourceLabel: 'Notifications',
-      eventLabel:
-        normalizedType === 'approval'
-          ? 'Approval'
-          : normalizedType === 'deadline'
-            ? 'Revision'
-            : normalizedType === 'feedback'
-              ? 'Feedback'
-              : normalizedType === 'schedule'
-                ? 'Milestone'
-                : 'Status',
-      statusLabel: entry.read ? 'Read' : 'Unread',
-      statusTone: entry.read ? 'neutral' : entry.priority === 'high' ? 'warning' : 'info',
-      route: entry.route || '/students/notifications',
-      actionLabel: entry.actionLabel || 'Open Notifications',
-      icon:
-        normalizedType === 'approval'
-          ? 'fa-circle-check'
-          : normalizedType === 'deadline'
-            ? 'fa-hourglass-half'
-            : normalizedType === 'feedback'
-              ? 'fa-comments'
-              : normalizedType === 'schedule'
-                ? 'fa-calendar-check'
-                : 'fa-bell',
-      tone: entry.priority === 'high' ? 'warning' : entry.read ? 'neutral' : 'info',
-      details: compactDetails([typeLabel, `${formatDisplayLabel(entry.priority)} priority`, entry.read ? 'Read' : 'Unread']),
-      filters: uniqueHistoryFilters([
-        normalizedType === 'feedback' ? 'feedback' : undefined,
-        normalizedType === 'deadline' ? 'submissions' : undefined,
-        normalizedType === 'deadline' ? 'revisions' : undefined,
-        normalizedType === 'approval' ? 'approvals' : undefined,
-        normalizedType === 'schedule' ? 'milestones' : undefined,
-        normalizedType === 'general' ? 'files' : undefined
-      ]),
-      priority: 'minor'
     };
   });
 
@@ -445,35 +285,10 @@ function buildHistoryEntries(data: StudentDashboardData): StudentHistoryEntry[] 
     };
   });
 
-  const technologyTransferEntries: StudentHistoryEntry[] = [
-    {
-      id: `history-tech-${data.technologyTransfer.id}`,
-      timestamp: data.technologyTransfer.updated_at,
-      title: 'Technology transfer status updated',
-      description: data.technologyTransfer.implementationNotes,
-      actor: 'Project Team',
-      sourceLabel: 'Technology Transfer',
-      eventLabel: 'Status',
-      statusLabel: data.technologyTransfer.transferabilityStatus,
-      statusTone: getStatusTone(data.technologyTransfer.transferabilityStatus),
-      route: '/students/technology-transfer',
-      actionLabel: 'Open Technology Transfer',
-      icon: 'fa-handshake-angle',
-      tone: getStatusTone(data.technologyTransfer.transferabilityStatus),
-      details: compactDetails([data.technologyTransfer.deploymentStatus, data.technologyTransfer.beneficiary]),
-      filters: uniqueHistoryFilters(['milestones']),
-      priority: 'minor'
-    }
-  ];
-
   return [
     ...titleEntries,
     ...documentEntries,
-    ...feedbackEntries,
-    ...milestoneEntries,
     ...reportEntries,
-    ...scheduleEntries,
-    ...notificationEntries,
     ...presentationEntries
   ].sort((left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime());
 }
@@ -525,7 +340,6 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
   const filterCounts = useMemo(() => {
     const counts: Record<HistoryEventFilterKey, number> = {
       submissions: 0,
-      feedback: 0,
       revisions: 0,
       approvals: 0,
       milestones: 0,
@@ -595,13 +409,6 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
   }, [filteredEntries]);
 
   const latestEntry = historyEntries[0] || null;
-  const latestMajorEntry = historyEntries.find((entry) => entry.priority === 'major') || latestEntry;
-  const importantActivityCount = historyEntries.filter((entry) => entry.priority === 'major').length;
-  const approvalCount = historyEntries.filter((entry) => entry.filters.includes('approvals')).length;
-  const fileActivityCount = historyEntries.filter((entry) => entry.filters.includes('files')).length;
-  const openReviewCount = historyEntries.filter(
-    (entry) => (entry.filters.includes('feedback') || entry.filters.includes('revisions')) && entry.statusTone !== 'success'
-  ).length;
 
   const collapsedMinorCount = useMemo(() => {
     return timelineGroups.reduce((monthTotal, monthGroup) => {
@@ -622,44 +429,6 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
     }, 0);
   }, [timelineGroups, expandedGroups]);
 
-  const quickLinks = [
-    { href: '/students/project-files', label: 'Project Files', copy: 'Review upload history and current file states.', icon: 'fa-file-lines' },
-    { href: '/students/faculty-feedback', label: 'Faculty Feedback', copy: 'Open adviser and panel review threads.', icon: 'fa-comments' },
-    { href: '/students/milestones', label: 'Milestones', copy: 'Check roadmap checkpoints and due phases.', icon: 'fa-timeline' },
-    { href: '/students/project-overview', label: 'Project Overview', copy: 'See the current project snapshot and scope.', icon: 'fa-folder-open' }
-  ];
-
-  const summaryCards: Array<{ label: string; value: string | number; note: string; icon: string; tone: BadgeTone }> = [
-    {
-      label: 'Important Actions',
-      value: importantActivityCount,
-      note: 'Major submissions, review notes, approvals, and milestone shifts.',
-      icon: 'fa-star',
-      tone: 'info'
-    },
-    {
-      label: 'Open Review Queue',
-      value: openReviewCount,
-      note: 'Feedback and revision-related items that still need attention.',
-      icon: 'fa-hourglass-half',
-      tone: 'warning'
-    },
-    {
-      label: 'Approvals Logged',
-      value: approvalCount,
-      note: 'Accepted reviews, cleared submissions, and completed formal steps.',
-      icon: 'fa-circle-check',
-      tone: 'success'
-    },
-    {
-      label: 'File Activity',
-      value: fileActivityCount,
-      note: 'Major uploads and file state changes across the workspace.',
-      icon: 'fa-folder-open',
-      tone: 'neutral'
-    }
-  ];
-
   const handleResetFilters = () => {
     setSearchTerm('');
     setSelectedFilter('all');
@@ -669,6 +438,12 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
   const toggleGroupExpansion = (groupKey: string) => {
     setExpandedGroups((previous) => ({ ...previous, [groupKey]: !previous[groupKey] }));
   };
+
+  const scrollToMonth = (monthKey: string) => {
+    document.getElementById(`history-month-${monthKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const todayKey = getDateKey(new Date());
 
   return (
     <>
@@ -685,150 +460,112 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
               </span>
             </div>
             <h1>Project History</h1>
-            <p>Trace submissions, feedback, revisions, approvals, milestones, and major project movement from one academic timeline.</p>
+            <p>A log of what you and your group have done — title submissions, file uploads, progress reports, and academic activity. For updates from your adviser or panel, check Notifications.</p>
           </div>
         </div>
       </header>
 
       <div className="page-body">
-        <section className="grid gap-5 rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)] xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,1fr)]">
-          <div className="grid gap-4">
-            <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#003A8F]">Activity Timeline</span>
-            <div className="grid gap-3">
-              <h2 className="max-w-[18ch] text-[clamp(1.7rem,3vw,2.25rem)] font-extrabold leading-tight text-slate-950">
-                Cleaner project history for review cycles, submissions, and milestone movement
-              </h2>
-              <p className="max-w-[64ch] text-sm leading-7 text-[var(--muted)]">
-                Major academic actions stay visible first. Routine updates are still preserved, but they sit under each date group so the timeline remains easier to scan.
-              </p>
-            </div>
-
-            <div className="rounded-[22px] border border-blue-100 bg-gradient-to-r from-blue-50 to-white p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-              <p className="text-sm font-semibold text-[var(--text)]">Latest major activity</p>
-              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
-                {latestMajorEntry
-                  ? `${latestMajorEntry.title} was recorded on ${formatHistoryDateTime(latestMajorEntry.timestamp)} under ${latestMajorEntry.sourceLabel}.`
-                  : 'Project activity will appear here once submissions, reviews, and milestone actions are recorded.'}
-              </p>
-              {latestMajorEntry ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Badge label={latestMajorEntry.eventLabel} tone={latestMajorEntry.tone} icon={latestMajorEntry.icon} />
-                  <Badge label={latestMajorEntry.statusLabel} tone={latestMajorEntry.statusTone} />
-                </div>
-              ) : null}
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <Link prefetch={false} className={PRIMARY_LINK_CLASS} href="/students/project-files">
-                <i className="fas fa-file-lines" aria-hidden="true" /> Open Project Files
-              </Link>
-              <Link prefetch={false} className={SECONDARY_LINK_CLASS} href="/students/faculty-feedback">
-                <i className="fas fa-comments" aria-hidden="true" /> Review Feedback
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {summaryCards.map((item) => (
-              <article key={item.label} className={`rounded-[22px] border p-4 shadow-sm ${SUMMARY_TONE_STYLES[item.tone]}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${ICON_TONE_STYLES[item.tone]}`}>
-                    <i className={`fas ${item.icon}`} aria-hidden="true" />
-                  </span>
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[var(--muted)]">{item.label}</span>
-                </div>
-                <strong className="mt-4 block text-3xl font-extrabold leading-none text-slate-950">{item.value}</strong>
-                <p className="mt-2 text-xs leading-5 text-[var(--muted)]">{item.note}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        <section className="overflow-hidden rounded-[28px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--border)] p-5">
             <div className="min-w-0">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">History Filters</span>
-              <h3 className="mt-2 text-xl font-bold text-slate-950">Focus the activity stream</h3>
-              <p className="mt-1 max-w-[56ch] text-sm leading-6 text-[var(--muted)]">
-                Filter the timeline by event type, search for a specific item, and keep minor updates collapsed until you need the extra detail.
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Activity Log</span>
+              <h2 className="mt-2 text-xl font-bold text-slate-950">Every action you've taken, searchable and grouped by day</h2>
+              <p className="mt-1 max-w-[60ch] text-sm leading-6 text-[var(--muted)]">
+                Title submissions, file uploads, progress reports, and academic activity — everything your group has done, in one filterable timeline.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge label={`${filteredEntries.length} visible`} tone="info" icon="fa-filter" />
+            <div className="flex flex-wrap justify-end gap-2">
+              <Badge label={`${filteredEntries.length} of ${historyEntries.length} shown`} tone="info" icon="fa-filter" />
               {collapsedMinorCount ? <Badge label={`${collapsedMinorCount} collapsed`} tone="warning" icon="fa-layer-group" /> : null}
+              {latestEntry ? <Badge label={`Latest: ${formatHistoryDay(latestEntry.timestamp)}`} tone="neutral" icon="fa-clock-rotate-left" /> : null}
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            {HISTORY_FILTERS.map((filter) => {
-              const count = filter.key === 'all' ? historyEntries.length : filterCounts[filter.key];
-              const isActive = selectedFilter === filter.key;
+          <div className="space-y-4 border-b border-[var(--border)] p-5">
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <label className="grid gap-1.5">
+                <span className="sr-only">Search Timeline</span>
+                <span className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-sm text-[var(--muted)] transition focus-within:border-[#003A8F] focus-within:bg-[var(--surface)] focus-within:ring-4 focus-within:ring-[#003A8F]/10">
+                  <i className="fas fa-magnifying-glass text-[var(--text-meta)]" aria-hidden="true" />
+                  <input
+                    className="w-full border-0 bg-transparent p-0 text-sm font-medium text-[var(--text)] outline-none placeholder:text-[var(--text-meta)]"
+                    type="search"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Search by activity title, actor, status, or file"
+                  />
+                </span>
+              </label>
 
-              return (
-                <button
-                  key={filter.key}
-                  aria-pressed={isActive}
-                  className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition ${
-                    isActive
-                      ? 'border-[#003A8F]/20 bg-[#003A8F]/10 text-[#003A8F]'
-                      : 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
-                  }`}
-                  type="button"
-                  onClick={() => setSelectedFilter(filter.key)}
-                >
-                  <i className={`fas ${filter.icon} text-[12px]`} aria-hidden="true" />
-                  {filter.label}
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-[var(--surface)] text-[#003A8F]' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>{count}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-            <label className="grid gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Search Timeline</span>
-              <span className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-sm text-[var(--muted)] transition focus-within:border-[#003A8F] focus-within:bg-[var(--surface)] focus-within:ring-4 focus-within:ring-[#003A8F]/10">
-                <i className="fas fa-magnifying-glass text-[var(--text-meta)]" aria-hidden="true" />
-                <input
-                  className="w-full border-0 bg-transparent p-0 text-sm font-medium text-[var(--text)] outline-none placeholder:text-[var(--text-meta)]"
-                  type="search"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Search by activity title, actor, status, or file"
-                />
-              </span>
-            </label>
-
-            <div className="flex items-end">
               <button
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface-alt)] hover:text-[var(--text)]"
                 type="button"
                 onClick={handleResetFilters}
               >
                 <i className="fas fa-rotate-left" aria-hidden="true" />
-                Reset Filters
+                Reset
               </button>
             </div>
-          </div>
-        </section>
 
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_320px] 2xl:grid-cols-[minmax(0,1.75fr)_340px]">
-          <article className="rounded-[28px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0">
-                <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Timeline View</span>
-                <h3 className="mt-2 text-xl font-bold text-slate-950">Grouped project activity by month and date</h3>
-                <p className="mt-1 max-w-[60ch] text-sm leading-6 text-[var(--muted)]">
-                  Important actions stay pinned near the top of each date group. Minor system updates remain available through the expanded timeline controls.
-                </p>
-              </div>
-              {latestEntry ? <Badge label={`Latest: ${formatHistoryDay(latestEntry.timestamp)}`} tone="neutral" icon="fa-clock-rotate-left" /> : null}
+            <div className="flex flex-wrap gap-2">
+              {HISTORY_FILTERS.map((filter) => {
+                const count = filter.key === 'all' ? historyEntries.length : filterCounts[filter.key];
+                const isActive = selectedFilter === filter.key;
+                const isEmpty = filter.key !== 'all' && count === 0 && !isActive;
+
+                return (
+                  <button
+                    key={filter.key}
+                    aria-pressed={isActive}
+                    className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition ${
+                      isActive
+                        ? 'border-[#003A8F]/20 bg-[#003A8F]/10 text-[#003A8F]'
+                        : isEmpty
+                          ? 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-meta)] opacity-60 hover:opacity-100 hover:border-[var(--border-strong)] hover:text-[var(--text)]'
+                          : 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
+                    }`}
+                    type="button"
+                    onClick={() => setSelectedFilter(filter.key)}
+                  >
+                    <i className={`fas ${filter.icon} text-[12px]`} aria-hidden="true" />
+                    {filter.label}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                        isActive ? 'bg-[var(--surface)] text-[#003A8F]' : isEmpty ? 'bg-[var(--surface-alt)] text-[var(--text-meta)]' : 'bg-[var(--surface)] text-[var(--muted)]'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+          </div>
 
+          {timelineGroups.length > 1 ? (
+            <div className="flex items-center gap-2 overflow-x-auto border-b border-[var(--border)] bg-[var(--surface-alt)]/60 px-5 py-3">
+              <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                <i className="fas fa-location-arrow" aria-hidden="true" /> Jump to
+              </span>
+              {timelineGroups.map((monthGroup) => (
+                <button
+                  key={monthGroup.key}
+                  type="button"
+                  onClick={() => scrollToMonth(monthGroup.key)}
+                  className="shrink-0 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--text)] shadow-sm transition hover:-translate-y-px hover:border-[var(--border-strong)]"
+                >
+                  {monthGroup.label} <span className="text-[var(--muted)]">· {monthGroup.total}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="p-5">
             {timelineGroups.length ? (
-              <div className="mt-6 space-y-8">
+              <div className="space-y-8">
                 {timelineGroups.map((monthGroup) => (
-                  <section key={monthGroup.key} className="space-y-5">
+                  <section key={monthGroup.key} id={`history-month-${monthGroup.key}`} className="scroll-mt-24 space-y-5">
                     <div className="flex items-center gap-3">
                       <div className="rounded-full bg-[#003A8F]/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#003A8F]">{monthGroup.label}</div>
                       <div className="h-px flex-1 bg-slate-200" />
@@ -838,6 +575,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                     <div className="space-y-5">
                       {monthGroup.days.map((dayGroup) => {
                         const isExpanded = Boolean(expandedGroups[dayGroup.key]);
+                        const isToday = dayGroup.key === todayKey;
                         const majorEntries = dayGroup.entries.filter((entry) => entry.priority === 'major');
                         const minorEntries = dayGroup.entries.filter((entry) => entry.priority === 'minor');
                         const defaultMinorVisibleCount = majorEntries.length === 0 ? Math.min(1, minorEntries.length) : 0;
@@ -847,8 +585,14 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                         return (
                           <div key={dayGroup.key} className="grid gap-4 lg:grid-cols-[108px_minmax(0,1fr)]">
                             <div className="flex lg:block">
-                              <div className="inline-flex w-full items-center gap-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 lg:grid lg:gap-1 lg:px-3 lg:text-center">
-                                <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">{dayGroup.weekday}</span>
+                              <div
+                                className={`inline-flex w-full items-center gap-4 rounded-[24px] border px-4 py-3 lg:grid lg:gap-1 lg:px-3 lg:text-center ${
+                                  isToday ? 'border-[#003A8F]/30 bg-[#003A8F]/5' : 'border-[var(--border)] bg-[var(--surface-alt)]'
+                                }`}
+                              >
+                                <span className={`text-[11px] font-bold uppercase tracking-[0.16em] ${isToday ? 'text-[#003A8F]' : 'text-[var(--muted)]'}`}>
+                                  {isToday ? 'Today' : dayGroup.weekday}
+                                </span>
                                 <strong className="text-2xl font-extrabold leading-none text-slate-950">{dayGroup.dayNumber}</strong>
                                 <span className="text-xs text-[var(--muted)]">{dayGroup.monthStamp}</span>
                               </div>
@@ -858,55 +602,58 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                               {[...majorEntries, ...visibleMinorEntries].map((entry) => (
                                 <article
                                   key={entry.id}
-                                  className={`group relative rounded-[24px] p-4 shadow-sm ring-1 transition duration-150 hover:-translate-y-px hover:shadow-md ${
+                                  className={`group relative rounded-[20px] border-l-[3px] p-4 shadow-sm ring-1 transition duration-150 hover:-translate-y-px hover:shadow-md ${ACCENT_BORDER_STYLES[entry.tone]} ${
                                     entry.priority === 'major' ? 'bg-[var(--surface)] ring-slate-200' : 'bg-[var(--surface-alt)] ring-slate-200/80'
                                   }`}
                                 >
-                                  <span className={`absolute -left-[27px] top-5 flex h-5 w-5 items-center justify-center rounded-full border-4 border-[var(--border)] ${ICON_TONE_STYLES[entry.tone]}`}>
+                                  <span className={`absolute -left-[28px] top-5 flex h-5 w-5 items-center justify-center rounded-full border-4 border-[var(--border)] ${ICON_TONE_STYLES[entry.tone]}`}>
                                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
                                   </span>
 
-                                  <div className="flex flex-wrap items-start justify-between gap-3">
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        <Badge label={entry.eventLabel} tone={entry.tone} icon={entry.icon} />
-                                        <Badge label={entry.statusLabel} tone={entry.statusTone} />
-                                        <span className="text-xs font-medium text-[var(--muted)]">{formatHistoryTime(entry.timestamp)}</span>
-                                      </div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${ICON_TONE_STYLES[entry.tone]}`}>
+                                      <i className={`fas ${entry.icon} text-xs`} aria-hidden="true" />
+                                    </span>
+                                    <Badge label={entry.eventLabel} tone={entry.tone} />
+                                    <Badge label={entry.statusLabel} tone={entry.statusTone} />
+                                    <span className="ml-auto shrink-0 text-xs font-medium text-[var(--muted)]">{formatHistoryTime(entry.timestamp)}</span>
+                                  </div>
 
-                                      <div className="mt-3">
-                                        <h4 className="text-base font-bold leading-6 text-slate-950">{entry.title}</h4>
-                                        <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{entry.description}</p>
-                                      </div>
+                                  <div className="mt-3">
+                                    <h4 className="text-base font-bold leading-6 text-slate-950">{entry.title}</h4>
+                                    <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{entry.description}</p>
+                                  </div>
+
+                                  {entry.details.length ? (
+                                    <div className="mt-3 flex flex-wrap gap-1.5">
+                                      {entry.details.map((detail) => (
+                                        <span key={`${entry.id}-${detail}`} className="rounded-full bg-[var(--surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)]">
+                                          {detail}
+                                        </span>
+                                      ))}
                                     </div>
+                                  ) : null}
 
-                                    <div className="flex min-w-[170px] items-center gap-3 rounded-2xl bg-[var(--surface-alt)] px-3 py-2">
-                                      <span className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold ${ICON_TONE_STYLES[entry.tone]}`}>
+                                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-3">
+                                    <div className="flex min-w-0 items-center gap-2.5">
+                                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${ICON_TONE_STYLES[entry.tone]}`}>
                                         {getInitials(entry.actor)}
                                       </span>
                                       <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-[var(--text)]">{entry.actor}</p>
-                                        <p className="truncate text-xs text-[var(--muted)]">{entry.sourceLabel}</p>
+                                        <p className="truncate text-xs font-semibold text-[var(--text)]">{entry.actor}</p>
+                                        <p className="truncate text-[11px] text-[var(--muted)]">{entry.sourceLabel}</p>
                                       </div>
                                     </div>
-                                  </div>
 
-                                  <div className="mt-3 flex flex-wrap gap-2">
-                                    {entry.details.map((detail) => (
-                                      <span key={`${entry.id}-${detail}`} className="rounded-full bg-[var(--surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)]">
-                                        {detail}
-                                      </span>
-                                    ))}
+                                    {entry.route ? (
+                                      <Link prefetch={false}
+                                        className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[#003A8F] transition hover:text-[#002c6b]"
+                                        href={entry.route}
+                                      >
+                                        {entry.actionLabel || 'Open Related Page'} <i className="fas fa-arrow-right text-[10px]" aria-hidden="true" />
+                                      </Link>
+                                    ) : null}
                                   </div>
-
-                                  {entry.route ? (
-                                    <Link prefetch={false}
-                                      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#003A8F] transition hover:text-[#002c6b]"
-                                      href={entry.route}
-                                    >
-                                      <i className="fas fa-arrow-right" aria-hidden="true" /> {entry.actionLabel || 'Open Related Page'}
-                                    </Link>
-                                  ) : null}
                                 </article>
                               ))}
 
@@ -942,7 +689,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                 ))}
               </div>
             ) : (
-              <div className="mt-6 rounded-[24px] border border-dashed border-[var(--border-strong)] bg-[var(--surface-alt)] p-8 text-center">
+              <div className="rounded-[24px] border border-dashed border-[var(--border-strong)] bg-[var(--surface-alt)] p-8 text-center">
                 <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
                   <i className="fas fa-clock-rotate-left text-lg" aria-hidden="true" />
                 </span>
@@ -958,80 +705,7 @@ export function StudentHistory({ data }: { data: StudentDashboardData }) {
                 </button>
               </div>
             )}
-          </article>
-
-          <aside className="grid gap-4 xl:sticky xl:top-6 xl:self-start">
-            <article className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Current Context</span>
-              <h3 className="mt-2 text-lg font-bold text-slate-950">What matters next</h3>
-              <div className="mt-4 space-y-3">
-                <div className="rounded-2xl bg-[var(--surface-alt)] p-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Current Milestone</p>
-                  <p className="mt-1 text-sm font-semibold text-[var(--text)]">{data.project.currentMilestone}</p>
-                </div>
-                <div className="rounded-2xl bg-[var(--surface-alt)] p-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Repository Status</p>
-                  <p className="mt-1 text-sm font-semibold text-[var(--text)]">{data.project.repositoryStatus}</p>
-                </div>
-                <div className="rounded-2xl bg-[var(--surface-alt)] p-3">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Upcoming Deadline</p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-[var(--text)]">{data.project.upcomingDeadline}</p>
-                </div>
-              </div>
-            </article>
-
-            <article className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Activity Mix</span>
-              <h3 className="mt-2 text-lg font-bold text-slate-950">Where the timeline is busiest</h3>
-              <div className="mt-4 space-y-2.5">
-                {HISTORY_EVENT_FILTERS.map((filterKey) => {
-                  const filter = HISTORY_FILTERS.find((item) => item.key === filterKey)!;
-
-                  return (
-                    <button
-                      key={filterKey}
-                      className="flex w-full items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-3.5 py-3 text-left transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface)]"
-                      type="button"
-                      onClick={() => setSelectedFilter(filterKey)}
-                    >
-                      <span className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
-                          <i className={`fas ${filter.icon}`} aria-hidden="true" />
-                        </span>
-                        <span>
-                          <span className="block text-sm font-semibold text-[var(--text)]">{filter.label}</span>
-                          <span className="block text-xs text-[var(--muted)]">Mapped from the student workspace records</span>
-                        </span>
-                      </span>
-                      <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-bold text-[var(--text)] shadow-sm">{filterCounts[filterKey]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </article>
-
-            <article className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Related Pages</span>
-              <h3 className="mt-2 text-lg font-bold text-slate-950">Jump to the source modules</h3>
-              <div className="mt-4 space-y-2.5">
-                {quickLinks.map((item) => (
-                  <Link prefetch={false}
-                    key={item.href}
-                    className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-3.5 py-3 transition hover:-translate-y-px hover:border-[var(--border-strong)] hover:bg-[var(--surface)]"
-                    href={item.href}
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
-                      <i className={`fas ${item.icon}`} aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-[var(--text)]">{item.label}</span>
-                      <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">{item.copy}</span>
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </article>
-          </aside>
+          </div>
         </section>
       </div>
     </>

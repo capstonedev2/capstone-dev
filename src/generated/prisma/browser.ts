@@ -83,6 +83,11 @@ export type MilestoneCheckpoint = Prisma.MilestoneCheckpointModel
  */
 export type Submission = Prisma.SubmissionModel
 /**
+ * Model ProgressReport
+ * 
+ */
+export type ProgressReport = Prisma.ProgressReportModel
+/**
  * Model ReviewComment
  * 
  */

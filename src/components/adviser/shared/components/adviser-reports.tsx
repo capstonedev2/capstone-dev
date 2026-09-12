@@ -7,12 +7,11 @@ import { AdviserShellActions } from '@/components/adviser/shared/components/advi
 import { getToastIcon, NAV_ITEMS, WORKSPACE_META, isNavItemActive } from '@/components/adviser/shared/config/dashboard-utils';
 import {
   buildAdviserReportsModule,
+  buildReportsCsv,
   REPORT_DATE_RANGE_OPTIONS,
   REPORT_STATUS_OPTIONS,
   REPORT_TYPE_OPTIONS,
   type ReportDateRange,
-  type ReportExportFormat,
-  type ReportSectionKey,
   type ReportStatusFilter,
   type ReportType
 } from '@/components/adviser/shared/data/report-workspace-data';
@@ -64,19 +63,19 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
     }, 3200);
   }
 
-  function handleExport(section: ReportSectionKey | 'all', format: ReportExportFormat) {
-    const sectionLabel =
-      section === 'all'
-        ? 'comprehensive report'
-        : section === 'evaluation'
-          ? 'evaluation summary'
-          : section === 'progress'
-            ? 'progress overview'
-            : section === 'completed-projects'
-              ? 'completed projects'
-              : 'supervision summary';
+  function handleExport() {
+    const csv = buildReportsCsv(reportModule);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `adviser-reports-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
-    showToast(`Preparing ${sectionLabel} export in ${format.toUpperCase()} format.`, 'success');
+    showToast('Report exported as CSV.', 'success');
   }
 
   return (
@@ -110,7 +109,7 @@ export function AdviserReports({ data }: { data: AdviserDashboardData }) {
             onDateRangeChange={setDateRange}
             onReportTypeChange={setReportType}
             onStatusChange={setStatus}
-            onGlobalExport={(format) => handleExport('all', format)}
+            onGlobalExport={handleExport}
           />
 
           {showEvaluation || showProgress ? (

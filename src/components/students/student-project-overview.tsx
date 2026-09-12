@@ -354,10 +354,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
     { label: 'Program', value: project.program },
     { label: 'Department', value: project.department },
     { label: 'Academic Year', value: project.academicYear },
-    { label: 'Category', value: project.category },
     { label: 'Project Status', value: project.status },
-    { label: 'Pilot Testing Status', value: project.pilotTestingStatus },
-    { label: 'Implementation Location', value: project.implementationLocation },
     { label: 'Repository Status', value: project.repositoryStatus }
   ];
 

@@ -1,12 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type NotificationType = StudentDashboardData['notifications'][number]['type'];
 type StudentNotification = StudentDashboardData['notifications'][number];
+
+// Mirrors the same allow-list used server-side in student-workspace.ts — live-polled
+// notifications go through this same normalization so a type never becomes unfilterable.
+const KNOWN_NOTIFICATION_FILTER_TYPES = new Set(['feedback', 'deadline', 'schedule', 'approval', 'transfer']);
 
 const BADGE_STYLES: Record<BadgeTone, string> = {
   neutral: 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--text)]',
@@ -62,12 +67,27 @@ function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: BadgeT
   );
 }
 
+// The `route` field every notification carries is always the notifications page itself
+// (it isn't populated with anything more specific anywhere in the app), so it's never a
+// useful "go here" link. `type` is mostly a severity flag (success/warning/info), not a
+// real category, so most notifications land in the generic Dashboard fallback below —
+// checking the exact, known notification titles first gets people to the actual page
+// the update is about (e.g. a title review outcome should open Title Submission, not
+// the Dashboard).
+const TITLE_BASED_ACTIONS: Record<string, { href: string; label: string }> = {
+  'Title Review Updated': { href: '/students/title-submission', label: 'Open Title Submission' },
+  'New Title Proposal Submitted': { href: '/students/title-submission', label: 'Open Title Submission' },
+  'Project Reset: New Title Required': { href: '/students/title-submission', label: 'Open Title Submission' },
+  'Feedback Resolved': { href: '/students/faculty-feedback', label: 'Open Feedback' },
+  'Schedule Updated': { href: '/students/schedule', label: 'Check Schedule' },
+  'Defense Passed': { href: '/students/milestones', label: 'Open Milestones' },
+  'Defense Not Passed': { href: '/students/milestones', label: 'Open Milestones' },
+  'Upload Permission Granted': { href: '/students/project-files', label: 'Open Project Files' }
+};
+
 function getNotificationAction(item: StudentNotification) {
-  if (item.route) {
-    return {
-      href: item.route,
-      label: item.actionLabel || 'View Detail'
-    };
+  if (TITLE_BASED_ACTIONS[item.title]) {
+    return TITLE_BASED_ACTIONS[item.title];
   }
 
   const fallbackActionByType: Record<string, { href: string; label: string }> = {
@@ -133,16 +153,12 @@ function getNotificationTypeMeta(type: NotificationType) {
       return {
         label: 'General',
         icon: 'fa-bell',
-        tone: 'neutral' as BadgeTone,
-        indicatorClass: 'bg-slate-400',
-        iconWrapClass: 'bg-[var(--surface-alt)] text-[var(--muted)]',
-        surfaceClass: 'from-slate-50/90 to-white'
+        tone: 'info' as BadgeTone,
+        indicatorClass: 'bg-[#003A8F]',
+        iconWrapClass: 'bg-blue-50 text-[#003A8F]',
+        surfaceClass: 'from-blue-50/90 to-white'
       };
   }
-}
-
-function isUrgentNotification(item: StudentNotification) {
-  return !item.read && (item.priority === 'high' || item.type === 'deadline');
 }
 
 function isNeedsActionNotification(item: StudentNotification) {
@@ -152,43 +168,43 @@ function isNeedsActionNotification(item: StudentNotification) {
 function NotificationCard({
   item,
   onMarkRead,
-  onAction
+  onAction,
+  onViewDetail
 }: {
   item: StudentNotification & { entityType?: string; entityId?: string };
   onMarkRead: (id: string) => void;
   onAction?: (id: string, action: 'accept' | 'reject') => void;
+  onViewDetail: (item: StudentNotification) => void;
 }) {
-  const action = getNotificationAction(item);
   const typeMeta = getNotificationTypeMeta(item.type);
-  const priorityTone: BadgeTone = item.priority === 'high' ? 'danger' : 'neutral';
   const isPermissionRequest = item.title === 'Upload Permission Request';
+  const isUnread = !item.read;
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl bg-[var(--surface)] shadow-sm ring-1 ring-slate-200/80 transition duration-150 hover:-translate-y-px hover:shadow-md">
+    <article
+      className={`group relative overflow-hidden rounded-[20px] shadow-sm ring-1 transition duration-150 hover:-translate-y-px hover:shadow-md ${
+        isUnread ? 'bg-blue-50/40 ring-blue-100' : 'bg-[var(--surface)] ring-slate-200/80'
+      }`}
+    >
       <span className={`absolute inset-y-0 left-0 w-1 ${typeMeta.indicatorClass}`} />
       <div className="p-5 pl-6">
         <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex min-w-0 gap-4">
-            <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${typeMeta.iconWrapClass}`}>
+            <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${typeMeta.iconWrapClass}`}>
               <i className={`fas ${typeMeta.icon}`} aria-hidden="true" />
+              {isUnread ? <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[var(--surface)] bg-[#F6BE00]" aria-hidden="true" /> : null}
             </span>
             <div className="min-w-0">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Badge label={typeMeta.label} tone={typeMeta.tone} icon={typeMeta.icon} />
-                <Badge label={item.priority === 'high' ? 'Urgent' : 'Standard'} tone={priorityTone} />
-                <Badge label={item.read ? 'Completed' : 'Unread'} tone={item.read ? 'success' : 'warning'} />
-                {isPermissionRequest && !item.read ? <Badge label="Action Required" tone="danger" icon="fa-hand" /> : null}
+                {item.priority === 'high' ? <Badge label="Urgent" tone="danger" /> : null}
+                {isPermissionRequest && isUnread ? <Badge label="Action Required" tone="danger" icon="fa-hand" /> : null}
               </div>
               <h4 className="mt-3 text-base font-bold leading-6 text-slate-950 sm:text-lg">{item.title}</h4>
-              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{item.message}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
-                  <i className="fas fa-clock" aria-hidden="true" /> {item.dateLabel}
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
-                  <i className="fas fa-layer-group" aria-hidden="true" /> {item.priority === 'high' ? 'Needs immediate attention' : 'Routine update'}
-                </span>
-              </div>
+              <p className="mt-1 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{item.message}</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
+                <i className="fas fa-clock" aria-hidden="true" /> {item.dateLabel}
+              </span>
             </div>
           </div>
 
@@ -212,9 +228,9 @@ function NotificationCard({
               </>
             ) : (
               <>
-                <Link prefetch={false} className={PRIMARY_ACTION_CLASS} href={action.href} onClick={() => !item.read && onMarkRead(item.id)}>
-                  <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" /> {action.label}
-                </Link>
+                <button className={PRIMARY_ACTION_CLASS} type="button" onClick={() => onViewDetail(item)}>
+                  <i className="fas fa-eye" aria-hidden="true" /> View
+                </button>
                 {!item.read ? (
                   <button className={SECONDARY_ACTION_CLASS} type="button" onClick={() => onMarkRead(item.id)}>
                     <i className="fas fa-check" aria-hidden="true" /> Mark Read
@@ -229,60 +245,116 @@ function NotificationCard({
   );
 }
 
-function NotificationSection({
-  kicker,
-  title,
-  copy,
-  items,
-  emptyCopy,
-  tone,
-  actions,
-  onMarkRead,
-  onAction
+function NotificationDetailModal({
+  item,
+  onClose,
+  onMarkRead
 }: {
-  kicker: string;
-  title: string;
-  copy: string;
-  items: StudentNotification[];
-  emptyCopy: string;
-  tone: BadgeTone;
-  actions?: ReactNode;
+  item: StudentNotification;
+  onClose: () => void;
   onMarkRead: (id: string) => void;
-  onAction?: (id: string, action: 'accept' | 'reject') => void;
 }) {
-  return (
-    <section className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">{kicker}</span>
-          <h3 className="mt-2 text-xl font-bold text-slate-950">{title}</h3>
-          <p className="mt-1 max-w-[58ch] text-sm leading-6 text-[var(--muted)]">{copy}</p>
+  const typeMeta = getNotificationTypeMeta(item.type);
+  const action = getNotificationAction(item);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [onClose]);
+
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+      <button
+        className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+        type="button"
+        aria-label="Close notification detail"
+        onClick={onClose}
+      />
+
+      <div className="relative w-full max-w-lg overflow-hidden rounded-[28px] bg-[var(--surface)] shadow-2xl ring-1 ring-slate-200/80">
+        <div className="relative bg-gradient-to-br from-blue-50 to-white p-6 pb-5">
+          <span className={`absolute inset-x-0 top-0 h-1.5 ${typeMeta.indicatorClass}`} />
+
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Notification Detail</span>
+              <div className="mt-3 flex items-center gap-3">
+                <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg ring-4 ring-white ${typeMeta.iconWrapClass}`}>
+                  <i className={`fas ${typeMeta.icon}`} aria-hidden="true" />
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <Badge label={typeMeta.label} tone={typeMeta.tone} icon={typeMeta.icon} />
+                  {item.priority === 'high' ? <Badge label="Urgent" tone="danger" /> : null}
+                  <Badge label={item.read ? 'Completed' : 'Unread'} tone={item.read ? 'success' : 'warning'} />
+                </div>
+              </div>
+            </div>
+            <button
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-white hover:text-[var(--text)]"
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+            >
+              <i className="fas fa-xmark" aria-hidden="true" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge label={`${items.length} item${items.length === 1 ? '' : 's'}`} tone={tone} />
-          {actions}
+        <div className="p-6 pt-5">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-xl font-bold leading-7 text-slate-950">{item.title}</h3>
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
+              <i className="fas fa-clock" aria-hidden="true" /> {item.dateLabel}
+            </span>
+          </div>
+
+          <div className="mt-3 rounded-2xl bg-[var(--surface-alt)] p-4">
+            <p className="text-sm leading-7 text-[var(--text)]">{item.message}</p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2 border-t border-[var(--border)] pt-5">
+            <Link prefetch={false} className={PRIMARY_ACTION_CLASS} href={action.href} onClick={onClose}>
+              <i className="fas fa-arrow-right" aria-hidden="true" /> {action.label}
+            </Link>
+            {!item.read ? (
+              <button
+                className={SECONDARY_ACTION_CLASS}
+                type="button"
+                onClick={() => {
+                  onMarkRead(item.id);
+                  onClose();
+                }}
+              >
+                <i className="fas fa-check" aria-hidden="true" /> Mark Read
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
-
-      {items.length ? (
-        <div className="mt-5 space-y-3">
-          {items.map((item) => (
-            <NotificationCard key={item.id} item={item as any} onMarkRead={onMarkRead} onAction={onAction} />
-          ))}
-        </div>
-      ) : (
-        <div className="mt-5 rounded-2xl bg-[var(--surface-alt)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">{emptyCopy}</div>
-      )}
-    </section>
+    </div>,
+    document.body
   );
 }
 
 export function StudentNotifications({ data }: { data: StudentDashboardData }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<NotificationType | 'all'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'read' | 'unread'>('all');
-  const [completedOpen, setCompletedOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'needs-action' | 'updates' | 'completed'>('needs-action');
+  const [selectedNotification, setSelectedNotification] = useState<StudentNotification | null>(null);
   const [notificationsData, setNotificationsData] = useState(() => sortByCreatedAtDesc(data.notifications || []));
 
   const [realNotifications, setRealNotifications] = useState<any[]>(() =>
@@ -351,7 +423,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
           id: notif.id,
           title: notif.title,
           message: notif.message,
-          type: notif.type === 'info' ? 'general' : notif.type,
+          type: KNOWN_NOTIFICATION_FILTER_TYPES.has(notif.type) ? notif.type : 'general',
           priority: notif.type === 'warning' || notif.type === 'danger' ? 'high' : 'normal',
           read: notif.status === 'READ',
           created_at: notif.createdAt,
@@ -379,35 +451,15 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
   const unreadFeedbackCount = data.feedback.filter((item) => item.unread).length;
   const filteredNotifications = useMemo(() => {
-    return notificationsData.filter((item) => {
-      if (typeFilter !== 'all' && item.type !== typeFilter) return false;
-      if (statusFilter === 'read' && !item.read) return false;
-      if (statusFilter === 'unread' && item.read) return false;
-      return true;
-    });
-  }, [notificationsData, statusFilter, typeFilter]);
+    return notificationsData.filter((item) => typeFilter === 'all' || item.type === typeFilter);
+  }, [notificationsData, typeFilter]);
   const unreadNotificationsCount = notificationsData.filter((item) => !item.read).length;
   const deadlines = notificationsData.filter((item) => item.type === 'deadline').length;
-  const feedbackItems = notificationsData.filter((item) => item.type === 'feedback').length;
-  const scheduleItems = notificationsData.filter((item) => item.type === 'schedule').length;
   const completedCount = notificationsData.filter((item) => item.read).length;
-  const latestNotification = notificationsData[0] || null;
-  const focusNotification = filteredNotifications.find((item) => isUrgentNotification(item)) || filteredNotifications.find((item) => !item.read) || filteredNotifications[0] || null;
-  const focusNotificationAction = focusNotification ? getNotificationAction(focusNotification) : null;
-  const focusNotificationMeta = focusNotification ? getNotificationTypeMeta(focusNotification.type) : null;
-  const remainingNotifications = focusNotification
-    ? filteredNotifications.filter((item) => item.id !== focusNotification.id)
-    : filteredNotifications;
-  const needsActionNotifications = remainingNotifications.filter((item) => isNeedsActionNotification(item));
+  const needsActionNotifications = filteredNotifications.filter((item) => isNeedsActionNotification(item));
   const needsActionIds = new Set(needsActionNotifications.map((item) => item.id));
-  const updatesNotifications = remainingNotifications.filter((item) => !item.read && !needsActionIds.has(item.id));
-  const completedNotifications = remainingNotifications.filter((item) => item.read);
-  const focusQueue = filteredNotifications.filter((item) => !item.read || item.priority === 'high').slice(0, 5);
-  const notificationBreakdown = [
-    { key: 'feedback', label: 'Feedback Notices', count: feedbackItems, href: '/students/faculty-feedback', icon: 'fa-comments' },
-    { key: 'deadlines', label: 'Deadline Reminders', count: deadlines, href: '/students/project-files', icon: 'fa-hourglass-half' },
-    { key: 'schedule', label: 'Schedule Alerts', count: scheduleItems, href: '/students/schedule', icon: 'fa-calendar-check' }
-  ].filter((item) => item.count > 0);
+  const updatesNotifications = filteredNotifications.filter((item) => !item.read && !needsActionIds.has(item.id));
+  const completedNotifications = filteredNotifications.filter((item) => item.read);
 
   const markRead = (id: string) => {
     setNotificationsData((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
@@ -459,10 +511,8 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
 
   const resetFilters = () => {
     setTypeFilter('all');
-    setStatusFilter('all');
   };
 
-  const completedIsOpen = statusFilter === 'read' ? true : completedOpen;
   const summaryCards = [
     {
       label: 'Needs Attention',
@@ -504,6 +554,17 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
     { value: 'transfer', label: 'Project', icon: 'fa-diagram-project' }
   ];
 
+  const realTypesPresent = typeFilterOptions.filter(
+    (option) => option.value !== 'all' && notificationsData.some((item) => item.type === option.value)
+  );
+  // If every notification is the same type, "All" and that one type pill would always
+  // select the exact same set — showing both is redundant, so the type row only appears
+  // once there's an actual choice to make.
+  const showTypeFilters = realTypesPresent.length > 1;
+  const visibleTypeFilterOptions = typeFilterOptions.filter(
+    (option) => option.value === 'all' || option.value === typeFilter || notificationsData.some((item) => item.type === option.value)
+  );
+
   return (
     <>
       <button className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`} type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />
@@ -525,16 +586,13 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
       </header>
 
       <div className="page-body">
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_380px]">
+        <section className="grid gap-5">
           <article className="rounded-[28px] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-slate-200/80">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#003A8F]">Notification Center</span>
-                <h2 className="mt-2 max-w-[18ch] text-[clamp(1.65rem,3vw,2.15rem)] font-extrabold leading-tight text-slate-950">
-                  A cleaner student inbox for alerts, deadlines, and review updates
-                </h2>
-                <p className="mt-3 max-w-[62ch] text-sm leading-7 text-[var(--muted)]">
-                  Focus on the urgent item first, process what still needs action, then keep the remaining updates organized without losing the academic trail.
+                <p className="mt-2 max-w-[58ch] text-sm leading-6 text-[var(--muted)]">
+                  Handle the urgent item first, then work through what's left.
                 </p>
               </div>
 
@@ -573,284 +631,144 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
               ))}
             </div>
           </article>
-
-          <article
-            className={`relative overflow-hidden rounded-[28px] bg-gradient-to-br p-6 shadow-sm ring-1 ring-slate-200/80 ${
-              focusNotificationMeta ? focusNotificationMeta.surfaceClass : 'from-blue-50/90 to-white'
-            }`}
-          >
-            {focusNotificationMeta ? <span className={`absolute inset-y-0 left-0 w-1.5 ${focusNotificationMeta.indicatorClass}`} /> : null}
-
-            <div className="pl-2">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Focus Alert</span>
-                  <h3 className="mt-2 text-xl font-bold text-slate-950">{focusNotification ? focusNotification.title : 'Inbox is clear'}</h3>
-                </div>
-                {focusNotification ? (
-                  <Badge
-                    label={focusNotification.read ? 'Reviewed' : focusNotification.priority === 'high' ? 'Urgent' : 'Action Needed'}
-                    tone={focusNotification.read ? 'success' : focusNotification.priority === 'high' ? 'danger' : 'warning'}
-                  />
-                ) : null}
-              </div>
-
-              {focusNotification ? (
-                <>
-                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{focusNotification.message}</p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Badge label={focusNotificationMeta?.label || 'Notification'} tone={focusNotificationMeta?.tone || 'info'} icon={focusNotificationMeta?.icon} />
-                    <Badge label={focusNotification.dateLabel} tone="neutral" icon="fa-clock" />
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {focusNotificationAction ? (
-                      <Link prefetch={false} className={PRIMARY_ACTION_CLASS} href={focusNotificationAction.href}>
-                        <i className="fas fa-arrow-right" aria-hidden="true" /> {focusNotificationAction.label}
-                      </Link>
-                    ) : null}
-                    {!focusNotification.read ? (
-                      <button className={SECONDARY_ACTION_CLASS} type="button" onClick={() => markRead(focusNotification.id)}>
-                        <i className="fas fa-check" aria-hidden="true" /> Mark Read
-                      </button>
-                    ) : null}
-                  </div>
-                </>
-              ) : (
-                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">No active notification is waiting in the current view.</p>
-              )}
-
-              <div className="mt-6 rounded-2xl bg-[var(--surface)] p-4 ring-1 ring-white/70">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Latest Inbox Activity</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--text)]">
-                  {latestNotification ? `${latestNotification.title} was recorded on ${latestNotification.dateLabel}.` : 'No student portal notification has been recorded yet.'}
-                </p>
-              </div>
-            </div>
-          </article>
         </section>
 
         <section className="rounded-[24px] bg-[var(--surface)] p-4 shadow-sm ring-1 ring-slate-200/80">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
               <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Inbox Filters</span>
-              <p className="mt-2 text-sm text-[var(--muted)]">Refine the inbox by type or read state without leaving the current workflow.</p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Badge label={`${filteredNotifications.length} visible`} tone="info" icon="fa-filter" />
-              <Badge label={`${focusQueue.length} in queue`} tone={focusQueue.length ? 'warning' : 'neutral'} icon="fa-list-check" />
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            {typeFilterOptions.map((option) => {
-              const isActive = typeFilter === option.value;
-              const count = option.value === 'all' ? notificationsData.length : notificationsData.filter((item) => item.type === option.value).length;
-
-              return (
-                <button
-                  key={option.value}
-                  aria-pressed={isActive}
-                  className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition ${
-                    isActive
-                      ? 'border-[#003A8F]/20 bg-[#003A8F]/10 text-[#003A8F]'
-                      : 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
-                  }`}
-                  type="button"
-                  onClick={() => setTypeFilter(option.value)}
-                >
-                  <i className={`fas ${option.icon} text-[12px]`} aria-hidden="true" />
-                  {option.label}
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-[var(--surface)] text-[#003A8F]' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>{count}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              {typeFilter !== 'all' ? (
+                <button className={SECONDARY_ACTION_CLASS} type="button" onClick={resetFilters}>
+                  <i className="fas fa-rotate-left" aria-hidden="true" /> Reset
                 </button>
-              );
-            })}
+              ) : null}
+              <button className={PRIMARY_ACTION_CLASS} type="button" onClick={markAllRead} disabled={!unreadNotificationsCount}>
+                <i className="fas fa-check-double" aria-hidden="true" /> Mark All Read
+              </button>
+            </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-end gap-3">
-            <label className="grid gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--muted)]">Status</span>
-              <select
-                className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-sm font-medium text-[var(--text)] outline-none transition focus:border-[#003A8F] focus:bg-[var(--surface)] focus:ring-4 focus:ring-[#003A8F]/10"
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as 'all' | 'read' | 'unread')}
-              >
-                <option value="all">All notifications</option>
-                <option value="unread">Unread only</option>
-                <option value="read">Completed only</option>
-              </select>
-            </label>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {showTypeFilters ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {visibleTypeFilterOptions.map((option) => {
+                  const isActive = typeFilter === option.value;
+                  const count = option.value === 'all' ? notificationsData.length : notificationsData.filter((item) => item.type === option.value).length;
 
-            <button className={SECONDARY_ACTION_CLASS} type="button" onClick={resetFilters}>
-              <i className="fas fa-rotate-left" aria-hidden="true" /> Reset Filters
-            </button>
+                  return (
+                    <button
+                      key={option.value}
+                      aria-pressed={isActive}
+                      className={`inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition ${
+                        isActive
+                          ? 'border-[#003A8F]/20 bg-[#003A8F]/10 text-[#003A8F]'
+                          : 'border-[var(--border)] bg-[var(--surface-alt)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
+                      }`}
+                      type="button"
+                      onClick={() => setTypeFilter(option.value)}
+                    >
+                      <i className={`fas ${option.icon} text-[12px]`} aria-hidden="true" />
+                      {option.label}
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-[var(--surface)] text-[#003A8F]' : 'bg-[var(--surface)] text-[var(--muted)]'}`}>{count}</span>
+                    </button>
+                  );
+                })}
 
-            <button className={PRIMARY_ACTION_CLASS} type="button" onClick={markAllRead} disabled={!unreadNotificationsCount}>
-              <i className="fas fa-check-double" aria-hidden="true" /> Mark All Read
-            </button>
-          </div>
-        </section>
+                <span className="mx-1 hidden h-6 w-px bg-[var(--border)] sm:block" aria-hidden="true" />
+              </div>
+            ) : null}
 
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_320px] 2xl:grid-cols-[minmax(0,1.65fr)_340px]">
-          <div className="grid gap-5">
-            <NotificationSection
-              kicker="Needs Action"
-              title="Priority inbox"
-              copy="Unread feedback, deadlines, and actionable approvals stay here until the student team responds."
-              items={needsActionNotifications}
-              emptyCopy="No actionable notification is waiting after the current filters were applied."
-              tone="warning"
-              actions={needsActionNotifications.length ? <Badge label="Respond first" tone="danger" icon="fa-bolt" /> : undefined}
-              onMarkRead={markRead}
-              onAction={handleAction}
-            />
+            <div className="inline-flex flex-wrap items-center gap-1 rounded-full bg-[var(--surface-alt)] p-1">
+              {(
+                [
+                  { key: 'all', label: 'All', icon: 'fa-layer-group', count: filteredNotifications.length, badgeTone: 'neutral' as BadgeTone },
+                  {
+                    key: 'needs-action',
+                    label: 'Needs Action',
+                    icon: 'fa-bolt',
+                    count: needsActionNotifications.length,
+                    badgeTone: (needsActionNotifications.length ? 'danger' : 'neutral') as BadgeTone
+                  },
+                  {
+                    key: 'updates',
+                    label: 'Updates',
+                    icon: 'fa-bell',
+                    count: updatesNotifications.length,
+                    badgeTone: (updatesNotifications.length ? 'info' : 'neutral') as BadgeTone
+                  },
+                  { key: 'completed', label: 'Completed', icon: 'fa-check-double', count: completedNotifications.length, badgeTone: 'success' as BadgeTone }
+                ] as const
+              ).map((tab) => {
+                const isActive = activeTab === tab.key;
 
-            <NotificationSection
-              kicker="Updates"
-              title="Non-urgent updates"
-              copy="Schedule changes, general reminders, and lower-pressure updates remain visible without crowding the action queue."
-              items={updatesNotifications}
-              emptyCopy="No non-urgent update is present in the current filtered view."
-              tone="info"
-              onMarkRead={markRead}
-              onAction={handleAction}
-            />
-
-            <section className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Completed</span>
-                  <h3 className="mt-2 text-xl font-bold text-slate-950">Archived after review</h3>
-                  <p className="mt-1 max-w-[58ch] text-sm leading-6 text-[var(--muted)]">Read notifications stay stored for reference, traceability, and follow-up navigation.</p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge label={`${completedNotifications.length} item${completedNotifications.length === 1 ? '' : 's'}`} tone="success" />
-                  <button className={SECONDARY_ACTION_CLASS} type="button" onClick={() => setCompletedOpen((previous) => !previous)}>
-                    <i className={`fas ${completedIsOpen ? 'fa-chevron-up' : 'fa-chevron-down'}`} aria-hidden="true" />
-                    {completedIsOpen ? 'Hide Completed' : 'Show Completed'}
+                return (
+                  <button
+                    key={tab.key}
+                    aria-pressed={isActive}
+                    className={`inline-flex min-h-9 items-center gap-2 rounded-full px-3.5 text-[13px] font-semibold transition ${
+                      isActive
+                        ? 'bg-[var(--surface)] text-[#003A8F] shadow-sm'
+                        : 'text-[var(--muted)] hover:text-[var(--text)]'
+                    }`}
+                    type="button"
+                    onClick={() => setActiveTab(tab.key)}
+                  >
+                    <i className={`fas ${tab.icon} text-[12px] ${isActive ? 'text-[#003A8F]' : 'text-[var(--text-meta)]'}`} aria-hidden="true" />
+                    {tab.label}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                        tab.badgeTone === 'neutral' ? 'bg-[var(--surface)] text-[var(--muted)]' : BADGE_STYLES[tab.badgeTone]
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
                   </button>
-                </div>
-              </div>
-
-              {completedIsOpen ? (
-                completedNotifications.length ? (
-                  <div className="mt-5 space-y-3">
-                    {completedNotifications.map((item) => (
-                      <NotificationCard key={item.id} item={item as any} onMarkRead={markRead} onAction={handleAction} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="mt-5 rounded-2xl bg-[var(--surface-alt)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
-                    No completed notification is available after the current filters were applied.
-                  </div>
-                )
-              ) : (
-                <div className="mt-5 rounded-2xl bg-[var(--surface-alt)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">
-                  Completed notifications are hidden by default to keep the inbox focused. Open this section when you need past items.
-                </div>
-              )}
-            </section>
+                );
+              })}
+            </div>
           </div>
 
-          <aside className="grid gap-4 xl:sticky xl:top-6 xl:self-start">
-            <article className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Action Queue</span>
-                  <h3 className="mt-2 text-lg font-bold text-slate-950">Priority follow-ups</h3>
-                </div>
-                <Badge label={`${focusQueue.length} queued`} tone={focusQueue.length ? 'warning' : 'neutral'} />
-              </div>
+          {(() => {
+            const activeItems =
+              activeTab === 'all'
+                ? filteredNotifications
+                : activeTab === 'needs-action'
+                  ? needsActionNotifications
+                  : activeTab === 'updates'
+                    ? updatesNotifications
+                    : completedNotifications;
+            const emptyCopy =
+              activeTab === 'all'
+                ? 'No notification is present in the current filtered view.'
+                : activeTab === 'needs-action'
+                  ? 'No actionable notification is waiting after the current filters were applied.'
+                  : activeTab === 'updates'
+                    ? 'No non-urgent update is present in the current filtered view.'
+                    : 'No completed notification is available after the current filters were applied.';
 
-              <div className="mt-4 space-y-2.5">
-                {focusQueue.length ? (
-                  focusQueue.map((item) => {
-                    const action = getNotificationAction(item);
-                    const typeMeta = getNotificationTypeMeta(item.type);
-
-                    return (
-                      <Link prefetch={false}
-                        key={item.id}
-                        className="flex items-start gap-3 rounded-2xl bg-[var(--surface-alt)] px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-[var(--surface)] hover:shadow-sm"
-                        href={action.href}
-                      >
-                        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${typeMeta.iconWrapClass}`}>
-                          <i className={`fas ${typeMeta.icon}`} aria-hidden="true" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold leading-5 text-[var(--text)]">{item.title}</p>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
-                            <span>{item.dateLabel}</span>
-                            <span className="text-[#F6BE00]">•</span>
-                            <span>{typeMeta.label}</span>
-                          </div>
-                        </div>
-                        <i className="fas fa-chevron-right mt-1 text-xs text-[var(--text-meta)]" aria-hidden="true" />
-                      </Link>
-                    );
-                  })
-                ) : (
-                  <p className="text-sm leading-6 text-[var(--muted)]">No priority item is waiting in the current filtered view.</p>
-                )}
-              </div>
-            </article>
-
-            <article className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Notification Breakdown</span>
-              <h3 className="mt-2 text-lg font-bold text-slate-950">Where updates are coming from</h3>
-
-              <div className="mt-4 space-y-2.5">
-                {notificationBreakdown.map((item) => (
-                  <Link prefetch={false}
-                    key={item.key}
-                    className="flex items-center gap-3 rounded-2xl bg-[var(--surface-alt)] px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-[var(--surface)] hover:shadow-sm"
-                    href={item.href}
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
-                      <i className={`fas ${item.icon}`} aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <strong className="block text-sm text-[var(--text)]">{item.label}</strong>
-                      <small className="text-xs text-[var(--muted)]">{item.count} alert{item.count === 1 ? '' : 's'}</small>
-                    </div>
-                    <span className="rounded-full bg-[var(--surface)] px-2.5 py-1 text-xs font-bold text-[var(--text)] shadow-sm">{item.count}</span>
-                  </Link>
+            return activeItems.length ? (
+              <div className="mt-5 space-y-3">
+                {activeItems.map((item) => (
+                  <NotificationCard key={item.id} item={item as any} onMarkRead={markRead} onAction={handleAction} onViewDetail={setSelectedNotification} />
                 ))}
               </div>
-            </article>
-
-            <article className="rounded-[24px] bg-[var(--surface)] p-5 shadow-sm ring-1 ring-slate-200/80">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#003A8F]">Quick Access</span>
-              <h3 className="mt-2 text-lg font-bold text-slate-950">Continue related student workflows</h3>
-
-              <div className="mt-4 space-y-2.5">
-                {[
-                  { href: '/students/faculty-feedback', label: 'Faculty Feedback', copy: 'Respond to adviser and panel comments.', icon: 'fa-comments' },
-                  { href: '/students/project-files', label: 'Project Files', copy: 'Review uploads tied to deadlines and approvals.', icon: 'fa-folder-open' },
-                  { href: '/students/schedule', label: 'Schedule', copy: 'Check consultation sessions and updated events.', icon: 'fa-calendar-days' }
-                ].map((item) => (
-                  <Link prefetch={false}
-                    key={item.href}
-                    className="flex items-start gap-3 rounded-2xl bg-[var(--surface-alt)] px-3.5 py-3 ring-1 ring-slate-200/80 transition hover:-translate-y-px hover:bg-[var(--surface)] hover:shadow-sm"
-                    href={item.href}
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#003A8F]">
-                      <i className={`fas ${item.icon}`} aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                      <strong className="block text-sm text-[var(--text)]">{item.label}</strong>
-                      <small className="text-xs leading-5 text-[var(--muted)]">{item.copy}</small>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </article>
-          </aside>
+            ) : (
+              <div className="mt-5 rounded-2xl bg-[var(--surface-alt)] px-4 py-5 text-sm leading-6 text-[var(--muted)]">{emptyCopy}</div>
+            );
+          })()}
         </section>
       </div>
+
+      {selectedNotification ? (
+        <NotificationDetailModal
+          item={selectedNotification}
+          onClose={() => setSelectedNotification(null)}
+          onMarkRead={markRead}
+        />
+      ) : null}
     </>
   );
 }
