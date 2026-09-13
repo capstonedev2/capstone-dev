@@ -78,6 +78,7 @@ const legacyRoutes = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   allowedDevOrigins: ['localhost', '16.165.11.0'],
   experimental: {
     serverActions: {
