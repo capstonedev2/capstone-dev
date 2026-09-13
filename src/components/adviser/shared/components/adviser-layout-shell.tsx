@@ -247,7 +247,7 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
           </div>
           <span className="user-badge">
             <i aria-hidden="true" className={`fas ${meta.badgeIcon}`} />
-            <span>{meta.badgeLabel}</span>
+            <span>{workspaceMode === 'adviser' ? data.profile.department || meta.badgeLabel : meta.badgeLabel}</span>
           </span>
         </div>
 

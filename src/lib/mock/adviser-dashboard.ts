@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { getServerAuthenticatedUser, buildDisplayName } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { NotificationStatus } from '@/generated/prisma/client';
+import { AdviserScheduleItemStatus, NotificationStatus } from '@/generated/prisma/client';
 import { getLatestDefenseOutcomeTag, getProjectProgressSummary } from '@/lib/milestone-checkpoint-tracking';
 
 const now = '2026-04-06T00:00:00.000Z';
@@ -98,6 +98,7 @@ export type AdviserDashboardData = {
     dept: string;
     students: string;
     defenseDate: string;
+    defenseTime: string;
     statusLabel: string;
     statusClass: string;
   }>;
@@ -112,7 +113,15 @@ export type AdviserDashboardData = {
     type: string;
     action: string;
   }>;
-  upcomingSchedule: string[];
+  upcomingSchedule: Array<{
+    id: string;
+    project_id: string;
+    dateLabel: string;
+    timeLabel: string;
+    eventType: string;
+    location: string;
+    tone: 'warning' | 'info';
+  }>;
   departmentPerformance: Array<{
     id: string;
     user_id: string;
@@ -122,23 +131,6 @@ export type AdviserDashboardData = {
     updated_at: string;
     name: string;
     progress: number;
-  }>;
-  adviserSubmissions: Array<{
-    id: string;
-    groupCode: string;
-    groupName: string;
-    dept: string;
-    type: string;
-    title: string;
-    submitted: string;
-    status: string;
-    reviewDays: number;
-    icon: string;
-    summary: string;
-    latestNote: string;
-    nextStep: string;
-    dueLabel: string;
-    approvedThisWeek: boolean;
   }>;
   progressReports: {
     totalFiled: number;
@@ -160,101 +152,8 @@ const adviserDashboardData: AdviserDashboardData = {
     department: 'IT Department',
     notificationCount: 5
   },
-  adviserActivity: [
-    {
-      id: 'activity-001',
-      user_id: 'user-adviser-001',
-      project_id: 'project-it-001',
-      status: 'completed',
-      created_at: now,
-      updated_at: now,
-      icon: 'fa-check-circle',
-      title: 'Chapter 3 Approved - Group A1',
-      text: 'Methodology chapter approved. Students can proceed to data collection.',
-      time: '2 hours ago',
-      meta: 'Adviser Activity'
-    },
-    {
-      id: 'activity-002',
-      user_id: 'user-adviser-001',
-      project_id: 'project-it-002',
-      status: 'completed',
-      created_at: now,
-      updated_at: now,
-      icon: 'fa-comment',
-      title: 'Feedback Provided - Group B2',
-      text: 'Proposal revision comments were sent with a follow-up due on Mar 30.',
-      time: 'Yesterday',
-      meta: 'Adviser Activity'
-    },
-    {
-      id: 'activity-003',
-      user_id: 'user-adviser-001',
-      project_id: 'project-it-003',
-      status: 'confirmed',
-      created_at: now,
-      updated_at: now,
-      icon: 'fa-calendar-check',
-      title: 'Consultation Scheduled - Group C3',
-      text: 'Meeting locked in for Mar 29, 2026 at 10:30 AM in Consult Room B.',
-      time: '2 days ago',
-      meta: 'Adviser Activity'
-    },
-    {
-      id: 'activity-004',
-      user_id: 'user-adviser-001',
-      project_id: 'project-it-004',
-      status: 'approved',
-      created_at: now,
-      updated_at: now,
-      icon: 'fa-file-signature',
-      title: 'Title Approved - Group D4',
-      text: '"Capstone Submission Monitoring Platform" cleared initial review and is ready for the next phase.',
-      time: '3 days ago',
-      meta: 'Adviser Activity'
-    }
-  ],
-  panelActivity: [
-    {
-      id: 'panel-activity-001',
-      user_id: 'user-adviser-001',
-      project_id: 'project-panel-001',
-      status: 'confirmed',
-      created_at: now,
-      updated_at: now,
-      icon: 'fa-users-viewfinder',
-      title: 'Panel Assignment Confirmed',
-      text: 'You were assigned to two upcoming IT proposal defenses this review cycle.',
-      time: 'Today',
-      meta: 'Panel Activity'
-    },
-    {
-      id: 'panel-activity-002',
-      user_id: 'user-adviser-001',
-      project_id: 'project-panel-002',
-      status: 'pending',
-      created_at: now,
-      updated_at: now,
-      icon: 'fa-clipboard-check',
-      title: 'Evaluation Packet Ready',
-      text: 'Blockchain for Supply Chain is ready for scoring before the Apr 3 defense.',
-      time: 'Yesterday',
-      meta: 'Panel Activity'
-    },
-    {
-      id: 'panel-activity-003',
-      user_id: 'user-adviser-001',
-      project_id: 'project-panel-003',
-      status: 'scheduled',
-      created_at: now,
-      updated_at: now,
-      icon: 'fa-calendar-day',
-      title: 'Defense Schedule Published',
-      text: 'Campus Safety Tracker was added to the Apr 5 defense lineup.',
-      time: '2 days ago',
-      meta: 'Panel Activity'
-    }
-  ],
+  adviserActivity: [],
+  panelActivity: [],
   groups: [
     {
       id: 'A1',
@@ -404,6 +303,7 @@ const adviserDashboardData: AdviserDashboardData = {
       dept: 'IT',
       students: 'No students assigned',
       defenseDate: 'Apr 3, 2026',
+      defenseTime: '9:00 AM',
       statusLabel: 'Pending',
       statusClass: 'status-pending'
     },
@@ -418,6 +318,7 @@ const adviserDashboardData: AdviserDashboardData = {
       dept: 'IT',
       students: 'No students assigned',
       defenseDate: 'Apr 5, 2026',
+      defenseTime: '1:30 PM',
       statusLabel: 'Scheduled',
       statusClass: 'status-warning'
     },
@@ -432,51 +333,13 @@ const adviserDashboardData: AdviserDashboardData = {
       dept: 'IT',
       students: 'No students assigned',
       defenseDate: 'Mar 18, 2026',
+      defenseTime: '3:30 PM',
       statusLabel: 'Completed',
       statusClass: 'status-approved'
     }
   ],
-  recentSubmissions: [
-    {
-      id: 'submission-001',
-      user_id: 'user-adviser-001',
-      project_id: 'project-it-001',
-      status: 'pending-review',
-      created_at: now,
-      updated_at: now,
-      group: 'Group A1',
-      type: 'Chapter 3',
-      action: 'A1'
-    },
-    {
-      id: 'submission-002',
-      user_id: 'user-adviser-001',
-      project_id: 'project-it-002',
-      status: 'pending-review',
-      created_at: now,
-      updated_at: now,
-      group: 'Group B2',
-      type: 'Proposal',
-      action: 'B2'
-    },
-    {
-      id: 'submission-003',
-      user_id: 'user-adviser-001',
-      project_id: 'project-it-005',
-      status: 'pending-review',
-      created_at: now,
-      updated_at: now,
-      group: 'Group E5',
-      type: 'Recovery Plan',
-      action: 'E5'
-    }
-  ],
-  upcomingSchedule: [
-    'Mar 28: Group A1 Defense Readiness',
-    'Mar 29: Group B2 Proposal Review',
-    'Mar 30: Group C3 Consultation',
-    'Apr 1: Group E5 Recovery Consultation'
-  ],
+  recentSubmissions: [],
+  upcomingSchedule: [],
   departmentPerformance: [
     {
       id: 'department-it',
@@ -487,76 +350,6 @@ const adviserDashboardData: AdviserDashboardData = {
       updated_at: now,
       name: 'IT',
       progress: 68
-    }
-  ],
-  adviserSubmissions: [
-    {
-        id: 'sub-it-01',
-        groupCode: 'IT-2024-01',
-        groupName: 'AI-Powered Learning System',
-        dept: 'IT',
-        type: 'Chapter 3',
-        title: 'Methodology and Data Collection',
-        submitted: 'Mar 24, 2026',
-        status: 'pending',
-        reviewDays: 0,
-        icon: 'fa-laptop-code',
-        summary: 'The team submitted the revised methodology section and is waiting for your go signal.',
-        latestNote: 'Check if the data gathering flow already matches the approved scope.',
-        nextStep: 'Confirm the methodology revisions and tell the group whether they can proceed to the final build test.',
-        dueLabel: 'Due tomorrow',
-        approvedThisWeek: false
-    },
-    {
-        id: 'sub-met-02',
-        groupCode: 'MET-2024-02',
-        groupName: 'Smart Energy Monitor',
-        dept: 'MET',
-        type: 'Proposal',
-        title: 'Project Proposal Revision',
-        submitted: 'Mar 23, 2026',
-        status: 'pending',
-        reviewDays: 0,
-        icon: 'fa-bolt',
-        summary: 'The feasibility section was updated after the first adviser comments.',
-        latestNote: 'Review the revised budget assumptions before you approve the proposal.',
-        nextStep: 'Check the feasibility summary and confirm if the proposal can move to Chapter 1 writing.',
-        dueLabel: 'Due in 2 days',
-        approvedThisWeek: false
-    },
-    {
-        id: 'sub-tcm-03',
-        groupCode: 'TCM-2024-03',
-        groupName: 'Herbal Database System',
-        dept: 'TCM',
-        type: 'Chapter 2',
-        title: 'Literature Review',
-        submitted: 'Mar 22, 2026',
-        status: 'under-review',
-        reviewDays: 2,
-        icon: 'fa-leaf',
-        summary: 'The group responded to earlier comments and is waiting for your second pass.',
-        latestNote: 'Focus on source quality and make sure the framework references are updated.',
-        nextStep: 'Continue the second review pass and either approve the revision or return a cleaner comment list.',
-        dueLabel: 'In progress',
-        approvedThisWeek: false
-    },
-    {
-        id: 'sub-esm-04',
-        groupCode: 'ESM-2024-04',
-        groupName: 'Waste Management System',
-        dept: 'ESM',
-        type: 'Final Manuscript',
-        title: 'Complete Thesis Document',
-        submitted: 'Mar 20, 2026',
-        status: 'approved',
-        reviewDays: 3,
-        icon: 'fa-recycle',
-        summary: 'This record is already approved and ready for file reference.',
-        latestNote: 'Approval note sent. Keep the final manuscript record for defense preparation.',
-        nextStep: 'Open the stored review if you need to revisit the approved manuscript notes.',
-        dueLabel: 'Approved this week',
-        approvedThisWeek: true
     }
   ],
   progressReports: {
@@ -570,18 +363,40 @@ function cloneAdviserDashboardData() {
   return JSON.parse(JSON.stringify(adviserDashboardData)) as AdviserDashboardData;
 }
 
-function clearMockStudentData(data: AdviserDashboardData) {
-  data.groups = [];
-  data.panelProjects = [];
-  data.recentSubmissions = [];
-  data.upcomingSchedule = [];
-}
-
 function toIsoString(value: Date | string | null | undefined, fallback = now) {
   if (value instanceof Date) return value.toISOString();
   return value || fallback;
 }
 
+function formatScheduleDate(value: Date) {
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(value);
+}
+
+function formatScheduleTime(value: Date) {
+  return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(value);
+}
+
+function formatRelativeTime(isoValue: string) {
+  const then = new Date(isoValue).getTime();
+  if (Number.isNaN(then)) {
+    return 'Recently';
+  }
+
+  const diffMs = Date.now() - then;
+  const diffMinutes = Math.round(diffMs / (1000 * 60));
+
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(then));
+}
 
 function getFacultyRoleLabel(role: unknown) {
   const normalized = String(role || '').toLowerCase();
@@ -632,6 +447,17 @@ function formatDefenseDate(value: Date | string | null | undefined) {
     day: 'numeric',
     year: 'numeric'
   });
+}
+
+function formatDefenseTime(value: Date | string | null | undefined) {
+  if (!value) return 'Time TBA';
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Time TBA';
+  }
+
+  return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' }).format(date);
 }
 
 const ADVISER_DASHBOARD_GROUP_LIMIT = 40;
@@ -855,6 +681,113 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
           filedThisWeek: progressReportRows.filter((r) => r.createdAt >= sevenDaysAgo).length,
           awaitingFeedback: progressReportRows.filter((r) => !r.submissionId || !reviewedSubmissionIds.has(r.submissionId)).length
         };
+
+        const groupCodeByProjectId = new Map(groupsWithPending.map((group) => [group.projectId, group.code] as const));
+        const adviserScheduleDelegate = 'adviserScheduleItem' in prisma ? prisma.adviserScheduleItem : null;
+
+        const [recentFiles, recentComments, upcomingDefenses, upcomingAdviserItems] = await Promise.all([
+          prisma.uploadedFile.findMany({
+            where: { projectId: { in: adviserProjectIds } },
+            orderBy: { createdAt: 'desc' },
+            take: 6,
+            select: {
+              id: true, projectId: true, fileName: true, documentCategory: true, category: true, createdAt: true,
+              submission: { select: { status: true } }
+            }
+          }),
+          prisma.reviewComment.findMany({
+            where: { authorId: dbUser.id, submission: { projectId: { in: adviserProjectIds } } },
+            orderBy: { createdAt: 'desc' },
+            take: 6,
+            select: {
+              id: true, body: true, createdAt: true,
+              submission: { select: { projectId: true, title: true } }
+            }
+          }),
+          prisma.defenseSchedule.findMany({
+            where: { projectId: { in: adviserProjectIds }, scheduledAt: { gte: new Date() } },
+            orderBy: { scheduledAt: 'asc' },
+            take: 6,
+            select: { id: true, projectId: true, title: true, scheduledAt: true, location: true }
+          }),
+          adviserScheduleDelegate
+            ? adviserScheduleDelegate.findMany({
+                where: { projectId: { in: adviserProjectIds }, scheduledAt: { gte: new Date() }, status: { not: AdviserScheduleItemStatus.CANCELLED } },
+                orderBy: { scheduledAt: 'asc' },
+                take: 6,
+                select: { id: true, projectId: true, title: true, type: true, scheduledAt: true, location: true }
+              })
+            : Promise.resolve([])
+        ]);
+
+        data.recentSubmissions = recentFiles.map((file) => ({
+          id: file.id,
+          user_id: dbUser.id,
+          project_id: file.projectId || '',
+          status: file.submission?.status || 'PENDING',
+          created_at: toIsoString(file.createdAt),
+          updated_at: toIsoString(file.createdAt),
+          group: (file.projectId && groupCodeByProjectId.get(file.projectId)) || 'Your group',
+          type: toTitleCase(file.documentCategory || file.category, file.fileName),
+          action: file.id
+        }));
+
+        const fileActivity = recentFiles.slice(0, 4).map((file) => ({
+          id: `activity-file-${file.id}`,
+          user_id: dbUser.id,
+          project_id: file.projectId || '',
+          status: file.submission?.status || 'pending',
+          created_at: toIsoString(file.createdAt),
+          updated_at: toIsoString(file.createdAt),
+          icon: 'fa-file-arrow-up',
+          title: `${(file.projectId && groupCodeByProjectId.get(file.projectId)) || 'A group'} uploaded ${toTitleCase(file.documentCategory || file.category, file.fileName)}`,
+          text: `${file.fileName} was added to the project workspace and is waiting for your review.`,
+          time: toIsoString(file.createdAt)
+        }));
+
+        const commentActivity = recentComments.map((comment) => ({
+          id: `activity-comment-${comment.id}`,
+          user_id: dbUser.id,
+          project_id: comment.submission.projectId || '',
+          status: 'completed',
+          created_at: toIsoString(comment.createdAt),
+          updated_at: toIsoString(comment.createdAt),
+          icon: 'fa-comment-dots',
+          title: `Feedback sent - ${(comment.submission.projectId && groupCodeByProjectId.get(comment.submission.projectId)) || comment.submission.title}`,
+          text: comment.body.length > 140 ? `${comment.body.slice(0, 140)}...` : comment.body,
+          time: toIsoString(comment.createdAt)
+        }));
+
+        data.adviserActivity = [...fileActivity, ...commentActivity]
+          .sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime())
+          .slice(0, 6)
+          .map((item) => ({ ...item, time: formatRelativeTime(item.time) }));
+
+        data.upcomingSchedule = [
+          ...upcomingDefenses.map((session) => ({
+            id: session.id,
+            project_id: session.projectId,
+            sortKey: session.scheduledAt.getTime(),
+            dateLabel: formatScheduleDate(session.scheduledAt),
+            timeLabel: formatScheduleTime(session.scheduledAt),
+            eventType: session.title || 'Defense',
+            location: session.location || 'TBA',
+            tone: 'warning' as const
+          })),
+          ...upcomingAdviserItems.map((item) => ({
+            id: item.id,
+            project_id: item.projectId,
+            sortKey: item.scheduledAt.getTime(),
+            dateLabel: formatScheduleDate(item.scheduledAt),
+            timeLabel: formatScheduleTime(item.scheduledAt),
+            eventType: item.title || toTitleCase(item.type, 'Consultation'),
+            location: item.location || 'TBA',
+            tone: 'info' as const
+          }))
+        ]
+          .sort((left, right) => left.sortKey - right.sortKey)
+          .slice(0, 6)
+          .map(({ sortKey, ...item }) => item);
       }
 
       data.panelProjects = panelEvaluations.map((evaluation) => {
@@ -873,10 +806,36 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
           dept: group?.dept || group?.department || dbUser.department || '',
           students: group?.students?.length ? group.students.join(', ') : 'No students assigned',
           defenseDate: formatDefenseDate(evaluation.defenseSchedule?.scheduledAt),
+          defenseTime: formatDefenseTime(evaluation.defenseSchedule?.scheduledAt),
           statusLabel: toTitleCase(statusValue),
           statusClass: getStatusClass(statusValue)
         };
       });
+
+      data.panelActivity = panelEvaluations
+        .filter((evaluation) => evaluation.recommendation || evaluation.defenseSchedule?.status)
+        .map((evaluation) => {
+          const project = evaluation.project;
+          const isScored = Boolean(evaluation.recommendation);
+
+          return {
+            id: `panel-activity-${evaluation.id}`,
+            user_id: dbUser.id,
+            project_id: project.id,
+            status: isScored ? 'completed' : 'scheduled',
+            created_at: toIsoString(evaluation.updatedAt),
+            updated_at: toIsoString(evaluation.updatedAt),
+            icon: isScored ? 'fa-check-double' : 'fa-calendar-day',
+            title: isScored ? `Evaluation submitted - ${project.title}` : `Defense scheduled - ${project.title}`,
+            text: isScored
+              ? `Recommendation recorded: ${toTitleCase(evaluation.recommendation)}.`
+              : `Defense session scheduled for ${formatDefenseDate(evaluation.defenseSchedule?.scheduledAt)}.`,
+            time: toIsoString(evaluation.updatedAt)
+          };
+        })
+        .sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime())
+        .slice(0, 6)
+        .map((item) => ({ ...item, time: formatRelativeTime(item.time) }));
     } catch (e) {
       console.error('Failed to load real data in adviser dashboard:', e);
       // Fallback to mock data if database fails

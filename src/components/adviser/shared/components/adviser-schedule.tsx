@@ -305,8 +305,8 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
     () =>
       workspaceMode === 'panel'
         ? buildPanelScheduleItems(data.panelProjects)
-        : buildAdviserScheduleItems(data.upcomingSchedule),
-    [workspaceMode, data.panelProjects, data.upcomingSchedule]
+        : buildAdviserScheduleItems(data.upcomingSchedule, data.groups),
+    [workspaceMode, data.panelProjects, data.upcomingSchedule, data.groups]
   );
   const savedAdviserScheduleItems = useMemo(
     () => adviserScheduleItems.map(mapApiScheduleItem),

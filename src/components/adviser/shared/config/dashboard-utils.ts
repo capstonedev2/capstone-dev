@@ -15,7 +15,7 @@ export const WORKSPACE_META = {
     pageCopy: 'Monitor groups, review submissions, and manage supervision tasks',
     navLabel: 'Dashboard',
     headerLabel: 'Adviser & Panel Portal',
-    badgeLabel: 'IT Department',
+    badgeLabel: 'Faculty Adviser',
     badgeIcon: 'fa-building',
     pillLabel: 'Adviser Workspace',
     primaryActionLabel: 'Review Submissions',
@@ -89,9 +89,6 @@ export function getWorkspaceModeFromPathname(pathname: string): WorkspaceMode {
 export function isNavItemActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + '/');
 }
-
-const adviserScheduleTimes = ['9:00 AM', '1:30 PM', '10:00 AM', '3:00 PM'];
-const panelScheduleTimes = ['9:00 AM', '1:30 PM', '3:30 PM', '10:30 AM'];
 
 export function getToastIcon(type: 'success' | 'error' | 'info') {
   if (type === 'success') {
@@ -228,6 +225,21 @@ export function getToneFromStatus(status: string, progress?: number): DashboardT
   return 'primary';
 }
 
+function formatRelativeSubmissionDate(isoValue: string) {
+  const then = new Date(isoValue).getTime();
+  if (Number.isNaN(then)) {
+    return 'Recently submitted';
+  }
+
+  const diffDays = Math.floor((Date.now() - then) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 0) return 'Submitted today';
+  if (diffDays === 1) return 'Submitted yesterday';
+  if (diffDays < 7) return `Submitted ${diffDays} days ago`;
+
+  return `Submitted ${new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(then))}`;
+}
+
 function getActivityStatusLabel(status: string) {
   if (status === 'confirmed') {
     return 'Scheduled';
@@ -256,26 +268,6 @@ function getReviewStatusLabel(status: string) {
   return formatSentenceCase(status);
 }
 
-export function buildAdviserMetrics(
-  groups: AdviserDashboardData['groups'],
-  submissions: AdviserDashboardData['adviserSubmissions'],
-  panelProjects: AdviserDashboardData['panelProjects']
-): DashboardMetric[] {
-  const totalStudents = groups.reduce((sum, group) => sum + group.members, 0);
-  const pendingReviews = submissions.filter((item) => item.status !== 'approved').length;
-  const upcomingDefenses = panelProjects.filter((item) => item.status !== 'completed').length;
-  const atRiskGroups = groups.filter((group) => {
-    const status = getComputedGroupStatus(group);
-    return status === 'pending' || status === 'needs-revision' || status === 'at-risk';
-  }).length;
-
-  return [
-    { id: 'assigned-groups', icon: 'fa-users', label: 'Assigned Groups', value: String(groups.length), helperText: `${totalStudents} students currently under supervision`, trendLabel: 'Active load', tone: 'primary' },
-    { id: 'pending-reviews', icon: 'fa-clock', label: 'Pending Reviews', value: String(pendingReviews), helperText: 'Submissions and revisions waiting for adviser action', trendLabel: pendingReviews ? 'Needs attention' : 'Clear', tone: pendingReviews ? 'warning' : 'success' },
-    { id: 'upcoming-defenses', icon: 'fa-gavel', label: 'Upcoming Defenses', value: String(upcomingDefenses), helperText: 'Defense sessions and panel commitments on the current cycle', trendLabel: upcomingDefenses ? 'This cycle' : 'No lineup', tone: upcomingDefenses ? 'info' : 'neutral' },
-    { id: 'at-risk-groups', icon: 'fa-triangle-exclamation', label: 'At-Risk Groups', value: String(atRiskGroups), helperText: 'Groups flagged for revisions, delays, or low milestone progress', trendLabel: atRiskGroups ? 'Escalate' : 'Stable', tone: atRiskGroups ? 'danger' : 'success' }
-  ];
-}
 
 export function buildPanelMetrics(panelProjects: AdviserDashboardData['panelProjects']): DashboardMetric[] {
   const pendingEvaluations = panelProjects.filter((item) => item.status !== 'completed').length;
@@ -290,24 +282,14 @@ export function buildPanelMetrics(panelProjects: AdviserDashboardData['panelProj
   ];
 }
 
-export function buildAdviserLiveUpdates(activity: AdviserDashboardData['adviserActivity'], recentSubmissions: AdviserDashboardData['recentSubmissions'], adviserSubmissions: AdviserDashboardData['adviserSubmissions'], groups: AdviserDashboardData['groups']): LiveUpdateItem[] {
+export function buildAdviserLiveUpdates(activity: AdviserDashboardData['adviserActivity'], groups: AdviserDashboardData['groups']): LiveUpdateItem[] {
   const groupsByProject = new Map(groups.map((group) => [group.project_id, group]));
-  const groupsById = new Map(groups.map((group) => [group.id, group]));
-  const submissionByCode = new Map(adviserSubmissions.map((item) => [item.groupCode, item]));
 
-  const activityItems = activity.map((item) => {
+  return activity.slice(0, 6).map((item, index) => {
     const group = groupsByProject.get(item.project_id);
-    const groupName = group?.code ?? item.title.split('-').pop()?.trim() ?? 'Supervision update';
-    return { id: item.id, icon: item.icon, title: item.title, description: item.text, groupName, timestamp: item.time, statusLabel: getActivityStatusLabel(item.status), tone: getToneFromStatus(item.status) };
+    const groupName = group?.code ?? 'Supervision update';
+    return { id: item.id, icon: item.icon, title: item.title, description: item.text, groupName, timestamp: item.time, statusLabel: getActivityStatusLabel(item.status), tone: getToneFromStatus(item.status), isNew: index === 0 };
   });
-
-  const submissionUpdates = recentSubmissions.map((item, index) => {
-    const group = groupsById.get(item.action);
-    const detailedSubmission = group ? submissionByCode.get(group.code) : null;
-    return { id: `submission-${item.id}`, icon: 'fa-file-circle-plus', title: `${item.group} uploaded ${item.type}`, description: detailedSubmission?.summary ?? `${item.type} is now waiting inside your review queue.`, groupName: group?.code ?? item.group, timestamp: index === 0 ? 'Just now' : 'Today', statusLabel: 'Pending Review', tone: 'warning' as const };
-  });
-
-  return [...activityItems, ...submissionUpdates].slice(0, 6).map((item, index) => ({ ...item, isNew: index === 0 }));
 }
 
 export function buildPanelLiveUpdates(activity: AdviserDashboardData['panelActivity'], panelProjects: AdviserDashboardData['panelProjects']): LiveUpdateItem[] {
@@ -318,25 +300,22 @@ export function buildPanelLiveUpdates(activity: AdviserDashboardData['panelActiv
   });
 }
 
-export function buildAdviserRecentSubmissionItems(recentSubmissions: AdviserDashboardData['recentSubmissions'], adviserSubmissions: AdviserDashboardData['adviserSubmissions'], groups: AdviserDashboardData['groups']): RecentSubmissionItem[] {
-  const groupsById = new Map(groups.map((group) => [group.id, group]));
-  const adviserSubmissionsByCode = new Map(adviserSubmissions.map((item) => [item.groupCode, item]));
-  return recentSubmissions.map((item, index) => {
-    const group = groupsById.get(item.action);
-    const detailedSubmission = group ? adviserSubmissionsByCode.get(group.code) : undefined;
-    const reviewStatus = detailedSubmission?.status ?? item.status;
+export function buildAdviserRecentSubmissionItems(recentSubmissions: AdviserDashboardData['recentSubmissions'], groups: AdviserDashboardData['groups']): RecentSubmissionItem[] {
+  const groupsByProject = new Map(groups.map((group) => [group.project_id, group]));
+
+  return recentSubmissions.map((item) => {
+    const group = groupsByProject.get(item.project_id);
     return {
       id: item.id,
       groupCode: group?.code ?? item.group,
       groupName: group ? getGroupProjectTitle(group) : item.group,
-      fileTitle: detailedSubmission?.title ?? `${item.type} Submission`,
-      submissionType: detailedSubmission?.type ?? item.type,
-      submittedDate: detailedSubmission?.submitted ?? 'Submitted today',
-      statusLabel: getReviewStatusLabel(reviewStatus),
-      tone: getToneFromStatus(reviewStatus),
+      fileTitle: `${item.type} Submission`,
+      submissionType: item.type,
+      submittedDate: formatRelativeSubmissionDate(item.created_at),
+      statusLabel: getReviewStatusLabel(item.status),
+      tone: getToneFromStatus(item.status),
       actionId: item.action,
-      meta: detailedSubmission?.dueLabel ?? 'Waiting for initial review',
-      revisionCount: Math.max(0, detailedSubmission?.reviewDays ?? index + 1)
+      meta: 'Waiting for adviser review'
     };
   });
 }
@@ -345,7 +324,7 @@ export function buildPanelRecentSubmissionItems(panelProjects: AdviserDashboardD
   return panelProjects.map((item, index) => ({ id: item.id, groupCode: item.dept, groupName: item.title, fileTitle: 'Defense Evaluation Packet', submissionType: 'Panel Evaluation', submittedDate: item.defenseDate, statusLabel: getReviewStatusLabel(item.status), tone: getToneFromStatus(item.status), actionId: item.id, meta: item.students, revisionCount: index }));
 }
 
-export function buildAdviserAlerts(groups: AdviserDashboardData['groups'], adviserSubmissions: AdviserDashboardData['adviserSubmissions']): AttentionAlertItem[] {
+export function buildAdviserAlerts(groups: AdviserDashboardData['groups']): AttentionAlertItem[] {
   const urgentAlerts = groups
     .filter((group) => getComputedGroupStatus(group) === 'needs-revision')
     .map((group) => {
@@ -370,16 +349,7 @@ export function buildAdviserAlerts(groups: AdviserDashboardData['groups'], advis
       priority: 'warning' as const,
       meta: `Pending approval - ${group.progress}% progress`
     }));
-  const normalAlerts = adviserSubmissions
-    .filter((item) => item.status === 'under-review')
-    .map((item) => ({
-      id: `alert-submission-${item.id}`,
-      title: `${item.groupCode} is waiting on a second review pass`,
-      description: item.latestNote,
-      priority: 'normal' as const,
-      meta: `${item.type} - ${item.dueLabel}`
-    }));
-  return [...urgentAlerts, ...warningAlerts, ...normalAlerts].slice(0, 4);
+  return [...urgentAlerts, ...warningAlerts].slice(0, 4);
 }
 
 export function buildPanelAlerts(panelProjects: AdviserDashboardData['panelProjects']): AttentionAlertItem[] {
@@ -389,20 +359,26 @@ export function buildPanelAlerts(panelProjects: AdviserDashboardData['panelProje
   return [...pending, ...scheduled, ...completed].slice(0, 4);
 }
 
-export function buildAdviserScheduleItems(items: AdviserDashboardData['upcomingSchedule']): WeeklyScheduleItem[] {
-  return items.map((item, index) => {
-    const [rawDate, ...rest] = item.split(':');
-    const details = rest.join(':').trim();
-    const groupMatch = details.match(/Group\s+[A-Z]\d/i);
-    const groupName = groupMatch?.[0] ?? 'Adviser session';
-    const eventType = details.replace(groupName, '').trim() || 'Consultation';
-    const location = eventType.toLowerCase().includes('defense') ? 'Research Hall' : eventType.toLowerCase().includes('consultation') ? 'Consultation Room B' : 'Adviser Conference Room';
-    return { id: `schedule-${index}`, dateLabel: rawDate.trim(), timeLabel: adviserScheduleTimes[index % adviserScheduleTimes.length], groupName, eventType, location, tone: eventType.toLowerCase().includes('defense') ? 'warning' : 'info' };
+export function buildAdviserScheduleItems(items: AdviserDashboardData['upcomingSchedule'], groups: AdviserDashboardData['groups']): WeeklyScheduleItem[] {
+  const groupsByProject = new Map(groups.map((group) => [group.project_id, group]));
+
+  return items.map((item) => {
+    const group = groupsByProject.get(item.project_id);
+    return {
+      id: item.id,
+      dateLabel: item.dateLabel,
+      timeLabel: item.timeLabel,
+      groupName: group?.code ?? 'Adviser session',
+      eventType: item.eventType,
+      location: item.location,
+      tone: item.tone,
+      projectId: item.project_id
+    };
   });
 }
 
 export function buildPanelScheduleItems(panelProjects: AdviserDashboardData['panelProjects']): WeeklyScheduleItem[] {
-  return panelProjects.filter((project) => project.status !== 'completed').map((project, index) => ({ id: `panel-schedule-${project.id}`, dateLabel: project.defenseDate, timeLabel: panelScheduleTimes[index % panelScheduleTimes.length], groupName: project.title, eventType: 'Defense evaluation', location: 'Panel Review Room', tone: getToneFromStatus(project.status) }));
+  return panelProjects.filter((project) => project.status !== 'completed').map((project) => ({ id: `panel-schedule-${project.id}`, dateLabel: project.defenseDate, timeLabel: project.defenseTime, groupName: project.title, eventType: 'Defense evaluation', location: 'Panel Review Room', tone: getToneFromStatus(project.status) }));
 }
 
 export function buildAdviserProgressSnapshot(groups: AdviserDashboardData['groups']): GroupProgressSnapshotItem[] {
@@ -424,8 +400,12 @@ export function buildAdviserProgressSnapshot(groups: AdviserDashboardData['group
 }
 
 export function buildPanelProgressSnapshot(panelProjects: AdviserDashboardData['panelProjects']): GroupProgressSnapshotItem[] {
+  // A defense evaluation is a real discrete state (not-yet-scored vs. scored) — there's no
+  // real underlying "percent complete" the way a student group has checkpoints. Rather than
+  // invent partial-credit numbers, only "completed" is a real 100%; everything else is 0%
+  // until it's actually scored.
   return panelProjects.slice(0, 4).map((project) => {
-    const progress = project.status === 'completed' ? 100 : project.status === 'scheduled' ? 72 : project.status === 'pending' ? 38 : 54;
+    const progress = project.status === 'completed' ? 100 : 0;
     return { id: project.id, groupName: project.dept, projectTitle: project.title, progress, milestone: `Defense schedule: ${project.defenseDate}`, statusLabel: project.statusLabel, tone: getToneFromStatus(project.status, progress) };
   });
 }

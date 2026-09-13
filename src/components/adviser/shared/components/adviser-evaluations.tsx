@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import {
   DocumentFileList,
@@ -75,6 +76,7 @@ function clampRubricMaxScore(value: number) {
 
 export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   const { workspaceMode, switchWorkspace, pathname, basePath } = useWorkspaceMode();
+  const searchParams = useSearchParams();
   const [statusFilter, setStatusFilter] = useState<EvaluationStatus | 'all'>('all');
   const [dateFilter, setDateFilter] = useState<EvaluationDateFilter>('all');
   const [searchValue, setSearchValue] = useState('');
@@ -152,6 +154,21 @@ export function AdviserEvaluations({ data }: { data: AdviserDashboardData }) {
   const meta = WORKSPACE_META[workspaceMode];
   const pageContent = PAGE_CONTENT[workspaceMode];
   const records = workspaceMode === 'adviser' ? adviserRecords : panelRecords;
+
+  // Supports deep-linking straight to one evaluation (e.g. from the dashboard's
+  // "Evaluate" quick action) via ?recordId=<Evaluation.id> once records have loaded.
+  useEffect(() => {
+    const recordId = searchParams.get('recordId');
+    if (!recordId || !records.length) {
+      return;
+    }
+
+    const target = records.find((record) => record.id === recordId);
+    if (target) {
+      openEvaluation(target, false);
+    }
+  }, [records, searchParams]);
+
   const evaluationFileProjectOptions = useMemo(
     () => records.map((record) => ({
       id: record.id,
