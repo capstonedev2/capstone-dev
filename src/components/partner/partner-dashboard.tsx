@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import {
+  PARTNER_DEPARTMENTS,
   PARTNER_IMPLEMENTATIONS,
   PARTNER_REQUESTS,
   PARTNER_TECHNOLOGIES,
@@ -10,23 +11,49 @@ import {
   getPartnerStatusTone
 } from '@/components/partner/partner-data';
 import {
-  PartnerButton,
   PartnerDepartmentBadge,
   PartnerModal,
   PartnerStatusBadge
 } from '@/components/partner/partner-primitives';
 import { PartnerShell } from '@/components/partner/partner-shell';
+import { getDepartmentBranding } from '@/config/department-branding';
+
+function getDepartmentAccent(department: string) {
+  const branding = getDepartmentBranding(department);
+  const isInformationTechnology = department.trim().toUpperCase() === 'IT';
+
+  return {
+    ink: branding.primaryColor,
+    soft: isInformationTechnology
+      ? 'color-mix(in srgb, #111111 12%, transparent)'
+      : department.trim().toUpperCase() === 'NAME'
+        ? 'color-mix(in srgb, #DBEAFE 38%, transparent)'
+        : department.trim().toUpperCase() === 'MET'
+          ? 'color-mix(in srgb, #F3D7B6 38%, transparent)'
+      : `color-mix(in srgb, ${branding.accentColor} 22%, transparent)`,
+    fill: `color-mix(in srgb, ${branding.primaryColor} 68%, var(--surface-accent))`
+  };
+}
+
+const KPI_CARDS = [
+  { label: 'Available technologies', icon: 'fa-microchip', accent: '#2563EB' },
+  { label: 'My requests', icon: 'fa-code-pull-request', accent: '#0F766E' },
+  { label: 'Active implementations', icon: 'fa-diagram-project', accent: '#C2410C' },
+  { label: 'Success rate', icon: 'fa-chart-line', accent: '#15803D' }
+] as const;
 
 export function PartnerDashboard() {
   const [departmentFilter, setDepartmentFilter] = useState('All Departments');
   const [search, setSearch] = useState('');
   const [selectedTechnologyId, setSelectedTechnologyId] = useState<string | null>(null);
+  const [hoveredDepartment, setHoveredDepartment] = useState<string | null>(null);
 
   const visibleTechnologies = useMemo(() => {
+    const term = search.trim().toLowerCase();
+
     return PARTNER_TECHNOLOGIES.filter((technology) => {
       const matchesDepartment =
         departmentFilter === 'All Departments' || technology.department === departmentFilter;
-      const term = search.trim().toLowerCase();
       const matchesSearch =
         !term ||
         technology.title.toLowerCase().includes(term) ||
@@ -38,6 +65,8 @@ export function PartnerDashboard() {
 
   const selectedTechnology =
     PARTNER_TECHNOLOGIES.find((technology) => technology.id === selectedTechnologyId) || null;
+  const approvedRequests = PARTNER_REQUESTS.filter((request) => request.status === 'Approved').length;
+  const pendingRequests = PARTNER_REQUESTS.length - approvedRequests;
 
   return (
     <PartnerShell
@@ -46,198 +75,187 @@ export function PartnerDashboard() {
       description="Discover and adopt innovative technologies"
       notificationCount={2}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {/* Premium KPI Section */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-          <article style={{ background: 'linear-gradient(135deg, #003A8F, #1A1851)', color: 'white', borderRadius: '1rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', boxShadow: '0 12px 24px rgba(0, 58, 143, 0.15)', position: 'relative', overflow: 'hidden' }}>
-            <span style={{ color: '#DBEAFE', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <i className="fas fa-microchip" style={{ color: '#F6BE00', fontSize: '1.1rem' }}></i> Available Technologies
-            </span>
-            <strong style={{ color: 'white', fontSize: '2.5rem', lineHeight: 1 }}>{PARTNER_TECHNOLOGIES.length}</strong>
-            <span style={{ color: '#93C5FD', fontSize: '0.85rem' }}>Ready for adoption</span>
-            <i className="fas fa-microchip" style={{ position: 'absolute', right: '-15px', bottom: '-20px', fontSize: '7rem', color: 'rgba(255,255,255,0.05)', transform: 'rotate(-15deg)' }}></i>
-          </article>
-
-          <article style={{ background: 'linear-gradient(135deg, #003A8F, #1A1851)', color: 'white', borderRadius: '1rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', boxShadow: '0 12px 24px rgba(0, 58, 143, 0.15)', position: 'relative', overflow: 'hidden' }}>
-            <span style={{ color: '#DBEAFE', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <i className="fas fa-code-pull-request" style={{ color: '#38BDF8', fontSize: '1.1rem' }}></i> My Requests
-            </span>
-            <strong style={{ color: 'white', fontSize: '2.5rem', lineHeight: 1 }}>{PARTNER_REQUESTS.length}</strong>
-            <span style={{ color: '#93C5FD', fontSize: '0.85rem' }}>2 approved, 2 pending</span>
-            <i className="fas fa-code-pull-request" style={{ position: 'absolute', right: '-15px', bottom: '-20px', fontSize: '7rem', color: 'rgba(255,255,255,0.05)', transform: 'rotate(-15deg)' }}></i>
-          </article>
-
-          <article style={{ background: 'linear-gradient(135deg, #003A8F, #1A1851)', color: 'white', borderRadius: '1rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', boxShadow: '0 12px 24px rgba(0, 58, 143, 0.15)', position: 'relative', overflow: 'hidden' }}>
-            <span style={{ color: '#DBEAFE', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <i className="fas fa-network-wired" style={{ color: '#F87171', fontSize: '1.1rem' }}></i> Active Implementations
-            </span>
-            <strong style={{ color: 'white', fontSize: '2.5rem', lineHeight: 1 }}>{PARTNER_IMPLEMENTATIONS.length}</strong>
-            <span style={{ color: '#93C5FD', fontSize: '0.85rem' }}>Currently deployed</span>
-            <i className="fas fa-network-wired" style={{ position: 'absolute', right: '-15px', bottom: '-20px', fontSize: '7rem', color: 'rgba(255,255,255,0.05)', transform: 'rotate(-15deg)' }}></i>
-          </article>
-
-          <article style={{ background: 'linear-gradient(135deg, #003A8F, #1A1851)', color: 'white', borderRadius: '1rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', boxShadow: '0 12px 24px rgba(0, 58, 143, 0.15)', position: 'relative', overflow: 'hidden' }}>
-            <span style={{ color: '#DBEAFE', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <i className="fas fa-chart-line" style={{ color: '#34D399', fontSize: '1.1rem' }}></i> Success Rate
-            </span>
-            <strong style={{ color: 'white', fontSize: '2.5rem', lineHeight: 1 }}>85%</strong>
-            <span style={{ color: '#93C5FD', fontSize: '0.85rem' }}>Successful adoptions</span>
-            <i className="fas fa-chart-line" style={{ position: 'absolute', right: '-15px', bottom: '-20px', fontSize: '7rem', color: 'rgba(255,255,255,0.05)', transform: 'rotate(-15deg)' }}></i>
-          </article>
+      <div className="flex flex-col gap-8" style={{ color: 'var(--text)' }}>
+        <section
+          className="relative overflow-hidden rounded-[1.5rem] border p-6 shadow-portal md:p-9"
+          style={{ background: 'linear-gradient(120deg, var(--primary), var(--primary-dark, #002C6B))', borderColor: 'var(--primary)', minHeight: '280px' }}
+        >
+          <div className="relative z-10 max-w-2xl text-white">
+            <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.7)' }}>
+              <span className="h-2 w-2 rounded-full" style={{ background: 'var(--accent, #F6BE00)' }} />
+              Partner workspace
+            </p>
+            <h2 className="max-w-xl text-3xl font-black leading-[1.08] tracking-tight md:text-5xl" style={{ color: '#F6BE00' }}>Turn promising research into practical impact.</h2>
+            <p className="mt-3 max-w-xl text-sm leading-6" style={{ color: 'rgba(255,255,255,0.78)' }}>
+              Explore deployment-ready technologies, coordinate adoption requests, and keep every active implementation moving.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link className="btn" href="/partner/project" style={{ background: '#0F766E', color: '#F8FAFC', border: '1px solid rgba(153,246,228,0.38)', fontWeight: 800 }}>
+                <i aria-hidden="true" className="fas fa-search mr-2" /> Browse projects
+              </Link>
+              <Link className="btn" href="/partner/requests" style={{ background: 'rgba(255,255,255,0.14)', color: '#F8FAFC', border: '1px solid rgba(255,255,255,0.38)', fontWeight: 700 }}>
+                View my requests <i aria-hidden="true" className="fas fa-arrow-right ml-2" />
+              </Link>
+            </div>
+          </div>
+          <i aria-hidden="true" className="fas fa-handshake absolute -bottom-10 -right-4 rotate-[-12deg] text-[12rem]" style={{ color: 'rgba(255,255,255,0.07)' }} />
         </section>
 
-        {/* Filter Bar */}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', background: 'white', padding: '1rem', borderRadius: '1rem', boxShadow: '0 4px 6px rgba(0,0,0,0.02)', border: '1px solid #F1F5F9' }}>
-          <div style={{ display: 'flex', alignItems: 'center', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '0.5rem', padding: '0.5rem 1rem', flex: 1, minWidth: '250px' }}>
-            <i className="fas fa-search" style={{ color: '#94A3B8', marginRight: '0.8rem' }}></i>
+        <section className="grid overflow-hidden rounded-2xl border shadow-soft md:grid-cols-4" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+          {KPI_CARDS.map((card, index) => {
+            const values = [PARTNER_TECHNOLOGIES.length, PARTNER_REQUESTS.length, PARTNER_IMPLEMENTATIONS.length, '85%'];
+            const notes = ['Ready for adoption', `${approvedRequests} approved, ${pendingRequests} in progress`, 'Currently deployed', 'Successful adoptions'];
+
+            return (
+              <article key={card.label} className={`group relative flex items-center gap-4 p-5 transition-colors hover:bg-[var(--surface-sunken)] ${index < 3 ? 'border-b md:border-b-0 md:border-r' : ''}`} style={{ borderColor: 'var(--border)' }}>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg" style={{ background: `${card.accent}18`, color: card.accent }}>
+                  <i aria-hidden="true" className={`fas ${card.icon}`} />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-[0.7rem] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--muted)' }}>{card.label}</p>
+                  <strong className="mt-1 block text-2xl font-black tracking-tight" style={{ color: 'var(--text)' }}>{values[index]}</strong>
+                  <span className="text-xs" style={{ color: 'var(--muted)' }}>{notes[index]}</span>
+                </div>
+                <span className="absolute bottom-0 left-5 right-5 h-0.5 rounded-full opacity-70 transition-all group-hover:h-1 group-hover:opacity-100" style={{ background: card.accent }} />
+              </article>
+            );
+          })}
+        </section>
+
+        <section className="flex flex-col gap-4 rounded-2xl border p-4 shadow-soft md:flex-row md:items-center" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Search available technologies</span>
+            <i aria-hidden="true" className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2" style={{ color: 'var(--muted)' }} />
             <input
-              placeholder="Search available technologies..."
-              type="text"
+              className="w-full rounded-xl border py-3 pl-11 pr-4 text-sm outline-none transition focus:ring-2"
+              placeholder="Search technologies by name or capability..."
+              type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '0.95rem', color: '#334155' }}
+              style={{ background: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text)', boxShadow: 'inset 0 0 0 1px transparent' }}
             />
+          </label>
+          <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
+            {['All Departments', ...PARTNER_DEPARTMENTS].map((department) => (
+              <button
+                key={department}
+                aria-pressed={departmentFilter === department}
+                className="shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition hover:-translate-y-px"
+                type="button"
+                onClick={() => setDepartmentFilter(department)}
+                onMouseEnter={() => setHoveredDepartment(department)}
+                onMouseLeave={() => setHoveredDepartment(null)}
+                style={(() => {
+                  const accent = department === 'All Departments' ? null : getDepartmentAccent(department);
+                  const selected = departmentFilter === department;
+                  const hovered = hoveredDepartment === department && !selected;
+
+                  return {
+                    background: selected
+                      ? accent?.ink || 'var(--primary)'
+                      : hovered && accent?.ink
+                        ? `color-mix(in srgb, ${accent.ink} 12%, var(--surface))`
+                      : accent?.ink
+                        ? `color-mix(in srgb, ${accent.ink} 5%, var(--surface))`
+                        : 'var(--surface-sunken)',
+                    borderColor: selected
+                      ? accent?.ink || 'var(--primary)'
+                      : hovered && accent?.ink
+                        ? `color-mix(in srgb, ${accent.ink} 30%, var(--border))`
+                      : accent?.ink
+                        ? `color-mix(in srgb, ${accent.ink} 14%, var(--border))`
+                        : 'var(--border)',
+                    color: selected ? 'white' : hovered && accent?.ink ? accent.ink : 'var(--muted)',
+                    textShadow: 'none'
+                  };
+                })()}
+              >
+                {department}
+              </button>
+            ))}
           </div>
-          <select value={departmentFilter} onChange={(event) => setDepartmentFilter(event.target.value)} style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #E2E8F0', background: 'white', color: '#475569', outline: 'none', cursor: 'pointer', fontWeight: 600 }}>
-            <option>All Departments</option>
-            <option>IT</option>
-            <option>MET</option>
-            <option>TCM</option>
-            <option>ESM</option>
-            <option>NAME</option>
-          </select>
-          <select defaultValue="Sort by: Latest" style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #E2E8F0', background: 'white', color: '#475569', outline: 'none', cursor: 'pointer', fontWeight: 600 }}>
-            <option>Sort by: Latest</option>
-            <option>Most Popular</option>
-            <option>Highest Impact</option>
-          </select>
-        </div>
+          <div className="flex items-center justify-between gap-3 border-t pt-3 text-xs md:border-l md:border-t-0 md:pl-4 md:pt-0" style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
+            <span><strong style={{ color: 'var(--text)' }}>{visibleTechnologies.length}</strong> shown</span>
+            {(search || departmentFilter !== 'All Departments') ? (
+              <button className="rounded-md px-2 py-1 font-bold transition hover:bg-[var(--primary-soft)]" type="button" onClick={() => { setSearch(''); setDepartmentFilter('All Departments'); }} style={{ color: 'var(--primary)' }}>
+                Reset
+              </button>
+            ) : null}
+          </div>
+        </section>
 
-        {/* Features Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
-          {visibleTechnologies.map((technology) => (
-            <article key={technology.id} style={{ borderTop: '4px solid #003A8F', borderRadius: '1rem', padding: '1.5rem', background: 'white', boxShadow: '0 10px 25px rgba(0, 58, 143, 0.05)', display: 'flex', flexDirection: 'column', gap: '1rem', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }} onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 58, 143, 0.08)'; }} onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 58, 143, 0.05)'; }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#003A8F', fontSize: '1.6rem' }}>
-                  <i aria-hidden="true" className={`fas ${technology.icon}`} />
-                </div>
-                <PartnerDepartmentBadge>{technology.department}</PartnerDepartmentBadge>
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.2rem', color: '#111827', margin: '0 0 0.5rem 0', fontWeight: 800 }}>{technology.title}</h3>
-                <p style={{ color: '#64748B', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>{technology.summary}</p>
-              </div>
-              
-              <div style={{ background: '#F8FAFC', padding: '1.2rem', borderRadius: '12px', border: '1px solid #F1F5F9', marginTop: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', marginBottom: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                  <span>Readiness: {technology.readinessLabel}</span>
-                  <span style={{ color: '#003A8F' }}>{technology.readinessPercent}%</span>
-                </div>
-                <div style={{ height: '6px', background: '#E2E8F0', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div style={{ width: `${technology.readinessPercent}%`, background: 'linear-gradient(90deg, #003A8F, #2563EB)', height: '100%' }}></div>
-                </div>
-                <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <strong style={{ color: '#334155' }}>Impact Rating:</strong> 
-                  <span style={{ color: '#F6BE00' }}>{getImpactStars(technology.impactRating)}</span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.5rem' }}>
-                <button onClick={() => setSelectedTechnologyId(technology.id)} style={{ flex: 1, padding: '0.7rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', borderRadius: '0.6rem', fontWeight: 600, background: 'linear-gradient(135deg, #003A8F, #1E40AF)', color: 'white', border: 'none', cursor: 'pointer', transition: 'box-shadow 0.2s', boxShadow: '0 4px 10px rgba(0, 58, 143, 0.2)' }} onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 58, 143, 0.3)'} onMouseOut={(e) => e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 58, 143, 0.2)'}>
-                  <i className="fas fa-handshake"></i> Adopt
-                </button>
-                <Link className="btn btn-outline" href={`/partner/details?id=${technology.id}`} style={{ flex: 1, padding: '0.7rem', textAlign: 'center', borderColor: '#E5E7EB', color: '#475569', borderRadius: '0.6rem', fontWeight: 600, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  Details
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {/* Implementations Table */}
-        <section style={{ borderTop: '4px solid #F6BE00', boxShadow: '0 20px 40px rgba(0, 58, 143, 0.06)', background: 'white', borderRadius: '1rem', overflow: 'hidden' }}>
-          <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
+        <section>
+          <div className="mb-4 flex items-end justify-between gap-4 border-b pb-4" style={{ borderColor: 'var(--border)' }}>
             <div>
-              <h3 style={{ fontSize: '1.25rem', color: '#111827', margin: 0, fontWeight: 800 }}>My Active Implementations</h3>
-              <p style={{ color: '#64748B', fontSize: '0.9rem', margin: '0.3rem 0 0 0' }}>Monitor deployment phase, partner coordination, and feedback timing.</p>
+              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--primary)' }}>Recommended for you</p>
+              <h2 className="text-2xl font-black tracking-tight" style={{ color: 'var(--text)' }}>Adoption-ready technologies</h2>
             </div>
-            <Link className="btn btn-outline small" href="/partner/implementations" style={{ borderColor: '#E5E7EB', color: '#003A8F', borderRadius: '0.6rem', fontWeight: 600, padding: '0.5rem 1rem' }}>
-              Open Full Tracker <i className="fas fa-arrow-right" style={{ marginLeft: '0.4rem' }}></i>
-            </Link>
+            <Link className="hidden text-sm font-bold md:block" href="/partner/project" style={{ color: 'var(--primary)' }}>Browse all <i aria-hidden="true" className="fas fa-arrow-right ml-1" /></Link>
           </div>
-          
-          <div className="table-scroll" style={{ padding: '0 1.5rem 1.5rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', marginTop: '1rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #E2E8F0', color: '#64748B', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  <th style={{ padding: '1rem 0.5rem', fontWeight: 700 }}>Project</th>
-                  <th style={{ padding: '1rem 0.5rem', fontWeight: 700 }}>Department</th>
-                  <th style={{ padding: '1rem 0.5rem', fontWeight: 700 }}>Adoption Date</th>
-                  <th style={{ padding: '1rem 0.5rem', fontWeight: 700 }}>Status</th>
-                  <th style={{ padding: '1rem 0.5rem', fontWeight: 700 }}>Impact</th>
-                  <th style={{ padding: '1rem 0.5rem', fontWeight: 700, textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PARTNER_IMPLEMENTATIONS.map((implementation, i) => (
-                  <tr key={implementation.id} style={{ borderBottom: i === PARTNER_IMPLEMENTATIONS.length - 1 ? 'none' : '1px solid #F1F5F9', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#F8FAFC'} onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}>
-                    <td style={{ padding: '1rem 0.5rem', color: '#003A8F', fontWeight: 700 }}>{implementation.title}</td>
-                    <td style={{ padding: '1rem 0.5rem' }}><PartnerDepartmentBadge>{implementation.department}</PartnerDepartmentBadge></td>
-                    <td style={{ padding: '1rem 0.5rem', color: '#475569' }}>{implementation.startDate}</td>
-                    <td style={{ padding: '1rem 0.5rem' }}>
-                      <PartnerStatusBadge tone={getPartnerStatusTone(implementation.status)}>{implementation.status}</PartnerStatusBadge>
-                    </td>
-                    <td style={{ padding: '1rem 0.5rem', color: '#475569', fontWeight: 600 }}>{implementation.impactLabel}</td>
-                    <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                        <Link className="btn btn-outline small" href="/partner/feedback" style={{ borderColor: '#E5E7EB', color: '#475569', borderRadius: '0.4rem', fontWeight: 600 }}>Report</Link>
-                        <Link className="btn btn-outline small" href="/partner/implementations" style={{ borderColor: '#E5E7EB', color: '#003A8F', borderRadius: '0.4rem', fontWeight: 600 }}>Monitor</Link>
+
+          {visibleTechnologies.length === 0 ? (
+            <div className="rounded-2xl border border-dashed p-12 text-center" style={{ background: 'var(--surface)', borderColor: 'var(--border-strong)', color: 'var(--muted)' }}>
+              <i aria-hidden="true" className="fas fa-magnifying-glass mb-4 text-3xl" style={{ color: 'var(--primary)' }} />
+              <h3 className="mb-1 text-lg font-bold" style={{ color: 'var(--text)' }}>No technologies match those filters</h3>
+              <p className="text-sm">Try another search term or department.</p>
+            </div>
+          ) : (
+            <div className="grid gap-5 lg:grid-cols-3">
+              {visibleTechnologies.map((technology) => {
+                const accent = getDepartmentAccent(technology.department);
+
+                return (
+                  <article key={technology.id} className="group flex flex-col overflow-hidden rounded-2xl border shadow-soft transition duration-200 hover:-translate-y-1 hover:shadow-card" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+                    <div className="h-1.5" style={{ background: accent.soft }} />
+                    <div className="flex flex-1 flex-col p-5 md:p-6">
+                      <div className="mb-5 flex items-start justify-between gap-3">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl text-xl" style={{ background: 'transparent', color: accent.ink }}>
+                          <i aria-hidden="true" className={`fas ${technology.icon}`} />
+                        </span>
+                        <PartnerDepartmentBadge style={{ background: 'transparent', borderColor: 'transparent', color: accent.ink, textShadow: 'none' }}>{technology.department}</PartnerDepartmentBadge>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <h3 className="min-h-[3.25rem] text-lg font-black leading-snug" style={{ color: 'var(--text)' }}>{technology.title}</h3>
+                      <p className="mt-2 line-clamp-3 text-sm leading-6" style={{ color: 'var(--muted)' }}>{technology.summary}</p>
+                      <div className="mt-4 flex min-h-[2rem] flex-wrap gap-2 text-[0.68rem] font-bold uppercase tracking-[0.08em]" style={{ color: 'var(--muted)' }}>
+                        <span className="rounded-full border px-2.5 py-1" style={{ borderColor: 'var(--border)', background: 'var(--surface-sunken)' }}>{technology.trl}</span>
+                        <span className="rounded-full border px-2.5 py-1" style={{ borderColor: 'var(--border)', background: 'var(--surface-sunken)' }}>{technology.platform}</span>
+                      </div>
+                      <div className="mt-5 rounded-xl border p-4" style={{ background: 'var(--surface-sunken)', borderColor: 'var(--border)' }}>
+                        <div className="mb-2 flex items-center justify-between text-xs font-bold"><span style={{ color: 'var(--muted)' }}>Readiness · {technology.readinessLabel}</span><span style={{ color: accent.ink }}>{technology.readinessPercent}%</span></div>
+                        <div className="h-2 overflow-hidden rounded-full" style={{ background: 'var(--surface-accent)' }}><div className="h-full rounded-full transition-all duration-500" style={{ width: `${technology.readinessPercent}%`, background: accent.fill }} /></div>
+                        <div className="mt-3 flex items-center justify-between text-xs"><span style={{ color: 'var(--muted)' }}>Impact rating</span><span style={{ color: 'var(--accent, #F6BE00)' }}>{getImpactStars(technology.impactRating)}</span></div>
+                      </div>
+                      <div className="mt-5 flex gap-2"><button className="btn btn-primary flex-1 transition hover:-translate-y-px active:!border-[#F6BE00] active:!bg-[#F6BE00] active:!text-[#1A1851]" type="button" onClick={() => setSelectedTechnologyId(technology.id)}><i aria-hidden="true" className="fas fa-handshake mr-2" /> Adopt</button><Link className="btn btn-outline flex-1 text-center transition hover:-translate-y-px active:!border-[#F6BE00] active:!bg-[#F6BE00] active:!text-white" href={`/partner/details?id=${technology.id}`}>Details</Link></div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="overflow-hidden rounded-2xl border shadow-soft" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b p-5 md:p-6" style={{ borderColor: 'var(--border)' }}>
+            <div><p className="mb-1 text-xs font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--accent, #F6BE00)' }}>Live portfolio</p><h2 className="text-xl font-black" style={{ color: 'var(--text)' }}>My active implementations</h2><p className="mt-1 text-sm" style={{ color: 'var(--muted)' }}>Keep deployment milestones and partner coordination visible.</p></div>
+            <Link className="btn btn-outline small" href="/partner/implementations">Open full tracker <i aria-hidden="true" className="fas fa-arrow-right ml-2" /></Link>
+          </div>
+          <div className="grid gap-3 p-4 md:p-5">
+            {PARTNER_IMPLEMENTATIONS.map((implementation) => (
+              <article key={implementation.id} className="group grid gap-4 rounded-xl border p-4 transition-colors hover:bg-[var(--surface)] md:grid-cols-[minmax(0,1.5fr)_minmax(180px,0.8fr)_auto] md:items-center" style={{ background: 'var(--surface-sunken)', borderColor: 'var(--border)' }}>
+                <div className="min-w-0"><div className="mb-2 flex flex-wrap items-center gap-2"><h3 className="truncate font-bold" style={{ color: 'var(--text)' }}>{implementation.title}</h3><PartnerDepartmentBadge style={{ background: 'transparent', borderColor: 'transparent', color: getDepartmentAccent(implementation.department).ink, textShadow: 'none' }}>{implementation.department}</PartnerDepartmentBadge></div><div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: 'var(--muted)' }}><span><i aria-hidden="true" className="fas fa-calendar mr-1" /> Started {implementation.startDate}</span><span><i aria-hidden="true" className="fas fa-flag mr-1" /> {implementation.currentPhase}</span></div></div>
+                <div><div className="mb-2 flex justify-between text-xs font-bold"><span style={{ color: 'var(--muted)' }}>Progress</span><span style={{ color: 'var(--primary)' }}>{implementation.progress}%</span></div><div className="h-2 overflow-hidden rounded-full" style={{ background: 'var(--surface-accent)' }}><div className="h-full rounded-full transition-all duration-500" style={{ width: `${implementation.progress}%`, background: 'var(--primary)' }} /></div></div>
+                <div className="flex items-center gap-3 md:justify-end"><PartnerStatusBadge tone={getPartnerStatusTone(implementation.status)}>{implementation.status}</PartnerStatusBadge><Link className="text-sm font-bold" href="/partner/implementations" style={{ color: 'var(--primary)' }}>Open <i aria-hidden="true" className="fas fa-arrow-right ml-1" /></Link></div>
+              </article>
+            ))}
           </div>
         </section>
       </div>
 
-      <PartnerModal
-        open={Boolean(selectedTechnologyId)}
-        title="Request Technology Adoption"
-        onClose={() => setSelectedTechnologyId(null)}
-        footer={
-          <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'flex-end' }}>
-            <button className="btn btn-outline" onClick={() => setSelectedTechnologyId(null)} style={{ padding: '0.6rem 1.2rem', borderRadius: '0.5rem', fontWeight: 600 }}>Cancel</button>
-            <Link className="btn btn-primary" href={`/partner/request?id=${selectedTechnology?.id}`} style={{ padding: '0.6rem 1.2rem', borderRadius: '0.5rem', background: 'linear-gradient(135deg, #003A8F, #1E40AF)', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'white', textDecoration: 'none' }}>
-              Continue Request <i className="fas fa-arrow-right"></i>
-            </Link>
-          </div>
-        }
-      >
-        <div style={{ padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ background: '#EFF6FF', padding: '1rem', borderRadius: '0.8rem', border: '1px solid #DBEAFE', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '44px', height: '44px', background: 'white', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#003A8F', fontSize: '1.3rem', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-              <i className={`fas ${selectedTechnology?.icon}`}></i>
-            </div>
-            <div>
-              <span style={{ fontSize: '0.8rem', color: '#3B82F6', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Target Project</span>
-              <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#1E3A8A', fontWeight: 800 }}>{selectedTechnology?.title}</h4>
-            </div>
-          </div>
-          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label htmlFor="partner-dashboard-plan" style={{ fontWeight: 600, color: '#334155' }}>Proposed Implementation Plan</label>
-            <textarea
-              defaultValue="We plan to deploy the system in a controlled pilot environment before full organizational rollout."
-              id="partner-dashboard-plan"
-              rows={4}
-              style={{ padding: '0.8rem', borderRadius: '0.6rem', border: '1px solid #E2E8F0', background: '#F8FAFC', outline: 'none', resize: 'vertical' }}
-            />
-          </div>
-          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label htmlFor="partner-dashboard-date" style={{ fontWeight: 600, color: '#334155' }}>Expected Timeline</label>
-            <input defaultValue="2026-05-15" id="partner-dashboard-date" type="date" style={{ padding: '0.8rem', borderRadius: '0.6rem', border: '1px solid #E2E8F0', background: '#F8FAFC', outline: 'none' }} />
-          </div>
+      <PartnerModal open={Boolean(selectedTechnologyId)} title="Request technology adoption" onClose={() => setSelectedTechnologyId(null)} footer={<div className="flex w-full justify-end gap-3"><button className="btn btn-outline" type="button" onClick={() => setSelectedTechnologyId(null)}>Cancel</button><Link className="btn" href={`/partner/request?id=${selectedTechnology?.id}`} style={{ background: '#F6BE00', border: '1px solid #D6A500', color: '#1A1851', fontWeight: 800 }}>Continue request <i aria-hidden="true" className="fas fa-arrow-right ml-2" /></Link></div>}>
+        <div className="flex flex-col gap-5">
+          <div className="flex items-center gap-4 rounded-xl border p-4" style={{ background: 'var(--primary-soft)', borderColor: 'var(--border)' }}><span className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'var(--surface)', color: 'var(--primary)' }}><i aria-hidden="true" className={`fas ${selectedTechnology?.icon}`} /></span><div><span className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--primary)' }}>Target project</span><h3 className="mt-1 font-black" style={{ color: 'var(--text)' }}>{selectedTechnology?.title}</h3></div></div>
+          <label className="flex flex-col gap-2 text-sm font-bold" htmlFor="partner-dashboard-plan" style={{ color: 'var(--text)' }}>Proposed implementation plan<textarea className="rounded-xl border p-3 font-normal outline-none" defaultValue="We plan to deploy the system in a controlled pilot environment before full organizational rollout." id="partner-dashboard-plan" rows={4} style={{ background: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text)' }} /></label>
+          <label className="flex flex-col gap-2 text-sm font-bold" htmlFor="partner-dashboard-date" style={{ color: 'var(--text)' }}>Expected timeline<input className="rounded-xl border p-3 font-normal outline-none" defaultValue="2026-05-15" id="partner-dashboard-date" type="date" style={{ background: 'var(--surface-sunken)', borderColor: 'var(--border)', color: 'var(--text)' }} /></label>
         </div>
       </PartnerModal>
     </PartnerShell>
