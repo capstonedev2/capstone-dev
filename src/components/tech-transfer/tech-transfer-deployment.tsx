@@ -1,12 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import {
-  TECH_TRANSFER_DEPLOYMENTS,
-  TECH_TRANSFER_TIMELINE,
-  getTechTransferStatusTone,
-  type TimelineMilestone
-} from '@/components/tech-transfer/tech-transfer-data';
+import { useEffect, useMemo, useState } from 'react';
 import {
   TechTransferButton,
   TechTransferDepartmentBadge,
@@ -16,36 +10,157 @@ import {
 } from '@/components/tech-transfer/tech-transfer-primitives';
 import { TechTransferShell } from '@/components/tech-transfer/tech-transfer-shell';
 
-const EMPTY_MILESTONE: TimelineMilestone = {
-  id: '',
-  title: '',
-  description: '',
-  date: '',
-  status: 'pending'
+type DeploymentStatus = 'PROPOSED' | 'ACTIVE' | 'COMPLETED' | 'TERMINATED';
+
+type DeploymentRecord = {
+  projectId: string;
+  title: string;
+  department: string | null;
+  publishedToRepository: boolean;
+  status: DeploymentStatus | null;
+  partnerName: string | null;
+  partnerEmail: string | null;
+  contactPerson: string | null;
+  moaUrl: string | null;
+  deploymentDate: string | null;
+};
+
+const STATUS_LABELS: Record<DeploymentStatus, string> = {
+  PROPOSED: 'Proposed',
+  ACTIVE: 'Active Deployment',
+  COMPLETED: 'Deployed & Completed',
+  TERMINATED: 'Terminated'
+};
+
+function getStatusTone(status: DeploymentStatus | null) {
+  switch (status) {
+    case 'ACTIVE':
+    case 'COMPLETED':
+      return 'deployed' as const;
+    case 'TERMINATED':
+      return 'danger' as const;
+    case 'PROPOSED':
+      return 'pending' as const;
+    default:
+      return 'active' as const;
+  }
+}
+
+const EMPTY_FORM = {
+  projectId: '',
+  partnerName: '',
+  partnerEmail: '',
+  contactPerson: '',
+  status: 'PROPOSED' as DeploymentStatus,
+  deploymentDate: '',
+  moaUrl: ''
 };
 
 export function TechTransferDeployment() {
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [deployments] = useState(() => [...TECH_TRANSFER_DEPLOYMENTS]);
-  const [timeline, setTimeline] = useState<TimelineMilestone[]>(() => [...TECH_TRANSFER_TIMELINE]);
-  const [editingMilestone, setEditingMilestone] = useState<TimelineMilestone>(EMPTY_MILESTONE);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [deployments, setDeployments] = useState<DeploymentRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [recordModalOpen, setRecordModalOpen] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  async function loadDeployments() {
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
+      const response = await fetch('/api/tech-transfer/deployments');
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || 'Unable to load deployment records.');
+      }
+
+      setDeployments(payload.deployments);
+    } catch (error) {
+      setLoadError((error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadDeployments();
+  }, []);
 
   const filteredDeployments = useMemo(() => {
     return deployments.filter((deployment) => {
       const matchesDepartment = departmentFilter === 'all' || deployment.department === departmentFilter;
-      const matchesStatus = statusFilter === 'all' || deployment.phase === statusFilter;
+      const matchesStatus = statusFilter === 'all' || deployment.status === statusFilter;
       return matchesDepartment && matchesStatus;
     });
   }, [departmentFilter, deployments, statusFilter]);
+
+  const activeCount = deployments.filter((item) => item.status === 'ACTIVE' || item.status === 'COMPLETED').length;
+  const proposedCount = deployments.filter((item) => item.status === 'PROPOSED').length;
+  const notYetCount = deployments.filter((item) => !item.status).length;
+
+  function openRecordModal(deployment?: DeploymentRecord) {
+    setSubmitError(null);
+    setFieldErrors({});
+
+    if (deployment) {
+      setForm({
+        projectId: deployment.projectId,
+        partnerName: deployment.partnerName || '',
+        partnerEmail: deployment.partnerEmail || '',
+        contactPerson: deployment.contactPerson || '',
+        status: deployment.status || 'PROPOSED',
+        deploymentDate: deployment.deploymentDate ? deployment.deploymentDate.slice(0, 10) : '',
+        moaUrl: deployment.moaUrl || ''
+      });
+    } else {
+      setForm(EMPTY_FORM);
+    }
+
+    setRecordModalOpen(true);
+  }
+
+  async function handleSubmit() {
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setFieldErrors({});
+
+    try {
+      const response = await fetch('/api/tech-transfer/deployments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        if (payload.fieldErrors) {
+          setFieldErrors(payload.fieldErrors);
+        }
+        throw new Error(payload.message || 'Unable to save this deployment record.');
+      }
+
+      setRecordModalOpen(false);
+      await loadDeployments();
+    } catch (error) {
+      setSubmitError((error as Error).message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <TechTransferShell
       activeNav="deployment"
       title="Deployment Tracking"
-      description="Monitor technology transfer implementations with editable timeline"
-      notificationCount={3}
+      description="Record real industry adoption for published research so guests can see the evidence"
+      notificationCount={0}
     >
       <div className="filter-bar">
         <select value={departmentFilter} onChange={(event) => setDepartmentFilter(event.target.value)}>
@@ -58,192 +173,169 @@ export function TechTransferDeployment() {
         </select>
         <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
           <option value="all">All Statuses</option>
-          <option value="Fully Operational">Fully Operational</option>
-          <option value="Testing Phase">Testing Phase</option>
-          <option value="Planning">Planning</option>
+          <option value="PROPOSED">Proposed</option>
+          <option value="ACTIVE">Active Deployment</option>
+          <option value="COMPLETED">Deployed &amp; Completed</option>
+          <option value="TERMINATED">Terminated</option>
         </select>
-        <TechTransferButton
-          variant="primary"
-          onClick={() => {
-            setEditingMilestone(EMPTY_MILESTONE);
-            setModalOpen(true);
-          }}
-        >
+        <TechTransferButton variant="primary" onClick={() => openRecordModal()}>
           <i aria-hidden="true" className="fas fa-plus" />
-          Add Milestone
+          Record Deployment
         </TechTransferButton>
       </div>
 
       <div className="stats-grid">
-        <TechTransferStatCard title="Active Deployments" value={TECH_TRANSFER_DEPLOYMENTS.length} />
-        <TechTransferStatCard title="In Testing Phase" value={TECH_TRANSFER_DEPLOYMENTS.filter((item) => item.phase === 'Testing Phase').length} />
-        <TechTransferStatCard title="Fully Operational" value={TECH_TRANSFER_DEPLOYMENTS.filter((item) => item.phase === 'Fully Operational').length} />
-        <TechTransferStatCard title="Success Rate" value="91%" />
+        <TechTransferStatCard title="Eligible Projects" value={deployments.length} />
+        <TechTransferStatCard title="Active or Completed" value={activeCount} />
+        <TechTransferStatCard title="Proposed" value={proposedCount} />
+        <TechTransferStatCard title="Not Yet Deployed" value={notYetCount} />
       </div>
 
       <section className="table-container">
         <div className="table-head">
           <div>
             <h3>Deployment Portfolio</h3>
+            <p>Only projects with an APPROVED, DEFENSE_SCHEDULED, COMPLETED, or ARCHIVED status are eligible.</p>
           </div>
         </div>
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Project</th>
-                <th>Department</th>
-                <th>Partner Company</th>
-                <th>Deployment Date</th>
-                <th>Current Phase</th>
-                <th>Progress</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredDeployments.map((deployment) => (
-                <tr key={deployment.id}>
-                  <td>{deployment.project}</td>
-                  <td><TechTransferDepartmentBadge>{deployment.department}</TechTransferDepartmentBadge></td>
-                  <td>{deployment.partner}</td>
-                  <td>{deployment.deploymentDate}</td>
-                  <td>
-                    <TechTransferStatusBadge tone={getTechTransferStatusTone(deployment.phase)}>
-                      {deployment.phase}
-                    </TechTransferStatusBadge>
-                  </td>
-                  <td>{deployment.progress}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
-      <section className="table-container">
-        <div className="timeline-header">
-          <h3>Deployment Timeline</h3>
-          <div className="table-actions">
-            <TechTransferButton small onClick={() => setTimeline([...TECH_TRANSFER_TIMELINE])}>
-              Reset Default
-            </TechTransferButton>
+        {loadError ? (
+          <div className="modal-body">
+            <p>{loadError}</p>
           </div>
-        </div>
-        <div className="modal-body">
-          <div className="timeline">
-            {timeline.map((milestone) => (
-              <div className={`timeline-item ${milestone.status}`} key={milestone.id}>
-                <div className="timeline-content">
-                  <h4>{milestone.title}</h4>
-                  <p>{milestone.description}</p>
-                  <p className="inline-note">{milestone.date}</p>
-                  <div className="table-actions mt-2">
-                    <TechTransferButton
-                      small
-                      onClick={() => {
-                        setEditingMilestone(milestone);
-                        setModalOpen(true);
-                      }}
-                    >
-                      Edit
-                    </TechTransferButton>
-                  </div>
-                </div>
-              </div>
-            ))}
+        ) : isLoading ? (
+          <div className="modal-body">
+            <p>Loading deployment records...</p>
           </div>
-        </div>
+        ) : (
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Department</th>
+                  <th>In Repository</th>
+                  <th>Partner Company</th>
+                  <th>Deployment Date</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredDeployments.map((deployment) => (
+                  <tr key={deployment.projectId}>
+                    <td>{deployment.title}</td>
+                    <td>{deployment.department ? <TechTransferDepartmentBadge>{deployment.department}</TechTransferDepartmentBadge> : '—'}</td>
+                    <td>{deployment.publishedToRepository ? 'Yes' : 'Not published yet'}</td>
+                    <td>{deployment.partnerName || '—'}</td>
+                    <td>{deployment.deploymentDate ? new Date(deployment.deploymentDate).toLocaleDateString() : '—'}</td>
+                    <td>
+                      <TechTransferStatusBadge tone={getStatusTone(deployment.status)}>
+                        {deployment.status ? STATUS_LABELS[deployment.status] : 'Not Yet Deployed'}
+                      </TechTransferStatusBadge>
+                    </td>
+                    <td>
+                      <TechTransferButton small onClick={() => openRecordModal(deployment)}>
+                        {deployment.status ? 'Update' : 'Record'}
+                      </TechTransferButton>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <TechTransferModal
-        open={modalOpen}
-        title={editingMilestone.id ? 'Edit Milestone' : 'Add Milestone'}
-        onClose={() => setModalOpen(false)}
+        open={recordModalOpen}
+        title="Record Deployment"
+        onClose={() => setRecordModalOpen(false)}
         footer={
           <>
-            <TechTransferButton onClick={() => setModalOpen(false)}>Cancel</TechTransferButton>
-            {editingMilestone.id ? (
-              <TechTransferButton
-                variant="danger"
-                onClick={() => {
-                  setTimeline((current) => current.filter((item) => item.id !== editingMilestone.id));
-                  setModalOpen(false);
-                }}
-              >
-                Delete
-              </TechTransferButton>
-            ) : null}
-            <TechTransferButton
-              variant="primary"
-              onClick={() => {
-                if (!editingMilestone.title.trim()) {
-                  return;
-                }
-
-                setTimeline((current) => {
-                  if (editingMilestone.id) {
-                    return current.map((item) => (item.id === editingMilestone.id ? editingMilestone : item));
-                  }
-
-                  return [
-                    ...current,
-                    {
-                      ...editingMilestone,
-                      id: `milestone-${current.length + 1}`
-                    }
-                  ];
-                });
-                setModalOpen(false);
-              }}
-            >
-              Save Milestone
+            <TechTransferButton onClick={() => setRecordModalOpen(false)}>Cancel</TechTransferButton>
+            <TechTransferButton variant="primary" onClick={handleSubmit}>
+              {isSubmitting ? 'Saving...' : 'Save Deployment'}
             </TechTransferButton>
           </>
         }
       >
+        {submitError ? <p style={{ color: '#B91C1C' }}>{submitError}</p> : null}
+
         <div className="form-group">
-          <label htmlFor="tt-timeline-title">Title</label>
-          <input
-            id="tt-timeline-title"
-            value={editingMilestone.title}
-            onChange={(event) => setEditingMilestone((current) => ({ ...current, title: event.target.value }))}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="tt-timeline-description">Description</label>
-          <textarea
-            id="tt-timeline-description"
-            rows={3}
-            value={editingMilestone.description}
-            onChange={(event) =>
-              setEditingMilestone((current) => ({ ...current, description: event.target.value }))
-            }
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="tt-timeline-date">Date</label>
-          <input
-            id="tt-timeline-date"
-            type="date"
-            value={editingMilestone.date}
-            onChange={(event) => setEditingMilestone((current) => ({ ...current, date: event.target.value }))}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="tt-timeline-status">Status</label>
+          <label htmlFor="tt-deploy-project">Project</label>
           <select
-            id="tt-timeline-status"
-            value={editingMilestone.status}
-            onChange={(event) =>
-              setEditingMilestone((current) => ({
-                ...current,
-                status: event.target.value as TimelineMilestone['status']
-              }))
-            }
+            id="tt-deploy-project"
+            value={form.projectId}
+            onChange={(event) => setForm((current) => ({ ...current, projectId: event.target.value }))}
           >
-            <option value="completed">Completed</option>
-            <option value="current">Current</option>
-            <option value="pending">Pending</option>
+            <option value="">Select a project</option>
+            {deployments.map((deployment) => (
+              <option key={deployment.projectId} value={deployment.projectId}>{deployment.title}</option>
+            ))}
           </select>
+          {fieldErrors.projectId ? <p style={{ color: '#B91C1C' }}>{fieldErrors.projectId}</p> : null}
+        </div>
+        <div className="form-group">
+          <label htmlFor="tt-deploy-partner">Partner Organization</label>
+          <input
+            id="tt-deploy-partner"
+            value={form.partnerName}
+            onChange={(event) => setForm((current) => ({ ...current, partnerName: event.target.value }))}
+          />
+          {fieldErrors.partnerName ? <p style={{ color: '#B91C1C' }}>{fieldErrors.partnerName}</p> : null}
+        </div>
+        <div className="form-group">
+          <label htmlFor="tt-deploy-email">Partner Contact Email</label>
+          <input
+            id="tt-deploy-email"
+            type="email"
+            value={form.partnerEmail}
+            onChange={(event) => setForm((current) => ({ ...current, partnerEmail: event.target.value }))}
+          />
+          {fieldErrors.partnerEmail ? <p style={{ color: '#B91C1C' }}>{fieldErrors.partnerEmail}</p> : null}
+        </div>
+        <div className="form-group">
+          <label htmlFor="tt-deploy-contact">Contact Person (optional)</label>
+          <input
+            id="tt-deploy-contact"
+            value={form.contactPerson}
+            onChange={(event) => setForm((current) => ({ ...current, contactPerson: event.target.value }))}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="tt-deploy-status">Status</label>
+          <select
+            id="tt-deploy-status"
+            value={form.status}
+            onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as DeploymentStatus }))}
+          >
+            <option value="PROPOSED">Proposed</option>
+            <option value="ACTIVE">Active Deployment</option>
+            <option value="COMPLETED">Deployed &amp; Completed</option>
+            <option value="TERMINATED">Terminated</option>
+          </select>
+          {fieldErrors.status ? <p style={{ color: '#B91C1C' }}>{fieldErrors.status}</p> : null}
+        </div>
+        <div className="form-group">
+          <label htmlFor="tt-deploy-date">Deployment Date (optional)</label>
+          <input
+            id="tt-deploy-date"
+            type="date"
+            value={form.deploymentDate}
+            onChange={(event) => setForm((current) => ({ ...current, deploymentDate: event.target.value }))}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="tt-deploy-moa">MOA Link (optional)</label>
+          <input
+            id="tt-deploy-moa"
+            type="url"
+            placeholder="https://..."
+            value={form.moaUrl}
+            onChange={(event) => setForm((current) => ({ ...current, moaUrl: event.target.value }))}
+          />
+          <p className="inline-note">Link to where the signed MOA is stored. Guests browsing the public repository will see this link if the project is published.</p>
         </div>
       </TechTransferModal>
     </TechTransferShell>

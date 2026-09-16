@@ -62,6 +62,11 @@ export type PasswordResetCode = Prisma.PasswordResetCodeModel
  */
 export type UploadedFile = Prisma.UploadedFileModel
 /**
+ * Model AcademicActivity
+ * 
+ */
+export type AcademicActivity = Prisma.AcademicActivityModel
+/**
  * Model Group
  * 
  */

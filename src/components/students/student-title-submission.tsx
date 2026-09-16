@@ -583,6 +583,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     initialSubmissions.find((item) => item.isCurrent)?.id ?? initialSubmissions[0]?.id ?? ''
   );
   const [activeTab, setActiveTab] = useState('Details');
+  const [customKeywordDraft, setCustomKeywordDraft] = useState('');
   const [notice, setNotice] = useState<NoticeState>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
@@ -932,6 +933,25 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     );
   };
 
+  const handleAddCustomKeyword = () => {
+    const trimmed = customKeywordDraft.trim();
+
+    if (!trimmed || activeSubmission.keywords.some((item) => item.toLowerCase() === trimmed.toLowerCase())) {
+      setCustomKeywordDraft('');
+      return;
+    }
+
+    updateActiveSubmission((submission) => ({ ...submission, keywords: [...submission.keywords, trimmed] }));
+    setCustomKeywordDraft('');
+  };
+
+  const handleRemoveKeyword = (keyword: string) => {
+    updateActiveSubmission((submission) => ({
+      ...submission,
+      keywords: submission.keywords.filter((item) => item !== keyword)
+    }));
+  };
+
   const handleSelectSubmission = (submissionId: string) => {
     setActiveSubmissionId(submissionId);
     setSubmissions((current) =>
@@ -1215,6 +1235,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       return;
     }
 
+    if (!activeSubmission.keywords.length) {
+      setNotice({
+        tone: 'warning',
+        message: 'Add at least one research type or technology tag before submission.'
+      });
+      return;
+    }
+
     if (!activeSubmission.attachments.length) {
       setNotice({
         tone: 'warning',
@@ -1353,8 +1381,21 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     return 'Pending';
   };
   const hasTitle = Boolean(activeSubmission.proposedTitle.trim());
+  const hasResearchType = activeSubmission.keywords.length > 0;
+  const isDetailsComplete = hasTitle && hasResearchType;
   const hasDocuments = activeSubmission.attachments.length > 0;
-  const canSubmitProposal = canUpload && !isSubmittingTitle && hasDocuments && hasTitle;
+  const canSubmitProposal = canUpload && !isSubmittingTitle && hasDocuments && isDetailsComplete;
+  // The submit banner's "ready?" message used to always blame the concept paper,
+  // even when the title or the (now-required) research type tag was what was
+  // actually missing — this lists whatever's genuinely still outstanding.
+  const missingBeforeSubmit = [
+    !hasTitle ? 'a proposed title' : null,
+    !hasResearchType ? 'a research type tag' : null,
+    !hasDocuments ? 'your concept paper' : null
+  ].filter((item): item is string => Boolean(item));
+  const draftReadinessMessage = missingBeforeSubmit.length
+    ? `Add ${missingBeforeSubmit.join(', ')} before submitting.`
+    : 'Everything is ready — submit when you are.';
   const nextActionLabel =
     currentStepIndex === 0
       ? 'Upload concept paper'
@@ -1373,6 +1414,14 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       label: 'Proposed title',
       detail: hasTitle ? 'Ready for the proposal package' : 'Enter the official title before upload',
       complete: hasTitle
+    },
+    {
+      id: 'research-type',
+      label: 'Research type',
+      detail: hasResearchType
+        ? `${activeSubmission.keywords.length} tag${activeSubmission.keywords.length === 1 ? '' : 's'} added`
+        : 'Tag at least one research type or technology',
+      complete: hasResearchType
     },
     {
       id: 'documents',
@@ -1498,7 +1547,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               </div>
               <div className="bg-white/5 rounded-xl px-4 py-2 border border-white/10 backdrop-blur-sm">
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-white/60">Department</p>
-                <p className="flex items-center gap-2 text-sm font-bold text-white"><i className="fas fa-building text-white/50"></i> {data.profile.department || 'Computer Science'}</p>
+                <p className="flex items-center gap-2 text-sm font-bold text-white"><i className="fas fa-building text-white/50"></i> {data.profile.department || 'Not set'}</p>
               </div>
             </div>
           </div>
@@ -1573,7 +1622,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       {/* Modern Premium Pill Tabs */}
       <div className="clear-both float-none flex w-full items-center gap-2 bg-[var(--surface)] p-1.5 rounded-2xl border border-[var(--border)] mb-8 max-w-fit shadow-sm">
         {titleSubmissionTabs.map((tab) => {
-          const isDisabled = tab.id === 'Documents' && (!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim());
+          const isDisabled = tab.id === 'Documents' && !isDetailsComplete;
           const isActive = activeTab === tab.id;
           return (
             <button 
@@ -1792,7 +1841,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-bright)] text-white flex items-center justify-center text-xl shadow-lg shadow-[var(--primary)]/20"><i className="fas fa-file-signature"></i></div>
                 <div>
                   <h3 className="text-2xl font-black text-[var(--text)] tracking-tight">Proposal Details</h3>
-                  <p className="text-sm text-[var(--muted)] font-medium mt-1">Provide the official title and a brief note to your adviser.</p>
+                  <p className="text-sm text-[var(--muted)] font-medium mt-1">Provide the official title, tag its research type, and add a brief note to your adviser.</p>
                 </div>
               </div>
 
@@ -1821,6 +1870,68 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 </div>
 
                 <div className="group/field">
+                  <label htmlFor="researchTypeDraft" className="block text-[12px] font-black text-[var(--text)] uppercase tracking-widest mb-3">
+                    Research Type / Technology Focus <span className="text-rose-500 ml-1">*</span>
+                  </label>
+                  <div className="relative flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--muted)] group-focus-within/field:text-[var(--primary)] transition-colors">
+                        <i className="fas fa-tag text-[13px]"></i>
+                      </div>
+                      <input
+                        id="researchTypeDraft"
+                        type="text"
+                        value={customKeywordDraft}
+                        onChange={(event) => setCustomKeywordDraft(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            handleAddCustomKeyword();
+                          }
+                        }}
+                        placeholder="e.g. Prototype, Web Application, IoT, Renewable Energy — press Enter"
+                        disabled={!canUpload}
+                        className="block w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--muted)] focus:bg-[var(--surface)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)] hover:border-[var(--border-strong)] text-[15px] font-bold outline-none disabled:opacity-60 disabled:bg-[var(--surface-alt)]"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddCustomKeyword}
+                      disabled={!canUpload || !customKeywordDraft.trim()}
+                      className="shrink-0 rounded-2xl bg-[var(--surface-alt)] border-2 border-[var(--border)] px-5 py-4 text-[13px] font-black text-[var(--text)] transition-all hover:border-[var(--border-strong)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Add
+                    </button>
+                  </div>
+
+                  {activeSubmission.keywords.length ? (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {activeSubmission.keywords.map((keyword) => (
+                        <span
+                          key={keyword}
+                          className="inline-flex items-center gap-1.5 rounded-full border-2 border-[var(--primary)] bg-[var(--primary-soft)] px-3.5 py-1.5 text-[12px] font-bold text-[var(--primary)]"
+                        >
+                          {keyword}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveKeyword(keyword)}
+                            disabled={!canUpload}
+                            className="ml-0.5 text-[var(--primary)] hover:text-rose-600 transition-colors disabled:opacity-60"
+                            aria-label={`Remove ${keyword} tag`}
+                          >
+                            <i className="fas fa-xmark text-[11px]" aria-hidden="true" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] font-bold text-[var(--muted)] mt-3 flex items-center gap-2">
+                      <i className="fas fa-circle-info text-[var(--info)]"></i> Add at least one research type or technology tag before you can proceed to upload documents.
+                    </p>
+                  )}
+                </div>
+
+                <div className="group/field">
                   <label htmlFor="briefDescription" className="block text-[12px] font-black text-[var(--text)] uppercase tracking-widest mb-3 flex items-center gap-3">
                     Note to Adviser <span className="text-[var(--text-meta)] font-bold text-[9px] px-2 py-0.5 bg-[var(--surface-alt)] rounded border border-[var(--border)]">OPTIONAL</span>
                   </label>
@@ -1844,21 +1955,15 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                 </div>
               </div>
               
-              <div className="mt-8 pt-8 border-t border-[var(--border)] flex items-center justify-between relative z-10">
-                 <div className="flex items-center gap-3 bg-[var(--surface-alt)] px-4 py-2 rounded-xl border border-[var(--border)]">
-                   <div className={`h-2.5 w-2.5 rounded-full ${!activeSubmission.proposedTitle.trim() ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`}></div>
-                   <span className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--text)]">
-                     {!activeSubmission.proposedTitle.trim() ? 'Awaiting Title' : 'Details Complete'}
-                   </span>
-                 </div>
-                 <button 
+              <div className="mt-8 pt-8 border-t border-[var(--border)] flex items-center justify-end relative z-10">
+                 <button
                    onClick={() => {
-                     if (activeSubmission.proposedTitle && activeSubmission.proposedTitle.trim()) {
+                     if (isDetailsComplete) {
                        setActiveTab('Documents');
                      }
                    }}
-                   disabled={!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()}
-                   className={`text-sm font-extrabold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-3 ${(!activeSubmission.proposedTitle || !activeSubmission.proposedTitle.trim()) ? 'bg-[var(--surface-alt)] cursor-not-allowed text-[var(--text-meta)] shadow-none border border-[var(--border)]' : 'bg-gradient-to-r from-[var(--primary)] to-[var(--primary-bright)] text-white hover:shadow-lg hover:-translate-y-0.5 border border-transparent'}`}
+                   disabled={!isDetailsComplete}
+                   className={`text-sm font-extrabold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-3 ${!isDetailsComplete ? 'bg-[var(--surface-alt)] cursor-not-allowed text-[var(--text-meta)] shadow-none border border-[var(--border)]' : 'bg-gradient-to-r from-[var(--primary)] to-[var(--primary-bright)] text-white hover:shadow-lg hover:-translate-y-0.5 border border-transparent'}`}
                  >
                    Continue to Documents <i className="fas fa-arrow-right"></i>
                  </button>
@@ -1866,19 +1971,19 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
             </div>
           )}
           
-          {!['Documents', 'Details'].includes(activeTab) && (
-            <div className="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-12 text-center text-[var(--muted)] flex flex-col items-center justify-center h-[400px]">
-               <div className="h-16 w-16 bg-[var(--surface-alt)] rounded-2xl flex items-center justify-center mb-5 text-2xl text-[var(--muted)] border border-[var(--border)]">
-                 <i className="fas fa-laptop-code"></i>
-               </div>
-               <h3 className="text-lg font-extrabold text-[var(--text)] mb-2">Tab Content Pending</h3>
-               <p className="text-[13px] font-medium max-w-sm leading-relaxed">The {activeTab} view is currently being implemented. Please use Details and Documents to submit your proposal.</p>
-            </div>
-          )}
 
-
-          {/* Action Banner (Proceed to Next Stage) */}
-          <div className="title-submission-cta-panel bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
+          {/* Action Banner (Proceed to Next Stage) — hidden while still on the
+              Details tab in draft state, since the Details tab's own "Continue
+              to Documents" footer already covers that exact next step; showing
+              both stacked competing "you're not ready" messages read as two
+              separate buttons fighting for the same job. */}
+          {!(activeTab === 'Details' && normalizedRegistrationStatus === 'draft') && (
+          <div className={`title-submission-cta-panel bg-[var(--surface)] rounded-2xl border border-l-4 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative ${
+            normalizedRegistrationStatus === 'rejected' ? 'border-[var(--border)] border-l-rose-400' :
+            normalizedRegistrationStatus === 'needs revision' ? 'border-[var(--border)] border-l-amber-400' :
+            normalizedRegistrationStatus === 'withdrawn' ? 'border-[var(--border)] border-l-slate-300' :
+            'border-[var(--border)] border-l-[var(--primary)]'
+          }`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-10 -translate-y-10"></div>
             <div className="flex items-center gap-5 z-10">
               <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm relative border ${normalizedRegistrationStatus === 'rejected' ? 'bg-rose-50 text-rose-600 border-rose-100' : normalizedRegistrationStatus === 'needs revision' ? 'bg-amber-50 text-amber-600 border-amber-100' : normalizedRegistrationStatus === 'withdrawn' ? 'bg-slate-100 text-slate-500 border-slate-200' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
@@ -1912,7 +2017,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                      ? 'Your group chose a different title to move forward with — this one is no longer active.'
                      : normalizedRegistrationStatus !== 'draft'
                      ? 'Your adviser has been notified and is currently reviewing your concept paper.'
-                     : 'Ensure your concept paper is fully uploaded before submitting.'}
+                     : draftReadinessMessage}
                 </p>
               </div>
             </div>
@@ -1973,6 +2078,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Right Column - Unified Insights Panel */}

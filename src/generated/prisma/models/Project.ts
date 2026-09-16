@@ -288,6 +288,7 @@ export type ProjectWhereInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemListRelationFilter
   evaluations?: Prisma.EvaluationListRelationFilter
   industryProjects?: Prisma.IndustryProjectListRelationFilter
+  academicActivities?: Prisma.AcademicActivityListRelationFilter
 }
 
 export type ProjectOrderByWithRelationInput = {
@@ -323,6 +324,7 @@ export type ProjectOrderByWithRelationInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemOrderByRelationAggregateInput
   evaluations?: Prisma.EvaluationOrderByRelationAggregateInput
   industryProjects?: Prisma.IndustryProjectOrderByRelationAggregateInput
+  academicActivities?: Prisma.AcademicActivityOrderByRelationAggregateInput
 }
 
 export type ProjectWhereUniqueInput = Prisma.AtLeast<{
@@ -361,6 +363,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   adviserScheduleItems?: Prisma.AdviserScheduleItemListRelationFilter
   evaluations?: Prisma.EvaluationListRelationFilter
   industryProjects?: Prisma.IndustryProjectListRelationFilter
+  academicActivities?: Prisma.AcademicActivityListRelationFilter
 }, "id">
 
 export type ProjectOrderByWithAggregationInput = {
@@ -439,6 +442,7 @@ export type ProjectCreateInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateInput = {
@@ -469,6 +473,7 @@ export type ProjectUncheckedCreateInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUpdateInput = {
@@ -499,6 +504,7 @@ export type ProjectUpdateInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateInput = {
@@ -529,6 +535,7 @@ export type ProjectUncheckedUpdateInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateManyInput = {
@@ -604,6 +611,11 @@ export type ProjectNullableScalarRelationFilter = {
   isNot?: Prisma.ProjectWhereInput | null
 }
 
+export type ProjectScalarRelationFilter = {
+  is?: Prisma.ProjectWhereInput
+  isNot?: Prisma.ProjectWhereInput
+}
+
 export type ProjectCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
@@ -659,11 +671,6 @@ export type ProjectMinOrderByAggregateInput = {
   transferReadyAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type ProjectScalarRelationFilter = {
-  is?: Prisma.ProjectWhereInput
-  isNot?: Prisma.ProjectWhereInput
 }
 
 export type ProjectCreateNestedManyWithoutOwnerInput = {
@@ -764,6 +771,20 @@ export type ProjectUpdateOneWithoutFilesNestedInput = {
   delete?: Prisma.ProjectWhereInput | boolean
   connect?: Prisma.ProjectWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutFilesInput, Prisma.ProjectUpdateWithoutFilesInput>, Prisma.ProjectUncheckedUpdateWithoutFilesInput>
+}
+
+export type ProjectCreateNestedOneWithoutAcademicActivitiesInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutAcademicActivitiesInput, Prisma.ProjectUncheckedCreateWithoutAcademicActivitiesInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutAcademicActivitiesInput
+  connect?: Prisma.ProjectWhereUniqueInput
+}
+
+export type ProjectUpdateOneRequiredWithoutAcademicActivitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutAcademicActivitiesInput, Prisma.ProjectUncheckedCreateWithoutAcademicActivitiesInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutAcademicActivitiesInput
+  upsert?: Prisma.ProjectUpsertWithoutAcademicActivitiesInput
+  connect?: Prisma.ProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutAcademicActivitiesInput, Prisma.ProjectUpdateWithoutAcademicActivitiesInput>, Prisma.ProjectUncheckedUpdateWithoutAcademicActivitiesInput>
 }
 
 export type ProjectCreateNestedManyWithoutGroupInput = {
@@ -1062,6 +1083,7 @@ export type ProjectCreateWithoutOwnerInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutOwnerInput = {
@@ -1091,6 +1113,7 @@ export type ProjectUncheckedCreateWithoutOwnerInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutOwnerInput = {
@@ -1130,6 +1153,7 @@ export type ProjectCreateWithoutAdviserInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutAdviserInput = {
@@ -1159,6 +1183,7 @@ export type ProjectUncheckedCreateWithoutAdviserInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutAdviserInput = {
@@ -1254,6 +1279,7 @@ export type ProjectCreateWithoutFilesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutFilesInput = {
@@ -1283,6 +1309,7 @@ export type ProjectUncheckedCreateWithoutFilesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutFilesInput = {
@@ -1328,6 +1355,7 @@ export type ProjectUpdateWithoutFilesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutFilesInput = {
@@ -1353,6 +1381,143 @@ export type ProjectUncheckedUpdateWithoutFilesInput = {
   milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
   progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutProjectNestedInput
+  defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
+  evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
+  industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectCreateWithoutAcademicActivitiesInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  keywords?: Prisma.ProjectCreatekeywordsInput | string[]
+  status?: $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
+  repositoryPublishedAt?: Date | string | null
+  transferReadyAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  department?: Prisma.DepartmentCreateNestedOneWithoutProjectsInput
+  academicYear?: Prisma.AcademicYearCreateNestedOneWithoutProjectsInput
+  group?: Prisma.GroupCreateNestedOneWithoutProjectsInput
+  owner?: Prisma.UserCreateNestedOneWithoutOwnedProjectsInput
+  adviser?: Prisma.UserCreateNestedOneWithoutAdvisedProjectsInput
+  milestones?: Prisma.MilestoneCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointCreateNestedManyWithoutProjectInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutProjectInput
+  progressReports?: Prisma.ProgressReportCreateNestedManyWithoutProjectInput
+  files?: Prisma.UploadedFileCreateNestedManyWithoutProjectInput
+  defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
+  evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
+  industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectUncheckedCreateWithoutAcademicActivitiesInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  keywords?: Prisma.ProjectCreatekeywordsInput | string[]
+  status?: $Enums.ProjectStatus
+  departmentId?: string | null
+  academicYearId?: string | null
+  groupId?: string | null
+  ownerId?: string | null
+  adviserId?: string | null
+  sdgs?: Prisma.ProjectCreatesdgsInput | string[]
+  awards?: Prisma.ProjectCreateawardsInput | string[]
+  isPublished?: boolean
+  archivedAt?: Date | string | null
+  repositoryPublishedAt?: Date | string | null
+  transferReadyAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  milestones?: Prisma.MilestoneUncheckedCreateNestedManyWithoutProjectInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedCreateNestedManyWithoutProjectInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutProjectInput
+  progressReports?: Prisma.ProgressReportUncheckedCreateNestedManyWithoutProjectInput
+  files?: Prisma.UploadedFileUncheckedCreateNestedManyWithoutProjectInput
+  defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
+  evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
+  industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectCreateOrConnectWithoutAcademicActivitiesInput = {
+  where: Prisma.ProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutAcademicActivitiesInput, Prisma.ProjectUncheckedCreateWithoutAcademicActivitiesInput>
+}
+
+export type ProjectUpsertWithoutAcademicActivitiesInput = {
+  update: Prisma.XOR<Prisma.ProjectUpdateWithoutAcademicActivitiesInput, Prisma.ProjectUncheckedUpdateWithoutAcademicActivitiesInput>
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutAcademicActivitiesInput, Prisma.ProjectUncheckedCreateWithoutAcademicActivitiesInput>
+  where?: Prisma.ProjectWhereInput
+}
+
+export type ProjectUpdateToOneWithWhereWithoutAcademicActivitiesInput = {
+  where?: Prisma.ProjectWhereInput
+  data: Prisma.XOR<Prisma.ProjectUpdateWithoutAcademicActivitiesInput, Prisma.ProjectUncheckedUpdateWithoutAcademicActivitiesInput>
+}
+
+export type ProjectUpdateWithoutAcademicActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  department?: Prisma.DepartmentUpdateOneWithoutProjectsNestedInput
+  academicYear?: Prisma.AcademicYearUpdateOneWithoutProjectsNestedInput
+  group?: Prisma.GroupUpdateOneWithoutProjectsNestedInput
+  owner?: Prisma.UserUpdateOneWithoutOwnedProjectsNestedInput
+  adviser?: Prisma.UserUpdateOneWithoutAdvisedProjectsNestedInput
+  milestones?: Prisma.MilestoneUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUpdateManyWithoutProjectNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutProjectNestedInput
+  progressReports?: Prisma.ProgressReportUpdateManyWithoutProjectNestedInput
+  files?: Prisma.UploadedFileUpdateManyWithoutProjectNestedInput
+  defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
+  adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
+  evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
+  industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectUncheckedUpdateWithoutAcademicActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  keywords?: Prisma.ProjectUpdatekeywordsInput | string[]
+  status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
+  departmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  academicYearId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adviserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sdgs?: Prisma.ProjectUpdatesdgsInput | string[]
+  awards?: Prisma.ProjectUpdateawardsInput | string[]
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repositoryPublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  transferReadyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  milestones?: Prisma.MilestoneUncheckedUpdateManyWithoutProjectNestedInput
+  milestoneCheckpoints?: Prisma.MilestoneCheckpointUncheckedUpdateManyWithoutProjectNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutProjectNestedInput
+  progressReports?: Prisma.ProgressReportUncheckedUpdateManyWithoutProjectNestedInput
+  files?: Prisma.UploadedFileUncheckedUpdateManyWithoutProjectNestedInput
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
@@ -1386,6 +1551,7 @@ export type ProjectCreateWithoutGroupInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutGroupInput = {
@@ -1415,6 +1581,7 @@ export type ProjectUncheckedCreateWithoutGroupInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutGroupInput = {
@@ -1470,6 +1637,7 @@ export type ProjectCreateWithoutDepartmentInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutDepartmentInput = {
@@ -1499,6 +1667,7 @@ export type ProjectUncheckedCreateWithoutDepartmentInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutDepartmentInput = {
@@ -1554,6 +1723,7 @@ export type ProjectCreateWithoutAcademicYearInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutAcademicYearInput = {
@@ -1583,6 +1753,7 @@ export type ProjectUncheckedCreateWithoutAcademicYearInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutAcademicYearInput = {
@@ -1638,6 +1809,7 @@ export type ProjectCreateWithoutMilestonesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutMilestonesInput = {
@@ -1667,6 +1839,7 @@ export type ProjectUncheckedCreateWithoutMilestonesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutMilestonesInput = {
@@ -1712,6 +1885,7 @@ export type ProjectUpdateWithoutMilestonesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutMilestonesInput = {
@@ -1741,6 +1915,7 @@ export type ProjectUncheckedUpdateWithoutMilestonesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutMilestoneCheckpointsInput = {
@@ -1770,6 +1945,7 @@ export type ProjectCreateWithoutMilestoneCheckpointsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutMilestoneCheckpointsInput = {
@@ -1799,6 +1975,7 @@ export type ProjectUncheckedCreateWithoutMilestoneCheckpointsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutMilestoneCheckpointsInput = {
@@ -1844,6 +2021,7 @@ export type ProjectUpdateWithoutMilestoneCheckpointsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutMilestoneCheckpointsInput = {
@@ -1873,6 +2051,7 @@ export type ProjectUncheckedUpdateWithoutMilestoneCheckpointsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutSubmissionsInput = {
@@ -1902,6 +2081,7 @@ export type ProjectCreateWithoutSubmissionsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutSubmissionsInput = {
@@ -1931,6 +2111,7 @@ export type ProjectUncheckedCreateWithoutSubmissionsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutSubmissionsInput = {
@@ -1976,6 +2157,7 @@ export type ProjectUpdateWithoutSubmissionsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutSubmissionsInput = {
@@ -2005,6 +2187,7 @@ export type ProjectUncheckedUpdateWithoutSubmissionsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutProgressReportsInput = {
@@ -2034,6 +2217,7 @@ export type ProjectCreateWithoutProgressReportsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutProgressReportsInput = {
@@ -2063,6 +2247,7 @@ export type ProjectUncheckedCreateWithoutProgressReportsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutProgressReportsInput = {
@@ -2108,6 +2293,7 @@ export type ProjectUpdateWithoutProgressReportsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutProgressReportsInput = {
@@ -2137,6 +2323,7 @@ export type ProjectUncheckedUpdateWithoutProgressReportsInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutDefenseSchedulesInput = {
@@ -2166,6 +2353,7 @@ export type ProjectCreateWithoutDefenseSchedulesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutDefenseSchedulesInput = {
@@ -2195,6 +2383,7 @@ export type ProjectUncheckedCreateWithoutDefenseSchedulesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutDefenseSchedulesInput = {
@@ -2240,6 +2429,7 @@ export type ProjectUpdateWithoutDefenseSchedulesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutDefenseSchedulesInput = {
@@ -2269,6 +2459,7 @@ export type ProjectUncheckedUpdateWithoutDefenseSchedulesInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutAdviserScheduleItemsInput = {
@@ -2298,6 +2489,7 @@ export type ProjectCreateWithoutAdviserScheduleItemsInput = {
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutAdviserScheduleItemsInput = {
@@ -2327,6 +2519,7 @@ export type ProjectUncheckedCreateWithoutAdviserScheduleItemsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutAdviserScheduleItemsInput = {
@@ -2372,6 +2565,7 @@ export type ProjectUpdateWithoutAdviserScheduleItemsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput = {
@@ -2401,6 +2595,7 @@ export type ProjectUncheckedUpdateWithoutAdviserScheduleItemsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutEvaluationsInput = {
@@ -2430,6 +2625,7 @@ export type ProjectCreateWithoutEvaluationsInput = {
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutEvaluationsInput = {
@@ -2459,6 +2655,7 @@ export type ProjectUncheckedCreateWithoutEvaluationsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   industryProjects?: Prisma.IndustryProjectUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutEvaluationsInput = {
@@ -2504,6 +2701,7 @@ export type ProjectUpdateWithoutEvaluationsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutEvaluationsInput = {
@@ -2533,6 +2731,7 @@ export type ProjectUncheckedUpdateWithoutEvaluationsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutIndustryProjectsInput = {
@@ -2562,6 +2761,7 @@ export type ProjectCreateWithoutIndustryProjectsInput = {
   defenseSchedules?: Prisma.DefenseScheduleCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutIndustryProjectsInput = {
@@ -2591,6 +2791,7 @@ export type ProjectUncheckedCreateWithoutIndustryProjectsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUncheckedCreateNestedManyWithoutProjectInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedCreateNestedManyWithoutProjectInput
   evaluations?: Prisma.EvaluationUncheckedCreateNestedManyWithoutProjectInput
+  academicActivities?: Prisma.AcademicActivityUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutIndustryProjectsInput = {
@@ -2636,6 +2837,7 @@ export type ProjectUpdateWithoutIndustryProjectsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutIndustryProjectsInput = {
@@ -2665,6 +2867,7 @@ export type ProjectUncheckedUpdateWithoutIndustryProjectsInput = {
   defenseSchedules?: Prisma.DefenseScheduleUncheckedUpdateManyWithoutProjectNestedInput
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateManyOwnerInput = {
@@ -2734,6 +2937,7 @@ export type ProjectUpdateWithoutOwnerInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutOwnerInput = {
@@ -2763,6 +2967,7 @@ export type ProjectUncheckedUpdateWithoutOwnerInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateManyWithoutOwnerInput = {
@@ -2812,6 +3017,7 @@ export type ProjectUpdateWithoutAdviserInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutAdviserInput = {
@@ -2841,6 +3047,7 @@ export type ProjectUncheckedUpdateWithoutAdviserInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateManyWithoutAdviserInput = {
@@ -2910,6 +3117,7 @@ export type ProjectUpdateWithoutGroupInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutGroupInput = {
@@ -2939,6 +3147,7 @@ export type ProjectUncheckedUpdateWithoutGroupInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateManyWithoutGroupInput = {
@@ -3008,6 +3217,7 @@ export type ProjectUpdateWithoutDepartmentInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutDepartmentInput = {
@@ -3037,6 +3247,7 @@ export type ProjectUncheckedUpdateWithoutDepartmentInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateManyWithoutDepartmentInput = {
@@ -3106,6 +3317,7 @@ export type ProjectUpdateWithoutAcademicYearInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutAcademicYearInput = {
@@ -3135,6 +3347,7 @@ export type ProjectUncheckedUpdateWithoutAcademicYearInput = {
   adviserScheduleItems?: Prisma.AdviserScheduleItemUncheckedUpdateManyWithoutProjectNestedInput
   evaluations?: Prisma.EvaluationUncheckedUpdateManyWithoutProjectNestedInput
   industryProjects?: Prisma.IndustryProjectUncheckedUpdateManyWithoutProjectNestedInput
+  academicActivities?: Prisma.AcademicActivityUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateManyWithoutAcademicYearInput = {
@@ -3172,6 +3385,7 @@ export type ProjectCountOutputType = {
   adviserScheduleItems: number
   evaluations: number
   industryProjects: number
+  academicActivities: number
 }
 
 export type ProjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3184,6 +3398,7 @@ export type ProjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   adviserScheduleItems?: boolean | ProjectCountOutputTypeCountAdviserScheduleItemsArgs
   evaluations?: boolean | ProjectCountOutputTypeCountEvaluationsArgs
   industryProjects?: boolean | ProjectCountOutputTypeCountIndustryProjectsArgs
+  academicActivities?: boolean | ProjectCountOutputTypeCountAcademicActivitiesArgs
 }
 
 /**
@@ -3259,6 +3474,13 @@ export type ProjectCountOutputTypeCountIndustryProjectsArgs<ExtArgs extends runt
   where?: Prisma.IndustryProjectWhereInput
 }
 
+/**
+ * ProjectCountOutputType without action
+ */
+export type ProjectCountOutputTypeCountAcademicActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AcademicActivityWhereInput
+}
+
 
 export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3293,6 +3515,7 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   adviserScheduleItems?: boolean | Prisma.Project$adviserScheduleItemsArgs<ExtArgs>
   evaluations?: boolean | Prisma.Project$evaluationsArgs<ExtArgs>
   industryProjects?: boolean | Prisma.Project$industryProjectsArgs<ExtArgs>
+  academicActivities?: boolean | Prisma.Project$academicActivitiesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["project"]>
 
@@ -3385,6 +3608,7 @@ export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   adviserScheduleItems?: boolean | Prisma.Project$adviserScheduleItemsArgs<ExtArgs>
   evaluations?: boolean | Prisma.Project$evaluationsArgs<ExtArgs>
   industryProjects?: boolean | Prisma.Project$industryProjectsArgs<ExtArgs>
+  academicActivities?: boolean | Prisma.Project$academicActivitiesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProjectIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3419,6 +3643,7 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     adviserScheduleItems: Prisma.$AdviserScheduleItemPayload<ExtArgs>[]
     evaluations: Prisma.$EvaluationPayload<ExtArgs>[]
     industryProjects: Prisma.$IndustryProjectPayload<ExtArgs>[]
+    academicActivities: Prisma.$AcademicActivityPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3847,6 +4072,7 @@ export interface Prisma__ProjectClient<T, Null = never, ExtArgs extends runtime.
   adviserScheduleItems<T extends Prisma.Project$adviserScheduleItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$adviserScheduleItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdviserScheduleItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   evaluations<T extends Prisma.Project$evaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$evaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   industryProjects<T extends Prisma.Project$industryProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$industryProjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IndustryProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  academicActivities<T extends Prisma.Project$academicActivitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$academicActivitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AcademicActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4603,6 +4829,30 @@ export type Project$industryProjectsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.IndustryProjectScalarFieldEnum | Prisma.IndustryProjectScalarFieldEnum[]
+}
+
+/**
+ * Project.academicActivities
+ */
+export type Project$academicActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AcademicActivity
+   */
+  select?: Prisma.AcademicActivitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AcademicActivity
+   */
+  omit?: Prisma.AcademicActivityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcademicActivityInclude<ExtArgs> | null
+  where?: Prisma.AcademicActivityWhereInput
+  orderBy?: Prisma.AcademicActivityOrderByWithRelationInput | Prisma.AcademicActivityOrderByWithRelationInput[]
+  cursor?: Prisma.AcademicActivityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AcademicActivityScalarFieldEnum | Prisma.AcademicActivityScalarFieldEnum[]
 }
 
 /**

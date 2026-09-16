@@ -16,7 +16,8 @@ const ADMIN_NAV_ITEMS = [
   { key: 'reports', href: '/admin/reports', label: 'Reports', icon: 'fa-chart-bar' },
   { key: 'final-repository-approval', href: '/admin/final-repository-approval', label: 'Final Repository Approval', icon: 'fa-clipboard-check' },
   { key: 'repository', href: '/admin/repository', label: 'Documents Repository', icon: 'fa-folder' },
-  { key: 'announcements', href: '/admin/announcements', label: 'Announcements', icon: 'fa-bullhorn' }
+  { key: 'announcements', href: '/admin/announcements', label: 'Announcements', icon: 'fa-bullhorn' },
+  { key: 'document-templates', href: '/admin/document-templates', label: 'Document Templates', icon: 'fa-file-shield' }
 ] as const;
 const ADMIN_PREFETCH_ROUTES = ADMIN_NAV_ITEMS.map((item) => item.href);
 

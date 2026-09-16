@@ -77,7 +77,7 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
         id: g.id,
         groupId: g.code as `IT-2024-${string}`,
         projectTitle: g.projectTitle || g.title,
-        department: (g.department || g.dept || 'IT') as 'IT',
+        department: g.department || g.dept || 'IT',
         progress: g.progress || 0,
         currentMilestone: mappedMilestone,
         status: mappedStatus,

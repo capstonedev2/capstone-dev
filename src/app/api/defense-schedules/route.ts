@@ -15,7 +15,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
-import { recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
+import { ensureProjectMilestoneWorkflow, recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -61,6 +61,14 @@ const SCHEDULE_TYPES = [
   'Pre-Final Defense',
   'Final Defense'
 ] as const;
+// Every official defense (not the Pre-Final practice run) requires its own
+// signed "Application for Oral Defense" evidence, independently reviewed by
+// the adviser, before that stage's defense can be scheduled.
+const DEFENSE_APPLICATION_EVIDENCE_CHECKPOINT_BY_SCHEDULE_TYPE: Partial<Record<string, string>> = {
+  'Concept Presentation': 'concept-defense-application',
+  'Proposal Defense': 'proposal-defense-application',
+  'Final Defense': 'final-defense-application'
+};
 const APPROVED_TITLE_PROJECT_STATUSES = new Set<ProjectStatus>([
   ProjectStatus.APPROVED,
   ProjectStatus.DEFENSE_SCHEDULED,
@@ -554,6 +562,25 @@ export async function POST(request: Request) {
       throw new HttpError('This group is not eligible for defense scheduling because it has no approved title yet.', 400, {
         group: 'Approve one title proposal before scheduling a presentation.'
       });
+    }
+
+    // Hard gate: an official defense can't be scheduled until the adviser has
+    // approved that stage's oral defense application evidence.
+    const defenseApplicationCheckpointKey = DEFENSE_APPLICATION_EVIDENCE_CHECKPOINT_BY_SCHEDULE_TYPE[scheduleType];
+
+    if (defenseApplicationCheckpointKey) {
+      await ensureProjectMilestoneWorkflow(prisma, approvedProject.id);
+      const evidenceCheckpoint = await prisma.milestoneCheckpoint.findUnique({
+        where: { projectId_key: { projectId: approvedProject.id, key: defenseApplicationCheckpointKey } }
+      });
+      const evidenceApproved = evidenceCheckpoint
+        && (evidenceCheckpoint.status === 'APPROVED' || evidenceCheckpoint.status === 'COMPLETED');
+
+      if (!evidenceApproved) {
+        throw new HttpError(`This group's oral defense application evidence must be reviewed and approved before ${scheduleType.toLowerCase()} can be scheduled.`, 400, {
+          group: 'Approve the oral defense application evidence in Title & Evidence Approval first.'
+        });
+      }
     }
 
     const actualAdviserIsPanelist = approvedProject.adviserId

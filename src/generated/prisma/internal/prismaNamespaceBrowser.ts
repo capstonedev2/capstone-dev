@@ -55,6 +55,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   PasswordResetCode: 'PasswordResetCode',
   UploadedFile: 'UploadedFile',
+  AcademicActivity: 'AcademicActivity',
   Group: 'Group',
   Department: 'Department',
   AcademicYear: 'AcademicYear',
@@ -169,11 +170,35 @@ export const UploadedFileScalarFieldEnum = {
   projectId: 'projectId',
   submissionId: 'submissionId',
   checkpointId: 'checkpointId',
+  activityId: 'activityId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type UploadedFileScalarFieldEnum = (typeof UploadedFileScalarFieldEnum)[keyof typeof UploadedFileScalarFieldEnum]
+
+
+export const AcademicActivityScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  createdById: 'createdById',
+  activityType: 'activityType',
+  eventName: 'eventName',
+  eventDate: 'eventDate',
+  venue: 'venue',
+  description: 'description',
+  scope: 'scope',
+  achievement: 'achievement',
+  status: 'status',
+  relatedMilestone: 'relatedMilestone',
+  participantsOrBeneficiary: 'participantsOrBeneficiary',
+  addToTimeline: 'addToTimeline',
+  markAsAchievement: 'markAsAchievement',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AcademicActivityScalarFieldEnum = (typeof AcademicActivityScalarFieldEnum)[keyof typeof AcademicActivityScalarFieldEnum]
 
 
 export const GroupScalarFieldEnum = {

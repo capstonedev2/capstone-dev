@@ -1,11 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { type ChangeEvent, type CSSProperties, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { logoutWithApi } from '@/lib/client-auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { STUDENT_NAV_ITEMS } from '@/components/students/student-navigation';
+import {
+  fetchAcademicActivities,
+  formatIsoDateLabel,
+  isImageFileByName,
+  type ApiAcademicActivity
+} from '@/components/students/student-academic-activity.shared';
+import { AcademicActivityDetailModal } from '@/components/students/student-academic-activity-detail';
 
 function getInitials(value: string) {
   return value
@@ -57,69 +63,62 @@ type AcademicActivityRecord = StudentDashboardData['presentations'][number] & {
     name: string;
     type: string;
   }>;
-};
-
-type AcademicActivityFormState = {
-  activityType: string;
-  activityTitle: string;
-  relatedMilestone: string;
-  date: string;
-  location: string;
-  description: string;
-  status: string;
-  participantsOrBeneficiary: string;
-  addToTimeline: boolean;
-  markAsAchievement: boolean;
-  evidenceFiles: File[];
+  // Real, downloadable links to the evidence files attached via Document
+  // Submissions — undefined for the brief local echo shown right after save,
+  // populated once the list is refetched from the server.
+  evidenceLinks?: Array<{
+    id: string;
+    fileName: string;
+    url: string;
+    previewUrl: string;
+  }>;
+  canDelete?: boolean;
+  // The full record, for the detail modal — the fields above are just a
+  // compatibility shape for the existing display helpers.
+  raw: ApiAcademicActivity;
 };
 
 type AcademicActivityTab = 'events' | 'evidence' | 'recognitions';
 
-const ACTIVITY_TYPE_OPTIONS = [
-  'Presentation',
-  'Research Colloquium',
-  'Project Defense',
-  'Academic Exhibit',
-  'Workshop',
-  'Seminar',
-  'Community Extension'
-];
+// Adapts the real API shape back onto the record shape the existing display
+// helpers (getEvidenceFileLabel, getRecognitionMeta, etc.) already expect, so
+// none of that rendering code needed to change — only where the data comes
+// from did.
+function mapApiActivityToRecord(activity: ApiAcademicActivity, currentUserId: string): AcademicActivityRecord {
+  const imageFiles = activity.files.filter((file) => isImageFileByName(file.fileName, file.fileType));
+  const certificateFile = activity.files.find((file) => !isImageFileByName(file.fileName, file.fileType));
 
-const ACTIVITY_STATUS_OPTIONS = ['Planned', 'Ongoing', 'Completed', 'Submitted', 'Recognized'];
-
-function createAcademicActivityForm(defaultMilestone: string): AcademicActivityFormState {
   return {
-    activityType: 'Presentation',
-    activityTitle: '',
-    relatedMilestone: defaultMilestone,
-    date: '',
-    location: '',
-    description: '',
-    status: 'Completed',
-    participantsOrBeneficiary: '',
-    addToTimeline: true,
-    markAsAchievement: false,
-    evidenceFiles: []
+    id: activity.id,
+    user_id: currentUserId,
+    project_id: activity.projectId,
+    status: 'active',
+    created_at: activity.createdAt,
+    updated_at: activity.createdAt,
+    eventName: activity.eventName,
+    eventType: activity.activityType,
+    date: activity.eventDate || activity.createdAt,
+    dateLabel: formatIsoDateLabel(activity.eventDate || activity.createdAt),
+    venue: activity.venue || '',
+    description: activity.description || '',
+    achievement: activity.achievement || '',
+    scope: activity.scope,
+    certificateFile: certificateFile?.fileName || '',
+    photoCount: imageFiles.length,
+    activityStatus: activity.status,
+    relatedMilestone: activity.relatedMilestone || '',
+    participantsOrBeneficiary: activity.participantsOrBeneficiary || '',
+    addToTimeline: activity.addToTimeline,
+    markAsAchievement: activity.markAsAchievement,
+    evidenceFiles: activity.files.map((file) => ({ name: file.fileName, type: file.fileType })),
+    evidenceLinks: activity.files.map((file) => ({
+      id: file.id,
+      fileName: file.fileName,
+      url: file.url,
+      previewUrl: file.previewUrl
+    })),
+    raw: activity
   };
-}
-
-function formatActivityDateLabel(value: string) {
-  if (!value) {
-    return 'Date to be confirmed';
-  }
-
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(date);
-}
-
-function isImageEvidenceFile(file: File) {
-  return file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(file.name);
 }
 
 const OVERVIEW_PILL_STYLES: Record<BadgeTone, string> = {
@@ -212,18 +211,37 @@ function MetaStat({
 }
 
 export function StudentProjectOverview({ data }: { data: StudentDashboardData }) {
-  const router = useRouter();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
-  const evidenceInputRef = useRef<HTMLInputElement | null>(null);
   const { project, group } = data;
-  const milestoneOptions = data.milestones || [];
-  const defaultActivityMilestone = project.currentMilestone || milestoneOptions[0]?.title || '';
-  const [isAcademicActivityModalOpen, setAcademicActivityModalOpen] = useState(false);
   const [activeAcademicActivityTab, setActiveAcademicActivityTab] = useState<AcademicActivityTab>('events');
-  const [presentations, setPresentations] = useState<AcademicActivityRecord[]>(() => data.presentations || []);
-  const [academicActivityForm, setAcademicActivityForm] = useState<AcademicActivityFormState>(() => createAcademicActivityForm(defaultActivityMilestone));
+  const [presentations, setPresentations] = useState<AcademicActivityRecord[]>([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true);
+  const [selectedActivity, setSelectedActivity] = useState<ApiAcademicActivity | null>(null);
+
+  const loadAcademicActivities = async () => {
+    if (!project.project_id) {
+      setIsLoadingActivities(false);
+      return;
+    }
+
+    setIsLoadingActivities(true);
+
+    try {
+      const activities = await fetchAcademicActivities(project.project_id);
+      setPresentations(activities.map((activity) => mapApiActivityToRecord(activity, data.profile.user_id)));
+    } catch {
+      // Non-critical: the log simply stays empty if this fails.
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAcademicActivities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project.project_id]);
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
@@ -235,7 +253,6 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
       if (event.key === 'Escape') {
         setProfileMenuOpen(false);
         setSidebarOpen(false);
-        setAcademicActivityModalOpen(false);
       }
     };
     document.addEventListener('click', handleDocumentClick);
@@ -246,87 +263,11 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
     };
   }, []);
 
-  useEffect(() => {
-    document.body.classList.toggle('is-modal-open', isAcademicActivityModalOpen);
-
-    return () => {
-      document.body.classList.remove('is-modal-open');
-    };
-  }, [isAcademicActivityModalOpen]);
-
   const summary = useMemo(() => {
     const unreadFeedback = data.feedback.filter((item) => item.unread).length;
     const unreadNotifications = data.notifications.filter((item) => !item.read).length;
     return { unreadFeedback, unreadNotifications };
   }, [data]);
-
-  const resetAcademicActivityForm = () => {
-    setAcademicActivityForm(createAcademicActivityForm(defaultActivityMilestone));
-
-    if (evidenceInputRef.current) {
-      evidenceInputRef.current.value = '';
-    }
-  };
-
-  const openAcademicActivityModal = () => {
-    resetAcademicActivityForm();
-    setAcademicActivityModalOpen(true);
-  };
-
-  const closeAcademicActivityModal = () => {
-    setAcademicActivityModalOpen(false);
-    resetAcademicActivityForm();
-  };
-
-  const updateAcademicActivityForm = <Key extends keyof AcademicActivityFormState,>(field: Key, value: AcademicActivityFormState[Key]) => {
-    setAcademicActivityForm((current) => ({
-      ...current,
-      [field]: value
-    }));
-  };
-
-  const handleEvidenceUploadChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateAcademicActivityForm('evidenceFiles', Array.from(event.target.files || []));
-  };
-
-  const handleAcademicActivitySave = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const now = new Date().toISOString();
-    const evidenceFiles = academicActivityForm.evidenceFiles.map((file) => ({
-      name: file.name,
-      type: file.type
-    }));
-    const imageFiles = academicActivityForm.evidenceFiles.filter((file) => isImageEvidenceFile(file));
-    const certificateFile = academicActivityForm.evidenceFiles.find((file) => !isImageEvidenceFile(file))?.name || '';
-    const nextActivity: AcademicActivityRecord = {
-      id: `pres-${Date.now()}`,
-      user_id: data.profile.user_id,
-      project_id: data.project.project_id,
-      status: 'active',
-      created_at: now,
-      updated_at: now,
-      eventName: academicActivityForm.activityTitle.trim(),
-      eventType: academicActivityForm.activityType,
-      date: academicActivityForm.date ? `${academicActivityForm.date}T00:00:00.000Z` : now,
-      dateLabel: formatActivityDateLabel(academicActivityForm.date),
-      venue: academicActivityForm.location.trim(),
-      description: academicActivityForm.description.trim(),
-      achievement: academicActivityForm.markAsAchievement ? 'Academic Achievement' : '',
-      scope: 'Local',
-      certificateFile,
-      photoCount: imageFiles.length,
-      activityStatus: academicActivityForm.status,
-      relatedMilestone: academicActivityForm.relatedMilestone.trim(),
-      participantsOrBeneficiary: academicActivityForm.participantsOrBeneficiary.trim(),
-      addToTimeline: academicActivityForm.addToTimeline,
-      markAsAchievement: academicActivityForm.markAsAchievement,
-      evidenceFiles
-    };
-
-    setPresentations((current) => [nextActivity, ...current]);
-    closeAcademicActivityModal();
-  };
 
   const latestEvent = presentations[0] || null;
   const latestRecognition = presentations.find((item) => item.achievement) || null;
@@ -366,6 +307,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
   const projectStatusTone = getStatusTone(project.status);
 
   return (
+    <>
     <div className="project-overview-page">
       <button className={`sidebar-backdrop ${sidebarOpen ? 'is-open' : ''}`} type="button" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />
 
@@ -578,14 +520,6 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               </div>
 
               <div className="flex flex-wrap gap-3 lg:justify-end">
-                <button
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-brand-dark"
-                  type="button"
-                  onClick={openAcademicActivityModal}
-                >
-                  <i className="fas fa-plus" aria-hidden="true" />
-                  Add Academic Activity
-                </button>
                 <Link prefetch={false}
                   className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text)] shadow-sm transition duration-200 hover:border-blue-200 hover:text-brand"
                   href="/students/faculty-feedback"
@@ -666,7 +600,11 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     {eventRecords.map((activity) => (
                       <article
                         key={`event-tab-${activity.id}`}
-                        className="rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-[var(--surface)]"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedActivity(activity.raw)}
+                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setSelectedActivity(activity.raw); }}
+                        className="cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-5 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-[var(--surface)]"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="space-y-2">
@@ -701,19 +639,9 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-6 py-6 text-left">
-                    <div>
-                      <strong className="block text-sm font-semibold text-[var(--text)]">No academic activities yet</strong>
-                      <p className="mt-1 text-sm text-[var(--muted)]">Log your first presentation, exhibit, or workshop.</p>
-                    </div>
-                    <button
-                      className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#003A8F] px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[#1E40AF]"
-                      type="button"
-                      onClick={openAcademicActivityModal}
-                    >
-                      <i className="fas fa-plus" aria-hidden="true" />
-                      Add Academic Activity
-                    </button>
+                  <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-6 py-6 text-left">
+                    <strong className="block text-sm font-semibold text-[var(--text)]">No academic activities yet</strong>
+                    <p className="mt-1 text-sm text-[var(--muted)]">Presentations, exhibits, and workshops logged from Document Submissions will appear here.</p>
                   </div>
                 )
               ) : null}
@@ -724,7 +652,11 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     {evidenceRecords.map((activity) => (
                       <article
                         key={`evidence-tab-${activity.id}`}
-                        className="flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-[var(--surface-alt)] sm:flex-row sm:items-center sm:justify-between"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedActivity(activity.raw)}
+                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setSelectedActivity(activity.raw); }}
+                        className="cursor-pointer flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-[var(--surface-alt)] sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="flex min-w-0 items-start gap-3">
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-brand">
@@ -764,19 +696,9 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-6 py-6 text-left">
-                    <div>
-                      <strong className="block text-sm font-semibold text-[var(--text)]">Upload your first evidence</strong>
-                      <p className="mt-1 text-sm text-[var(--muted)]">Certificates and photo evidence will appear here.</p>
-                    </div>
-                    <button
-                      className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#003A8F] px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-[#1E40AF]"
-                      type="button"
-                      onClick={openAcademicActivityModal}
-                    >
-                      <i className="fas fa-plus" aria-hidden="true" />
-                      Add Academic Activity
-                    </button>
+                  <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-6 py-6 text-left">
+                    <strong className="block text-sm font-semibold text-[var(--text)]">Upload your first evidence</strong>
+                    <p className="mt-1 text-sm text-[var(--muted)]">Certificates and photo evidence uploaded from Document Submissions will appear here.</p>
                   </div>
                 )
               ) : null}
@@ -787,7 +709,11 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     {recognitionRecords.map((activity) => (
                       <article
                         key={`recognition-tab-${activity.id}`}
-                        className="rounded-xl border border-yellow-100 bg-gradient-to-br from-yellow-50 via-white to-blue-50 p-5 shadow-sm transition duration-200 hover:border-amber-200"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedActivity(activity.raw)}
+                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') setSelectedActivity(activity.raw); }}
+                        className="cursor-pointer rounded-xl border border-yellow-100 bg-gradient-to-br from-yellow-50 via-white to-blue-50 p-5 shadow-sm transition duration-200 hover:border-amber-200"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="space-y-2">
@@ -824,14 +750,6 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                       Awards and distinctions will appear here after the group logs a recognized or awarded academic activity.
                     </p>
-                    <button
-                      className="mt-4 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-brand shadow-sm transition duration-200 hover:border-blue-300 hover:bg-blue-100"
-                      type="button"
-                      onClick={openAcademicActivityModal}
-                    >
-                      <i className="fas fa-plus" aria-hidden="true" />
-                      Add Academic Activity
-                    </button>
                   </div>
                 )
               ) : null}
@@ -841,190 +759,9 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
           </section>
         </div>
 
-        <div className={`modal-shell ${isAcademicActivityModalOpen ? 'is-open' : ''}`} aria-hidden={isAcademicActivityModalOpen ? 'false' : 'true'}>
-          <button className="modal-backdrop" type="button" aria-label="Close add academic activity modal" onClick={closeAcademicActivityModal} />
-          <div className="modal-card project-overview-modal-card" role="dialog" aria-modal="true" aria-labelledby="add-academic-activity-title">
-            <button className="modal-close" type="button" aria-label="Close add academic activity modal" onClick={closeAcademicActivityModal}>
-              <i className="fas fa-times" aria-hidden="true" />
-            </button>
-            <div className="modal-content project-overview-modal-content">
-              <div className="project-overview-modal-head">
-                <div className="project-overview-modal-copy">
-                  <span className="section-kicker">Presentations and Achievements</span>
-                  <h3 id="add-academic-activity-title">Add Academic Activity</h3>
-                  <p>Log an academic activity without leaving Project Overview.</p>
-                </div>
-                <Badge label={`${presentations.length} total record${presentations.length === 1 ? '' : 's'}`} tone="neutral" />
-              </div>
-
-              <div className="project-overview-modal-summary">
-                <i className="fas fa-circle-info" aria-hidden="true" />
-                <span>This modal saves directly into the Presentations & Achievements section on this page and does not redirect to Project Files.</span>
-              </div>
-
-              <form className="project-overview-modal-form" onSubmit={handleAcademicActivitySave}>
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label htmlFor="academic-activity-type">Activity Type</label>
-                    <select
-                      id="academic-activity-type"
-                      value={academicActivityForm.activityType}
-                      onChange={(event) => updateAcademicActivityForm('activityType', event.target.value)}
-                    >
-                      {ACTIVITY_TYPE_OPTIONS.map((option) => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="academic-activity-status">Status</label>
-                    <select
-                      id="academic-activity-status"
-                      value={academicActivityForm.status}
-                      onChange={(event) => updateAcademicActivityForm('status', event.target.value)}
-                    >
-                      {ACTIVITY_STATUS_OPTIONS.map((option) => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-field full">
-                    <label htmlFor="academic-activity-title">Activity Title</label>
-                    <input
-                      id="academic-activity-title"
-                      type="text"
-                      value={academicActivityForm.activityTitle}
-                      onChange={(event) => updateAcademicActivityForm('activityTitle', event.target.value)}
-                      placeholder="Enter the academic activity title"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="academic-activity-milestone">Related Milestone</label>
-                    <select
-                      id="academic-activity-milestone"
-                      value={academicActivityForm.relatedMilestone}
-                      onChange={(event) => updateAcademicActivityForm('relatedMilestone', event.target.value)}
-                    >
-                      <option value="">Not linked to a milestone</option>
-                      {milestoneOptions.map((milestone) => (
-                        <option key={milestone.id} value={milestone.title}>{milestone.title}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="academic-activity-date">Date</label>
-                    <input
-                      id="academic-activity-date"
-                      type="date"
-                      value={academicActivityForm.date}
-                      onChange={(event) => updateAcademicActivityForm('date', event.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="academic-activity-location">Location / Venue</label>
-                    <input
-                      id="academic-activity-location"
-                      type="text"
-                      value={academicActivityForm.location}
-                      onChange={(event) => updateAcademicActivityForm('location', event.target.value)}
-                      placeholder="University auditorium, partner site, online, etc."
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="academic-activity-participants">Participants / Beneficiary</label>
-                    <input
-                      id="academic-activity-participants"
-                      type="text"
-                      value={academicActivityForm.participantsOrBeneficiary}
-                      onChange={(event) => updateAcademicActivityForm('participantsOrBeneficiary', event.target.value)}
-                      placeholder="Students, faculty panel, community partner, or beneficiary"
-                    />
-                  </div>
-
-                  <div className="form-field full">
-                    <label htmlFor="academic-activity-description">Description</label>
-                    <textarea
-                      id="academic-activity-description"
-                      value={academicActivityForm.description}
-                      onChange={(event) => updateAcademicActivityForm('description', event.target.value)}
-                      placeholder="Summarize the activity, outcomes, and relevance to the project."
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field full project-overview-upload-field">
-                    <label htmlFor="academic-activity-evidence">Evidence Upload</label>
-                    <input
-                      ref={evidenceInputRef}
-                      id="academic-activity-evidence"
-                      type="file"
-                      multiple
-                      onChange={handleEvidenceUploadChange}
-                    />
-                    <p className="project-overview-upload-hint">
-                      Upload photos, certificates, or supporting proof. Image files are counted as photo evidence and the first non-image file is used as the main attachment.
-                    </p>
-                    {academicActivityForm.evidenceFiles.length ? (
-                      <div className="project-overview-upload-list">
-                        {academicActivityForm.evidenceFiles.map((file) => (
-                          <div key={`${file.name}-${file.size}`} className="project-overview-upload-item">
-                            <span>{file.name}</span>
-                            <small>{Math.max(1, Math.round(file.size / 1024))} KB</small>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-
-                  <div className="form-field full">
-                    <span className="project-overview-form-label">Additional Options</span>
-                    <div className="project-overview-checkbox-grid">
-                      <label className="project-overview-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={academicActivityForm.addToTimeline}
-                          onChange={(event) => updateAcademicActivityForm('addToTimeline', event.target.checked)}
-                        />
-                        <span>
-                          <strong>Add this activity to project timeline</strong>
-                          <span>Keep the activity aligned with the related milestone record.</span>
-                        </span>
-                      </label>
-
-                      <label className="project-overview-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={academicActivityForm.markAsAchievement}
-                          onChange={(event) => updateAcademicActivityForm('markAsAchievement', event.target.checked)}
-                        />
-                        <span>
-                          <strong>Mark as achievement / recognition</strong>
-                          <span>Use this when the activity should also count as a recognition entry.</span>
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-actions project-overview-modal-actions">
-                  <button className="btn btn-secondary" type="button" onClick={closeAcademicActivityModal}>Cancel</button>
-                  <button className="btn btn-primary" type="submit">
-                    <i className="fas fa-floppy-disk" aria-hidden="true" /> Save Academic Activity
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
       </div>
+
+      <AcademicActivityDetailModal activity={selectedActivity} onClose={() => setSelectedActivity(null)} />
+    </>
   );
 }

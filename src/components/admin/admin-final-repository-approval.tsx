@@ -1,173 +1,51 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AdminShell } from '@/components/admin/admin-shell';
 
-type SubmissionStatus = 'Pending' | 'Under Review' | 'Approved to Repository' | 'Returned' | 'Archived';
+type AdviserReviewStatus = 'APPROVED' | 'NEEDS_REVISION' | 'UNDER_REVIEW' | null;
 
-type RepositorySubmission = {
-  id: string;
-  mainProjectId?: string;
-  repositoryRecordId?: string;
+type RepositoryApprovalRecord = {
+  projectId: string;
   projectTitle: string;
-  department: string;
-  submittedBy: string;
-  adviserApproval: 'Approved' | 'Pending' | 'Returned';
-  departmentVerification: 'Verified' | 'Pending' | 'Returned';
-  dateSubmitted: string;
-  status: SubmissionStatus;
-  documentType: string;
+  department: string | null;
+  submittedBy: string | null;
+  adviserName: string | null;
+  adviserReviewStatus: AdviserReviewStatus;
+  lastActivityAt: string;
   fileCount: number;
-  totalSize: string;
-  adviserName: string;
-  notes: string;
+  totalFileSize: string;
+  isPublished: boolean;
+  publishedAt: string | null;
 };
 
-const STATUS_TABS: SubmissionStatus[] = [
-  'Pending',
-  'Under Review',
-  'Approved to Repository',
-  'Returned',
-  'Archived'
+type QueueTab = 'ready' | 'published';
+
+const QUEUE_TABS: Array<{ key: QueueTab; label: string; icon: string }> = [
+  { key: 'ready', label: 'Ready for Approval', icon: 'fa-clock' },
+  { key: 'published', label: 'Published to Repository', icon: 'fa-circle-check' }
 ];
 
-const STATUS_ICON_MAP: Record<SubmissionStatus, string> = {
-  'Pending': 'fa-clock',
-  'Under Review': 'fa-magnifying-glass',
-  'Approved to Repository': 'fa-circle-check',
-  'Returned': 'fa-rotate-left',
-  'Archived': 'fa-box-archive'
+const ADVISER_REVIEW_LABEL: Record<string, string> = {
+  APPROVED: 'Approved',
+  NEEDS_REVISION: 'Needs Revision',
+  UNDER_REVIEW: 'Under Review'
 };
 
-const STATUS_CLASS_MAP: Record<SubmissionStatus, string> = {
-  'Pending': 'status-pending',
-  'Under Review': 'status-info',
-  'Approved to Repository': 'status-approved',
-  'Returned': 'status-review',
-  'Archived': 'status-neutral'
+const ADVISER_REVIEW_CLASS: Record<string, string> = {
+  APPROVED: 'status-approved',
+  NEEDS_REVISION: 'status-critical',
+  UNDER_REVIEW: 'status-pending'
 };
-
-const APPROVAL_CLASS_MAP: Record<string, string> = {
-  'Approved': 'status-approved',
-  'Verified': 'status-approved',
-  'Pending': 'status-pending',
-  'Returned': 'status-critical'
-};
-
-const INITIAL_SUBMISSIONS: RepositorySubmission[] = [
-  {
-    id: 'FRA-2026-001',
-    projectTitle: 'AI-Powered Learning Management System',
-    department: 'IT',
-    submittedBy: 'Submitter pending',
-    adviserApproval: 'Approved',
-    departmentVerification: 'Verified',
-    dateSubmitted: 'May 8, 2026',
-    status: 'Pending',
-    documentType: 'Final Manuscript',
-    fileCount: 4,
-    totalSize: '12.8 MB',
-    adviserName: 'Dr. Ricardo Cruz',
-    notes: 'All chapters completed. Similarity index 8%. Ready for final repository release.'
-  },
-  {
-    id: 'FRA-2026-002',
-    projectTitle: 'Smart Solar Energy Monitoring System',
-    department: 'MET',
-    submittedBy: 'Submitter pending',
-    adviserApproval: 'Approved',
-    departmentVerification: 'Verified',
-    dateSubmitted: 'May 7, 2026',
-    status: 'Under Review',
-    documentType: 'Final Manuscript',
-    fileCount: 3,
-    totalSize: '9.4 MB',
-    adviserName: 'Prof. Maria Ramos',
-    notes: 'Pending final verification of deployment evidence and utilization report.'
-  },
-  {
-    id: 'FRA-2026-003',
-    projectTitle: 'Herbal Medicine Knowledge Portal',
-    department: 'TCM',
-    submittedBy: 'Submitter pending',
-    adviserApproval: 'Approved',
-    departmentVerification: 'Pending',
-    dateSubmitted: 'May 6, 2026',
-    status: 'Pending',
-    documentType: 'Proposal + Manuscript',
-    fileCount: 5,
-    totalSize: '15.2 MB',
-    adviserName: 'Dr. Anna Reyes',
-    notes: 'Adviser approved, awaiting Department Chair verification before Research Head review.'
-  },
-  {
-    id: 'FRA-2026-004',
-    projectTitle: 'Sustainable Agriculture IoT System',
-    department: 'ESM',
-    submittedBy: 'Submitter pending',
-    adviserApproval: 'Approved',
-    departmentVerification: 'Verified',
-    dateSubmitted: 'May 5, 2026',
-    status: 'Approved to Repository',
-    documentType: 'Final Manuscript',
-    fileCount: 6,
-    totalSize: '22.1 MB',
-    adviserName: 'Prof. Jose Lopez',
-    notes: 'Approved and archived in the Official Institutional Repository on May 9, 2026.'
-  },
-  {
-    id: 'FRA-2026-005',
-    projectTitle: 'Marine Pollution Detection Buoy System',
-    department: 'NAME',
-    submittedBy: 'Submitter pending',
-    adviserApproval: 'Approved',
-    departmentVerification: 'Verified',
-    dateSubmitted: 'May 3, 2026',
-    status: 'Archived',
-    documentType: 'Full Package',
-    fileCount: 8,
-    totalSize: '34.5 MB',
-    adviserName: 'Dr. Elena Aquino',
-    notes: 'Complete package including MOA, presentation, manuscript, and certificates archived.'
-  },
-  {
-    id: 'FRA-2026-006',
-    projectTitle: 'Blockchain-Based Voting Platform',
-    department: 'IT',
-    submittedBy: 'Submitter pending',
-    adviserApproval: 'Approved',
-    departmentVerification: 'Returned',
-    dateSubmitted: 'May 2, 2026',
-    status: 'Returned',
-    documentType: 'Final Manuscript',
-    fileCount: 2,
-    totalSize: '6.7 MB',
-    adviserName: 'Dr. Ricardo Cruz',
-    notes: 'Department Chair returned: missing signed approval sheet and ethics clearance certificate.'
-  },
-  {
-    id: 'FRA-2026-007',
-    projectTitle: 'Smart Classroom Attendance Tracker',
-    department: 'IT',
-    submittedBy: 'Submitter pending',
-    adviserApproval: 'Approved',
-    departmentVerification: 'Verified',
-    dateSubmitted: 'May 10, 2026',
-    status: 'Under Review',
-    documentType: 'Final Manuscript',
-    fileCount: 3,
-    totalSize: '8.9 MB',
-    adviserName: 'Dr. Ricardo Cruz',
-    notes: 'Research Head currently reviewing final chapters and similarity report.'
-  }
-];
 
 export function AdminFinalRepositoryApproval() {
-  const [submissions, setSubmissions] = useState<RepositorySubmission[]>(INITIAL_SUBMISSIONS);
-  const [activeTab, setActiveTab] = useState<SubmissionStatus>('Pending');
+  const [records, setRecords] = useState<RepositoryApprovalRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<QueueTab>('ready');
   const [departmentFilter, setDepartmentFilter] = useState('All Departments');
   const [query, setQuery] = useState('');
-  const [selectedSubmission, setSelectedSubmission] = useState<RepositorySubmission | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<RepositoryApprovalRecord | null>(null);
   const [publishingId, setPublishingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
 
@@ -185,80 +63,65 @@ export function AdminFinalRepositoryApproval() {
     }
   };
 
-  const filteredSubmissions = useMemo(
+  async function loadRecords() {
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
+      const response = await fetch('/api/admin/repository-approvals');
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || 'Unable to load repository approval records.');
+      }
+
+      setRecords(payload.records);
+    } catch (error) {
+      setLoadError((error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadRecords();
+  }, []);
+
+  const filteredRecords = useMemo(
     () =>
-      submissions.filter((submission) => {
-        const matchesTab = submission.status === activeTab;
-        const matchesDept = departmentFilter === 'All Departments' || submission.department === departmentFilter;
+      records.filter((record) => {
+        const matchesTab = activeTab === 'ready' ? !record.isPublished : record.isPublished;
+        const matchesDept = departmentFilter === 'All Departments' || record.department === departmentFilter;
         const matchesQuery =
           !query ||
-          submission.projectTitle.toLowerCase().includes(query.toLowerCase()) ||
-          submission.submittedBy.toLowerCase().includes(query.toLowerCase()) ||
-          submission.id.toLowerCase().includes(query.toLowerCase());
+          record.projectTitle.toLowerCase().includes(query.toLowerCase()) ||
+          (record.submittedBy || '').toLowerCase().includes(query.toLowerCase());
 
         return matchesTab && matchesDept && matchesQuery;
       }),
-    [activeTab, departmentFilter, query, submissions]
+    [activeTab, departmentFilter, query, records]
   );
 
-  const tabCounts = useMemo(() => {
-    const counts: Record<SubmissionStatus, number> = {
-      'Pending': 0,
-      'Under Review': 0,
-      'Approved to Repository': 0,
-      'Returned': 0,
-      'Archived': 0
-    };
+  const readyCount = records.filter((record) => !record.isPublished).length;
+  const publishedCount = records.filter((record) => record.isPublished).length;
 
-    for (const submission of submissions) {
-      counts[submission.status]++;
-    }
-
-    return counts;
-  }, [submissions]);
-
-  const pendingCount = tabCounts['Pending'];
-  const underReviewCount = tabCounts['Under Review'];
-  const approvedCount = tabCounts['Approved to Repository'];
-  const archivedCount = tabCounts['Archived'];
-
-  const handleApprove = async (submission: RepositorySubmission) => {
-    setPublishingId(submission.id);
+  const handleApprove = async (record: RepositoryApprovalRecord) => {
+    setPublishingId(record.projectId);
 
     try {
-      let repositoryRecordId = submission.repositoryRecordId;
+      const response = await fetch('/api/repository/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId: record.projectId })
+      });
 
-      if (submission.mainProjectId) {
-        const response = await fetch('/api/repository/publish', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ projectId: submission.mainProjectId })
-        });
-
-        if (!response.ok && response.status !== 409) {
-          throw new Error(await getApiErrorMessage(response));
-        }
-
-        if (response.ok) {
-          const payload = await response.json();
-          repositoryRecordId = payload.repositoryRecord?.id || repositoryRecordId;
-        } else {
-          showToast(await getApiErrorMessage(response), 'warning');
-        }
+      if (!response.ok) {
+        throw new Error(await getApiErrorMessage(response));
       }
 
-      setSubmissions((current) =>
-        current.map((item) =>
-          item.id === submission.id
-            ? { ...item, repositoryRecordId, status: 'Approved to Repository' as SubmissionStatus }
-            : item
-        )
-      );
-      setSelectedSubmission(null);
-      showToast(
-        `"${submission.projectTitle}" approved and moved to Official Institutional Repository.`,
-        'success'
-      );
+      setSelectedRecord(null);
+      showToast(`"${record.projectTitle}" approved and moved to the Official Institutional Repository.`, 'success');
+      await loadRecords();
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Repository publication failed.', 'warning');
     } finally {
@@ -266,40 +129,12 @@ export function AdminFinalRepositoryApproval() {
     }
   };
 
-  const handleReturn = (submission: RepositorySubmission) => {
-    setSubmissions((current) =>
-      current.map((item) =>
-        item.id === submission.id ? { ...item, status: 'Returned' as SubmissionStatus } : item
-      )
-    );
-    setSelectedSubmission(null);
-    showToast(`"${submission.projectTitle}" returned for revision.`, 'warning');
-  };
-
-  const handleStartReview = (submission: RepositorySubmission) => {
-    setSubmissions((current) =>
-      current.map((item) =>
-        item.id === submission.id ? { ...item, status: 'Under Review' as SubmissionStatus } : item
-      )
-    );
-    showToast(`Now reviewing "${submission.projectTitle}".`, 'info');
-  };
-
-  const handleArchive = (submission: RepositorySubmission) => {
-    setSubmissions((current) =>
-      current.map((item) =>
-        item.id === submission.id ? { ...item, status: 'Archived' as SubmissionStatus } : item
-      )
-    );
-    showToast(`"${submission.projectTitle}" archived successfully.`, 'success');
-  };
-
   return (
     <>
       <AdminShell
         activeNav="final-repository-approval"
         title="Final Repository Approval"
-        description="Review and approve completed thesis and capstone submissions before they become official repository records."
+        description="Review and approve completed thesis and capstone projects before they become official repository records."
       >
         <div className="admin-page-stack">
 
@@ -310,19 +145,9 @@ export function AdminFinalRepositoryApproval() {
                 <i className="fas fa-clock"></i>
               </div>
               <div className="fra-summary-body">
-                <span className="fra-summary-label">Pending Final Submissions</span>
-                <strong className="fra-summary-value">{pendingCount}</strong>
-                <span className="fra-summary-meta">Awaiting Research Head review</span>
-              </div>
-            </article>
-            <article className="fra-summary-card fra-summary-review">
-              <div className="fra-summary-icon">
-                <i className="fas fa-magnifying-glass"></i>
-              </div>
-              <div className="fra-summary-body">
-                <span className="fra-summary-label">For Verification</span>
-                <strong className="fra-summary-value">{underReviewCount}</strong>
-                <span className="fra-summary-meta">Currently under Research Head review</span>
+                <span className="fra-summary-label">Ready for Approval</span>
+                <strong className="fra-summary-value">{readyCount}</strong>
+                <span className="fra-summary-meta">Eligible projects not yet in the repository</span>
               </div>
             </article>
             <article className="fra-summary-card fra-summary-approved">
@@ -330,19 +155,9 @@ export function AdminFinalRepositoryApproval() {
                 <i className="fas fa-circle-check"></i>
               </div>
               <div className="fra-summary-body">
-                <span className="fra-summary-label">Approved Today</span>
-                <strong className="fra-summary-value">{approvedCount}</strong>
-                <span className="fra-summary-meta">Moved to Official Repository</span>
-              </div>
-            </article>
-            <article className="fra-summary-card fra-summary-archived">
-              <div className="fra-summary-icon">
-                <i className="fas fa-box-archive"></i>
-              </div>
-              <div className="fra-summary-body">
-                <span className="fra-summary-label">Archived All Time</span>
-                <strong className="fra-summary-value">{archivedCount}</strong>
-                <span className="fra-summary-meta">Permanently stored records</span>
+                <span className="fra-summary-label">Published to Repository</span>
+                <strong className="fra-summary-value">{publishedCount}</strong>
+                <span className="fra-summary-meta">Official institutional repository records</span>
               </div>
             </article>
           </section>
@@ -355,23 +170,23 @@ export function AdminFinalRepositoryApproval() {
             <div className="fra-workflow-body">
               <strong>Approval Workflow</strong>
               <p>
-                Student uploads final documents → Adviser approves → Program Head / Department Chair verifies → <strong>Research Head approves</strong> → System automatically archives to Official Repository.
+                A project becomes eligible once it reaches Approved, Defense Scheduled, Completed, or Archived status. <strong>Research Head approves</strong> it here, which publishes the record to the Official Repository.
               </p>
             </div>
           </section>
 
           {/* Status Tabs */}
           <section className="fra-tabs-bar">
-            {STATUS_TABS.map((tab) => (
+            {QUEUE_TABS.map((tab) => (
               <button
-                key={tab}
-                className={`fra-tab${activeTab === tab ? ' is-active' : ''}`}
+                key={tab.key}
+                className={`fra-tab${activeTab === tab.key ? ' is-active' : ''}`}
                 type="button"
-                onClick={() => setActiveTab(tab)}
+                onClick={() => setActiveTab(tab.key)}
               >
-                <i className={`fas ${STATUS_ICON_MAP[tab]}`}></i>
-                <span>{tab}</span>
-                <span className="fra-tab-count">{tabCounts[tab]}</span>
+                <i className={`fas ${tab.icon}`}></i>
+                <span>{tab.label}</span>
+                <span className="fra-tab-count">{tab.key === 'ready' ? readyCount : publishedCount}</span>
               </button>
             ))}
           </section>
@@ -382,7 +197,7 @@ export function AdminFinalRepositoryApproval() {
               <i className="fas fa-magnifying-glass"></i>
               <input
                 className="fra-filter-input"
-                placeholder="Search by project title, student, or ID..."
+                placeholder="Search by project title or student..."
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -405,7 +220,7 @@ export function AdminFinalRepositoryApproval() {
             <div className="fra-filter-meta">
               <span className="admin-inline-badge">
                 <i className="fas fa-filter"></i>
-                {filteredSubmissions.length} {filteredSubmissions.length === 1 ? 'record' : 'records'} shown
+                {filteredRecords.length} {filteredRecords.length === 1 ? 'record' : 'records'} shown
               </span>
             </div>
           </section>
@@ -415,120 +230,105 @@ export function AdminFinalRepositoryApproval() {
             <div className="admin-section-head">
               <div>
                 <h3>
-                  <i className={`fas ${STATUS_ICON_MAP[activeTab]}`} style={{ marginRight: '0.5rem', opacity: 0.7 }}></i>
-                  Review Queue — {activeTab}
+                  <i className={`fas ${activeTab === 'ready' ? 'fa-clock' : 'fa-circle-check'}`} style={{ marginRight: '0.5rem', opacity: 0.7 }}></i>
+                  Review Queue — {activeTab === 'ready' ? 'Ready for Approval' : 'Published to Repository'}
                 </h3>
-                <p>
-                  {activeTab === 'Pending' && 'Submissions awaiting Research Head review. Adviser and department clearance must be complete.'}
-                  {activeTab === 'Under Review' && 'Submissions currently being reviewed by the Research Head for final approval.'}
-                  {activeTab === 'Approved to Repository' && 'Approved submissions that have been moved to the Official Institutional Repository.'}
-                  {activeTab === 'Returned' && 'Submissions returned for revision with comments from the Research Head.'}
-                  {activeTab === 'Archived' && 'Permanently archived repository records with full audit trail.'}
-                </p>
               </div>
-              <span className={`status-badge ${STATUS_CLASS_MAP[activeTab]}`}>
-                {filteredSubmissions.length} {filteredSubmissions.length === 1 ? 'item' : 'items'}
+              <span className="status-badge status-info">
+                {filteredRecords.length} {filteredRecords.length === 1 ? 'item' : 'items'}
               </span>
             </div>
-            {filteredSubmissions.length > 0 ? (
-              <div className="table-scroll">
-                <table className="fra-table">
-                  <thead>
-                    <tr>
-                      <th>Project Title</th>
-                      <th>Department</th>
-                      <th>Submitted By</th>
-                      <th>Adviser Approval</th>
-                      <th>Dept. Verification</th>
-                      <th>Date Submitted</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredSubmissions.map((submission) => (
-                      <tr key={submission.id}>
-                        <td>
-                          <div className="fra-project-cell">
-                            <span className="fra-project-id">{submission.id}</span>
-                            <strong className="fra-project-title">{submission.projectTitle}</strong>
-                            <span className="fra-project-meta">
-                              {submission.documentType} · {submission.fileCount} files · {submission.totalSize}
-                            </span>
+
+            {loadError ? (
+              <div className="fra-empty-state">
+                <i className="fas fa-triangle-exclamation"></i>
+                <p>{loadError}</p>
+              </div>
+            ) : isLoading ? (
+              <div className="fra-empty-state">
+                <i className="fas fa-circle-notch fa-spin"></i>
+                <p>Loading records...</p>
+              </div>
+            ) : filteredRecords.length > 0 ? (
+              <div className="fra-record-list">
+                {filteredRecords.map((record) => (
+                  <article key={record.projectId} className={`fra-record-card${record.isPublished ? ' is-published' : ''}`}>
+                    <div className="fra-record-head">
+                      <div className="fra-record-heading">
+                        <div className="fra-record-icon">
+                          <i className={`fas ${record.isPublished ? 'fa-box-archive' : 'fa-hourglass-half'}`}></i>
+                        </div>
+                        <div className="fra-record-titles">
+                          <strong className="fra-record-title">{record.projectTitle}</strong>
+                          <div className="fra-record-subtitle">
+                            <span className="dept-badge">{record.department || 'No department'}</span>
+                            <span>{record.fileCount} files &middot; {record.totalFileSize}</span>
                           </div>
-                        </td>
-                        <td><span className="dept-badge">{submission.department}</span></td>
-                        <td>
-                          <div className="fra-person-cell">
-                            <strong>{submission.submittedBy}</strong>
-                            <span>Student</span>
-                          </div>
-                        </td>
-                        <td>
-                          <span className={`status-badge ${APPROVAL_CLASS_MAP[submission.adviserApproval]}`}>
-                            {submission.adviserApproval}
+                        </div>
+                      </div>
+                      <div className="fra-record-badges">
+                        {record.adviserReviewStatus ? (
+                          <span className={`status-badge ${ADVISER_REVIEW_CLASS[record.adviserReviewStatus]}`}>
+                            {ADVISER_REVIEW_LABEL[record.adviserReviewStatus]}
                           </span>
-                        </td>
-                        <td>
-                          <span className={`status-badge ${APPROVAL_CLASS_MAP[submission.departmentVerification]}`}>
-                            {submission.departmentVerification}
-                          </span>
-                        </td>
-                        <td>{submission.dateSubmitted}</td>
-                        <td>
-                          <div className="fra-action-group">
-                            <button
-                              className="btn btn-outline small"
-                              type="button"
-                              onClick={() => setSelectedSubmission(submission)}
-                            >
-                              <i className="fas fa-eye"></i>
-                              Review
-                            </button>
-                            {(submission.status === 'Pending' || submission.status === 'Under Review') &&
-                              submission.adviserApproval === 'Approved' &&
-                              submission.departmentVerification === 'Verified' && (
-                              <button
-                                className="btn btn-primary small"
-                                type="button"
-                                disabled={publishingId === submission.id}
-                                onClick={() => handleApprove(submission)}
-                              >
-                                <i className="fas fa-circle-check"></i>
-                                {publishingId === submission.id ? 'Publishing...' : 'Approve'}
-                              </button>
-                            )}
-                            {submission.status === 'Pending' && (
-                              <button
-                                className="btn btn-outline small"
-                                type="button"
-                                onClick={() => handleStartReview(submission)}
-                              >
-                                <i className="fas fa-magnifying-glass"></i>
-                                Start Review
-                              </button>
-                            )}
-                            {submission.status === 'Approved to Repository' && (
-                              <button
-                                className="btn btn-outline small"
-                                type="button"
-                                onClick={() => handleArchive(submission)}
-                              >
-                                <i className="fas fa-box-archive"></i>
-                                Archive
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        ) : (
+                          <span className="status-badge status-pending">No submission on record</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="fra-record-body">
+                      <div className="fra-record-field">
+                        <span>Submitted By</span>
+                        <strong>{record.submittedBy || 'Not on record'}</strong>
+                      </div>
+                      <div className="fra-record-field">
+                        <span>Adviser</span>
+                        <strong>{record.adviserName || 'Not assigned'}</strong>
+                      </div>
+                      <div className="fra-record-field">
+                        <span>Last Activity</span>
+                        <strong>{new Date(record.lastActivityAt).toLocaleDateString()}</strong>
+                      </div>
+                    </div>
+
+                    <div className="fra-record-footer">
+                      <span className="fra-record-footer-meta">
+                        <i className={`fas ${record.isPublished ? 'fa-circle-check' : 'fa-route'}`}></i>
+                        {record.isPublished
+                          ? `Published${record.publishedAt ? ` ${new Date(record.publishedAt).toLocaleDateString()}` : ''}`
+                          : 'Awaiting Research Head approval'}
+                      </span>
+                      <div className="fra-action-group">
+                        <button
+                          className="btn btn-outline small"
+                          type="button"
+                          onClick={() => setSelectedRecord(record)}
+                        >
+                          <i className="fas fa-eye"></i>
+                          Review
+                        </button>
+                        {!record.isPublished && (
+                          <button
+                            className="btn btn-primary small"
+                            type="button"
+                            disabled={publishingId === record.projectId}
+                            onClick={() => handleApprove(record)}
+                          >
+                            <i className="fas fa-circle-check"></i>
+                            {publishingId === record.projectId ? 'Publishing...' : 'Approve'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ))}
               </div>
             ) : (
               <div className="fra-empty-state">
-                <i className={`fas ${STATUS_ICON_MAP[activeTab]}`}></i>
-                <strong>No {activeTab.toLowerCase()} submissions</strong>
-                <p>There are no submissions with "{activeTab}" status matching your current filters.</p>
+                <i className="fas fa-box-archive"></i>
+                <strong>No records</strong>
+                <p>There are no records in this queue matching your current filters.</p>
               </div>
             )}
           </section>
@@ -536,10 +336,10 @@ export function AdminFinalRepositoryApproval() {
       </AdminShell>
 
       {/* Review Detail Modal */}
-      {selectedSubmission ? (
+      {selectedRecord ? (
         <div
           className="modal show"
-          onClick={(event) => event.target === event.currentTarget && setSelectedSubmission(null)}
+          onClick={(event) => event.target === event.currentTarget && setSelectedRecord(null)}
         >
           <div className="modal-content fra-review-modal">
             <div className="modal-header">
@@ -548,36 +348,38 @@ export function AdminFinalRepositoryApproval() {
                   <i className="fas fa-clipboard-check" style={{ marginRight: '0.5rem' }}></i>
                   Submission Review
                 </h3>
-                <p>{selectedSubmission.id} · {selectedSubmission.documentType}</p>
               </div>
               <button
                 className="close-modal"
                 type="button"
-                onClick={() => setSelectedSubmission(null)}
+                onClick={() => setSelectedRecord(null)}
               >
                 &times;
               </button>
             </div>
             <div className="modal-body">
               <div className="fra-review-layout">
-                {/* Status & Project Info */}
                 <section className="fra-review-section">
-                  <span className={`status-badge ${STATUS_CLASS_MAP[selectedSubmission.status]}`}>
-                    {selectedSubmission.status}
-                  </span>
-                  <h2 className="fra-review-title">{selectedSubmission.projectTitle}</h2>
-                  <p className="fra-review-notes">{selectedSubmission.notes}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+                    <div className={`fra-record-icon${selectedRecord.isPublished ? ' is-published' : ''}`}>
+                      <i className={`fas ${selectedRecord.isPublished ? 'fa-box-archive' : 'fa-hourglass-half'}`}></i>
+                    </div>
+                    <div>
+                      <span className={`status-badge ${selectedRecord.isPublished ? 'status-approved' : 'status-pending'}`}>
+                        {selectedRecord.isPublished ? 'Published to Repository' : 'Ready for Approval'}
+                      </span>
+                      <h2 className="fra-review-title" style={{ marginTop: '0.4rem' }}>{selectedRecord.projectTitle}</h2>
+                    </div>
+                  </div>
                 </section>
 
-                {/* Detail Grid */}
                 <section className="fra-review-details">
                   {[
-                    ['Department', selectedSubmission.department],
-                    ['Submitted By', selectedSubmission.submittedBy],
-                    ['Adviser', selectedSubmission.adviserName],
-                    ['Date Submitted', selectedSubmission.dateSubmitted],
-                    ['Document Type', selectedSubmission.documentType],
-                    ['Files', `${selectedSubmission.fileCount} files (${selectedSubmission.totalSize})`]
+                    ['Department', selectedRecord.department || 'Not on record'],
+                    ['Submitted By', selectedRecord.submittedBy || 'Not on record'],
+                    ['Adviser', selectedRecord.adviserName || 'Not assigned'],
+                    ['Last Activity', new Date(selectedRecord.lastActivityAt).toLocaleDateString()],
+                    ['Files', `${selectedRecord.fileCount} files (${selectedRecord.totalFileSize})`]
                   ].map(([label, value]) => (
                     <div key={label} className="fra-review-detail-item">
                       <span>{label}</span>
@@ -586,7 +388,6 @@ export function AdminFinalRepositoryApproval() {
                   ))}
                 </section>
 
-                {/* Approval Chain */}
                 <section className="fra-approval-chain">
                   <strong className="fra-chain-title">Approval Chain</strong>
                   <div className="fra-chain-steps">
@@ -594,53 +395,30 @@ export function AdminFinalRepositoryApproval() {
                       <div className="fra-chain-icon"><i className="fas fa-user-graduate"></i></div>
                       <div>
                         <strong>Student Submission</strong>
-                        <span>Uploaded by {selectedSubmission.submittedBy}</span>
+                        <span>{selectedRecord.submittedBy || 'Not on record'}</span>
                       </div>
                     </div>
-                    <div className={`fra-chain-step ${selectedSubmission.adviserApproval === 'Approved' ? 'is-complete' : selectedSubmission.adviserApproval === 'Returned' ? 'is-returned' : 'is-pending'}`}>
+                    <div className={`fra-chain-step ${selectedRecord.adviserReviewStatus === 'APPROVED' ? 'is-complete' : selectedRecord.adviserReviewStatus === 'NEEDS_REVISION' ? 'is-returned' : 'is-pending'}`}>
                       <div className="fra-chain-icon"><i className="fas fa-chalkboard-user"></i></div>
                       <div>
-                        <strong>Adviser Approval</strong>
-                        <span>{selectedSubmission.adviserName} — {selectedSubmission.adviserApproval}</span>
+                        <strong>Adviser Review</strong>
+                        <span>
+                          {selectedRecord.adviserName || 'Not assigned'} —{' '}
+                          {selectedRecord.adviserReviewStatus ? ADVISER_REVIEW_LABEL[selectedRecord.adviserReviewStatus] : 'No submission on record'}
+                        </span>
                       </div>
                     </div>
-                    <div className={`fra-chain-step ${selectedSubmission.departmentVerification === 'Verified' ? 'is-complete' : selectedSubmission.departmentVerification === 'Returned' ? 'is-returned' : 'is-pending'}`}>
-                      <div className="fra-chain-icon"><i className="fas fa-user-tie"></i></div>
-                      <div>
-                        <strong>Department Verification</strong>
-                        <span>Program Head / Chair — {selectedSubmission.departmentVerification}</span>
-                      </div>
-                    </div>
-                    <div className={`fra-chain-step ${selectedSubmission.status === 'Approved to Repository' || selectedSubmission.status === 'Archived' ? 'is-complete' : selectedSubmission.status === 'Returned' ? 'is-returned' : 'is-current'}`}>
+                    <div className={`fra-chain-step ${selectedRecord.isPublished ? 'is-complete' : 'is-current'}`}>
                       <div className="fra-chain-icon"><i className="fas fa-building-columns"></i></div>
                       <div>
                         <strong>Research Head Approval</strong>
                         <span>
-                          {selectedSubmission.status === 'Approved to Repository' || selectedSubmission.status === 'Archived'
-                            ? 'Approved — moved to repository'
-                            : selectedSubmission.status === 'Returned'
-                            ? 'Returned for revision'
-                            : 'Awaiting approval'
-                          }
+                          {selectedRecord.isPublished
+                            ? `Approved — published${selectedRecord.publishedAt ? ` on ${new Date(selectedRecord.publishedAt).toLocaleDateString()}` : ''}`
+                            : 'Awaiting approval'}
                         </span>
                       </div>
                     </div>
-                  </div>
-                </section>
-
-                {/* File Preview */}
-                <section className="fra-files-preview">
-                  <strong>Attached Documents ({selectedSubmission.fileCount})</strong>
-                  <div className="fra-files-list">
-                    {Array.from({ length: selectedSubmission.fileCount }, (_, index) => (
-                      <div key={index} className="fra-file-item">
-                        <i className="fas fa-file-pdf"></i>
-                        <span>{selectedSubmission.projectTitle.replace(/\s+/g, '_')}_Part{index + 1}.pdf</span>
-                        <button className="btn btn-outline small" type="button">
-                          <i className="fas fa-download"></i>
-                        </button>
-                      </div>
-                    ))}
                   </div>
                 </section>
               </div>
@@ -649,31 +427,19 @@ export function AdminFinalRepositoryApproval() {
               <button
                 className="btn btn-outline"
                 type="button"
-                onClick={() => setSelectedSubmission(null)}
+                onClick={() => setSelectedRecord(null)}
               >
                 Close
               </button>
-              {(selectedSubmission.status === 'Pending' || selectedSubmission.status === 'Under Review') && (
-                <button
-                  className="btn btn-outline"
-                  type="button"
-                  onClick={() => handleReturn(selectedSubmission)}
-                >
-                  <i className="fas fa-rotate-left"></i>
-                  Return for Revision
-                </button>
-              )}
-              {(selectedSubmission.status === 'Pending' || selectedSubmission.status === 'Under Review') &&
-                selectedSubmission.adviserApproval === 'Approved' &&
-                selectedSubmission.departmentVerification === 'Verified' && (
+              {!selectedRecord.isPublished && (
                 <button
                   className="btn btn-primary"
                   type="button"
-                  disabled={publishingId === selectedSubmission.id}
-                  onClick={() => handleApprove(selectedSubmission)}
+                  disabled={publishingId === selectedRecord.projectId}
+                  onClick={() => handleApprove(selectedRecord)}
                 >
                   <i className="fas fa-circle-check"></i>
-                  {publishingId === selectedSubmission.id ? 'Publishing...' : 'Approve to Repository'}
+                  {publishingId === selectedRecord.projectId ? 'Publishing...' : 'Approve to Repository'}
                 </button>
               )}
             </div>

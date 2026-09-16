@@ -184,6 +184,7 @@ model User {
   notifications        Notification[]
   auditLogs            AuditLog[]            @relation("AuditActor")
   brandingAssets       BrandingAsset[]       @relation("UserBrandingAssets")
+  academicActivities   AcademicActivity[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
@@ -245,6 +246,8 @@ model UploadedFile {
   submission       Submission?          @relation(fields: [submissionId], references: [id], onDelete: SetNull)
   checkpointId     String?              @map("checkpoint_id")
   checkpoint       MilestoneCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
+  activityId       String?              @map("activity_id")
+  activity         AcademicActivity?    @relation(fields: [activityId], references: [id], onDelete: SetNull)
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")
 
@@ -252,11 +255,48 @@ model UploadedFile {
   @@index([projectId])
   @@index([submissionId])
   @@index([checkpointId])
+  @@index([activityId])
   @@index([category])
   @@index([documentCategory])
   @@index([bucketName])
   @@index([createdAt])
   @@map("uploaded_files")
+}
+
+// A student's academic activity log — presentations, seminars, workshops,
+// awards/recognitions. Unlike Submission/MilestoneCheckpoint, this is never
+// gated by thesis progression; a student can log one at any point. The actual
+// evidence (a certificate PDF, a photo of an event) is an UploadedFile with
+// documentCategory 'award-recognition' or 'activity-evidence', uploaded
+// through Document Submissions and then linked here — this model only holds
+// the descriptive metadata (what/when/where) that a bare file doesn't carry.
+model AcademicActivity {
+  id                        String    @id @default(cuid())
+  projectId                 String
+  project                   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdById               String?
+  createdBy                 User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  activityType              String
+  eventName                 String
+  eventDate                 DateTime?
+  venue                     String?
+  description               String?
+  scope                     String    @default("Local")
+  achievement               String?
+  status                    String    @default("Completed")
+  relatedMilestone          String?
+  participantsOrBeneficiary String?
+  addToTimeline             Boolean   @default(true)
+  markAsAchievement         Boolean   @default(false)
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  files UploadedFile[]
+
+  @@index([projectId])
+  @@index([createdById])
+  @@index([createdAt])
+  @@map("academic_activities")
 }
 
 model Group {
@@ -358,32 +398,32 @@ model GroupMember {
 }
 
 model Project {
-  id                    String        @id @default(cuid())
-  title                 String
-  abstract              String?
-  keywords              String[]      @default([])
-  status                ProjectStatus @default(DRAFT)
-  departmentId          String?
-  department            Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  academicYearId        String?
-  academicYear          AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
-  groupId               String?
-  group                 Group?        @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  ownerId               String?
-  owner                 User?         @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  adviserId             String?
-  adviser               User?         @relation("ProjectAdviser", fields: [adviserId], references: [id], onDelete: SetNull)
-  
+  id             String        @id @default(cuid())
+  title          String
+  abstract       String?
+  keywords       String[]      @default([])
+  status         ProjectStatus @default(DRAFT)
+  departmentId   String?
+  department     Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  academicYearId String?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id], onDelete: SetNull)
+  groupId        String?
+  group          Group?        @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  ownerId        String?
+  owner          User?         @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  adviserId      String?
+  adviser        User?         @relation("ProjectAdviser", fields: [adviserId], references: [id], onDelete: SetNull)
+
   // Proposal feedback integrations
-  sdgs                  String[]      @default([])
-  awards                String[]      @default([])
-  isPublished           Boolean       @default(false)
-  archivedAt            DateTime?
+  sdgs        String[]  @default([])
+  awards      String[]  @default([])
+  isPublished Boolean   @default(false)
+  archivedAt  DateTime?
 
   repositoryPublishedAt DateTime?
   transferReadyAt       DateTime?
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   milestones           Milestone[]
   milestoneCheckpoints MilestoneCheckpoint[]
@@ -394,6 +434,7 @@ model Project {
   adviserScheduleItems AdviserScheduleItem[]
   evaluations          Evaluation[]
   industryProjects     IndustryProject[]
+  academicActivities   AcademicActivity[]
 
   @@index([departmentId])
   @@index([academicYearId])
@@ -462,24 +503,24 @@ model MilestoneCheckpoint {
 }
 
 model Submission {
-  id            String               @id @default(cuid())
-  projectId     String
-  project       Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  milestoneId   String?
-  milestone     Milestone?           @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
-  checkpointId  String?
-  checkpoint    MilestoneCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
-  submittedById String?
-  submittedBy   User?                @relation("SubmissionSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
-  title         String
-  description   String?
-  status        SubmissionStatus     @default(SUBMITTED)
+  id              String               @id @default(cuid())
+  projectId       String
+  project         Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestoneId     String?
+  milestone       Milestone?           @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  checkpointId    String?
+  checkpoint      MilestoneCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
+  submittedById   String?
+  submittedBy     User?                @relation("SubmissionSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+  title           String
+  description     String?
+  status          SubmissionStatus     @default(SUBMITTED)
   rejectionReason String?
-  version       Int                  @default(1)
-  submittedAt   DateTime             @default(now())
-  reviewedAt    DateTime?
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
+  version         Int                  @default(1)
+  submittedAt     DateTime             @default(now())
+  reviewedAt      DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
 
   files    UploadedFile[]
   comments ReviewComment[]
@@ -532,22 +573,22 @@ model ReviewComment {
 }
 
 model DefenseSchedule {
-  id                    String                @id @default(cuid())
-  projectId             String
-  project               Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  scheduledById         String?
-  scheduledBy           User?                 @relation("DefenseScheduler", fields: [scheduledById], references: [id], onDelete: SetNull)
-  title                 String                @default("Final Defense")
-  scheduledAt           DateTime
-  location              String?
-  meetingUrl            String?
-  status                DefenseStatus         @default(SCHEDULED)
-  notes                 String?
-  chairDecision         DefenseChairDecision?
-  chairDecisionAt       DateTime?
-  chairDecisionRemarks  String?
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  id                   String                @id @default(cuid())
+  projectId            String
+  project              Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scheduledById        String?
+  scheduledBy          User?                 @relation("DefenseScheduler", fields: [scheduledById], references: [id], onDelete: SetNull)
+  title                String                @default("Final Defense")
+  scheduledAt          DateTime
+  location             String?
+  meetingUrl           String?
+  status               DefenseStatus         @default(SCHEDULED)
+  notes                String?
+  chairDecision        DefenseChairDecision?
+  chairDecisionAt      DateTime?
+  chairDecisionRemarks String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   evaluations Evaluation[]
 

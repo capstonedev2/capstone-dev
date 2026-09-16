@@ -1,4 +1,5 @@
 import type { DocumentFileSummary } from '@/components/documents/document-file-controls';
+import { ACHIEVEMENT_DOCUMENT_CATEGORIES } from '@/lib/storage/upload-config';
 
 export function getReviewReferenceDate() {
   return new Date().toISOString();
@@ -78,7 +79,10 @@ export type AdviserSubmissionRecord = {
   fileType: string;
   fileExtension: string;
   documentCategory: string;
-  department: 'IT';
+  // Not IT-only — see src/lib/landing/departments-data.ts. Not currently sourced
+  // from real data (DocumentFileSummary has no department field yet) or displayed
+  // anywhere on this page, but the type shouldn't force it to a single value.
+  department: string;
   uploadedBy?: string;
   approvedAt?: string;
   workspaceHref: string;
@@ -192,8 +196,29 @@ export function isTitleSubmissionFile(file: Pick<DocumentFileSummary, 'documentC
     || (category === 'proposal' && fileName.includes('title'));
 }
 
+// Every stage's oral defense application evidence photo has its own independent
+// review flow on Title & Evidence Approval (separate from that stage's other
+// decisions) — none of them should also show up as a generic pending document here.
+const DEFENSE_APPLICATION_EVIDENCE_CATEGORIES = new Set([
+  'concept-defense-application',
+  'proposal-defense-application',
+  'final-defense-application'
+]);
+
+function isDefenseApplicationEvidenceFile(file: Pick<DocumentFileSummary, 'documentCategory'>) {
+  return DEFENSE_APPLICATION_EVIDENCE_CATEGORIES.has(String(file.documentCategory || '').trim().toLowerCase());
+}
+
 export function getAdviserReviewQueueFiles(files: DocumentFileSummary[]) {
-  return files.filter((file) => !isTitleSubmissionFile(file));
+  return files.filter((file) => {
+    if (isTitleSubmissionFile(file) || isDefenseApplicationEvidenceFile(file)) {
+      return false;
+    }
+
+    // Award/Recognition and Activity Evidence are a read-only achievement log
+    // with no adviser review step — never surface them as a pending submission.
+    return !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(String(file.documentCategory || ''));
+  });
 }
 
 function getWorkflowStepIndex(status: SubmissionStatus, currentVersionNumber: number) {
@@ -501,7 +526,7 @@ function mapTitleStatus(status: TitleSubmissionSummary['status']): SubmissionSta
 /**
  * Surfaces title proposals inside the same Document Submissions list as chapters
  * and manuscripts, read-only — the actual Approve/Reject actions still only live
- * on the dedicated Title Approvals page, since that flow drives Group/Project
+ * on the dedicated Title & Evidence Approval page, since that flow drives Group/Project
  * status and shouldn't be duplicated here. This just makes titles visible and
  * filterable alongside everything else an adviser has waiting on them.
  */
@@ -534,7 +559,7 @@ export function toAdviserSubmissionRecordFromTitle(title: TitleSubmissionSummary
     latestReviewComment: title.latestReviewComment,
     reviewedAt,
     reviewFocus: `${submittedBy} proposed a title for adviser review under ${title.groupId}.`,
-    nextAction: 'Open Title Approvals to accept, request revision, or reject this proposed title.',
+    nextAction: 'Open Title & Evidence Approval to accept, request revision, or reject this proposed title.',
     fileUrl: attachedFile?.url || '',
     fileType: attachedFile?.fileType || 'title',
     fileExtension: attachedFile ? getFileExtension(attachedFile.name) : 'title',

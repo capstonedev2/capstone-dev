@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { ensureProjectMilestoneWorkflow } from '@/lib/milestone-checkpoint-tracking';
+import { ensureProjectMilestoneWorkflow, TOTAL_WORKFLOW_CHECKPOINTS, TOTAL_WORKFLOW_MILESTONES } from '@/lib/milestone-checkpoint-tracking';
 
 const now = '2026-04-06T00:00:00.000Z';
 
@@ -851,7 +851,13 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             ]);
 
             const milestoneWorkflowPromise = fetchMilestonesAndCheckpoints().then(async ([milestones, checkpointRows]) => {
-              if (milestones.length < 6 || checkpointRows.length < 26) {
+              // Compared against the live workflow definition (not a hardcoded count), and
+              // as an exact mismatch rather than "fewer than", so that both adding a
+              // checkpoint (e.g. the concept-stage compliance evidence checkpoint) and
+              // removing one (e.g. folding 'concept-paper' into 'concept-title') are picked
+              // up for existing projects on their next dashboard load, instead of silently
+              // staying stuck at whatever count existed when they were seeded.
+              if (milestones.length !== TOTAL_WORKFLOW_MILESTONES || checkpointRows.length !== TOTAL_WORKFLOW_CHECKPOINTS) {
                 await ensureProjectMilestoneWorkflow(prisma, activeProject.id);
                 const nextData = await fetchMilestonesAndCheckpoints();
                 return [nextData[0], nextData[1]] as const;

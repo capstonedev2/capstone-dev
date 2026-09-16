@@ -564,7 +564,7 @@ function SubmissionItem({
   const latestTimelineEvent = [...submission.timeline].reverse().find((event) => event.isComplete) || submission.timeline[0];
   const latestNote = submission.latestReviewComment?.body || 'No adviser notes yet. Open the review workspace to add comments.';
   const primaryActionLabel = submission.type === 'Title'
-    ? 'Open Title Approvals'
+    ? 'Open Title & Evidence Approval'
     : submission.status === 'approved' ? 'View Summary' : 'Open Review';
 
   return (
@@ -769,7 +769,7 @@ function SubmissionItem({
               </button>
             ) : null}
             <p className="text-center text-[11px] font-bold leading-4 text-slate-500">
-              {submission.type === 'Title' ? 'Approve/reject from Title Approvals.' : 'Review actions are inside the workspace.'}
+              {submission.type === 'Title' ? 'Approve/reject from Title & Evidence Approval.' : 'Review actions are inside the workspace.'}
             </p>
           </div>
         </aside>

@@ -120,7 +120,12 @@ export const TechnologyTransferRecordScalarFieldEnum = {
   id: 'id',
   repositoryProjectId: 'repositoryProjectId',
   partnerName: 'partnerName',
+  requesterEmail: 'requesterEmail',
+  requesterOrganization: 'requesterOrganization',
+  source: 'source',
   transferStatus: 'transferStatus',
+  moaUrl: 'moaUrl',
+  deploymentDate: 'deploymentDate',
   remarks: 'remarks',
   dateRecorded: 'dateRecorded'
 } as const

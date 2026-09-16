@@ -178,14 +178,42 @@ function toTitlePayload(project: any) {
       : null,
     academicYear: project.academicYear?.label || 'Current Academic Year',
     submissionId: latestSubmission?.id || null,
-    uploadedFiles: (latestSubmission?.files?.length ? latestSubmission.files : project.files)?.map((file: any) => ({
-      id: file.id,
-      name: file.fileName,
-      url: `/api/document-files/${file.id}/download`,
-      previewUrl: `/api/document-files/${file.id}/preview`,
-      fileType: file.fileType,
-      size: file.size
-    })) || []
+    // Union both sources rather than "latest submission's files, else project's" —
+    // the oral defense application evidence now lives on its own Submission
+    // (separate from the title/concept-paper one), so it wouldn't show up here
+    // if the title's latest submission were treated as the only source.
+    uploadedFiles: (() => {
+      const filesById = new Map<string, any>();
+      (project.files || []).forEach((file: any) => filesById.set(file.id, file));
+      (latestSubmission?.files || []).forEach((file: any) => filesById.set(file.id, file));
+
+      return Array.from(filesById.values()).map((file: any) => ({
+        id: file.id,
+        name: file.fileName,
+        url: `/api/document-files/${file.id}/download`,
+        previewUrl: `/api/document-files/${file.id}/preview`,
+        fileType: file.fileType,
+        size: file.size,
+        documentCategory: file.documentCategory || null
+      }));
+    })(),
+    evidenceReview: findEvidenceReview(project.milestoneCheckpoints, 'concept-defense-application'),
+    proposalEvidenceReview: findEvidenceReview(project.milestoneCheckpoints, 'proposal-defense-application'),
+    finalEvidenceReview: findEvidenceReview(project.milestoneCheckpoints, 'final-defense-application')
+  };
+}
+
+function findEvidenceReview(checkpoints: any[] | undefined, key: string) {
+  const checkpoint = checkpoints?.find((item) => item.key === key);
+
+  if (!checkpoint) {
+    return null;
+  }
+
+  return {
+    status: checkpoint.status,
+    feedback: checkpoint.latestFeedback || null,
+    feedbackBy: checkpoint.latestFeedbackBy || null
   };
 }
 
@@ -222,14 +250,23 @@ const projectInclude = {
     }
   },
   files: {
-    where: { 
-      documentCategory: { in: ['Title Proposal', 'Proposal'] }
+    where: {
+      documentCategory: {
+        in: [
+          'Title Proposal',
+          'Proposal',
+          'concept-defense-application',
+          'proposal-defense-application',
+          'final-defense-application'
+        ]
+      }
     },
     select: {
       id: true,
       fileName: true,
       fileType: true,
-      size: true
+      size: true,
+      documentCategory: true
     }
   },
   submissions: {
@@ -245,7 +282,8 @@ const projectInclude = {
           id: true,
           fileName: true,
           fileType: true,
-          size: true
+          size: true,
+          documentCategory: true
         }
       },
       comments: {
@@ -267,6 +305,17 @@ const projectInclude = {
           }
         }
       }
+    }
+  },
+  milestoneCheckpoints: {
+    where: {
+      key: { in: ['concept-defense-application', 'proposal-defense-application', 'final-defense-application'] }
+    },
+    select: {
+      key: true,
+      status: true,
+      latestFeedback: true,
+      latestFeedbackBy: true
     }
   }
 } satisfies Prisma.ProjectInclude;
@@ -382,7 +431,7 @@ export async function POST(request: Request) {
       const formData = await request.formData();
       title = normalizeText(formData.get('title') as string);
       description = normalizeText(formData.get('description') as string);
-      
+
       const keywordsData = formData.get('keywords');
       if (keywordsData) {
         try {
@@ -533,9 +582,12 @@ export async function POST(request: Request) {
           }
         });
 
+        // 'concept-paper' was folded into 'concept-title' — the concept paper
+        // document is always uploaded together with the title, so this file
+        // ties to the same checkpoint the title submission itself uses.
         await recordCheckpointSubmission(prisma, {
           projectId: project.id,
-          checkpointKey: 'concept-paper',
+          checkpointKey: 'concept-title',
           documentCategory: 'Title Proposal',
           fileName: file.name,
           fileId: uploadedFile.id
@@ -616,6 +668,12 @@ export async function PATCH(request: Request) {
         { status: 403 }
       );
     }
+
+    // The oral defense application evidence is no longer required before title
+    // approval — the adviser now approves the idea first, and the evidence is
+    // uploaded and independently reviewed afterward (see
+    // /api/concept-defense-application's PATCH handler), with its own hard
+    // block further down the workflow at presentation scheduling instead.
 
     const submissionStatus = nextStatus === ProjectStatus.APPROVED
       ? SubmissionStatus.APPROVED

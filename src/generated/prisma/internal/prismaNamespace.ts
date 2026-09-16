@@ -388,6 +388,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   PasswordResetCode: 'PasswordResetCode',
   UploadedFile: 'UploadedFile',
+  AcademicActivity: 'AcademicActivity',
   Group: 'Group',
   Department: 'Department',
   AcademicYear: 'AcademicYear',
@@ -423,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "progressReport" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
+    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "academicActivity" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "progressReport" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -720,6 +721,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UploadedFileCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UploadedFileCountAggregateOutputType> | number
+        }
+      }
+    }
+    AcademicActivity: {
+      payload: Prisma.$AcademicActivityPayload<ExtArgs>
+      fields: Prisma.AcademicActivityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AcademicActivityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AcademicActivityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>
+        }
+        findFirst: {
+          args: Prisma.AcademicActivityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AcademicActivityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>
+        }
+        findMany: {
+          args: Prisma.AcademicActivityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>[]
+        }
+        create: {
+          args: Prisma.AcademicActivityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>
+        }
+        createMany: {
+          args: Prisma.AcademicActivityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AcademicActivityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>[]
+        }
+        delete: {
+          args: Prisma.AcademicActivityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>
+        }
+        update: {
+          args: Prisma.AcademicActivityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>
+        }
+        deleteMany: {
+          args: Prisma.AcademicActivityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AcademicActivityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AcademicActivityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>[]
+        }
+        upsert: {
+          args: Prisma.AcademicActivityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcademicActivityPayload>
+        }
+        aggregate: {
+          args: Prisma.AcademicActivityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAcademicActivity>
+        }
+        groupBy: {
+          args: Prisma.AcademicActivityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AcademicActivityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AcademicActivityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AcademicActivityCountAggregateOutputType> | number
         }
       }
     }
@@ -2318,11 +2393,35 @@ export const UploadedFileScalarFieldEnum = {
   projectId: 'projectId',
   submissionId: 'submissionId',
   checkpointId: 'checkpointId',
+  activityId: 'activityId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type UploadedFileScalarFieldEnum = (typeof UploadedFileScalarFieldEnum)[keyof typeof UploadedFileScalarFieldEnum]
+
+
+export const AcademicActivityScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  createdById: 'createdById',
+  activityType: 'activityType',
+  eventName: 'eventName',
+  eventDate: 'eventDate',
+  venue: 'venue',
+  description: 'description',
+  scope: 'scope',
+  achievement: 'achievement',
+  status: 'status',
+  relatedMilestone: 'relatedMilestone',
+  participantsOrBeneficiary: 'participantsOrBeneficiary',
+  addToTimeline: 'addToTimeline',
+  markAsAchievement: 'markAsAchievement',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AcademicActivityScalarFieldEnum = (typeof AcademicActivityScalarFieldEnum)[keyof typeof AcademicActivityScalarFieldEnum]
 
 
 export const GroupScalarFieldEnum = {
@@ -3176,6 +3275,7 @@ export type GlobalOmitConfig = {
   passwordResetToken?: Prisma.PasswordResetTokenOmit
   passwordResetCode?: Prisma.PasswordResetCodeOmit
   uploadedFile?: Prisma.UploadedFileOmit
+  academicActivity?: Prisma.AcademicActivityOmit
   group?: Prisma.GroupOmit
   department?: Prisma.DepartmentOmit
   academicYear?: Prisma.AcademicYearOmit

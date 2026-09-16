@@ -71,9 +71,11 @@ export type ProjectFileUploadState = {
   tag: ProjectFileTag;
 };
 
+// 'title-proposal' and 'concept-paper' were removed — both are already fully
+// handled by Title Submission's bundled upload, so offering them again here
+// was redundant and confusing (a file uploaded here under either category
+// wasn't tracked against any real checkpoint anyway).
 export const PROJECT_FILE_CATEGORY_OPTIONS: ProjectFileCategoryOption[] = [
-  { key: 'title-proposal', label: 'Title Proposal' },
-  { key: 'concept-paper', label: 'Concept Paper' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'chapter-1', label: 'Chapter 1' },
   { key: 'chapter-2', label: 'Chapter 2' },
@@ -83,20 +85,26 @@ export const PROJECT_FILE_CATEGORY_OPTIONS: ProjectFileCategoryOption[] = [
   { key: 'system-files', label: 'System Files' },
   { key: 'presentation-files', label: 'Presentation' },
   { key: 'supporting-documents', label: 'Supporting Docs' },
-  { key: 'certificates', label: 'Certificates' },
   { key: 'final-manuscript', label: 'Final Manuscript' },
-  { key: 'photos', label: 'Photos' }
+  { key: 'concept-defense-application', label: 'Oral Defense Application Evidence (Concept)' },
+  { key: 'proposal-defense-application', label: 'Oral Defense Application Evidence (Proposal)' },
+  { key: 'final-defense-application', label: 'Oral Defense Application Evidence (Final)' },
+  { key: 'award-recognition', label: 'Award / Recognition' },
+  { key: 'activity-evidence', label: 'Activity Evidence' }
 ];
 
 export const PROJECT_FILE_FILTER_OPTIONS = [
   { key: 'all', label: 'All Project Files' },
-  { key: 'concept-paper', label: 'Concept Paper' },
   { key: 'proposal', label: 'Proposal' },
   { key: 'chapters', label: 'Chapter 1-5' },
   { key: 'system-files', label: 'System Files' },
   { key: 'presentation-files', label: 'Presentation' },
   { key: 'supporting-documents', label: 'Supporting Docs' },
-  { key: 'certificates', label: 'Certificates' }
+  { key: 'concept-defense-application', label: 'Oral Defense Application Evidence (Concept)' },
+  { key: 'proposal-defense-application', label: 'Oral Defense Application Evidence (Proposal)' },
+  { key: 'final-defense-application', label: 'Oral Defense Application Evidence (Final)' },
+  { key: 'award-recognition', label: 'Award / Recognition' },
+  { key: 'activity-evidence', label: 'Activity Evidence' }
 ];
 
 export const PROJECT_FILE_SORT_OPTIONS: Array<{ key: ProjectFileSortOption; label: string }> = [

@@ -2599,7 +2599,7 @@
 
 .footerGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(9rem, 0.65fr));
+  grid-template-columns: minmax(0, 1.45fr) minmax(9rem, 0.65fr);
   gap: 2rem;
   padding: 4rem 0 1.25rem;
 }

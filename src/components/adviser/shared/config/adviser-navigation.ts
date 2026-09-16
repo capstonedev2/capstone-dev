@@ -14,7 +14,7 @@ export const ADVISER_NAV_ITEMS = {
   adviser: [
     { key: 'dashboard', label: 'Dashboard', href: '/adviser/adviser-mode/dashboard', icon: 'fa-gauge-high', section: 'workspace' },
     { key: 'groups', label: 'My Groups', href: '/adviser/adviser-mode/groups', icon: 'fa-users', section: 'workspace' },
-    { key: 'titles', label: 'Title Approvals', href: '/adviser/adviser-mode/title-approvals', icon: 'fa-file-signature', section: 'supervision' },
+    { key: 'titles', label: 'Title & Evidence Approval', href: '/adviser/adviser-mode/title-approvals', icon: 'fa-file-signature', section: 'supervision' },
     { key: 'submissions', label: 'Document Submissions', href: '/adviser/adviser-mode/submissions', icon: 'fa-check-double', section: 'supervision' },
     { key: 'progress', label: 'Progress Monitoring', href: '/adviser/adviser-mode/progress', icon: 'fa-chart-line', section: 'supervision' },
     { key: 'evaluations', label: 'Evaluations', href: '/adviser/adviser-mode/evaluations', icon: 'fa-star', section: 'supervision' },

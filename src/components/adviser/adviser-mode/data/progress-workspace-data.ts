@@ -21,7 +21,8 @@ export type AdviserProgressRecord = {
   id: string;
   groupId: `IT-2024-${string}`;
   projectTitle: string;
-  department: 'IT';
+  // Not IT-only — see src/lib/landing/departments-data.ts for the full department list.
+  department: string;
   progress: number;
   currentMilestone: ProgressMilestone;
   status: ProgressStatus;

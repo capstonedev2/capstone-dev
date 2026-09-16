@@ -584,6 +584,16 @@ export function LoginPage() {
                 </svg>
                 {loginBranding.googleLabel}
               </button>
+
+              <button
+                type="button"
+                className="group relative inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-white/70 bg-white/80 px-5 text-sm font-bold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[14px] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white hover:bg-white hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-slate-200 disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0 sm:h-12"
+                disabled={isSubmitting}
+                onClick={() => router.push('/repository')}
+              >
+                <i className="fas fa-user-group text-slate-500" aria-hidden="true" />
+                Continue as Guest
+              </button>
                 </form>
 
                 <div className="mt-2 text-center">
@@ -598,6 +608,7 @@ export function LoginPage() {
                     </Link>
                   </p>
                 </div>
+
                 <div className="mt-3 border-t border-white/70 pt-3 text-center text-xs font-bold text-slate-700">
                   <i className="fas fa-shield-halved mr-2 text-slate-700" aria-hidden="true" />
                   Secure access for ThesisTrack users only.

@@ -2,11 +2,16 @@
 
 import Link from 'next/link';
 import { type ChangeEvent, type DragEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import {
+  ACHIEVEMENT_DOCUMENT_CATEGORIES,
+  CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES,
   DOCUMENT_FILE_ACCEPT,
+  DOCUMENT_OR_IMAGE_FILE_ACCEPT,
   DOCUMENT_STORAGE_BUCKETS,
+  IMAGE_ALLOWED_DOCUMENT_CATEGORIES,
   validateFileSize,
   validateFileType
 } from '@/lib/storage/upload-config';
@@ -37,6 +42,17 @@ import {
   normalizeProjectFileStatus,
   sortProjectFiles
 } from '@/components/students/student-project-files.shared';
+import {
+  ACTIVITY_STATUS_OPTIONS,
+  ACTIVITY_TYPE_OPTIONS,
+  createAcademicActivityForm,
+  deleteAcademicActivity,
+  fetchAcademicActivities,
+  formatIsoDateLabel,
+  saveAcademicActivity,
+  type ApiAcademicActivity
+} from '@/components/students/student-academic-activity.shared';
+import { AcademicActivityDetailModal } from '@/components/students/student-academic-activity-detail';
 
 type ToastTone = 'success' | 'danger' | 'warning';
 
@@ -72,6 +88,10 @@ function createUploadDraft(uploadedBy: string): ProjectFileUploadState {
 }
 
 function getInitialHistoryNote(category: string) {
+  if (ACHIEVEMENT_DOCUMENT_CATEGORIES.has(category)) {
+    return `${getProjectFileCategoryLabel(category)} evidence uploaded to this project.`;
+  }
+
   return `Initial ${getProjectFileCategoryLabel(category).toLowerCase()} file uploaded for adviser review.`;
 }
 
@@ -326,6 +346,27 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const [pageError, setPageError] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState>(null);
   const [historyFile, setHistoryFile] = useState<ProjectFileRecord | null>(null);
+  const [defenseApplicationTemplate, setDefenseApplicationTemplate] = useState<{ fileName: string } | null>(null);
+
+  // Academic activity log — the metadata (title, date, venue) that a bare
+  // uploaded file doesn't carry. Logging happens here, next to the evidence
+  // upload itself; Project Overview only ever displays the result.
+  const [activities, setActivities] = useState<ApiAcademicActivity[]>([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true);
+  const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [activityForm, setActivityForm] = useState(() => createAcademicActivityForm(''));
+  const [isSavingActivity, setIsSavingActivity] = useState(false);
+  const [activityFormError, setActivityFormError] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<ApiAcademicActivity | null>(null);
+  // .student-shell has a backdrop-filter on it, which traps position:fixed
+  // descendants to its own box instead of the real viewport — rendering the
+  // "Log Activity" modal via a portal to document.body sidesteps that, so
+  // the sidebar and top nav actually sit under the dimmed backdrop.
+  const [isModalPortalMounted, setIsModalPortalMounted] = useState(false);
+
+  useEffect(() => {
+    setIsModalPortalMounted(true);
+  }, []);
 
   // Background polling for specific member permission state via notifications
   const [isUploadAllowed, setIsUploadAllowed] = useState(false);
@@ -345,6 +386,175 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   ];
 
   const isConceptStageComplete = useMemo(() => hasCompletedConceptStage(data), [data]);
+
+  // Two switchable groups instead of one long mixed dropdown: "Project
+  // Documents" (chapters, proposal, etc. — fully sequence-locked behind Stage
+  // 1, no exceptions) and "Academic Activities & Evidence" (awards, activity
+  // evidence, and the oral defense application — none of these are tied to
+  // thesis progression, so this tab is never locked). Keeping the oral defense
+  // application out of the Project Documents tab avoids that tab looking
+  // "partly open" while everything else in it is locked.
+  const [uploadCategoryTab, setUploadCategoryTab] = useState<'documents' | 'activities'>(
+    () => (hasCompletedConceptStage(data) ? 'documents' : 'activities')
+  );
+
+  // Already-uploaded files an activity can attach as evidence — sourced from
+  // this page's own upload list rather than a second file picker.
+  const activityEvidenceFiles = useMemo(
+    () => files.filter((file) => file.category === 'award-recognition' || file.category === 'activity-evidence'),
+    [files]
+  );
+
+  const documentTabCategoryOptions = useMemo(
+    () => PROJECT_FILE_CATEGORY_OPTIONS.filter((option) => !CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES.has(option.key)),
+    []
+  );
+  const activityTabCategoryOptions = useMemo(
+    () => PROJECT_FILE_CATEGORY_OPTIONS.filter((option) => CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES.has(option.key)),
+    []
+  );
+
+  // The Project Documents tab has nothing to offer until Stage 1 is complete
+  // — the form for it doesn't render at all while locked (see below), so an
+  // empty option list here is fine. Academic Activities is never locked.
+  const visibleCategoryOptions = uploadCategoryTab === 'activities'
+    ? activityTabCategoryOptions
+    : documentTabCategoryOptions;
+  const isUploadFormLocked = uploadCategoryTab === 'documents' && !isConceptStageComplete;
+
+  const allowsImageUpload = IMAGE_ALLOWED_DOCUMENT_CATEGORIES.has(uploadDraft.category);
+
+  useEffect(() => {
+    if (!visibleCategoryOptions.some((option) => option.key === uploadDraft.category)) {
+      setUploadDraft((current) => ({ ...current, category: visibleCategoryOptions[0]?.key || current.category }));
+    }
+  }, [visibleCategoryOptions, uploadDraft.category]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch('/api/concept-defense-application-template', { cache: 'no-store' })
+      .then((response) => response.json().catch(() => null))
+      .then((payload) => {
+        if (!cancelled) {
+          setDefenseApplicationTemplate(payload?.template ?? null);
+        }
+      })
+      .catch(() => {
+        // Non-critical: the download link simply stays hidden if this fails.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const loadActivities = async () => {
+    const projectId = data.project.project_id;
+
+    if (!projectId) {
+      setIsLoadingActivities(false);
+      return;
+    }
+
+    setIsLoadingActivities(true);
+
+    try {
+      const list = await fetchAcademicActivities(projectId);
+      setActivities(list);
+    } catch {
+      // Non-critical: the log simply stays empty if this fails.
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  };
+
+  useEffect(() => {
+    loadActivities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.project.project_id]);
+
+  useEffect(() => {
+    document.body.classList.toggle('is-modal-open', isActivityModalOpen);
+
+    return () => {
+      document.body.classList.remove('is-modal-open');
+    };
+  }, [isActivityModalOpen]);
+
+  const openActivityModal = () => {
+    setActivityForm(createAcademicActivityForm(data.project.currentMilestone || ''));
+    setActivityFormError(null);
+    setIsActivityModalOpen(true);
+  };
+
+  const closeActivityModal = () => {
+    setIsActivityModalOpen(false);
+  };
+
+  const updateActivityForm = <Key extends keyof ReturnType<typeof createAcademicActivityForm>,>(
+    field: Key,
+    value: ReturnType<typeof createAcademicActivityForm>[Key]
+  ) => {
+    setActivityForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const toggleActivityEvidenceFile = (fileId: string) => {
+    setActivityForm((current) => ({
+      ...current,
+      selectedFileIds: current.selectedFileIds.includes(fileId)
+        ? current.selectedFileIds.filter((id) => id !== fileId)
+        : [...current.selectedFileIds, fileId]
+    }));
+  };
+
+  const handleSaveActivity = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!activityForm.activityTitle.trim()) {
+      setActivityFormError('Enter the academic activity title.');
+      return;
+    }
+
+    const projectId = data.project.project_id;
+
+    if (!projectId) {
+      setActivityFormError('No assigned thesis project was found for your account.');
+      return;
+    }
+
+    setIsSavingActivity(true);
+    setActivityFormError(null);
+
+    try {
+      const saved = await saveAcademicActivity(projectId, activityForm);
+
+      if (saved) {
+        setActivities((current) => [saved, ...current]);
+      } else {
+        await loadActivities();
+      }
+
+      closeActivityModal();
+    } catch (error) {
+      setActivityFormError(error instanceof Error ? error.message : 'Unable to save the academic activity.');
+    } finally {
+      setIsSavingActivity(false);
+    }
+  };
+
+  const handleDeleteActivity = async (activityId: string) => {
+    if (!window.confirm('Remove this academic activity? This only removes the log entry, not the uploaded evidence file.')) {
+      return;
+    }
+
+    try {
+      await deleteAcademicActivity(activityId);
+      setActivities((current) => current.filter((item) => item.id !== activityId));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to remove this activity.');
+    }
+  };
 
   useEffect(() => {
     uploadAllowedRef.current = isUploadAllowed;
@@ -630,7 +840,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   const latestApprovedFile = repositoryFiles[0] || null;
   const activeFilterLabel = PROJECT_FILE_FILTER_OPTIONS.find((item) => item.key === categoryFilter)?.label || 'Filtered Files';
   const quickFilterOptions = useMemo(
-    () => PROJECT_FILE_FILTER_OPTIONS.filter((item) => ['all', 'chapters', 'system-files', 'presentation-files', 'supporting-documents', 'certificates'].includes(item.key)),
+    () => PROJECT_FILE_FILTER_OPTIONS.filter((item) => ['all', 'chapters', 'system-files', 'presentation-files', 'supporting-documents', 'concept-defense-application', 'award-recognition', 'activity-evidence'].includes(item.key)),
     []
   );
   const quickFilterCounts = useMemo(
@@ -714,7 +924,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     setUploadError(null);
 
     if (file) {
-      const typeError = validateFileType(file.name, file.type);
+      const typeError = validateFileType(file.name, file.type, allowsImageUpload);
       const sizeError = validateFileSize(file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
 
       if (typeError || sizeError) {
@@ -797,7 +1007,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
 
     const selectedFile = uploadDraft.file;
-    const typeError = validateFileType(selectedFile.name, selectedFile.type);
+    const typeError = validateFileType(selectedFile.name, selectedFile.type, allowsImageUpload);
     const sizeError = validateFileSize(selectedFile.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
 
     if (typeError || sizeError) {
@@ -1096,14 +1306,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
             </div>
           </div>
           <div className="project-files-header-actions">
-            <button 
-              className={`btn btn-primary project-files-upload-button ${!isConceptStageComplete ? 'opacity-50 cursor-not-allowed' : ''}`} 
-              type="button" 
-              onClick={isConceptStageComplete ? openUploadSection : undefined}
-              disabled={!isConceptStageComplete}
-              title={!isConceptStageComplete ? "You can upload project files once Stage 1: Concept Proposal is completed." : "Upload New Version"}
+            <button
+              className="btn btn-primary project-files-upload-button"
+              type="button"
+              onClick={openUploadSection}
+              title={!isConceptStageComplete ? "Award, activity evidence, and oral defense application uploads are open now; other project files open once Stage 1: Concept Proposal is complete." : "Upload New Version"}
             >
-              {!isConceptStageComplete ? <i className="fas fa-lock" aria-hidden="true" /> : <i className="fas fa-cloud-arrow-up" aria-hidden="true" />} 
+              <i className="fas fa-cloud-arrow-up" aria-hidden="true" />
               Upload New Version
             </button>
           </div>
@@ -1286,41 +1495,19 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                 </div>
               </div>
 
-              {isConceptStageComplete ? (
-                <div className="project-files-upload-stepper" aria-label="Upload submission steps">
-                  {PROJECT_FILE_UPLOAD_STEPS.map((step) => (
-                    <div key={step.id} className="project-files-upload-step">
-                      <span>{step.id}</span>
-                      <div>
-                        <strong>{step.title}</strong>
-                        <small>{step.text}</small>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-
-              {!isConceptStageComplete ? (
-                <div className="project-files-locked-panel" aria-labelledby="project-files-upload-locked-title">
-                  <div className="project-files-locked-icon" aria-hidden="true">
-                    <i className="fas fa-file-shield" />
-                  </div>
-
-                  <div className="project-files-locked-copy">
-                    <h4 id="project-files-upload-locked-title">Uploads open after Stage 1</h4>
-                    <p className="project-files-locked-description">
-                      Complete your Concept Proposal in Title Submission. When Stage 1 is marked complete, you can upload chapters, revisions, and project documents.
-                    </p>
-
-                    <div className="project-files-locked-actions">
-                      <Link prefetch={false} href="/students/title-submission">
-                        <i className="fas fa-pen-to-square" aria-hidden="true" />
-                        Continue Title Submission
-                      </Link>
+              <div className="project-files-upload-stepper" aria-label="Upload submission steps">
+                {PROJECT_FILE_UPLOAD_STEPS.map((step) => (
+                  <div key={step.id} className="project-files-upload-step">
+                    <span>{step.id}</span>
+                    <div>
+                      <strong>{step.title}</strong>
+                      <small>{step.text}</small>
                     </div>
                   </div>
-                </div>
-              ) : !isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (
+                ))}
+              </div>
+
+              {!isGroupLeader && currentUserRole === 'student' && !isUploadAllowed && !data.group?.allowMemberSubmission ? (
                 <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/50 p-8 shadow-sm">
                   <div className="flex flex-col items-center text-center">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 shadow-sm">
@@ -1340,6 +1527,131 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   </div>
                 </div>
               ) : (
+                <>
+                <div className="project-files-upload-tabs flex flex-wrap gap-2 mb-6" role="tablist" aria-label="Upload category group">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={uploadCategoryTab === 'documents'}
+                    onClick={() => setUploadCategoryTab('documents')}
+                    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${
+                      uploadCategoryTab === 'documents'
+                        ? 'bg-[#003A8F] text-white shadow-sm'
+                        : 'bg-[var(--surface-alt)] text-[var(--muted)] hover:bg-blue-50 hover:text-[#003A8F]'
+                    }`}
+                  >
+                    <i className="fas fa-file-lines" aria-hidden="true" />
+                    Project Documents
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={uploadCategoryTab === 'activities'}
+                    onClick={() => setUploadCategoryTab('activities')}
+                    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${
+                      uploadCategoryTab === 'activities'
+                        ? 'bg-[#003A8F] text-white shadow-sm'
+                        : 'bg-[var(--surface-alt)] text-[var(--muted)] hover:bg-blue-50 hover:text-[#003A8F]'
+                    }`}
+                  >
+                    <i className="fas fa-award" aria-hidden="true" />
+                    Academic Activities & Evidence
+                  </button>
+                </div>
+
+                {uploadCategoryTab === 'activities' && (
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm mb-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                      <div>
+                        <h3 className="text-sm font-bold text-[var(--text)]">Academic Activity Log</h3>
+                        <p className="text-xs text-[var(--muted)] mt-1">
+                          Log a presentation, seminar, or award and attach evidence uploaded below.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={openActivityModal}
+                      >
+                        <i className="fas fa-plus" aria-hidden="true" /> Log Activity
+                      </button>
+                    </div>
+
+                    {isLoadingActivities ? (
+                      <p className="text-sm text-[var(--muted)]">Loading activities...</p>
+                    ) : activities.length ? (
+                      <div className="flex flex-col gap-2">
+                        {activities.map((activity) => (
+                          <button
+                            type="button"
+                            key={activity.id}
+                            onClick={() => setSelectedActivity(activity)}
+                            className="flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3 text-left transition hover:border-blue-300 hover:bg-blue-50/40"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-[var(--text)] truncate">
+                                {activity.eventName}
+                                {activity.markAsAchievement ? (
+                                  <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-amber-700">Achievement</span>
+                                ) : null}
+                              </p>
+                              <p className="text-xs text-[var(--muted)]">
+                                {activity.activityType} &middot; {formatIsoDateLabel(activity.eventDate || activity.createdAt)}
+                                {activity.venue ? ` · ${activity.venue}` : ''}
+                                {activity.files.length ? ` · ${activity.files.length} file${activity.files.length === 1 ? '' : 's'}` : ''}
+                              </p>
+                            </div>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleDeleteActivity(activity.id);
+                              }}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.stopPropagation();
+                                  handleDeleteActivity(activity.id);
+                                }
+                              }}
+                              className="shrink-0 h-8 w-8 rounded-full bg-[var(--surface)] border border-[var(--border)] shadow-sm flex items-center justify-center text-[var(--text-meta)] hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all cursor-pointer"
+                              title="Remove activity"
+                            >
+                              <i className="fas fa-trash-can text-[11px]" aria-hidden="true" />
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-[var(--muted)]">No academic activities logged yet.</p>
+                    )}
+                  </div>
+                )}
+
+                {uploadCategoryTab === 'documents' && !isConceptStageComplete && (
+                  <div className="project-files-locked-panel mb-6" aria-labelledby="project-files-upload-locked-title">
+                    <div className="project-files-locked-icon" aria-hidden="true">
+                      <i className="fas fa-file-shield" />
+                    </div>
+
+                    <div className="project-files-locked-copy">
+                      <h4 id="project-files-upload-locked-title">Project documents open after Stage 1</h4>
+                      <p className="project-files-locked-description">
+                        Complete your Concept Proposal in Title Submission to unlock chapters, revisions, and other
+                        project documents. Switch to the Academic Activities & Evidence tab to upload the oral
+                        defense application evidence, log awards, or attach activity evidence any time.
+                      </p>
+
+                      <div className="project-files-locked-actions">
+                        <Link prefetch={false} href="/students/title-submission">
+                          <i className="fas fa-pen-to-square" aria-hidden="true" />
+                          Continue Title Submission
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {!isUploadFormLocked && (
                 <>
                 {!isGroupLeader && permissionCountdown && (
                   <div className="rounded-[1.25rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm mb-4">
@@ -1396,9 +1708,16 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
                       {!uploadDraft.file && (
                         <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-[var(--muted)] z-10">
-                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
-                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOC</span>
-                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-file-powerpoint text-amber-500 text-sm"></i> PPT</span>
+                          {allowsImageUpload && (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-image text-emerald-500 text-sm"></i> JPG / PNG</span>
+                          )}
+                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
+                          {!allowsImageUpload && (
+                            <>
+                              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOC</span>
+                              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-200"><i className="fas fa-file-powerpoint text-amber-500 text-sm"></i> PPT</span>
+                            </>
+                          )}
                         </div>
                       )}
 
@@ -1418,13 +1737,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                       ref={fileInputRef}
                       className="hidden"
                       type="file"
-                      accept={DOCUMENT_FILE_ACCEPT}
+                      accept={allowsImageUpload ? DOCUMENT_OR_IMAGE_FILE_ACCEPT : DOCUMENT_FILE_ACCEPT}
                       onChange={handleFileInputChange}
                     />
                   </section>
 
                   <section className="project-files-upload-fields flex flex-col gap-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={`grid grid-cols-1 gap-6 ${uploadCategoryTab === 'activities' ? '' : 'md:grid-cols-2'}`}>
                       <div className="flex flex-col gap-2.5">
                         <label htmlFor="project-file-category" className="text-sm font-bold text-[var(--text)] ml-1">Category <span className="text-rose-500">*</span></label>
                         <div className="relative group">
@@ -1438,38 +1757,60 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                             disabled={isUploading}
                             className="block w-full appearance-none rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-12 pr-10 text-[var(--text)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-[var(--surface)] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-[var(--surface-alt)] sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            {PROJECT_FILE_CATEGORY_OPTIONS.map((option) => (
+                            {visibleCategoryOptions.map((option) => (
                               <option key={option.key} value={option.key}>{option.label}</option>
                             ))}
                           </select>
                           <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[var(--text-meta)] pointer-events-none" aria-hidden="true" />
                         </div>
+                        {uploadDraft.category === 'concept-defense-application' ? (
+                          defenseApplicationTemplate ? (
+                            <a
+                              href="/api/concept-defense-application-template/download"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-1 inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline"
+                            >
+                              <i className="fas fa-file-arrow-down" aria-hidden="true" />
+                              Download the current blank form
+                            </a>
+                          ) : (
+                            <p className="ml-1 text-[11px] text-[var(--text-meta)]">
+                              No downloadable blank form has been posted yet &mdash; get the current version from your department.
+                            </p>
+                          )
+                        ) : null}
                       </div>
 
-                      <div className="flex flex-col gap-2.5">
-                        <label htmlFor="project-file-tag" className="text-sm font-bold text-[var(--text)] ml-1">Tag / Version <span className="text-rose-500">*</span></label>
-                        <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-blue-600 transition-colors">
-                            <i className="fas fa-code-branch"></i>
+                      {uploadCategoryTab === 'activities' ? null : (
+                        <div className="flex flex-col gap-2.5">
+                          <label htmlFor="project-file-tag" className="text-sm font-bold text-[var(--text)] ml-1">Tag / Version <span className="text-rose-500">*</span></label>
+                          <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-blue-600 transition-colors">
+                              <i className="fas fa-code-branch"></i>
+                            </div>
+                            <select
+                              id="project-file-tag"
+                              value={uploadDraft.tag}
+                              onChange={(event) => updateUploadDraft('tag', event.target.value as ProjectFileUploadState['tag'])}
+                              disabled={isUploading}
+                              className="block w-full appearance-none rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-12 pr-10 text-[var(--text)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-[var(--surface)] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-[var(--surface-alt)] sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                              {PROJECT_FILE_TAG_OPTIONS.map((tag) => (
+                                <option key={tag} value={tag}>{tag}</option>
+                              ))}
+                            </select>
+                            <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[var(--text-meta)] pointer-events-none" aria-hidden="true" />
                           </div>
-                          <select
-                            id="project-file-tag"
-                            value={uploadDraft.tag}
-                            onChange={(event) => updateUploadDraft('tag', event.target.value as ProjectFileUploadState['tag'])}
-                            disabled={isUploading}
-                            className="block w-full appearance-none rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-12 pr-10 text-[var(--text)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all focus:bg-[var(--surface)] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-[var(--surface-alt)] sm:text-sm font-bold outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-                          >
-                            {PROJECT_FILE_TAG_OPTIONS.map((tag) => (
-                              <option key={tag} value={tag}>{tag}</option>
-                            ))}
-                          </select>
-                          <i className="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[var(--text-meta)] pointer-events-none" aria-hidden="true" />
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-2.5">
-                      <label htmlFor="project-file-version-notes" className="text-sm font-bold text-[var(--text)] ml-1">Version Notes <span className="text-[var(--text-meta)] font-medium text-[10px] uppercase tracking-wider ml-1 px-2 py-0.5 bg-[var(--surface-alt)] rounded-md">Optional</span></label>
+                      <label htmlFor="project-file-version-notes" className="text-sm font-bold text-[var(--text)] ml-1">
+                        {uploadCategoryTab === 'activities' ? 'Notes' : 'Version Notes'}{' '}
+                        <span className="text-[var(--text-meta)] font-medium text-[10px] uppercase tracking-wider ml-1 px-2 py-0.5 bg-[var(--surface-alt)] rounded-md">Optional</span>
+                      </label>
                       <div className="relative group">
                         <div className="absolute top-4 left-0 flex items-start pl-4 pointer-events-none text-[var(--text-meta)] group-focus-within:text-blue-600 transition-colors">
                           <i className="fas fa-comment-dots"></i>
@@ -1478,7 +1819,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                           id="project-file-version-notes"
                           value={uploadDraft.versionNotes}
                           onChange={(event) => updateUploadDraft('versionNotes', event.target.value)}
-                          placeholder="Summarize what changed in this version..."
+                          placeholder={uploadCategoryTab === 'activities' ? 'Add any context for this evidence...' : 'Summarize what changed in this version...'}
                           disabled={isUploading}
                           className="block w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] py-3.5 pl-12 pr-4 text-[var(--text)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] transition-all placeholder:text-[var(--text-meta)] focus:bg-[var(--surface)] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 hover:bg-[var(--surface-alt)] sm:text-sm font-medium outline-none min-h-[120px] resize-y disabled:opacity-60 disabled:cursor-not-allowed leading-relaxed"
                         />
@@ -1514,6 +1855,8 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                   </section>
                 </div>
                 </form>
+                </>
+                )}
                 </>
               )}
             </article>
@@ -1639,6 +1982,237 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
           </div>
         </div>
       ) : null}
+
+      {isModalPortalMounted ? createPortal(
+      <div className={`modal-shell ${isActivityModalOpen ? 'is-open' : ''}`} aria-hidden={isActivityModalOpen ? 'false' : 'true'}>
+        <button className="modal-backdrop" type="button" aria-label="Close log activity modal" onClick={closeActivityModal} />
+        <div
+          className="modal-card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="log-activity-title"
+          style={{ width: 'min(46rem, calc(100vw - 2rem))', overflow: 'hidden' }}
+        >
+          <button className="modal-close" type="button" aria-label="Close log activity modal" onClick={closeActivityModal}>
+            <i className="fas fa-times" aria-hidden="true" />
+          </button>
+          <div className="modal-content" style={{ padding: 0 }}>
+            <form onSubmit={handleSaveActivity} className="flex max-h-[calc(100vh-2rem)] flex-col">
+              <div className="shrink-0 border-b border-[var(--border)] px-7 pt-7 pb-5">
+                <span className="section-kicker">Academic Activities &amp; Evidence</span>
+                <h3 id="log-activity-title" className="mt-1.5 text-xl font-black text-[var(--text)]">Log Academic Activity</h3>
+                <p className="mt-1 text-sm text-[var(--muted)]">Record what happened, then attach evidence you&apos;ve already uploaded on this page.</p>
+              </div>
+
+              <div className="flex-1 space-y-7 overflow-y-auto px-7 py-6">
+                {activityFormError ? (
+                  <div className="flex items-start gap-2 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                    <i className="fas fa-circle-exclamation mt-0.5" aria-hidden="true" />
+                    <span>{activityFormError}</span>
+                  </div>
+                ) : null}
+
+                <section>
+                  <h4 className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">
+                    <i className="fas fa-clipboard-list" aria-hidden="true" /> Activity Details
+                  </h4>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="form-field">
+                      <label htmlFor="activity-type">Activity Type</label>
+                      <select
+                        id="activity-type"
+                        value={activityForm.activityType}
+                        onChange={(event) => updateActivityForm('activityType', event.target.value)}
+                      >
+                        {ACTIVITY_TYPE_OPTIONS.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-status">Status</label>
+                      <select
+                        id="activity-status"
+                        value={activityForm.status}
+                        onChange={(event) => updateActivityForm('status', event.target.value)}
+                      >
+                        {ACTIVITY_STATUS_OPTIONS.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field sm:col-span-2">
+                      <label htmlFor="activity-title">Activity Title</label>
+                      <input
+                        id="activity-title"
+                        type="text"
+                        value={activityForm.activityTitle}
+                        onChange={(event) => updateActivityForm('activityTitle', event.target.value)}
+                        placeholder="Enter the academic activity title"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-milestone">Related Milestone</label>
+                      <select
+                        id="activity-milestone"
+                        value={activityForm.relatedMilestone}
+                        onChange={(event) => updateActivityForm('relatedMilestone', event.target.value)}
+                      >
+                        <option value="">Not linked to a milestone</option>
+                        {(data.milestones || []).map((milestone) => (
+                          <option key={milestone.id} value={milestone.title}>{milestone.title}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-date">Date</label>
+                      <input
+                        id="activity-date"
+                        type="date"
+                        value={activityForm.date}
+                        onChange={(event) => updateActivityForm('date', event.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-location">Location / Venue</label>
+                      <input
+                        id="activity-location"
+                        type="text"
+                        value={activityForm.location}
+                        onChange={(event) => updateActivityForm('location', event.target.value)}
+                        placeholder="University auditorium, partner site, online, etc."
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-participants">Participants / Beneficiary</label>
+                      <input
+                        id="activity-participants"
+                        type="text"
+                        value={activityForm.participantsOrBeneficiary}
+                        onChange={(event) => updateActivityForm('participantsOrBeneficiary', event.target.value)}
+                        placeholder="Students, faculty panel, community partner, or beneficiary"
+                      />
+                    </div>
+
+                    <div className="form-field sm:col-span-2">
+                      <label htmlFor="activity-description">Description</label>
+                      <textarea
+                        id="activity-description"
+                        value={activityForm.description}
+                        onChange={(event) => updateActivityForm('description', event.target.value)}
+                        placeholder="Summarize the activity, outcomes, and relevance to the project."
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <h4 className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">
+                    <i className="fas fa-paperclip" aria-hidden="true" /> Evidence
+                  </h4>
+                  {activityEvidenceFiles.length ? (
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                      {activityEvidenceFiles.map((file) => {
+                        const isSelected = activityForm.selectedFileIds.includes(file.id);
+                        return (
+                          <label
+                            key={file.id}
+                            className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition ${
+                              isSelected
+                                ? 'border-blue-400 bg-blue-50/60 ring-1 ring-blue-400/30'
+                                : 'border-[var(--border)] bg-[var(--surface-alt)] hover:border-blue-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleActivityEvidenceFile(file.id)}
+                              className="h-4 w-4 shrink-0 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
+                            />
+                            <i className="fas fa-file-lines shrink-0 text-[var(--text-meta)]" aria-hidden="true" />
+                            <span className="min-w-0 truncate text-sm font-semibold text-[var(--text)]">{file.fileName}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="rounded-xl border border-dashed border-[var(--border)] px-4 py-3 text-sm text-[var(--muted)]">
+                      Upload an Award/Recognition or Activity Evidence file above first, then attach it here.
+                    </p>
+                  )}
+                </section>
+
+                <section>
+                  <h4 className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">
+                    <i className="fas fa-sliders" aria-hidden="true" /> Additional Options
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3.5 transition ${
+                        activityForm.addToTimeline
+                          ? 'border-blue-400 bg-blue-50/60'
+                          : 'border-[var(--border)] bg-[var(--surface-alt)] hover:border-blue-300'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={activityForm.addToTimeline}
+                        onChange={(event) => updateActivityForm('addToTimeline', event.target.checked)}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="flex flex-col gap-0.5">
+                        <strong className="text-sm font-bold text-[var(--text)]">Add this activity to project timeline</strong>
+                        <span className="text-xs text-[var(--muted)]">Keep the activity aligned with the related milestone record.</span>
+                      </span>
+                    </label>
+
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3.5 transition ${
+                        activityForm.markAsAchievement
+                          ? 'border-amber-400 bg-amber-50/60'
+                          : 'border-[var(--border)] bg-[var(--surface-alt)] hover:border-amber-300'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={activityForm.markAsAchievement}
+                        onChange={(event) => updateActivityForm('markAsAchievement', event.target.checked)}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--border)] text-amber-600 focus:ring-amber-500"
+                      />
+                      <span className="flex flex-col gap-0.5">
+                        <strong className="text-sm font-bold text-[var(--text)]">Mark as achievement / recognition</strong>
+                        <span className="text-xs text-[var(--muted)]">Use this when the activity should also count as a recognition entry.</span>
+                      </span>
+                    </label>
+                  </div>
+                </section>
+              </div>
+
+              <div className="form-actions shrink-0 border-t border-[var(--border)] px-7 py-4">
+                <button className="btn btn-secondary" type="button" onClick={closeActivityModal}>Cancel</button>
+                <button className="btn btn-primary" type="submit" disabled={isSavingActivity}>
+                  <i className="fas fa-floppy-disk" aria-hidden="true" /> {isSavingActivity ? 'Saving...' : 'Save Academic Activity'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>,
+      document.body
+      ) : null}
+
+      <AcademicActivityDetailModal
+        activity={selectedActivity}
+        onClose={() => setSelectedActivity(null)}
+        onDelete={handleDeleteActivity}
+      />
     </>
   );
 }

@@ -4,20 +4,6 @@ import { BrandName } from '@/components/branding/brand-copy';
 
 import styles from '@/app/page.module.css';
 
-const quickLinks = [
-  { href: '/#home', label: 'Home' },
-  { href: '/#modules', label: 'Modules' },
-  { href: '/#workflow', label: 'Workflow' },
-  { href: '/#about', label: 'About' }
-];
-
-const accessLinks = [
-  { href: '/login', label: 'Login' },
-  { href: '/register', label: 'Sign Up' },
-  { href: '/about#system-purpose', label: 'Support' },
-  { href: '/about#capstone-team', label: 'Contact' }
-];
-
 const socialLinks = [
   { href: '#', label: 'Facebook', icon: 'fab fa-facebook-f' },
   { href: '#', label: 'Twitter', icon: 'fab fa-twitter' },
@@ -39,28 +25,6 @@ export function LandingFooter() {
             Institutional thesis and capstone project management for registration,
             progress monitoring, repository archiving, and research outcomes.
           </p>
-        </div>
-
-        <div className={styles.footerColumn}>
-          <h3>Quick Links</h3>
-          <ul>
-            {quickLinks.map(link => (
-              <li key={link.href}>
-                <Link href={link.href}>{link.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className={styles.footerColumn}>
-          <h3>User Access</h3>
-          <ul>
-            {accessLinks.map(link => (
-              <li key={link.href}>
-                <Link href={link.href}>{link.label}</Link>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <div className={styles.footerColumn}>

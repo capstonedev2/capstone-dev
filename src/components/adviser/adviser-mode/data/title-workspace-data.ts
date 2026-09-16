@@ -12,7 +12,10 @@ export type AdviserTitleRecord = {
   groupId: string;
   title: string;
   description: string;
-  department: 'IT';
+  // Not IT-only — this platform also serves Manufacturing Engineering Technology,
+  // Technology Communication Management, Energy Systems, and Naval Architecture /
+  // Marine Engineering (see src/lib/landing/departments-data.ts).
+  department: string;
   status: TitleStatus;
   submittedAt: string;
   keywords: string[];
@@ -34,8 +37,23 @@ export type AdviserTitleRecord = {
     previewUrl?: string;
     fileType?: string;
     size: number | null;
+    documentCategory?: string | null;
   }>;
+  // Independent review status for each stage's oral defense application
+  // evidence photo — reviewed separately from (and typically after) that
+  // stage's other decisions. `evidenceReview` is the Concept-stage one (kept
+  // under its original name for backward compatibility); Proposal and Final
+  // each get their own, since a group's evidence photo differs per stage.
+  evidenceReview: EvidenceReview;
+  proposalEvidenceReview: EvidenceReview;
+  finalEvidenceReview: EvidenceReview;
 };
+
+export type EvidenceReview = {
+  status: string;
+  feedback: string | null;
+  feedbackBy: string | null;
+} | null;
 
 export const TITLE_STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'All Status' },

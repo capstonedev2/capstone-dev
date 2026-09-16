@@ -54,13 +54,18 @@ model RepositoryFile {
 }
 
 model TechnologyTransferRecord {
-  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @repositoryDb.Uuid
-  repositoryProjectId String?            @map("repository_project_id") @repositoryDb.Uuid
-  repositoryProject   RepositoryProject? @relation(fields: [repositoryProjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  partnerName         String?            @map("partner_name")
-  transferStatus      String?            @default("PENDING") @map("transfer_status")
-  remarks             String?
-  dateRecorded        DateTime?          @default(now()) @map("date_recorded") @repositoryDb.Timestamptz(6)
+  id                    String             @id @default(dbgenerated("gen_random_uuid()")) @repositoryDb.Uuid
+  repositoryProjectId   String?            @map("repository_project_id") @repositoryDb.Uuid
+  repositoryProject     RepositoryProject? @relation(fields: [repositoryProjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  partnerName           String?            @map("partner_name")
+  requesterEmail        String?            @map("requester_email")
+  requesterOrganization String?            @map("requester_organization")
+  source                String?            @default("SYSTEM")
+  transferStatus        String?            @default("PENDING") @map("transfer_status")
+  moaUrl                String?            @map("moa_url")
+  deploymentDate        DateTime?          @map("deployment_date") @repositoryDb.Timestamptz(6)
+  remarks               String?
+  dateRecorded          DateTime?          @default(now()) @map("date_recorded") @repositoryDb.Timestamptz(6)
 
   @@map("technology_transfer_records")
 }

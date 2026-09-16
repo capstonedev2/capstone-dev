@@ -12,6 +12,7 @@ import {
   TitleFilters,
   TitleList,
   TitleSummaryCards,
+  type DefenseApplicationStageKey,
   type TitleSummaryMetric
 } from '@/components/adviser/adviser-mode/data/title-workspace-sections';
 import {
@@ -25,6 +26,12 @@ import {
   type TitleStatus
 } from '@/components/adviser/adviser-mode/data/title-workspace-data';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
+
+const EVIDENCE_REVIEW_FIELD_BY_CHECKPOINT_KEY: Record<DefenseApplicationStageKey, 'evidenceReview' | 'proposalEvidenceReview' | 'finalEvidenceReview'> = {
+  'concept-defense-application': 'evidenceReview',
+  'proposal-defense-application': 'proposalEvidenceReview',
+  'final-defense-application': 'finalEvidenceReview'
+};
 
 export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const { workspaceMode, switchWorkspace, pathname, basePath } = useWorkspaceMode();
@@ -230,11 +237,49 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
     }
   };
 
+  const applyEvidenceDecision = async (
+    record: AdviserTitleRecord,
+    decision: 'approved' | 'needs_revision' | 'rejected',
+    remarks: string,
+    checkpointKey: DefenseApplicationStageKey
+  ) => {
+    const response = await fetch('/api/defense-application-evidence', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectId: record.id, decision, remarks: remarks.trim(), checkpointKey })
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(payload?.message || 'Unable to update the evidence review.');
+    }
+
+    const reviewField = EVIDENCE_REVIEW_FIELD_BY_CHECKPOINT_KEY[checkpointKey];
+    const nextStatus = payload?.checkpoint?.status || record[reviewField]?.status || 'SUBMITTED';
+
+    setTitleRecords((current) =>
+      current.map((item) =>
+        item.id === record.id
+          ? {
+              ...item,
+              [reviewField]: {
+                status: nextStatus,
+                feedback: remarks.trim() || item[reviewField]?.feedback || null,
+                feedbackBy: remarks.trim() ? 'You' : item[reviewField]?.feedbackBy || null
+              }
+            }
+          : item
+      )
+    );
+
+    window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+  };
+
   return (
     <>
         <AdviserPageHeader
-          title="Title Approvals"
-          description="Review, validate, and manage proposed capstone project titles from your assigned IT groups."
+          title="Title & Evidence Approval"
+          description="Decide on proposed capstone project titles and review Oral Defense Application evidence from your assigned IT groups."
           actions={
             <AdviserShellActions
               basePath={basePath}
@@ -305,6 +350,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
             onApprove={(r) => applyDecision(r, 'approved', remarksDraft)}
             onRequestRevision={(r) => applyDecision(r, 'needs-revision', remarksDraft)}
             onReject={(r) => applyDecision(r, 'rejected', remarksDraft)}
+            onReviewEvidence={applyEvidenceDecision}
           />
         ) : null}
       </>

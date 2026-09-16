@@ -58,12 +58,40 @@ type TitleDetailsDrawerProps = {
   onApprove: (record: AdviserTitleRecord) => Promise<void> | void;
   onRequestRevision: (record: AdviserTitleRecord) => Promise<void> | void;
   onReject: (record: AdviserTitleRecord) => Promise<void> | void;
+  onReviewEvidence: (
+    record: AdviserTitleRecord,
+    decision: 'approved' | 'needs_revision' | 'rejected',
+    remarks: string,
+    checkpointKey: DefenseApplicationStageKey
+  ) => Promise<void> | void;
 };
+
+export type DefenseApplicationStageKey =
+  | 'concept-defense-application'
+  | 'proposal-defense-application'
+  | 'final-defense-application';
+
+const DEFENSE_APPLICATION_STAGES: Array<{
+  checkpointKey: DefenseApplicationStageKey;
+  stageLabel: string;
+  reviewField: 'evidenceReview' | 'proposalEvidenceReview' | 'finalEvidenceReview';
+  alwaysShow: boolean;
+}> = [
+  { checkpointKey: 'concept-defense-application', stageLabel: 'Concept', reviewField: 'evidenceReview', alwaysShow: true },
+  { checkpointKey: 'proposal-defense-application', stageLabel: 'Proposal', reviewField: 'proposalEvidenceReview', alwaysShow: false },
+  { checkpointKey: 'final-defense-application', stageLabel: 'Final', reviewField: 'finalEvidenceReview', alwaysShow: false }
+];
 
 type TitleUploadedFile = AdviserTitleRecord['uploadedFiles'][number];
 
 const GENERATED_PREVIEW_ID = 'generated';
 const OFFICE_FILE_EXTENSIONS = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
+const IMAGE_FILE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
+const COMPLIANCE_EVIDENCE_CATEGORIES: Record<string, string> = {
+  'concept-defense-application': 'Concept',
+  'proposal-defense-application': 'Proposal',
+  'final-defense-application': 'Final'
+};
 
 function WorkspaceSelect<TValue extends string>({
   value,
@@ -107,6 +135,7 @@ function getTitleFileIcon(file: TitleUploadedFile) {
   if (['doc', 'docx'].includes(extension)) return 'fa-file-word';
   if (['ppt', 'pptx'].includes(extension)) return 'fa-file-powerpoint';
   if (['xls', 'xlsx', 'csv'].includes(extension)) return 'fa-file-excel';
+  if (IMAGE_FILE_EXTENSIONS.includes(extension)) return 'fa-file-image';
 
   return 'fa-file-lines';
 }
@@ -115,6 +144,23 @@ function isTitleOfficeFile(file: TitleUploadedFile) {
   const extension = getTitleFileExtension(file.name, file.fileType);
 
   return OFFICE_FILE_EXTENSIONS.includes(extension);
+}
+
+function isTitleImageFile(file: TitleUploadedFile) {
+  const extension = getTitleFileExtension(file.name, file.fileType);
+
+  return IMAGE_FILE_EXTENSIONS.includes(extension);
+}
+
+// Flags the photo evidence of a signed Application for Oral Defense of Thesis
+// (any stage) so the adviser drawer can label it distinctly from the concept
+// paper / chapters / manuscript instead of listing it as a generic "attachment".
+function isComplianceEvidenceFile(file: TitleUploadedFile) {
+  return Boolean(file.documentCategory && COMPLIANCE_EVIDENCE_CATEGORIES[file.documentCategory]);
+}
+
+function getComplianceEvidenceStageLabel(file: TitleUploadedFile) {
+  return file.documentCategory ? COMPLIANCE_EVIDENCE_CATEGORIES[file.documentCategory] || '' : '';
 }
 
 function getTitleFilePreviewUrl(file: TitleUploadedFile, signedUrl?: string) {
@@ -135,6 +181,23 @@ function formatTitleFileSize(size?: number | null) {
   }
 
   return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function getEvidenceReviewMeta(status?: string) {
+  switch (status) {
+    case 'COMPLETED':
+    case 'APPROVED':
+      return { label: 'Approved', className: 'bg-emerald-50 text-emerald-700 ring-emerald-100', icon: 'fa-circle-check' };
+    case 'NEEDS_REVISION':
+      return { label: 'Needs Revision', className: 'bg-amber-50 text-amber-700 ring-amber-100', icon: 'fa-rotate-left' };
+    case 'REJECTED':
+      return { label: 'Rejected', className: 'bg-rose-50 text-rose-700 ring-rose-100', icon: 'fa-ban' };
+    case 'SUBMITTED':
+    case 'IN_REVIEW':
+      return { label: 'Pending Review', className: 'bg-blue-50 text-blue-700 ring-blue-100', icon: 'fa-hourglass-half' };
+    default:
+      return { label: 'Not Uploaded Yet', className: 'bg-slate-100 text-slate-600 ring-slate-200', icon: 'fa-circle-exclamation' };
+  }
 }
 
 function getTitleReviewStage(record: AdviserTitleRecord) {
@@ -414,7 +477,8 @@ export function TitleDetailsDrawer({
   onClose,
   onApprove,
   onRequestRevision,
-  onReject
+  onReject,
+  onReviewEvidence
 }: TitleDetailsDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => { setIsMounted(true); }, []);
@@ -423,6 +487,37 @@ export function TitleDetailsDrawer({
     else document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
   }, [!!record]);
+
+  const [evidenceRemarksDrafts, setEvidenceRemarksDrafts] = useState<Record<string, string>>({});
+  const [submittingEvidenceKey, setSubmittingEvidenceKey] = useState<DefenseApplicationStageKey | null>(null);
+
+  const submitEvidenceDecision = async (
+    checkpointKey: DefenseApplicationStageKey,
+    decision: 'approved' | 'needs_revision' | 'rejected'
+  ) => {
+    if (!record || submittingEvidenceKey) {
+      return;
+    }
+
+    const confirmMessage = decision === 'approved'
+      ? 'Approve this oral defense application evidence?'
+      : decision === 'needs_revision'
+        ? 'Send this evidence back for revision?'
+        : 'Reject this oral defense application evidence?';
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    setSubmittingEvidenceKey(checkpointKey);
+
+    try {
+      await onReviewEvidence(record, decision, evidenceRemarksDrafts[checkpointKey] || '', checkpointKey);
+      setEvidenceRemarksDrafts((current) => ({ ...current, [checkpointKey]: '' }));
+    } finally {
+      setSubmittingEvidenceKey(null);
+    }
+  };
 
   const [selectedPreviewId, setSelectedPreviewId] = useState<string>(GENERATED_PREVIEW_ID);
   const [signedPreviewUrls, setSignedPreviewUrls] = useState<Record<string, string>>({});
@@ -561,7 +656,11 @@ export function TitleDetailsDrawer({
                         ? `${getTitleFileExtension(selectedUploadedFile.name, selectedUploadedFile.fileType).toUpperCase()} Preview`
                         : 'File Preview'}
                     </p>
-                    <h2 className="mt-1 truncate text-lg font-black text-slate-950">Proposal Preview</h2>
+                    <h2 className="mt-1 truncate text-lg font-black text-slate-950">
+                      {selectedUploadedFile && isComplianceEvidenceFile(selectedUploadedFile)
+                        ? `Oral Defense Application Evidence (${getComplianceEvidenceStageLabel(selectedUploadedFile)})`
+                        : 'Proposal Preview'}
+                    </h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
 
@@ -579,6 +678,11 @@ export function TitleDetailsDrawer({
                       >
                         <i className={`fas ${getTitleFileIcon(file)} text-[10px]`} aria-hidden="true" />
                         <span className="truncate">{file.name}</span>
+                        {isComplianceEvidenceFile(file) ? (
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-amber-700">
+                            Evidence
+                          </span>
+                        ) : null}
                       </button>
                     ))}
                   </div>
@@ -668,6 +772,14 @@ export function TitleDetailsDrawer({
                               </a>
                             ) : null}
                           </div>
+                        ) : isTitleImageFile(selectedUploadedFile) ? (
+                          <div className="flex h-[clamp(620px,76vh,960px)] w-full items-center justify-center overflow-auto rounded-xl border border-slate-200 bg-slate-950/90 p-3">
+                            <img
+                              src={selectedPreviewUrl || selectedUploadedFile.previewUrl || selectedUploadedFile.url}
+                              alt={`${selectedUploadedFile.name} preview`}
+                              className="max-h-full max-w-full rounded-lg object-contain shadow-lg"
+                            />
+                          </div>
                         ) : (
                           <iframe
                             className="block h-[clamp(620px,76vh,960px)] w-full rounded-xl border border-slate-200 bg-white"
@@ -739,7 +851,14 @@ export function TitleDetailsDrawer({
                             <i className={`fas ${getTitleFileIcon(file)}`} aria-hidden="true" />
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-bold text-slate-800 group-hover:text-blue-800">{file.name}</p>
+                            <p className="truncate text-sm font-bold text-slate-800 group-hover:text-blue-800">
+                              {file.name}
+                              {isComplianceEvidenceFile(file) ? (
+                                <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-amber-700">
+                                  {getComplianceEvidenceStageLabel(file)} Defense Application Evidence
+                                </span>
+                              ) : null}
+                            </p>
                             <p className="text-xs font-medium text-slate-500">{formatTitleFileSize(file.size)}</p>
                           </div>
                         </div>
@@ -852,6 +971,107 @@ export function TitleDetailsDrawer({
                   </div>
                 </div>
               </section>
+
+              {DEFENSE_APPLICATION_STAGES.map((stage) => {
+                const evidenceReview = record[stage.reviewField];
+                const hasEvidenceFile = uploadedFiles.some((file) => file.documentCategory === stage.checkpointKey);
+                // ensureProjectMilestoneWorkflow pre-creates every stage's checkpoint
+                // row up front, so evidenceReview exists (status PENDING) even for a
+                // stage the group hasn't reached yet — checking the file/status is
+                // what actually tells us whether there's real activity to show.
+                const hasStageActivity = hasEvidenceFile || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
+
+                // Proposal/Final cards only appear once there's something to review —
+                // no point cluttering the drawer with a card for a stage the group
+                // hasn't reached yet (Concept's card always shows, unchanged).
+                if (!stage.alwaysShow && !hasStageActivity) {
+                  return null;
+                }
+
+                const remarksValue = evidenceRemarksDrafts[stage.checkpointKey] || '';
+                const isSubmitting = submittingEvidenceKey === stage.checkpointKey;
+
+                return (
+                  <section
+                    key={stage.checkpointKey}
+                    className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+                  >
+                    <div className="p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                          <i className="fas fa-file-signature" /> Oral Defense Application Evidence ({stage.stageLabel})
+                        </p>
+                        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${getEvidenceReviewMeta(evidenceReview?.status).className}`}>
+                          <i className={`fas ${getEvidenceReviewMeta(evidenceReview?.status).icon}`} aria-hidden="true" />
+                          {getEvidenceReviewMeta(evidenceReview?.status).label}
+                        </span>
+                      </div>
+
+                      <p className="mt-3 text-sm font-medium leading-6 text-slate-500">
+                        Reviewed independently from the {stage.stageLabel.toLowerCase()} stage's other decisions, since the
+                        group typically uploads this once the rest of the stage is already cleared. Find the photo
+                        itself in Attached Documents above.
+                      </p>
+
+                      {evidenceReview?.feedback ? (
+                        <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm font-medium text-slate-700 ring-1 ring-inset ring-slate-100">
+                          <strong className="text-slate-900">
+                            {evidenceReview.feedbackBy || 'Adviser'}:
+                          </strong>{' '}
+                          {evidenceReview.feedback}
+                        </div>
+                      ) : null}
+
+                      {evidenceReview ? (
+                        <>
+                          <label className="mt-4 block">
+                            <span className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                              <i className="fas fa-comment-dots" /> Evidence Remarks
+                            </span>
+                            <textarea
+                              className="mt-3 min-h-[80px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                              placeholder="Add notes about the signatures or clearance..."
+                              value={remarksValue}
+                              onChange={(event) => setEvidenceRemarksDrafts((current) => ({ ...current, [stage.checkpointKey]: event.target.value }))}
+                            />
+                          </label>
+
+                          <div className="mt-3 grid grid-cols-3 gap-2">
+                            <button
+                              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 text-xs font-black text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
+                              type="button"
+                              disabled={isSubmitting}
+                              onClick={() => submitEvidenceDecision(stage.checkpointKey, 'approved')}
+                            >
+                              <i className="fas fa-check" /> Approve
+                            </button>
+                            <button
+                              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-amber-50 px-3 text-xs font-black text-amber-700 shadow-sm ring-1 ring-inset ring-amber-200 transition hover:bg-amber-100 disabled:opacity-60"
+                              type="button"
+                              disabled={isSubmitting}
+                              onClick={() => submitEvidenceDecision(stage.checkpointKey, 'needs_revision')}
+                            >
+                              <i className="fas fa-rotate-left" /> Revise
+                            </button>
+                            <button
+                              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-black text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition hover:bg-rose-50 disabled:opacity-60"
+                              type="button"
+                              disabled={isSubmitting}
+                              onClick={() => submitEvidenceDecision(stage.checkpointKey, 'rejected')}
+                            >
+                              <i className="fas fa-ban" /> Reject
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="mt-3 rounded-xl bg-amber-50/70 p-3 text-sm font-medium text-amber-800 ring-1 ring-inset ring-amber-100">
+                          Waiting for the group to upload the signed application photo from Document Submissions.
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                );
+              })}
 
               <SimilarityIndicator compact score={record.similarityScore} similarTitles={record.similarTitles} />
 
@@ -1039,7 +1259,7 @@ export function TitleCard({
         <div className="min-w-0 pl-1">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)] shadow-sm">
-              <i className="fas fa-layer-group text-[10px]" /> IT
+              <i className="fas fa-layer-group text-[10px]" /> {record.department}
             </span>
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-sm ${statusMeta.badgeClassName}`}>
               {record.status === 'pending' ? (
@@ -1108,6 +1328,24 @@ export function TitleCard({
           ) : (
             <p className="mt-3 text-sm font-medium text-slate-500">{formatMemberPreview(record.memberPreview)}</p>
           )}
+
+          {record.keywords.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {record.keywords.slice(0, 4).map((keyword) => (
+                <span
+                  key={keyword}
+                  className="inline-flex items-center rounded-full bg-[#0F3DDE]/5 px-2.5 py-1 text-[11px] font-bold text-[#0F3DDE] ring-1 ring-inset ring-[#0F3DDE]/15"
+                >
+                  #{keyword}
+                </span>
+              ))}
+              {record.keywords.length > 4 ? (
+                <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
+                  +{record.keywords.length - 4} more
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">

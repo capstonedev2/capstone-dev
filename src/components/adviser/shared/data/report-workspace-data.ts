@@ -66,7 +66,7 @@ export type SupervisionSummary = {
 };
 
 export type AdviserReportsModule = {
-  department: 'IT';
+  department: string;
   totalGroups: number;
   completedGroups: number;
   averageProgress: number;
@@ -252,8 +252,12 @@ export function formatReportDate(value: string) {
 }
 
 export function buildAdviserReportsModule(data: AdviserDashboardData, filters: ReportsFilterInput): AdviserReportsModule {
-  const adviserGroups = data.groups.filter((group) => (group.department || group.dept) === 'IT');
-  const panelProjects = data.panelProjects.filter((project) => project.dept === 'IT');
+  // data.groups/panelProjects are already scoped to this adviser/panelist server-side —
+  // filtering again by department === 'IT' here silently dropped every group and panel
+  // project outside IT (Manufacturing Engineering Technology, Technology Communication
+  // Management, Energy Systems, Naval Architecture) from the whole report.
+  const adviserGroups = data.groups;
+  const panelProjects = data.panelProjects;
 
   const filteredGroups = adviserGroups
     .filter((group) => matchesDateRange(getGroupReportDate(group), filters.dateRange))
@@ -334,7 +338,7 @@ export function buildAdviserReportsModule(data: AdviserDashboardData, filters: R
           };
 
   return {
-    department: 'IT',
+    department: 'All Departments',
     totalGroups: filteredGroups.length,
     completedGroups: completedGroups.length,
     averageProgress,
@@ -344,7 +348,7 @@ export function buildAdviserReportsModule(data: AdviserDashboardData, filters: R
         id: 'total-groups',
         label: 'Total Groups',
         value: String(filteredGroups.length),
-        helperText: 'IT groups currently included in the selected reporting scope.',
+        helperText: 'Groups currently included in the selected reporting scope.',
         icon: 'fa-users',
         iconClassName: 'bg-blue-50 text-blue-600'
       },
@@ -360,7 +364,7 @@ export function buildAdviserReportsModule(data: AdviserDashboardData, filters: R
         id: 'average-progress',
         label: 'Average Progress',
         value: formatPercentValue(averageProgress),
-        helperText: 'Average completion across the selected IT adviser records.',
+        helperText: 'Average completion across the selected adviser records.',
         icon: 'fa-chart-line',
         iconClassName: 'bg-sky-50 text-sky-600'
       },

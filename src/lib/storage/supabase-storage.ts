@@ -59,8 +59,8 @@ export function assertDocumentBucket(value: string): asserts value is DocumentSt
   }
 }
 
-export function assertValidDocumentFile(file: File, bucketName: DocumentStorageBucket) {
-  const typeError = validateFileType(file.name, file.type);
+export function assertValidDocumentFile(file: File, bucketName: DocumentStorageBucket, allowImages = false) {
+  const typeError = validateFileType(file.name, file.type, allowImages);
 
   if (typeError) {
     throw new HttpError(typeError, 400, { file: typeError });

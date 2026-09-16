@@ -24457,27 +24457,6 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
     box-shadow: 0 0 0 4px rgba(0, 58, 143, 0.11) !important;
 }
 
-.student-title-submission-page .title-submission-cta-panel {
-    border-color: #bfdbfe !important;
-    background:
-        linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(255, 255, 255, 0.98)),
-        linear-gradient(135deg, rgba(0, 58, 143, 0.08), transparent) !important;
-    box-shadow: 0 16px 36px rgba(0, 58, 143, 0.08) !important;
-}
-
-.student-title-submission-page .title-submission-cta-panel > .flex:first-of-type > div:first-child {
-    border: 0 !important;
-    background: rgba(0, 58, 143, 0.1) !important;
-    color: #003a8f !important;
-}
-
-.student-title-submission-page .title-submission-cta-panel button[type="submit"] {
-    min-height: 44px;
-    border: 0 !important;
-    background: linear-gradient(135deg, #003a8f, #1e40af) !important;
-    box-shadow: 0 12px 24px rgba(0, 58, 143, 0.22) !important;
-}
-
 .student-title-submission-page .title-submission-side-rail > .bg-white {
     padding: 1rem !important;
     height: auto !important;
@@ -25021,25 +25000,6 @@ html[data-student-theme="dark"] .student-shell .student-title-submission-page .t
 .student-title-submission-page .title-submission-main-stack textarea:focus {
     border-color: var(--primary, #003A8F) !important;
     box-shadow: 0 0 0 4px rgba(0, 58, 143, 0.1) !important;
-}
-
-.student-title-submission-page .title-submission-cta-panel {
-    border-color: #bfdbfe !important;
-    border-left: 4px solid var(--primary, #003A8F) !important;
-    background: var(--surface) !important;
-    box-shadow: var(--title-shell-shadow) !important;
-}
-
-.student-title-submission-page .title-submission-cta-panel > .flex:first-of-type > div:first-child {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 8px !important;
-    background: var(--primary-soft, #EFF6FF) !important;
-    color: var(--primary, #003A8F) !important;
-}
-
-.student-title-submission-page .title-submission-cta-panel button {
-    border-radius: 8px !important;
 }
 
 .student-title-submission-page .title-submission-side-rail {

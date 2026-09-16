@@ -28,7 +28,12 @@ export type TechnologyTransferRecordMinAggregateOutputType = {
   id: string | null
   repositoryProjectId: string | null
   partnerName: string | null
+  requesterEmail: string | null
+  requesterOrganization: string | null
+  source: string | null
   transferStatus: string | null
+  moaUrl: string | null
+  deploymentDate: Date | null
   remarks: string | null
   dateRecorded: Date | null
 }
@@ -37,7 +42,12 @@ export type TechnologyTransferRecordMaxAggregateOutputType = {
   id: string | null
   repositoryProjectId: string | null
   partnerName: string | null
+  requesterEmail: string | null
+  requesterOrganization: string | null
+  source: string | null
   transferStatus: string | null
+  moaUrl: string | null
+  deploymentDate: Date | null
   remarks: string | null
   dateRecorded: Date | null
 }
@@ -46,7 +56,12 @@ export type TechnologyTransferRecordCountAggregateOutputType = {
   id: number
   repositoryProjectId: number
   partnerName: number
+  requesterEmail: number
+  requesterOrganization: number
+  source: number
   transferStatus: number
+  moaUrl: number
+  deploymentDate: number
   remarks: number
   dateRecorded: number
   _all: number
@@ -57,7 +72,12 @@ export type TechnologyTransferRecordMinAggregateInputType = {
   id?: true
   repositoryProjectId?: true
   partnerName?: true
+  requesterEmail?: true
+  requesterOrganization?: true
+  source?: true
   transferStatus?: true
+  moaUrl?: true
+  deploymentDate?: true
   remarks?: true
   dateRecorded?: true
 }
@@ -66,7 +86,12 @@ export type TechnologyTransferRecordMaxAggregateInputType = {
   id?: true
   repositoryProjectId?: true
   partnerName?: true
+  requesterEmail?: true
+  requesterOrganization?: true
+  source?: true
   transferStatus?: true
+  moaUrl?: true
+  deploymentDate?: true
   remarks?: true
   dateRecorded?: true
 }
@@ -75,7 +100,12 @@ export type TechnologyTransferRecordCountAggregateInputType = {
   id?: true
   repositoryProjectId?: true
   partnerName?: true
+  requesterEmail?: true
+  requesterOrganization?: true
+  source?: true
   transferStatus?: true
+  moaUrl?: true
+  deploymentDate?: true
   remarks?: true
   dateRecorded?: true
   _all?: true
@@ -157,7 +187,12 @@ export type TechnologyTransferRecordGroupByOutputType = {
   id: string
   repositoryProjectId: string | null
   partnerName: string | null
+  requesterEmail: string | null
+  requesterOrganization: string | null
+  source: string | null
   transferStatus: string | null
+  moaUrl: string | null
+  deploymentDate: Date | null
   remarks: string | null
   dateRecorded: Date | null
   _count: TechnologyTransferRecordCountAggregateOutputType | null
@@ -187,7 +222,12 @@ export type TechnologyTransferRecordWhereInput = {
   id?: Prisma.UuidFilter<"TechnologyTransferRecord"> | string
   repositoryProjectId?: Prisma.UuidNullableFilter<"TechnologyTransferRecord"> | string | null
   partnerName?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  requesterEmail?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  requesterOrganization?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  source?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
   transferStatus?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  moaUrl?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  deploymentDate?: Prisma.DateTimeNullableFilter<"TechnologyTransferRecord"> | Date | string | null
   remarks?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
   dateRecorded?: Prisma.DateTimeNullableFilter<"TechnologyTransferRecord"> | Date | string | null
   repositoryProject?: Prisma.XOR<Prisma.RepositoryProjectNullableScalarRelationFilter, Prisma.RepositoryProjectWhereInput> | null
@@ -197,7 +237,12 @@ export type TechnologyTransferRecordOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   repositoryProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   partnerName?: Prisma.SortOrderInput | Prisma.SortOrder
+  requesterEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  requesterOrganization?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
   transferStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  moaUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  deploymentDate?: Prisma.SortOrderInput | Prisma.SortOrder
   remarks?: Prisma.SortOrderInput | Prisma.SortOrder
   dateRecorded?: Prisma.SortOrderInput | Prisma.SortOrder
   repositoryProject?: Prisma.RepositoryProjectOrderByWithRelationInput
@@ -210,7 +255,12 @@ export type TechnologyTransferRecordWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TechnologyTransferRecordWhereInput | Prisma.TechnologyTransferRecordWhereInput[]
   repositoryProjectId?: Prisma.UuidNullableFilter<"TechnologyTransferRecord"> | string | null
   partnerName?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  requesterEmail?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  requesterOrganization?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  source?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
   transferStatus?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  moaUrl?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  deploymentDate?: Prisma.DateTimeNullableFilter<"TechnologyTransferRecord"> | Date | string | null
   remarks?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
   dateRecorded?: Prisma.DateTimeNullableFilter<"TechnologyTransferRecord"> | Date | string | null
   repositoryProject?: Prisma.XOR<Prisma.RepositoryProjectNullableScalarRelationFilter, Prisma.RepositoryProjectWhereInput> | null
@@ -220,7 +270,12 @@ export type TechnologyTransferRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   repositoryProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   partnerName?: Prisma.SortOrderInput | Prisma.SortOrder
+  requesterEmail?: Prisma.SortOrderInput | Prisma.SortOrder
+  requesterOrganization?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
   transferStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  moaUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  deploymentDate?: Prisma.SortOrderInput | Prisma.SortOrder
   remarks?: Prisma.SortOrderInput | Prisma.SortOrder
   dateRecorded?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TechnologyTransferRecordCountOrderByAggregateInput
@@ -235,7 +290,12 @@ export type TechnologyTransferRecordScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"TechnologyTransferRecord"> | string
   repositoryProjectId?: Prisma.UuidNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
   partnerName?: Prisma.StringNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
+  requesterEmail?: Prisma.StringNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
+  requesterOrganization?: Prisma.StringNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
+  source?: Prisma.StringNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
   transferStatus?: Prisma.StringNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
+  moaUrl?: Prisma.StringNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
+  deploymentDate?: Prisma.DateTimeNullableWithAggregatesFilter<"TechnologyTransferRecord"> | Date | string | null
   remarks?: Prisma.StringNullableWithAggregatesFilter<"TechnologyTransferRecord"> | string | null
   dateRecorded?: Prisma.DateTimeNullableWithAggregatesFilter<"TechnologyTransferRecord"> | Date | string | null
 }
@@ -243,7 +303,12 @@ export type TechnologyTransferRecordScalarWhereWithAggregatesInput = {
 export type TechnologyTransferRecordCreateInput = {
   id?: string
   partnerName?: string | null
+  requesterEmail?: string | null
+  requesterOrganization?: string | null
+  source?: string | null
   transferStatus?: string | null
+  moaUrl?: string | null
+  deploymentDate?: Date | string | null
   remarks?: string | null
   dateRecorded?: Date | string | null
   repositoryProject?: Prisma.RepositoryProjectCreateNestedOneWithoutTechnologyTransferInput
@@ -253,7 +318,12 @@ export type TechnologyTransferRecordUncheckedCreateInput = {
   id?: string
   repositoryProjectId?: string | null
   partnerName?: string | null
+  requesterEmail?: string | null
+  requesterOrganization?: string | null
+  source?: string | null
   transferStatus?: string | null
+  moaUrl?: string | null
+  deploymentDate?: Date | string | null
   remarks?: string | null
   dateRecorded?: Date | string | null
 }
@@ -261,7 +331,12 @@ export type TechnologyTransferRecordUncheckedCreateInput = {
 export type TechnologyTransferRecordUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   partnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterOrganization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transferStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deploymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dateRecorded?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repositoryProject?: Prisma.RepositoryProjectUpdateOneWithoutTechnologyTransferNestedInput
@@ -271,7 +346,12 @@ export type TechnologyTransferRecordUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   repositoryProjectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterOrganization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transferStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deploymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dateRecorded?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -280,7 +360,12 @@ export type TechnologyTransferRecordCreateManyInput = {
   id?: string
   repositoryProjectId?: string | null
   partnerName?: string | null
+  requesterEmail?: string | null
+  requesterOrganization?: string | null
+  source?: string | null
   transferStatus?: string | null
+  moaUrl?: string | null
+  deploymentDate?: Date | string | null
   remarks?: string | null
   dateRecorded?: Date | string | null
 }
@@ -288,7 +373,12 @@ export type TechnologyTransferRecordCreateManyInput = {
 export type TechnologyTransferRecordUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   partnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterOrganization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transferStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deploymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dateRecorded?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -297,7 +387,12 @@ export type TechnologyTransferRecordUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   repositoryProjectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   partnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterOrganization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transferStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deploymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dateRecorded?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -316,7 +411,12 @@ export type TechnologyTransferRecordCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   repositoryProjectId?: Prisma.SortOrder
   partnerName?: Prisma.SortOrder
+  requesterEmail?: Prisma.SortOrder
+  requesterOrganization?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   transferStatus?: Prisma.SortOrder
+  moaUrl?: Prisma.SortOrder
+  deploymentDate?: Prisma.SortOrder
   remarks?: Prisma.SortOrder
   dateRecorded?: Prisma.SortOrder
 }
@@ -325,7 +425,12 @@ export type TechnologyTransferRecordMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   repositoryProjectId?: Prisma.SortOrder
   partnerName?: Prisma.SortOrder
+  requesterEmail?: Prisma.SortOrder
+  requesterOrganization?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   transferStatus?: Prisma.SortOrder
+  moaUrl?: Prisma.SortOrder
+  deploymentDate?: Prisma.SortOrder
   remarks?: Prisma.SortOrder
   dateRecorded?: Prisma.SortOrder
 }
@@ -334,7 +439,12 @@ export type TechnologyTransferRecordMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   repositoryProjectId?: Prisma.SortOrder
   partnerName?: Prisma.SortOrder
+  requesterEmail?: Prisma.SortOrder
+  requesterOrganization?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   transferStatus?: Prisma.SortOrder
+  moaUrl?: Prisma.SortOrder
+  deploymentDate?: Prisma.SortOrder
   remarks?: Prisma.SortOrder
   dateRecorded?: Prisma.SortOrder
 }
@@ -384,7 +494,12 @@ export type TechnologyTransferRecordUncheckedUpdateManyWithoutRepositoryProjectN
 export type TechnologyTransferRecordCreateWithoutRepositoryProjectInput = {
   id?: string
   partnerName?: string | null
+  requesterEmail?: string | null
+  requesterOrganization?: string | null
+  source?: string | null
   transferStatus?: string | null
+  moaUrl?: string | null
+  deploymentDate?: Date | string | null
   remarks?: string | null
   dateRecorded?: Date | string | null
 }
@@ -392,7 +507,12 @@ export type TechnologyTransferRecordCreateWithoutRepositoryProjectInput = {
 export type TechnologyTransferRecordUncheckedCreateWithoutRepositoryProjectInput = {
   id?: string
   partnerName?: string | null
+  requesterEmail?: string | null
+  requesterOrganization?: string | null
+  source?: string | null
   transferStatus?: string | null
+  moaUrl?: string | null
+  deploymentDate?: Date | string | null
   remarks?: string | null
   dateRecorded?: Date | string | null
 }
@@ -430,7 +550,12 @@ export type TechnologyTransferRecordScalarWhereInput = {
   id?: Prisma.UuidFilter<"TechnologyTransferRecord"> | string
   repositoryProjectId?: Prisma.UuidNullableFilter<"TechnologyTransferRecord"> | string | null
   partnerName?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  requesterEmail?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  requesterOrganization?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  source?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
   transferStatus?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  moaUrl?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
+  deploymentDate?: Prisma.DateTimeNullableFilter<"TechnologyTransferRecord"> | Date | string | null
   remarks?: Prisma.StringNullableFilter<"TechnologyTransferRecord"> | string | null
   dateRecorded?: Prisma.DateTimeNullableFilter<"TechnologyTransferRecord"> | Date | string | null
 }
@@ -438,7 +563,12 @@ export type TechnologyTransferRecordScalarWhereInput = {
 export type TechnologyTransferRecordCreateManyRepositoryProjectInput = {
   id?: string
   partnerName?: string | null
+  requesterEmail?: string | null
+  requesterOrganization?: string | null
+  source?: string | null
   transferStatus?: string | null
+  moaUrl?: string | null
+  deploymentDate?: Date | string | null
   remarks?: string | null
   dateRecorded?: Date | string | null
 }
@@ -446,7 +576,12 @@ export type TechnologyTransferRecordCreateManyRepositoryProjectInput = {
 export type TechnologyTransferRecordUpdateWithoutRepositoryProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   partnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterOrganization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transferStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deploymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dateRecorded?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -454,7 +589,12 @@ export type TechnologyTransferRecordUpdateWithoutRepositoryProjectInput = {
 export type TechnologyTransferRecordUncheckedUpdateWithoutRepositoryProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   partnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterOrganization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transferStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deploymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dateRecorded?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -462,7 +602,12 @@ export type TechnologyTransferRecordUncheckedUpdateWithoutRepositoryProjectInput
 export type TechnologyTransferRecordUncheckedUpdateManyWithoutRepositoryProjectInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   partnerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requesterOrganization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transferStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deploymentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   remarks?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dateRecorded?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -473,7 +618,12 @@ export type TechnologyTransferRecordSelect<ExtArgs extends runtime.Types.Extensi
   id?: boolean
   repositoryProjectId?: boolean
   partnerName?: boolean
+  requesterEmail?: boolean
+  requesterOrganization?: boolean
+  source?: boolean
   transferStatus?: boolean
+  moaUrl?: boolean
+  deploymentDate?: boolean
   remarks?: boolean
   dateRecorded?: boolean
   repositoryProject?: boolean | Prisma.TechnologyTransferRecord$repositoryProjectArgs<ExtArgs>
@@ -483,7 +633,12 @@ export type TechnologyTransferRecordSelectCreateManyAndReturn<ExtArgs extends ru
   id?: boolean
   repositoryProjectId?: boolean
   partnerName?: boolean
+  requesterEmail?: boolean
+  requesterOrganization?: boolean
+  source?: boolean
   transferStatus?: boolean
+  moaUrl?: boolean
+  deploymentDate?: boolean
   remarks?: boolean
   dateRecorded?: boolean
   repositoryProject?: boolean | Prisma.TechnologyTransferRecord$repositoryProjectArgs<ExtArgs>
@@ -493,7 +648,12 @@ export type TechnologyTransferRecordSelectUpdateManyAndReturn<ExtArgs extends ru
   id?: boolean
   repositoryProjectId?: boolean
   partnerName?: boolean
+  requesterEmail?: boolean
+  requesterOrganization?: boolean
+  source?: boolean
   transferStatus?: boolean
+  moaUrl?: boolean
+  deploymentDate?: boolean
   remarks?: boolean
   dateRecorded?: boolean
   repositoryProject?: boolean | Prisma.TechnologyTransferRecord$repositoryProjectArgs<ExtArgs>
@@ -503,12 +663,17 @@ export type TechnologyTransferRecordSelectScalar = {
   id?: boolean
   repositoryProjectId?: boolean
   partnerName?: boolean
+  requesterEmail?: boolean
+  requesterOrganization?: boolean
+  source?: boolean
   transferStatus?: boolean
+  moaUrl?: boolean
+  deploymentDate?: boolean
   remarks?: boolean
   dateRecorded?: boolean
 }
 
-export type TechnologyTransferRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "repositoryProjectId" | "partnerName" | "transferStatus" | "remarks" | "dateRecorded", ExtArgs["result"]["technologyTransferRecord"]>
+export type TechnologyTransferRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "repositoryProjectId" | "partnerName" | "requesterEmail" | "requesterOrganization" | "source" | "transferStatus" | "moaUrl" | "deploymentDate" | "remarks" | "dateRecorded", ExtArgs["result"]["technologyTransferRecord"]>
 export type TechnologyTransferRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   repositoryProject?: boolean | Prisma.TechnologyTransferRecord$repositoryProjectArgs<ExtArgs>
 }
@@ -528,7 +693,12 @@ export type $TechnologyTransferRecordPayload<ExtArgs extends runtime.Types.Exten
     id: string
     repositoryProjectId: string | null
     partnerName: string | null
+    requesterEmail: string | null
+    requesterOrganization: string | null
+    source: string | null
     transferStatus: string | null
+    moaUrl: string | null
+    deploymentDate: Date | null
     remarks: string | null
     dateRecorded: Date | null
   }, ExtArgs["result"]["technologyTransferRecord"]>
@@ -958,7 +1128,12 @@ export interface TechnologyTransferRecordFieldRefs {
   readonly id: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
   readonly repositoryProjectId: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
   readonly partnerName: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
+  readonly requesterEmail: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
+  readonly requesterOrganization: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
+  readonly source: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
   readonly transferStatus: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
+  readonly moaUrl: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
+  readonly deploymentDate: Prisma.FieldRef<"TechnologyTransferRecord", 'DateTime'>
   readonly remarks: Prisma.FieldRef<"TechnologyTransferRecord", 'String'>
   readonly dateRecorded: Prisma.FieldRef<"TechnologyTransferRecord", 'DateTime'>
 }

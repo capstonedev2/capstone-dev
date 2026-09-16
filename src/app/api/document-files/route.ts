@@ -8,8 +8,11 @@ import {
   successResponse
 } from '@/lib/utils';
 import {
+  ACHIEVEMENT_DOCUMENT_CATEGORIES,
+  CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES,
   DOCUMENT_STORAGE_BUCKETS,
   DOCUMENT_UPLOAD_ERROR_MESSAGES,
+  IMAGE_ALLOWED_DOCUMENT_CATEGORIES,
   type DocumentStorageBucket
 } from '@/lib/storage/upload-config';
 import {
@@ -114,7 +117,10 @@ async function createUploadNotifications({
 }) {
   const recipientIds = new Set<string>([uploaderId]);
 
-  if (bucketName === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project) {
+  // Award/Recognition and Activity Evidence are a read-only achievement log —
+  // no adviser review step exists for them, so don't page the adviser/panel
+  // as if a submission were waiting on them.
+  if (bucketName === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(documentCategory)) {
     if (project.adviserId && project.adviserId !== uploaderId) {
       recipientIds.add(project.adviserId);
     }
@@ -312,12 +318,12 @@ export async function POST(request: Request) {
       });
     }
 
-    const bucketNameValue = normalizeText(formData.get('bucketName')) || getBucketForCategory(normalizeText(formData.get('documentCategory')));
+    const documentCategory = normalizeText(formData.get('documentCategory')) || 'Uncategorized';
+    const bucketNameValue = normalizeText(formData.get('bucketName')) || getBucketForCategory(documentCategory);
     assertDocumentBucket(bucketNameValue);
-    assertValidDocumentFile(file, bucketNameValue);
+    assertValidDocumentFile(file, bucketNameValue, IMAGE_ALLOWED_DOCUMENT_CATEGORIES.has(documentCategory));
 
     const projectId = normalizeText(formData.get('projectId'));
-    const documentCategory = normalizeText(formData.get('documentCategory')) || 'Uncategorized';
     const checkpointKey = normalizeText(formData.get('checkpointKey'));
     const project = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && user.role === UserRole.STUDENT
       ? await getStudentUploadProjectAccessRecord(user, projectId)
@@ -336,8 +342,10 @@ export async function POST(request: Request) {
         });
       }
 
-      const approvedStatuses: ProjectStatus[] = [ProjectStatus.APPROVED, ProjectStatus.DEFENSE_SCHEDULED, ProjectStatus.COMPLETED];
-      await assertConceptApprovedForUpload(project.id, approvedStatuses.includes(project.status));
+      if (!CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES.has(documentCategory)) {
+        const approvedStatuses: ProjectStatus[] = [ProjectStatus.APPROVED, ProjectStatus.DEFENSE_SCHEDULED, ProjectStatus.COMPLETED];
+        await assertConceptApprovedForUpload(project.id, approvedStatuses.includes(project.status));
+      }
     }
 
     await assertCanUploadDocument({
@@ -359,8 +367,12 @@ export async function POST(request: Request) {
       file
     });
 
+    const shouldLinkCheckpoint = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS
+      && Boolean(project?.id)
+      && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(documentCategory);
+
     const uploadedFile = await prisma.$transaction(async (tx) => {
-      const checkpoint = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project?.id
+      const checkpoint = shouldLinkCheckpoint && project?.id
         ? await resolveMilestoneCheckpointForSubmission(tx, {
             projectId: project.id,
             checkpointKey,
@@ -368,7 +380,9 @@ export async function POST(request: Request) {
             fileName: file.name
           })
         : null;
-      const submission = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project?.id
+      const submission = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS
+        && project?.id
+        && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(documentCategory)
         ? await tx.submission.create({
             data: {
               projectId: project.id,
@@ -431,7 +445,7 @@ export async function POST(request: Request) {
         }
       });
 
-      if (bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && project?.id && submission) {
+      if (shouldLinkCheckpoint && project?.id && submission) {
         await recordCheckpointSubmission(tx, {
           projectId: project.id,
           checkpointKey: checkpoint?.key ?? checkpointKey,

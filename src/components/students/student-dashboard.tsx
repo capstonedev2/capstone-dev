@@ -4,6 +4,11 @@ import Link from 'next/link';
 import type { CSSProperties } from 'react';
 import { useMemo, useState, useEffect } from 'react';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
+import {
+  fetchAcademicActivities,
+  formatIsoDateLabel,
+  type ApiAcademicActivity
+} from '@/components/students/student-academic-activity.shared';
 
 const CATEGORY_LABELS: Record<string, string> = {
   Proposal: 'Proposal',
@@ -24,35 +29,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   certificates: 'Certificates'
 };
 
-const DEFAULT_QUICK_LINKS = [
-  {
-    id: 'project-overview',
-    label: 'View Project',
-    href: '/students/project-overview',
-    icon: 'fa-folder-open'
-  },
-  {
-    id: 'project-files',
-    label: 'Open Files',
-    href: '/students/project-files',
-    icon: 'fa-file-arrow-up'
-  },
-  {
-    id: 'faculty-feedback',
-    label: 'Open Feedback',
-    href: '/students/faculty-feedback',
-    icon: 'fa-comments'
-  },
-  {
-    id: 'schedule',
-    label: 'Open Schedule',
-    href: '/students/schedule',
-    icon: 'fa-calendar-check'
-  }
-] as const;
-
-
-
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type ShellTone =
   | 'completed'
@@ -72,12 +48,6 @@ type DashboardWorkflowStep = {
   dateLabel: string;
   route: string;
   actionLabel?: string;
-};
-type DashboardQuickLink = {
-  id: string;
-  label: string;
-  href: string;
-  icon: string;
 };
 type PriorityTask = {
   id: string;
@@ -164,21 +134,6 @@ function getShellToneFromWorkflowStatus(status: WorkflowStatus): ShellTone {
   }
 }
 
-function getNotificationShellTone(
-  unreadNotificationsCount: number,
-  highPriorityNotificationCount: number
-): ShellTone {
-  if (!unreadNotificationsCount) {
-    return 'archived';
-  }
-
-  if (highPriorityNotificationCount) {
-    return 'overdue';
-  }
-
-  return 'pending';
-}
-
 function getAttentionShellTone({
   attentionCount,
   overdueCount,
@@ -247,6 +202,49 @@ function getWorkflowStatusConfig(status: WorkflowStatus) {
   }
 
   return { label: 'Pending', tone: 'neutral' as const };
+}
+
+const DEFENSE_APPLICATION_STAGES = [
+  { key: 'concept-defense-application', label: 'Concept' },
+  { key: 'proposal-defense-application', label: 'Proposal' },
+  { key: 'final-defense-application', label: 'Final' }
+] as const;
+
+function getDefenseEvidenceStatusConfig(status: string) {
+  const normalized = status.toUpperCase();
+
+  if (normalized === 'APPROVED' || normalized === 'COMPLETED') {
+    return { label: 'Approved', tone: 'success' as const, hint: 'The adviser cleared this evidence.' };
+  }
+
+  if (normalized === 'NEEDS_REVISION') {
+    return { label: 'Needs Revision', tone: 'danger' as const, hint: 'Upload a corrected copy of the signed form.' };
+  }
+
+  if (normalized === 'REJECTED') {
+    return { label: 'Rejected', tone: 'danger' as const, hint: 'Check adviser remarks and re-submit.' };
+  }
+
+  if (normalized === 'SUBMITTED' || normalized === 'IN_REVIEW') {
+    return { label: 'Pending Review', tone: 'warning' as const, hint: 'Waiting for the adviser to review your evidence.' };
+  }
+
+  return { label: 'Not Uploaded', tone: 'neutral' as const, hint: 'Upload a photo of the signed application form.' };
+}
+
+function getToneVisual(tone: BadgeTone) {
+  switch (tone) {
+    case 'danger':
+      return { bar: 'bg-red-500', iconBg: 'bg-red-50 text-red-600' };
+    case 'warning':
+      return { bar: 'bg-amber-500', iconBg: 'bg-amber-50 text-amber-600' };
+    case 'success':
+      return { bar: 'bg-emerald-500', iconBg: 'bg-emerald-50 text-emerald-600' };
+    case 'info':
+      return { bar: 'bg-blue-500', iconBg: 'bg-blue-50 text-blue-600' };
+    default:
+      return { bar: 'bg-slate-400', iconBg: 'bg-slate-100 text-slate-600' };
+  }
 }
 
 function getFeedbackStatusConfig(status: string) {
@@ -381,21 +379,15 @@ function EmptyState({
 }
 
 export function StudentDashboard({ data }: { data: StudentDashboardData }) {
-  const [realGroup, setRealGroup] = useState<any>(() =>
-    data.group.id
-      ? {
-          id: data.group.id,
-          title: data.group.groupName,
-          projectTitle: data.project.title,
-          leader: data.group.leaderName,
-          allowMemberSubmission: data.group.allowMemberSubmission ?? false
-        }
-      : null
-  );
-  const [titleDraft, setTitleDraft] = useState('');
-  const [debugInfo] = useState<any>(() => ({ status: 'Loaded from server', name: data.profile.fullName }));
-  const [accessRequested, setAccessRequested] = useState(false);
-  const [isTogglingAccess, setIsTogglingAccess] = useState(false);
+  const realGroup = data.group.id
+    ? {
+        id: data.group.id,
+        title: data.group.groupName,
+        projectTitle: data.project.title,
+        leader: data.group.leaderName,
+        allowMemberSubmission: data.group.allowMemberSubmission ?? false
+      }
+    : null;
 
   const realNotifications = useMemo(
     () =>
@@ -410,54 +402,74 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     [data.notifications]
   );
 
+  const projectId = data.project.project_id || data.project.id;
+  const [activities, setActivities] = useState<ApiAcademicActivity[]>([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true);
 
-  const handleSubmitTitle = async () => {
-    if (!realGroup || !titleDraft.trim()) return;
-    try {
-      const res = await fetch('/api/groups', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          id: realGroup.id, 
-          title: 'Awaiting Adviser Approval',
-          projectTitle: titleDraft 
-        })
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setRealGroup(updated);
-      }
-    } catch (e) {
-      console.error('Failed to update group title', e);
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!projectId) {
+      setIsLoadingActivities(false);
+      return;
     }
-  };
 
-  const handleToggleMemberAccess = async () => {
-    if (!realGroup) return;
-    setIsTogglingAccess(true);
-    try {
-      const nextState = !realGroup.allowMemberSubmission;
-      const res = await fetch('/api/groups', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: realGroup.id, allowMemberSubmission: nextState })
+    setIsLoadingActivities(true);
+    fetchAcademicActivities(projectId)
+      .then((items) => {
+        if (!cancelled) {
+          setActivities(items);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setActivities([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingActivities(false);
+        }
       });
-      if (res.ok) {
-        setRealGroup({ ...realGroup, allowMemberSubmission: nextState });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  const recentActivities = useMemo(
+    () =>
+      [...activities]
+        .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+        .slice(0, 3),
+    [activities]
+  );
+
+  // Surfaces whichever defense-application stage is currently relevant — the
+  // first one the group has actually touched, so a Concept-stage project
+  // doesn't show a premature "Not Uploaded" badge for Proposal/Final.
+  const defenseApplicationStatus = useMemo(() => {
+    const checkpoints = data.milestoneCheckpoints || [];
+
+    for (const stage of DEFENSE_APPLICATION_STAGES) {
+      const checkpoint = checkpoints.find((item) => item.key === stage.key);
+
+      if (checkpoint && checkpoint.status !== 'PENDING') {
+        return { label: stage.label, status: checkpoint.status };
       }
-    } catch (e) {
-      console.error('Failed to toggle member access', e);
-    } finally {
-      setIsTogglingAccess(false);
     }
-  };
 
-  const isLeader = realGroup && debugInfo?.name === realGroup.leader;
-  const canSubmitTitle = isLeader || realGroup?.allowMemberSubmission;
+    const firstStageCheckpoint = checkpoints.find((item) =>
+      DEFENSE_APPLICATION_STAGES.some((stage) => stage.key === item.key)
+    );
 
-  const quickLinks: DashboardQuickLink[] = data.dashboard?.quickLinks?.length
-    ? data.dashboard.quickLinks
-    : [...DEFAULT_QUICK_LINKS];
+    if (!firstStageCheckpoint) {
+      return null;
+    }
+
+    const stage = DEFENSE_APPLICATION_STAGES.find((item) => item.key === firstStageCheckpoint.key);
+    return stage ? { label: stage.label, status: firstStageCheckpoint.status } : null;
+  }, [data.milestoneCheckpoints]);
 
   const workflow = useMemo<DashboardWorkflowStep[]>(
     () => (data.dashboard?.workflow?.length ? data.dashboard.workflow : buildFallbackWorkflow(data.milestones)),
@@ -619,81 +631,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     }
   ];
 
-  const projectMeta = [
-    {
-      id: 'project-code',
-      label: 'Project code',
-      value: data.project.projectCode
-    },
-    {
-      id: 'adviser',
-      label: 'Adviser',
-      value: data.project.adviser
-    },
-    {
-      id: 'group',
-      label: 'Group',
-      value: data.group.groupName
-    },
-    {
-      id: 'program',
-      label: 'Program',
-      value: data.project.program
-    },
-    {
-      id: 'academic-year',
-      label: 'Academic year',
-      value: data.project.academicYear
-    }
-  ];
-
-  const analyticsCards = [
-    {
-      id: 'submissions',
-      icon: 'fa-file-lines',
-      value: `${data.documents.length}`,
-      label: 'Tracked submissions',
-      badgeLabel: 'Active',
-      note: latestSubmission
-        ? `Latest: ${CATEGORY_LABELS[latestSubmission.category] ?? latestSubmission.category}`
-        : 'No project file is recorded yet.',
-      tone: 'info' as const
-    },
-    {
-      id: 'revisions',
-      icon: revisionCount ? 'fa-rotate-right' : 'fa-check-circle',
-      value: `${revisionCount}`,
-      label: 'Pending revisions',
-      badgeLabel: revisionCount ? 'Needs Action' : 'Up to date',
-      note: revisionFiles[0]
-        ? createExcerpt(`${revisionFiles[0].fileName} still needs updates before the next review pass.`, 72)
-        : 'No file is currently waiting for revision.',
-      tone: revisionCount ? ('danger' as const) : ('neutral' as const)
-    },
-    {
-      id: 'overdue',
-      icon: overdueCount ? 'fa-triangle-exclamation' : 'fa-check-circle',
-      value: `${overdueCount}`,
-      label: 'Overdue items',
-      badgeLabel: overdueCount ? 'Action Required' : 'On schedule',
-      note: overdueCount
-        ? 'Resolve delayed deadlines and missed confirmations as soon as possible.'
-        : 'No overdue schedules are currently recorded.',
-      tone: overdueCount ? ('danger' as const) : ('neutral' as const)
-    },
-    {
-      id: 'alerts',
-      icon: 'fa-bell',
-      value: `${unreadNotificationsCount}`,
-      label: 'Unread alerts',
-      badgeLabel: highPriorityNotificationCount ? 'Check now' : 'All clear',
-      note: highPriorityNotificationCount
-        ? `${highPriorityNotificationCount} high-priority reminder${highPriorityNotificationCount === 1 ? '' : 's'}`
-        : 'No high-priority notification is waiting.',
-      tone: highPriorityNotificationCount ? ('warning' as const) : ('info' as const)
-    }
-  ];
-
   const priorityTasks = useMemo<PriorityTask[]>(() => {
     const tasks: PriorityTask[] = [];
 
@@ -749,72 +686,9 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     return tasks.slice(0, 3);
   }, [latestFeedback, nextSchedule, revisionFiles]);
 
-  const readinessItems = [
-    {
-      id: 'repository',
-      label: 'Repository status',
-      value: data.project.repositoryStatus,
-      note: `${approvedCount} approved file${approvedCount === 1 ? '' : 's'} are ready for archive or endorsement review.`,
-      tone: approvedCount >= 4 ? ('success' as const) : ('warning' as const)
-    },
-    {
-      id: 'transfer',
-      label: 'Technology transfer',
-      value: data.project.technologyTransferStatus ?? data.technologyTransfer.transferabilityStatus,
-      note: data.technologyTransfer.beneficiary,
-      tone: getStatusTone(data.project.technologyTransferStatus ?? data.technologyTransfer.transferabilityStatus)
-    },
-    {
-      id: 'reports',
-      label: 'Latest progress report',
-      value: data.progressReports[0]?.title ?? 'No report submitted yet',
-      note:
-        data.progressReports[0]?.dateLabel ??
-        'Submit a report to capture adviser review history and implementation notes.',
-      tone: data.progressReports[0] ? ('neutral' as const) : ('warning' as const)
-    }
-  ];
-
-  const fileSummaryCards = [
-    {
-      id: 'latest-submission',
-      label: 'Latest submission',
-      value: latestSubmission?.fileName ?? 'No submission yet',
-      note: latestSubmission?.uploadDateLabel ?? 'Upload project files to start your archive record.'
-    },
-    {
-      id: 'pending-revision',
-      label: 'Pending revisions',
-      value: `${revisionCount}`,
-      note: revisionFiles[0]?.fileName ?? 'All tracked files are currently clear.'
-    },
-    {
-      id: 'pending-review',
-      label: 'Pending review',
-      value: `${pendingCount}`,
-      note: pendingReviewFiles[0]?.fileName ?? 'No file is currently waiting for adviser validation.'
-    },
-    {
-      id: 'archive-status',
-      label: 'Archive readiness',
-      value: data.project.repositoryStatus,
-      note:
-        data.project.technologyTransferStatus ??
-        data.technologyTransfer.transferabilityStatus ??
-        'Waiting for archive endorsement.'
-    }
-  ];
-
   const attentionCount =
     revisionCount + highPriorityNotificationCount + dueSoonCount + overdueCount + unreadFeedbackCount;
   const currentPhaseTone = getShellToneFromWorkflowStatus(currentWorkflowStep?.status ?? 'current');
-  const nextMilestoneTone = nextWorkflowStep
-    ? getShellToneFromWorkflowStatus(nextWorkflowStep.status)
-    : ('archived' as const);
-  const notificationTone = getNotificationShellTone(
-    unreadNotificationsCount,
-    highPriorityNotificationCount
-  );
   const attentionTone = getAttentionShellTone({
     attentionCount,
     overdueCount,
@@ -823,18 +697,40 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     unreadFeedbackCount,
     revisionCount
   });
-  const topNavAlertCopy = unreadNotificationsCount
-    ? highPriorityNotificationCount
-      ? `${highPriorityNotificationCount} high-priority alert${highPriorityNotificationCount === 1 ? '' : 's'}`
-      : `${unreadNotificationsCount} unread update${unreadNotificationsCount === 1 ? '' : 's'}`
-    : 'All caught up';
   const attentionLabel = attentionCount
     ? `${attentionCount} item${attentionCount === 1 ? '' : 's'} need attention`
     : 'On track';
   const currentPhaseToneUi = getShellToneUi(currentPhaseTone);
-  const nextMilestoneToneUi = getShellToneUi(nextMilestoneTone);
-  const notificationToneUi = getShellToneUi(notificationTone);
   const attentionToneUi = getShellToneUi(attentionTone);
+
+  // "Not assigned" reads poorly as a "current focus" — swap in an actionable
+  // message once there's genuinely no workflow step yet, instead of echoing
+  // whatever placeholder the raw project record happens to hold.
+  const hasAssignedFocus = Boolean(currentWorkflowStep) || Boolean(
+    data.project.currentMilestone &&
+      !['not assigned', 'n/a', ''].includes(data.project.currentMilestone.trim().toLowerCase())
+  );
+  const focusTitle = hasAssignedFocus ? currentPhaseTitle : 'Milestones not set up yet';
+  const focusSummary = hasAssignedFocus
+    ? currentPhaseSummary
+    : "Your adviser hasn't initialized your project workflow yet. Check the Milestones page for updates.";
+  const focusRoute = currentWorkflowStep?.route ?? '/students/milestones';
+  const focusActionLabel = hasAssignedFocus
+    ? (currentWorkflowStep?.actionLabel ?? 'Continue Phase')
+    : 'View Milestones';
+
+  const progressRingColors = (() => {
+    switch (currentPhaseToneUi.tone) {
+      case 'success':
+        return { from: '#34D399', to: '#047857', glow: 'bg-emerald-500/10' };
+      case 'danger':
+        return { from: '#F87171', to: '#B91C1C', glow: 'bg-red-500/10' };
+      case 'warning':
+        return { from: '#FBBF24', to: '#B45309', glow: 'bg-amber-500/10' };
+      default:
+        return { from: '#60A5FA', to: '#003A8F', glow: 'bg-blue-500/10' };
+    }
+  })();
   const workspaceHeroActions = [
     {
       id: 'continue-phase',
@@ -865,112 +761,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       tone: unreadFeedbackCount ? 'warning' : 'neutral'
     }
   ];
-  const workspaceActions = quickLinks.map((item) => {
-    if (item.href === '/students/project-overview') {
-      return {
-        ...item,
-        metric: currentPhaseTitle,
-        description: 'Review scope, implementation status, and adviser-aligned project context.'
-      };
-    }
-
-    if (item.href === '/students/project-files') {
-      return {
-        ...item,
-        metric: `${data.documents.length} tracked file${data.documents.length === 1 ? '' : 's'}`,
-        description: revisionCount
-          ? `${revisionCount} submission${revisionCount === 1 ? '' : 's'} need revision before the next review cycle.`
-          : pendingCount
-            ? `${pendingCount} file${pendingCount === 1 ? '' : 's'} waiting for adviser validation.`
-            : 'All tracked files are currently clear or approved.'
-      };
-    }
-
-    if (item.href === '/students/faculty-feedback') {
-      return {
-        ...item,
-        metric: unreadFeedbackCount
-          ? `${unreadFeedbackCount} unread comment${unreadFeedbackCount === 1 ? '' : 's'}`
-          : 'Feedback clear',
-        description: latestFeedback
-          ? `${latestFeedback.facultyName}: ${createExcerpt(latestFeedback.content, 92)}`
-          : 'Adviser and panel recommendations will surface here after the next review pass.'
-      };
-    }
-
-    if (item.href === '/students/schedule') {
-      return {
-        ...item,
-        metric: nextSchedule?.startDateLabel ?? 'No schedule yet',
-        description: nextSchedule
-          ? createExcerpt(`${nextSchedule.title} | ${nextSchedule.time} | ${nextSchedule.location}`, 96)
-          : 'Consultations, deadlines, and defense events will appear here once confirmed.'
-      };
-    }
-
-    return {
-      ...item,
-      metric: 'Workspace',
-      description: 'Open the next part of your student workflow.'
-    };
-  });
-  const pulseItems = [
-    {
-      id: 'phase',
-      label: 'Current phase',
-      value: currentPhaseTitle,
-      note: currentWorkflowStep?.dateLabel ?? 'Current academic cycle',
-      tone: currentPhaseToneUi
-    },
-    {
-      id: 'milestone',
-      label: 'Next milestone',
-      value: nextWorkflowStep?.title ?? 'Final review preparation',
-      note: nextWorkflowStep?.dateLabel ?? 'Waiting for schedule confirmation',
-      tone: nextMilestoneToneUi
-    },
-    {
-      id: 'alerts',
-      label: 'Notifications',
-      value: topNavAlertCopy,
-      note: attentionLabel,
-      tone: notificationToneUi
-    },
-    {
-      id: 'feedback',
-      label: 'Latest feedback',
-      value: latestFeedback?.title ?? 'No new adviser feedback',
-      note: latestFeedback ? `${latestFeedback.facultyName} | ${latestFeedback.dateLabel}` : 'Waiting for next review.',
-      tone: latestFeedback?.unread ? getShellToneUi('needs-revision') : getShellToneUi('completed')
-    }
-  ];
-  const phaseSummaryCards = [
-    {
-      id: 'completed',
-      label: 'Completed phases',
-      value: `${completedWorkflowCount}`,
-      note: `${Math.max(workflow.length - completedWorkflowCount, 0)} remaining in the workflow`,
-      tone: 'success' as const
-    },
-    {
-      id: 'active',
-      label: 'Active focus',
-      value: currentPhaseTitle,
-      note: currentWorkflowStep?.dateLabel ?? 'Current academic cycle',
-      tone: currentPhaseToneUi.tone
-    },
-    {
-      id: 'risk',
-      label: 'Recovery items',
-      value: delayedWorkflowCount || overdueCount ? `${delayedWorkflowCount + overdueCount}` : 'Clear',
-      note:
-        delayedWorkflowCount || overdueCount
-          ? 'Delayed phases or overdue schedules need recovery planning.'
-          : 'No delayed phase or overdue event is recorded right now.',
-      tone: delayedWorkflowCount || overdueCount ? ('danger' as const) : ('success' as const)
-    }
-  ];
-
   return (
     <>
       <header className="top-nav">
@@ -1125,16 +915,16 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                  {/* Premium Progress Orb */}
                  <div className="relative flex items-center justify-center h-44 w-44 my-4">
                    {/* Outer glow aura */}
-                   <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-3xl animate-pulse pointer-events-none" />
-                   
+                   <div className={`absolute inset-0 rounded-full blur-3xl animate-pulse pointer-events-none ${progressRingColors.glow}`} />
+
                    {/* Background decoration ring */}
                    <div className="absolute inset-3 border border-dashed border-[var(--border)] rounded-full animate-[spin_40s_linear_infinite] opacity-60 pointer-events-none" />
-                   
+
                    <svg className="relative z-10 w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 36 36">
                      <defs>
                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                         <stop offset="0%" stopColor="#60A5FA" />
-                         <stop offset="100%" stopColor="#003A8F" />
+                         <stop offset="0%" stopColor={progressRingColors.from} />
+                         <stop offset="100%" stopColor={progressRingColors.to} />
                        </linearGradient>
                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                          <feGaussianBlur stdDeviation="1" result="blur" />
@@ -1149,27 +939,36 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                        stroke="currentColor"
                        strokeWidth="1.5"
                      />
-                     {/* Progress */}
-                     <path
-                       className="transition-all duration-1000 ease-out"
-                       strokeDasharray={`${animatedProgress}, 100`}
-                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                       fill="none"
-                       stroke="url(#progressGradient)"
-                       strokeWidth="3"
-                       strokeLinecap="round"
-                       filter="url(#glow)"
-                     />
+                     {/* Progress — only rendered once there's something to show; a
+                         zero-length dash with a round linecap otherwise paints a
+                         stray dot at the arc's start point. */}
+                     {animatedProgress > 0 ? (
+                       <path
+                         className="transition-all duration-1000 ease-out"
+                         strokeDasharray={`${animatedProgress}, 100`}
+                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                         fill="none"
+                         stroke="url(#progressGradient)"
+                         strokeWidth="3"
+                         strokeLinecap="round"
+                         filter="url(#glow)"
+                       />
+                     ) : null}
                    </svg>
                    <div className="absolute flex flex-col items-center justify-center z-20">
                      <span className="text-4xl font-black bg-gradient-to-br from-[#3B82F6] to-[#003A8F] bg-clip-text text-transparent drop-shadow-sm tracking-tighter">
                        {animatedProgress}%
                      </span>
                      <span className="text-[9px] font-extrabold text-[var(--muted)] uppercase tracking-[0.2em] mt-1">Completed</span>
+                     {totalCheckpoints > 0 ? (
+                       <span className="text-[10px] font-bold text-[var(--muted)] mt-1.5">
+                         {completedCheckpoints} of {totalCheckpoints} checkpoints
+                       </span>
+                     ) : null}
                    </div>
                  </div>
                </div>
-               
+
                {/* Upgraded Current Focus Block */}
                <div className="flex flex-col w-full bg-[var(--surface-alt)] p-5 rounded-2xl border border-[var(--border)] mt-auto relative overflow-hidden group">
                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#3B82F6] to-[#003A8F]" />
@@ -1181,18 +980,77 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                      Current Focus
                    </span>
                  </div>
-                 <p className="text-[15px] font-black text-[var(--text)] leading-tight mb-1">{currentPhaseTitle}</p>
-                 <span className="text-[11px] text-[var(--muted)] font-medium leading-relaxed line-clamp-2">{currentPhaseSummary}</span>
-                 <button className="bg-gradient-to-r from-[#003A8F] to-[#1E40AF] hover:from-[#002c6b] hover:to-[#003A8F] transition-all text-white text-[12px] font-bold py-2.5 px-4 rounded-xl mt-4 w-full flex items-center justify-center gap-2 shadow-md shadow-blue-900/20 active:scale-[0.98]">
-                   <i className="fas fa-file-alt"></i> View guidelines
-                 </button>
+                 <p className="text-[15px] font-black text-[var(--text)] leading-tight mb-1">{focusTitle}</p>
+                 <span className="text-[11px] text-[var(--muted)] font-medium leading-relaxed line-clamp-2">{focusSummary}</span>
+                 <Link
+                   prefetch={false}
+                   href={focusRoute}
+                   className="bg-gradient-to-r from-[#003A8F] to-[#1E40AF] hover:from-[#002c6b] hover:to-[#003A8F] transition-all text-white text-[12px] font-bold py-2.5 px-4 rounded-xl mt-4 w-full flex items-center justify-center gap-2 shadow-md shadow-blue-900/20 active:scale-[0.98]"
+                 >
+                   <i className="fas fa-file-alt"></i> {focusActionLabel}
+                 </Link>
                </div>
             </article>
           </div>
         </section>
 
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-5 shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] mt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Priority Actions</span>
+              <h3 className="text-lg font-bold text-[var(--text)]">What needs your attention</h3>
+            </div>
+            <Badge label={attentionLabel} tone={attentionToneUi.tone} icon={attentionToneUi.icon} />
+          </div>
+
+          {priorityTasks.length ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {priorityTasks.map((task) => {
+                const visual = getToneVisual(task.tone);
+
+                return (
+                  <Link
+                    prefetch={false}
+                    key={task.id}
+                    href={task.href}
+                    className="group relative flex flex-col gap-2 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-4 pl-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span className={`absolute top-0 left-0 h-full w-1 ${visual.bar}`} aria-hidden="true" />
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${visual.iconBg}`}>
+                        <i className={`fas ${task.icon || 'fa-circle-exclamation'} text-xs`} aria-hidden="true" />
+                      </span>
+                      <Badge label={task.label} tone={task.tone} />
+                    </div>
+                    <strong className="text-sm font-bold text-[var(--text)] leading-tight line-clamp-1">{task.title}</strong>
+                    <p className="text-[11px] text-[var(--muted)] leading-relaxed line-clamp-2">{task.description}</p>
+                    <div className="mt-auto flex items-center justify-between pt-2">
+                      {task.meta ? (
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-meta)]">{task.meta}</span>
+                      ) : <span />}
+                      <span className="text-[11px] font-bold text-[#003A8F] group-hover:text-blue-700 transition-colors flex items-center gap-1">
+                        {task.actionLabel} <i className="fas fa-arrow-right text-[9px]" aria-hidden="true" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-alt)] px-4 py-3.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                <i className="fas fa-champagne-glasses text-sm" aria-hidden="true" />
+              </span>
+              <div className="flex flex-col">
+                <strong className="text-[13px] font-bold text-[var(--text)]">You&apos;re all caught up</strong>
+                <span className="text-[11px] text-[var(--muted)]">No pending revisions, unread feedback, or upcoming deadlines need action right now.</span>
+              </div>
+            </div>
+          )}
+        </section>
+
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-          {/* Column 1: Milestone Pipeline */}
+          {/* Column 1: Milestone Pipeline & Submission Health */}
           <div className="flex flex-col gap-5">
             <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
@@ -1232,9 +1090,63 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                 />
               )}
             </article>
+
+            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+              <div className="flex flex-col gap-1 mb-5">
+                <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Submission Health</span>
+                <h4 className="text-lg font-bold text-[var(--text)]">Review status overview</h4>
+              </div>
+
+              <div className="flex flex-col gap-3.5 mb-5">
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-sm font-bold">
+                    <span className="text-emerald-700">Approved</span>
+                    <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 text-xs rounded-full border border-emerald-100">{approvedCount}</span>
+                  </div>
+                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
+                    <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(approvedCount / Math.max(data.documents.length, 1)) * 100}%` }} />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-sm font-bold">
+                    <span className="text-amber-700">Pending Review</span>
+                    <span className="text-amber-700 bg-amber-50 px-2 py-0.5 text-xs rounded-full border border-amber-100">{pendingCount}</span>
+                  </div>
+                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
+                    <div className="h-full bg-amber-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(pendingCount / Math.max(data.documents.length, 1)) * 100}%` }} />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-sm font-bold">
+                    <span className="text-red-700">Needs Revision</span>
+                    <span className="text-red-700 bg-red-50 px-2 py-0.5 text-xs rounded-full border border-red-100">{revisionCount}</span>
+                  </div>
+                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
+                    <div className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(revisionCount / Math.max(data.documents.length, 1)) * 100}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="flex flex-col items-center justify-center gap-1 bg-amber-50/80 hover:bg-amber-50 transition-colors rounded-xl p-3 border border-amber-100">
+                  <strong className="text-xl font-black text-amber-700">{dueSoonCount}</strong>
+                  <span className="text-[9px] font-bold text-amber-600 uppercase tracking-widest text-center leading-tight">Due<br/>soon</span>
+                </div>
+                <div className={`flex flex-col items-center justify-center gap-1 transition-colors rounded-xl p-3 border ${overdueCount ? 'bg-red-50/80 hover:bg-red-50 border-red-200' : 'bg-[var(--surface-alt)] border-[var(--border)]'}`}>
+                  <strong className={`text-xl font-black ${overdueCount ? 'text-red-700' : 'text-[var(--text)]'}`}>{overdueCount}</strong>
+                  <span className={`text-[9px] font-bold uppercase tracking-widest text-center leading-tight ${overdueCount ? 'text-red-600' : 'text-[var(--muted)]'}`}>Overdue</span>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-1 bg-blue-50/80 hover:bg-blue-50 transition-colors rounded-xl p-3 border border-blue-100">
+                  <strong className="text-xl font-black text-blue-700">{unreadFeedbackCount}</strong>
+                  <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest text-center leading-tight">New<br/>feedback</span>
+                </div>
+              </div>
+            </article>
           </div>
 
-          {/* Column 2: Upcoming Activity & Submission Health */}
+          {/* Column 2: Upcoming Activity & Faculty Feedback */}
           <div className="flex flex-col gap-5">
             <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
@@ -1279,102 +1191,6 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                 />
               )}
             </article>
-
-            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
-              <div className="flex flex-col gap-1 mb-5">
-                <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Submission Health</span>
-                <h4 className="text-lg font-bold text-[var(--text)]">Review status overview</h4>
-              </div>
-              
-              <div className="flex flex-col gap-3.5 mb-5">
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-center text-sm font-bold">
-                    <span className="text-emerald-700">Approved</span>
-                    <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 text-xs rounded-full border border-emerald-100">{approvedCount}</span>
-                  </div>
-                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
-                    <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(approvedCount / Math.max(data.documents.length, 1)) * 100}%` }} />
-                  </div>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-center text-sm font-bold">
-                    <span className="text-amber-700">Pending Review</span>
-                    <span className="text-amber-700 bg-amber-50 px-2 py-0.5 text-xs rounded-full border border-amber-100">{pendingCount}</span>
-                  </div>
-                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
-                    <div className="h-full bg-amber-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(pendingCount / Math.max(data.documents.length, 1)) * 100}%` }} />
-                  </div>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-center text-sm font-bold">
-                    <span className="text-red-700">Needs Revision</span>
-                    <span className="text-red-700 bg-red-50 px-2 py-0.5 text-xs rounded-full border border-red-100">{revisionCount}</span>
-                  </div>
-                  <div className="h-2 w-full bg-[var(--surface-alt)] rounded-full overflow-hidden shadow-inner">
-                    <div className="h-full bg-red-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(revisionCount / Math.max(data.documents.length, 1)) * 100}%` }} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="flex flex-col items-center justify-center gap-1 bg-amber-50/80 hover:bg-amber-50 transition-colors rounded-xl p-3 border border-amber-100">
-                  <strong className="text-xl font-black text-amber-700">{dueSoonCount}</strong>
-                  <span className="text-[9px] font-bold text-amber-600 uppercase tracking-widest text-center leading-tight">Due<br/>soon</span>
-                </div>
-                <div className={`flex flex-col items-center justify-center gap-1 transition-colors rounded-xl p-3 border ${overdueCount ? 'bg-red-50/80 hover:bg-red-50 border-red-200' : 'bg-[var(--surface-alt)] border-[var(--border)]'}`}>
-                  <strong className={`text-xl font-black ${overdueCount ? 'text-red-700' : 'text-[var(--text)]'}`}>{overdueCount}</strong>
-                  <span className={`text-[9px] font-bold uppercase tracking-widest text-center leading-tight ${overdueCount ? 'text-red-600' : 'text-[var(--muted)]'}`}>Overdue</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-1 bg-blue-50/80 hover:bg-blue-50 transition-colors rounded-xl p-3 border border-blue-100">
-                  <strong className="text-xl font-black text-blue-700">{unreadFeedbackCount}</strong>
-                  <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest text-center leading-tight">New<br/>feedback</span>
-                </div>
-              </div>
-            </article>
-          </div>
-
-          {/* Column 3: Project Files, Feedback, Team */}
-          <div className="flex flex-col gap-5">
-            <section className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
-              <div className="flex justify-between items-start mb-5">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Project Files</span>
-                  <h3 className="text-lg font-bold text-[var(--text)]">Latest submissions</h3>
-                </div>
-                <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/project-files">
-                  Open project files
-                </Link>
-              </div>
-              {recentUploads.length ? (
-                <div className="flex flex-col gap-2.5">
-                  {recentUploads.map((item) => (
-                    <article key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors cursor-pointer group">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center justify-center h-10 w-10 rounded-lg bg-blue-100 text-blue-600 shrink-0 transition-transform group-hover:scale-105">
-                          <i className="fas fa-file-lines text-lg" aria-hidden="true" />
-                        </span>
-                        <div className="flex flex-col">
-                          <strong className="text-[13px] font-bold text-[var(--text)] group-hover:text-[#003A8F] transition-colors leading-tight">{item.fileName}</strong>
-                          <small className="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-wider">{CATEGORY_LABELS[item.category] ?? item.category}</small>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />
-                        <span className="text-[9px] font-semibold text-[var(--text-meta)] uppercase tracking-wider">{item.uploadDateLabel}</span>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  title="No recent uploads"
-                  description="Latest file activity will appear here once your group records project submissions."
-                  icon="fa-file-circle-plus"
-                />
-              )}
-            </section>
 
             <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
               <div className="flex justify-between items-start mb-5">
@@ -1424,6 +1240,103 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                   description="Adviser and panel comments will appear here after the next review session."
                   icon="fa-comments"
                 />
+              )}
+            </article>
+          </div>
+
+          {/* Column 3: Document Submissions & Team */}
+          <div className="flex flex-col gap-5">
+            <article className="bg-[var(--surface)] backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-[0_16px_36px_rgba(15,23,42,0.06),inset_0_0_0_1px_rgba(255,255,255,0.7)] p-5 hover:shadow-[0_24px_48px_rgba(15,23,42,0.1),inset_0_0_0_1px_rgba(255,255,255,0.9)] transition-all hover:-translate-y-1">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Document Submissions</span>
+                  <h3 className="text-lg font-bold text-[var(--text)]">Files &amp; activity log</h3>
+                </div>
+                <Link prefetch={false} className="text-sm font-semibold text-[#003A8F] hover:text-blue-700 transition-colors" href="/students/project-files">
+                  Open submissions
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-1.5 mb-2">
+                <i className="fas fa-file-lines text-[9px] text-[var(--text-meta)]" aria-hidden="true" />
+                <span className="text-[9px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Project Documents</span>
+              </div>
+              {recentUploads.length ? (
+                <div className="flex flex-col gap-2 mb-4">
+                  {recentUploads.slice(0, 2).map((item) => (
+                    <article key={item.id} className="flex items-center justify-between p-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] hover:bg-[var(--surface-alt)] transition-colors cursor-pointer group">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-100 text-blue-600 shrink-0 transition-transform group-hover:scale-105">
+                          <i className="fas fa-file-lines text-sm" aria-hidden="true" />
+                        </span>
+                        <div className="flex flex-col min-w-0">
+                          <strong className="text-[12px] font-bold text-[var(--text)] group-hover:text-[#003A8F] transition-colors leading-tight truncate">{item.fileName}</strong>
+                          <small className="text-[9px] font-semibold text-[var(--muted)] uppercase tracking-wider">{CATEGORY_LABELS[item.category] ?? item.category}</small>
+                        </div>
+                      </div>
+                      <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="mb-4 text-[11px] text-[var(--muted)] leading-relaxed">
+                  No recent uploads. Latest file activity will appear here once your group submits project documents.
+                </p>
+              )}
+
+              <div className="border-t border-[var(--border)] mb-4" />
+
+              <div className="flex items-center gap-1.5 mb-2">
+                <i className="fas fa-award text-[9px] text-[var(--text-meta)]" aria-hidden="true" />
+                <span className="text-[9px] font-bold text-[var(--text-meta)] uppercase tracking-widest">Academic Activities &amp; Evidence</span>
+              </div>
+
+              {defenseApplicationStatus ? (() => {
+                const statusConfig = getDefenseEvidenceStatusConfig(defenseApplicationStatus.status);
+
+                return (
+                  <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)] p-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 shrink-0">
+                        <i className="fas fa-file-signature text-sm" aria-hidden="true" />
+                      </span>
+                      <div className="flex flex-col min-w-0">
+                        <strong className="text-[12px] font-bold text-[var(--text)] leading-tight">
+                          Defense Application ({defenseApplicationStatus.label})
+                        </strong>
+                        <span className="text-[10px] text-[var(--muted)] font-medium leading-snug">{statusConfig.hint}</span>
+                      </div>
+                    </div>
+                    <Badge label={statusConfig.label} tone={statusConfig.tone} />
+                  </div>
+                );
+              })() : null}
+
+              {isLoadingActivities ? (
+                <div className="flex items-center justify-center py-4 text-[11px] font-semibold text-[var(--muted)]">
+                  Loading activity log...
+                </div>
+              ) : recentActivities.length ? (
+                <div className="flex flex-col gap-2">
+                  {recentActivities.slice(0, 2).map((activity) => (
+                    <article key={activity.id} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-alt)]">
+                      <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-amber-50 text-amber-600 shrink-0">
+                        <i className={`fas ${activity.markAsAchievement ? 'fa-award' : 'fa-diagram-project'} text-sm`} aria-hidden="true" />
+                      </span>
+                      <div className="flex flex-col flex-grow min-w-0">
+                        <strong className="text-[12px] font-bold text-[var(--text)] leading-tight truncate">{activity.eventName}</strong>
+                        <small className="text-[9px] font-semibold text-[var(--muted)] uppercase tracking-wider">
+                          {activity.activityType} &bull; {formatIsoDateLabel(activity.eventDate || activity.createdAt)}
+                        </small>
+                      </div>
+                      {activity.markAsAchievement ? <Badge label="Achievement" tone="warning" icon="fa-award" /> : null}
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] text-[var(--muted)] leading-relaxed">
+                  No activities logged yet. Awards, presentations, and other academic activities you log will appear here.
+                </p>
               )}
             </article>
 

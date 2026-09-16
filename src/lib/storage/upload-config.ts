@@ -35,8 +35,51 @@ export const DOCUMENT_BUCKET_MAX_FILE_SIZE_BYTES: Record<DocumentStorageBucket, 
   [DOCUMENT_STORAGE_BUCKETS.FINAL_REPOSITORY]: 50 * 1024 * 1024
 };
 
+// Image evidence (e.g. a photo of a signed compliance/clearance form) is a
+// separate, narrower allowlist from ALLOWED_DOCUMENT_EXTENSIONS above — kept
+// distinct so document categories stay document-only and this stays image-only,
+// rather than broadening the whole thesis-documents bucket to accept images.
+export const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'] as const;
+
+export const ALLOWED_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/png'
+] as const;
+
+// Shared, single source of truth for which document-category keys get special
+// upload treatment — used by both the /api/document-files route and the
+// student-facing upload forms, so client-side validation/accept attributes
+// and server-side enforcement never drift apart.
+//
+// - ACHIEVEMENT: awards/recognitions and activity evidence aren't part of the
+//   sequential thesis workflow (no milestone checkpoint), so they skip
+//   checkpoint linking entirely rather than being mislabeled as some other
+//   stage's submission.
+// - CONCEPT_GATE_EXEMPT: achievement categories plus the oral defense
+//   application evidence, which is uploaded mid-Concept-stage — all three
+//   skip the "Concept must be approved first" gate that everything else on
+//   Document Submissions is still subject to.
+// - IMAGE_ALLOWED: categories where proof may be a photo instead of (or in
+//   addition to) a document.
+export const ACHIEVEMENT_DOCUMENT_CATEGORIES = new Set(['award-recognition', 'activity-evidence']);
+
+export const CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES = new Set([
+  'award-recognition',
+  'activity-evidence',
+  'concept-defense-application'
+]);
+
+export const IMAGE_ALLOWED_DOCUMENT_CATEGORIES = new Set([
+  'award-recognition',
+  'activity-evidence',
+  'concept-defense-application',
+  'proposal-defense-application',
+  'final-defense-application'
+]);
+
 export const DOCUMENT_UPLOAD_ERROR_MESSAGES = {
   invalidFileType: 'Invalid file type: Only PDF, DOC, DOCX, PPT, PPTX, XLS, and XLSX files are allowed.',
+  invalidFileTypeWithImages: 'Invalid file type: Only PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, and PNG files are allowed.',
   emptyFile: 'The selected file is empty.',
   missingFile: 'Please attach a document file to upload.',
   invalidBucket: 'Selected document storage bucket is not supported.',
@@ -51,6 +94,13 @@ export const DOCUMENT_FILE_ACCEPT = ALLOWED_DOCUMENT_EXTENSIONS
   .map((extension) => `.${extension}`)
   .join(',');
 
+// For categories that accept either a document or a photo as proof (awards,
+// activity evidence, the oral defense application) — documents and images
+// combined, rather than opening every category up to images.
+export const DOCUMENT_OR_IMAGE_FILE_ACCEPT = [...ALLOWED_DOCUMENT_EXTENSIONS, ...ALLOWED_IMAGE_EXTENSIONS]
+  .map((extension) => `.${extension}`)
+  .join(',');
+
 export function isDocumentStorageBucket(value: string): value is DocumentStorageBucket {
   return DOCUMENT_STORAGE_BUCKET_LIST.includes(value as DocumentStorageBucket);
 }
@@ -59,16 +109,21 @@ export function getFileExtension(fileName: string) {
   return fileName.split('.').pop()?.trim().toLowerCase() || '';
 }
 
-export function validateFileType(fileName: string, mimeType?: string) {
+export function validateFileType(fileName: string, mimeType?: string, allowImages = false) {
   const extension = getFileExtension(fileName);
-  const hasAllowedExtension = ALLOWED_DOCUMENT_EXTENSIONS.includes(
-    extension as (typeof ALLOWED_DOCUMENT_EXTENSIONS)[number]
-  );
-  const hasAllowedMimeType = Boolean(mimeType)
-    && ALLOWED_DOCUMENT_MIME_TYPES.includes(mimeType as (typeof ALLOWED_DOCUMENT_MIME_TYPES)[number]);
+  const allowedExtensions: readonly string[] = allowImages
+    ? [...ALLOWED_DOCUMENT_EXTENSIONS, ...ALLOWED_IMAGE_EXTENSIONS]
+    : ALLOWED_DOCUMENT_EXTENSIONS;
+  const allowedMimeTypes: readonly string[] = allowImages
+    ? [...ALLOWED_DOCUMENT_MIME_TYPES, ...ALLOWED_IMAGE_MIME_TYPES]
+    : ALLOWED_DOCUMENT_MIME_TYPES;
+  const hasAllowedExtension = allowedExtensions.includes(extension);
+  const hasAllowedMimeType = Boolean(mimeType) && allowedMimeTypes.includes(mimeType as string);
 
   if (!hasAllowedExtension || (mimeType && !hasAllowedMimeType)) {
-    return DOCUMENT_UPLOAD_ERROR_MESSAGES.invalidFileType;
+    return allowImages
+      ? DOCUMENT_UPLOAD_ERROR_MESSAGES.invalidFileTypeWithImages
+      : DOCUMENT_UPLOAD_ERROR_MESSAGES.invalidFileType;
   }
 
   return null;

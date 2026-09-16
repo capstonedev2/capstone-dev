@@ -16,12 +16,13 @@ type CheckpointBlueprint = {
   label: string;
   kind:
     | 'title-submitted'
-    | 'concept-paper'
+    | 'concept-defense-application'
     | 'adviser-approval'
     | 'concept-presentation-scheduled'
     | 'concept-panel-approval'
     | 'chapters-uploaded'
     | 'adviser-review'
+    | 'proposal-defense-application'
     | 'proposal-defense-scheduled'
     | 'panel-evaluation'
     | 'final-approval'
@@ -34,6 +35,7 @@ type CheckpointBlueprint = {
     | 'panel-comments'
     | 'revisions-completed'
     | 'final-manuscript'
+    | 'final-defense-application'
     | 'final-defense-scheduled'
     | 'panel-approval'
     | 'final-revisions'
@@ -120,14 +122,16 @@ const SCHEDULE_CHECKPOINT_KINDS = new Set<CheckpointBlueprint['kind']>([
 
 const STUDENT_TASK_KINDS = new Set<CheckpointBlueprint['kind']>([
   'title-submitted',
-  'concept-paper',
+  'concept-defense-application',
   'chapters-uploaded',
+  'proposal-defense-application',
   'prototype-uploaded',
   'progress-report',
   'testing-evidence',
   'presentation-uploaded',
   'revisions-completed',
   'final-manuscript',
+  'final-defense-application',
   'final-revisions',
   'approved-manuscript',
   'approval-sheet',
@@ -148,9 +152,9 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
     scheduleKeywords: ['concept', 'title', 'presentation', 'defense'],
     feedbackKeywords: ['concept', 'title'],
     checkpoints: [
-      { id: 'concept-title', label: 'Title submitted', kind: 'title-submitted' },
-      { id: 'concept-paper', label: 'Concept paper uploaded', kind: 'concept-paper' },
+      { id: 'concept-title', label: 'Title & concept paper submitted', kind: 'title-submitted' },
       { id: 'concept-adviser-approval', label: 'Adviser idea approval', kind: 'adviser-approval' },
+      { id: 'concept-defense-application', label: 'Oral defense application uploaded', kind: 'concept-defense-application' },
       { id: 'concept-presentation-scheduled', label: 'Concept presentation scheduled', kind: 'concept-presentation-scheduled' },
       { id: 'concept-panel-approval', label: 'Panel concept approval', kind: 'concept-panel-approval' }
     ]
@@ -170,6 +174,7 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
     checkpoints: [
       { id: 'proposal-chapters', label: 'Chapters 1-3 uploaded', kind: 'chapters-uploaded' },
       { id: 'proposal-adviser-review', label: 'Adviser initial review', kind: 'adviser-review' },
+      { id: 'proposal-defense-application', label: 'Oral defense application uploaded', kind: 'proposal-defense-application' },
       { id: 'proposal-defense-scheduled', label: 'Proposal defense scheduled', kind: 'proposal-defense-scheduled' },
       { id: 'proposal-panel-evaluation', label: 'Panel evaluation', kind: 'panel-evaluation' },
       { id: 'proposal-final-approval', label: 'Final approval', kind: 'final-approval' }
@@ -227,6 +232,7 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
     feedbackKeywords: ['final', 'defense', 'panel', 'revision'],
     checkpoints: [
       { id: 'final-manuscript', label: 'Final manuscript uploaded', kind: 'final-manuscript' },
+      { id: 'final-defense-application', label: 'Oral defense application uploaded', kind: 'final-defense-application' },
       { id: 'final-defense-scheduled', label: 'Final defense scheduled', kind: 'final-defense-scheduled' },
       { id: 'final-panel-approval', label: 'Panel approval', kind: 'panel-approval' },
       { id: 'final-revisions-submitted', label: 'Final revisions submitted', kind: 'final-revisions' }
@@ -553,10 +559,7 @@ function getCheckpointStatus(
   record?: SavedCheckpoint
 ): BuiltCheckpoint {
   if (record) {
-    const savedStatus = mapSavedCheckpointStatus(record.status);
-    const status = checkpoint.kind === 'concept-paper' && hasApprovedDocument(evidence)
-      ? 'completed'
-      : savedStatus;
+    const status = mapSavedCheckpointStatus(record.status);
 
     return {
       ...checkpoint,
@@ -586,10 +589,8 @@ function getCheckpointStatus(
       return hasSubmittedTitle(data)
         ? { ...checkpoint, status: 'completed', note: 'Project title has been submitted.' }
         : { ...checkpoint, status: 'pending', note: 'Waiting for title submission.' };
-    case 'concept-paper':
-      return hasEvidence
-        ? { ...checkpoint, status: hasApprovedDocument(evidence) ? 'completed' : 'in-review', note: 'Concept evidence is attached.' }
-        : { ...checkpoint, status: 'pending', note: 'Upload the concept paper.' };
+    case 'concept-defense-application':
+      return { ...checkpoint, status: 'pending', note: 'Upload a photo of the signed Application for Oral Defense of Thesis (Concept).' };
     case 'adviser-approval':
       if (isApprovedStatus(data.titleRegistration.registrationStatus)) {
         return { ...checkpoint, status: 'completed', note: 'Adviser cleared the idea for concept presentation.' };
@@ -602,7 +603,7 @@ function getCheckpointStatus(
         ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }
         : isApprovedStatus(data.titleRegistration.registrationStatus)
           ? { ...checkpoint, status: 'pending', note: 'Ready to request or wait for concept presentation schedule.' }
-          : { ...checkpoint, status: 'locked', note: 'Adviser idea approval is required first.' };
+          : { ...checkpoint, status: 'locked', note: 'Adviser idea approval and approved oral defense application evidence are required first.' };
     case 'concept-panel-approval':
       if (feedback.some((item) => normalizeText(item.mode).includes('panel') && isApprovedStatus(item.status))) {
         return { ...checkpoint, status: 'completed', note: 'Panel approved the concept after presentation.' };
@@ -623,6 +624,8 @@ function getCheckpointStatus(
       return hasEvidence
         ? { ...checkpoint, status: 'in-review', note: 'Waiting for adviser review.' }
         : { ...checkpoint, status: 'pending', note: 'Submit proposal files first.' };
+    case 'proposal-defense-application':
+      return { ...checkpoint, status: 'pending', note: 'Upload a photo of the signed Application for Oral Defense of Thesis (Proposal).' };
     case 'proposal-defense-scheduled':
       return schedules.length
         ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }
@@ -683,6 +686,8 @@ function getCheckpointStatus(
       return hasEvidence
         ? { ...checkpoint, status: 'completed', note: 'Final manuscript is uploaded.' }
         : { ...checkpoint, status: 'pending', note: 'Upload the final manuscript.' };
+    case 'final-defense-application':
+      return { ...checkpoint, status: 'pending', note: 'Upload a photo of the signed Application for Oral Defense of Thesis (Final).' };
     case 'final-defense-scheduled':
       return schedules.length
         ? { ...checkpoint, status: 'completed', note: schedules[0].startDateLabel }

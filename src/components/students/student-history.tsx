@@ -206,7 +206,7 @@ function buildHistoryEntries(data: StudentDashboardData): StudentHistoryEntry[] 
       }))
   );
 
-  const majorFileCategories = new Set(['proposal', 'chapter-3', 'system-files', 'presentation-files', 'certificates']);
+  const majorFileCategories = new Set(['proposal', 'chapter-3', 'system-files', 'presentation-files', 'award-recognition']);
 
   const documentEntries: StudentHistoryEntry[] = data.documents.map((document) => {
     const reviewStatus = document.reviewStatus || formatDisplayLabel(document.status);

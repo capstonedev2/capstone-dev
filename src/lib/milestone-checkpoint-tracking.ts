@@ -53,10 +53,10 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
     description: 'Define the research topic, problem scope, and initial capstone direction.',
     sequence: 1,
     checkpoints: [
-      { key: 'concept-title', title: 'Title submitted', description: 'Official project title has been submitted.', sequence: 1, panelRequired: false },
-      { key: 'concept-paper', title: 'Concept paper uploaded', description: 'Concept paper or title proposal evidence is uploaded.', sequence: 2, panelRequired: false },
-      { key: 'concept-adviser-approval', title: 'Adviser idea approval', description: 'Adviser cleared the idea for concept presentation.', sequence: 3, panelRequired: false },
-      { key: 'concept-presentation-scheduled', title: 'Concept presentation scheduled', description: 'Concept presentation schedule is recorded after adviser clearance.', sequence: 4, panelRequired: false },
+      { key: 'concept-title', title: 'Title & concept paper submitted', description: 'Official project title and concept paper document have been submitted together for adviser review.', sequence: 1, panelRequired: false },
+      { key: 'concept-adviser-approval', title: 'Adviser idea approval', description: 'Adviser cleared the idea for concept presentation.', sequence: 2, panelRequired: false },
+      { key: 'concept-defense-application', title: 'Oral defense application form uploaded', description: 'Photo evidence of the signed Application for Oral Defense of Thesis (Concept) — cleared by the Research Head, Director, and Program Head — is uploaded from Project Overview and independently reviewed by the adviser.', sequence: 3, panelRequired: false },
+      { key: 'concept-presentation-scheduled', title: 'Concept presentation scheduled', description: 'Concept presentation schedule is recorded once the oral defense application evidence is approved.', sequence: 4, panelRequired: false },
       { key: 'concept-panel-approval', title: 'Panel concept approval', description: 'Panel approved the concept after presentation.', sequence: 5 }
     ]
   },
@@ -68,9 +68,10 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
     checkpoints: [
       { key: 'proposal-chapters', title: 'Chapters 1-3 uploaded', description: 'Proposal manuscript or Chapters 1-3 were submitted.', sequence: 1, panelRequired: false },
       { key: 'proposal-adviser-review', title: 'Adviser initial review', description: 'Adviser completed the first proposal review.', sequence: 2, panelRequired: false },
-      { key: 'proposal-defense-scheduled', title: 'Proposal defense scheduled', description: 'Proposal defense schedule is recorded.', sequence: 3, panelRequired: false },
-      { key: 'proposal-panel-evaluation', title: 'Panel evaluation', description: 'Panel evaluation is recorded for proposal defense.', sequence: 4 },
-      { key: 'proposal-final-approval', title: 'Final approval', description: 'Proposal stage received final clearance.', sequence: 5 }
+      { key: 'proposal-defense-application', title: 'Oral defense application form uploaded', description: 'Photo evidence of the signed Application for Oral Defense of Thesis (Proposal) — cleared by the Research Head, Director, and Program Head — is uploaded from Document Submissions and independently reviewed by the adviser.', sequence: 3, panelRequired: false },
+      { key: 'proposal-defense-scheduled', title: 'Proposal defense scheduled', description: 'Proposal defense schedule is recorded once the oral defense application evidence is approved.', sequence: 4, panelRequired: false },
+      { key: 'proposal-panel-evaluation', title: 'Panel evaluation', description: 'Panel evaluation is recorded for proposal defense.', sequence: 5 },
+      { key: 'proposal-final-approval', title: 'Final approval', description: 'Proposal stage received final clearance.', sequence: 6 }
     ]
   },
   {
@@ -104,9 +105,10 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
     sequence: 5,
     checkpoints: [
       { key: 'final-manuscript', title: 'Final manuscript uploaded', description: 'Final manuscript was uploaded for review.', sequence: 1, panelRequired: false },
-      { key: 'final-defense-scheduled', title: 'Final defense scheduled', description: 'Final defense schedule is recorded.', sequence: 2, panelRequired: false },
-      { key: 'final-panel-approval', title: 'Panel approval', description: 'Panel approval is recorded after final defense.', sequence: 3 },
-      { key: 'final-revisions-submitted', title: 'Final revisions submitted', description: 'Final revisions were submitted and cleared.', sequence: 4 }
+      { key: 'final-defense-application', title: 'Oral defense application form uploaded', description: 'Photo evidence of the signed Application for Oral Defense of Thesis (Final) — cleared by the Research Head, Director, and Program Head — is uploaded from Document Submissions and independently reviewed by the adviser.', sequence: 2, panelRequired: false },
+      { key: 'final-defense-scheduled', title: 'Final defense scheduled', description: 'Final defense schedule is recorded once the oral defense application evidence is approved.', sequence: 3, panelRequired: false },
+      { key: 'final-panel-approval', title: 'Panel approval', description: 'Panel approval is recorded after final defense.', sequence: 4 },
+      { key: 'final-revisions-submitted', title: 'Final revisions submitted', description: 'Final revisions were submitted and cleared.', sequence: 5 }
     ]
   },
   {
@@ -127,6 +129,15 @@ const EXPECTED_WORKFLOW_MILESTONE_SEQUENCES = THESIS_MILESTONE_WORKFLOW.map((sta
 const EXPECTED_WORKFLOW_CHECKPOINT_KEYS = THESIS_MILESTONE_WORKFLOW.flatMap((stage) =>
   stage.checkpoints.map((checkpoint) => checkpoint.key)
 );
+// Lets ensureProjectMilestoneWorkflow detect a checkpoint whose stored `sequence`
+// no longer matches the current workflow definition (e.g. after reordering
+// checkpoints within a stage) and re-sync it, instead of only detecting a
+// checkpoint that's missing outright.
+const EXPECTED_CHECKPOINT_SEQUENCE_BY_KEY = new Map(
+  THESIS_MILESTONE_WORKFLOW.flatMap((stage) =>
+    stage.checkpoints.map((checkpoint) => [checkpoint.key, checkpoint.sequence] as const)
+  )
+);
 const NON_PANEL_REVIEW_CHECKPOINT_KEYS = new Set(
   THESIS_MILESTONE_WORKFLOW.flatMap((stage) =>
     stage.checkpoints
@@ -136,14 +147,28 @@ const NON_PANEL_REVIEW_CHECKPOINT_KEYS = new Set(
 );
 
 const CHECKPOINT_MATCHERS = [
-  { checkpointKey: 'concept-paper', keywords: ['title proposal', 'concept paper', 'concept', 'title'] },
+  // Placed before the broader 'concept-title' matcher below (whose 'concept'/'title'
+  // keywords would otherwise catch this category too) so uploads categorized as the
+  // defense application form resolve to their own checkpoint instead.
+  { checkpointKey: 'concept-defense-application', keywords: ['concept-defense-application', 'oral defense application', 'application for oral defense', 'defense application', 'defense clearance form', 'defense compliance evidence'] },
+  // 'concept-paper' was folded into 'concept-title' — the concept paper document
+  // is always uploaded together with the title (same form, same submission), so
+  // there's no independent checkpoint for it anymore.
+  { checkpointKey: 'concept-title', keywords: ['title proposal', 'concept paper', 'concept', 'title'] },
   { checkpointKey: 'concept-presentation-scheduled', keywords: ['concept presentation', 'concept defense', 'concept schedule'] },
+  // Placed before 'proposal-chapters' below (whose broad 'proposal' keyword would
+  // otherwise catch this category too) so proposal defense-application evidence
+  // resolves to its own checkpoint instead of being counted as a chapter upload.
+  { checkpointKey: 'proposal-defense-application', keywords: ['proposal-defense-application', 'proposal defense application', 'oral defense application (proposal)'] },
   { checkpointKey: 'proposal-chapters', keywords: ['proposal', 'chapter 1', 'chapter 2', 'chapter 3', 'chapters 1-3', 'chapters 1–3', 'manuscript'] },
   { checkpointKey: 'development-progress-report', keywords: ['progress report', 'progress'] },
   { checkpointKey: 'development-testing-evidence', keywords: ['testing', 'test evidence', 'qa', 'validation', 'evaluation evidence'] },
   { checkpointKey: 'development-prototype', keywords: ['prototype', 'system file', 'system-files', 'development', 'source code', 'build'] },
   { checkpointKey: 'mock-presentation', keywords: ['mock presentation', 'pre-final presentation', 'mock defense presentation', 'pre-final defense presentation', 'presentation', 'slides', 'deck'] },
   { checkpointKey: 'mock-revisions-completed', keywords: ['mock revision', 'pre-final revision', 'revised mock', 'revised pre-final', 'mock defense revision', 'pre-final defense revision'] },
+  // Placed before 'final-manuscript' and 'final-revisions-submitted' below so
+  // final defense-application evidence resolves to its own checkpoint instead.
+  { checkpointKey: 'final-defense-application', keywords: ['final-defense-application', 'final defense application', 'oral defense application (final)'] },
   { checkpointKey: 'final-manuscript', keywords: ['final manuscript', 'final paper', 'final document'] },
   { checkpointKey: 'final-revisions-submitted', keywords: ['final revision', 'revised final', 'final revisions'] },
   { checkpointKey: 'completion-approved-manuscript', keywords: ['approved manuscript', 'approved final'] },
@@ -191,7 +216,7 @@ function getInitialCheckpointState(stage: WorkflowStage, checkpoint: WorkflowSta
 
   if (projectStatus && APPROVED_PROJECT_STATUSES.has(projectStatus)) {
     const isAdviserClearedCheckpoint = checkpoint.key === 'concept-title' ||
-      checkpoint.key === 'concept-paper' ||
+      checkpoint.key === 'concept-defense-application' ||
       checkpoint.key === 'concept-adviser-approval';
 
     return {
@@ -282,9 +307,20 @@ type ExistingCheckpointSummary = {
 
 const TITLE_REVIEW_APPROVED_CHECKPOINT_KEYS = [
   'concept-title',
-  'concept-paper',
+  'concept-defense-application',
   'concept-adviser-approval'
 ];
+
+// The defense-application-evidence checkpoints shouldn't be fabricated as
+// "completed" by the repair pass below unless there's real submission activity
+// on them — a project that moved past a stage before that stage's evidence-form
+// requirement existed shouldn't retroactively show a checkmark for something
+// that was never actually submitted.
+const NO_FABRICATE_ON_REPAIR_KEYS = new Set([
+  'concept-defense-application',
+  'proposal-defense-application',
+  'final-defense-application'
+]);
 
 function hasCheckpointActivity(checkpoint?: ExistingCheckpointSummary) {
   if (!checkpoint) {
@@ -331,7 +367,7 @@ async function repairApprovedConceptTitleReview(
       continue;
     }
 
-    if (key === 'concept-paper' && !hasCheckpointActivity(checkpoint)) {
+    if (NO_FABRICATE_ON_REPAIR_KEYS.has(key) && !hasCheckpointActivity(checkpoint)) {
       continue;
     }
 
@@ -392,6 +428,7 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
       select: {
         id: true,
         key: true,
+        sequence: true,
         status: true,
         milestoneId: true,
         adviserReviewStatus: true,
@@ -412,9 +449,16 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
 
   const existingSequences = new Set(existingMilestones.map((milestone: { sequence: number }) => milestone.sequence));
   const existingKeys = new Set(existingCheckpoints.map((checkpoint: { key: string }) => checkpoint.key));
+  const expectedKeySet = new Set(EXPECTED_WORKFLOW_CHECKPOINT_KEYS);
+  // Catches a checkpoint that's still in the DB but no longer part of the workflow
+  // definition (e.g. 'concept-paper' after it was folded into 'concept-title') —
+  // without this, a row-count-only check can't tell "one is missing" apart from
+  // "the set has changed shape", and would leave the stale row on screen forever.
+  const orphanedCheckpointKeys = Array.from(existingKeys as Set<string>).filter((key) => !expectedKeySet.has(key));
   const hasAllWorkflowRows =
     EXPECTED_WORKFLOW_MILESTONE_SEQUENCES.every((sequence) => existingSequences.has(sequence)) &&
-    EXPECTED_WORKFLOW_CHECKPOINT_KEYS.every((key) => existingKeys.has(key));
+    EXPECTED_WORKFLOW_CHECKPOINT_KEYS.every((key) => existingKeys.has(key)) &&
+    orphanedCheckpointKeys.length === 0;
   const hasReviewSchemaDrift = existingCheckpoints.some((checkpoint: {
     key: string;
     panelReviewStatus: MilestoneCheckpointReviewStatus;
@@ -422,8 +466,11 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
     NON_PANEL_REVIEW_CHECKPOINT_KEYS.has(checkpoint.key) &&
     checkpoint.panelReviewStatus !== MilestoneCheckpointReviewStatus.NOT_REQUIRED
   );
+  const hasSequenceDrift = existingCheckpoints.some((checkpoint: { key: string; sequence: number }) =>
+    EXPECTED_CHECKPOINT_SEQUENCE_BY_KEY.get(checkpoint.key) !== checkpoint.sequence
+  );
 
-  if (hasAllWorkflowRows && !hasReviewSchemaDrift) {
+  if (hasAllWorkflowRows && !hasReviewSchemaDrift && !hasSequenceDrift) {
     type ExistingMilestoneSummary = {
       id: string;
       status: MilestoneStatus;
@@ -539,6 +586,16 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
     }
 
     await updateMilestoneRollup(db, milestone.id);
+  }
+
+  if (orphanedCheckpointKeys.length) {
+    // Retired checkpoint (e.g. the old standalone 'concept-paper' step) — its
+    // linked submissions/files aren't deleted, just detached (checkpointId is
+    // onDelete: SetNull), so no uploaded evidence is lost, only the stale
+    // checklist row.
+    await db.milestoneCheckpoint.deleteMany({
+      where: { projectId, key: { in: orphanedCheckpointKeys } }
+    });
   }
 
   return checkpoints;
@@ -861,7 +918,8 @@ export async function recordDefenseVoteOutcome(
   await Promise.all(Array.from(updatedMilestoneIds).map((milestoneId) => updateMilestoneRollup(db, milestoneId)));
 }
 
-const TOTAL_WORKFLOW_CHECKPOINTS = EXPECTED_WORKFLOW_CHECKPOINT_KEYS.length;
+export const TOTAL_WORKFLOW_CHECKPOINTS = EXPECTED_WORKFLOW_CHECKPOINT_KEYS.length;
+export const TOTAL_WORKFLOW_MILESTONES = THESIS_MILESTONE_WORKFLOW.length;
 
 export type ProjectProgressSummary = {
   percent: number;
@@ -873,8 +931,8 @@ export type ProjectProgressSummary = {
 /**
  * Computes a group's real completion percentage from actual MilestoneCheckpoint
  * rows instead of the stored Group.progress column, which no write path ever
- * updates after creation. Counts completed checkpoints against the full 26-item
- * workflow (THESIS_MILESTONE_WORKFLOW) rather than requiring the per-project
+ * updates after creation. Counts completed checkpoints against the full
+ * workflow (THESIS_MILESTONE_WORKFLOW, TOTAL_WORKFLOW_CHECKPOINTS items) rather than requiring the per-project
  * checkpoint rows to already exist, so this stays a pure read with no side effects.
  * Also reports which workflow stage the group is currently sitting in — the
  * first stage (in sequence order) that isn't fully checked off yet — so UI can
@@ -1122,7 +1180,10 @@ function getCompanionReviewCheckpointKeys(sourceKey: string | null | undefined, 
   }
 
   if (isReviewedConceptTitle) {
-    return ['concept-paper', 'concept-adviser-approval'];
+    // concept-defense-application is no longer bundled into the title decision —
+    // it's uploaded and independently reviewed after the adviser has already
+    // approved the idea, so it needs its own review action (syncEvidenceReview).
+    return ['concept-adviser-approval'];
   }
 
   if (source.startsWith('concept-')) {
@@ -1185,7 +1246,7 @@ async function syncCompanionReviewCheckpoints(
       continue;
     }
 
-    if (sourceKey === 'concept-title' && key === 'concept-paper' && !hasCheckpointActivity(checkpoint)) {
+    if (sourceKey === 'concept-title' && NO_FABRICATE_ON_REPAIR_KEYS.has(key) && !hasCheckpointActivity(checkpoint)) {
       continue;
     }
 

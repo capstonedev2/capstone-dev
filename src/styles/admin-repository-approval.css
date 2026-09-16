@@ -195,6 +195,153 @@
 
 .fra-filter-meta { margin-left: auto; }
 
+/* Record Cards (replaces the plain table for the review queue) */
+.fra-record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.fra-record-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.25rem 1.4rem 1.25rem 1.65rem;
+  border-radius: 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.fra-record-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0,58,143,0.18);
+}
+
+.fra-record-card::before {
+  content: '';
+  position: absolute;
+  top: 0.65rem;
+  bottom: 0.65rem;
+  left: 0;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--warning);
+}
+
+.fra-record-card.is-published::before {
+  background: var(--success);
+}
+
+.fra-record-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fra-record-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.fra-record-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  min-width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.85rem;
+  background: rgba(0,58,143,0.08);
+  color: var(--primary);
+  font-size: 1.05rem;
+}
+
+.fra-record-card.is-published .fra-record-icon,
+.fra-record-icon.is-published {
+  background: rgba(16,185,129,0.12);
+  color: #047857;
+}
+
+.fra-record-titles { min-width: 0; }
+
+.fra-record-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.fra-record-subtitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.fra-record-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.fra-record-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  background: var(--surface-alt, rgba(0,58,143,0.03));
+}
+
+.fra-record-field {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.fra-record-field span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.fra-record-field strong {
+  font-size: 0.86rem;
+  color: var(--text);
+}
+
+.fra-record-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.fra-record-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 /* Table Styles */
 .fra-table th, .repo-table th {
   font-size: 0.76rem;

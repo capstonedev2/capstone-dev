@@ -190,14 +190,29 @@ export async function PATCH(
     }
 
     // Approving a title-proposal file here would leave Project.status/Group.title behind —
-    // only the dedicated Title Approvals flow (/api/title-submissions) completes that
-    // transition, so route reviewers there instead of silently approving half the workflow.
+    // only the dedicated Title & Evidence Approval flow (/api/title-submissions) completes
+    // that transition, so route reviewers there instead of silently approving half the workflow.
     const documentCategory = normalizeText(file.documentCategory || file.category).toLowerCase();
     if (nextStatus === SubmissionStatus.APPROVED && documentCategory === 'title proposal') {
       return Response.json(
         {
           success: false,
-          message: 'Title proposals must be approved from Title Approvals, not from the document review screen.'
+          message: 'Title proposals must be approved from Title & Evidence Approval, not from the document review screen.'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Same reasoning as the title-proposal guard above — every stage's oral defense
+    // application evidence has its own independent review action (with its own
+    // feedback/status fields) on Title & Evidence Approval, so none of them should
+    // be approved from here too.
+    const DEFENSE_APPLICATION_CATEGORIES = ['concept-defense-application', 'proposal-defense-application', 'final-defense-application'];
+    if (nextStatus === SubmissionStatus.APPROVED && DEFENSE_APPLICATION_CATEGORIES.includes(documentCategory)) {
+      return Response.json(
+        {
+          success: false,
+          message: 'Oral defense application evidence must be approved from Title & Evidence Approval, not from the document review screen.'
         },
         { status: 400 }
       );
