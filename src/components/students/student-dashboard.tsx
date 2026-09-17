@@ -634,6 +634,21 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
   const priorityTasks = useMemo<PriorityTask[]>(() => {
     const tasks: PriorityTask[] = [];
 
+    const delayedStep = workflow.find((item) => item.status === 'delayed');
+    if (delayedStep) {
+      tasks.push({
+        id: `delayed-${delayedStep.id}`,
+        title: delayedStep.title,
+        label: 'Overdue',
+        tone: 'danger',
+        description: 'This milestone is past its due date and has not been marked complete.',
+        href: delayedStep.route,
+        actionLabel: 'Open Milestones',
+        meta: delayedStep.dateLabel,
+        icon: 'fa-triangle-exclamation'
+      });
+    }
+
     if (revisionFiles[0]) {
       tasks.push({
         id: `revision-${revisionFiles[0].id}`,
@@ -684,10 +699,10 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     }
 
     return tasks.slice(0, 3);
-  }, [latestFeedback, nextSchedule, revisionFiles]);
+  }, [latestFeedback, nextSchedule, revisionFiles, workflow]);
 
   const attentionCount =
-    revisionCount + highPriorityNotificationCount + dueSoonCount + overdueCount + unreadFeedbackCount;
+    revisionCount + highPriorityNotificationCount + dueSoonCount + overdueCount + unreadFeedbackCount + delayedWorkflowCount;
   const currentPhaseTone = getShellToneFromWorkflowStatus(currentWorkflowStep?.status ?? 'current');
   const attentionTone = getAttentionShellTone({
     attentionCount,

@@ -9,9 +9,8 @@ import {
   ACHIEVEMENT_DOCUMENT_CATEGORIES,
   CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES,
   DOCUMENT_FILE_ACCEPT,
-  DOCUMENT_OR_IMAGE_FILE_ACCEPT,
   DOCUMENT_STORAGE_BUCKETS,
-  IMAGE_ALLOWED_DOCUMENT_CATEGORIES,
+  UNRESTRICTED_FILE_TYPE_CATEGORIES,
   validateFileSize,
   validateFileType
 } from '@/lib/storage/upload-config';
@@ -422,13 +421,30 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     : documentTabCategoryOptions;
   const isUploadFormLocked = uploadCategoryTab === 'documents' && !isConceptStageComplete;
 
-  const allowsImageUpload = IMAGE_ALLOWED_DOCUMENT_CATEGORIES.has(uploadDraft.category);
+  const isUnrestrictedCategory = UNRESTRICTED_FILE_TYPE_CATEGORIES.has(uploadDraft.category);
+  const fileTypeMode = isUnrestrictedCategory ? 'any' : false;
 
   useEffect(() => {
     if (!visibleCategoryOptions.some((option) => option.key === uploadDraft.category)) {
       setUploadDraft((current) => ({ ...current, category: visibleCategoryOptions[0]?.key || current.category }));
     }
   }, [visibleCategoryOptions, uploadDraft.category]);
+
+  // A file's validity depends on the selected category (only some categories allow images),
+  // but switching the Category dropdown doesn't itself go through handleSelectedFile — so
+  // without this, a file rejected under one category could leave a stale error banner shown
+  // alongside a file that's actually valid under the newly-selected category (or vice versa).
+  useEffect(() => {
+    if (!uploadDraft.file) {
+      return;
+    }
+
+    const typeError = validateFileType(uploadDraft.file.name, uploadDraft.file.type, fileTypeMode);
+    const sizeError = validateFileSize(uploadDraft.file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+
+    setUploadError(typeError || sizeError || null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadDraft.category]);
 
   useEffect(() => {
     let cancelled = false;
@@ -924,7 +940,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     setUploadError(null);
 
     if (file) {
-      const typeError = validateFileType(file.name, file.type, allowsImageUpload);
+      const typeError = validateFileType(file.name, file.type, fileTypeMode);
       const sizeError = validateFileSize(file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
 
       if (typeError || sizeError) {
@@ -1007,7 +1023,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
 
     const selectedFile = uploadDraft.file;
-    const typeError = validateFileType(selectedFile.name, selectedFile.type, allowsImageUpload);
+    const typeError = validateFileType(selectedFile.name, selectedFile.type, fileTypeMode);
     const sizeError = validateFileSize(selectedFile.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
 
     if (typeError || sizeError) {
@@ -1045,6 +1061,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       formData.append('bucketName', DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
       formData.append('projectId', data.project.project_id || data.project.id);
       formData.append('documentCategory', uploadDraft.category);
+      if (uploadDraft.versionNotes.trim()) {
+        formData.append('notes', uploadDraft.versionNotes.trim());
+      }
 
       const response = await fetch('/api/document-files', {
         method: 'POST',
@@ -1708,12 +1727,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
 
                       {!uploadDraft.file && (
                         <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-[var(--muted)] z-10">
-                          {allowsImageUpload && (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5"><i className="fas fa-file-image text-emerald-500 text-sm"></i> JPG / PNG</span>
-                          )}
-                          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
-                          {!allowsImageUpload && (
+                          {isUnrestrictedCategory ? (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5">
+                              <i className="fas fa-infinity text-emerald-500 text-sm"></i> Any file type
+                            </span>
+                          ) : (
                             <>
+                              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-75"><i className="fas fa-file-pdf text-rose-500 text-sm"></i> PDF</span>
                               <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-150"><i className="fas fa-file-word text-blue-600 text-sm"></i> DOC</span>
                               <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5 delay-200"><i className="fas fa-file-powerpoint text-amber-500 text-sm"></i> PPT</span>
                             </>
@@ -1737,7 +1757,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                       ref={fileInputRef}
                       className="hidden"
                       type="file"
-                      accept={allowsImageUpload ? DOCUMENT_OR_IMAGE_FILE_ACCEPT : DOCUMENT_FILE_ACCEPT}
+                      accept={isUnrestrictedCategory ? undefined : DOCUMENT_FILE_ACCEPT}
                       onChange={handleFileInputChange}
                     />
                   </section>

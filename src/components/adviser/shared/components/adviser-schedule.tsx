@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
 import type { WeeklyScheduleItem } from '@/components/adviser/shared/config/dashboard-types';
@@ -11,7 +11,6 @@ import {
   WORKSPACE_META,
   buildAdviserScheduleItems,
   buildPanelScheduleItems,
-  getShortName,
   isNavItemActive
 } from '@/components/adviser/shared/config/dashboard-utils';
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
@@ -57,16 +56,68 @@ type ScheduleFormState = {
   location: string;
   notes: string;
   notifyStudents: boolean;
+  requiredSubmission: string;
+  // Own dedicated fields for the two "Other" text boxes, kept separate from `title` so the
+  // Agenda field never doubles up with a second box editing the exact same value live.
+  otherTypeLabel: string;
+  otherSubmissionLabel: string;
 };
 
 const SCHEDULE_TYPE_OPTIONS = [
   { value: 'CONSULTATION', label: 'Consultation', icon: 'fa-comments' },
-  { value: 'DEADLINE', label: 'Deadline', icon: 'fa-hourglass-half' },
+  { value: 'DEADLINE', label: 'Submission', icon: 'fa-hourglass-half' },
   { value: 'MEETING', label: 'Meeting', icon: 'fa-users' },
   { value: 'REMINDER', label: 'Reminder', icon: 'fa-bell' },
   { value: 'EVENT', label: 'Event', icon: 'fa-calendar-day' },
-  { value: 'REVIEW', label: 'Review', icon: 'fa-clipboard-check' }
+  { value: 'REVIEW', label: 'Review', icon: 'fa-clipboard-check' },
+  // UI-only — AdviserScheduleItemType has no "other" value in the schema, so this is
+  // translated to EVENT before it's ever sent to the API (see saveScheduleItem below);
+  // the adviser's own wording is preserved in the title instead of the type badge.
+  { value: 'OTHER', label: 'Other', icon: 'fa-shapes' }
 ] as const;
+
+// Deadline-only: lets the adviser say exactly what deliverable a deadline is for, instead of
+// students having to guess from a generic "Deadline" agenda line. Not a DB column — there's no
+// AdviserScheduleItem field for this, so picking one just pre-fills the Agenda/Notes text below
+// (which the adviser can still edit), rather than requiring a schema migration for a label.
+const REQUIRED_SUBMISSION_OPTIONS = [
+  { value: '', label: 'Not specified', hint: '' },
+  { value: 'title-proposal', label: 'Title Proposal', hint: 'Students submit their proposed thesis/capstone title for review.' },
+  { value: 'concept-paper', label: 'Concept Paper', hint: 'Students submit the concept paper covering the research problem and scope.' },
+  { value: 'proposal-chapters', label: 'Proposal (Chapters 1-3)', hint: 'Students submit the formal proposal document (Introduction, Review of Related Literature, Methodology).' },
+  {
+    value: 'progress-development',
+    label: 'Progress of Development',
+    hint: 'Students submit a development progress update. Remind them to attach photo or video evidence if the project is a hardware prototype or IoT system.'
+  },
+  { value: 'web-application', label: 'Web Application / System Demo', hint: 'Students submit or demo the working web application or system build.' },
+  { value: 'system-documentation', label: 'System Documentation', hint: 'Students submit technical or user documentation for the system.' },
+  { value: 'final-manuscript', label: 'Final Manuscript', hint: 'Students submit the final, panel-approved manuscript.' },
+  { value: 'other', label: 'Other requirement', hint: 'Specify the exact requirement in the field below so students know what to submit.' }
+] as const;
+
+function getRequiredSubmissionOption(value: string) {
+  return REQUIRED_SUBMISSION_OPTIONS.find((option) => option.value === value) ?? REQUIRED_SUBMISSION_OPTIONS[0];
+}
+
+// Folds the dedicated "Other" specify field into the final title, since AdviserScheduleItem
+// has nowhere else to store it. Used by both the live Preview panel and the actual save,
+// so what the adviser previews is exactly what gets sent.
+function buildScheduleTitle(form: ScheduleFormState) {
+  const otherLabel = (
+    form.type === 'OTHER'
+      ? form.otherTypeLabel
+      : form.type === 'DEADLINE' && form.requiredSubmission === 'other'
+        ? form.otherSubmissionLabel
+        : ''
+  ).trim();
+
+  if (!otherLabel) {
+    return form.title;
+  }
+
+  return form.title.trim() ? `${otherLabel}: ${form.title.trim()}` : otherLabel;
+}
 
 function getInitialScheduleForm(): ScheduleFormState {
   const now = new Date();
@@ -80,7 +131,10 @@ function getInitialScheduleForm(): ScheduleFormState {
     time: '09:00',
     location: '',
     notes: '',
-    notifyStudents: true
+    notifyStudents: true,
+    requiredSubmission: '',
+    otherTypeLabel: '',
+    otherSubmissionLabel: ''
   };
 }
 
@@ -143,13 +197,11 @@ function ScheduleSummaryCard({
   icon,
   label,
   value,
-  helper,
   tone = 'primary'
 }: {
   icon: string;
   label: string;
   value: string | number;
-  helper: string;
   tone?: 'primary' | 'warning' | 'success';
 }) {
   const toneStyles =
@@ -160,14 +212,16 @@ function ScheduleSummaryCard({
         : { background: 'rgba(0, 58, 143, 0.08)', color: 'var(--primary)' };
 
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <p className="text-sm font-semibold text-slate-500">{label}</p>
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">{value}</h2>
-          <p className="text-sm text-slate-500">{helper}</p>
         </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl text-lg shadow-sm" style={toneStyles}>
+        <div
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg shadow-sm ring-1 ring-inset ring-white/60"
+          style={toneStyles}
+        >
           <i className={`fas ${icon}`}></i>
         </div>
       </div>
@@ -227,7 +281,7 @@ function getScheduleCategoryLabel(item: WeeklyScheduleItem) {
     case 'defense':
       return 'Defense-Related';
     case 'deadline':
-      return 'Deadline';
+      return 'Submission';
     case 'reminder':
       return 'Reminder';
     case 'event':
@@ -299,6 +353,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
   const [scheduleNotice, setScheduleNotice] = useState<string | null>(null);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
   const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+  const createFormRef = useRef<HTMLElement | null>(null);
 
   const meta = WORKSPACE_META[workspaceMode];
   const fallbackScheduleItems = useMemo(
@@ -375,10 +430,17 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
     setScheduleNotice(null);
 
     try {
+      // AdviserScheduleItemType has no "other" value, and there's no column for a custom
+      // requirement label either — so both get folded into the title here, exactly as the
+      // Preview panel already shows it, and only the DB-safe type needs swapping.
       const response = await fetch('/api/adviser-schedule-items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(scheduleForm)
+        body: JSON.stringify({
+          ...scheduleForm,
+          title: buildScheduleTitle(scheduleForm),
+          type: scheduleForm.type === 'OTHER' ? 'EVENT' : scheduleForm.type
+        })
       });
       const payload = await response.json().catch(() => null);
 
@@ -424,6 +486,26 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
     return result;
   }, [activeFilter, scheduleItems, search]);
 
+  // Counts always reflect the full scheduleItems set (not filteredItems) so pills show
+  // how many exist in each bucket regardless of which filter is currently active.
+  const filterCounts = useMemo(() => {
+    const counts: Record<ScheduleFilter, number> = {
+      all: scheduleItems.length,
+      consultation: 0,
+      meeting: 0,
+      deadline: 0,
+      reminder: 0,
+      event: 0,
+      defense: 0
+    };
+
+    scheduleItems.forEach((item) => {
+      counts[getScheduleCategory(item)] += 1;
+    });
+
+    return counts;
+  }, [scheduleItems]);
+
   const groupedItems = useMemo(() => {
     const groups = new Map<string, WeeklyScheduleItem[]>();
 
@@ -439,12 +521,13 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
     }));
   }, [filteredItems]);
 
-  const nextSession = filteredItems[0] ?? scheduleItems[0] ?? null;
   const defenseCount = scheduleItems.filter((item) => getScheduleCategory(item) === 'defense').length;
   const reviewCount = scheduleItems.filter((item) => ['consultation', 'meeting'].includes(getScheduleCategory(item))).length;
   const deadlineCount = scheduleItems.filter((item) => ['deadline', 'reminder'].includes(getScheduleCategory(item))).length;
   const locationCount = new Set(scheduleItems.map((item) => item.location).filter(Boolean)).size;
   const selectedScheduleTypeOption = getScheduleTypeOption(scheduleForm.type);
+  const isOtherType = scheduleForm.type === 'OTHER';
+  const isOtherRequirement = scheduleForm.type === 'DEADLINE' && scheduleForm.requiredSubmission === 'other';
   const selectedScheduleProject = scheduleProjects.find((project) => project.id === scheduleForm.projectId) || null;
   const primaryActionHref =
     workspaceMode === 'panel' ? `${basePath}/evaluation-queue` : `${basePath}/submissions`;
@@ -481,38 +564,31 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
               icon="fa-calendar-check"
               label="Upcoming Sessions"
               value={scheduleItems.length}
-              helper="Scheduled items currently visible in this workspace"
             />
             <ScheduleSummaryCard
               icon="fa-comments"
               label={workspaceMode === 'panel' ? 'Review Slots' : 'Consultations & Reviews'}
               value={reviewCount}
-              helper={
-                workspaceMode === 'panel'
-                  ? 'Working sessions attached to defense preparation'
-                  : 'Meetings focused on milestone guidance and follow-up'
-              }
               tone="warning"
             />
             <ScheduleSummaryCard
               icon={workspaceMode === 'panel' ? 'fa-gavel' : 'fa-hourglass-half'}
-              label={workspaceMode === 'panel' ? 'Defense-Related' : 'Deadlines & Reminders'}
+              label={workspaceMode === 'panel' ? 'Defense-Related' : 'Submissions & Reminders'}
               value={workspaceMode === 'panel' ? defenseCount : deadlineCount}
-              helper={workspaceMode === 'panel'
-                ? 'Sessions that need defense readiness or evaluation prep'
-                : 'Time-sensitive items students can track in their schedule'}
               tone="success"
             />
             <ScheduleSummaryCard
               icon="fa-location-dot"
               label="Active Venues"
               value={locationCount}
-              helper="Distinct rooms or work areas used in the current schedule"
             />
           </section>
 
           {workspaceMode === 'adviser' ? (
-            <section className="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+            <section
+              ref={createFormRef}
+              className="overflow-hidden rounded-3xl border border-white/60 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
+            >
               <form
                 className="grid lg:grid-cols-[minmax(0,1fr)_320px]"
                 onSubmit={(event) => {
@@ -571,28 +647,121 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
 
                     <label className="block">
                       <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">Type</span>
-                      <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                          <i className={`fas ${SCHEDULE_TYPE_OPTIONS.find(o => o.value === scheduleForm.type)?.icon || 'fa-tag'} text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]`} aria-hidden="true" />
+                      <div
+                        className={`overflow-hidden rounded-2xl border bg-white/50 shadow-sm backdrop-blur-sm transition-all ${
+                          isOtherType ? 'border-amber-300/80' : 'border-slate-200/60'
+                        }`}
+                      >
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                            <i className={`fas ${SCHEDULE_TYPE_OPTIONS.find(o => o.value === scheduleForm.type)?.icon || 'fa-tag'} text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]`} aria-hidden="true" />
+                          </div>
+                          <select
+                            className="min-h-[3.25rem] w-full appearance-none border-0 bg-transparent pl-11 pr-10 text-sm font-semibold text-slate-700 outline-none transition-all hover:bg-white focus:bg-white focus:ring-4 focus:ring-blue-900/10"
+                            value={scheduleForm.type}
+                            onChange={(event) => {
+                              const nextType = event.target.value;
+                              setScheduleForm((current) => ({
+                                ...current,
+                                type: nextType,
+                                requiredSubmission: nextType === 'DEADLINE' ? current.requiredSubmission : '',
+                                otherTypeLabel: nextType === 'OTHER' ? current.otherTypeLabel : ''
+                              }));
+                            }}
+                            disabled={isLoadingSchedule}
+                          >
+                            {SCHEDULE_TYPE_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                            <i className="fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true" />
+                          </div>
                         </div>
-                        <select
-                          className="min-h-[3.25rem] w-full appearance-none rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-10 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm transition-all hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10 outline-none"
-                          value={scheduleForm.type}
-                          onChange={(event) => updateScheduleForm('type', event.target.value as any)}
-                          disabled={isLoadingSchedule}
-                        >
-                          {SCHEDULE_TYPE_OPTIONS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                          <i className="fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true" />
-                        </div>
+
+                        {isOtherType && (
+                          <div className="flex items-center gap-2 border-t border-amber-300/60 bg-amber-50/40 px-4 py-3">
+                            <span className="shrink-0 text-sm font-medium text-slate-600">Specify:</span>
+                            <input
+                              className="min-w-0 flex-1 border-0 border-b border-dashed border-slate-400 bg-transparent pb-0.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400 placeholder:font-normal focus:border-amber-500"
+                              value={scheduleForm.otherTypeLabel}
+                              onChange={(event) => updateScheduleForm('otherTypeLabel', event.target.value)}
+                              placeholder="Ethics review hearing, Turnitin check, MOA signing, etc."
+                              required
+                            />
+                          </div>
+                        )}
                       </div>
                     </label>
                   </div>
+
+                  {scheduleForm.type === 'DEADLINE' && (
+                    <div className="mt-6">
+                      <label className="block">
+                        <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          What should students submit?
+                        </span>
+                        <div
+                          className={`overflow-hidden rounded-2xl border bg-white/50 shadow-sm backdrop-blur-sm transition-all ${
+                            isOtherRequirement ? 'border-amber-300/80' : 'border-slate-200/60'
+                          }`}
+                        >
+                          <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                              <i className="fas fa-file-circle-check text-sm text-slate-400 transition-colors group-focus-within:text-[var(--primary)]" aria-hidden="true" />
+                            </div>
+                            <select
+                              className="min-h-[3.25rem] w-full appearance-none border-0 bg-transparent pl-11 pr-10 text-sm font-semibold text-slate-700 outline-none transition-all hover:bg-white focus:bg-white focus:ring-4 focus:ring-blue-900/10"
+                              value={scheduleForm.requiredSubmission}
+                              onChange={(event) => {
+                                const option = getRequiredSubmissionOption(event.target.value);
+                                const isOther = option.value === 'other';
+                                setScheduleForm((current) => ({
+                                  ...current,
+                                  requiredSubmission: option.value,
+                                  // "Other" has no generic label worth prefilling — the Specify
+                                  // row below asks the adviser to type it instead.
+                                  title: isOther || current.title.trim() ? current.title : option.label,
+                                  notes: isOther || current.notes.trim() ? current.notes : option.hint,
+                                  otherSubmissionLabel: isOther ? current.otherSubmissionLabel : ''
+                                }));
+                              }}
+                            >
+                              {REQUIRED_SUBMISSION_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                              <i className="fas fa-chevron-down text-[10px] text-slate-400" aria-hidden="true" />
+                            </div>
+                          </div>
+
+                          {isOtherRequirement && (
+                            <div className="flex items-center gap-2 border-t border-amber-300/60 bg-amber-50/40 px-4 py-3">
+                              <span className="shrink-0 text-sm font-medium text-slate-600">Specify:</span>
+                              <input
+                                className="min-w-0 flex-1 border-0 border-b border-dashed border-slate-400 bg-transparent pb-0.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400 placeholder:font-normal focus:border-amber-500"
+                                value={scheduleForm.otherSubmissionLabel}
+                                onChange={(event) => updateScheduleForm('otherSubmissionLabel', event.target.value)}
+                                placeholder="Source code repository link, user manual, deployment evidence, etc."
+                                required
+                              />
+                            </div>
+                          )}
+                        </div>
+                        {getRequiredSubmissionOption(scheduleForm.requiredSubmission).hint && (
+                          <p className="mt-2 text-xs leading-5 text-slate-500">
+                            <i className="fas fa-circle-info mr-1 text-[var(--primary)]" aria-hidden="true" />
+                            {getRequiredSubmissionOption(scheduleForm.requiredSubmission).hint}
+                          </p>
+                        )}
+                      </label>
+                    </div>
+                  )}
 
                   <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(260px,1fr)_160px_140px]">
                     <label className="block">
@@ -605,7 +774,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                           className="min-h-[3.25rem] w-full rounded-2xl border border-slate-200/60 bg-white/50 pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm outline-none transition-all placeholder:text-slate-400 hover:bg-white focus:border-[var(--primary)] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                           value={scheduleForm.title}
                           onChange={(event) => updateScheduleForm('title', event.target.value)}
-                          placeholder={`${selectedScheduleTypeOption.label} agenda`}
+                          placeholder={`${selectedScheduleTypeOption.label} agenda (optional extra detail)`}
                         />
                       </div>
                     </label>
@@ -688,7 +857,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                       <div className="min-w-0">
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Preview</p>
                         <h3 className="truncate text-base font-bold tracking-tight text-slate-800">
-                          {scheduleForm.title || selectedScheduleTypeOption.label}
+                          {buildScheduleTitle(scheduleForm) || selectedScheduleTypeOption.label}
                         </h3>
                       </div>
                     </div>
@@ -712,6 +881,16 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                         <i className="fas fa-location-dot mt-1 w-4 shrink-0 text-center text-xs text-slate-400" aria-hidden="true" />
                         <span className="min-w-0 flex-1 break-words text-slate-500">{scheduleForm.location || 'Location not set'}</span>
                       </div>
+                      {scheduleForm.type === 'DEADLINE' && scheduleForm.requiredSubmission && (
+                        <div className="flex items-start gap-3.5">
+                          <i className="fas fa-file-circle-check mt-1 w-4 shrink-0 text-center text-xs text-slate-400" aria-hidden="true" />
+                          <span className="min-w-0 flex-1 break-words font-medium text-slate-700">
+                            {scheduleForm.requiredSubmission === 'other'
+                              ? scheduleForm.otherSubmissionLabel || 'Other requirement'
+                              : getRequiredSubmissionOption(scheduleForm.requiredSubmission).label}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -779,12 +958,13 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                   { id: 'all' as const, label: 'All Sessions' },
                   { id: 'consultation' as const, label: workspaceMode === 'panel' ? 'Review Windows' : 'Consultations' },
                   { id: 'meeting' as const, label: 'Meetings' },
-                  { id: 'deadline' as const, label: 'Deadlines' },
+                  { id: 'deadline' as const, label: 'Submissions' },
                   { id: 'reminder' as const, label: 'Reminders' },
                   { id: 'event' as const, label: 'Events' },
                   { id: 'defense' as const, label: 'Defense-Related' }
                 ].map((option) => {
                   const active = activeFilter === option.id;
+                  const count = filterCounts[option.id];
                   return (
                     <button
                       key={option.id}
@@ -797,6 +977,13 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                       }`}
                     >
                       {option.label}
+                      <span
+                        className={`inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[11px] font-bold ${
+                          active ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
@@ -816,7 +1003,7 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
               </div>
             </div>
 
-            <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,0.95fr)]">
+            <div className="p-6">
               <div className="space-y-6">
                 {groupedItems.length ? (
                   groupedItems.map((group) => (
@@ -902,119 +1089,50 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                       >
                         <i className="fas fa-calendar-day text-xl"></i>
                       </div>
-                      <p className="text-base font-semibold text-slate-700">No schedule items match the current view.</p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Try switching the session filter or clearing the search field.
-                      </p>
+                      {scheduleItems.length === 0 ? (
+                        <>
+                          <p className="text-base font-semibold text-slate-700">No sessions scheduled yet.</p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {workspaceMode === 'adviser'
+                              ? 'Create your first consultation, submission deadline, or meeting above.'
+                              : 'Sessions your advisees schedule will show up here.'}
+                          </p>
+                          {workspaceMode === 'adviser' && (
+                            <button
+                              type="button"
+                              onClick={() => createFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                              className="mt-5 inline-flex min-h-[42px] items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-white shadow-md ring-1 ring-blue-900/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                              style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}
+                            >
+                              <i className="fas fa-calendar-plus text-xs" aria-hidden="true" />
+                              Create a schedule item
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-base font-semibold text-slate-700">No schedule items match the current view.</p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            Try switching the session filter or clearing the search field.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveFilter('all');
+                              setSearch('');
+                            }}
+                            className="mt-5 inline-flex min-h-[38px] items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                          >
+                            <i className="fas fa-rotate-left text-xs" aria-hidden="true" />
+                            Clear filters
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
 
-              <aside className="space-y-5">
-                <section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Next Up</p>
-                  <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">
-                    {nextSession ? nextSession.groupName : 'Schedule is clear'}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {nextSession
-                      ? `${nextSession.eventType} - ${nextSession.dateLabel}`
-                      : 'No upcoming item is queued in the current planner view.'}
-                  </p>
-
-                  {nextSession ? (
-                    <>
-                      <div className="mt-5 grid gap-3">
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Time</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900">{nextSession.timeLabel}</p>
-                        </div>
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Venue</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900">
-                            {nextSession.location ?? 'Venue to be confirmed'}
-                          </p>
-                        </div>
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Assigned To</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900">
-                            {getShortName(data.profile.fullName)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 rounded-[1.15rem] border border-[rgba(0,58,143,0.12)] bg-[rgba(0,58,143,0.04)] px-4 py-4">
-                        <p className="text-sm font-semibold text-slate-900">Preparation note</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">{getScheduleSupportNote(nextSession)}</p>
-                      </div>
-                    </>
-                  ) : null}
-                </section>
-
-                <section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Week At A Glance</p>
-                  <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">Schedule balance</h3>
-                  <div className="mt-5 space-y-3">
-                    {[
-                      {
-                        label: workspaceMode === 'panel' ? 'Evaluation sessions' : 'Consultations & reviews',
-                        value: reviewCount,
-                        tone: 'warning'
-                      },
-                      {
-                        label: workspaceMode === 'panel' ? 'Defense-related sessions' : 'Deadlines & reminders',
-                        value: workspaceMode === 'panel' ? defenseCount : deadlineCount,
-                        tone: 'success'
-                      },
-                      {
-                        label: 'Distinct venues',
-                        value: locationCount,
-                        tone: 'primary'
-                      }
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                        <span className="text-sm font-medium text-slate-600">{item.label}</span>
-                        <span
-                          className={`inline-flex min-w-[2rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold ${
-                            item.tone === 'warning'
-                              ? 'bg-amber-100 text-amber-700'
-                              : item.tone === 'success'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-[rgba(0,58,143,0.08)] text-[var(--primary)]'
-                          }`}
-                        >
-                          {item.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Planning Notes</p>
-                  <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-900">Keep the week moving</h3>
-                  <div className="mt-5 space-y-3">
-                    {[
-                      workspaceMode === 'panel'
-                        ? 'Review the evaluation packet before each defense slot so scoring time stays focused.'
-                        : 'Open the latest submission notes before each consultation so feedback stays specific.',
-                      'Confirm rooms and attendance early when the same venue is used by multiple sessions.',
-                      'Use the grouped agenda above to clear the next milestone decision while the meeting is still fresh.'
-                    ].map((note) => (
-                      <div key={note} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-                        <div
-                          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs"
-                          style={{ background: 'rgba(0, 58, 143, 0.08)', color: 'var(--primary)' }}
-                        >
-                          <i className="fas fa-check"></i>
-                        </div>
-                        <p className="text-sm leading-6 text-slate-600">{note}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              </aside>
             </div>
           </section>
         </div>

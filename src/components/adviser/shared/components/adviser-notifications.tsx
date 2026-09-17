@@ -67,6 +67,7 @@ export function AdviserNotifications({
               fullName={data.profile.fullName}
               notificationCount={data.profile.notificationCount}
               notificationItems={notificationPreviewItems}
+              userId={data.profile.user_id}
               workspaceMode={workspaceMode}
               onSwitchWorkspace={switchWorkspace}
             />

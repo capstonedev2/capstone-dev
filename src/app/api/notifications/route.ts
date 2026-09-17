@@ -172,7 +172,23 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { notificationId, notificationIds, action } = body;
+    const { notificationId, notificationIds, userId, action } = body;
+
+    if (action === 'read-all') {
+      if (typeof userId !== 'string' || !userId.trim()) {
+        return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+      }
+
+      const updated = await prisma.notification.updateMany({
+        where: { userId, status: 'UNREAD' },
+        data: {
+          status: 'READ',
+          readAt: new Date()
+        }
+      });
+
+      return NextResponse.json({ success: true, count: updated.count });
+    }
 
     const ids = Array.isArray(notificationIds)
       ? notificationIds.filter((id): id is string => typeof id === 'string' && Boolean(id.trim()))

@@ -19,6 +19,7 @@ export type AdviserActionStatus =
 
 export type AdviserProgressRecord = {
   id: string;
+  projectId: string | null;
   groupId: `IT-2024-${string}`;
   projectTitle: string;
   // Not IT-only — see src/lib/landing/departments-data.ts for the full department list.
@@ -26,7 +27,9 @@ export type AdviserProgressRecord = {
   progress: number;
   currentMilestone: ProgressMilestone;
   status: ProgressStatus;
-  deadline: string;
+  // null means no adviser/admin has set a milestone due date for this project yet
+  // (see the "Set Deadlines" modal) — never fabricate a placeholder date here.
+  deadline: string | null;
   lastUpdate: string;
   adviserAction: AdviserActionStatus;
 };
@@ -40,6 +43,7 @@ export type ProgressSortOption =
 export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
   {
     id: 'progress-it-01',
+    projectId: null,
     groupId: 'IT-2024-06',
     projectTitle: 'Smart Queue Analytics Dashboard',
     department: 'IT',
@@ -52,6 +56,7 @@ export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
   },
   {
     id: 'progress-it-02',
+    projectId: null,
     groupId: 'IT-2024-09',
     projectTitle: 'Clinic Appointment Flow Optimizer',
     department: 'IT',
@@ -64,6 +69,7 @@ export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
   },
   {
     id: 'progress-it-03',
+    projectId: null,
     groupId: 'IT-2024-11',
     projectTitle: 'Barangay Incident Mapping and Alerting',
     department: 'IT',
@@ -76,6 +82,7 @@ export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
   },
   {
     id: 'progress-it-04',
+    projectId: null,
     groupId: 'IT-2024-14',
     projectTitle: 'Student Services Help Desk Portal',
     department: 'IT',
@@ -88,6 +95,7 @@ export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
   },
   {
     id: 'progress-it-05',
+    projectId: null,
     groupId: 'IT-2024-18',
     projectTitle: 'Campus Wi-Fi Ticketing Insight Tool',
     department: 'IT',
@@ -100,6 +108,7 @@ export const IT_ADVISER_PROGRESS_RECORDS: AdviserProgressRecord[] = [
   },
   {
     id: 'progress-it-06',
+    projectId: null,
     groupId: 'IT-2024-21',
     projectTitle: 'Internship Partner Matching Assistant',
     department: 'IT',
@@ -186,7 +195,11 @@ export function formatProgressDate(value: string) {
   }).format(new Date(value));
 }
 
-export function getDeadlineLabel(deadline: string, referenceDate = PROGRESS_REFERENCE_DATE) {
+export function getDeadlineLabel(deadline: string | null, referenceDate = new Date().toISOString()) {
+  if (!deadline) {
+    return 'No deadline set';
+  }
+
   const days = diffInDays(deadline, referenceDate);
 
   if (days < 0) {
@@ -205,7 +218,11 @@ export function getDeadlineLabel(deadline: string, referenceDate = PROGRESS_REFE
   return `Due in ${days} days`;
 }
 
-export function getDeadlineToneClass(deadline: string, referenceDate = PROGRESS_REFERENCE_DATE) {
+export function getDeadlineToneClass(deadline: string | null, referenceDate = new Date().toISOString()) {
+  if (!deadline) {
+    return 'text-[var(--text-light)]';
+  }
+
   const days = diffInDays(deadline, referenceDate);
 
   if (days < 0) {
@@ -219,7 +236,7 @@ export function getDeadlineToneClass(deadline: string, referenceDate = PROGRESS_
   return 'text-[var(--text-light)]';
 }
 
-export function getLastUpdateLabel(lastUpdate: string, referenceDate = PROGRESS_REFERENCE_DATE) {
+export function getLastUpdateLabel(lastUpdate: string, referenceDate = new Date().toISOString()) {
   const days = Math.abs(diffInDays(referenceDate, lastUpdate));
 
   if (days === 0) {
@@ -233,7 +250,7 @@ export function getLastUpdateLabel(lastUpdate: string, referenceDate = PROGRESS_
   return `Updated ${days} days ago`;
 }
 
-export function getLastUpdateToneClass(lastUpdate: string, referenceDate = PROGRESS_REFERENCE_DATE) {
+export function getLastUpdateToneClass(lastUpdate: string, referenceDate = new Date().toISOString()) {
   const days = Math.abs(diffInDays(referenceDate, lastUpdate));
 
   if (days >= 7) {
@@ -262,15 +279,15 @@ export function getMostActiveMilestone(records: AdviserProgressRecord[]) {
 
 export function getNextMajorDeadline(records: AdviserProgressRecord[]) {
   return [...records]
-    .filter((record) => record.status !== 'completed')
-    .sort((left, right) => new Date(left.deadline).getTime() - new Date(right.deadline).getTime())[0] ?? null;
+    .filter((record) => record.status !== 'completed' && record.deadline)
+    .sort((left, right) => new Date(left.deadline!).getTime() - new Date(right.deadline!).getTime())[0] ?? null;
 }
 
-export function getAttentionReason(record: AdviserProgressRecord, referenceDate = PROGRESS_REFERENCE_DATE) {
-  const deadlineDays = diffInDays(record.deadline, referenceDate);
+export function getAttentionReason(record: AdviserProgressRecord, referenceDate = new Date().toISOString()) {
+  const deadlineDays = record.deadline ? diffInDays(record.deadline, referenceDate) : null;
   const inactivityDays = Math.abs(diffInDays(referenceDate, record.lastUpdate));
 
-  if (record.status === 'delayed' && deadlineDays < 0) {
+  if (record.status === 'delayed' && deadlineDays !== null && deadlineDays < 0) {
     return `Milestone overdue by ${Math.abs(deadlineDays)} day${Math.abs(deadlineDays) === 1 ? '' : 's'}.`;
   }
 
@@ -306,6 +323,12 @@ export function sortProgressRecords(records: AdviserProgressRecord[], sortBy: Pr
     if (sortBy === 'latest-update') {
       return new Date(right.lastUpdate).getTime() - new Date(left.lastUpdate).getTime();
     }
+
+    // Records with no deadline set yet sort to the end rather than to
+    // 1970 (which `new Date(null)` would otherwise put them at).
+    if (!left.deadline && !right.deadline) return 0;
+    if (!left.deadline) return 1;
+    if (!right.deadline) return -1;
 
     return new Date(left.deadline).getTime() - new Date(right.deadline).getTime();
   });

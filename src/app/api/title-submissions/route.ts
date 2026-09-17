@@ -1,4 +1,12 @@
-import { Prisma, ProjectStatus, ReviewDecision, SubmissionStatus, UserRole } from '@/generated/prisma/client';
+import {
+  MilestoneCheckpointReviewStatus,
+  MilestoneCheckpointStatus,
+  Prisma,
+  ProjectStatus,
+  ReviewDecision,
+  SubmissionStatus,
+  UserRole
+} from '@/generated/prisma/client';
 
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -7,7 +15,8 @@ import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import { uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
 import {
   recordCheckpointSubmission,
-  syncCheckpointReview
+  syncCheckpointReview,
+  updateMilestoneRollup
 } from '@/lib/milestone-checkpoint-tracking';
 import { findSimilarTitles, type SimilarTitleMatch } from '@/lib/title-similarity';
 
@@ -213,7 +222,8 @@ function findEvidenceReview(checkpoints: any[] | undefined, key: string) {
   return {
     status: checkpoint.status,
     feedback: checkpoint.latestFeedback || null,
-    feedbackBy: checkpoint.latestFeedbackBy || null
+    feedbackBy: checkpoint.latestFeedbackBy || null,
+    uploaderNote: checkpoint.submissions?.[0]?.description || null
   };
 }
 
@@ -315,7 +325,12 @@ const projectInclude = {
       key: true,
       status: true,
       latestFeedback: true,
-      latestFeedbackBy: true
+      latestFeedbackBy: true,
+      submissions: {
+        orderBy: { submittedAt: 'desc' },
+        take: 1,
+        select: { description: true }
+      }
     }
   }
 } satisfies Prisma.ProjectInclude;
@@ -734,13 +749,38 @@ export async function PATCH(request: Request) {
         submissionId: submission.id
       });
 
-      await syncCheckpointReview(tx, {
+      const updatedTitleCheckpoint = await syncCheckpointReview(tx, {
         submissionId: submission.id,
         nextStatus: submissionStatus,
         reviewNotes: remarks,
         reviewerName: getPersonName(user) || user.name,
         reviewerRole: user.role
       });
+
+      // Reopening a title that was already approved (adviser now wants a new
+      // one, e.g. after a Proposal-stage rejection) — syncCheckpointReview
+      // above only touches the 'concept-title' checkpoint, so without this
+      // the roadmap keeps showing "Adviser idea approval: Completed" even
+      // though the title itself just got sent back for revision.
+      if (project.status === ProjectStatus.APPROVED && nextStatus !== ProjectStatus.APPROVED) {
+        await tx.milestoneCheckpoint.updateMany({
+          where: { projectId: project.id, key: 'concept-adviser-approval' },
+          data: {
+            status: MilestoneCheckpointStatus.PENDING,
+            adviserReviewStatus: MilestoneCheckpointReviewStatus.PENDING,
+            submittedAt: null,
+            reviewedAt: null,
+            completedAt: null,
+            latestFeedback: remarks || null,
+            latestFeedbackBy: remarks ? (getPersonName(user) || user.name) : null,
+            latestFeedbackAt: remarks ? new Date() : null
+          }
+        });
+
+        if (updatedTitleCheckpoint?.milestoneId) {
+          await updateMilestoneRollup(tx, updatedTitleCheckpoint.milestoneId);
+        }
+      }
 
       if (nextStatus === ProjectStatus.APPROVED && project.groupId) {
         // Group.status/statusLabel/statusClass are separate stored columns from

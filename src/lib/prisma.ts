@@ -29,6 +29,12 @@ function createPrismaClient() {
     max: getPoolMax(),
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5_000,
+    // Without this, a pooled connection that Supabase's pooler (or an intermediate NAT/
+    // firewall) silently drops while idle isn't discovered until the app tries to reuse it —
+    // surfacing as "Connection terminated due to connection timeout" on an unrelated request.
+    // TCP keep-alive probes let dead sockets get detected and evicted from the pool proactively.
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
     ssl: connectionString.includes('localhost') || connectionString.includes('127.0.0.1') ? false : {
       rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED === 'true'
     }

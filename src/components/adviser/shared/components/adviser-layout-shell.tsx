@@ -209,11 +209,12 @@ export function AdviserLayoutShell({ children, data, notifications }: AdviserLay
         </div>
 
         <div className="student-global-navbar-actions adviser-global-navbar-actions">
-          <AdviserShellActions 
+          <AdviserShellActions
             basePath={basePath}
             fullName={data.profile.fullName}
             notificationCount={data.profile.notificationCount}
             notificationItems={notificationPreviewItems}
+            userId={data.profile.user_id}
             rawRole={data.profile.rawRole}
             themeMode={themeMode}
             workspaceMode={workspaceMode}

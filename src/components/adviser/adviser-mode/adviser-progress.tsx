@@ -75,13 +75,14 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
 
       return {
         id: g.id,
+        projectId: g.project_id || null,
         groupId: g.code as `IT-2024-${string}`,
         projectTitle: g.projectTitle || g.title,
         department: g.department || g.dept || 'IT',
         progress: g.progress || 0,
         currentMilestone: mappedMilestone,
         status: mappedStatus,
-        deadline: g.completedAt || new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+        deadline: g.nextMilestoneDueAt,
         lastUpdate: g.updated_at || new Date().toISOString(),
         adviserAction: action
       };
@@ -113,7 +114,6 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
         id: 'total-groups',
         label: 'Total Groups',
         value: progressRecords.length,
-        helperText: 'Total advised IT groups currently tracked in this progress workspace.',
         icon: 'fa-users',
         iconClassName: 'bg-blue-50 text-blue-600'
       },
@@ -121,7 +121,6 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
         id: 'on-track',
         label: 'On Track',
         value: progressRecords.filter((record) => record.status === 'on-track').length,
-        helperText: 'Groups progressing normally against their current milestone targets.',
         icon: 'fa-circle-check',
         iconClassName: 'bg-emerald-50 text-emerald-600'
       },
@@ -129,7 +128,6 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
         id: 'at-risk',
         label: 'At Risk',
         value: progressRecords.filter((record) => record.status === 'at-risk').length,
-        helperText: 'Groups that need closer adviser review before timelines slip further.',
         icon: 'fa-triangle-exclamation',
         iconClassName: 'bg-amber-50 text-amber-600'
       },
@@ -137,7 +135,6 @@ export function AdviserProgress({ data }: { data: AdviserDashboardData }) {
         id: 'delayed',
         label: 'Delayed',
         value: progressRecords.filter((record) => record.status === 'delayed').length,
-        helperText: 'Groups with overdue milestones or stale activity that need follow-up.',
         icon: 'fa-clock',
         iconClassName: 'bg-rose-50 text-rose-600'
       }

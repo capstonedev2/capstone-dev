@@ -58,9 +58,18 @@ type TitleDetailsDrawerProps = {
   onApprove: (record: AdviserTitleRecord) => Promise<void> | void;
   onRequestRevision: (record: AdviserTitleRecord) => Promise<void> | void;
   onReject: (record: AdviserTitleRecord) => Promise<void> | void;
+};
+
+export type EvidenceReviewDrawerProps = {
+  record: AdviserTitleRecord | null;
+  onClose: () => void;
+  // No "rejected" option here — the underlying MilestoneCheckpointStatus/ReviewStatus
+  // enums have no distinct rejected value, so it would silently save as needs_revision
+  // anyway (see the mapping in syncCheckpointReview). Only offer decisions the checkpoint
+  // model can actually represent.
   onReviewEvidence: (
     record: AdviserTitleRecord,
-    decision: 'approved' | 'needs_revision' | 'rejected',
+    decision: 'approved' | 'needs_revision',
     remarks: string,
     checkpointKey: DefenseApplicationStageKey
   ) => Promise<void> | void;
@@ -470,6 +479,134 @@ export function TitleList({
   );
 }
 
+// Deliberately independent from TitleList/TitleCard above — its own header, its own record
+// set (not affected by the Title Queue's status/search filters), and its own "Review
+// Evidence" action, so evidence review never shares a card, a button, or filter state with
+// title decisions. See EvidenceReviewDrawer for why that separation matters.
+export function EvidenceQueueList({
+  titles,
+  onReviewEvidence
+}: {
+  titles: AdviserTitleRecord[];
+  onReviewEvidence: (record: AdviserTitleRecord) => void;
+}) {
+  const clearedCount = titles.filter((record) => record.evidenceReview?.status === 'APPROVED' || record.evidenceReview?.status === 'COMPLETED').length;
+  const pendingCount = titles.length - clearedCount;
+
+  return (
+    <section className="space-y-5">
+      <div className="flex flex-col gap-5 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="relative z-10 flex items-start gap-4">
+          <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 text-amber-600 ring-1 ring-amber-500/20 shadow-sm">
+            <i className="fas fa-file-signature text-lg" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Evidence Review Queue</h2>
+            <p className="mt-1 text-sm font-medium text-[var(--muted)]">
+              Review Oral Defense Application evidence per group — independent from title decisions above.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
+            <i className="fas fa-list-check text-[10px] opacity-50" />
+            {titles.length} group{titles.length === 1 ? '' : 's'}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-amber-100">
+            <i className="fas fa-clock text-[10px]" />
+            {pendingCount} awaiting concept evidence decision
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 ring-1 ring-inset ring-emerald-100">
+            <i className="fas fa-check text-[10px]" />
+            {clearedCount} cleared
+          </span>
+        </div>
+      </div>
+
+      {titles.length ? (
+        <div className="space-y-4">
+          {titles.map((record) => (
+            <EvidenceQueueCard key={record.id} record={record} onReviewEvidence={onReviewEvidence} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[2rem] border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center">
+          <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+            <i className="fas fa-file-signature text-lg" />
+          </span>
+          <h3 className="mt-4 text-lg font-bold text-[var(--text)]">No groups to review yet</h3>
+          <p className="mt-2 text-sm font-medium text-[var(--muted)]">
+            Evidence review requests will appear here once groups have submitted a title.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function EvidenceQueueCard({
+  record,
+  onReviewEvidence
+}: {
+  record: AdviserTitleRecord;
+  onReviewEvidence: (record: AdviserTitleRecord) => void;
+}) {
+  const visibleStages = DEFENSE_APPLICATION_STAGES.filter((stage) => {
+    if (stage.alwaysShow) return true;
+
+    const evidenceReview = record[stage.reviewField];
+    const hasFile = record.uploadedFiles.some((file) => file.documentCategory === stage.checkpointKey);
+
+    return hasFile || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
+  });
+
+  return (
+    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/50 hover:shadow-lg hover:shadow-amber-500/5">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-300 opacity-80 group-hover:opacity-100 transition-opacity" />
+
+      <div className="flex flex-col gap-5 p-6 pl-7 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]">
+              <i className="fas fa-layer-group text-[10px]" /> {record.department}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-100">
+              <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
+            </span>
+          </div>
+          <h3 className="mt-3 truncate text-lg font-extrabold tracking-tight text-[var(--text)]" title={record.title}>
+            {record.title}
+          </h3>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {visibleStages.map((stage) => {
+              const meta = getEvidenceReviewMeta(record[stage.reviewField]?.status);
+              return (
+                <span
+                  key={stage.checkpointKey}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${meta.className}`}
+                >
+                  <i className={`fas ${meta.icon} text-[10px]`} aria-hidden="true" />
+                  {stage.stageLabel}: {meta.label}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        <button
+          className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-5 text-sm font-black text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-amber-100 lg:w-auto"
+          type="button"
+          onClick={() => onReviewEvidence(record)}
+        >
+          <i className="fas fa-file-signature text-xs" /> Review Evidence
+        </button>
+      </div>
+    </article>
+  );
+}
+
 export function TitleDetailsDrawer({
   record,
   remarksDraft,
@@ -477,8 +614,7 @@ export function TitleDetailsDrawer({
   onClose,
   onApprove,
   onRequestRevision,
-  onReject,
-  onReviewEvidence
+  onReject
 }: TitleDetailsDrawerProps) {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => { setIsMounted(true); }, []);
@@ -488,42 +624,13 @@ export function TitleDetailsDrawer({
     return () => { document.body.style.overflow = ''; };
   }, [!!record]);
 
-  const [evidenceRemarksDrafts, setEvidenceRemarksDrafts] = useState<Record<string, string>>({});
-  const [submittingEvidenceKey, setSubmittingEvidenceKey] = useState<DefenseApplicationStageKey | null>(null);
-
-  const submitEvidenceDecision = async (
-    checkpointKey: DefenseApplicationStageKey,
-    decision: 'approved' | 'needs_revision' | 'rejected'
-  ) => {
-    if (!record || submittingEvidenceKey) {
-      return;
-    }
-
-    const confirmMessage = decision === 'approved'
-      ? 'Approve this oral defense application evidence?'
-      : decision === 'needs_revision'
-        ? 'Send this evidence back for revision?'
-        : 'Reject this oral defense application evidence?';
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    setSubmittingEvidenceKey(checkpointKey);
-
-    try {
-      await onReviewEvidence(record, decision, evidenceRemarksDrafts[checkpointKey] || '', checkpointKey);
-      setEvidenceRemarksDrafts((current) => ({ ...current, [checkpointKey]: '' }));
-    } finally {
-      setSubmittingEvidenceKey(null);
-    }
-  };
-
   const [selectedPreviewId, setSelectedPreviewId] = useState<string>(GENERATED_PREVIEW_ID);
   const [signedPreviewUrls, setSignedPreviewUrls] = useState<Record<string, string>>({});
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<'approve' | 'revise' | 'reject' | null>(null);
-  const uploadedFiles = record?.uploadedFiles ?? [];
+  // Evidence photos now live only in the separate EvidenceReviewDrawer, so this drawer's
+  // file preview/attached-documents lists stay scoped to the title proposal's own files.
+  const uploadedFiles = (record?.uploadedFiles ?? []).filter((file) => !isComplianceEvidenceFile(file));
   const firstUploadedFileId = uploadedFiles[0]?.id;
   const documentData = useMemo(() => (record ? createAdviserTitleDocumentData(record) : null), [record]);
   const generatedPreviewHtml = useMemo(
@@ -972,107 +1079,6 @@ export function TitleDetailsDrawer({
                 </div>
               </section>
 
-              {DEFENSE_APPLICATION_STAGES.map((stage) => {
-                const evidenceReview = record[stage.reviewField];
-                const hasEvidenceFile = uploadedFiles.some((file) => file.documentCategory === stage.checkpointKey);
-                // ensureProjectMilestoneWorkflow pre-creates every stage's checkpoint
-                // row up front, so evidenceReview exists (status PENDING) even for a
-                // stage the group hasn't reached yet — checking the file/status is
-                // what actually tells us whether there's real activity to show.
-                const hasStageActivity = hasEvidenceFile || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
-
-                // Proposal/Final cards only appear once there's something to review —
-                // no point cluttering the drawer with a card for a stage the group
-                // hasn't reached yet (Concept's card always shows, unchanged).
-                if (!stage.alwaysShow && !hasStageActivity) {
-                  return null;
-                }
-
-                const remarksValue = evidenceRemarksDrafts[stage.checkpointKey] || '';
-                const isSubmitting = submittingEvidenceKey === stage.checkpointKey;
-
-                return (
-                  <section
-                    key={stage.checkpointKey}
-                    className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
-                  >
-                    <div className="p-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
-                          <i className="fas fa-file-signature" /> Oral Defense Application Evidence ({stage.stageLabel})
-                        </p>
-                        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${getEvidenceReviewMeta(evidenceReview?.status).className}`}>
-                          <i className={`fas ${getEvidenceReviewMeta(evidenceReview?.status).icon}`} aria-hidden="true" />
-                          {getEvidenceReviewMeta(evidenceReview?.status).label}
-                        </span>
-                      </div>
-
-                      <p className="mt-3 text-sm font-medium leading-6 text-slate-500">
-                        Reviewed independently from the {stage.stageLabel.toLowerCase()} stage's other decisions, since the
-                        group typically uploads this once the rest of the stage is already cleared. Find the photo
-                        itself in Attached Documents above.
-                      </p>
-
-                      {evidenceReview?.feedback ? (
-                        <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm font-medium text-slate-700 ring-1 ring-inset ring-slate-100">
-                          <strong className="text-slate-900">
-                            {evidenceReview.feedbackBy || 'Adviser'}:
-                          </strong>{' '}
-                          {evidenceReview.feedback}
-                        </div>
-                      ) : null}
-
-                      {evidenceReview ? (
-                        <>
-                          <label className="mt-4 block">
-                            <span className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
-                              <i className="fas fa-comment-dots" /> Evidence Remarks
-                            </span>
-                            <textarea
-                              className="mt-3 min-h-[80px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                              placeholder="Add notes about the signatures or clearance..."
-                              value={remarksValue}
-                              onChange={(event) => setEvidenceRemarksDrafts((current) => ({ ...current, [stage.checkpointKey]: event.target.value }))}
-                            />
-                          </label>
-
-                          <div className="mt-3 grid grid-cols-3 gap-2">
-                            <button
-                              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 text-xs font-black text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
-                              type="button"
-                              disabled={isSubmitting}
-                              onClick={() => submitEvidenceDecision(stage.checkpointKey, 'approved')}
-                            >
-                              <i className="fas fa-check" /> Approve
-                            </button>
-                            <button
-                              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-amber-50 px-3 text-xs font-black text-amber-700 shadow-sm ring-1 ring-inset ring-amber-200 transition hover:bg-amber-100 disabled:opacity-60"
-                              type="button"
-                              disabled={isSubmitting}
-                              onClick={() => submitEvidenceDecision(stage.checkpointKey, 'needs_revision')}
-                            >
-                              <i className="fas fa-rotate-left" /> Revise
-                            </button>
-                            <button
-                              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-xs font-black text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition hover:bg-rose-50 disabled:opacity-60"
-                              type="button"
-                              disabled={isSubmitting}
-                              onClick={() => submitEvidenceDecision(stage.checkpointKey, 'rejected')}
-                            >
-                              <i className="fas fa-ban" /> Reject
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="mt-3 rounded-xl bg-amber-50/70 p-3 text-sm font-medium text-amber-800 ring-1 ring-inset ring-amber-100">
-                          Waiting for the group to upload the signed application photo from Document Submissions.
-                        </div>
-                      )}
-                    </div>
-                  </section>
-                );
-              })}
-
               <SimilarityIndicator compact score={record.similarityScore} similarTitles={record.similarTitles} />
 
               <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
@@ -1165,6 +1171,326 @@ export function TitleDetailsDrawer({
                     if (confirmAction === 'reject') await onReject(record);
                     await new Promise(r => setTimeout(r, 600)); // Minimum animation time
                     setConfirmAction(null);
+                  }}
+                >
+                  Confirm Decision
+                </PremiumAnimatedButton>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// Fully separate from TitleDetailsDrawer/its "Open Preview" button — a title decision and
+// an evidence decision are independent checkpoints on the backend (see applyDecision vs
+// applyEvidenceDecision in adviser-title-approval.tsx), and this drawer keeps that true in
+// the UI too: approving a title here can never also affect evidence status, because there's
+// no shared approve action or shared state between the two anymore.
+export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: EvidenceReviewDrawerProps) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
+  useEffect(() => {
+    if (record) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [!!record]);
+
+  const [evidenceRemarksDrafts, setEvidenceRemarksDrafts] = useState<Record<string, string>>({});
+  const [submittingEvidenceKey, setSubmittingEvidenceKey] = useState<DefenseApplicationStageKey | null>(null);
+  // Which photo is currently shown per stage, when a stage has more than one uploaded file.
+  const [evidenceSlideIndex, setEvidenceSlideIndex] = useState<Record<string, number>>({});
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
+  // A native window.confirm() can silently return false (or never appear at all) in some
+  // embedded/webview browser contexts, which made Approve/Reject look like they did nothing.
+  // This in-app confirm (same pattern as TitleDetailsDrawer's) doesn't depend on the browser's
+  // own dialog implementation.
+  const [confirmEvidenceAction, setConfirmEvidenceAction] = useState<{
+    checkpointKey: DefenseApplicationStageKey;
+    decision: 'approved' | 'needs_revision';
+    stageLabel: string;
+  } | null>(null);
+
+  const submitEvidenceDecision = async (
+    checkpointKey: DefenseApplicationStageKey,
+    decision: 'approved' | 'needs_revision'
+  ) => {
+    if (!record || submittingEvidenceKey) {
+      return;
+    }
+
+    setEvidenceError(null);
+    setSubmittingEvidenceKey(checkpointKey);
+
+    try {
+      await onReviewEvidence(record, decision, evidenceRemarksDrafts[checkpointKey] || '', checkpointKey);
+      setEvidenceRemarksDrafts((current) => ({ ...current, [checkpointKey]: '' }));
+    } catch (error) {
+      setEvidenceError(error instanceof Error ? error.message : 'Unable to update the evidence review.');
+    } finally {
+      setSubmittingEvidenceKey(null);
+    }
+  };
+
+  if (!record || !isMounted) {
+    return null;
+  }
+
+  const uploadedFiles = record.uploadedFiles ?? [];
+
+  return createPortal(
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6" onClick={onClose}>
+      <div
+        aria-label="Oral defense application evidence modal"
+        aria-modal="true"
+        className="relative flex flex-col max-h-full w-full max-w-[900px] overflow-hidden rounded-[2rem] bg-white/95 backdrop-blur-3xl shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-white/60 transition-all scale-100"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+      >
+        <header className="relative shrink-0 border-b border-slate-100 bg-white/80 backdrop-blur px-6 py-5 sm:px-8">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600">
+                <i className="fas fa-file-signature opacity-70" /> Oral Defense Application Evidence
+              </p>
+              <h2 className="mt-2 truncate text-2xl font-black tracking-tight text-slate-900 leading-tight">{record.title}</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-500">
+                {record.groupId} · Reviewed independently from the title decision
+              </p>
+            </div>
+            <button
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100/80 text-slate-500 transition hover:bg-slate-200 hover:text-slate-800 focus:outline-none"
+              type="button"
+              onClick={onClose}
+            >
+              <i className="fas fa-xmark text-lg" />
+            </button>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto bg-slate-50/40 px-4 py-4 sm:px-6 sm:py-6 custom-scrollbar space-y-5">
+          {evidenceError && (
+            <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-sm font-medium text-rose-800 shadow-sm">
+              <i className="fas fa-circle-exclamation mt-0.5 shrink-0" aria-hidden="true" />
+              <p>{evidenceError}</p>
+            </div>
+          )}
+
+          {DEFENSE_APPLICATION_STAGES.map((stage) => {
+            const evidenceReview = record[stage.reviewField];
+            const evidenceFiles = uploadedFiles.filter((file) => file.documentCategory === stage.checkpointKey);
+            const slideIndex = Math.min(evidenceSlideIndex[stage.checkpointKey] ?? 0, Math.max(evidenceFiles.length - 1, 0));
+            const evidenceFile = evidenceFiles[slideIndex] ?? null;
+            // ensureProjectMilestoneWorkflow pre-creates every stage's checkpoint row up
+            // front, so evidenceReview exists (status PENDING) even for a stage the group
+            // hasn't reached yet — checking the file/status is what actually tells us
+            // whether there's real activity to show.
+            const hasStageActivity = evidenceFiles.length > 0 || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
+
+            // Proposal/Final cards only appear once there's something to review — no point
+            // cluttering the drawer with a card for a stage the group hasn't reached yet
+            // (Concept's card always shows, unchanged).
+            if (!stage.alwaysShow && !hasStageActivity) {
+              return null;
+            }
+
+            const remarksValue = evidenceRemarksDrafts[stage.checkpointKey] || '';
+            const isSubmitting = submittingEvidenceKey === stage.checkpointKey;
+
+            return (
+              <section
+                key={stage.checkpointKey}
+                className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]"
+              >
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                      <i className="fas fa-file-signature" /> {stage.stageLabel} Stage
+                    </p>
+                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${getEvidenceReviewMeta(evidenceReview?.status).className}`}>
+                      <i className={`fas ${getEvidenceReviewMeta(evidenceReview?.status).icon}`} aria-hidden="true" />
+                      {getEvidenceReviewMeta(evidenceReview?.status).label}
+                    </span>
+                  </div>
+
+                  {evidenceFile ? (
+                    <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="relative">
+                        {isTitleImageFile(evidenceFile) ? (
+                          <img
+                            src={evidenceFile.previewUrl || evidenceFile.url}
+                            alt={`${stage.stageLabel} evidence ${slideIndex + 1} of ${evidenceFiles.length}`}
+                            className="max-h-[420px] w-full bg-slate-950/5 object-contain"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-3 p-4">
+                            <i className={`fas ${getTitleFileIcon(evidenceFile)} text-2xl text-blue-600`} aria-hidden="true" />
+                            <span className="truncate text-sm font-bold text-slate-800">{evidenceFile.name}</span>
+                          </div>
+                        )}
+
+                        {evidenceFiles.length > 1 && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label="Previous evidence photo"
+                              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-slate-900/60 text-white shadow-sm transition hover:bg-slate-900/80"
+                              onClick={() =>
+                                setEvidenceSlideIndex((current) => ({
+                                  ...current,
+                                  [stage.checkpointKey]: (slideIndex - 1 + evidenceFiles.length) % evidenceFiles.length
+                                }))
+                              }
+                            >
+                              <i className="fas fa-chevron-left text-xs" aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Next evidence photo"
+                              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-slate-900/60 text-white shadow-sm transition hover:bg-slate-900/80"
+                              onClick={() =>
+                                setEvidenceSlideIndex((current) => ({
+                                  ...current,
+                                  [stage.checkpointKey]: (slideIndex + 1) % evidenceFiles.length
+                                }))
+                              }
+                            >
+                              <i className="fas fa-chevron-right text-xs" aria-hidden="true" />
+                            </button>
+                            <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-slate-900/60 px-2.5 py-1 text-[11px] font-bold text-white">
+                              {slideIndex + 1} / {evidenceFiles.length}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-2.5">
+                        <span className="truncate text-xs font-bold text-slate-500">{evidenceFile.name}</span>
+                        <div className="flex shrink-0 gap-2">
+                          <a
+                            className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                            href={evidenceFile.previewUrl || evidenceFile.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <i className="fas fa-up-right-from-square text-[10px]" aria-hidden="true" /> Open
+                          </a>
+                          <a
+                            className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                            href={evidenceFile.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <i className="fas fa-download text-[10px]" aria-hidden="true" /> Download
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {evidenceReview?.uploaderNote ? (
+                    <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-sm font-medium text-slate-700">
+                      <p className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest text-blue-700">
+                        <i className="fas fa-comment" aria-hidden="true" /> Student&apos;s Note
+                      </p>
+                      <p className="mt-1.5">{evidenceReview.uploaderNote}</p>
+                    </div>
+                  ) : null}
+
+                  {evidenceReview?.feedback ? (
+                    <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm font-medium text-slate-700 ring-1 ring-inset ring-slate-100">
+                      <strong className="text-slate-900">
+                        {evidenceReview.feedbackBy || 'Adviser'}:
+                      </strong>{' '}
+                      {evidenceReview.feedback}
+                    </div>
+                  ) : null}
+
+                  {evidenceReview ? (
+                    <>
+                      <label className="mt-4 block">
+                        <span className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+                          <i className="fas fa-comment-dots" /> Evidence Remarks
+                        </span>
+                        <textarea
+                          className="mt-3 min-h-[80px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          placeholder="Add notes about the signatures or clearance..."
+                          value={remarksValue}
+                          onChange={(event) => setEvidenceRemarksDrafts((current) => ({ ...current, [stage.checkpointKey]: event.target.value }))}
+                        />
+                      </label>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <button
+                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 text-xs font-black text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-60"
+                          type="button"
+                          disabled={isSubmitting}
+                          onClick={() => setConfirmEvidenceAction({ checkpointKey: stage.checkpointKey, decision: 'approved', stageLabel: stage.stageLabel })}
+                        >
+                          <i className="fas fa-check" /> Approve
+                        </button>
+                        <button
+                          className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-amber-50 px-3 text-xs font-black text-amber-700 shadow-sm ring-1 ring-inset ring-amber-200 transition hover:bg-amber-100 disabled:opacity-60"
+                          type="button"
+                          disabled={isSubmitting}
+                          onClick={() => setConfirmEvidenceAction({ checkpointKey: stage.checkpointKey, decision: 'needs_revision', stageLabel: stage.stageLabel })}
+                        >
+                          <i className="fas fa-rotate-left" /> Revise
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-3 rounded-xl bg-amber-50/70 p-3 text-sm font-medium text-amber-800 ring-1 ring-inset ring-amber-100">
+                      Waiting for the group to upload the signed application photo from Document Submissions.
+                    </div>
+                  )}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+
+        {confirmEvidenceAction && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+              <div className="flex items-start gap-4">
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
+                  confirmEvidenceAction.decision === 'approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                }`}>
+                  <i className={`fas ${
+                    confirmEvidenceAction.decision === 'approved' ? 'fa-check' : 'fa-rotate-left'
+                  } text-xl`} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    {confirmEvidenceAction.decision === 'approved' ? 'Approve Evidence' : 'Request Revision'}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    {confirmEvidenceAction.decision === 'approved'
+                      ? `Approve the ${confirmEvidenceAction.stageLabel.toLowerCase()} stage's oral defense application evidence?`
+                      : `Send the ${confirmEvidenceAction.stageLabel.toLowerCase()} stage's evidence back for revision?`}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  className="rounded-xl px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100"
+                  onClick={() => setConfirmEvidenceAction(null)}
+                >
+                  Cancel
+                </button>
+                <PremiumAnimatedButton
+                  className={`rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm ${
+                    confirmEvidenceAction.decision === 'approved' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'
+                  }`}
+                  onPress={async () => {
+                    const { checkpointKey, decision } = confirmEvidenceAction;
+                    await submitEvidenceDecision(checkpointKey, decision);
+                    await new Promise((resolve) => setTimeout(resolve, 600));
+                    setConfirmEvidenceAction(null);
                   }}
                 >
                   Confirm Decision

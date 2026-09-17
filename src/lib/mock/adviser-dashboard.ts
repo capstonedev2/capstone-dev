@@ -2,7 +2,7 @@ import { cache } from 'react';
 import { getServerAuthenticatedUser, buildDisplayName } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { AdviserScheduleItemStatus, NotificationStatus } from '@/generated/prisma/client';
-import { getLatestDefenseOutcomeTag, getProjectProgressSummary } from '@/lib/milestone-checkpoint-tracking';
+import { getLatestDefenseOutcomeTag, getNextMilestoneDueDate, getProjectProgressSummary } from '@/lib/milestone-checkpoint-tracking';
 
 const now = '2026-04-06T00:00:00.000Z';
 
@@ -79,6 +79,7 @@ export type AdviserDashboardData = {
     finalManuscriptApproved: boolean;
     allRequiredMilestonesCompleted: boolean;
     completedAt: string | null;
+    nextMilestoneDueAt: string | null;
     finalScore: number | null;
     finalRecommendation: string | null;
     leader: string | null;
@@ -178,6 +179,7 @@ const adviserDashboardData: AdviserDashboardData = {
       finalManuscriptApproved: false,
       allRequiredMilestonesCompleted: false,
       completedAt: null,
+      nextMilestoneDueAt: null,
       finalScore: null,
       finalRecommendation: null,
       leader: null
@@ -205,6 +207,7 @@ const adviserDashboardData: AdviserDashboardData = {
       finalManuscriptApproved: false,
       allRequiredMilestonesCompleted: false,
       completedAt: null,
+      nextMilestoneDueAt: null,
       finalScore: null,
       finalRecommendation: null,
       leader: null
@@ -232,6 +235,7 @@ const adviserDashboardData: AdviserDashboardData = {
       finalManuscriptApproved: false,
       allRequiredMilestonesCompleted: false,
       completedAt: null,
+      nextMilestoneDueAt: null,
       finalScore: null,
       finalRecommendation: 'Resubmit the security validation report before final scheduling.',
       leader: null
@@ -259,6 +263,7 @@ const adviserDashboardData: AdviserDashboardData = {
       finalManuscriptApproved: true,
       allRequiredMilestonesCompleted: true,
       completedAt: '2026-04-04T00:00:00.000Z',
+      nextMilestoneDueAt: null,
       finalScore: 96,
       finalRecommendation: 'Ready for archiving and alumni showcase endorsement.',
       leader: null
@@ -286,6 +291,7 @@ const adviserDashboardData: AdviserDashboardData = {
       finalManuscriptApproved: false,
       allRequiredMilestonesCompleted: false,
       completedAt: null,
+      nextMilestoneDueAt: null,
       finalScore: null,
       finalRecommendation: 'Prioritize system stabilization and document the recovery plan.',
       leader: null
@@ -608,9 +614,10 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
           return pendingUserNames.includes(norm);
         });
 
-        const [defenseOutcomeTag, progressSummary] = await Promise.all([
+        const [defenseOutcomeTag, progressSummary, nextMilestoneDueAt] = await Promise.all([
           getLatestDefenseOutcomeTag(prisma, group.projectId),
-          getProjectProgressSummary(prisma, group.projectId)
+          getProjectProgressSummary(prisma, group.projectId),
+          getNextMilestoneDueDate(prisma, group.projectId)
         ]);
 
         return {
@@ -619,7 +626,8 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
           defenseOutcomeTag,
           liveProgress: progressSummary.percent,
           progressStage: progressSummary.currentStageTitle,
-          progressDetail: `${progressSummary.completedCheckpoints} of ${progressSummary.totalCheckpoints} checkpoints complete`
+          progressDetail: `${progressSummary.completedCheckpoints} of ${progressSummary.totalCheckpoints} checkpoints complete`,
+          nextMilestoneDueAt
         };
       }));
 
@@ -646,6 +654,7 @@ export const getAdviserDashboardData = cache(async function getAdviserDashboardD
         finalManuscriptApproved: group.finalManuscriptApproved,
         allRequiredMilestonesCompleted: group.allRequiredMilestonesCompleted,
         completedAt: group.completedAt ? toIsoString(group.completedAt) : null,
+        nextMilestoneDueAt: group.nextMilestoneDueAt,
         finalScore: group.finalScore,
         finalRecommendation: group.finalRecommendation,
         leader: group.leader,

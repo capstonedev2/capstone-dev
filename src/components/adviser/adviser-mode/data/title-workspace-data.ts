@@ -53,6 +53,7 @@ export type EvidenceReview = {
   status: string;
   feedback: string | null;
   feedbackBy: string | null;
+  uploaderNote: string | null;
 } | null;
 
 export const TITLE_STATUS_FILTER_OPTIONS = [

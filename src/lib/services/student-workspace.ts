@@ -931,11 +931,14 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               reviewStatus: getReviewStatusLabel(f.submission?.status)
             }));
 
+            const isMilestoneOverdue = (m: (typeof milestones)[number]) =>
+              Boolean(m.dueAt) && m.dueAt!.getTime() < Date.now() && m.status !== 'COMPLETED';
+
             data.milestones = milestones.map(m => ({
               id: m.id,
               user_id: dbUser.id,
               project_id: activeProject.id,
-              status: m.status,
+              status: isMilestoneOverdue(m) ? 'OVERDUE' : m.status,
               created_at: m.createdAt.toISOString(),
               updated_at: m.updatedAt.toISOString(),
               title: m.title,
@@ -943,6 +946,39 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               summary: m.description || '',
               route: '/students/milestones'
             }));
+
+            // Lazily raise a one-time "deadline" alert for the student and adviser the first
+            // time a milestone is found overdue, mirroring the ensureProjectMilestoneWorkflow
+            // lazy-write-on-read pattern above rather than requiring a separate cron job.
+            const overdueMilestones = milestones.filter(isMilestoneOverdue);
+            if (overdueMilestones.length > 0) {
+              const overdueIds = overdueMilestones.map(m => m.id);
+              const existingAlerts = await prisma.notification.findMany({
+                where: { entityType: 'milestone_overdue', entityId: { in: overdueIds } },
+                select: { entityId: true, userId: true }
+              });
+              const alerted = new Set(existingAlerts.map(n => `${n.userId}:${n.entityId}`));
+              const recipients = [dbUser.id, adviserUser?.id].filter((id): id is string => Boolean(id));
+
+              const notificationsToCreate = overdueMilestones.flatMap((m) =>
+                recipients
+                  .filter((userId) => !alerted.has(`${userId}:${m.id}`))
+                  .map((userId) => ({
+                    userId,
+                    title: 'Milestone Overdue',
+                    message: `"${m.title}" for "${activeProject.title}" was due ${formatDate(m.dueAt!)} and has not been completed.`,
+                    type: 'deadline',
+                    entityType: 'milestone_overdue',
+                    entityId: m.id
+                  }))
+              );
+
+              if (notificationsToCreate.length > 0) {
+                await prisma.notification.createMany({ data: notificationsToCreate }).catch((err) => {
+                  console.error('Failed to create overdue milestone notifications:', err);
+                });
+              }
+            }
 
             data.milestoneCheckpoints = checkpointRows
               .sort((left, right) =>

@@ -36,9 +36,10 @@ type PortalShellActionMenusProps = {
   notificationCount?: number;
   notificationButtonLabel?: string;
   notificationTitle: string;
-  notificationDescription: string;
+  notificationDescription?: string;
   notificationItems: PortalNotificationItem[];
   notificationMarkAllReadEnabled?: boolean;
+  notificationUserId?: string;
   notificationFooterLabel?: string;
   notificationEmptyTitle?: string;
   notificationEmptyMessage?: string;
@@ -71,6 +72,7 @@ export function PortalShellActionMenus({
   notificationDescription,
   notificationItems,
   notificationMarkAllReadEnabled = false,
+  notificationUserId,
   notificationFooterLabel = 'See all notifications',
   notificationEmptyTitle = 'All caught up',
   notificationEmptyMessage = 'No notification is waiting right now.',
@@ -83,9 +85,11 @@ export function PortalShellActionMenus({
 }: PortalShellActionMenusProps) {
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const suppressNextOutsideClickRef = useRef(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(new Set());
+  const [allNotificationsRead, setAllNotificationsRead] = useState(false);
   const [themeMode, setThemeMode] = useState('light');
 
   useEffect(() => {
@@ -111,11 +115,25 @@ export function PortalShellActionMenus({
 
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
-      if (!notificationMenuRef.current?.contains(event.target as Node)) {
+      if (suppressNextOutsideClickRef.current) {
+        return;
+      }
+
+      const target = event.target as Node;
+
+      // A click that removes its own target from the DOM (e.g. "Mark all
+      // read" hiding itself once the unread count hits 0) leaves a detached
+      // node here — Node.contains() reports false for it, which would
+      // otherwise be misread as an outside click and close the menu.
+      if (!target.isConnected) {
+        return;
+      }
+
+      if (!notificationMenuRef.current?.contains(target)) {
         setNotificationMenuOpen(false);
       }
 
-      if (!profileMenuRef.current?.contains(event.target as Node)) {
+      if (!profileMenuRef.current?.contains(target)) {
         setProfileMenuOpen(false);
       }
     };
@@ -149,6 +167,27 @@ export function PortalShellActionMenus({
   };
 
   const markAllNotificationsRead = () => {
+    if (allNotificationsRead) {
+      return;
+    }
+
+    // Marking every unread notification for the user (not just the up-to-5
+    // preview items rendered here) needs the real userId, since the "N
+    // unread" count in the trigger/pills reflects the user's full inbox,
+    // which can hold unread items older than what's previewed.
+    if (notificationUserId) {
+      setAllNotificationsRead(true);
+      void fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: notificationUserId, action: 'read-all' }),
+        keepalive: true
+      }).finally(() => {
+        window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+      });
+      return;
+    }
+
     const unreadItems = notificationItems.filter((item) => item.unread !== false && !readNotificationIds.has(item.id));
 
     if (!unreadItems.length) {
@@ -171,9 +210,11 @@ export function PortalShellActionMenus({
     });
   };
 
-  const unreadPreviewCount = notificationItems.filter((item) => item.unread !== false && !readNotificationIds.has(item.id)).length;
+  const unreadPreviewCount = allNotificationsRead
+    ? 0
+    : notificationItems.filter((item) => item.unread !== false && !readNotificationIds.has(item.id)).length;
   const urgentPreviewCount = notificationItems.filter((item) => item.tone === 'danger' || item.tone === 'warning').length;
-  const visibleNotificationCount = Math.max(0, notificationCount - readNotificationIds.size);
+  const visibleNotificationCount = allNotificationsRead ? 0 : Math.max(0, notificationCount - readNotificationIds.size);
 
   return (
     <div className="portal-shell-action-menus">
@@ -204,16 +245,20 @@ export function PortalShellActionMenus({
             <div className="portal-shell-notification-menu-hero-copy">
               <span className="portal-shell-notification-menu-kicker">Inbox</span>
               <strong>{notificationTitle}</strong>
-              <small>{notificationDescription}</small>
+              {notificationDescription ? <small>{notificationDescription}</small> : null}
             </div>
             <div className="portal-shell-notification-menu-actions">
-              {notificationMarkAllReadEnabled && unreadPreviewCount ? (
+              {notificationMarkAllReadEnabled && !allNotificationsRead && (unreadPreviewCount || visibleNotificationCount) ? (
                 <button
                   className="portal-shell-notification-menu-view-all is-secondary"
                   type="button"
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
+                    suppressNextOutsideClickRef.current = true;
+                    window.setTimeout(() => {
+                      suppressNextOutsideClickRef.current = false;
+                    }, 0);
                     markAllNotificationsRead();
                   }}
                 >
@@ -247,11 +292,11 @@ export function PortalShellActionMenus({
               {notificationItems.map((item) => (
                 <Link
                   key={item.id}
-                  className={`portal-shell-notification-menu-item${item.unread === false || readNotificationIds.has(item.id) ? '' : ' is-unread'}`}
+                  className={`portal-shell-notification-menu-item${item.unread === false || allNotificationsRead || readNotificationIds.has(item.id) ? '' : ' is-unread'}`}
                   href={item.href}
                   prefetch={false}
                   onClick={() => {
-                    if (item.unread !== false && !readNotificationIds.has(item.id)) {
+                    if (item.unread !== false && !allNotificationsRead && !readNotificationIds.has(item.id)) {
                       markNotificationRead(item.id);
                     }
                     setNotificationMenuOpen(false);
@@ -263,7 +308,7 @@ export function PortalShellActionMenus({
                   <span className="portal-shell-notification-menu-item-copy">
                     <span className="portal-shell-notification-menu-item-head">
                       <strong>{item.title}</strong>
-                      {item.unread === false || readNotificationIds.has(item.id) ? null : <span aria-hidden="true" className="portal-shell-notification-menu-item-dot" />}
+                      {item.unread === false || allNotificationsRead || readNotificationIds.has(item.id) ? null : <span aria-hidden="true" className="portal-shell-notification-menu-item-dot" />}
                     </span>
                     <small>{item.message}</small>
                     <span className="portal-shell-notification-menu-item-footer">

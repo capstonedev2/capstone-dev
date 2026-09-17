@@ -12,6 +12,7 @@ type UploadFileInput = {
   bucketName: DocumentStorageBucket;
   filePath: string;
   file: File;
+  allowImages?: boolean | 'any';
 };
 
 type SignedUrlResponse = {
@@ -59,7 +60,7 @@ export function assertDocumentBucket(value: string): asserts value is DocumentSt
   }
 }
 
-export function assertValidDocumentFile(file: File, bucketName: DocumentStorageBucket, allowImages = false) {
+export function assertValidDocumentFile(file: File, bucketName: DocumentStorageBucket, allowImages: boolean | 'any' = false) {
   const typeError = validateFileType(file.name, file.type, allowImages);
 
   if (typeError) {
@@ -96,9 +97,13 @@ export function generateUniqueFilePath({
   return `${bucketName}/${safeProjectId}/${safeUserId || 'system'}/${timestamp}-${safeFileName}`;
 }
 
-export async function uploadFile({ bucketName, filePath, file }: UploadFileInput) {
+export async function uploadFile({ bucketName, filePath, file, allowImages = false }: UploadFileInput) {
   assertDocumentBucket(bucketName);
-  assertValidDocumentFile(file, bucketName);
+  // This used to always re-validate with allowImages defaulted to false, silently
+  // overriding a caller's own (correct) category-based decision — e.g. document-files/
+  // route.ts already checks the file against the right category above, but every upload
+  // still passed back through here and got rejected a second time under the wrong rule.
+  assertValidDocumentFile(file, bucketName, allowImages);
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const response = await fetch(

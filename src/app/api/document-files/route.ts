@@ -12,7 +12,7 @@ import {
   CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES,
   DOCUMENT_STORAGE_BUCKETS,
   DOCUMENT_UPLOAD_ERROR_MESSAGES,
-  IMAGE_ALLOWED_DOCUMENT_CATEGORIES,
+  UNRESTRICTED_FILE_TYPE_CATEGORIES,
   type DocumentStorageBucket
 } from '@/lib/storage/upload-config';
 import {
@@ -320,11 +320,13 @@ export async function POST(request: Request) {
 
     const documentCategory = normalizeText(formData.get('documentCategory')) || 'Uncategorized';
     const bucketNameValue = normalizeText(formData.get('bucketName')) || getBucketForCategory(documentCategory);
+    const fileTypeMode = UNRESTRICTED_FILE_TYPE_CATEGORIES.has(documentCategory) ? 'any' : false;
     assertDocumentBucket(bucketNameValue);
-    assertValidDocumentFile(file, bucketNameValue, IMAGE_ALLOWED_DOCUMENT_CATEGORIES.has(documentCategory));
+    assertValidDocumentFile(file, bucketNameValue, fileTypeMode);
 
     const projectId = normalizeText(formData.get('projectId'));
     const checkpointKey = normalizeText(formData.get('checkpointKey'));
+    const uploaderNote = normalizeText(formData.get('notes'));
     const project = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS && user.role === UserRole.STUDENT
       ? await getStudentUploadProjectAccessRecord(user, projectId)
       : await getBestProjectAccessRecord(user, projectId);
@@ -364,7 +366,8 @@ export async function POST(request: Request) {
     await uploadFile({
       bucketName: bucketNameValue,
       filePath,
-      file
+      file,
+      allowImages: fileTypeMode
     });
 
     const shouldLinkCheckpoint = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS
@@ -390,7 +393,7 @@ export async function POST(request: Request) {
               checkpointId: checkpoint?.id,
               submittedById: user.id,
               title: file.name,
-              description: `${documentCategory} document submitted for adviser review.`,
+              description: uploaderNote || null,
               status: SubmissionStatus.SUBMITTED,
               version: 1
             }

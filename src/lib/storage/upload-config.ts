@@ -59,8 +59,10 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
 //   application evidence, which is uploaded mid-Concept-stage — all three
 //   skip the "Concept must be approved first" gate that everything else on
 //   Document Submissions is still subject to.
-// - IMAGE_ALLOWED: categories where proof may be a photo instead of (or in
-//   addition to) a document.
+// - UNRESTRICTED: evidence/activity/award categories aren't part of the sequential
+//   thesis document set, so any file type is accepted for them (a photo, video, scan,
+//   whatever proves the claim) — strict type checking stays reserved for real thesis
+//   documents (manuscript, chapters, proposal, system files, etc.).
 export const ACHIEVEMENT_DOCUMENT_CATEGORIES = new Set(['award-recognition', 'activity-evidence']);
 
 export const CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES = new Set([
@@ -69,7 +71,7 @@ export const CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES = new Set([
   'concept-defense-application'
 ]);
 
-export const IMAGE_ALLOWED_DOCUMENT_CATEGORIES = new Set([
+export const UNRESTRICTED_FILE_TYPE_CATEGORIES = new Set([
   'award-recognition',
   'activity-evidence',
   'concept-defense-application',
@@ -94,13 +96,6 @@ export const DOCUMENT_FILE_ACCEPT = ALLOWED_DOCUMENT_EXTENSIONS
   .map((extension) => `.${extension}`)
   .join(',');
 
-// For categories that accept either a document or a photo as proof (awards,
-// activity evidence, the oral defense application) — documents and images
-// combined, rather than opening every category up to images.
-export const DOCUMENT_OR_IMAGE_FILE_ACCEPT = [...ALLOWED_DOCUMENT_EXTENSIONS, ...ALLOWED_IMAGE_EXTENSIONS]
-  .map((extension) => `.${extension}`)
-  .join(',');
-
 export function isDocumentStorageBucket(value: string): value is DocumentStorageBucket {
   return DOCUMENT_STORAGE_BUCKET_LIST.includes(value as DocumentStorageBucket);
 }
@@ -109,7 +104,15 @@ export function getFileExtension(fileName: string) {
   return fileName.split('.').pop()?.trim().toLowerCase() || '';
 }
 
-export function validateFileType(fileName: string, mimeType?: string, allowImages = false) {
+// 'any' means no file-type restriction at all — used for the evidence/activity/award
+// categories (see UNRESTRICTED_FILE_TYPE_CATEGORIES below), which aren't part of the
+// sequential thesis document set and can reasonably be a photo, video, scan, or anything
+// else. Document categories like the manuscript/chapters keep the strict allowlist.
+export function validateFileType(fileName: string, mimeType?: string, allowImages: boolean | 'any' = false) {
+  if (allowImages === 'any') {
+    return null;
+  }
+
   const extension = getFileExtension(fileName);
   const allowedExtensions: readonly string[] = allowImages
     ? [...ALLOWED_DOCUMENT_EXTENSIONS, ...ALLOWED_IMAGE_EXTENSIONS]

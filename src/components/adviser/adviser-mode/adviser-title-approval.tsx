@@ -8,6 +8,8 @@ import { NAV_ITEMS, WORKSPACE_META, isNavItemActive, getShortName } from '@/comp
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
 import {
   EmptyState,
+  EvidenceQueueList,
+  EvidenceReviewDrawer,
   TitleDetailsDrawer,
   TitleFilters,
   TitleList,
@@ -44,6 +46,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const [sortBy, setSortBy] = useState<TitleSortOption>('newest');
   const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
   const [remarksDraft, setRemarksDraft] = useState('');
+  const [selectedEvidenceTitleId, setSelectedEvidenceTitleId] = useState<string | null>(null);
 
   const adviserMeta = WORKSPACE_META[workspaceMode];
 
@@ -87,6 +90,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setSelectedTitleId(null);
+        setSelectedEvidenceTitleId(null);
       }
     };
 
@@ -115,6 +119,11 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const selectedRecord = useMemo(
     () => titleRecords.find((record) => record.id === selectedTitleId) ?? null,
     [selectedTitleId, titleRecords]
+  );
+
+  const selectedEvidenceRecord = useMemo(
+    () => titleRecords.find((record) => record.id === selectedEvidenceTitleId) ?? null,
+    [selectedEvidenceTitleId, titleRecords]
   );
 
   useEffect(() => {
@@ -265,7 +274,8 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
               [reviewField]: {
                 status: nextStatus,
                 feedback: remarks.trim() || item[reviewField]?.feedback || null,
-                feedbackBy: remarks.trim() ? 'You' : item[reviewField]?.feedbackBy || null
+                feedbackBy: remarks.trim() ? 'You' : item[reviewField]?.feedbackBy || null,
+                uploaderNote: item[reviewField]?.uploaderNote || null
               }
             }
           : item
@@ -339,6 +349,13 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
               }}
             />
           )}
+
+          {!isLoadingTitles && titleRecords.length ? (
+            <EvidenceQueueList
+              titles={titleRecords}
+              onReviewEvidence={(record) => setSelectedEvidenceTitleId(record.id)}
+            />
+          ) : null}
         </div>
 
         {selectedRecord ? (
@@ -350,6 +367,13 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
             onApprove={(r) => applyDecision(r, 'approved', remarksDraft)}
             onRequestRevision={(r) => applyDecision(r, 'needs-revision', remarksDraft)}
             onReject={(r) => applyDecision(r, 'rejected', remarksDraft)}
+          />
+        ) : null}
+
+        {selectedEvidenceRecord ? (
+          <EvidenceReviewDrawer
+            record={selectedEvidenceRecord}
+            onClose={() => setSelectedEvidenceTitleId(null)}
             onReviewEvidence={applyEvidenceDecision}
           />
         ) : null}

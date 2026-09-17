@@ -10,6 +10,7 @@ type AdviserShellActionsProps = {
   fullName: string;
   notificationCount: number;
   notificationItems?: PortalNotificationItem[];
+  userId?: string;
   rawRole?: string;
   themeMode?: 'light' | 'dark' | 'system';
   workspaceMode: WorkspaceMode;
@@ -94,6 +95,7 @@ export function AdviserShellActions({
   fullName,
   notificationCount,
   notificationItems,
+  userId,
   rawRole,
   themeMode = 'light',
   workspaceMode,
@@ -108,9 +110,9 @@ export function AdviserShellActions({
       notificationHref={`${basePath}/notifications`}
       notificationCount={notificationCount}
       notificationTitle="Workspace Notifications"
-      notificationDescription="Latest reviews, schedule changes, and supervision updates for the current adviser workspace."
       notificationItems={notificationItems ?? buildNotificationItems(basePath, workspaceMode)}
       notificationMarkAllReadEnabled={Boolean(notificationItems)}
+      notificationUserId={userId}
       profileName={fullName}
       profileSubtitle={workspaceMeta.pillLabel}
       profileDetail={`${workspaceMeta.headerLabel} • ${getInitials(fullName) || 'AD'}`}

@@ -30,6 +30,7 @@ type WorkflowStage = {
     description: string;
     sequence: number;
     panelRequired?: boolean;
+    adviserRequired?: boolean;
   }>;
 };
 
@@ -56,8 +57,8 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
       { key: 'concept-title', title: 'Title & concept paper submitted', description: 'Official project title and concept paper document have been submitted together for adviser review.', sequence: 1, panelRequired: false },
       { key: 'concept-adviser-approval', title: 'Adviser idea approval', description: 'Adviser cleared the idea for concept presentation.', sequence: 2, panelRequired: false },
       { key: 'concept-defense-application', title: 'Oral defense application form uploaded', description: 'Photo evidence of the signed Application for Oral Defense of Thesis (Concept) — cleared by the Research Head, Director, and Program Head — is uploaded from Project Overview and independently reviewed by the adviser.', sequence: 3, panelRequired: false },
-      { key: 'concept-presentation-scheduled', title: 'Concept presentation scheduled', description: 'Concept presentation schedule is recorded once the oral defense application evidence is approved.', sequence: 4, panelRequired: false },
-      { key: 'concept-panel-approval', title: 'Panel concept approval', description: 'Panel approved the concept after presentation.', sequence: 5 }
+      { key: 'concept-presentation-scheduled', title: 'Concept presentation scheduled', description: 'Concept presentation schedule is recorded once the oral defense application evidence is approved.', sequence: 4, panelRequired: false, adviserRequired: false },
+      { key: 'concept-panel-approval', title: 'Panel concept approval', description: 'Panel approved the concept after presentation.', sequence: 5, adviserRequired: false }
     ]
   },
   {
@@ -69,8 +70,8 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
       { key: 'proposal-chapters', title: 'Chapters 1-3 uploaded', description: 'Proposal manuscript or Chapters 1-3 were submitted.', sequence: 1, panelRequired: false },
       { key: 'proposal-adviser-review', title: 'Adviser initial review', description: 'Adviser completed the first proposal review.', sequence: 2, panelRequired: false },
       { key: 'proposal-defense-application', title: 'Oral defense application form uploaded', description: 'Photo evidence of the signed Application for Oral Defense of Thesis (Proposal) — cleared by the Research Head, Director, and Program Head — is uploaded from Document Submissions and independently reviewed by the adviser.', sequence: 3, panelRequired: false },
-      { key: 'proposal-defense-scheduled', title: 'Proposal defense scheduled', description: 'Proposal defense schedule is recorded once the oral defense application evidence is approved.', sequence: 4, panelRequired: false },
-      { key: 'proposal-panel-evaluation', title: 'Panel evaluation', description: 'Panel evaluation is recorded for proposal defense.', sequence: 5 },
+      { key: 'proposal-defense-scheduled', title: 'Proposal defense scheduled', description: 'Proposal defense schedule is recorded once the oral defense application evidence is approved.', sequence: 4, panelRequired: false, adviserRequired: false },
+      { key: 'proposal-panel-evaluation', title: 'Panel evaluation', description: 'Panel evaluation is recorded for proposal defense.', sequence: 5, adviserRequired: false },
       { key: 'proposal-final-approval', title: 'Final approval', description: 'Proposal stage received final clearance.', sequence: 6 }
     ]
   },
@@ -93,8 +94,8 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
     sequence: 4,
     checkpoints: [
       { key: 'mock-presentation', title: 'Presentation uploaded', description: 'Pre-final defense presentation file was uploaded.', sequence: 1, panelRequired: false },
-      { key: 'mock-defense-scheduled', title: 'Pre-final defense scheduled', description: 'Pre-final defense schedule is recorded.', sequence: 2, panelRequired: false },
-      { key: 'mock-panel-comments', title: 'Panel comments received', description: 'Panel comments were received after pre-final defense.', sequence: 3 },
+      { key: 'mock-defense-scheduled', title: 'Pre-final defense scheduled', description: 'Pre-final defense schedule is recorded.', sequence: 2, panelRequired: false, adviserRequired: false },
+      { key: 'mock-panel-comments', title: 'Panel comments received', description: 'Panel comments were received after pre-final defense.', sequence: 3, adviserRequired: false },
       { key: 'mock-revisions-completed', title: 'Revisions completed', description: 'Pre-final defense revisions were submitted and cleared.', sequence: 4 }
     ]
   },
@@ -106,8 +107,8 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
     checkpoints: [
       { key: 'final-manuscript', title: 'Final manuscript uploaded', description: 'Final manuscript was uploaded for review.', sequence: 1, panelRequired: false },
       { key: 'final-defense-application', title: 'Oral defense application form uploaded', description: 'Photo evidence of the signed Application for Oral Defense of Thesis (Final) — cleared by the Research Head, Director, and Program Head — is uploaded from Document Submissions and independently reviewed by the adviser.', sequence: 2, panelRequired: false },
-      { key: 'final-defense-scheduled', title: 'Final defense scheduled', description: 'Final defense schedule is recorded once the oral defense application evidence is approved.', sequence: 3, panelRequired: false },
-      { key: 'final-panel-approval', title: 'Panel approval', description: 'Panel approval is recorded after final defense.', sequence: 4 },
+      { key: 'final-defense-scheduled', title: 'Final defense scheduled', description: 'Final defense schedule is recorded once the oral defense application evidence is approved.', sequence: 3, panelRequired: false, adviserRequired: false },
+      { key: 'final-panel-approval', title: 'Panel approval', description: 'Panel approval is recorded after final defense.', sequence: 4, adviserRequired: false },
       { key: 'final-revisions-submitted', title: 'Final revisions submitted', description: 'Final revisions were submitted and cleared.', sequence: 5 }
     ]
   },
@@ -142,6 +143,19 @@ const NON_PANEL_REVIEW_CHECKPOINT_KEYS = new Set(
   THESIS_MILESTONE_WORKFLOW.flatMap((stage) =>
     stage.checkpoints
       .filter((checkpoint) => checkpoint.panelRequired === false)
+      .map((checkpoint) => checkpoint.key)
+  )
+);
+// Checkpoints that are purely a scheduling record or a panel-only decision
+// (e.g. 'concept-panel-approval', 'concept-presentation-scheduled') never get
+// an adviser decision of their own — without this, their adviserReviewStatus
+// sits at its default PENDING forever, which drags the stage's whole
+// "Adviser review" summary pill down to "In Review"/"Pending" even after the
+// adviser has approved everything they're actually asked to approve.
+const NON_ADVISER_REVIEW_CHECKPOINT_KEYS = new Set(
+  THESIS_MILESTONE_WORKFLOW.flatMap((stage) =>
+    stage.checkpoints
+      .filter((checkpoint) => checkpoint.adviserRequired === false)
       .map((checkpoint) => checkpoint.key)
   )
 );
@@ -202,11 +216,18 @@ function getInitialCheckpointState(stage: WorkflowStage, checkpoint: WorkflowSta
   const panelReviewStatus = checkpoint.panelRequired === false
     ? MilestoneCheckpointReviewStatus.NOT_REQUIRED
     : MilestoneCheckpointReviewStatus.PENDING;
+  // The "no special case applies" adviser status — NOT_REQUIRED for a
+  // scheduling/panel-only checkpoint, PENDING otherwise. Used everywhere
+  // below instead of a bare PENDING literal so those checkpoints never sit
+  // in a state that reads as "still waiting on the adviser".
+  const defaultAdviserReviewStatus = checkpoint.adviserRequired === false
+    ? MilestoneCheckpointReviewStatus.NOT_REQUIRED
+    : MilestoneCheckpointReviewStatus.PENDING;
 
   if (stage.sequence !== 1) {
     return {
       status: MilestoneCheckpointStatus.PENDING,
-      adviserReviewStatus: MilestoneCheckpointReviewStatus.PENDING,
+      adviserReviewStatus: defaultAdviserReviewStatus,
       panelReviewStatus,
       submittedAt: null,
       reviewedAt: null,
@@ -223,7 +244,7 @@ function getInitialCheckpointState(stage: WorkflowStage, checkpoint: WorkflowSta
       status: isAdviserClearedCheckpoint ? MilestoneCheckpointStatus.COMPLETED : MilestoneCheckpointStatus.PENDING,
       adviserReviewStatus: isAdviserClearedCheckpoint
         ? MilestoneCheckpointReviewStatus.APPROVED
-        : MilestoneCheckpointReviewStatus.PENDING,
+        : defaultAdviserReviewStatus,
       panelReviewStatus,
       submittedAt: isAdviserClearedCheckpoint ? new Date() : null,
       reviewedAt: isAdviserClearedCheckpoint ? new Date() : null,
@@ -234,7 +255,9 @@ function getInitialCheckpointState(stage: WorkflowStage, checkpoint: WorkflowSta
   if (projectStatus === ProjectStatus.NEEDS_REVISION) {
     return {
       status: MilestoneCheckpointStatus.NEEDS_REVISION,
-      adviserReviewStatus: MilestoneCheckpointReviewStatus.NEEDS_REVISION,
+      adviserReviewStatus: checkpoint.adviserRequired === false
+        ? MilestoneCheckpointReviewStatus.NOT_REQUIRED
+        : MilestoneCheckpointReviewStatus.NEEDS_REVISION,
       panelReviewStatus,
       submittedAt: new Date(),
       reviewedAt: new Date(),
@@ -247,7 +270,7 @@ function getInitialCheckpointState(stage: WorkflowStage, checkpoint: WorkflowSta
       status: checkpoint.key === 'concept-title' ? MilestoneCheckpointStatus.SUBMITTED : MilestoneCheckpointStatus.PENDING,
       adviserReviewStatus: checkpoint.key === 'concept-title'
         ? MilestoneCheckpointReviewStatus.IN_REVIEW
-        : MilestoneCheckpointReviewStatus.PENDING,
+        : defaultAdviserReviewStatus,
       panelReviewStatus,
       submittedAt: checkpoint.key === 'concept-title' ? new Date() : null,
       reviewedAt: null,
@@ -257,7 +280,7 @@ function getInitialCheckpointState(stage: WorkflowStage, checkpoint: WorkflowSta
 
   return {
     status: MilestoneCheckpointStatus.PENDING,
-    adviserReviewStatus: MilestoneCheckpointReviewStatus.PENDING,
+    adviserReviewStatus: defaultAdviserReviewStatus,
     panelReviewStatus,
     submittedAt: null,
     reviewedAt: null,
@@ -407,45 +430,48 @@ async function repairApprovedConceptTitleReview(
     updatedMilestoneIds.add(checkpoint.milestoneId);
   }
 
-  await Promise.all(Array.from(updatedMilestoneIds).map((milestoneId) =>
-    updateMilestoneRollup(db, milestoneId)
-  ));
+  for (const milestoneId of updatedMilestoneIds) {
+    await updateMilestoneRollup(db, milestoneId);
+  }
 }
 
 export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: string) {
-  const [existingMilestones, existingCheckpoints, project] = await Promise.all([
-    db.milestone.findMany({
-      where: { projectId },
-      select: {
-        id: true,
-        sequence: true,
-        status: true,
-        completedAt: true
-      }
-    }),
-    db.milestoneCheckpoint.findMany({
-      where: { projectId },
-      select: {
-        id: true,
-        key: true,
-        sequence: true,
-        status: true,
-        milestoneId: true,
-        adviserReviewStatus: true,
-        panelReviewStatus: true,
-        submittedAt: true,
-        reviewedAt: true,
-        completedAt: true,
-        latestFeedback: true,
-        latestFeedbackBy: true,
-        latestFeedbackAt: true
-      }
-    }),
-    db.project.findUnique({
-      where: { id: projectId },
-      select: { status: true }
-    })
-  ]);
+  // Sequential, not Promise.all: this is sometimes called with a Prisma interactive-
+  // transaction client (via recordCheckpointSubmission during title-submission POST),
+  // which pins a single physical connection — concurrent queries on it aren't actually
+  // concurrent, they just fight over that one connection (triggers a pg "client already
+  // executing a query" warning and serializes anyway, just slower and unsupported).
+  const existingMilestones = await db.milestone.findMany({
+    where: { projectId },
+    select: {
+      id: true,
+      sequence: true,
+      status: true,
+      completedAt: true
+    }
+  });
+  const existingCheckpoints = await db.milestoneCheckpoint.findMany({
+    where: { projectId },
+    select: {
+      id: true,
+      key: true,
+      sequence: true,
+      status: true,
+      milestoneId: true,
+      adviserReviewStatus: true,
+      panelReviewStatus: true,
+      submittedAt: true,
+      reviewedAt: true,
+      completedAt: true,
+      latestFeedback: true,
+      latestFeedbackBy: true,
+      latestFeedbackAt: true
+    }
+  });
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+    select: { status: true }
+  });
 
   const existingSequences = new Set(existingMilestones.map((milestone: { sequence: number }) => milestone.sequence));
   const existingKeys = new Set(existingCheckpoints.map((checkpoint: { key: string }) => checkpoint.key));
@@ -462,9 +488,12 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
   const hasReviewSchemaDrift = existingCheckpoints.some((checkpoint: {
     key: string;
     panelReviewStatus: MilestoneCheckpointReviewStatus;
+    adviserReviewStatus: MilestoneCheckpointReviewStatus;
   }) =>
-    NON_PANEL_REVIEW_CHECKPOINT_KEYS.has(checkpoint.key) &&
-    checkpoint.panelReviewStatus !== MilestoneCheckpointReviewStatus.NOT_REQUIRED
+    (NON_PANEL_REVIEW_CHECKPOINT_KEYS.has(checkpoint.key) &&
+      checkpoint.panelReviewStatus !== MilestoneCheckpointReviewStatus.NOT_REQUIRED) ||
+    (NON_ADVISER_REVIEW_CHECKPOINT_KEYS.has(checkpoint.key) &&
+      checkpoint.adviserReviewStatus !== MilestoneCheckpointReviewStatus.NOT_REQUIRED)
   );
   const hasSequenceDrift = existingCheckpoints.some((checkpoint: { key: string; sequence: number }) =>
     EXPECTED_CHECKPOINT_SEQUENCE_BY_KEY.get(checkpoint.key) !== checkpoint.sequence
@@ -490,33 +519,28 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
       checkpointStatusesByMilestone.set(checkpoint.milestoneId, statuses);
     }
 
-    const rollupUpdates = Array.from(checkpointStatusesByMilestone.entries())
-      .map(([milestoneId, statuses]) => {
-        const milestone = milestonesById.get(milestoneId);
+    // Sequential (same reason as above): db may be a pinned transaction connection.
+    for (const [milestoneId, statuses] of checkpointStatusesByMilestone.entries()) {
+      const milestone = milestonesById.get(milestoneId);
 
-        if (!milestone) {
-          return null;
+      if (!milestone) {
+        continue;
+      }
+
+      const nextStatus = getMilestoneRollupStatus(statuses);
+      const shouldBeCompleted = nextStatus === MilestoneStatus.COMPLETED;
+
+      if (milestone.status === nextStatus && (shouldBeCompleted || !milestone.completedAt)) {
+        continue;
+      }
+
+      await db.milestone.update({
+        where: { id: milestoneId },
+        data: {
+          status: nextStatus,
+          completedAt: shouldBeCompleted ? milestone.completedAt ?? new Date() : null
         }
-
-        const nextStatus = getMilestoneRollupStatus(statuses);
-        const shouldBeCompleted = nextStatus === MilestoneStatus.COMPLETED;
-
-        if (milestone.status === nextStatus && (shouldBeCompleted || !milestone.completedAt)) {
-          return null;
-        }
-
-        return db.milestone.update({
-          where: { id: milestoneId },
-          data: {
-            status: nextStatus,
-            completedAt: shouldBeCompleted ? milestone.completedAt ?? new Date() : null
-          }
-        });
-      })
-      .filter(Boolean);
-
-    if (rollupUpdates.length) {
-      await Promise.all(rollupUpdates);
+      });
     }
 
     await repairApprovedConceptTitleReview(
@@ -568,6 +592,9 @@ export async function ensureProjectMilestoneWorkflow(db: DbClient, projectId: st
           required: true,
           ...(checkpoint.panelRequired === false
             ? { panelReviewStatus: MilestoneCheckpointReviewStatus.NOT_REQUIRED }
+            : {}),
+          ...(checkpoint.adviserRequired === false
+            ? { adviserReviewStatus: MilestoneCheckpointReviewStatus.NOT_REQUIRED }
             : {})
         },
         create: {
@@ -915,7 +942,9 @@ export async function recordDefenseVoteOutcome(
     updatedMilestoneIds.add(updated.milestoneId);
   }
 
-  await Promise.all(Array.from(updatedMilestoneIds).map((milestoneId) => updateMilestoneRollup(db, milestoneId)));
+  for (const milestoneId of updatedMilestoneIds) {
+    await updateMilestoneRollup(db, milestoneId);
+  }
 }
 
 export const TOTAL_WORKFLOW_CHECKPOINTS = EXPECTED_WORKFLOW_CHECKPOINT_KEYS.length;
@@ -970,6 +999,27 @@ export async function getProjectProgressSummary(db: DbClient, projectId?: string
     totalCheckpoints: TOTAL_WORKFLOW_CHECKPOINTS,
     currentStageTitle
   };
+}
+
+// The nearest upcoming (or already-overdue) milestone due date an adviser/admin has
+// actually set via the "Set Deadlines" UI. Returns null rather than a placeholder
+// date when nothing has been set — callers must not fabricate a fallback deadline.
+export async function getNextMilestoneDueDate(db: DbClient, projectId?: string | null): Promise<string | null> {
+  if (!projectId) {
+    return null;
+  }
+
+  const milestone = await db.milestone.findFirst({
+    where: {
+      projectId,
+      dueAt: { not: null },
+      status: { not: MilestoneStatus.COMPLETED }
+    },
+    orderBy: { dueAt: 'asc' },
+    select: { dueAt: true }
+  });
+
+  return milestone?.dueAt ? milestone.dueAt.toISOString() : null;
 }
 
 export type DefenseOutcomeTag = {
