@@ -2,12 +2,12 @@ import { DefenseChairDecision, DefensePanelRole, DefenseStatus, ProjectStatus } 
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, parseJsonBody, successResponse } from '@/lib/utils';
-import { attachDefenseDecisionFeedback, resetGroupForNewTitle } from '@/lib/milestone-checkpoint-tracking';
+import { applyDefensePassOutcome, attachDefenseDecisionFeedback, resetGroupForNewTitle } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
 type ChairDecisionBody = {
-  decision: 'redefense' | 'new_title';
+  decision: 'approve' | 'redefense' | 'new_title';
   remarks?: string;
 };
 
@@ -17,7 +17,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const authUser = await requireAuthenticatedUser(request);
     const body = await parseJsonBody<ChairDecisionBody>(request);
 
-    if (body.decision !== 'redefense' && body.decision !== 'new_title') {
+    if (body.decision !== 'approve' && body.decision !== 'redefense' && body.decision !== 'new_title') {
       throw new HttpError('Invalid decision.', 400);
     }
 
@@ -50,21 +50,25 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       throw new HttpError('This defense has not been finalized yet.', 400);
     }
 
-    let yesVotes = 0;
     let noVotes = 0;
     for (const ev of schedule.evaluations) {
-      if (['PASSED', 'PASSED_MINOR', 'PASSED_MAJOR'].includes(ev.recommendation)) {
-        yesVotes++;
-      } else if (['REDEFENSE', 'FAILED'].includes(ev.recommendation)) {
+      if (['REDEFENSE', 'FAILED'].includes(ev.recommendation)) {
         noVotes++;
       }
     }
 
-    if (yesVotes > noVotes) {
+    // Matches finalizeDefenseSchedule in evaluate/route.ts: unanimous Yes is
+    // required to pass, so any No vote is enough to put this in the chair's
+    // court.
+    if (noVotes === 0) {
       throw new HttpError('This decision only applies when the panel did not pass the defense.', 400);
     }
 
-    const decision = body.decision === 'redefense' ? DefenseChairDecision.REDEFENSE : DefenseChairDecision.NEW_TITLE;
+    const decision = body.decision === 'approve'
+      ? DefenseChairDecision.APPROVED
+      : body.decision === 'redefense'
+        ? DefenseChairDecision.REDEFENSE
+        : DefenseChairDecision.NEW_TITLE;
     const remarks = body.remarks?.trim() || null;
     const reviewerName = authUser.displayName || authUser.name || undefined;
 
@@ -77,7 +81,27 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       }
     });
 
-    if (decision === DefenseChairDecision.REDEFENSE) {
+    // Notify the student and their adviser — same pattern as title-submissions' review
+    // notification. Neither would otherwise learn about this decision until they happened
+    // to notice the project status change or a resubmitted title.
+    const notifyUserIds = Array.from(
+      new Set([schedule.project.ownerId, schedule.project.adviserId].filter((id): id is string => Boolean(id)))
+    );
+
+    if (decision === DefenseChairDecision.APPROVED) {
+      // The chair overrules the panel's own No vote(s) and passes it anyway —
+      // reuses the exact same "pass" state as a real panel pass, just with
+      // notification wording that's honest about it being an override rather
+      // than implying the panel agreed.
+      await applyDefensePassOutcome(prisma, {
+        projectId: schedule.projectId,
+        projectTitle: schedule.project.title,
+        scheduleTitle: schedule.title,
+        groupId: schedule.project.group?.id ?? null,
+        notifyUserIds,
+        notificationMessage: `The panel chair approved "${schedule.project.title}" despite the panel's vote, overriding the ${schedule.title} outcome.${remarks ? ` ${remarks}` : ''}`
+      });
+    } else if (decision === DefenseChairDecision.REDEFENSE) {
       // Project.status/checkpoint status are already NEEDS_REVISION from the vote finalize step —
       // this just attaches the chair's rationale so the student sees why.
       await attachDefenseDecisionFeedback(prisma, {
@@ -86,6 +110,19 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         remarks,
         reviewerName
       });
+
+      if (notifyUserIds.length) {
+        await prisma.notification.createMany({
+          data: notifyUserIds.map((userId) => ({
+            userId,
+            title: 'Defense Decision: Redefense Required',
+            message: `The panel chair recorded a redefense decision for "${schedule.project.title}".${remarks ? ` ${remarks}` : ''}`,
+            type: 'warning',
+            entityType: 'project',
+            entityId: schedule.projectId
+          }))
+        });
+      }
     } else {
       // This title's track ends here. Archive the project and send the group back through
       // title submission — POST /api/title-submissions already creates a fresh Project from
@@ -99,40 +136,28 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
           data: { status: ProjectStatus.ARCHIVED }
         });
       }
-    }
 
-    // Notify the student and their adviser — same pattern as title-submissions' review
-    // notification. Neither would otherwise learn about this decision until they happened
-    // to notice the project status change or a resubmitted title.
-    const notifyUserIds = Array.from(
-      new Set([schedule.project.ownerId, schedule.project.adviserId].filter((id): id is string => Boolean(id)))
-    );
-
-    if (notifyUserIds.length) {
-      const notificationTitle =
-        decision === DefenseChairDecision.REDEFENSE ? 'Defense Decision: Redefense Required' : 'Defense Decision: New Title Required';
-      const notificationMessage =
-        decision === DefenseChairDecision.REDEFENSE
-          ? `The panel chair recorded a redefense decision for "${schedule.project.title}".${remarks ? ` ${remarks}` : ''}`
-          : `The panel chair determined "${schedule.project.title}" requires a new title. The group will need to submit a new title proposal.${remarks ? ` ${remarks}` : ''}`;
-
-      await prisma.notification.createMany({
-        data: notifyUserIds.map((userId) => ({
-          userId,
-          title: notificationTitle,
-          message: notificationMessage,
-          type: decision === DefenseChairDecision.REDEFENSE ? 'warning' : 'info',
-          entityType: 'project',
-          entityId: schedule.projectId
-        }))
-      });
+      if (notifyUserIds.length) {
+        await prisma.notification.createMany({
+          data: notifyUserIds.map((userId) => ({
+            userId,
+            title: 'Defense Decision: New Title Required',
+            message: `The panel chair determined "${schedule.project.title}" requires a new title. The group will need to submit a new title proposal.${remarks ? ` ${remarks}` : ''}`,
+            type: 'info',
+            entityType: 'project',
+            entityId: schedule.projectId
+          }))
+        });
+      }
     }
 
     return successResponse({
       message:
-        decision === DefenseChairDecision.REDEFENSE
-          ? 'Recorded: the student will revise and re-attempt this title.'
-          : 'Recorded: this title has been archived — the student will need to submit a new title.'
+        decision === DefenseChairDecision.APPROVED
+          ? 'Recorded: the defense is approved, overriding the panel vote.'
+          : decision === DefenseChairDecision.REDEFENSE
+            ? 'Recorded: the student will revise and re-attempt this title.'
+            : 'Recorded: this title has been archived — the student will need to submit a new title.'
     });
   } catch (error) {
     return handleApiError(error);

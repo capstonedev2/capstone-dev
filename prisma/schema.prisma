@@ -136,6 +136,9 @@ enum DefensePanelRole {
 enum DefenseChairDecision {
   REDEFENSE @map("redefense")
   NEW_TITLE @map("new_title")
+  // Chair overrides the panel vote and approves the defense anyway, despite
+  // enough No votes to have failed it otherwise — their call is final.
+  APPROVED  @map("approved")
 }
 
 enum NotificationStatus {

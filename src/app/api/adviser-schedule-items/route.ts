@@ -12,7 +12,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
-import { recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
+import { recordCheckpointSchedule, syncMilestoneDueDateFromDeadline } from '@/lib/milestone-checkpoint-tracking';
 import { sendScheduleNotificationEmail } from '@/lib/mailer';
 
 export const runtime = 'nodejs';
@@ -412,6 +412,7 @@ export async function POST(request: Request) {
       location?: unknown;
       notes?: unknown;
       notifyStudents?: unknown;
+      requiredSubmission?: unknown;
     }>(request);
 
     const groupId = normalizeText(body.projectId); // UI sends groupId as projectId
@@ -420,6 +421,7 @@ export async function POST(request: Request) {
     const location = normalizeText(body.location);
     const notes = normalizeText(body.notes);
     const title = normalizeText(body.title) || `${scheduleTypeLabels[type]} schedule`;
+    const requiredSubmission = normalizeText(body.requiredSubmission);
 
     if (!groupId) {
       throw new HttpError('Choose a project or group for this schedule.', 400, {
@@ -495,6 +497,14 @@ export async function POST(request: Request) {
           title,
           scheduledAt
         });
+
+        if (type === AdviserScheduleItemType.DEADLINE) {
+          await syncMilestoneDueDateFromDeadline(prisma, {
+            projectId: activeProjectId,
+            requiredSubmission,
+            dueAt: scheduledAt
+          });
+        }
 
         if (body.notifyStudents !== false) {
           const host = request.headers.get('host') || 'localhost:3000';
@@ -575,6 +585,14 @@ export async function POST(request: Request) {
       title,
       scheduledAt
     });
+
+    if (type === AdviserScheduleItemType.DEADLINE) {
+      await syncMilestoneDueDateFromDeadline(prisma, {
+        projectId: activeProjectId,
+        requiredSubmission,
+        dueAt: scheduledAt
+      });
+    }
 
     if (body.notifyStudents !== false) {
       const host = request.headers.get('host') || 'localhost:3000';

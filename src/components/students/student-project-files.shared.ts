@@ -61,8 +61,10 @@ export type ProjectFileRecord = {
   history: ProjectFileHistoryEntry[];
 };
 
+export const MAX_UPLOAD_FILES = 10;
+
 export type ProjectFileUploadState = {
-  file: File | null;
+  files: File[];
   category: string;
   versionNotes: string;
   status: ProjectFileStatus;

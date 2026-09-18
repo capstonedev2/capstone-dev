@@ -54,6 +54,18 @@ export type EvidenceReview = {
   feedback: string | null;
   feedbackBy: string | null;
   uploaderNote: string | null;
+  // Only the files belonging to this stage's latest submission — not every file
+  // ever uploaded under this document category — so a resubmission after "Needs
+  // Revision" replaces the old photo here instead of piling up alongside it.
+  files: Array<{
+    id: string;
+    name: string;
+    url: string;
+    previewUrl?: string;
+    fileType?: string;
+    size: number | null;
+    documentCategory?: string | null;
+  }>;
 } | null;
 
 export const TITLE_STATUS_FILTER_OPTIONS = [

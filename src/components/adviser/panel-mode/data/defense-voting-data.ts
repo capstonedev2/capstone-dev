@@ -15,9 +15,9 @@ export type DefenseVotingPanelist = {
   voteStatus: PanelistVoteStatus;
 };
 
-export type DefenseVotingStatus = 'awaiting-vote' | 'awaiting-others' | 'passed' | 'needs-redefense' | 'tie';
+export type DefenseVotingStatus = 'awaiting-vote' | 'awaiting-others' | 'passed' | 'needs-redefense';
 
-export type DefenseChairDecision = 'REDEFENSE' | 'NEW_TITLE';
+export type DefenseChairDecision = 'APPROVED' | 'REDEFENSE' | 'NEW_TITLE';
 
 export type DefenseVotingRecord = {
   id: string;
@@ -143,11 +143,10 @@ function deriveVotingStatus(myVote: PanelistVoteStatus, panelists: DefenseVoting
   const allVoted = panelists.every((panelist) => panelist.voteStatus !== 'pending');
   if (!allVoted) return 'awaiting-others';
 
-  const yesCount = panelists.filter((panelist) => panelist.voteStatus === 'yes').length;
+  // Unanimous Yes required to pass — a single No sends it to the panel
+  // chair's decision (Approve override, Redefense, or New Title) instead.
   const noCount = panelists.filter((panelist) => panelist.voteStatus === 'no').length;
-  if (yesCount > noCount) return 'passed';
-  if (noCount > yesCount) return 'needs-redefense';
-  return 'tie';
+  return noCount > 0 ? 'needs-redefense' : 'passed';
 }
 
 export function buildDefenseVotingRecord(
@@ -178,7 +177,6 @@ export function buildDefenseVotingRecord(
       normalizeIdentityValue(assignment.adviserName) === normalizeIdentityValue(getIdentityDisplayName(currentUser))
   );
   const myVote = panelists.find((panelist) => panelist.isMe)?.voteStatus ?? 'pending';
-
   return {
     id: assignment.id,
     projectId: assignment.projectId,
@@ -240,11 +238,6 @@ const votingStatusMeta: Record<
     label: 'Needs Re-Defense',
     badgeClassName: 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200',
     icon: 'fa-rotate-left'
-  },
-  tie: {
-    label: 'Tie — Chair Decides',
-    badgeClassName: 'bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-200',
-    icon: 'fa-scale-balanced'
   }
 };
 
@@ -252,11 +245,18 @@ export function getVotingStatusMeta(status: DefenseVotingStatus) {
   return votingStatusMeta[status];
 }
 
+// True when this record is sitting in the chair's court specifically — the panel
+// didn't pass, and no chair decision has been recorded yet. Drives the chair-only
+// "needs your decision" summary metric and the attention state on the chair card.
+export function needsChairDecision(record: DefenseVotingRecord) {
+  return record.isChair && record.votingStatus === 'needs-redefense' && !record.chairDecision;
+}
+
 export function matchesVotingStatusFilter(record: DefenseVotingRecord, filter: DefenseVotingStatusFilter) {
   if (filter === 'all') return true;
   if (filter === 'awaiting-vote') return record.votingStatus === 'awaiting-vote';
   if (filter === 'awaiting-others') return record.votingStatus === 'awaiting-others';
-  return ['passed', 'needs-redefense', 'tie'].includes(record.votingStatus);
+  return ['passed', 'needs-redefense'].includes(record.votingStatus);
 }
 
 export function formatScheduleDate(value: string) {

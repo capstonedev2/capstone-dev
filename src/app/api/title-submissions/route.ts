@@ -219,11 +219,41 @@ function findEvidenceReview(checkpoints: any[] | undefined, key: string) {
     return null;
   }
 
+  // Fetched newest-first (see projectInclude above) — put back in chronological
+  // order so a multi-photo batch displays page-1-first, and the "latest note"
+  // fallback below can just take the last entry.
+  const submissionsChronological = [...(checkpoint.submissions || [])].reverse();
+
+  // Each uploaded file is its own Submission row, so a single multi-photo batch
+  // (e.g. 3 pages of the same form) is several Submissions, not one. Group
+  // everything submitted since the checkpoint's last reviewedAt into "the current
+  // round" — that shows a whole batch together, while an earlier, already-decided
+  // round (from before the last approve/revise decision) doesn't pile up
+  // alongside a later resubmission. If nothing's been submitted since that last
+  // decision, fall back to just the single most recent submission, so an
+  // already-approved stage still has something to show.
+  const reviewedAtMs = checkpoint.reviewedAt ? new Date(checkpoint.reviewedAt).getTime() : null;
+  const currentRound = reviewedAtMs
+    ? submissionsChronological.filter((submission) => new Date(submission.submittedAt).getTime() > reviewedAtMs)
+    : submissionsChronological;
+  const relevantSubmissions = currentRound.length ? currentRound : submissionsChronological.slice(-1);
+
   return {
     status: checkpoint.status,
     feedback: checkpoint.latestFeedback || null,
     feedbackBy: checkpoint.latestFeedbackBy || null,
-    uploaderNote: checkpoint.submissions?.[0]?.description || null
+    uploaderNote: relevantSubmissions[relevantSubmissions.length - 1]?.description || null,
+    files: relevantSubmissions.flatMap((submission) =>
+      (submission.files || []).map((file: any) => ({
+        id: file.id,
+        name: file.fileName,
+        url: `/api/document-files/${file.id}/download`,
+        previewUrl: `/api/document-files/${file.id}/preview`,
+        fileType: file.fileType,
+        size: file.size,
+        documentCategory: file.documentCategory || null
+      }))
+    )
   };
 }
 
@@ -326,10 +356,32 @@ const projectInclude = {
       status: true,
       latestFeedback: true,
       latestFeedbackBy: true,
+      reviewedAt: true,
+      // Each uploaded file gets its own Submission row (see document-files/route.ts),
+      // so a single multi-photo batch (e.g. 3 pages of the same form) can be several
+      // Submissions, not one. findEvidenceReview groups these by "everything
+      // submitted since the checkpoint's last reviewedAt" into one review round, so
+      // a whole batch shows together but an old, already-decided round doesn't pile
+      // up alongside a later resubmission. Capped at the 20 most recent to bound
+      // worst case (a real evidence cycle never approaches that many) — fetched
+      // newest-first so `take` keeps the recent ones, reversed back to
+      // chronological order in findEvidenceReview below.
       submissions: {
         orderBy: { submittedAt: 'desc' },
-        take: 1,
-        select: { description: true }
+        take: 20,
+        select: {
+          submittedAt: true,
+          description: true,
+          files: {
+            select: {
+              id: true,
+              fileName: true,
+              fileType: true,
+              size: true,
+              documentCategory: true
+            }
+          }
+        }
       }
     }
   }

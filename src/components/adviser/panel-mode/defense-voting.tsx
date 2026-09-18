@@ -129,15 +129,15 @@ export function DefenseVoting({ data }: { data: AdviserDashboardData }) {
         id: 'passed',
         label: 'Passed',
         value: records.filter((record) => record.votingStatus === 'passed').length,
-        helperText: 'Majority approved — the defense stage is complete.',
+        helperText: 'Everyone approved — the defense stage is complete.',
         icon: 'fa-circle-check',
         iconClassName: 'bg-emerald-50 text-emerald-600'
       },
       {
         id: 'needs-redefense',
         label: 'Needs Re-Defense',
-        value: records.filter((record) => ['needs-redefense', 'tie'].includes(record.votingStatus)).length,
-        helperText: 'Majority rejected or the vote tied — a decision from the chair may be needed.',
+        value: records.filter((record) => record.votingStatus === 'needs-redefense').length,
+        helperText: 'At least one Reject vote — a decision from the chair is needed.',
         icon: 'fa-rotate-left',
         iconClassName: 'bg-rose-50 text-rose-600'
       }
@@ -168,7 +168,7 @@ export function DefenseVoting({ data }: { data: AdviserDashboardData }) {
     }
   }
 
-  async function submitChairDecision(record: DefenseVotingRecord, decision: 'redefense' | 'new_title', remarks: string) {
+  async function submitChairDecision(record: DefenseVotingRecord, decision: 'approve' | 'redefense' | 'new_title', remarks: string) {
     setIsSubmitting(true);
 
     try {

@@ -455,12 +455,13 @@ export async function POST(request: Request) {
           documentCategory,
           fileName: file.name,
           submissionId: submission.id,
-          fileId: savedFile.id
+          fileId: savedFile.id,
+          resolvedCheckpoint: checkpoint
         });
       }
 
       return savedFile;
-    });
+    }, { timeout: 15000 });
 
     await createUploadNotifications({
       bucketName: bucketNameValue,

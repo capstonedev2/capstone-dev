@@ -17,6 +17,7 @@ type DbClient = {
   uploadedFile: any;
   group: any;
   defenseSchedule: any;
+  notification: any;
 };
 
 type WorkflowStage = {
@@ -723,7 +724,8 @@ export async function recordCheckpointSubmission(
     documentCategory,
     fileName,
     submissionId,
-    fileId
+    fileId,
+    resolvedCheckpoint
   }: {
     projectId: string;
     checkpointKey?: string | null;
@@ -731,14 +733,23 @@ export async function recordCheckpointSubmission(
     fileName?: string | null;
     submissionId?: string | null;
     fileId?: string | null;
+    // Pass this when the caller already resolved the checkpoint moments earlier
+    // (e.g. document-files/route.ts, to decide whether to link one at all) —
+    // resolveMilestoneCheckpointForSubmission calls ensureProjectMilestoneWorkflow,
+    // a multi-query drift-check-and-repair pass, so re-resolving here doubled that
+    // work on every single upload for no reason (this was the whole cause of a
+    // batch upload occasionally blowing the 5s interactive-transaction timeout).
+    resolvedCheckpoint?: Awaited<ReturnType<typeof resolveMilestoneCheckpointForSubmission>>;
   }
 ) {
-  const checkpoint = await resolveMilestoneCheckpointForSubmission(db, {
-    projectId,
-    checkpointKey,
-    documentCategory,
-    fileName
-  });
+  const checkpoint = resolvedCheckpoint !== undefined
+    ? resolvedCheckpoint
+    : await resolveMilestoneCheckpointForSubmission(db, {
+        projectId,
+        checkpointKey,
+        documentCategory,
+        fileName
+      });
 
   if (!checkpoint) {
     return null;
@@ -852,6 +863,55 @@ export async function recordCheckpointSchedule(
   return updatedCheckpoint;
 }
 
+// Which stage a "what should students submit?" Schedule > Deadline item is
+// for, so creating that deadline can also set the real Milestone.dueAt that
+// drives the overdue-alert feature — there's otherwise no adviser-facing way
+// to set it at all (see 'other'/unset, deliberately left unmapped: too
+// ambiguous to guess a stage from free text).
+const DEADLINE_REQUIREMENT_MILESTONE_SEQUENCE: Record<string, number> = {
+  'title-proposal': 1,
+  'concept-paper': 1,
+  'proposal-chapters': 2,
+  'progress-development': 3,
+  'web-application': 3,
+  'system-documentation': 3,
+  'final-manuscript': 5
+};
+
+export async function syncMilestoneDueDateFromDeadline(
+  db: DbClient,
+  {
+    projectId,
+    requiredSubmission,
+    dueAt
+  }: {
+    projectId: string;
+    requiredSubmission?: string | null;
+    dueAt: Date;
+  }
+) {
+  const sequence = requiredSubmission ? DEADLINE_REQUIREMENT_MILESTONE_SEQUENCE[requiredSubmission] : undefined;
+
+  if (!sequence) {
+    return null;
+  }
+
+  await ensureProjectMilestoneWorkflow(db, projectId);
+
+  const milestone = await db.milestone.findUnique({
+    where: { projectId_sequence: { projectId, sequence } }
+  });
+
+  if (!milestone) {
+    return null;
+  }
+
+  return db.milestone.update({
+    where: { id: milestone.id },
+    data: { dueAt }
+  });
+}
+
 function getCheckpointKeysForDefenseOutcome(title: string, outcome: 'passed' | 'redefense') {
   const normalized = normalize(title);
 
@@ -944,6 +1004,76 @@ export async function recordDefenseVoteOutcome(
 
   for (const milestoneId of updatedMilestoneIds) {
     await updateMilestoneRollup(db, milestoneId);
+  }
+}
+
+// Shared by the auto-finalize path (evaluate/route.ts, when the panel actually
+// passes) and the chair's "Approve" override (chair-decision/route.ts, when
+// the chair passes it anyway despite enough No votes to have failed it) — both
+// need the exact same project/checkpoint/group state, just with different
+// notification wording so students and advisers aren't told a defense "passed"
+// when it was really the chair overruling their own panel.
+export async function applyDefensePassOutcome(
+  db: DbClient,
+  {
+    projectId,
+    projectTitle,
+    scheduleTitle,
+    groupId,
+    notifyUserIds,
+    notificationMessage
+  }: {
+    projectId: string;
+    projectTitle: string;
+    scheduleTitle: string;
+    groupId: string | null;
+    notifyUserIds: string[];
+    notificationMessage?: string;
+  }
+) {
+  const normalizedTitle = scheduleTitle.toLowerCase();
+  const isFinal = normalizedTitle.includes('final') && !normalizedTitle.includes('pre-final');
+
+  await db.project.update({
+    where: { id: projectId },
+    data: {
+      status: isFinal ? ProjectStatus.COMPLETED : ProjectStatus.APPROVED
+    }
+  });
+
+  // Mark the stage's panel-approval checkpoint(s) done so the student
+  // milestone tracker's rollup can actually reach COMPLETED — updating
+  // Project.status alone never touched this.
+  await recordDefenseVoteOutcome(db, {
+    projectId,
+    scheduleTitle,
+    outcome: 'passed'
+  });
+
+  // Clear the "Needs Revision" flag a prior rejected defense may have set — a
+  // group that just passed isn't flagged anymore.
+  if (groupId) {
+    await db.group.update({
+      where: { id: groupId },
+      data: {
+        status: 'active',
+        statusLabel: 'Active',
+        statusClass: 'status-active'
+      }
+    });
+  }
+
+  if (notifyUserIds.length) {
+    await db.notification.createMany({
+      data: notifyUserIds.map((userId) => ({
+        userId,
+        title: 'Defense Passed',
+        message: notificationMessage || `"${projectTitle}" passed its ${scheduleTitle} defense.`,
+        type: 'success',
+        entityType: 'Project',
+        entityId: projectId
+      }))
+    });
   }
 }
 
@@ -1234,6 +1364,16 @@ function getCompanionReviewCheckpointKeys(sourceKey: string | null | undefined, 
     // it's uploaded and independently reviewed after the adviser has already
     // approved the idea, so it needs its own review action (syncEvidenceReview).
     return ['concept-adviser-approval'];
+  }
+
+  // A "*-defense-application" source is always the independent oral-defense-evidence
+  // review — it must never cascade into that stage's other adviser checkpoint
+  // (concept-adviser-approval / proposal-adviser-review / etc.). Without this guard,
+  // the prefix checks below would catch it too (they only exist for the title/chapters/
+  // monitoring submissions), silently overwriting an already-decided, unrelated
+  // checkpoint's status, timestamps, and feedback with the evidence decision instead.
+  if (source.endsWith('-defense-application')) {
+    return [];
   }
 
   if (source.startsWith('concept-')) {

@@ -1,6 +1,7 @@
 import {
   DefensePanelRole,
   DefenseStatus,
+  EvaluationRecommendation,
   MilestoneStatus,
   Prisma,
   ProjectStatus,
@@ -427,9 +428,27 @@ export async function GET(request: Request) {
       ? (statusParam.toUpperCase() as keyof typeof DefenseStatus)
       : null;
 
-    const where: Prisma.DefenseScheduleWhereInput = {
-      status: requestedStatus ? DefenseStatus[requestedStatus] : DefenseStatus.SCHEDULED
-    };
+    // Defaulting to just SCHEDULED used to make a defense vanish from this
+    // queue the instant the last vote landed and it flipped to COMPLETED —
+    // including one the panel didn't pass, right when the chair most needs to
+    // see it to record Approve/Redefense/New Title. Keep surfacing a
+    // completed-but-undecided one (no chairDecision yet, and the project
+    // actually landed on NEEDS_REVISION, so a clean pass doesn't linger here
+    // indefinitely) alongside the normal upcoming ones.
+    const statusCondition: Prisma.DefenseScheduleWhereInput = requestedStatus
+      ? { status: DefenseStatus[requestedStatus] }
+      : {
+          OR: [
+            { status: DefenseStatus.SCHEDULED },
+            {
+              status: DefenseStatus.COMPLETED,
+              chairDecision: null,
+              project: { status: ProjectStatus.NEEDS_REVISION }
+            }
+          ]
+        };
+
+    const andConditions: Prisma.DefenseScheduleWhereInput[] = [statusCondition];
 
     if (groupCode) {
       const group = await prisma.group.findUnique({
@@ -441,17 +460,19 @@ export async function GET(request: Request) {
         return successResponse({ assignment: null, assignments: [] });
       }
 
-      where.project = {
-        groupId: group.id
-      };
+      andConditions.push({ project: { groupId: group.id } });
     }
 
     if (authUser.role === UserRole.ADVISER || authUser.role === UserRole.PANEL) {
-      where.OR = [
-        { evaluations: { some: { evaluatorId: authUser.id } } },
-        { project: { adviserId: authUser.id } }
-      ];
+      andConditions.push({
+        OR: [
+          { evaluations: { some: { evaluatorId: authUser.id } } },
+          { project: { adviserId: authUser.id } }
+        ]
+      });
     }
+
+    const where: Prisma.DefenseScheduleWhereInput = { AND: andConditions };
 
     const schedules = await prisma.defenseSchedule.findMany({
       where,
@@ -635,7 +656,14 @@ export async function POST(request: Request) {
             scheduledAt,
             location: room,
             status: DefenseStatus.SCHEDULED,
-            notes: `${scheduleType} scheduled. Panel chair assigned to ${panelUsers.find((user) => user.id === chairId)?.name || 'selected faculty'}.`
+            notes: `${scheduleType} scheduled. Panel chair assigned to ${panelUsers.find((user) => user.id === chairId)?.name || 'selected faculty'}.`,
+            // Reusing a completed schedule row for a second attempt (e.g. after
+            // a Redefense decision) without this left the previous round's
+            // chair decision sitting on the new one — making the new vote
+            // round look already decided before anyone had voted.
+            chairDecision: null,
+            chairDecisionAt: null,
+            chairDecisionRemarks: null
           }
         })
       : await prisma.defenseSchedule.create({
@@ -669,7 +697,15 @@ export async function POST(request: Request) {
         },
         update: {
           projectId: project.id,
-          panelRole: evaluatorId === chairId ? DefensePanelRole.CHAIR : DefensePanelRole.MEMBER
+          panelRole: evaluatorId === chairId ? DefensePanelRole.CHAIR : DefensePanelRole.MEMBER,
+          // Same reason as clearing chairDecision above — a panelist reused
+          // from a prior round (very likely, it's often the same panel) would
+          // otherwise keep their old vote, corrupting the new round's tally
+          // before anyone re-votes.
+          recommendation: EvaluationRecommendation.PENDING,
+          submittedAt: null,
+          remarks: null,
+          rubricData: Prisma.JsonNull
         },
         create: {
           projectId: project.id,

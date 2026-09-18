@@ -113,7 +113,7 @@ function WorkspaceSelect<TValue extends string>({
 }) {
   return (
     <select
-      className="min-h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-xs font-bold text-[var(--text)] shadow-sm outline-none transition-all hover:border-slate-300 focus:border-[#0F3DDE] focus:ring-4 focus:ring-[#0F3DDE]/10 appearance-none cursor-pointer"
+      className="min-h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] px-4 text-xs font-bold text-[var(--text)] shadow-sm outline-none transition-all hover:border-slate-300 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/10 appearance-none cursor-pointer"
       value={value}
       onChange={(event) => onChange(event.target.value as TValue)}
     >
@@ -340,9 +340,9 @@ export function TitleSummaryCards({ metrics }: { metrics: TitleSummaryMetric[] }
       {metrics.map((metric) => (
         <article
           key={metric.id}
-          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0F3DDE]/30 hover:shadow-lg hover:shadow-[#0F3DDE]/10"
+          className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/10"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] via-[#0F3DDE] to-blue-400 opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--primary)] to-[var(--color-info)] opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">{metric.label}</p>
@@ -410,7 +410,7 @@ export function TitleFilters({
             <i className="fas fa-search text-sm" />
           </span>
           <input
-            className="min-h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] pl-11 pr-4 text-sm font-bold text-[var(--text)] shadow-sm outline-none transition-all placeholder:font-medium placeholder:text-[var(--muted)] hover:border-slate-300 focus:border-[#0F3DDE] focus:ring-4 focus:ring-[#0F3DDE]/10"
+            className="min-h-12 w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] pl-11 pr-4 text-sm font-bold text-[var(--text)] shadow-sm outline-none transition-all placeholder:font-medium placeholder:text-[var(--muted)] hover:border-slate-300 focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary)]/10"
             placeholder="Search title or group"
             type="search"
             value={searchValue}
@@ -434,9 +434,9 @@ export function TitleList({
   return (
     <section className="space-y-5">
       <div className="flex flex-col gap-5 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[var(--primary)]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="relative z-10 flex items-start gap-4">
-          <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0F3DDE]/10 to-[#0F3DDE]/5 text-[#0F3DDE] ring-1 ring-[#0F3DDE]/20 shadow-sm">
+          <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--primary)]/10 to-[var(--primary)]/5 text-[var(--primary)] ring-1 ring-[var(--primary)]/20 shadow-sm">
             <i className="fas fa-file-signature text-lg" />
           </span>
           <div className="min-w-0">
@@ -451,11 +451,11 @@ export function TitleList({
             <i className="fas fa-list-check text-[10px] opacity-50" />
             {titles.length} title record{titles.length === 1 ? '' : 's'}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-amber-100">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-warning)]/10 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-[var(--color-warning)]/25">
             <i className="fas fa-clock text-[10px]" />
             {pendingCount} pending
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 ring-1 ring-inset ring-emerald-100">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-success)]/10 px-3 py-1.5 text-emerald-700 ring-1 ring-inset ring-[var(--color-success)]/25">
             <i className="fas fa-check text-[10px]" />
             {completedCount} processed
           </span>
@@ -496,9 +496,9 @@ export function EvidenceQueueList({
   return (
     <section className="space-y-5">
       <div className="flex flex-col gap-5 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[var(--accent)]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="relative z-10 flex items-start gap-4">
-          <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 text-amber-600 ring-1 ring-amber-500/20 shadow-sm">
+          <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/5 text-amber-700 ring-1 ring-[var(--accent)]/30 shadow-sm">
             <i className="fas fa-file-signature text-lg" />
           </span>
           <div className="min-w-0">
@@ -513,11 +513,11 @@ export function EvidenceQueueList({
             <i className="fas fa-list-check text-[10px] opacity-50" />
             {titles.length} group{titles.length === 1 ? '' : 's'}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-amber-100">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)]/15 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-[var(--accent)]/30">
             <i className="fas fa-clock text-[10px]" />
             {pendingCount} awaiting concept evidence decision
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700 ring-1 ring-inset ring-emerald-100">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-success)]/10 px-3 py-1.5 text-emerald-700 ring-1 ring-inset ring-[var(--color-success)]/25">
             <i className="fas fa-check text-[10px]" />
             {clearedCount} cleared
           </span>
@@ -556,14 +556,40 @@ function EvidenceQueueCard({
     if (stage.alwaysShow) return true;
 
     const evidenceReview = record[stage.reviewField];
-    const hasFile = record.uploadedFiles.some((file) => file.documentCategory === stage.checkpointKey);
+    const hasFile = (evidenceReview?.files?.length ?? 0) > 0;
 
     return hasFile || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
   });
 
+  // How many evidence files this group has uploaded across all visible stages —
+  // sourced from each stage's latest submission only (evidenceReview.files), so a
+  // resubmission after "Needs Revision" doesn't double-count the old, superseded
+  // photo alongside the new one.
+  const evidenceFileCount = visibleStages.reduce(
+    (total, stage) => total + (record[stage.reviewField]?.files?.length ?? 0),
+    0
+  );
+
+  // Surface the student's own upload note (or the adviser's prior feedback) right
+  // on the card, same as the Title card's "Next Step" quote — otherwise this text
+  // only ever showed up after opening the Evidence drawer.
+  const noteStage = visibleStages.find((stage) => record[stage.reviewField]?.uploaderNote || record[stage.reviewField]?.feedback);
+  const noteReview = noteStage ? record[noteStage.reviewField] : null;
+  const noteText = noteReview?.uploaderNote || noteReview?.feedback || null;
+  const noteLabel = noteReview?.uploaderNote ? "Student's note" : 'Adviser feedback';
+
+  const pendingStageCount = visibleStages.filter((stage) => {
+    const evidenceReview = record[stage.reviewField];
+    const status = evidenceReview?.status;
+    const hasFileForStage = (evidenceReview?.files?.length ?? 0) > 0;
+    // A stage with nothing uploaded yet isn't "awaiting" the adviser — it's
+    // waiting on the student, so it shouldn't inflate this count.
+    return hasFileForStage && (status === 'SUBMITTED' || status === 'IN_REVIEW' || !status);
+  }).length;
+
   return (
-    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/50 hover:shadow-lg hover:shadow-amber-500/5">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-300 opacity-80 group-hover:opacity-100 transition-opacity" />
+    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--accent)]/50 hover:shadow-lg hover:shadow-[var(--accent)]/10">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[var(--accent)] to-amber-300 opacity-80 group-hover:opacity-100 transition-opacity" />
 
       <div className="flex flex-col gap-5 p-6 pl-7 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
@@ -571,8 +597,15 @@ function EvidenceQueueCard({
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]">
               <i className="fas fa-layer-group text-[10px]" /> {record.department}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-100">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)]/8 px-3 py-1.5 text-xs font-bold text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15">
               <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-user-group opacity-60" /> {record.membersCount} members
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-paperclip opacity-60" />
+              {evidenceFileCount ? `${evidenceFileCount} file${evidenceFileCount === 1 ? '' : 's'}` : 'No file yet'}
             </span>
           </div>
           <h3 className="mt-3 truncate text-lg font-extrabold tracking-tight text-[var(--text)]" title={record.title}>
@@ -593,14 +626,28 @@ function EvidenceQueueCard({
               );
             })}
           </div>
+
+          {noteText ? (
+            <p
+              className="mt-3 max-w-xl text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+              title={noteText}
+            >
+              <span className="not-italic font-bold text-slate-600">{noteLabel}: </span>"{noteText}"
+            </p>
+          ) : null}
         </div>
 
         <button
-          className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-5 text-sm font-black text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-amber-100 lg:w-auto"
+          className="relative inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/15 px-5 text-sm font-black text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--accent)]/25 lg:w-auto"
           type="button"
           onClick={() => onReviewEvidence(record)}
         >
           <i className="fas fa-file-signature text-xs" /> Review Evidence
+          {pendingStageCount > 0 ? (
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-600 px-1.5 text-[11px] font-black text-white">
+              {pendingStageCount}
+            </span>
+          ) : null}
         </button>
       </div>
     </article>
@@ -1239,8 +1286,6 @@ export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: Evid
     return null;
   }
 
-  const uploadedFiles = record.uploadedFiles ?? [];
-
   return createPortal(
     <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6" onClick={onClose}>
       <div
@@ -1281,7 +1326,11 @@ export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: Evid
 
           {DEFENSE_APPLICATION_STAGES.map((stage) => {
             const evidenceReview = record[stage.reviewField];
-            const evidenceFiles = uploadedFiles.filter((file) => file.documentCategory === stage.checkpointKey);
+            // Sourced from the checkpoint's latest submission (evidenceReview.files),
+            // not a category-wide filter over every file ever uploaded — otherwise a
+            // resubmission after "Needs Revision" would pile up next to the old,
+            // already-superseded photo instead of replacing it in this carousel.
+            const evidenceFiles = evidenceReview?.files ?? [];
             const slideIndex = Math.min(evidenceSlideIndex[stage.checkpointKey] ?? 0, Math.max(evidenceFiles.length - 1, 0));
             const evidenceFile = evidenceFiles[slideIndex] ?? null;
             // ensureProjectMilestoneWorkflow pre-creates every stage's checkpoint row up
@@ -1578,11 +1627,15 @@ export function TitleCard({
   const firstFile = record.uploadedFiles[0] || null;
 
   return (
-    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0F3DDE]/30 hover:shadow-lg hover:shadow-[#0F3DDE]/5">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#0F3DDE] to-blue-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/5">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[var(--primary)] to-[var(--color-info)] opacity-80 group-hover:opacity-100 transition-opacity" />
 
       <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
         <div className="min-w-0 pl-1">
+          {/* Previously showed the status twice (e.g. "APPROVED" + "Approved") since
+              getTitleReviewStage's label duplicates statusMeta.label for every status
+              except 'pending' — one badge now, reviewStage.helper still feeds the Next
+              Step panel below where it's actually distinct information. */}
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)] shadow-sm">
               <i className="fas fa-layer-group text-[10px]" /> {record.department}
@@ -1596,14 +1649,10 @@ export function TitleCard({
               ) : null}
               {statusMeta.label}
             </span>
-            <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-wide ${reviewStage.className}`}>
-              <i className={`fas ${reviewStage.icon} text-[10px]`} aria-hidden="true" />
-              {reviewStage.label}
-            </span>
           </div>
 
           <h3
-            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[#0F3DDE] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.title}
           >
             {record.title}
@@ -1617,7 +1666,7 @@ export function TitleCard({
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm font-semibold">
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-blue-700 ring-1 ring-inset ring-blue-100">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)]/8 px-3 py-2 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15">
               <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
@@ -1660,7 +1709,7 @@ export function TitleCard({
               {record.keywords.slice(0, 4).map((keyword) => (
                 <span
                   key={keyword}
-                  className="inline-flex items-center rounded-full bg-[#0F3DDE]/5 px-2.5 py-1 text-[11px] font-bold text-[#0F3DDE] ring-1 ring-inset ring-[#0F3DDE]/15"
+                  className="inline-flex items-center rounded-full bg-[var(--primary)]/5 px-2.5 py-1 text-[11px] font-bold text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15"
                 >
                   #{keyword}
                 </span>
@@ -1705,9 +1754,9 @@ export function TitleCard({
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-4">
+        <div className="flex flex-col justify-between rounded-2xl border border-[var(--primary)]/15 bg-gradient-to-br from-[var(--primary)]/5 via-white to-white p-4">
           <div>
-            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-blue-700">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[var(--primary)]">
               <i className="fas fa-route" /> Next Step
             </p>
             <p className="mt-3 text-sm font-bold leading-6 text-slate-700">{reviewStage.helper}</p>
@@ -1719,7 +1768,9 @@ export function TitleCard({
             </p>
           </div>
           <button
-            className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-black text-white shadow-md shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg"
+            className={`mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 text-sm font-black text-white shadow-md shadow-[var(--primary)]/20 transition hover:-translate-y-0.5 hover:bg-[var(--hover)] hover:shadow-lg ${
+              record.status === 'pending' ? 'ring-2 ring-[var(--primary)]/25 ring-offset-2' : ''
+            }`}
             type="button"
             onClick={() => onViewDetails(record)}
           >

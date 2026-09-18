@@ -275,7 +275,8 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
                 status: nextStatus,
                 feedback: remarks.trim() || item[reviewField]?.feedback || null,
                 feedbackBy: remarks.trim() ? 'You' : item[reviewField]?.feedbackBy || null,
-                uploaderNote: item[reviewField]?.uploaderNote || null
+                uploaderNote: item[reviewField]?.uploaderNote || null,
+                files: item[reviewField]?.files || []
               }
             }
           : item

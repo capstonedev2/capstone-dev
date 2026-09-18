@@ -2,7 +2,7 @@ import { DefensePanelRole, DefenseStatus, ProjectStatus } from '@/generated/pris
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, parseJsonBody, successResponse } from '@/lib/utils';
-import { recordDefenseVoteOutcome } from '@/lib/milestone-checkpoint-tracking';
+import { applyDefensePassOutcome, recordDefenseVoteOutcome } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -37,54 +37,17 @@ async function finalizeDefenseSchedule(
     }
   }
 
-  if (yesVotes > noVotes) {
-    const normalizedTitle = scheduleTitle.toLowerCase();
-    const isFinal = normalizedTitle.includes('final') && !normalizedTitle.includes('pre-final');
-    await prisma.project.update({
-      where: { id: projectId },
-      data: {
-        status: isFinal ? ProjectStatus.COMPLETED : ProjectStatus.APPROVED
-      }
-    });
-
-    // Mark the stage's panel-approval checkpoint(s) done so the student
-    // milestone tracker's rollup can actually reach COMPLETED — updating
-    // Project.status alone never touched this, which is why "Stage N"
-    // stayed stuck even after the panel approved.
-    await recordDefenseVoteOutcome(prisma, {
+  // Unanimous Yes required to pass — a single No sends it to the panel
+  // chair's decision (Approve override, Redefense, or New Title) instead.
+  if (noVotes === 0) {
+    await applyDefensePassOutcome(prisma, {
       projectId,
+      projectTitle,
       scheduleTitle,
-      outcome: 'passed'
+      groupId,
+      notifyUserIds
     });
-
-    // Clear the "Needs Revision" flag a prior rejected defense may have set — a
-    // group that just passed (including a redefense) isn't flagged anymore.
-    // Without this, a group that recovers from a rejection stays stuck showing
-    // "Needs Revision" and the loud demotion panel forever, even after passing.
-    if (groupId) {
-      await prisma.group.update({
-        where: { id: groupId },
-        data: {
-          status: 'active',
-          statusLabel: 'Active',
-          statusClass: 'status-active'
-        }
-      });
-    }
-
-    if (notifyUserIds.length) {
-      await prisma.notification.createMany({
-        data: notifyUserIds.map((userId) => ({
-          userId,
-          title: 'Defense Passed',
-          message: `"${projectTitle}" passed its ${scheduleTitle} defense.`,
-          type: 'success',
-          entityType: 'Project',
-          entityId: projectId
-        }))
-      });
-    }
-  } else if (noVotes > yesVotes) {
+  } else {
     await prisma.project.update({
       where: { id: projectId },
       data: {

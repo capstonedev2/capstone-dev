@@ -24,6 +24,7 @@ import type {
   ProjectFileUploadState
 } from '@/components/students/student-project-files.shared';
 import {
+  MAX_UPLOAD_FILES,
   PROJECT_FILE_CATEGORY_OPTIONS,
   PROJECT_FILE_FILTER_OPTIONS,
   PROJECT_FILE_TAG_OPTIONS,
@@ -76,7 +77,7 @@ function resolveUserRole(groupRole?: string): PortalRole {
 
 function createUploadDraft(uploadedBy: string): ProjectFileUploadState {
   return {
-    file: null,
+    files: [],
     category: PROJECT_FILE_CATEGORY_OPTIONS[0]?.key || 'proposal',
     versionNotes: '',
     status: 'pending',
@@ -431,18 +432,30 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   }, [visibleCategoryOptions, uploadDraft.category]);
 
   // A file's validity depends on the selected category (only some categories allow images),
-  // but switching the Category dropdown doesn't itself go through handleSelectedFile — so
+  // but switching the Category dropdown doesn't itself go through handleSelectedFiles — so
   // without this, a file rejected under one category could leave a stale error banner shown
   // alongside a file that's actually valid under the newly-selected category (or vice versa).
   useEffect(() => {
-    if (!uploadDraft.file) {
+    if (!uploadDraft.files.length) {
       return;
     }
 
-    const typeError = validateFileType(uploadDraft.file.name, uploadDraft.file.type, fileTypeMode);
-    const sizeError = validateFileSize(uploadDraft.file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+    const stillValid = uploadDraft.files.filter((file) => {
+      const typeError = validateFileType(file.name, file.type, fileTypeMode);
+      const sizeError = validateFileSize(file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+      return !typeError && !sizeError;
+    });
 
-    setUploadError(typeError || sizeError || null);
+    if (stillValid.length !== uploadDraft.files.length) {
+      setUploadDraft((current) => ({ ...current, files: stillValid }));
+      setUploadError(
+        stillValid.length
+          ? `${uploadDraft.files.length - stillValid.length} file(s) removed — not valid for the newly selected category.`
+          : 'None of the selected files are valid for the newly selected category.'
+      );
+    } else {
+      setUploadError(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploadDraft.category]);
 
@@ -929,6 +942,16 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }
   };
 
+  // Project Documents and Academic Activities & Evidence are independent upload
+  // contexts (one gated by Stage 1 completion, the other never gated) — without
+  // this, files staged in one tab (e.g. 3 evidence photos) would silently carry
+  // over if the student switched tabs before submitting, getting uploaded under
+  // whatever category the other tab defaults to instead of the one they picked.
+  const handleSwitchUploadTab = (tab: 'documents' | 'activities') => {
+    setUploadCategoryTab(tab);
+    resetUploadDraft();
+  };
+
   const updateUploadDraft = <Key extends keyof ProjectFileUploadState,>(field: Key, value: ProjectFileUploadState[Key]) => {
     setUploadDraft((current) => ({
       ...current,
@@ -936,27 +959,57 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     }));
   };
 
-  const handleSelectedFile = (file: File | null) => {
-    setUploadError(null);
+  // Handles both the browse input (one file at a time, no `multiple` attribute — the
+  // native OS picker enforces that) and drag-and-drop, which can carry several files
+  // in one gesture regardless of the input's own attribute. Files are staged (added to
+  // uploadDraft.files, up to MAX_UPLOAD_FILES) rather than uploaded immediately; the
+  // student can drop more before hitting Submit, mirroring the Evidence drawer's
+  // multi-image carousel on the review side.
+  const handleSelectedFiles = (fileList: FileList | File[] | null) => {
+    const incoming = fileList ? Array.from(fileList) : [];
 
-    if (file) {
-      const typeError = validateFileType(file.name, file.type, fileTypeMode);
-      const sizeError = validateFileSize(file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
-
-      if (typeError || sizeError) {
-        setUploadError(typeError || sizeError || 'Selected file is not valid.');
-        updateUploadDraft('file', null);
-
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-
-        return;
-      }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
 
-    updateUploadDraft('file', file);
-    updateUploadDraft('uploadedAt', new Date().toISOString());
+    if (!incoming.length) {
+      return;
+    }
+
+    const invalidReasons: string[] = [];
+    const validIncoming = incoming.filter((file) => {
+      const typeError = validateFileType(file.name, file.type, fileTypeMode);
+      const sizeError = validateFileSize(file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+      const reason = typeError || sizeError;
+
+      if (reason) {
+        invalidReasons.push(`${file.name}: ${reason}`);
+        return false;
+      }
+
+      return true;
+    });
+
+    setUploadDraft((current) => {
+      const combined = [...current.files, ...validIncoming];
+      const overflow = Math.max(0, combined.length - MAX_UPLOAD_FILES);
+      const nextFiles = combined.slice(0, MAX_UPLOAD_FILES);
+
+      const messages = [...invalidReasons];
+      if (overflow > 0) {
+        messages.push(`Only the first ${MAX_UPLOAD_FILES} files are kept — ${overflow} extra file(s) were not added.`);
+      }
+      setUploadError(messages.length ? messages.join(' ') : null);
+
+      return { ...current, files: nextFiles, uploadedAt: new Date().toISOString() };
+    });
+  };
+
+  const removeStagedFile = (index: number) => {
+    setUploadDraft((current) => ({
+      ...current,
+      files: current.files.filter((_, fileIndex) => fileIndex !== index)
+    }));
   };
 
   const openUploadSection = useCallback(() => {
@@ -982,14 +1035,14 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   };
 
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    handleSelectedFile(event.target.files?.[0] || null);
+    handleSelectedFiles(event.target.files);
   };
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setIsDragOver(false);
-    handleSelectedFile(event.dataTransfer.files?.[0] || null);
+    handleSelectedFiles(event.dataTransfer.files);
   };
 
   const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -1004,8 +1057,9 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     setIsDragOver(false);
   };
 
-  const clearSelectedFile = () => {
-    handleSelectedFile(null);
+  const clearAllStagedFiles = () => {
+    setUploadDraft((current) => ({ ...current, files: [] }));
+    setUploadError(null);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -1017,93 +1071,104 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     setUploadError(null);
     setPageError(null);
 
-    if (!uploadDraft.file) {
-      setUploadError('Select a file before submitting it to the project workspace.');
+    if (!uploadDraft.files.length) {
+      setUploadError('Select at least one file before submitting it to the project workspace.');
       return;
     }
 
-    const selectedFile = uploadDraft.file;
-    const typeError = validateFileType(selectedFile.name, selectedFile.type, fileTypeMode);
-    const sizeError = validateFileSize(selectedFile.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
-
-    if (typeError || sizeError) {
-      setUploadError(typeError || sizeError || 'Selected file is not valid.');
-      return;
-    }
-    const uploadedAt = new Date().toISOString();
-    const nextVersion = getNextProjectFileVersionParts(files, uploadDraft.category);
-    const previousLatestFile = [...files]
-      .filter((item) => item.category === uploadDraft.category)
-      .sort((left, right) => {
-        const versionDelta = compareProjectFileVersions(right, left);
-
-        if (versionDelta !== 0) {
-          return versionDelta;
-        }
-
-        return new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime();
-      })[0];
     const versionNotes = uploadDraft.versionNotes.trim() || getDefaultPendingNote(uploadDraft.category, uploadDraft.tag);
-    const nextHistoryEntry: ProjectFileHistoryEntry = {
-      id: `history-${Date.now()}`,
-      versionMajor: nextVersion.versionMajor,
-      versionMinor: nextVersion.versionMinor,
-      status: 'pending',
-      uploadedBy: data.profile.fullName,
-      uploadedAt,
-      versionNotes
-    };
     setIsUploading(true);
 
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('bucketName', DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
-      formData.append('projectId', data.project.project_id || data.project.id);
-      formData.append('documentCategory', uploadDraft.category);
-      if (uploadDraft.versionNotes.trim()) {
-        formData.append('notes', uploadDraft.versionNotes.trim());
-      }
+    // Uploaded sequentially (not Promise.all) so each file's version number is computed
+    // against a running list that already includes the ones uploaded earlier in this same
+    // batch — a concurrent batch would have every file see the same "next version" and
+    // collide, plus it's gentler on the upload API than firing up to 10 requests at once.
+    let runningFiles = files;
+    const uploadedRecords: ProjectFileRecord[] = [];
+    const failures: Array<{ name: string; message: string }> = [];
 
-      const response = await fetch('/api/document-files', {
-        method: 'POST',
-        body: formData
-      });
+    for (const selectedFile of uploadDraft.files) {
+      const uploadedAt = new Date().toISOString();
+      const nextVersion = getNextProjectFileVersionParts(runningFiles, uploadDraft.category);
+      const previousLatestFile = [...runningFiles]
+        .filter((item) => item.category === uploadDraft.category)
+        .sort((left, right) => {
+          const versionDelta = compareProjectFileVersions(right, left);
 
-      if (!response.ok) {
-        throw new Error(await getApiErrorMessage(response));
-      }
+          if (versionDelta !== 0) {
+            return versionDelta;
+          }
 
-      const payload = await response.json();
-      const uploadedFile = payload.file;
-      const nextRecord: ProjectFileRecord = {
-        id: uploadedFile.id,
-        projectId: uploadedFile.projectId || data.project.project_id,
-        category: uploadedFile.documentCategory || uploadDraft.category,
-        fileName: uploadedFile.fileName || selectedFile.name,
-        fileUrl: `/api/document-files/${uploadedFile.id}/download`,
+          return new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime();
+        })[0];
+      const nextHistoryEntry: ProjectFileHistoryEntry = {
+        id: `history-${Date.now()}-${selectedFile.name}`,
         versionMajor: nextVersion.versionMajor,
         versionMinor: nextVersion.versionMinor,
-        status: getFileStatusFromSubmission(uploadedFile),
-        tag: uploadDraft.tag,
-        versionNotes,
+        status: 'pending',
         uploadedBy: data.profile.fullName,
-        uploadedAt: uploadedFile.createdAt || uploadedAt,
-        rejectionReason: uploadedFile.rejectionReason || null,
-        latestReviewComment: uploadedFile.latestReviewComment || null,
-        reviewComments: uploadedFile.reviewComments || [],
-        isFinal: false,
-        isRepositoryCopy: false,
-        fileType: uploadedFile.fileType || selectedFile.type || selectedFile.name.split('.').pop() || 'File',
-        sizeLabel: formatFileSizeLabel(uploadedFile.fileSize || selectedFile.size),
-        uploadedById: uploadedFile.uploadedBy || currentUserId,
-        history: [...(previousLatestFile?.history || []), nextHistoryEntry]
+        uploadedAt,
+        versionNotes
       };
 
-      setFiles((current) => [nextRecord, ...current]);
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('bucketName', DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
+        formData.append('projectId', data.project.project_id || data.project.id);
+        formData.append('documentCategory', uploadDraft.category);
+        if (uploadDraft.versionNotes.trim()) {
+          formData.append('notes', uploadDraft.versionNotes.trim());
+        }
+
+        const response = await fetch('/api/document-files', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(await getApiErrorMessage(response));
+        }
+
+        const payload = await response.json();
+        const uploadedFile = payload.file;
+        const nextRecord: ProjectFileRecord = {
+          id: uploadedFile.id,
+          projectId: uploadedFile.projectId || data.project.project_id,
+          category: uploadedFile.documentCategory || uploadDraft.category,
+          fileName: uploadedFile.fileName || selectedFile.name,
+          fileUrl: `/api/document-files/${uploadedFile.id}/download`,
+          versionMajor: nextVersion.versionMajor,
+          versionMinor: nextVersion.versionMinor,
+          status: getFileStatusFromSubmission(uploadedFile),
+          tag: uploadDraft.tag,
+          versionNotes,
+          uploadedBy: data.profile.fullName,
+          uploadedAt: uploadedFile.createdAt || uploadedAt,
+          rejectionReason: uploadedFile.rejectionReason || null,
+          latestReviewComment: uploadedFile.latestReviewComment || null,
+          reviewComments: uploadedFile.reviewComments || [],
+          isFinal: false,
+          isRepositoryCopy: false,
+          fileType: uploadedFile.fileType || selectedFile.type || selectedFile.name.split('.').pop() || 'File',
+          sizeLabel: formatFileSizeLabel(uploadedFile.fileSize || selectedFile.size),
+          uploadedById: uploadedFile.uploadedBy || currentUserId,
+          history: [...(previousLatestFile?.history || []), nextHistoryEntry]
+        };
+
+        uploadedRecords.push(nextRecord);
+        runningFiles = [nextRecord, ...runningFiles];
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to upload the document.';
+        failures.push({ name: selectedFile.name, message });
+      }
+    }
+
+    if (uploadedRecords.length) {
+      setFiles((current) => [...uploadedRecords, ...current]);
       setCurrentPage(1);
 
-      // Consume ALL one-time use permission tokens if used
+      // Consume ALL one-time use permission tokens if used — once per batch, not per file.
       if (!isGroupLeader && permissionNotificationId) {
         try {
           const tokenIds = permissionNotificationId.split(',').filter(Boolean);
@@ -1120,19 +1185,38 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
         }
       }
 
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    }
+
+    if (failures.length) {
+      const failureSummary = failures.map((failure) => `${failure.name}: ${failure.message}`).join(' ');
+      setUploadError(
+        uploadedRecords.length
+          ? `${uploadedRecords.length} of ${uploadDraft.files.length} file(s) uploaded. Failed: ${failureSummary}`
+          : failureSummary
+      );
+      setToast({
+        tone: uploadedRecords.length ? 'warning' : 'danger',
+        message: uploadedRecords.length
+          ? `${uploadedRecords.length} of ${uploadDraft.files.length} file(s) uploaded — ${failures.length} failed.`
+          : 'Upload failed.'
+      });
+      // Only clear the files that succeeded, so the ones that failed stay staged for retry.
+      setUploadDraft((current) => ({
+        ...current,
+        files: current.files.filter((file) => failures.some((failure) => failure.name === file.name))
+      }));
+    } else {
       setToast({
         tone: 'success',
-        message: `${selectedFile.name} uploaded securely as ${getProjectFileVersionLabel(nextRecord)}.`
+        message: uploadedRecords.length === 1
+          ? `${uploadedRecords[0].fileName} uploaded securely as ${getProjectFileVersionLabel(uploadedRecords[0])}.`
+          : `${uploadedRecords.length} files uploaded securely.`
       });
-      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
       resetUploadDraft();
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to upload the document.';
-      setUploadError(message);
-      setToast({ tone: 'danger', message });
-    } finally {
-      setIsUploading(false);
     }
+
+    setIsUploading(false);
   };
 
   const handleViewFile = useCallback(async (file: ProjectFileRecord) => {
@@ -1552,7 +1636,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     type="button"
                     role="tab"
                     aria-selected={uploadCategoryTab === 'documents'}
-                    onClick={() => setUploadCategoryTab('documents')}
+                    onClick={() => handleSwitchUploadTab('documents')}
                     className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${
                       uploadCategoryTab === 'documents'
                         ? 'bg-[#003A8F] text-white shadow-sm'
@@ -1566,7 +1650,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     type="button"
                     role="tab"
                     aria-selected={uploadCategoryTab === 'activities'}
-                    onClick={() => setUploadCategoryTab('activities')}
+                    onClick={() => handleSwitchUploadTab('activities')}
                     className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${
                       uploadCategoryTab === 'activities'
                         ? 'bg-[#003A8F] text-white shadow-sm'
@@ -1698,11 +1782,11 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                 <div className="project-files-upload-workflow">
                   <section className="project-files-upload-drop-panel mb-8">
                     <div
-                      onClick={!uploadDraft.file ? handleBrowseFile : undefined}
+                      onClick={!uploadDraft.files.length ? handleBrowseFile : undefined}
                       className={`group relative flex w-full flex-col items-center justify-center rounded-3xl border-2 border-dashed py-14 transition-all duration-300 overflow-hidden cursor-pointer ${
                         isDragOver
                           ? 'border-blue-500 bg-blue-50/80 shadow-inner scale-[1.01]'
-                          : uploadDraft.file
+                          : uploadDraft.files.length
                             ? 'border-emerald-300 bg-emerald-50/30'
                             : 'border-[var(--border-strong)] bg-[var(--surface-alt)] hover:border-blue-400 hover:bg-blue-50/40 hover:shadow-sm'
                       }`}
@@ -1712,20 +1796,26 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                     >
                       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 
-                      <div className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--surface)] shadow-md mb-6 transition-all duration-500 z-10 ${isDragOver ? 'scale-110 shadow-blue-200 shadow-lg' : uploadDraft.file ? 'scale-110 shadow-emerald-200 shadow-lg' : 'group-hover:scale-110 group-hover:shadow-blue-100 group-hover:shadow-lg rotate-3 group-hover:rotate-0'}`}>
-                        <div className={`absolute inset-0 rounded-2xl ${uploadDraft.file ? 'bg-emerald-400/20' : 'bg-blue-400/20'} animate-ping opacity-0 group-hover:opacity-100 duration-1000`}></div>
-                        <i className={`fas ${uploadDraft.file ? getProjectFileTypeIcon(uploadDraft.file.name, uploadDraft.file.type) : 'fa-cloud-arrow-up'} text-3xl transition-colors duration-300 ${uploadDraft.file ? 'text-emerald-600' : isDragOver ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
+                      <div className={`relative flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--surface)] shadow-md mb-6 transition-all duration-500 z-10 ${isDragOver ? 'scale-110 shadow-blue-200 shadow-lg' : uploadDraft.files.length ? 'scale-110 shadow-emerald-200 shadow-lg' : 'group-hover:scale-110 group-hover:shadow-blue-100 group-hover:shadow-lg rotate-3 group-hover:rotate-0'}`}>
+                        <div className={`absolute inset-0 rounded-2xl ${uploadDraft.files.length ? 'bg-emerald-400/20' : 'bg-blue-400/20'} animate-ping opacity-0 group-hover:opacity-100 duration-1000`}></div>
+                        <i className={`fas ${uploadDraft.files.length === 1 ? getProjectFileTypeIcon(uploadDraft.files[0].name, uploadDraft.files[0].type) : uploadDraft.files.length > 1 ? 'fa-layer-group' : 'fa-cloud-arrow-up'} text-3xl transition-colors duration-300 ${uploadDraft.files.length ? 'text-emerald-600' : isDragOver ? 'text-blue-600' : 'text-blue-500 group-hover:text-blue-600'}`} aria-hidden="true"></i>
                       </div>
 
-                      <h4 className={`text-lg font-extrabold transition-colors z-10 ${uploadDraft.file ? 'text-emerald-800' : 'text-[var(--text)] group-hover:text-blue-700'}`}>
-                        {uploadDraft.file ? uploadDraft.file.name : 'Drag and drop your file here'}
+                      <h4 className={`text-lg font-extrabold transition-colors z-10 ${uploadDraft.files.length ? 'text-emerald-800' : 'text-[var(--text)] group-hover:text-blue-700'}`}>
+                        {uploadDraft.files.length === 1
+                          ? uploadDraft.files[0].name
+                          : uploadDraft.files.length > 1
+                            ? `${uploadDraft.files.length} files selected`
+                            : 'Drag and drop your files here'}
                       </h4>
 
                       <p className="mt-2 text-sm text-[var(--muted)] font-medium z-10 max-w-sm text-center">
-                        {uploadDraft.file ? 'The selected file is ready for secure private storage and version tracking.' : 'or click to browse from your computer'}
+                        {uploadDraft.files.length
+                          ? `Ready for secure private storage and version tracking. Up to ${MAX_UPLOAD_FILES} files per batch.`
+                          : `or click to browse from your computer — up to ${MAX_UPLOAD_FILES} files at once`}
                       </p>
 
-                      {!uploadDraft.file && (
+                      {!uploadDraft.files.length && (
                         <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-[var(--muted)] z-10">
                           {isUnrestrictedCategory ? (
                             <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface)] backdrop-blur-sm rounded-lg border border-[var(--border)] shadow-sm transition-transform group-hover:-translate-y-0.5">
@@ -1741,22 +1831,52 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                         </div>
                       )}
 
-                      {uploadDraft.file && (
+                      {uploadDraft.files.length > 0 && (
                         <div className="mt-8 flex items-center gap-3 z-10">
-                          <button className="flex items-center gap-2 rounded-xl bg-[var(--surface)] px-4 py-2 text-sm font-bold text-[var(--text)] shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-[var(--surface-alt)] transition-all" type="button" onClick={(e) => { e.stopPropagation(); handleBrowseFile(); }}>
-                            <i className="fas fa-folder-open text-blue-500" aria-hidden="true" /> Change File
+                          <button
+                            className="flex items-center gap-2 rounded-xl bg-[var(--surface)] px-4 py-2 text-sm font-bold text-[var(--text)] shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-[var(--surface-alt)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            type="button"
+                            disabled={uploadDraft.files.length >= MAX_UPLOAD_FILES}
+                            onClick={(e) => { e.stopPropagation(); handleBrowseFile(); }}
+                          >
+                            <i className="fas fa-folder-open text-blue-500" aria-hidden="true" /> Add More
                           </button>
-                          <button className="flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 shadow-sm ring-1 ring-inset ring-rose-200 hover:bg-rose-100 transition-all" type="button" onClick={(e) => { e.stopPropagation(); clearSelectedFile(); }}>
-                            <i className="fas fa-trash-can text-rose-500" aria-hidden="true" /> Remove
+                          <button className="flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 shadow-sm ring-1 ring-inset ring-rose-200 hover:bg-rose-100 transition-all" type="button" onClick={(e) => { e.stopPropagation(); clearAllStagedFiles(); }}>
+                            <i className="fas fa-trash-can text-rose-500" aria-hidden="true" /> Remove All
                           </button>
                         </div>
                       )}
                     </div>
 
+                    {uploadDraft.files.length > 1 && (
+                      <ul className="mt-4 space-y-2">
+                        {uploadDraft.files.map((file, index) => (
+                          <li
+                            key={`${file.name}-${file.lastModified}-${index}`}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm"
+                          >
+                            <span className="flex min-w-0 items-center gap-2.5 font-semibold text-[var(--text)]">
+                              <i className={`fas ${getProjectFileTypeIcon(file.name, file.type)} text-blue-500 shrink-0`} aria-hidden="true" />
+                              <span className="truncate">{file.name}</span>
+                            </span>
+                            <button
+                              type="button"
+                              className="shrink-0 rounded-lg p-1.5 text-rose-500 hover:bg-rose-50 transition-colors"
+                              onClick={() => removeStagedFile(index)}
+                              aria-label={`Remove ${file.name}`}
+                            >
+                              <i className="fas fa-xmark" aria-hidden="true" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
                     <input
                       ref={fileInputRef}
                       className="hidden"
                       type="file"
+                      multiple
                       accept={isUnrestrictedCategory ? undefined : DOCUMENT_FILE_ACCEPT}
                       onChange={handleFileInputChange}
                     />
@@ -1865,10 +1985,16 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
                           await handleUploadSubmit();
                           await new Promise(r => setTimeout(r, 600)); // Minimum animation time
                         }}
-                        disabled={isUploading || !uploadDraft.file}
+                        disabled={isUploading || !uploadDraft.files.length}
                       >
                         <div className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] skew-x-[-20deg] group-hover:translate-x-[50%] transition-transform duration-1000 ease-in-out"></div>
-                        <span className="relative z-10">{isUploading ? 'Uploading...' : 'Submit to Adviser'}</span>
+                        <span className="relative z-10">
+                          {isUploading
+                            ? 'Uploading...'
+                            : uploadDraft.files.length > 1
+                              ? `Submit ${uploadDraft.files.length} Files to Adviser`
+                              : 'Submit to Adviser'}
+                        </span>
                         <i className={`fas fa-paper-plane relative z-10 transition-transform ${isUploading ? 'animate-bounce' : 'group-hover:translate-x-1 group-hover:-translate-y-1'}`} aria-hidden="true" />
                       </PremiumAnimatedButton>
                     </div>

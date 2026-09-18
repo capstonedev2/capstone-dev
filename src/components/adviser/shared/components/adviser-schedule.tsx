@@ -96,6 +96,20 @@ const REQUIRED_SUBMISSION_OPTIONS = [
   { value: 'other', label: 'Other requirement', hint: 'Specify the exact requirement in the field below so students know what to submit.' }
 ] as const;
 
+// Mirrors DEADLINE_REQUIREMENT_MILESTONE_SEQUENCE in milestone-checkpoint-tracking.ts —
+// which stage's due date (shown on the student's roadmap and driving the overdue alert)
+// gets set when this requirement is picked, so the adviser knows this isn't just a
+// calendar note. 'other'/unset are deliberately left out there — too ambiguous to map.
+const REQUIRED_SUBMISSION_STAGE_LABEL: Record<string, string> = {
+  'title-proposal': 'Concept',
+  'concept-paper': 'Concept',
+  'proposal-chapters': 'Proposal',
+  'progress-development': 'Development',
+  'web-application': 'Development',
+  'system-documentation': 'Development',
+  'final-manuscript': 'Final Defense'
+};
+
 function getRequiredSubmissionOption(value: string) {
   return REQUIRED_SUBMISSION_OPTIONS.find((option) => option.value === value) ?? REQUIRED_SUBMISSION_OPTIONS[0];
 }
@@ -757,6 +771,12 @@ export function AdviserSchedule({ data }: { data: AdviserDashboardData }) {
                           <p className="mt-2 text-xs leading-5 text-slate-500">
                             <i className="fas fa-circle-info mr-1 text-[var(--primary)]" aria-hidden="true" />
                             {getRequiredSubmissionOption(scheduleForm.requiredSubmission).hint}
+                          </p>
+                        )}
+                        {REQUIRED_SUBMISSION_STAGE_LABEL[scheduleForm.requiredSubmission] && (
+                          <p className="mt-2 text-xs leading-5 text-emerald-700">
+                            <i className="fas fa-calendar-check mr-1" aria-hidden="true" />
+                            This also sets the due date for the {REQUIRED_SUBMISSION_STAGE_LABEL[scheduleForm.requiredSubmission]} stage on the student's roadmap.
                           </p>
                         )}
                       </label>
