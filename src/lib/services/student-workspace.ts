@@ -243,6 +243,7 @@ export type StudentDashboardData = {
     uploadDateLabel: string;
     uploadedBy: string;
     reviewStatus: string;
+    isSuperseded: boolean;
   }>;
   feedback: Array<{
     id: string;
@@ -260,6 +261,7 @@ export type StudentDashboardData = {
     mode: string;
     dateLabel: string;
     unread: boolean;
+    isSuperseded: boolean;
   }>;
   milestones: Array<{
     id: string;
@@ -716,6 +718,12 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
 
           data.project = {
             ...data.project,
+            // Was never set here, so it stayed stuck on the 'DRAFT' placeholder
+            // from the default state forever — the dashboard's hero card (which
+            // reads this field, not titleRegistration.registrationStatus below)
+            // kept showing "pending approval" even once the title, and every
+            // Concept checkpoint, had long since been approved.
+            status: activeProject?.status || data.project.status,
             projectCode: group.code || data.project.projectCode,
             title: approvedTitleProject?.title || group.projectTitle || data.project.title,
             description: approvedTitleProject?.abstract || data.project.description,
@@ -758,7 +766,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               select: {
                 id: true, userId: true, visibility: true, createdAt: true, updatedAt: true,
                 documentCategory: true, category: true, fileName: true, fileType: true, size: true,
-                user: { select: { name: true } }, submission: { select: { status: true } }
+                user: { select: { name: true } }, submission: { select: { status: true, reviewedAt: true } }
               },
               orderBy: { createdAt: 'desc' },
               take: 50
@@ -794,13 +802,23 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               orderBy: { reviewedAt: 'desc' },
               take: 20,
               select: {
-                id: true, title: true, status: true,
+                id: true, title: true, status: true, checkpointId: true, submittedAt: true, reviewedAt: true,
                 comments: {
                   orderBy: { createdAt: 'desc' },
                   take: 5,
                   select: { id: true, body: true, createdAt: true, updatedAt: true, author: { select: { name: true, role: true } } }
                 }
               }
+            });
+
+            // Lightweight, any-status probe used only to detect whether a checkpoint
+            // already has a newer submission than one we're about to show feedback
+            // for — a rejected round's own feedback thread otherwise keeps reading
+            // as "Needs Action"/"Unread" forever, even after the student resubmitted
+            // and that later round has already been decided (or is simply pending).
+            const checkpointSubmissionTimesPromise = prisma.submission.findMany({
+              where: { projectId: activeProject.id, checkpointId: { not: null } },
+              select: { checkpointId: true, submittedAt: true }
             });
 
             const titleSubmissionEventsPromise = prisma.submission.findMany({
@@ -895,6 +913,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               schedules,
               adviserScheduleItems,
               submissions,
+              checkpointSubmissionTimes,
               titleSubmissionEvents,
               [milestones, checkpointRows]
             ] = await Promise.all([
@@ -902,6 +921,7 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               schedulesPromise,
               adviserSchedulePromise,
               submissionsPromise,
+              checkpointSubmissionTimesPromise,
               titleSubmissionEventsPromise,
               milestoneWorkflowPromise
             ]);
@@ -914,6 +934,27 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               note: `"${event.project.title}" was submitted for adviser title review.`,
               reviewedBy: event.submittedBy?.name || data.profile.fullName
             }));
+
+            // A rejected/needs-revision file whose category already has a newer
+            // upload isn't a live ask anymore — the student already resubmitted
+            // and that later round has its own (possibly since-approved) verdict.
+            // Without this, "Priority Actions" and the revision counter keep
+            // flagging an already-resolved round forever.
+            const isSupersededFile = (file: (typeof files)[number]) => {
+              if (file.submission?.status !== SubmissionStatus.NEEDS_REVISION || !file.submission.reviewedAt) {
+                return false;
+              }
+
+              const category = file.documentCategory || file.category;
+              const decisionTime = file.submission.reviewedAt.getTime();
+
+              return files.some(
+                (other) =>
+                  other.id !== file.id &&
+                  (other.documentCategory || other.category) === category &&
+                  other.createdAt.getTime() > decisionTime
+              );
+            };
 
             data.documents = files.map(f => ({
               id: f.id,
@@ -928,7 +969,8 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               sizeLabel: f.size ? `${Math.round(f.size / 1024)} KB` : 'Unknown',
               uploadDateLabel: formatDate(f.createdAt),
               uploadedBy: f.user?.name || 'Unknown',
-              reviewStatus: getReviewStatusLabel(f.submission?.status)
+              reviewStatus: getReviewStatusLabel(f.submission?.status),
+              isSuperseded: isSupersededFile(f)
             }));
 
             const isMilestoneOverdue = (m: (typeof milestones)[number]) =>
@@ -1081,8 +1123,21 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               }))
             ].sort((left, right) => new Date(left.startDate).getTime() - new Date(right.startDate).getTime());
 
+            const isSupersededSubmission = (sub: (typeof submissions)[number]) => {
+              if (sub.status !== SubmissionStatus.NEEDS_REVISION || !sub.checkpointId || !sub.reviewedAt) {
+                return false;
+              }
+
+              const decisionTime = sub.reviewedAt.getTime();
+              return checkpointSubmissionTimes.some(
+                (other) => other.checkpointId === sub.checkpointId && other.submittedAt.getTime() > decisionTime
+              );
+            };
+
             const allFeedback: any[] = [];
             submissions.forEach(sub => {
+              const superseded = isSupersededSubmission(sub);
+
               sub.comments.forEach(c => {
                 allFeedback.push({
                   id: c.id,
@@ -1099,7 +1154,8 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
                   facultyName: c.author?.name || 'Faculty',
                   mode: c.author?.role === 'ADVISER' ? 'Adviser' : 'Panel',
                   dateLabel: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(c.createdAt),
-                  unread: sub.status === SubmissionStatus.NEEDS_REVISION
+                  unread: sub.status === SubmissionStatus.NEEDS_REVISION && !superseded,
+                  isSuperseded: superseded
                 });
               });
             });

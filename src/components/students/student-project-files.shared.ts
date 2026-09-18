@@ -1,3 +1,5 @@
+import type { StudentDashboardData } from '@/lib/services/student-workspace';
+
 export type PortalRole = 'student' | 'adviser' | 'admin';
 
 export type ProjectFileStatus = 'approved' | 'pending' | 'under_review' | 'revision' | 'rejected';
@@ -59,6 +61,7 @@ export type ProjectFileRecord = {
   sizeLabel: string;
   uploadedById?: string;
   history: ProjectFileHistoryEntry[];
+  isSuperseded?: boolean;
 };
 
 export const MAX_UPLOAD_FILES = 10;
@@ -199,6 +202,29 @@ export function getProjectFileTagFromStatus(status: ProjectFileStatus): ProjectF
   }
 }
 
+// Mirrors CHECKPOINT_MATCHERS in src/lib/milestone-checkpoint-tracking.ts — a
+// category name alone (e.g. "System Files") doesn't tell an adviser which
+// workflow stage it actually belongs to, so this maps it to the same stage
+// that category resolves to a checkpoint under. Evidence/achievement
+// categories are excluded on purpose — they never reach this lookup since
+// callers already filter those out before showing "which stage" badges.
+const DOCUMENT_CATEGORY_STAGE: Record<string, string> = {
+  proposal: 'Proposal',
+  'chapter-1': 'Proposal',
+  'chapter-2': 'Proposal',
+  'chapter-3': 'Proposal',
+  'chapter-4': 'Proposal',
+  'chapter-5': 'Proposal',
+  'supporting-documents': 'Proposal',
+  'system-files': 'Development',
+  'presentation-files': 'Pre-Final Defense',
+  'final-manuscript': 'Final Defense'
+};
+
+export function getDocumentCategoryStage(category: string) {
+  return DOCUMENT_CATEGORY_STAGE[category] || 'Proposal';
+}
+
 export function getProjectFileCategoryLabel(category: string) {
   return PROJECT_FILE_CATEGORY_OPTIONS.find((item) => item.key === category)?.label
     || category
@@ -333,6 +359,57 @@ export function isProjectFileDeleteAllowed(file: ProjectFileRecord, role: Portal
 
 export function isProjectFileApproveAllowed(file: ProjectFileRecord, role: PortalRole) {
   return role === 'adviser' && file.status !== 'approved';
+}
+
+// Once a newer round has been uploaded for a category, that round's own
+// rejected/needs-revision files are done — they're history now, not something
+// still awaiting the student's action, so they read as "Superseded" instead
+// of a live "Needs Revision" that looks like it's still the active ask.
+export function markSupersededProjectFiles(files: ProjectFileRecord[]): ProjectFileRecord[] {
+  return files.map((file) => {
+    if ((file.status !== 'revision' && file.status !== 'rejected') || !file.reviewedAt) {
+      return { ...file, isSuperseded: false };
+    }
+
+    const decisionTime = new Date(file.reviewedAt).getTime();
+    const isSuperseded = files.some(
+      (other) => other.id !== file.id && other.category === file.category && new Date(other.uploadedAt).getTime() > decisionTime
+    );
+
+    return { ...file, isSuperseded };
+  });
+}
+
+const COMPLETED_STAGE_STATUSES = new Set(['approved', 'completed']);
+
+function normalizeStageStatus(value: unknown) {
+  return String(value || '').trim().replace(/[_-]+/g, ' ').toLowerCase();
+}
+
+function isCompletedStageStatus(value: unknown) {
+  return COMPLETED_STAGE_STATUSES.has(normalizeStageStatus(value));
+}
+
+// Shared by the Document Submission page and the unified Submit page — both
+// need to know whether uploads outside the concept-gate-exempt categories
+// (achievement log, oral defense evidence) are unlocked yet.
+export function hasCompletedConceptStage(data: StudentDashboardData) {
+  const conceptMilestone = data.milestones.find((milestone) =>
+    milestone.title.trim().toLowerCase().includes('concept')
+  );
+
+  const conceptCheckpoints = data.milestoneCheckpoints.filter((checkpoint) =>
+    checkpoint.milestoneSequence === 1 ||
+    checkpoint.milestoneTitle.trim().toLowerCase().includes('concept') ||
+    checkpoint.key.startsWith('concept-')
+  );
+  const requiredConceptCheckpoints = conceptCheckpoints.filter((checkpoint) => checkpoint.required);
+
+  if (requiredConceptCheckpoints.length > 0) {
+    return requiredConceptCheckpoints.every((checkpoint) => isCompletedStageStatus(checkpoint.status));
+  }
+
+  return Boolean(conceptMilestone && isCompletedStageStatus(conceptMilestone.status));
 }
 
 export function getNextProjectFileVersionParts(files: ProjectFileRecord[], category: string) {

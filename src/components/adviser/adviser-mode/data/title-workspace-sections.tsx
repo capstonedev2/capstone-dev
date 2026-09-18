@@ -19,6 +19,8 @@ import {
   type TitleSubmissionDocumentData
 } from '@/lib/title-submission-document';
 import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
+import type { DocumentFileSummary } from '@/components/documents/document-file-controls';
+import { formatFileSizeLabel, getDocumentCategoryStage, getProjectFileCategoryLabel } from '@/components/students/student-project-files.shared';
 
 export type TitleSummaryMetric = {
   id: string;
@@ -43,11 +45,12 @@ type TitleFiltersProps = {
   onSortChange: (value: TitleSortOption) => void;
 };
 
-type TitleListProps = {
+type GroupReviewListProps = {
   titles: AdviserTitleRecord[];
   onViewDetails: (record: AdviserTitleRecord) => void;
   onViewApproved: () => void;
   hasPendingTitles: boolean;
+  onReviewEvidence: (record: AdviserTitleRecord) => void;
 };
 
 type TitleDetailsDrawerProps = {
@@ -422,12 +425,13 @@ export function TitleFilters({
   );
 }
 
-export function TitleList({
+export function GroupReviewList({
   titles,
   onViewDetails,
   onViewApproved,
-  hasPendingTitles
-}: TitleListProps) {
+  hasPendingTitles,
+  onReviewEvidence
+}: GroupReviewListProps) {
   const pendingCount = titles.filter((record) => record.status === 'pending').length;
   const completedCount = titles.filter((record) => ['approved', 'needs-revision', 'rejected'].includes(record.status)).length;
 
@@ -440,16 +444,16 @@ export function TitleList({
             <i className="fas fa-file-signature text-lg" />
           </span>
           <div className="min-w-0">
-            <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Title Review Queue</h2>
+            <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Group Review Queue</h2>
             <p className="mt-1 text-sm font-medium text-[var(--muted)]">
-              Scan proposed titles here, then open preview to record approval, revision, or rejection.
+              Title and Oral Defense Application evidence for each group — one card per group.
             </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
             <i className="fas fa-list-check text-[10px] opacity-50" />
-            {titles.length} title record{titles.length === 1 ? '' : 's'}
+            {titles.length} group{titles.length === 1 ? '' : 's'}
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-warning)]/10 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-[var(--color-warning)]/25">
             <i className="fas fa-clock text-[10px]" />
@@ -465,10 +469,11 @@ export function TitleList({
       {titles.length ? (
         <div className="space-y-4">
           {titles.map((record) => (
-            <TitleCard
+            <GroupReviewCard
               key={record.id}
               record={record}
               onViewDetails={onViewDetails}
+              onReviewEvidence={onReviewEvidence}
             />
           ))}
         </div>
@@ -479,79 +484,22 @@ export function TitleList({
   );
 }
 
-// Deliberately independent from TitleList/TitleCard above — its own header, its own record
-// set (not affected by the Title Queue's status/search filters), and its own "Review
-// Evidence" action, so evidence review never shares a card, a button, or filter state with
-// title decisions. See EvidenceReviewDrawer for why that separation matters.
-export function EvidenceQueueList({
-  titles,
-  onReviewEvidence
-}: {
-  titles: AdviserTitleRecord[];
-  onReviewEvidence: (record: AdviserTitleRecord) => void;
-}) {
-  const clearedCount = titles.filter((record) => record.evidenceReview?.status === 'APPROVED' || record.evidenceReview?.status === 'COMPLETED').length;
-  const pendingCount = titles.length - clearedCount;
-
-  return (
-    <section className="space-y-5">
-      <div className="flex flex-col gap-5 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[var(--accent)]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-        <div className="relative z-10 flex items-start gap-4">
-          <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/5 text-amber-700 ring-1 ring-[var(--accent)]/30 shadow-sm">
-            <i className="fas fa-file-signature text-lg" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Evidence Review Queue</h2>
-            <p className="mt-1 text-sm font-medium text-[var(--muted)]">
-              Review Oral Defense Application evidence per group — independent from title decisions above.
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
-            <i className="fas fa-list-check text-[10px] opacity-50" />
-            {titles.length} group{titles.length === 1 ? '' : 's'}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)]/15 px-3 py-1.5 text-amber-700 ring-1 ring-inset ring-[var(--accent)]/30">
-            <i className="fas fa-clock text-[10px]" />
-            {pendingCount} awaiting concept evidence decision
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-success)]/10 px-3 py-1.5 text-emerald-700 ring-1 ring-inset ring-[var(--color-success)]/25">
-            <i className="fas fa-check text-[10px]" />
-            {clearedCount} cleared
-          </span>
-        </div>
-      </div>
-
-      {titles.length ? (
-        <div className="space-y-4">
-          {titles.map((record) => (
-            <EvidenceQueueCard key={record.id} record={record} onReviewEvidence={onReviewEvidence} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-[2rem] border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center">
-          <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-            <i className="fas fa-file-signature text-lg" />
-          </span>
-          <h3 className="mt-4 text-lg font-bold text-[var(--text)]">No groups to review yet</h3>
-          <p className="mt-2 text-sm font-medium text-[var(--muted)]">
-            Evidence review requests will appear here once groups have submitted a title.
-          </p>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function EvidenceQueueCard({
+function GroupReviewCard({
   record,
+  onViewDetails,
   onReviewEvidence
 }: {
   record: AdviserTitleRecord;
+  onViewDetails: (record: AdviserTitleRecord) => void;
   onReviewEvidence: (record: AdviserTitleRecord) => void;
 }) {
+  const statusMeta = getTitleStatusMeta(record.status);
+  const similarityMeta = getSimilarityMeta(record.similarityScore, record.similarTitles);
+  const fileCount = record.uploadedFiles?.length ?? 0;
+  const previewButtonLabel = record.status === 'pending' ? 'Preview & Decide' : 'Open Preview';
+  const reviewStage = getTitleReviewStage(record);
+  const firstFile = record.uploadedFiles[0] || null;
+
   const visibleStages = DEFENSE_APPLICATION_STAGES.filter((stage) => {
     if (stage.alwaysShow) return true;
 
@@ -571,8 +519,8 @@ function EvidenceQueueCard({
   );
 
   // Surface the student's own upload note (or the adviser's prior feedback) right
-  // on the card, same as the Title card's "Next Step" quote — otherwise this text
-  // only ever showed up after opening the Evidence drawer.
+  // on the card, same as the "Next Step" quote below — otherwise this text only
+  // ever showed up after opening the Evidence drawer.
   const noteStage = visibleStages.find((stage) => record[stage.reviewField]?.uploaderNote || record[stage.reviewField]?.feedback);
   const noteReview = noteStage ? record[noteStage.reviewField] : null;
   const noteText = noteReview?.uploaderNote || noteReview?.feedback || null;
@@ -588,69 +536,594 @@ function EvidenceQueueCard({
   }).length;
 
   return (
-    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--accent)]/50 hover:shadow-lg hover:shadow-[var(--accent)]/10">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[var(--accent)] to-amber-300 opacity-80 group-hover:opacity-100 transition-opacity" />
+    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/5">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[var(--primary)] to-[var(--color-info)] opacity-80 group-hover:opacity-100 transition-opacity" />
 
-      <div className="flex flex-col gap-5 p-6 pl-7 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
+      <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
+        <div className="min-w-0 pl-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)] shadow-sm">
               <i className="fas fa-layer-group text-[10px]" /> {record.department}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)]/8 px-3 py-1.5 text-xs font-bold text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15">
-              <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
-              <i className="fas fa-user-group opacity-60" /> {record.membersCount} members
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
-              <i className="fas fa-paperclip opacity-60" />
-              {evidenceFileCount ? `${evidenceFileCount} file${evidenceFileCount === 1 ? '' : 's'}` : 'No file yet'}
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-sm ${statusMeta.badgeClassName}`}>
+              {record.status === 'pending' ? (
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+                </span>
+              ) : null}
+              {statusMeta.label}
             </span>
           </div>
-          <h3 className="mt-3 truncate text-lg font-extrabold tracking-tight text-[var(--text)]" title={record.title}>
+
+          <h3
+            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            title={record.title}
+          >
             {record.title}
           </h3>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {visibleStages.map((stage) => {
-              const meta = getEvidenceReviewMeta(record[stage.reviewField]?.status);
-              return (
-                <span
-                  key={stage.checkpointKey}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${meta.className}`}
-                >
-                  <i className={`fas ${meta.icon} text-[10px]`} aria-hidden="true" />
-                  {stage.stageLabel}: {meta.label}
-                </span>
-              );
-            })}
+          <p
+            className="mt-3 max-w-4xl text-sm font-medium leading-relaxed text-[var(--muted)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            title={record.description}
+          >
+            {record.description}
+          </p>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm font-semibold">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)]/8 px-3 py-2 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15">
+              <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-user-group opacity-60" />
+              {record.membersCount} members
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-calendar-day opacity-60" />
+              {formatTitleDate(record.submittedAt)}
+            </span>
           </div>
 
-          {noteText ? (
-            <p
-              className="mt-3 max-w-xl text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-              title={noteText}
-            >
-              <span className="not-italic font-bold text-slate-600">{noteLabel}: </span>"{noteText}"
-            </p>
+          {record.groupMembers && record.groupMembers.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {record.groupMembers.slice(0, 4).map((member, idx) => (
+                <span
+                  key={idx}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold ring-1 ring-inset shadow-sm ${
+                    member.isLeader
+                      ? 'bg-amber-50 text-amber-700 ring-amber-200/80'
+                      : 'bg-white text-slate-600 ring-slate-200/80'
+                  }`}
+                >
+                  <i className={`fas ${member.isLeader ? 'fa-crown text-amber-500' : 'fa-user text-slate-400'} text-[10px]`} />
+                  {member.name}
+                </span>
+              ))}
+              {record.groupMembers.length > 4 ? (
+                <span className="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
+                  +{record.groupMembers.length - 4} more
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm font-medium text-slate-500">{formatMemberPreview(record.memberPreview)}</p>
+          )}
+
+          {record.keywords.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {record.keywords.slice(0, 4).map((keyword) => (
+                <span
+                  key={keyword}
+                  className="inline-flex items-center rounded-full bg-[var(--primary)]/5 px-2.5 py-1 text-[11px] font-bold text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15"
+                >
+                  #{keyword}
+                </span>
+              ))}
+              {record.keywords.length > 4 ? (
+                <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
+                  +{record.keywords.length - 4} more
+                </span>
+              ) : null}
+            </div>
           ) : null}
         </div>
 
-        <button
-          className="relative inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/15 px-5 text-sm font-black text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--accent)]/25 lg:w-auto"
-          type="button"
-          onClick={() => onReviewEvidence(record)}
-        >
-          <i className="fas fa-file-signature text-xs" /> Review Evidence
-          {pendingStageCount > 0 ? (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-600 px-1.5 text-[11px] font-black text-white">
-              {pendingStageCount}
-            </span>
-          ) : null}
-        </button>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+              <i className="fas fa-percent text-emerald-500" /> Similarity
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-3xl font-black tracking-tight text-slate-900">{record.similarityScore}%</span>
+              <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${similarityMeta.toneClass} ring-current/20`}>
+                {similarityMeta.label}
+              </span>
+            </div>
+            <p className={`mt-2 text-xs font-bold ${similarityMeta.helperClass}`}>
+              {record.similarTitles.length
+                ? `${record.similarTitles.length} related title${record.similarTitles.length === 1 ? '' : 's'} found`
+                : 'No related IT titles found'}
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+              <i className="fas fa-paperclip text-blue-500" /> Proposal File
+            </p>
+            <p className="mt-3 truncate text-sm font-black text-slate-900" title={firstFile?.name || undefined}>
+              {firstFile?.name || 'No proposal file'}
+            </p>
+            <p className="mt-1 text-xs font-bold text-slate-500">
+              {fileCount ? `${fileCount} attached file${fileCount === 1 ? '' : 's'}` : 'No uploaded file'}
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+              <i className="fas fa-file-signature text-amber-500" /> Evidence
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {visibleStages.map((stage) => {
+                const meta = getEvidenceReviewMeta(record[stage.reviewField]?.status);
+                return (
+                  <span
+                    key={stage.checkpointKey}
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-black ring-1 ring-inset ${meta.className}`}
+                  >
+                    <i className={`fas ${meta.icon} text-[10px]`} aria-hidden="true" />
+                    {stage.stageLabel}: {meta.label}
+                  </span>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs font-bold text-slate-500">
+              {evidenceFileCount ? `${evidenceFileCount} file${evidenceFileCount === 1 ? '' : 's'}` : 'No file yet'}
+            </p>
+            {noteText ? (
+              <p
+                className="mt-2 text-xs italic leading-5 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+                title={noteText}
+              >
+                <span className="not-italic font-bold text-slate-600">{noteLabel}: </span>"{noteText}"
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--primary)]/15 bg-gradient-to-br from-[var(--primary)]/5 via-white to-white p-4">
+          <div>
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[var(--primary)]">
+              <i className="fas fa-route" /> Next Step
+            </p>
+            <p className="mt-3 text-sm font-bold leading-6 text-slate-700">{reviewStage.helper}</p>
+            <p
+              className="mt-3 text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+              title={record.adviserAction}
+            >
+              "{record.adviserAction}"
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <button
+              className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 text-sm font-black text-white shadow-md shadow-[var(--primary)]/20 transition hover:-translate-y-0.5 hover:bg-[var(--hover)] hover:shadow-lg ${
+                record.status === 'pending' ? 'ring-2 ring-[var(--primary)]/25 ring-offset-2' : ''
+              }`}
+              type="button"
+              onClick={() => onViewDetails(record)}
+            >
+              <i className="fas fa-up-right-from-square text-xs" /> {previewButtonLabel}
+            </button>
+            <button
+              className="relative inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/15 px-4 text-sm font-black text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--accent)]/25"
+              type="button"
+              onClick={() => onReviewEvidence(record)}
+            >
+              <i className="fas fa-file-signature text-xs" /> Review Evidence
+              {pendingStageCount > 0 ? (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-600 px-1.5 text-[11px] font-black text-white">
+                  {pendingStageCount}
+                </span>
+              ) : null}
+            </button>
+          </div>
+        </div>
       </div>
+
     </article>
+  );
+}
+
+export type OtherDocumentsGroup = {
+  projectId: string;
+  projectTitle: string;
+  groupLabel: string;
+  groupMembers: Array<{ userId?: string; name: string; role: string; isLeader: boolean }>;
+  files: DocumentFileSummary[];
+};
+
+// Deliberately its own section, separate from the Group Review Queue above —
+// a group's pending chapters/manuscripts/etc. often belong to a different
+// stage (e.g. Proposal) than the title card's own Concept-stage evidence, so
+// bundling them into the same per-group card was misleading about what stage
+// each thing actually belongs to.
+export function OtherDocumentsQueueList({
+  groups,
+  isLoading,
+  savingFileId,
+  onDecide
+}: {
+  groups: OtherDocumentsGroup[];
+  isLoading: boolean;
+  savingFileId: string | null;
+  onDecide: (file: DocumentFileSummary, decision: 'approved' | 'needs_revision', remarks: string) => void;
+}) {
+  if (isLoading || !groups.length) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-4">
+      {groups.map((group) => (
+        <OtherDocumentsQueueCard key={group.projectId} group={group} savingFileId={savingFileId} onDecide={onDecide} />
+      ))}
+    </div>
+  );
+}
+
+function OtherDocumentsQueueCard({
+  group,
+  savingFileId,
+  onDecide
+}: {
+  group: OtherDocumentsGroup;
+  savingFileId: string | null;
+  onDecide: (file: DocumentFileSummary, decision: 'approved' | 'needs_revision', remarks: string) => void;
+}) {
+  const [reviewingDocument, setReviewingDocument] = useState<DocumentFileSummary | null>(null);
+  const firstFile = group.files[0] || null;
+  // Files in this group can span more than one stage/category (e.g. a Proposal
+  // chapter and a System Files upload both pending at once) — surface each
+  // distinct one as its own badge so the adviser knows what they're looking at
+  // without opening every file. Category (e.g. "System Files") and stage (e.g.
+  // "Development") aren't the same thing — a category badge alone doesn't tell
+  // an adviser which workflow stage it belongs to, so both are shown.
+  const categoryLabels = Array.from(new Set(group.files.map((file) => getProjectFileCategoryLabel(file.documentCategory))));
+  const stageLabels = Array.from(new Set(group.files.map((file) => getDocumentCategoryStage(file.documentCategory))));
+
+  return (
+    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/5">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[var(--primary)] to-[var(--color-info)] opacity-80 group-hover:opacity-100 transition-opacity" />
+
+      <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
+        <div className="min-w-0 pl-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {stageLabels.map((label) => (
+              <span key={label} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primary)]/8 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/20 shadow-sm">
+                <i className="fas fa-route text-[10px]" /> {label} Stage
+              </span>
+            ))}
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-sm bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+              </span>
+              Pending
+            </span>
+          </div>
+
+          <h3
+            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            title={group.projectTitle}
+          >
+            {group.projectTitle}
+          </h3>
+
+          <p className="mt-3 max-w-4xl text-sm font-medium leading-relaxed text-[var(--muted)]">
+            {categoryLabels.length === 1
+              ? `${categoryLabels[0]} document${group.files.length === 1 ? '' : 's'} awaiting your review.`
+              : `Documents awaiting your review across ${categoryLabels.length} categories: ${categoryLabels.join(', ')}.`}
+          </p>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm font-semibold">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)]/8 px-3 py-2 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15">
+              <i className="fas fa-users-rectangle opacity-70" /> {group.groupLabel}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-file-lines opacity-60" />
+              {group.files.length} file{group.files.length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          {group.groupMembers.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {group.groupMembers.slice(0, 4).map((member, idx) => (
+                <span
+                  key={idx}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold ring-1 ring-inset shadow-sm ${
+                    member.isLeader
+                      ? 'bg-amber-50 text-amber-700 ring-amber-200/80'
+                      : 'bg-white text-slate-600 ring-slate-200/80'
+                  }`}
+                >
+                  <i className={`fas ${member.isLeader ? 'fa-crown text-amber-500' : 'fa-user text-slate-400'} text-[10px]`} />
+                  {member.name}
+                </span>
+              ))}
+              {group.groupMembers.length > 4 ? (
+                <span className="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
+                  +{group.groupMembers.length - 4} more
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+              <i className="fas fa-file-lines text-blue-500" /> Files Pending
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-3xl font-black tracking-tight text-slate-900">{group.files.length}</span>
+              <span className="inline-flex rounded-lg bg-[var(--color-warning)]/10 px-2.5 py-1 text-xs font-black text-amber-700 ring-1 ring-inset ring-[var(--color-warning)]/25">
+                Awaiting Review
+              </span>
+            </div>
+            <p className="mt-2 truncate text-xs font-bold text-slate-500" title={firstFile?.fileName}>
+              {firstFile ? firstFile.fileName : 'No file'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--primary)]/15 bg-gradient-to-br from-[var(--primary)]/5 via-white to-white p-4">
+          <div>
+            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[var(--primary)]">
+              <i className="fas fa-route" /> Next Step
+            </p>
+            <p className="mt-3 text-sm font-bold leading-6 text-slate-700">
+              Open each file to preview and decide.
+            </p>
+            <p className="mt-3 text-sm italic leading-6 text-slate-500">
+              {group.files.length} file{group.files.length === 1 ? '' : 's'} awaiting your review.
+            </p>
+          </div>
+          {firstFile ? (
+            <button
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 text-sm font-black text-white shadow-md shadow-[var(--primary)]/20 transition hover:-translate-y-0.5 hover:bg-[var(--hover)] hover:shadow-lg disabled:opacity-50"
+              type="button"
+              disabled={savingFileId === firstFile.id}
+              onClick={() => setReviewingDocument(firstFile)}
+            >
+              <i className={`fas ${savingFileId === firstFile.id ? 'fa-spinner fa-spin' : 'fa-eye'} text-xs`} /> Review Documents
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {reviewingDocument ? (
+        <OtherDocumentReviewModal
+          file={reviewingDocument}
+          isSaving={savingFileId === reviewingDocument.id}
+          onClose={() => setReviewingDocument(null)}
+          onDecide={(decision, remarks) => {
+            onDecide(reviewingDocument, decision, remarks);
+            setReviewingDocument(null);
+          }}
+        />
+      ) : null}
+    </article>
+  );
+}
+
+function OtherDocumentReviewModal({
+  file,
+  isSaving,
+  onClose,
+  onDecide
+}: {
+  file: DocumentFileSummary;
+  isSaving: boolean;
+  onClose: () => void;
+  onDecide: (decision: 'approved' | 'needs_revision', remarks: string) => void;
+}) {
+  const [isMounted, setIsMounted] = useState(false);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [remarks, setRemarks] = useState('');
+  useEffect(() => { setIsMounted(true); }, []);
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.removeProperty('overflow'); };
+  }, []);
+
+  // Office files (doc/docx/ppt/pptx/xls/xlsx) can't render natively in an
+  // iframe — pointed at the raw file, the browser just downloads it instead
+  // of showing it. Same fix as the Title drawer's preview: fetch a signed URL
+  // and hand it to Google's viewer for those types.
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadSignedUrl = async () => {
+      try {
+        const response = await fetch(`/api/document-files/${file.id}/signed-url`, { method: 'POST' });
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(payload?.message || payload?.error || 'Unable to prepare document preview.');
+        }
+
+        if (!cancelled) {
+          setSignedUrl(payload.signedUrl);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setPreviewError(error instanceof Error ? error.message : 'Unable to prepare document preview.');
+        }
+      }
+    };
+
+    loadSignedUrl();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [file.id]);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  const isOfficeFile = OFFICE_FILE_EXTENSIONS.includes(getTitleFileExtension(file.fileName, file.fileType));
+  const previewUrl = signedUrl
+    ? isOfficeFile
+      ? `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(signedUrl)}`
+      : signedUrl
+    : null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6" onClick={onClose}>
+      <div
+        aria-label="Document review modal"
+        aria-modal="true"
+        role="dialog"
+        onClick={(event) => event.stopPropagation()}
+        className="flex max-h-full w-full max-w-[1560px] flex-col overflow-hidden rounded-[2rem] bg-white/95 backdrop-blur-3xl shadow-[0_24px_80px_rgba(15,23,42,0.28)] ring-1 ring-white/60"
+      >
+        <header className="relative shrink-0 border-b border-slate-100 bg-white/80 backdrop-blur px-6 py-5 sm:px-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-blue-600">
+                <i className="fas fa-file-lines opacity-70" /> Document Review
+              </p>
+              <h2 className="mt-2 truncate text-2xl font-black tracking-tight text-slate-900 leading-tight" title={file.fileName}>{file.fileName}</h2>
+            </div>
+            <button
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100/80 text-slate-500 transition hover:bg-slate-200 hover:text-slate-800 focus:outline-none"
+              type="button"
+              onClick={onClose}
+            >
+              <i className="fas fa-xmark text-lg" />
+            </button>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200/80">
+              {getProjectFileCategoryLabel(file.documentCategory)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-200/60">
+              <i className="fas fa-hard-drive text-[10px]" aria-hidden="true" />
+              {formatFileSizeLabel(file.fileSize || 0)}
+            </span>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto bg-slate-50/40 px-4 py-4 sm:px-6 sm:py-6 custom-scrollbar">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
+            <div className="min-w-0 space-y-5">
+              <section className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+                <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black uppercase tracking-[0.15em] text-blue-700">
+                      {getTitleFileExtension(file.fileName, file.fileType).toUpperCase()} Preview
+                    </p>
+                    <h2 className="mt-1 truncate text-lg font-black text-slate-950">Document Preview</h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                      href={previewUrl || `/api/document-files/${file.id}/download`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <i className="fas fa-up-right-from-square text-[10px]" aria-hidden="true" />
+                      Open
+                    </a>
+                    <a
+                      className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
+                      href={`/api/document-files/${file.id}/download`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <i className="fas fa-download text-[10px]" aria-hidden="true" />
+                      Download
+                    </a>
+                  </div>
+                </div>
+
+                <div className="bg-slate-100 p-3 sm:p-4">
+                  {previewError ? (
+                    <div className="flex h-[min(70vh,780px)] w-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-center">
+                      <i className="fas fa-triangle-exclamation text-2xl text-amber-500" aria-hidden="true" />
+                      <p className="text-sm font-bold text-slate-600">{previewError}</p>
+                      <p className="text-xs text-slate-400">Use Download instead.</p>
+                    </div>
+                  ) : previewUrl ? (
+                    <iframe
+                      className="h-[min(70vh,780px)] w-full rounded-xl border border-slate-200 bg-white"
+                      src={previewUrl}
+                      title={`${file.fileName} preview`}
+                    />
+                  ) : (
+                    <div className="flex h-[min(70vh,780px)] w-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white">
+                      <i className="fas fa-spinner fa-spin text-2xl text-[var(--primary)]" aria-hidden="true" />
+                      <p className="text-sm font-bold text-slate-500">Preparing preview...</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            <aside className="space-y-5 self-start xl:sticky xl:top-0">
+              <section className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
+                <div className="bg-gradient-to-br from-slate-950 via-blue-950 to-blue-800 p-5 text-white">
+                  <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-blue-100">
+                    <i className="fas fa-clipboard-check" /> Document Decision
+                  </p>
+                  <h3 className="mt-1 text-lg font-black">Ready for Decision</h3>
+                  <p className="mt-3 text-sm font-medium leading-6 text-blue-100">
+                    Review the document, then approve it or send it back for revision.
+                  </p>
+                </div>
+
+                <div className="p-5">
+                  <label className="block">
+                    <span className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-blue-700">
+                      <i className="fas fa-comment-dots" /> Adviser Remarks
+                    </span>
+                    <textarea
+                      className="mt-3 min-h-[130px] w-full rounded-xl border border-blue-200/80 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      placeholder="Add notes for approval or revision..."
+                      value={remarks}
+                      onChange={(event) => setRemarks(event.target.value)}
+                    />
+                  </label>
+
+                  <div className="mt-4 grid gap-3">
+                    <button
+                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-black text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-700 hover:shadow-lg focus:outline-none disabled:opacity-50"
+                      type="button"
+                      disabled={isSaving}
+                      onClick={() => onDecide('approved', remarks)}
+                    >
+                      <i className={`fas ${isSaving ? 'fa-spinner fa-spin' : 'fa-check'}`} /> Approve
+                    </button>
+                    <button
+                      className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-50 px-6 text-sm font-black text-amber-700 shadow-sm ring-1 ring-inset ring-amber-200 transition hover:bg-amber-100 hover:ring-amber-300 focus:outline-none disabled:opacity-50"
+                      type="button"
+                      disabled={isSaving}
+                      onClick={() => onDecide('needs_revision', remarks)}
+                    >
+                      <i className="fas fa-rotate-left" /> Request Revision
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
 
@@ -1609,176 +2082,6 @@ export function SimilarityIndicator({
         )}
       </div>
     </section>
-  );
-}
-
-export function TitleCard({
-  record,
-  onViewDetails
-}: {
-  record: AdviserTitleRecord;
-  onViewDetails: (record: AdviserTitleRecord) => void;
-}) {
-  const statusMeta = getTitleStatusMeta(record.status);
-  const similarityMeta = getSimilarityMeta(record.similarityScore, record.similarTitles);
-  const fileCount = record.uploadedFiles?.length ?? 0;
-  const previewButtonLabel = record.status === 'pending' ? 'Preview & Decide' : 'Open Preview';
-  const reviewStage = getTitleReviewStage(record);
-  const firstFile = record.uploadedFiles[0] || null;
-
-  return (
-    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/5">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[var(--primary)] to-[var(--color-info)] opacity-80 group-hover:opacity-100 transition-opacity" />
-
-      <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
-        <div className="min-w-0 pl-1">
-          {/* Previously showed the status twice (e.g. "APPROVED" + "Approved") since
-              getTitleReviewStage's label duplicates statusMeta.label for every status
-              except 'pending' — one badge now, reviewStage.helper still feeds the Next
-              Step panel below where it's actually distinct information. */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)] shadow-sm">
-              <i className="fas fa-layer-group text-[10px]" /> {record.department}
-            </span>
-            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wide shadow-sm ${statusMeta.badgeClassName}`}>
-              {record.status === 'pending' ? (
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
-                </span>
-              ) : null}
-              {statusMeta.label}
-            </span>
-          </div>
-
-          <h3
-            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-            title={record.title}
-          >
-            {record.title}
-          </h3>
-
-          <p
-            className="mt-3 max-w-4xl text-sm font-medium leading-relaxed text-[var(--muted)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-            title={record.description}
-          >
-            {record.description}
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm font-semibold">
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)]/8 px-3 py-2 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15">
-              <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
-              <i className="fas fa-user-group opacity-60" />
-              {record.membersCount} members
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
-              <i className="fas fa-calendar-day opacity-60" />
-              {formatTitleDate(record.submittedAt)}
-            </span>
-          </div>
-
-          {record.groupMembers && record.groupMembers.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {record.groupMembers.slice(0, 4).map((member, idx) => (
-                <span 
-                  key={idx} 
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold ring-1 ring-inset shadow-sm ${
-                    member.isLeader 
-                      ? 'bg-amber-50 text-amber-700 ring-amber-200/80' 
-                      : 'bg-white text-slate-600 ring-slate-200/80'
-                  }`}
-                >
-                  <i className={`fas ${member.isLeader ? 'fa-crown text-amber-500' : 'fa-user text-slate-400'} text-[10px]`} />
-                  {member.name}
-                </span>
-              ))}
-              {record.groupMembers.length > 4 ? (
-                <span className="inline-flex items-center rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
-                  +{record.groupMembers.length - 4} more
-                </span>
-              ) : null}
-            </div>
-          ) : (
-            <p className="mt-3 text-sm font-medium text-slate-500">{formatMemberPreview(record.memberPreview)}</p>
-          )}
-
-          {record.keywords.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {record.keywords.slice(0, 4).map((keyword) => (
-                <span
-                  key={keyword}
-                  className="inline-flex items-center rounded-full bg-[var(--primary)]/5 px-2.5 py-1 text-[11px] font-bold text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15"
-                >
-                  #{keyword}
-                </span>
-              ))}
-              {record.keywords.length > 4 ? (
-                <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-inset ring-slate-200">
-                  +{record.keywords.length - 4} more
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
-            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
-              <i className="fas fa-percent text-emerald-500" /> Similarity
-            </p>
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-3xl font-black tracking-tight text-slate-900">{record.similarityScore}%</span>
-              <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-black ring-1 ring-inset ${similarityMeta.toneClass} ring-current/20`}>
-                {similarityMeta.label}
-              </span>
-            </div>
-            <p className={`mt-2 text-xs font-bold ${similarityMeta.helperClass}`}>
-              {record.similarTitles.length
-                ? `${record.similarTitles.length} related title${record.similarTitles.length === 1 ? '' : 's'} found`
-                : 'No related IT titles found'}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
-            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
-              <i className="fas fa-paperclip text-blue-500" /> Proposal File
-            </p>
-            <p className="mt-3 truncate text-sm font-black text-slate-900" title={firstFile?.name || undefined}>
-              {firstFile?.name || 'No proposal file'}
-            </p>
-            <p className="mt-1 text-xs font-bold text-slate-500">
-              {fileCount ? `${fileCount} attached file${fileCount === 1 ? '' : 's'}` : 'No uploaded file'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col justify-between rounded-2xl border border-[var(--primary)]/15 bg-gradient-to-br from-[var(--primary)]/5 via-white to-white p-4">
-          <div>
-            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[var(--primary)]">
-              <i className="fas fa-route" /> Next Step
-            </p>
-            <p className="mt-3 text-sm font-bold leading-6 text-slate-700">{reviewStage.helper}</p>
-            <p
-              className="mt-3 text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-              title={record.adviserAction}
-            >
-              "{record.adviserAction}"
-            </p>
-          </div>
-          <button
-            className={`mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-4 text-sm font-black text-white shadow-md shadow-[var(--primary)]/20 transition hover:-translate-y-0.5 hover:bg-[var(--hover)] hover:shadow-lg ${
-              record.status === 'pending' ? 'ring-2 ring-[var(--primary)]/25 ring-offset-2' : ''
-            }`}
-            type="button"
-            onClick={() => onViewDetails(record)}
-          >
-            <i className="fas fa-up-right-from-square text-xs" /> {previewButtonLabel}
-          </button>
-        </div>
-      </div>
-    </article>
   );
 }
 

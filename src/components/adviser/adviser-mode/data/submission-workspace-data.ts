@@ -209,6 +209,30 @@ function isDefenseApplicationEvidenceFile(file: Pick<DocumentFileSummary, 'docum
   return DEFENSE_APPLICATION_EVIDENCE_CATEGORIES.has(String(file.documentCategory || '').trim().toLowerCase());
 }
 
+// Once a project resubmits a category, the earlier rejected/needs-revision file
+// in that same category is done — the adviser already acted on it and a newer
+// attempt exists. Without this, an old resolved round keeps showing up in the
+// review queue (and its "Needs Revision" count) forever, alongside its own
+// resubmission's real, current status.
+function isSupersededSubmissionFile(file: DocumentFileSummary, allFiles: DocumentFileSummary[]) {
+  const status = String(file.submissionStatus || '').toUpperCase();
+  if (status !== 'NEEDS_REVISION' || !file.reviewedAt) {
+    return false;
+  }
+
+  const decisionTime = new Date(file.reviewedAt).getTime();
+  const category = file.documentCategory;
+  const projectId = file.projectId;
+
+  return allFiles.some(
+    (other) =>
+      other.id !== file.id &&
+      other.projectId === projectId &&
+      other.documentCategory === category &&
+      new Date(other.createdAt).getTime() > decisionTime
+  );
+}
+
 export function getAdviserReviewQueueFiles(files: DocumentFileSummary[]) {
   return files.filter((file) => {
     if (isTitleSubmissionFile(file) || isDefenseApplicationEvidenceFile(file)) {
@@ -217,7 +241,11 @@ export function getAdviserReviewQueueFiles(files: DocumentFileSummary[]) {
 
     // Award/Recognition and Activity Evidence are a read-only achievement log
     // with no adviser review step — never surface them as a pending submission.
-    return !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(String(file.documentCategory || ''));
+    if (ACHIEVEMENT_DOCUMENT_CATEGORIES.has(String(file.documentCategory || ''))) {
+      return false;
+    }
+
+    return !isSupersededSubmissionFile(file, files);
   });
 }
 

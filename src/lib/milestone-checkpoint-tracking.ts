@@ -1464,13 +1464,18 @@ export async function syncCheckpointReview(
     nextStatus,
     reviewNotes,
     reviewerName,
-    reviewerRole
+    reviewerRole,
+    resolveOpenRound = false
   }: {
     submissionId: string;
     nextStatus: SubmissionStatus;
     reviewNotes?: string | null;
     reviewerName?: string | null;
     reviewerRole: UserRole;
+    // Set this when the decision covers every file in the checkpoint's current
+    // open round (e.g. a multi-photo evidence batch decided as one unit) rather
+    // than a single independently-reviewable file — see call site comment.
+    resolveOpenRound?: boolean;
   }
 ) {
   let submission = await db.submission.findUnique({
@@ -1525,6 +1530,24 @@ export async function syncCheckpointReview(
   const reviewedAt = REVIEWED_SUBMISSION_STATUSES.has(nextStatus) ? new Date() : null;
   const reviewField = getReviewFieldForRole(reviewerRole);
   const feedback = String(reviewNotes ?? '').trim();
+
+  // A round can span several files (a multi-photo evidence batch), each its own
+  // Submission row — when the caller says this decision covers the whole round,
+  // apply it to every still-open Submission under the checkpoint, otherwise
+  // every sibling file uploaded in that batch stays stuck at SUBMITTED forever
+  // even after the checkpoint itself is marked approved/needs-revision.
+  if (resolveOpenRound) {
+    await db.submission.updateMany({
+      where: {
+        checkpointId: submission.checkpointId,
+        OR: [{ status: SubmissionStatus.SUBMITTED }, { id: submission.id }]
+      },
+      data: {
+        status: nextStatus,
+        reviewedAt
+      }
+    });
+  }
 
   const updatedCheckpoint = await db.milestoneCheckpoint.update({
     where: { id: submission.checkpointId },

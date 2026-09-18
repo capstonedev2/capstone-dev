@@ -93,25 +93,17 @@ export async function PATCH(request: Request) {
       throw new HttpError('No oral defense application evidence has been uploaded yet for this project.', 400);
     }
 
-    // syncCheckpointReview only rolls the decision into the checkpoint's own
-    // review fields — unlike the title-approval and document-review routes,
-    // this endpoint has no earlier step that writes the decision onto the
-    // Submission itself, so without this the file stays "Pending Review"
-    // forever regardless of what the adviser decides here.
-    await prisma.submission.update({
-      where: { id: latestSubmissionId },
-      data: {
-        status: nextStatus,
-        reviewedAt: new Date()
-      }
-    });
-
+    // resolveOpenRound: true because evidence is typically a multi-photo batch —
+    // the decision covers every still-pending Submission under this checkpoint,
+    // not just the single latest one, otherwise sibling photos from the same
+    // batch stay stuck showing "Sent to Adviser" forever.
     const updatedCheckpoint = await syncCheckpointReview(prisma, {
       submissionId: latestSubmissionId,
       nextStatus,
       reviewNotes: remarks,
       reviewerName: user.name || 'Adviser',
-      reviewerRole: user.role
+      reviewerRole: user.role,
+      resolveOpenRound: true
     });
 
     if (project.ownerId) {

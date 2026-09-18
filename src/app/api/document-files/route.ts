@@ -383,6 +383,26 @@ export async function POST(request: Request) {
             fileName: file.name
           })
         : null;
+
+      // Backstops the client-side check: reject re-uploading the exact same
+      // file while an earlier submission of it is still awaiting a decision,
+      // so a slow network retry or a bypass of the client guard can't quietly
+      // create a second identical row stuck showing "Sent to Adviser" forever.
+      if (checkpoint) {
+        const duplicatePending = await tx.submission.findFirst({
+          where: {
+            checkpointId: checkpoint.id,
+            status: SubmissionStatus.SUBMITTED,
+            title: file.name
+          },
+          select: { id: true }
+        });
+
+        if (duplicatePending) {
+          throw new HttpError(`${file.name} is already awaiting your adviser's review — wait for a decision before submitting it again.`, 409);
+        }
+      }
+
       const submission = bucketNameValue === DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS
         && project?.id
         && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(documentCategory)

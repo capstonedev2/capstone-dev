@@ -332,6 +332,14 @@ export function ProgramHeadSchedule() {
     } else {
       setSelectedGroupCodes(prev => [...prev, code]);
       setPresentationOrder(prev => [...prev, code]);
+
+      // The group card already shows exactly which stage this is for (e.g. a
+      // "Proposal Defense" reschedule after a redefense) — auto-fill Schedule
+      // Parameters from it instead of making the program head re-pick a stage
+      // the system already knows, which was easy to leave mismatched.
+      if (stageFilter === 'All Stages') {
+        setStageFilter(group.eligibleStage);
+      }
     }
   };
 
@@ -572,15 +580,6 @@ export function ProgramHeadSchedule() {
     window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
     setFormMessage({ tone: 'success', text: 'Queue draft saved on this device.' });
   };
-
-  const getTotalDurationStr = () => {
-    if (!presentationOrder.length) return '0h 0m';
-    const totalMins = (DEFAULT_SLOT_DURATION_MINUTES * presentationOrder.length) + (DEFAULT_BREAK_MINUTES * Math.max(presentationOrder.length - 1, 0));
-    const h = Math.floor(totalMins / 60);
-    const m = totalMins % 60;
-    return `${h > 0 ? `${h}h ` : ''}${m}m`;
-  };
-
 
   return (
     <div className="space-y-6 pb-8">
@@ -879,7 +878,7 @@ export function ProgramHeadSchedule() {
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="text-[14px] font-bold text-slate-900">Presentation Queue</h3>
-                <p className="text-[12px] text-slate-500 font-medium mt-0.5">{presentationOrder.length} groups selected - {getTotalDurationStr()}</p>
+                <p className="text-[12px] text-slate-500 font-medium mt-0.5">{presentationOrder.length} group{presentationOrder.length === 1 ? '' : 's'} selected</p>
               </div>
               {presentationOrder.length > 0 && (
                 <button onClick={clearSelection} className="text-[12px] font-bold text-slate-500 hover:text-rose-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors">
@@ -1144,14 +1143,10 @@ export function ProgramHeadSchedule() {
               )}
 
               <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Queue</span>
                     <strong className="mt-0.5 block text-[14px] font-bold text-slate-900">{presentationOrder.length} Groups</strong>
-                  </div>
-                  <div>
-                    <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Duration</span>
-                    <strong className="mt-0.5 block text-[14px] font-bold text-blue-600">{getTotalDurationStr()}</strong>
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Conflicts</span>

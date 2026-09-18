@@ -38,6 +38,8 @@ import {
   getProjectFileTone,
   getProjectFileTypeIcon,
   getProjectFileVersionLabel,
+  hasCompletedConceptStage,
+  markSupersededProjectFiles,
   matchesProjectFileFilter,
   normalizeProjectFileStatus,
   sortProjectFiles
@@ -184,35 +186,6 @@ const PROJECT_FILE_UPLOAD_STEPS = [
   { id: 3, title: 'Version Notes', text: 'Add version details' },
   { id: 4, title: 'Submit to Adviser', text: 'Send for review' }
 ];
-
-const COMPLETED_STAGE_STATUSES = new Set(['approved', 'completed']);
-
-function normalizeStatus(value: unknown) {
-  return String(value || '').trim().replace(/[_-]+/g, ' ').toLowerCase();
-}
-
-function isCompletedStageStatus(value: unknown) {
-  return COMPLETED_STAGE_STATUSES.has(normalizeStatus(value));
-}
-
-function hasCompletedConceptStage(data: StudentDashboardData) {
-  const conceptMilestone = data.milestones.find((milestone) =>
-    milestone.title.trim().toLowerCase().includes('concept')
-  );
-
-  const conceptCheckpoints = data.milestoneCheckpoints.filter((checkpoint) =>
-    checkpoint.milestoneSequence === 1 ||
-    checkpoint.milestoneTitle.trim().toLowerCase().includes('concept') ||
-    checkpoint.key.startsWith('concept-')
-  );
-  const requiredConceptCheckpoints = conceptCheckpoints.filter((checkpoint) => checkpoint.required);
-
-  if (requiredConceptCheckpoints.length > 0) {
-    return requiredConceptCheckpoints.every((checkpoint) => isCompletedStageStatus(checkpoint.status));
-  }
-
-  return Boolean(conceptMilestone && isCompletedStageStatus(conceptMilestone.status));
-}
 
 function GroupAssignmentRequired({ hasPendingInvite }: { hasPendingInvite?: boolean }) {
   return (
@@ -878,11 +851,13 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
   );
   const hasActiveTableFilters = categoryFilter !== 'all' || sortBy !== 'newest' || searchTerm.trim().length > 0 || pageSize !== 5;
 
+  const annotatedFiles = useMemo(() => markSupersededProjectFiles(files), [files]);
+
   const filteredFiles = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
     return sortProjectFiles(
-      files.filter((file) => {
+      annotatedFiles.filter((file) => {
         if (!matchesProjectFileFilter(file, categoryFilter)) {
           return false;
         }
@@ -907,7 +882,7 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
       }),
       sortBy
     );
-  }, [files, categoryFilter, searchTerm, sortBy]);
+  }, [annotatedFiles, categoryFilter, searchTerm, sortBy]);
 
   const totalCount = filteredFiles.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -1074,6 +1049,19 @@ export function StudentProjectFiles({ data }: { data: StudentDashboardData }) {
     if (!uploadDraft.files.length) {
       setUploadError('Select at least one file before submitting it to the project workspace.');
       return;
+    }
+
+    // Achievement-log categories (Award/Recognition, Activity Evidence) have no
+    // adviser review step, so there's no "still pending" round to block against.
+    if (!ACHIEVEMENT_DOCUMENT_CATEGORIES.has(uploadDraft.category)) {
+      const hasPendingRound = files.some(
+        (file) => file.category === uploadDraft.category && (file.status === 'pending' || file.status === 'under_review')
+      );
+
+      if (hasPendingRound) {
+        setUploadError('This category already has files awaiting your adviser’s review. Wait for a decision before submitting again.');
+        return;
+      }
     }
 
     const versionNotes = uploadDraft.versionNotes.trim() || getDefaultPendingNote(uploadDraft.category, uploadDraft.tag);

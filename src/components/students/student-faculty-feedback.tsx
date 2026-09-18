@@ -269,7 +269,10 @@ function buildFeedbackRecords(data: StudentDashboardData): FeedbackRecord[] {
   return Array.from(groupedFeedback.values()).map((record) => {
     const comments = [...record.comments].sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime());
     const latestComment = comments[0];
-    const workflowStatus = getThreadWorkflowStatus(comments);
+    // A superseded thread belongs to a round the student already resubmitted
+    // past — it's resolved, not a live ask, so it reads the same as "Approved"
+    // instead of surfacing forever in Unread/Needs Action.
+    const workflowStatus = record.isSuperseded ? 'Approved' : getThreadWorkflowStatus(comments);
     const commentCount = comments.length;
     const preview = commentCount > 1
       ? `${commentCount} adviser comments are grouped in this thread. Latest: ${latestComment.text}`
@@ -280,7 +283,7 @@ function buildFeedbackRecords(data: StudentDashboardData): FeedbackRecord[] {
       id: latestComment.id,
       status: workflowStatus,
       workflowStatus,
-      unread: comments.some((comment) => comment.unread),
+      unread: !record.isSuperseded && comments.some((comment) => comment.unread),
       created_at: latestComment.created_at,
       updated_at: latestComment.updated_at,
       content: preview,

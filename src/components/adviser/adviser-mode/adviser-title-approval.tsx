@@ -7,14 +7,14 @@ import { AdviserShellActions } from '@/components/adviser/shared/components/advi
 import { NAV_ITEMS, WORKSPACE_META, isNavItemActive, getShortName } from '@/components/adviser/shared/config/dashboard-utils';
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
 import {
-  EmptyState,
-  EvidenceQueueList,
   EvidenceReviewDrawer,
+  GroupReviewList,
+  OtherDocumentsQueueList,
   TitleDetailsDrawer,
   TitleFilters,
-  TitleList,
   TitleSummaryCards,
   type DefenseApplicationStageKey,
+  type OtherDocumentsGroup,
   type TitleSummaryMetric
 } from '@/components/adviser/adviser-mode/data/title-workspace-sections';
 import {
@@ -27,6 +27,9 @@ import {
   type TitleSortOption,
   type TitleStatus
 } from '@/components/adviser/adviser-mode/data/title-workspace-data';
+import { getAdviserReviewQueueFiles } from '@/components/adviser/adviser-mode/data/submission-workspace-data';
+import type { DocumentFileSummary } from '@/components/documents/document-file-controls';
+import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
 const EVIDENCE_REVIEW_FIELD_BY_CHECKPOINT_KEY: Record<DefenseApplicationStageKey, 'evidenceReview' | 'proposalEvidenceReview' | 'finalEvidenceReview'> = {
@@ -47,6 +50,9 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
   const [remarksDraft, setRemarksDraft] = useState('');
   const [selectedEvidenceTitleId, setSelectedEvidenceTitleId] = useState<string | null>(null);
+  const [otherDocuments, setOtherDocuments] = useState<DocumentFileSummary[]>([]);
+  const [isLoadingOtherDocuments, setIsLoadingOtherDocuments] = useState(true);
+  const [savingOtherDocumentId, setSavingOtherDocumentId] = useState<string | null>(null);
 
   const adviserMeta = WORKSPACE_META[workspaceMode];
 
@@ -87,6 +93,41 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const loadOtherDocuments = async () => {
+      setIsLoadingOtherDocuments(true);
+
+      try {
+        const response = await fetch(
+          `/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}&limit=100`,
+          { cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+
+        if (!cancelled) {
+          setOtherDocuments(getAdviserReviewQueueFiles(payload.files || []));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingOtherDocuments(false);
+        }
+      }
+    };
+
+    loadOtherDocuments();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setSelectedTitleId(null);
@@ -113,6 +154,61 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
       document.body.style.removeProperty('overflow');
     };
   }, [selectedTitleId]);
+
+  const otherDocumentGroups = useMemo<OtherDocumentsGroup[]>(() => {
+    const groupsByProject = new Map<string, OtherDocumentsGroup>();
+
+    otherDocuments.forEach((file) => {
+      if (!file.projectId) {
+        return;
+      }
+
+      const existing = groupsByProject.get(file.projectId);
+      if (existing) {
+        existing.files.push(file);
+        return;
+      }
+
+      groupsByProject.set(file.projectId, {
+        projectId: file.projectId,
+        projectTitle: file.projectTitle || file.groupTitle || 'Untitled Project',
+        groupLabel: file.groupCode || file.groupTitle || 'Assigned Project',
+        groupMembers: file.groupMembers || [],
+        files: [file]
+      });
+    });
+
+    return Array.from(groupsByProject.values());
+  }, [otherDocuments]);
+
+  const applyOtherDocumentDecision = async (file: DocumentFileSummary, decision: 'approved' | 'needs_revision', remarks: string) => {
+    const trimmedRemarks = remarks.trim();
+    const notes = trimmedRemarks || (decision === 'approved'
+      ? 'Approved by adviser. The student can now view the adviser remarks and approval status.'
+      : 'Revision requested. Please address adviser feedback and upload a new version.');
+
+    setSavingOtherDocumentId(file.id);
+
+    try {
+      const response = await fetch(`/api/document-files/${file.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: decision, notes })
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to update the review status.');
+      }
+
+      setOtherDocuments((current) => current.filter((item) => item.id !== file.id));
+      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+    } catch (error) {
+      setTitleError(error instanceof Error ? error.message : 'Unable to update the review status.');
+    } finally {
+      setSavingOtherDocumentId(null);
+    }
+  };
 
   const academicYearOptions = useMemo(() => getAcademicYearOptions(titleRecords), [titleRecords]);
 
@@ -290,7 +386,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
     <>
         <AdviserPageHeader
           title="Title & Evidence Approval"
-          description="Decide on proposed capstone project titles and review Oral Defense Application evidence from your assigned IT groups."
+          description="Decide on proposed capstone project titles and review Oral Defense Application evidence, plus other pending documents, from your assigned IT groups."
           actions={
             <AdviserShellActions
               basePath={basePath}
@@ -331,8 +427,8 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
               <span className="project-files-spinner" aria-hidden="true" />
               <span>Loading title submissions...</span>
             </div>
-          ) : titleRecords.length ? (
-            <TitleList
+          ) : (
+            <GroupReviewList
               hasPendingTitles={hasPendingTitles}
               onViewApproved={() => {
                 setStatusFilter('approved');
@@ -340,23 +436,16 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
               }}
               onViewDetails={(record) => setSelectedTitleId(record.id)}
               titles={filteredRecords}
-            />
-          ) : (
-            <EmptyState
-              hasPendingTitles={hasPendingTitles}
-              onViewApproved={() => {
-                setStatusFilter('approved');
-                setSearchValue('');
-              }}
+              onReviewEvidence={(record) => setSelectedEvidenceTitleId(record.id)}
             />
           )}
 
-          {!isLoadingTitles && titleRecords.length ? (
-            <EvidenceQueueList
-              titles={titleRecords}
-              onReviewEvidence={(record) => setSelectedEvidenceTitleId(record.id)}
-            />
-          ) : null}
+          <OtherDocumentsQueueList
+            groups={otherDocumentGroups}
+            isLoading={isLoadingOtherDocuments}
+            savingFileId={savingOtherDocumentId}
+            onDecide={applyOtherDocumentDecision}
+          />
         </div>
 
         {selectedRecord ? (

@@ -9,25 +9,7 @@ import {
   formatIsoDateLabel,
   type ApiAcademicActivity
 } from '@/components/students/student-academic-activity.shared';
-
-const CATEGORY_LABELS: Record<string, string> = {
-  Proposal: 'Proposal',
-  'Chapter 1': 'Chapter 1',
-  'Chapter 2': 'Chapter 2',
-  'Chapter 3': 'Chapter 3',
-  'System Files': 'System Files',
-  'Supporting Documents': 'Supporting Documents',
-  'Presentation Files': 'Presentation Files',
-  Certificates: 'Certificates',
-  proposal: 'Proposal',
-  'chapter-1': 'Chapter 1',
-  'chapter-2': 'Chapter 2',
-  'chapter-3': 'Chapter 3',
-  'system-files': 'System Files',
-  'supporting-documents': 'Supporting Documents',
-  'presentation-files': 'Presentation Files',
-  certificates: 'Certificates'
-};
+import { getProjectFileCategoryLabel } from '@/components/students/student-project-files.shared';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type ShellTone =
@@ -140,7 +122,8 @@ function getAttentionShellTone({
   dueSoonCount,
   highPriorityNotificationCount,
   unreadFeedbackCount,
-  revisionCount
+  revisionCount,
+  redefenseCount
 }: {
   attentionCount: number;
   overdueCount: number;
@@ -148,6 +131,7 @@ function getAttentionShellTone({
   highPriorityNotificationCount: number;
   unreadFeedbackCount: number;
   revisionCount: number;
+  redefenseCount: number;
 }): ShellTone {
   if (!attentionCount) {
     return 'completed';
@@ -157,7 +141,7 @@ function getAttentionShellTone({
     return 'overdue';
   }
 
-  if (revisionCount || unreadFeedbackCount) {
+  if (revisionCount || redefenseCount || unreadFeedbackCount) {
     return 'needs-revision';
   }
 
@@ -500,7 +484,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
   const recentUploads = useMemo(() => sortByDateDesc(data.documents).slice(0, 3), [data.documents]);
   const latestSubmission = useMemo(() => sortByDateDesc(data.documents)[0] ?? null, [data.documents]);
   const revisionFiles = useMemo(
-    () => sortByDateDesc(data.documents.filter((item) => item.reviewStatus === 'Needs Revision')).slice(0, 2),
+    () => sortByDateDesc(data.documents.filter((item) => item.reviewStatus === 'Needs Revision' && !item.isSuperseded)).slice(0, 2),
     [data.documents]
   );
   const pendingReviewFiles = useMemo(
@@ -536,7 +520,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
 
   const approvedCount = data.documents.filter((item) => item.reviewStatus === 'Approved').length;
   const pendingCount = data.documents.filter((item) => item.reviewStatus === 'Pending Review').length;
-  const revisionCount = data.documents.filter((item) => item.reviewStatus === 'Needs Revision').length;
+  const revisionCount = data.documents.filter((item) => item.reviewStatus === 'Needs Revision' && !item.isSuperseded).length;
   const unreadFeedbackCount = data.feedback.filter((item) => item.unread).length;
   const unreadNotificationsCount = mergedNotifications.filter((item) => !item.read).length;
   const highPriorityNotificationCount = mergedNotifications.filter(
@@ -572,6 +556,10 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     null;
   const completedWorkflowCount = workflow.filter((item) => item.status === 'completed').length;
   const delayedWorkflowCount = workflow.filter((item) => item.status === 'delayed').length;
+  // A failed defense flags its milestone NEEDS_REVISION, but buildFallbackWorkflow
+  // maps that to the plain 'current' workflow status (not 'delayed', which reads
+  // as a missed deadline) — so this needs its own count to actually surface it.
+  const redefenseCount = data.milestones.filter((m) => m.status === 'NEEDS_REVISION').length;
   const currentPhaseTitle = currentWorkflowStep?.title ?? data.project.currentMilestone;
   const currentPhaseSummary =
     currentWorkflowStep?.summary ??
@@ -649,10 +637,25 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
       });
     }
 
+    const redefenseMilestone = data.milestones.find((m) => m.status === 'NEEDS_REVISION');
+    if (redefenseMilestone) {
+      tasks.push({
+        id: `redefense-${redefenseMilestone.id}`,
+        title: redefenseMilestone.title,
+        label: 'Redefense Required',
+        tone: 'danger',
+        description: "Your panel did not pass this defense — check the chair's decision and adviser feedback before your next attempt.",
+        href: '/students/faculty-feedback',
+        actionLabel: 'Review Feedback',
+        meta: redefenseMilestone.dateLabel,
+        icon: 'fa-rotate-left'
+      });
+    }
+
     if (revisionFiles[0]) {
       tasks.push({
         id: `revision-${revisionFiles[0].id}`,
-        title: `Revise ${CATEGORY_LABELS[revisionFiles[0].category] ?? revisionFiles[0].category}`,
+        title: `Revise ${getProjectFileCategoryLabel(revisionFiles[0].category)}`,
         label: 'Needs Revision',
         tone: 'danger',
         description: 'A submitted file still needs updates before the next review cycle can move forward.',
@@ -699,10 +702,10 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     }
 
     return tasks.slice(0, 3);
-  }, [latestFeedback, nextSchedule, revisionFiles, workflow]);
+  }, [data.milestones, latestFeedback, nextSchedule, revisionFiles, workflow]);
 
   const attentionCount =
-    revisionCount + highPriorityNotificationCount + dueSoonCount + overdueCount + unreadFeedbackCount + delayedWorkflowCount;
+    revisionCount + highPriorityNotificationCount + dueSoonCount + overdueCount + unreadFeedbackCount + delayedWorkflowCount + redefenseCount;
   const currentPhaseTone = getShellToneFromWorkflowStatus(currentWorkflowStep?.status ?? 'current');
   const attentionTone = getAttentionShellTone({
     attentionCount,
@@ -710,7 +713,8 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
     dueSoonCount,
     highPriorityNotificationCount,
     unreadFeedbackCount,
-    revisionCount
+    revisionCount,
+    redefenseCount
   });
   const attentionLabel = attentionCount
     ? `${attentionCount} item${attentionCount === 1 ? '' : 's'} need attention`
@@ -806,7 +810,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
                 <span className="text-[11px] font-bold tracking-widest text-[var(--text-meta)] uppercase">Project Workspace</span>
                 <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full ${projectStatusTone === 'success' ? 'bg-emerald-100 text-emerald-700' : projectStatusTone === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                  <span className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full ${projectStatusTone === 'success' ? 'bg-emerald-100 text-emerald-700' : projectStatusTone === 'danger' ? 'bg-red-100 text-red-700' : projectStatusTone === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
                     {data.project.status}
                   </span>
                   <Badge label={attentionLabel} tone={attentionToneUi.tone} icon={attentionToneUi.icon} />
@@ -1286,7 +1290,7 @@ export function StudentDashboard({ data }: { data: StudentDashboardData }) {
                         </span>
                         <div className="flex flex-col min-w-0">
                           <strong className="text-[12px] font-bold text-[var(--text)] group-hover:text-[#003A8F] transition-colors leading-tight truncate">{item.fileName}</strong>
-                          <small className="text-[9px] font-semibold text-[var(--muted)] uppercase tracking-wider">{CATEGORY_LABELS[item.category] ?? item.category}</small>
+                          <small className="text-[9px] font-semibold text-[var(--muted)] uppercase tracking-wider">{getProjectFileCategoryLabel(item.category)}</small>
                         </div>
                       </div>
                       <Badge label={item.reviewStatus} tone={getStatusTone(item.reviewStatus)} />

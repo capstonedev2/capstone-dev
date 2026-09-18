@@ -174,7 +174,7 @@ export const FileItem = memo(function FileItem({
   }
 
   return (
-    <tr className="project-files-table-row">
+    <tr className={`project-files-table-row${file.isSuperseded ? ' opacity-60' : ''}`}>
       <td>
         <div className="table-title-cell">
           <span className="table-file-icon">
@@ -182,7 +182,12 @@ export const FileItem = memo(function FileItem({
           </span>
           <div className="project-files-row-title">
             <strong>{file.fileName}</strong>
-            {file.status === 'rejected' && file.rejectionReason ? (
+            {file.isSuperseded ? (
+              <small className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500 ring-1 ring-inset ring-slate-200">
+                <i className="fas fa-clock-rotate-left" aria-hidden="true" />
+                Replaced by a newer submission
+              </small>
+            ) : file.status === 'rejected' && file.rejectionReason ? (
               <p className="mt-1 text-xs font-bold text-red-600">
                 <i className="fas fa-ban mr-1" aria-hidden="true" />
                 {file.rejectionReason}
@@ -206,7 +211,11 @@ export const FileItem = memo(function FileItem({
         <MiniFileProgress status={file.status} />
       </td>
       <td>
-        <span className={`ui-badge is-${statusTone}`}>{formatProjectFileAdviserStatus(file.status)}</span>
+        {file.isSuperseded ? (
+          <span className="ui-badge is-neutral">Superseded</span>
+        ) : (
+          <span className={`ui-badge is-${statusTone}`}>{formatProjectFileAdviserStatus(file.status)}</span>
+        )}
       </td>
       <td>
         <div className="project-files-user-cell">

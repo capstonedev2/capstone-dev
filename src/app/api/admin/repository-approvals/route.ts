@@ -49,8 +49,24 @@ export async function GET(request: Request) {
           select: { id: true, fileName: true, size: true, createdAt: true, category: true, documentCategory: true },
           orderBy: { createdAt: 'desc' }
         },
+        // Scoped to the final-manuscript files this screen is actually about —
+        // otherwise the "latest submission" here could be an unrelated earlier
+        // stage (e.g. a Chapter 1 revision request), showing a stale/irrelevant
+        // status instead of what's actually gating the repository publish.
         submissions: {
-          where: { status: { in: [SubmissionStatus.APPROVED, SubmissionStatus.NEEDS_REVISION, SubmissionStatus.UNDER_REVIEW] } },
+          where: {
+            status: { in: [SubmissionStatus.APPROVED, SubmissionStatus.NEEDS_REVISION, SubmissionStatus.UNDER_REVIEW] },
+            files: {
+              some: {
+                OR: [
+                  { documentCategory: { contains: 'final', mode: 'insensitive' } },
+                  { documentCategory: { contains: 'manuscript', mode: 'insensitive' } },
+                  { category: { contains: 'final', mode: 'insensitive' } },
+                  { category: { contains: 'manuscript', mode: 'insensitive' } }
+                ]
+              }
+            }
+          },
           orderBy: { submittedAt: 'desc' },
           take: 1,
           select: { status: true, submittedAt: true, reviewedAt: true }
