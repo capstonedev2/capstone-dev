@@ -3,6 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { syncCheckpointReview } from '@/lib/milestone-checkpoint-tracking';
+import { assertDocumentBucket, deleteFile } from '@/lib/storage/supabase-storage';
 
 export const runtime = 'nodejs';
 
@@ -87,7 +88,11 @@ export async function PATCH(request: Request) {
       }
     });
 
-    const latestSubmissionId = checkpoint?.submissions[0]?.id;
+    if (!checkpoint) {
+      throw new HttpError('No oral defense application evidence has been uploaded yet for this project.', 400);
+    }
+
+    const latestSubmissionId = checkpoint.submissions[0]?.id;
 
     if (!latestSubmissionId) {
       throw new HttpError('No oral defense application evidence has been uploaded yet for this project.', 400);
@@ -105,6 +110,40 @@ export async function PATCH(request: Request) {
       reviewerRole: user.role,
       resolveOpenRound: true
     });
+
+    // Needs Revision means the student is expected to re-upload a corrected
+    // photo, so the rejected one no longer needs to sit in storage. The
+    // Submission/UploadedFile rows stay (so the rejection reason and history
+    // are still visible) — only the underlying storage object is removed.
+    if (decision === 'needs_revision') {
+      // By this point syncCheckpointReview (above) has already flipped every
+      // submission in this round — including the latest one — to NEEDS_REVISION,
+      // so filtering on that status here is enough to catch the whole batch.
+      const filesToRemove = await prisma.uploadedFile.findMany({
+        where: {
+          submission: { checkpointId: checkpoint.id, status: SubmissionStatus.NEEDS_REVISION },
+          filePath: { not: null }
+        },
+        select: { id: true, filePath: true, bucketName: true }
+      });
+
+      for (const file of filesToRemove) {
+        if (!file.filePath || !file.bucketName) {
+          continue;
+        }
+
+        try {
+          assertDocumentBucket(file.bucketName);
+          await deleteFile(file.bucketName, file.filePath);
+          await prisma.uploadedFile.update({
+            where: { id: file.id },
+            data: { filePath: null, secureUrl: null }
+          });
+        } catch (error) {
+          console.error(`Failed to remove storage object for evidence file ${file.id}:`, error);
+        }
+      }
+    }
 
     if (project.ownerId) {
       const statusLabel = decision === 'approved' ? 'approved' : decision === 'needs_revision' ? 'returned for revision' : 'rejected';

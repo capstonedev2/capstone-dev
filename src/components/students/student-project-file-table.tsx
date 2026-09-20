@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import Link from 'next/link';
 import { FileItem } from '@/components/students/student-project-file-item';
 import type { PortalRole, ProjectFileRecord, ProjectFileSortOption } from '@/components/students/student-project-files.shared';
 import {
@@ -30,9 +31,6 @@ type FileTableProps = {
   onDelete: (file: ProjectFileRecord) => void;
   onApprove: (file: ProjectFileRecord) => void;
   onViewHistory: (file: ProjectFileRecord) => void;
-  onOpenUpload: () => void;
-  canOpenUpload?: boolean;
-  uploadLockedMessage?: string;
 };
 
 export const FileTable = memo(function FileTable({
@@ -57,10 +55,7 @@ export const FileTable = memo(function FileTable({
   onDownload,
   onDelete,
   onApprove,
-  onViewHistory,
-  onOpenUpload,
-  canOpenUpload = true,
-  uploadLockedMessage = 'Project file uploads are not available yet.'
+  onViewHistory
 }: FileTableProps) {
   const itemStart = totalCount ? (currentPage - 1) * pageSize + 1 : 0;
   const itemEnd = totalCount ? Math.min(currentPage * pageSize, totalCount) : 0;
@@ -219,16 +214,10 @@ export const FileTable = memo(function FileTable({
         <div className="empty-state project-files-empty-state">
           <span className="empty-state-icon"><i className="fas fa-file-shield" aria-hidden="true" /></span>
           <strong>No private project files yet</strong>
-          <p>Upload your first thesis or capstone document to begin secure tracking, adviser review, and version history.</p>
-          <button
-            className="btn btn-primary project-files-empty-action"
-            type="button"
-            onClick={onOpenUpload}
-            disabled={!canOpenUpload}
-            title={!canOpenUpload ? uploadLockedMessage : undefined}
-          >
-            <i className="fas fa-file-arrow-up" aria-hidden="true" /> Upload Document
-          </button>
+          <p>Submit your first thesis or capstone document to begin secure tracking, adviser review, and version history.</p>
+          <Link className="btn btn-primary project-files-empty-action" href="/students/submit">
+            <i className="fas fa-file-arrow-up" aria-hidden="true" /> Submit Documents
+          </Link>
         </div>
       )}
     </div>

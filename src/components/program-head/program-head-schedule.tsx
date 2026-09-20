@@ -50,6 +50,7 @@ type ScheduleProject = {
   eligibleStage: ScheduleStageType;
   attemptCount: number;
   scheduleStatus: ScheduleStatus;
+  redefenseReason?: { label: string; detail: string } | null;
 };
 type AdviserApiResponse = { advisers?: FacultyOption[]; panelists?: FacultyOption[]; data?: { advisers?: FacultyOption[]; panelists?: FacultyOption[]; }; };
 type DefenseSchedulesApiResponse = {
@@ -416,6 +417,16 @@ export function ProgramHeadSchedule() {
     [chair, member1, member2, member3, member4, member5]
   );
 
+  // Faculty already picked for a different chair/member slot can't be picked again
+  // for this one — each set is "everyone chosen elsewhere", excluding this slot's
+  // own current value so it still shows as selected in its own dropdown.
+  const chairTakenIds = useMemo(() => new Set([member1, member2, member3, member4, member5].filter(Boolean)), [member1, member2, member3, member4, member5]);
+  const member1TakenIds = useMemo(() => new Set([chair, member2, member3, member4, member5].filter(Boolean)), [chair, member2, member3, member4, member5]);
+  const member2TakenIds = useMemo(() => new Set([chair, member1, member3, member4, member5].filter(Boolean)), [chair, member1, member3, member4, member5]);
+  const member3TakenIds = useMemo(() => new Set([chair, member1, member2, member4, member5].filter(Boolean)), [chair, member1, member2, member4, member5]);
+  const member4TakenIds = useMemo(() => new Set([chair, member1, member2, member3, member5].filter(Boolean)), [chair, member1, member2, member3, member5]);
+  const member5TakenIds = useMemo(() => new Set([chair, member1, member2, member3, member4].filter(Boolean)), [chair, member1, member2, member3, member4]);
+
   const scheduleConflicts = useMemo(() => {
     const conflicts: string[] = [];
     const selectedPanelSet = new Set(selectedPanelIds);
@@ -770,18 +781,34 @@ export function ProgramHeadSchedule() {
                             Attempt {group.attemptCount}
                           </span>
                         )}
+                        {group.redefenseReason && (
+                          <span
+                            className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100"
+                            title={group.redefenseReason.detail}
+                          >
+                            <i className="fas fa-rotate-left mr-1" aria-hidden="true"></i>
+                            {group.redefenseReason.label}
+                          </span>
+                        )}
                         {isSelected && queueIndex !== -1 && (
                           <span className="text-[11px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-md ml-auto shadow-sm">
                             Queue #{queueIndex + 1}
                           </span>
                         )}
                       </div>
-                      
+
                       <h4 className="text-[15px] font-bold text-slate-900 leading-tight mb-2">
                         <i className="fas fa-users text-blue-500 mr-2" aria-hidden="true"></i>
                         {group.title || group.code}
                       </h4>
-                      
+
+                      {group.redefenseReason && (
+                        <p className="mb-2 text-[12px] font-medium text-amber-800">
+                          <i className="fas fa-circle-info mr-1.5 opacity-70" aria-hidden="true"></i>
+                          {group.redefenseReason.detail}
+                        </p>
+                      )}
+
                       <div className="flex items-center gap-4 text-[12px] font-medium text-slate-500">
                         <div className="flex items-center gap-1.5">
                           <i className="fas fa-user-tie text-slate-400"></i> {group.adviser}
@@ -816,35 +843,42 @@ export function ProgramHeadSchedule() {
                         </div>
                       </div>
 
-                      <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Title Proposals</span>
-                          <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">
-                            {group.titles.length} submitted
-                          </span>
-                        </div>
-                        {visibleTitles.length ? (
-                          <div className="space-y-1.5">
-                            {visibleTitles.map((title) => (
-                              <div key={title.id} className="flex items-start justify-between gap-3 rounded-lg bg-white px-3 py-2 text-[12px] ring-1 ring-slate-100">
-                                <span className="min-w-0 truncate font-semibold text-slate-700">{title.title}</span>
-                                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                  title.isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                                }`}>
-                                  {title.isApproved ? 'Approved' : formatTitleStatus(title.status)}
-                                </span>
-                              </div>
-                            ))}
-                            {group.titles.length > visibleTitles.length ? (
-                              <p className="text-[11px] font-semibold text-slate-500">
-                                +{group.titles.length - visibleTitles.length} more title proposal(s)
-                              </p>
-                            ) : null}
+                      {/* Skip this when there's exactly one title and it's already approved —
+                          that's the exact same text already shown in the "Approved Title" box
+                          above, so listing it again here adds nothing (and on a long title, just
+                          repeats the whole string a 3rd time). Still shown for 0 titles (distinct
+                          "nothing submitted yet" info) or multiple titles (an actual comparison). */}
+                      {!(visibleTitles.length === 1 && visibleTitles[0].isApproved) && (
+                        <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                          <div className="mb-2 flex items-center justify-between gap-3">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Title Proposals</span>
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">
+                              {group.titles.length} submitted
+                            </span>
                           </div>
-                        ) : (
-                          <p className="text-[12px] font-semibold text-slate-500">No title proposal has been submitted for this group.</p>
-                        )}
-                      </div>
+                          {visibleTitles.length ? (
+                            <div className="space-y-1.5">
+                              {visibleTitles.map((title) => (
+                                <div key={title.id} className="flex items-start justify-between gap-3 rounded-lg bg-white px-3 py-2 text-[12px] ring-1 ring-slate-100">
+                                  <span className="min-w-0 truncate font-semibold text-slate-700">{title.title}</span>
+                                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                    title.isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                                  }`}>
+                                    {title.isApproved ? 'Approved' : formatTitleStatus(title.status)}
+                                  </span>
+                                </div>
+                              ))}
+                              {group.titles.length > visibleTitles.length ? (
+                                <p className="text-[11px] font-semibold text-slate-500">
+                                  +{group.titles.length - visibleTitles.length} more title proposal(s)
+                                </p>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <p className="text-[12px] font-semibold text-slate-500">No title proposal has been submitted for this group.</p>
+                          )}
+                        </div>
+                      )}
 
                       {group.assignment ? (
                         <div className="mt-4 grid grid-cols-1 gap-2 rounded-xl border border-emerald-100 bg-emerald-50/60 p-3 text-[12px] font-semibold text-emerald-900 sm:grid-cols-3">
@@ -1033,7 +1067,12 @@ export function ProgramHeadSchedule() {
                     {panelFaculty.map(a => {
                       const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
                       const isAdviser = selectedAdvisers.has(facultyNorm);
-                      return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}{isAdviser ? ' (Conflict)' : ''}</option>;
+                      const isTakenElsewhere = chairTakenIds.has(a.id);
+                      return (
+                        <option key={a.id} value={a.id} disabled={isAdviser || isTakenElsewhere}>
+                          {getFacultyName(a)}{isAdviser ? ' (Conflict)' : isTakenElsewhere ? ' (Already assigned)' : ''}
+                        </option>
+                      );
                     })}
                   </select>
                   <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
@@ -1049,7 +1088,12 @@ export function ProgramHeadSchedule() {
                       {panelFaculty.map(a => {
                         const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
                         const isAdviser = selectedAdvisers.has(facultyNorm);
-                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                        const isTakenElsewhere = member1TakenIds.has(a.id);
+                        return (
+                          <option key={a.id} value={a.id} disabled={isAdviser || isTakenElsewhere}>
+                            {getFacultyName(a)}{isTakenElsewhere ? ' (Already assigned)' : ''}
+                          </option>
+                        );
                       })}
                     </select>
                     <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
@@ -1063,7 +1107,12 @@ export function ProgramHeadSchedule() {
                       {panelFaculty.map(a => {
                         const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
                         const isAdviser = selectedAdvisers.has(facultyNorm);
-                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                        const isTakenElsewhere = member2TakenIds.has(a.id);
+                        return (
+                          <option key={a.id} value={a.id} disabled={isAdviser || isTakenElsewhere}>
+                            {getFacultyName(a)}{isTakenElsewhere ? ' (Already assigned)' : ''}
+                          </option>
+                        );
                       })}
                     </select>
                     <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
@@ -1077,7 +1126,12 @@ export function ProgramHeadSchedule() {
                       {panelFaculty.map(a => {
                         const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
                         const isAdviser = selectedAdvisers.has(facultyNorm);
-                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                        const isTakenElsewhere = member3TakenIds.has(a.id);
+                        return (
+                          <option key={a.id} value={a.id} disabled={isAdviser || isTakenElsewhere}>
+                            {getFacultyName(a)}{isTakenElsewhere ? ' (Already assigned)' : ''}
+                          </option>
+                        );
                       })}
                     </select>
                     <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
@@ -1091,7 +1145,12 @@ export function ProgramHeadSchedule() {
                       {panelFaculty.map(a => {
                         const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
                         const isAdviser = selectedAdvisers.has(facultyNorm);
-                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                        const isTakenElsewhere = member4TakenIds.has(a.id);
+                        return (
+                          <option key={a.id} value={a.id} disabled={isAdviser || isTakenElsewhere}>
+                            {getFacultyName(a)}{isTakenElsewhere ? ' (Already assigned)' : ''}
+                          </option>
+                        );
                       })}
                     </select>
                     <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
@@ -1105,7 +1164,12 @@ export function ProgramHeadSchedule() {
                       {panelFaculty.map(a => {
                         const facultyNorm = normalizeFacultyIdentity(getFacultyName(a));
                         const isAdviser = selectedAdvisers.has(facultyNorm);
-                        return <option key={a.id} value={a.id} disabled={isAdviser}>{getFacultyName(a)}</option>;
+                        const isTakenElsewhere = member5TakenIds.has(a.id);
+                        return (
+                          <option key={a.id} value={a.id} disabled={isAdviser || isTakenElsewhere}>
+                            {getFacultyName(a)}{isTakenElsewhere ? ' (Already assigned)' : ''}
+                          </option>
+                        );
                       })}
                     </select>
                     <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>

@@ -1,8 +1,8 @@
-import { DefenseChairDecision, DefensePanelRole, DefenseStatus, ProjectStatus } from '@/generated/prisma/client';
+import { DefenseChairDecision, DefensePanelRole, DefenseStatus } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, parseJsonBody, successResponse } from '@/lib/utils';
-import { applyDefensePassOutcome, attachDefenseDecisionFeedback, resetGroupForNewTitle } from '@/lib/milestone-checkpoint-tracking';
+import { applyDefensePassOutcome, attachDefenseDecisionFeedback, resetProjectForNewTitle } from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
@@ -124,25 +124,26 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         });
       }
     } else {
-      // This title's track ends here. Archive the project and send the group back through
-      // title submission — POST /api/title-submissions already creates a fresh Project from
-      // scratch for a group with no special-casing, so resetting the group is all that's needed.
-      const group = schedule.project.group;
-      if (group && group.projectId === schedule.projectId) {
-        await resetGroupForNewTitle(prisma, { groupId: group.id, projectId: schedule.projectId });
-      } else {
-        await prisma.project.update({
-          where: { id: schedule.projectId },
-          data: { status: ProjectStatus.ARCHIVED }
-        });
-      }
+      // The panel rejected the title itself, not the Concept-stage idea or the
+      // group's already-submitted proposal work — Concept stays approved, and the
+      // proposal chapters/defense evidence stay as they are too, since those
+      // aren't invalidated by a title change. Only the title's adviser review and
+      // the defense schedule/panel vote that rejected it reopen. The group submits
+      // a replacement title against this same project via /api/title-submissions,
+      // which recognizes this "new title required" state and updates it in place
+      // instead of creating a fresh project.
+      await resetProjectForNewTitle(prisma, {
+        projectId: schedule.projectId,
+        previousTitle: schedule.project.title,
+        chairRemarks: remarks
+      });
 
       if (notifyUserIds.length) {
         await prisma.notification.createMany({
           data: notifyUserIds.map((userId) => ({
             userId,
             title: 'Defense Decision: New Title Required',
-            message: `The panel chair determined "${schedule.project.title}" requires a new title. The group will need to submit a new title proposal.${remarks ? ` ${remarks}` : ''}`,
+            message: `The panel chair determined "${schedule.project.title}" requires a new title.${remarks ? ` ${remarks}` : ''} Your Concept-stage approval is unaffected — submit a replacement title to continue.`,
             type: 'info',
             entityType: 'project',
             entityId: schedule.projectId

@@ -1,4 +1,5 @@
 import {
+  DefenseChairDecision,
   MilestoneCheckpointReviewStatus,
   MilestoneCheckpointStatus,
   Prisma,
@@ -251,7 +252,12 @@ function findEvidenceReview(checkpoints: any[] | undefined, key: string) {
         previewUrl: `/api/document-files/${file.id}/preview`,
         fileType: file.fileType,
         size: file.size,
-        documentCategory: file.documentCategory || null
+        documentCategory: file.documentCategory || null,
+        // Two stages' evidence photos can share the exact same original filename
+        // (e.g. the same "Team Leader.png" re-uploaded for Concept, then again for
+        // Proposal) even though they're unrelated uploads — the timestamp is what
+        // actually tells them apart in the review drawer.
+        uploadedAt: submission.submittedAt || null
       }))
     )
   };
@@ -546,7 +552,91 @@ export async function POST(request: Request) {
 
     // Removed the requirement for an assigned adviser so students can submit a proposal to the pending queue
 
+    // A Proposal (or later) defense panel can decide a group needs an entirely new
+    // title while Concept stays approved (chair-decision/route.ts + resetProjectForNewTitle) —
+    // in that specific recovery state the group's own project is left NEEDS_REVISION
+    // with a NEW_TITLE chair decision on record. Detect it and update that same
+    // project in place instead of creating a fresh one, so Concept-stage checkpoints
+    // and evidence aren't orphaned by a title change that was never their fault.
+    const pendingNewTitleProject = group.projectId
+      ? await prisma.project.findFirst({
+          where: {
+            id: group.projectId,
+            status: ProjectStatus.NEEDS_REVISION,
+            defenseSchedules: {
+              some: { chairDecision: DefenseChairDecision.NEW_TITLE }
+            }
+          },
+          select: { id: true, title: true }
+        })
+      : null;
+
+    // The whole point of a "New Title" decision is that the title has to actually
+    // change — block resubmitting the exact same one (trim/case-insensitive so
+    // whitespace or capitalization tweaks don't count as "different"). Whether a
+    // reworded-but-still-the-same-idea title is different ENOUGH is a judgment
+    // call for the adviser reviewing it, not something a text match can safely
+    // decide — this only catches the "didn't actually change it" case.
+    if (pendingNewTitleProject && normalizeText(title).toLowerCase() === normalizeText(pendingNewTitleProject.title).toLowerCase()) {
+      return Response.json(
+        {
+          success: false,
+          message: 'This is the same title the panel required you to change. Submit a genuinely different title.'
+        },
+        { status: 400 }
+      );
+    }
+
     const { project, submissionId } = await prisma.$transaction(async (tx) => {
+      if (pendingNewTitleProject) {
+        const updatedProject = await tx.project.update({
+          where: { id: pendingNewTitleProject.id },
+          data: {
+            title,
+            abstract: description || 'Replacement title proposal submitted for adviser validation.',
+            keywords,
+            status: ProjectStatus.SUBMITTED
+          }
+        });
+
+        const submission = await tx.submission.create({
+          data: {
+            projectId: updatedProject.id,
+            submittedById: user.id,
+            title: 'Replacement Title Submission',
+            description: description || `Proposed replacement title: ${title}`,
+            status: SubmissionStatus.SUBMITTED,
+            version: 1
+          }
+        });
+
+        await recordCheckpointSubmission(tx, {
+          projectId: updatedProject.id,
+          checkpointKey: 'proposal-adviser-review',
+          submissionId: submission.id
+        });
+
+        if (group.userId) {
+          await tx.notification.create({
+            data: {
+              userId: group.userId,
+              title: 'Replacement Title Submitted',
+              message: `${getPersonName(user) || 'A student'} submitted a replacement title "${title}" for adviser review.`,
+              type: 'feedback',
+              entityType: 'project',
+              entityId: updatedProject.id
+            }
+          });
+        }
+
+        const fullProject = await tx.project.findUniqueOrThrow({
+          where: { id: updatedProject.id },
+          include: projectInclude
+        });
+
+        return { project: fullProject, submissionId: submission.id };
+      }
+
       const deptName = group.department || group.dept || null;
       let resolvedDeptId: string | null = null;
       if (deptName) {
@@ -795,11 +885,19 @@ export async function PATCH(request: Request) {
         });
       }
 
-      await recordCheckpointSubmission(tx, {
-        projectId: project.id,
-        checkpointKey: 'concept-title',
-        submissionId: submission.id
-      });
+      // Every title decision used to be about the 'concept-title' checkpoint, so this
+      // unconditionally (re)linked the submission there — but a replacement title
+      // submitted after a Proposal-stage "New Title" decision is deliberately linked
+      // to 'proposal-adviser-review' instead (see the POST handler above). Only
+      // (re)link to concept-title when the submission doesn't already have its own
+      // checkpoint association, so that deliberate link never gets silently clobbered.
+      if (!project.submissions[0]?.checkpointId) {
+        await recordCheckpointSubmission(tx, {
+          projectId: project.id,
+          checkpointKey: 'concept-title',
+          submissionId: submission.id
+        });
+      }
 
       const updatedTitleCheckpoint = await syncCheckpointReview(tx, {
         submissionId: submission.id,

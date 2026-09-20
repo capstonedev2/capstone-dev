@@ -23,6 +23,11 @@ export type ProjectFileHistoryEntry = {
   versionNotes: string;
   reviewedBy?: string;
   reviewedAt?: string;
+  // Only set for a grouped multi-file record (e.g. an evidence category with
+  // several individually-uploaded photos rolled into one row) — lets the
+  // version history drawer open/download this specific file directly.
+  fileUrl?: string;
+  fileName?: string;
 };
 
 export type ProjectFileRecord = {
@@ -95,7 +100,8 @@ export const PROJECT_FILE_CATEGORY_OPTIONS: ProjectFileCategoryOption[] = [
   { key: 'proposal-defense-application', label: 'Oral Defense Application Evidence (Proposal)' },
   { key: 'final-defense-application', label: 'Oral Defense Application Evidence (Final)' },
   { key: 'award-recognition', label: 'Award / Recognition' },
-  { key: 'activity-evidence', label: 'Activity Evidence' }
+  { key: 'activity-evidence', label: 'Activity Evidence' },
+  { key: 'other', label: 'Other' }
 ];
 
 export const PROJECT_FILE_FILTER_OPTIONS = [
@@ -109,7 +115,8 @@ export const PROJECT_FILE_FILTER_OPTIONS = [
   { key: 'proposal-defense-application', label: 'Oral Defense Application Evidence (Proposal)' },
   { key: 'final-defense-application', label: 'Oral Defense Application Evidence (Final)' },
   { key: 'award-recognition', label: 'Award / Recognition' },
-  { key: 'activity-evidence', label: 'Activity Evidence' }
+  { key: 'activity-evidence', label: 'Activity Evidence' },
+  { key: 'other', label: 'Other' }
 ];
 
 export const PROJECT_FILE_SORT_OPTIONS: Array<{ key: ProjectFileSortOption; label: string }> = [
@@ -410,6 +417,31 @@ export function hasCompletedConceptStage(data: StudentDashboardData) {
   }
 
   return Boolean(conceptMilestone && isCompletedStageStatus(conceptMilestone.status));
+}
+
+// The 3 Oral Defense Application Evidence categories are meant to be submitted in
+// this order — Concept, then Proposal, then Final. Nothing on the backend actually
+// blocks submitting Final while Proposal is still pending/needs-revision, so this
+// lets the Submit page warn a student who's about to jump ahead of their real stage.
+const EVIDENCE_STAGE_KEYS_IN_ORDER = ['concept-defense-application', 'proposal-defense-application', 'final-defense-application'];
+
+export function getSkippedEvidenceStageKey(data: StudentDashboardData, targetCategoryKey: string): string | null {
+  const targetIndex = EVIDENCE_STAGE_KEYS_IN_ORDER.indexOf(targetCategoryKey);
+
+  if (targetIndex <= 0) {
+    return null;
+  }
+
+  for (let index = 0; index < targetIndex; index += 1) {
+    const stageKey = EVIDENCE_STAGE_KEYS_IN_ORDER[index];
+    const checkpoint = data.milestoneCheckpoints.find((item) => item.key === stageKey);
+
+    if (!checkpoint || !isCompletedStageStatus(checkpoint.status)) {
+      return stageKey;
+    }
+  }
+
+  return null;
 }
 
 export function getNextProjectFileVersionParts(files: ProjectFileRecord[], category: string) {

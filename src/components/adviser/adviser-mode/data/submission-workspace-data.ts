@@ -6,7 +6,7 @@ export function getReviewReferenceDate() {
 }
 
 export type SubmissionStatus = 'pending-review' | 'under-review' | 'needs-revision' | 'approved';
-export type SubmissionType = 'Title' | 'Proposal' | 'Chapter' | 'Final';
+export type SubmissionType = 'Title' | 'Proposal' | 'Chapter' | 'Final' | 'Evidence';
 export type SubmissionMilestone =
   | 'Title Screening'
   | 'Proposal Screening'
@@ -78,6 +78,15 @@ export type AdviserSubmissionRecord = {
   fileUrl: string;
   fileType: string;
   fileExtension: string;
+  // The real uploaded_files id backing this card's file, for preview/signed-url
+  // calls. Null when there's genuinely nothing uploaded yet. Distinct from `id`
+  // above, which for Title/Evidence records is a synthetic composite key, not
+  // a real file id.
+  previewFileId: string | null;
+  // Every file behind this card, in order — a multi-photo evidence batch or a
+  // multi-file title submission has more than one, so the details modal can
+  // step through them instead of only ever showing the first.
+  previewFiles: Array<{ id: string; name: string; fileType?: string }>;
   documentCategory: string;
   // Not IT-only — see src/lib/landing/departments-data.ts. Not currently sourced
   // from real data (DocumentFileSummary has no department field yet) or displayed
@@ -184,7 +193,7 @@ function asIsoString(value: string | Date | null | undefined) {
   return value ? new Date(value).toISOString() : null;
 }
 
-function getFileExtension(fileName: string) {
+export function getFileExtension(fileName: string) {
   return fileName.split('.').pop()?.toLowerCase() || 'doc';
 }
 
@@ -506,6 +515,8 @@ export function toAdviserSubmissionRecord(file: DocumentFileSummary, index = 0):
     fileUrl: `/api/document-files/${file.id}/download`,
     fileType: file.fileType,
     fileExtension: getFileExtension(file.fileName),
+    previewFileId: file.id,
+    previewFiles: [{ id: file.id, name: file.fileName, fileType: file.fileType }],
     documentCategory: file.documentCategory,
     department: 'IT',
     approvedAt,
@@ -537,7 +548,22 @@ export type TitleSubmissionSummary = {
     authorName?: string | null;
   } | null;
   uploadedFiles: Array<{ id: string; name: string; url: string; fileType: string }>;
+  // Oral Defense Application evidence for each stage — returned by the same
+  // /api/title-submissions endpoint alongside the title fields above, but kept
+  // optional here since this narrower type predates evidence being surfaced
+  // through this file.
+  evidenceReview?: EvidenceReviewSummary;
+  proposalEvidenceReview?: EvidenceReviewSummary;
+  finalEvidenceReview?: EvidenceReviewSummary;
 };
+
+export type EvidenceReviewSummary = {
+  status: string;
+  feedback: string | null;
+  feedbackBy: string | null;
+  uploaderNote: string | null;
+  files: Array<{ id: string; name: string; url: string; fileType?: string; size: number | null; documentCategory?: string | null }>;
+} | null;
 
 function mapTitleStatus(status: TitleSubmissionSummary['status']): SubmissionStatus {
   switch (status) {
@@ -591,6 +617,12 @@ export function toAdviserSubmissionRecordFromTitle(title: TitleSubmissionSummary
     fileUrl: attachedFile?.url || '',
     fileType: attachedFile?.fileType || 'title',
     fileExtension: attachedFile ? getFileExtension(attachedFile.name) : 'title',
+    previewFileId: attachedFile?.id || null,
+    previewFiles: title.uploadedFiles.map((uploadedFile) => ({
+      id: uploadedFile.id,
+      name: uploadedFile.name,
+      fileType: uploadedFile.fileType
+    })),
     documentCategory: 'Title Proposal',
     department: 'IT',
     approvedAt: status === 'approved' ? reviewedAt || submittedAt : undefined,
@@ -617,6 +649,132 @@ export function toAdviserSubmissionRecordFromTitle(title: TitleSubmissionSummary
       { id: 'approved', label: 'Approved by adviser', actor: 'Adviser', occurredAt: reviewedAt || submittedAt, isComplete: status === 'approved' }
     ]
   };
+}
+
+const EVIDENCE_STAGES: Array<{
+  field: 'evidenceReview' | 'proposalEvidenceReview' | 'finalEvidenceReview';
+  stageLabel: string;
+}> = [
+  { field: 'evidenceReview', stageLabel: 'Concept' },
+  { field: 'proposalEvidenceReview', stageLabel: 'Proposal' },
+  { field: 'finalEvidenceReview', stageLabel: 'Final' }
+];
+
+// Checkpoint statuses (MilestoneCheckpointStatus) use IN_REVIEW, not
+// mapSubmissionStatus()'s UNDER_REVIEW — evidence needs its own mapping so an
+// in-review stage doesn't fall through to "pending-review".
+function mapEvidenceStatus(status?: string | null): SubmissionStatus {
+  switch (String(status || '').toUpperCase()) {
+    case 'IN_REVIEW':
+      return 'under-review';
+    case 'APPROVED':
+    case 'COMPLETED':
+      return 'approved';
+    case 'NEEDS_REVISION':
+      return 'needs-revision';
+    default:
+      return 'pending-review';
+  }
+}
+
+/**
+ * Surfaces each stage's Oral Defense Application evidence inside the same
+ * Document Submissions list, read-only — same reasoning as
+ * toAdviserSubmissionRecordFromTitle above: the actual Approve/Needs Revision
+ * decision only lives on Title & Evidence Approval's Review Evidence drawer,
+ * this just makes it visible/filterable alongside everything else. Only
+ * stages with an uploaded file produce a card; a stage nothing's been
+ * uploaded for yet isn't waiting on the adviser.
+ */
+export function toAdviserSubmissionRecordsFromEvidence(title: TitleSubmissionSummary): AdviserSubmissionRecord[] {
+  const submittedAt = asIsoString(title.submittedAt) || getReviewReferenceDate();
+  const submittedBy = title.groupMembers.find((member) => member.isLeader)?.name
+    || title.groupMembers[0]?.name
+    || 'Project Member';
+
+  return EVIDENCE_STAGES.flatMap((stage) => {
+    const review = title[stage.field];
+    const hasFile = (review?.files?.length ?? 0) > 0;
+
+    if (!review || !hasFile) {
+      return [];
+    }
+
+    const status = mapEvidenceStatus(review.status);
+    const milestone: SubmissionMilestone = 'Defense Clearance';
+    // Evidence has no submission-level timestamp of its own in this payload —
+    // approximate with the title's own submission/review time, same fallback
+    // toAdviserSubmissionRecordFromTitle uses.
+    const reviewedAt = status === 'approved' || status === 'needs-revision'
+      ? asIsoString(title.reviewedAt) || submittedAt
+      : null;
+    const attachedFile = review.files[0] || null;
+    const latestReviewComment = review.feedback
+      ? {
+          id: `evidence-${title.id}-${stage.field}`,
+          body: review.feedback,
+          decision: status === 'approved' ? 'approved' : status === 'needs-revision' ? 'needs_revision' : 'comment',
+          createdAt: reviewedAt || submittedAt,
+          authorName: review.feedbackBy || 'Adviser'
+        }
+      : null;
+    const commentCategories = inferCommentCategories(status, milestone, latestReviewComment);
+
+    const record: AdviserSubmissionRecord = {
+      id: `evidence-${title.id}-${stage.field}`,
+      groupId: title.groupId,
+      projectTitle: `${title.groupTitle || title.groupId} — ${stage.stageLabel} Evidence`,
+      submissionTitle: `${stage.stageLabel} Oral Defense Application Evidence`,
+      type: 'Evidence',
+      milestone,
+      status,
+      statusLabel: getSubmissionStatusMeta(status).label,
+      version: 'v1',
+      currentVersionNumber: 1,
+      submittedAt,
+      deadline: null,
+      submittedBy,
+      groupMembers: title.groupMembers,
+      latestReviewComment,
+      reviewedAt,
+      reviewFocus: `${submittedBy} uploaded ${stage.stageLabel.toLowerCase()}-stage oral defense application evidence for adviser review.`,
+      nextAction: 'Open Title & Evidence Approval to review this stage\'s evidence.',
+      fileUrl: attachedFile?.url || '',
+      fileType: attachedFile?.fileType || 'image',
+      fileExtension: attachedFile ? getFileExtension(attachedFile.name) : 'jpg',
+      previewFileId: attachedFile?.id || null,
+      previewFiles: review.files.map((evidenceFile) => ({
+        id: evidenceFile.id,
+        name: evidenceFile.name,
+        fileType: evidenceFile.fileType
+      })),
+      documentCategory: `${stage.stageLabel} Evidence`,
+      department: 'IT',
+      approvedAt: status === 'approved' ? reviewedAt || submittedAt : undefined,
+      workspaceHref: '/adviser/adviser-mode/title-approvals',
+      deadlineProgress: getDeadlineProgress(submittedAt, null, status),
+      workflowStepIndex: getWorkflowStepIndex(status, 1),
+      commentCategories,
+      comments: latestReviewComment ? buildComments(status, 'v1', milestone, [], latestReviewComment) : [],
+      versionHistory: [{
+        id: `evidence-${title.id}-${stage.field}-v1`,
+        version: 'v1',
+        label: `${stage.stageLabel} Evidence`,
+        uploadedAt: submittedAt,
+        uploader: submittedBy,
+        isCurrent: true
+      }],
+      timeline: [
+        { id: 'submitted', label: 'Submitted by student', actor: submittedBy, occurredAt: submittedAt, isComplete: true },
+        { id: 'under-review', label: 'Adviser review pending', actor: 'Adviser', occurredAt: submittedAt, isComplete: status !== 'pending-review' },
+        { id: 'revision-requested', label: 'Revision requested', actor: 'Adviser', occurredAt: reviewedAt || submittedAt, isComplete: status === 'needs-revision' },
+        { id: 'resubmitted', label: 'Student resubmitted', actor: submittedBy, occurredAt: submittedAt, isComplete: false },
+        { id: 'approved', label: 'Approved by adviser', actor: 'Adviser', occurredAt: reviewedAt || submittedAt, isComplete: status === 'approved' }
+      ]
+    };
+
+    return [record];
+  });
 }
 
 export function getSubmissionStatusMeta(status: SubmissionStatus) {

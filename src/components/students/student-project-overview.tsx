@@ -1,17 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { logoutWithApi } from '@/lib/client-auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { STUDENT_NAV_ITEMS } from '@/components/students/student-navigation';
+import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import {
+  ACTIVITY_STATUS_OPTIONS,
+  ACTIVITY_TYPE_OPTIONS,
+  createAcademicActivityForm,
+  deleteAcademicActivity,
   fetchAcademicActivities,
   formatIsoDateLabel,
   isImageFileByName,
+  saveAcademicActivity,
   type ApiAcademicActivity
 } from '@/components/students/student-academic-activity.shared';
 import { AcademicActivityDetailModal } from '@/components/students/student-academic-activity-detail';
+import { hasCompletedConceptStage } from '@/components/students/student-project-files.shared';
 
 function getInitials(value: string) {
   return value
@@ -25,7 +33,11 @@ function getInitials(value: string) {
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
 
 function getStatusTone(status: string): BadgeTone {
-  const normalized = status.toLowerCase();
+  // Raw Prisma enum values (e.g. "NEEDS_REVISION", "UNDER_REVIEW") use
+  // underscores, but the match lists below are space-separated — without this,
+  // every multi-word enum status silently fell through to "neutral" instead of
+  // its real tone.
+  const normalized = status.toLowerCase().replace(/_/g, ' ');
   if (['approved', 'completed', 'resolved', 'confirmed', 'in use', 'enhanced', 'incorporated', 'in development', 'recognized'].includes(normalized)) {
     return 'success';
   }
@@ -220,6 +232,138 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
   const [selectedActivity, setSelectedActivity] = useState<ApiAcademicActivity | null>(null);
 
+  // Log Activity — moved here from Document Submission so logging an
+  // achievement/activity lives next to where the rest of the log is already
+  // displayed, instead of a separate page.
+  const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [activityForm, setActivityForm] = useState(() => createAcademicActivityForm(''));
+  const [isSavingActivity, setIsSavingActivity] = useState(false);
+  const [activityFormError, setActivityFormError] = useState<string | null>(null);
+  // .project-overview-page may sit under a backdrop-filter ancestor, which traps
+  // position:fixed descendants to its own box instead of the real viewport —
+  // rendering the modal via a portal to document.body sidesteps that.
+  const [isModalPortalMounted, setIsModalPortalMounted] = useState(false);
+  const [evidenceFiles, setEvidenceFiles] = useState<Array<{ id: string; fileName: string }>>([]);
+
+  useEffect(() => {
+    setIsModalPortalMounted(true);
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('is-modal-open', isActivityModalOpen);
+
+    return () => {
+      document.body.classList.remove('is-modal-open');
+    };
+  }, [isActivityModalOpen]);
+
+  // Evidence a new activity can attach — files the student has already
+  // uploaded from Submit Documents under Award/Recognition or Activity
+  // Evidence, sourced from the same /api/document-files data that page writes to.
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch(
+          `/api/document-files?bucketName=${DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS}&page=1&limit=50`,
+          { cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        const files = (payload.files || [])
+          .filter((file: any) => file.documentCategory === 'award-recognition' || file.documentCategory === 'activity-evidence')
+          .map((file: any) => ({ id: file.id, fileName: file.fileName }));
+
+        if (!cancelled) {
+          setEvidenceFiles(files);
+        }
+      } catch {
+        // Non-critical: the evidence checklist simply stays empty if this fails.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const openActivityModal = () => {
+    setActivityForm(createAcademicActivityForm(project.currentMilestone || ''));
+    setActivityFormError(null);
+    setIsActivityModalOpen(true);
+  };
+
+  const closeActivityModal = () => {
+    setIsActivityModalOpen(false);
+  };
+
+  const updateActivityForm = <Key extends keyof ReturnType<typeof createAcademicActivityForm>,>(
+    field: Key,
+    value: ReturnType<typeof createAcademicActivityForm>[Key]
+  ) => {
+    setActivityForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const toggleActivityEvidenceFile = (fileId: string) => {
+    setActivityForm((current) => ({
+      ...current,
+      selectedFileIds: current.selectedFileIds.includes(fileId)
+        ? current.selectedFileIds.filter((id) => id !== fileId)
+        : [...current.selectedFileIds, fileId]
+    }));
+  };
+
+  const handleSaveActivity = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!activityForm.activityTitle.trim()) {
+      setActivityFormError('Enter the academic activity title.');
+      return;
+    }
+
+    if (!project.project_id) {
+      setActivityFormError('No assigned thesis project was found for your account.');
+      return;
+    }
+
+    setIsSavingActivity(true);
+    setActivityFormError(null);
+
+    try {
+      const saved = await saveAcademicActivity(project.project_id, activityForm);
+
+      if (saved) {
+        setPresentations((current) => [mapApiActivityToRecord(saved, data.profile.user_id), ...current]);
+      } else {
+        await loadAcademicActivities();
+      }
+
+      closeActivityModal();
+    } catch (error) {
+      setActivityFormError(error instanceof Error ? error.message : 'Unable to save the academic activity.');
+    } finally {
+      setIsSavingActivity(false);
+    }
+  };
+
+  const handleDeleteActivity = async (activityId: string) => {
+    if (!window.confirm('Remove this academic activity? This only removes the log entry, not the uploaded evidence file.')) {
+      return;
+    }
+
+    try {
+      await deleteAcademicActivity(activityId);
+      setPresentations((current) => current.filter((item) => item.id !== activityId));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to remove this activity.');
+    }
+  };
+
   const loadAcademicActivities = async () => {
     if (!project.project_id) {
       setIsLoadingActivities(false);
@@ -305,6 +449,13 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
 
   const isLeader = data.profile.groupRole.includes('Leader');
   const projectStatusTone = getStatusTone(project.status);
+  // Whether the title itself has ever been approved (Concept stage) is a
+  // separate question from the project's CURRENT overall status — a later
+  // stage's redefense (e.g. Proposal) flips project.status to NEEDS_REVISION,
+  // which used to also make an already-approved title vanish behind the
+  // "pending approval" placeholder here even though the title was decided
+  // long ago. Concept completion is the real, stable signal for that.
+  const hasApprovedTitle = hasCompletedConceptStage(data);
 
   return (
     <>
@@ -332,7 +483,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                 <div>
                   <span className="section-kicker">Project Summary</span>
                   <div className="project-overview-summary-title flex items-center flex-wrap gap-3 mb-2">
-                    {projectStatusTone !== 'success' ? (
+                    {!hasApprovedTitle ? (
                       <>
                         <h2 className="text-xl font-medium text-[var(--muted)] italic flex items-center">
                           <i className="fas fa-lock text-sm mr-2 opacity-60"></i>
@@ -348,7 +499,7 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                     )}
                     <Badge label={project.status} tone={projectStatusTone} />
                   </div>
-                  {projectStatusTone !== 'success' ? (
+                  {!hasApprovedTitle ? (
                     <p className="project-overview-summary-copy text-sm text-[var(--muted)] max-w-2xl">Your project title will appear here once the concept proposal has been officially approved.</p>
                   ) : (
                     <p className="project-overview-summary-copy text-sm text-[var(--muted)] max-w-2xl">{project.description}</p>
@@ -520,6 +671,14 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
               </div>
 
               <div className="flex flex-wrap gap-3 lg:justify-end">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-brand-dark"
+                  onClick={openActivityModal}
+                >
+                  <i className="fas fa-plus" aria-hidden="true" />
+                  Log Activity
+                </button>
                 <Link prefetch={false}
                   className="inline-flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text)] shadow-sm transition duration-200 hover:border-blue-200 hover:text-brand"
                   href="/students/faculty-feedback"
@@ -761,7 +920,232 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
 
       </div>
 
-      <AcademicActivityDetailModal activity={selectedActivity} onClose={() => setSelectedActivity(null)} />
+      {isModalPortalMounted ? createPortal(
+      <div className={`modal-shell ${isActivityModalOpen ? 'is-open' : ''}`} aria-hidden={isActivityModalOpen ? 'false' : 'true'}>
+        <button className="modal-backdrop" type="button" aria-label="Close log activity modal" onClick={closeActivityModal} />
+        <div
+          className="modal-card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="log-activity-title"
+          style={{ width: 'min(46rem, calc(100vw - 2rem))', overflow: 'hidden' }}
+        >
+          <button className="modal-close" type="button" aria-label="Close log activity modal" onClick={closeActivityModal}>
+            <i className="fas fa-times" aria-hidden="true" />
+          </button>
+          <div className="modal-content" style={{ padding: 0 }}>
+            <form onSubmit={handleSaveActivity} className="flex max-h-[calc(100vh-2rem)] flex-col">
+              <div className="shrink-0 border-b border-[var(--border)] px-7 pt-7 pb-5">
+                <span className="section-kicker">Academic Activities &amp; Evidence</span>
+                <h3 id="log-activity-title" className="mt-1.5 text-xl font-black text-[var(--text)]">Log Academic Activity</h3>
+                <p className="mt-1 text-sm text-[var(--muted)]">Record what happened, then attach evidence you&apos;ve already uploaded from Submit Documents.</p>
+              </div>
+
+              <div className="flex-1 space-y-7 overflow-y-auto px-7 py-6">
+                {activityFormError ? (
+                  <div className="flex items-start gap-2 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                    <i className="fas fa-circle-exclamation mt-0.5" aria-hidden="true" />
+                    <span>{activityFormError}</span>
+                  </div>
+                ) : null}
+
+                <section>
+                  <h4 className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">
+                    <i className="fas fa-clipboard-list" aria-hidden="true" /> Activity Details
+                  </h4>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="form-field">
+                      <label htmlFor="activity-type">Activity Type</label>
+                      <select
+                        id="activity-type"
+                        value={activityForm.activityType}
+                        onChange={(event) => updateActivityForm('activityType', event.target.value)}
+                      >
+                        {ACTIVITY_TYPE_OPTIONS.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-status">Status</label>
+                      <select
+                        id="activity-status"
+                        value={activityForm.status}
+                        onChange={(event) => updateActivityForm('status', event.target.value)}
+                      >
+                        {ACTIVITY_STATUS_OPTIONS.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field sm:col-span-2">
+                      <label htmlFor="activity-title">Activity Title</label>
+                      <input
+                        id="activity-title"
+                        type="text"
+                        value={activityForm.activityTitle}
+                        onChange={(event) => updateActivityForm('activityTitle', event.target.value)}
+                        placeholder="Enter the academic activity title"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-milestone">Related Milestone</label>
+                      <select
+                        id="activity-milestone"
+                        value={activityForm.relatedMilestone}
+                        onChange={(event) => updateActivityForm('relatedMilestone', event.target.value)}
+                      >
+                        <option value="">Not linked to a milestone</option>
+                        {(data.milestones || []).map((milestone) => (
+                          <option key={milestone.id} value={milestone.title}>{milestone.title}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-date">Date</label>
+                      <input
+                        id="activity-date"
+                        type="date"
+                        value={activityForm.date}
+                        onChange={(event) => updateActivityForm('date', event.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-location">Location / Venue</label>
+                      <input
+                        id="activity-location"
+                        type="text"
+                        value={activityForm.location}
+                        onChange={(event) => updateActivityForm('location', event.target.value)}
+                        placeholder="University auditorium, partner site, online, etc."
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="activity-participants">Participants / Beneficiary</label>
+                      <input
+                        id="activity-participants"
+                        type="text"
+                        value={activityForm.participantsOrBeneficiary}
+                        onChange={(event) => updateActivityForm('participantsOrBeneficiary', event.target.value)}
+                        placeholder="Students, faculty panel, community partner, or beneficiary"
+                      />
+                    </div>
+
+                    <div className="form-field sm:col-span-2">
+                      <label htmlFor="activity-description">Description</label>
+                      <textarea
+                        id="activity-description"
+                        value={activityForm.description}
+                        onChange={(event) => updateActivityForm('description', event.target.value)}
+                        placeholder="Summarize the activity, outcomes, and relevance to the project."
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <h4 className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">
+                    <i className="fas fa-paperclip" aria-hidden="true" /> Evidence
+                  </h4>
+                  {evidenceFiles.length ? (
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                      {evidenceFiles.map((file) => {
+                        const isSelected = activityForm.selectedFileIds.includes(file.id);
+                        return (
+                          <label
+                            key={file.id}
+                            className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition ${
+                              isSelected
+                                ? 'border-blue-400 bg-blue-50/60 ring-1 ring-blue-400/30'
+                                : 'border-[var(--border)] bg-[var(--surface-alt)] hover:border-blue-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleActivityEvidenceFile(file.id)}
+                              className="h-4 w-4 shrink-0 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
+                            />
+                            <i className="fas fa-file-lines shrink-0 text-[var(--text-meta)]" aria-hidden="true" />
+                            <span className="min-w-0 truncate text-sm font-semibold text-[var(--text)]">{file.fileName}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="rounded-xl border border-dashed border-[var(--border)] px-4 py-3 text-sm text-[var(--muted)]">
+                      Submit an Award/Recognition or Activity Evidence file from Submit Documents first, then attach it here.
+                    </p>
+                  )}
+                </section>
+
+                <section>
+                  <h4 className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-[var(--text-meta)]">
+                    <i className="fas fa-sliders" aria-hidden="true" /> Additional Options
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3.5 transition ${
+                        activityForm.addToTimeline
+                          ? 'border-blue-400 bg-blue-50/60'
+                          : 'border-[var(--border)] bg-[var(--surface-alt)] hover:border-blue-300'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={activityForm.addToTimeline}
+                        onChange={(event) => updateActivityForm('addToTimeline', event.target.checked)}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="flex flex-col gap-0.5">
+                        <strong className="text-sm font-bold text-[var(--text)]">Add this activity to project timeline</strong>
+                        <span className="text-xs text-[var(--muted)]">Keep the activity aligned with the related milestone record.</span>
+                      </span>
+                    </label>
+
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3.5 transition ${
+                        activityForm.markAsAchievement
+                          ? 'border-amber-400 bg-amber-50/60'
+                          : 'border-[var(--border)] bg-[var(--surface-alt)] hover:border-amber-300'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={activityForm.markAsAchievement}
+                        onChange={(event) => updateActivityForm('markAsAchievement', event.target.checked)}
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--border)] text-amber-600 focus:ring-amber-500"
+                      />
+                      <span className="flex flex-col gap-0.5">
+                        <strong className="text-sm font-bold text-[var(--text)]">Mark as achievement / recognition</strong>
+                        <span className="text-xs text-[var(--muted)]">Use this when the activity should also count as a recognition entry.</span>
+                      </span>
+                    </label>
+                  </div>
+                </section>
+              </div>
+
+              <div className="form-actions shrink-0 border-t border-[var(--border)] px-7 py-4">
+                <button className="btn btn-secondary" type="button" onClick={closeActivityModal}>Cancel</button>
+                <button className="btn btn-primary" type="submit" disabled={isSavingActivity}>
+                  <i className="fas fa-floppy-disk" aria-hidden="true" /> {isSavingActivity ? 'Saving...' : 'Save Academic Activity'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>,
+      document.body
+      ) : null}
+
+      <AcademicActivityDetailModal activity={selectedActivity} onClose={() => setSelectedActivity(null)} onDelete={handleDeleteActivity} />
     </>
   );
 }

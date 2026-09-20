@@ -1,4 +1,5 @@
 import {
+  DefenseChairDecision,
   DefensePanelRole,
   DefenseStatus,
   EvaluationRecommendation,
@@ -159,7 +160,10 @@ const scheduleGroupInclude = {
         select: {
           id: true,
           status: true,
-          title: true
+          title: true,
+          scheduledAt: true,
+          chairDecision: true,
+          chairDecisionRemarks: true
         }
       },
       submissions: {
@@ -297,9 +301,55 @@ function getScheduleStatus(project: ScheduleTitleProjectRecord | null) {
   return 'Ready First Schedule';
 }
 
+// "Ready for Reschedule" alone doesn't say WHY the last attempt didn't finish —
+// this pulls the reason from the most recent past defense schedule's chair
+// decision, so the Program Head can tell a plain redefense apart from a
+// rejected-title recovery (defenseSchedules is already sorted newest-first).
+function getRedefenseReason(project: ScheduleTitleProjectRecord | null) {
+  if (!project) {
+    return null;
+  }
+
+  const lastDecidedSchedule = project.defenseSchedules.find((schedule) => schedule.chairDecision);
+
+  if (!lastDecidedSchedule) {
+    return null;
+  }
+
+  // schedule.title is just the generic schedule TYPE (e.g. "Proposal Defense") —
+  // already shown as its own badge on the card, so repeating it here added
+  // nothing. The date of that specific session is the actually new information.
+  const decidedOn = lastDecidedSchedule.scheduledAt.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  if (lastDecidedSchedule.chairDecision === DefenseChairDecision.NEW_TITLE) {
+    return {
+      label: 'Redefense (New Title)',
+      detail: `The panel required a new title after the ${lastDecidedSchedule.title} on ${decidedOn}.${
+        lastDecidedSchedule.chairDecisionRemarks ? ` ${lastDecidedSchedule.chairDecisionRemarks}` : ''
+      }`
+    };
+  }
+
+  if (lastDecidedSchedule.chairDecision === DefenseChairDecision.REDEFENSE) {
+    return {
+      label: 'Redefense Required',
+      detail: `The panel required a redefense of the same title after the ${lastDecidedSchedule.title} on ${decidedOn}.${
+        lastDecidedSchedule.chairDecisionRemarks ? ` ${lastDecidedSchedule.chairDecisionRemarks}` : ''
+      }`
+    };
+  }
+
+  return null;
+}
+
 function formatScheduleGroup(group: ScheduleGroupRecord) {
   const approvedProject = getApprovedTitleProject(group);
   const activeProject = approvedProject || group.projects[0] || null;
+  const scheduleStage = inferScheduleStage(approvedProject, group);
   const students = group.groupMembers.length
     ? group.groupMembers.map((member) => getPersonName(member.user) || member.userId)
     : group.students || [];
@@ -336,9 +386,19 @@ function formatScheduleGroup(group: ScheduleGroupRecord) {
     currentStage: approvedProject?.milestones.find((milestone) => (
       !COMPLETED_MILESTONE_STATUSES.has(milestone.status) && !milestone.completedAt
     ))?.title || group.currentMilestone || group.milestone || 'Concept',
-    eligibleStage: inferScheduleStage(approvedProject, group),
-    attemptCount: Math.max(1, (approvedProject?.defenseSchedules.length || 0) + 1),
-    scheduleStatus: getScheduleStatus(approvedProject)
+    eligibleStage: scheduleStage,
+    // Counts only past schedules FOR THIS STAGE (matched by title, e.g. "Proposal
+    // Defense") — this used to count every schedule ever recorded for the project
+    // regardless of stage, so a group on their 1st Proposal Defense attempt (after
+    // an earlier, separate Concept Presentation) incorrectly showed "Attempt 2".
+    attemptCount: Math.max(
+      1,
+      (approvedProject?.defenseSchedules.filter((schedule) => schedule.title === scheduleStage).length || 0) + 1
+    ),
+    scheduleStatus: getScheduleStatus(approvedProject),
+    redefenseReason: getScheduleStatus(approvedProject) === 'Ready for Reschedule'
+      ? getRedefenseReason(approvedProject)
+      : null
   };
 }
 

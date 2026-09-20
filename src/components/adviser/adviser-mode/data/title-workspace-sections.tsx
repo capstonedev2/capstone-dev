@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type {
   AdviserTitleRecord,
@@ -32,14 +32,14 @@ export type TitleSummaryMetric = {
 };
 
 type TitleFiltersProps = {
-  statusFilter: TitleStatus | 'all';
+  statusFilter: TitleStatus | 'all' | 'active';
   academicYearFilter: string;
   searchValue: string;
   sortBy: TitleSortOption;
   academicYearOptions: string[];
-  statusOptions: ReadonlyArray<{ value: TitleStatus | 'all'; label: string }>;
+  statusOptions: ReadonlyArray<{ value: TitleStatus | 'all' | 'active'; label: string }>;
   sortOptions: ReadonlyArray<{ value: TitleSortOption; label: string }>;
-  onStatusChange: (value: TitleStatus | 'all') => void;
+  onStatusChange: (value: TitleStatus | 'all' | 'active') => void;
   onAcademicYearChange: (value: string) => void;
   onSearchChange: (value: string) => void;
   onSortChange: (value: TitleSortOption) => void;
@@ -50,7 +50,6 @@ type GroupReviewListProps = {
   onViewDetails: (record: AdviserTitleRecord) => void;
   onViewApproved: () => void;
   hasPendingTitles: boolean;
-  onReviewEvidence: (record: AdviserTitleRecord) => void;
 };
 
 type TitleDetailsDrawerProps = {
@@ -93,6 +92,22 @@ const DEFENSE_APPLICATION_STAGES: Array<{
   { checkpointKey: 'proposal-defense-application', stageLabel: 'Proposal', reviewField: 'proposalEvidenceReview', alwaysShow: false },
   { checkpointKey: 'final-defense-application', stageLabel: 'Final', reviewField: 'finalEvidenceReview', alwaysShow: false }
 ];
+
+// A group's title can be fully decided while a later-stage evidence round (e.g.
+// Proposal or Final defense application evidence) is still awaiting the adviser —
+// so "is this group still actionable" can't be judged from record.status alone.
+// Shared by the card (badge count) and the list (default pending-only filter) so
+// they can't drift apart.
+export function getGroupPendingStageCount(record: AdviserTitleRecord) {
+  return DEFENSE_APPLICATION_STAGES.filter((stage) => {
+    const evidenceReview = record[stage.reviewField];
+    const status = evidenceReview?.status;
+    const hasFileForStage = (evidenceReview?.files?.length ?? 0) > 0;
+    // A stage with nothing uploaded yet isn't "awaiting" the adviser — it's
+    // waiting on the student, so it shouldn't inflate this count.
+    return hasFileForStage && (status === 'SUBMITTED' || status === 'IN_REVIEW' || !status);
+  }).length;
+}
 
 type TitleUploadedFile = AdviserTitleRecord['uploadedFiles'][number];
 
@@ -210,6 +225,21 @@ function getEvidenceReviewMeta(status?: string) {
     default:
       return { label: 'Not Uploaded Yet', className: 'bg-slate-100 text-slate-600 ring-slate-200', icon: 'fa-circle-exclamation' };
   }
+}
+
+function formatEvidenceUploadedAt(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
 }
 
 function getTitleReviewStage(record: AdviserTitleRecord) {
@@ -429,8 +459,7 @@ export function GroupReviewList({
   titles,
   onViewDetails,
   onViewApproved,
-  hasPendingTitles,
-  onReviewEvidence
+  hasPendingTitles
 }: GroupReviewListProps) {
   const pendingCount = titles.filter((record) => record.status === 'pending').length;
   const completedCount = titles.filter((record) => ['approved', 'needs-revision', 'rejected'].includes(record.status)).length;
@@ -445,9 +474,6 @@ export function GroupReviewList({
           </span>
           <div className="min-w-0">
             <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Group Review Queue</h2>
-            <p className="mt-1 text-sm font-medium text-[var(--muted)]">
-              Title and Oral Defense Application evidence for each group — one card per group.
-            </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
@@ -473,7 +499,6 @@ export function GroupReviewList({
               key={record.id}
               record={record}
               onViewDetails={onViewDetails}
-              onReviewEvidence={onReviewEvidence}
             />
           ))}
         </div>
@@ -486,12 +511,10 @@ export function GroupReviewList({
 
 function GroupReviewCard({
   record,
-  onViewDetails,
-  onReviewEvidence
+  onViewDetails
 }: {
   record: AdviserTitleRecord;
   onViewDetails: (record: AdviserTitleRecord) => void;
-  onReviewEvidence: (record: AdviserTitleRecord) => void;
 }) {
   const statusMeta = getTitleStatusMeta(record.status);
   const similarityMeta = getSimilarityMeta(record.similarityScore, record.similarTitles);
@@ -500,43 +523,11 @@ function GroupReviewCard({
   const reviewStage = getTitleReviewStage(record);
   const firstFile = record.uploadedFiles[0] || null;
 
-  const visibleStages = DEFENSE_APPLICATION_STAGES.filter((stage) => {
-    if (stage.alwaysShow) return true;
-
-    const evidenceReview = record[stage.reviewField];
-    const hasFile = (evidenceReview?.files?.length ?? 0) > 0;
-
-    return hasFile || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
-  });
-
-  // How many evidence files this group has uploaded across all visible stages —
-  // sourced from each stage's latest submission only (evidenceReview.files), so a
-  // resubmission after "Needs Revision" doesn't double-count the old, superseded
-  // photo alongside the new one.
-  const evidenceFileCount = visibleStages.reduce(
-    (total, stage) => total + (record[stage.reviewField]?.files?.length ?? 0),
-    0
-  );
-
-  // Surface the student's own upload note (or the adviser's prior feedback) right
-  // on the card, same as the "Next Step" quote below — otherwise this text only
-  // ever showed up after opening the Evidence drawer.
-  const noteStage = visibleStages.find((stage) => record[stage.reviewField]?.uploaderNote || record[stage.reviewField]?.feedback);
-  const noteReview = noteStage ? record[noteStage.reviewField] : null;
-  const noteText = noteReview?.uploaderNote || noteReview?.feedback || null;
-  const noteLabel = noteReview?.uploaderNote ? "Student's note" : 'Adviser feedback';
-
-  const pendingStageCount = visibleStages.filter((stage) => {
-    const evidenceReview = record[stage.reviewField];
-    const status = evidenceReview?.status;
-    const hasFileForStage = (evidenceReview?.files?.length ?? 0) > 0;
-    // A stage with nothing uploaded yet isn't "awaiting" the adviser — it's
-    // waiting on the student, so it shouldn't inflate this count.
-    return hasFileForStage && (status === 'SUBMITTED' || status === 'IN_REVIEW' || !status);
-  }).length;
-
   return (
-    <article className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/5">
+    <article
+      className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-[var(--primary)]/5 cursor-pointer"
+      onClick={() => onViewDetails(record)}
+    >
       <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[var(--primary)] to-[var(--color-info)] opacity-80 group-hover:opacity-100 transition-opacity" />
 
       <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.8fr)_260px] xl:items-stretch">
@@ -557,14 +548,14 @@ function GroupReviewCard({
           </div>
 
           <h3
-            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-4 overflow-hidden text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.title}
           >
             {record.title}
           </h3>
 
           <p
-            className="mt-3 max-w-4xl text-sm font-medium leading-relaxed text-[var(--muted)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-3 max-w-4xl overflow-hidden text-sm font-medium leading-relaxed text-[var(--muted)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={record.description}
           >
             {record.description}
@@ -658,36 +649,6 @@ function GroupReviewCard({
             </p>
           </div>
 
-          <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-inset ring-slate-200/80">
-            <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
-              <i className="fas fa-file-signature text-amber-500" /> Evidence
-            </p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {visibleStages.map((stage) => {
-                const meta = getEvidenceReviewMeta(record[stage.reviewField]?.status);
-                return (
-                  <span
-                    key={stage.checkpointKey}
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-black ring-1 ring-inset ${meta.className}`}
-                  >
-                    <i className={`fas ${meta.icon} text-[10px]`} aria-hidden="true" />
-                    {stage.stageLabel}: {meta.label}
-                  </span>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-xs font-bold text-slate-500">
-              {evidenceFileCount ? `${evidenceFileCount} file${evidenceFileCount === 1 ? '' : 's'}` : 'No file yet'}
-            </p>
-            {noteText ? (
-              <p
-                className="mt-2 text-xs italic leading-5 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-                title={noteText}
-              >
-                <span className="not-italic font-bold text-slate-600">{noteLabel}: </span>"{noteText}"
-              </p>
-            ) : null}
-          </div>
         </div>
 
         <div className="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--primary)]/15 bg-gradient-to-br from-[var(--primary)]/5 via-white to-white p-4">
@@ -697,7 +658,7 @@ function GroupReviewCard({
             </p>
             <p className="mt-3 text-sm font-bold leading-6 text-slate-700">{reviewStage.helper}</p>
             <p
-              className="mt-3 text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+              className="mt-3 overflow-hidden text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
               title={record.adviserAction}
             >
               "{record.adviserAction}"
@@ -713,22 +674,170 @@ function GroupReviewCard({
             >
               <i className="fas fa-up-right-from-square text-xs" /> {previewButtonLabel}
             </button>
-            <button
-              className="relative inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/15 px-4 text-sm font-black text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--accent)]/25"
-              type="button"
-              onClick={() => onReviewEvidence(record)}
-            >
-              <i className="fas fa-file-signature text-xs" /> Review Evidence
-              {pendingStageCount > 0 ? (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-600 px-1.5 text-[11px] font-black text-white">
-                  {pendingStageCount}
-                </span>
-              ) : null}
-            </button>
           </div>
         </div>
       </div>
 
+    </article>
+  );
+}
+
+// Split out from the Group Review Queue above for the same reason Other
+// Pending Documents is its own section: bundling a group's title status and
+// its Oral Defense Application evidence into one card made it unclear which
+// status/badge belonged to which thing, especially once evidence gets a new
+// pending round after the title itself is already decided. Only shows
+// groups with at least one stage still awaiting an adviser decision.
+export function EvidenceQueueList({
+  titles,
+  isLoading,
+  onReviewEvidence
+}: {
+  titles: AdviserTitleRecord[];
+  isLoading: boolean;
+  onReviewEvidence: (record: AdviserTitleRecord) => void;
+}) {
+  const pendingTitles = titles.filter((record) => getGroupPendingStageCount(record) > 0);
+
+  if (isLoading || !pendingTitles.length) {
+    return null;
+  }
+
+  return (
+    <section className="space-y-5">
+      <div className="flex items-center gap-4 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm">
+        <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 text-amber-600 ring-1 ring-amber-500/20 shadow-sm">
+          <i className="fas fa-file-signature text-lg" />
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Evidence Review Queue</h2>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {pendingTitles.map((record) => (
+          <EvidenceQueueCard key={record.id} record={record} onReviewEvidence={onReviewEvidence} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function EvidenceQueueCard({
+  record,
+  onReviewEvidence
+}: {
+  record: AdviserTitleRecord;
+  onReviewEvidence: (record: AdviserTitleRecord) => void;
+}) {
+  const visibleStages = DEFENSE_APPLICATION_STAGES.filter((stage) => {
+    if (stage.alwaysShow) return true;
+
+    const evidenceReview = record[stage.reviewField];
+    const hasFile = (evidenceReview?.files?.length ?? 0) > 0;
+
+    return hasFile || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
+  });
+
+  const evidenceFileCount = visibleStages.reduce(
+    (total, stage) => total + (record[stage.reviewField]?.files?.length ?? 0),
+    0
+  );
+
+  // Same rule as before: only fall back to the checkpoint's prior feedback
+  // when that stage's current status is itself a decision — a fresh
+  // unreviewed round has no decision yet, so showing older leftover feedback
+  // next to it would misleadingly suggest the adviser already looked at it.
+  const noteStage = visibleStages.find((stage) => {
+    const review = record[stage.reviewField];
+    if (!review) return false;
+    if (review.uploaderNote) return true;
+    return Boolean(review.feedback) && review.status !== 'SUBMITTED' && review.status !== 'IN_REVIEW';
+  });
+  const noteReview = noteStage ? record[noteStage.reviewField] : null;
+  const noteText = noteReview?.uploaderNote || noteReview?.feedback || null;
+  const noteLabel = noteReview?.uploaderNote ? "Student's note" : 'Adviser feedback';
+
+  const pendingStageCount = getGroupPendingStageCount(record);
+
+  return (
+    <article
+      className="group relative overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/40 hover:shadow-lg cursor-pointer"
+      onClick={() => onReviewEvidence(record)}
+    >
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-amber-500 to-amber-300 opacity-80 group-hover:opacity-100 transition-opacity" />
+
+      <div className="grid gap-6 p-6 xl:grid-cols-[minmax(0,1.45fr)_260px] xl:items-stretch">
+        <div className="min-w-0 pl-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-[var(--muted)] ring-1 ring-inset ring-[var(--border)] shadow-sm">
+              <i className="fas fa-layer-group text-[10px]" /> {record.department}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-warning)]/10 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-[var(--color-warning)]/25 shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+              </span>
+              {pendingStageCount} stage{pendingStageCount === 1 ? '' : 's'} pending
+            </span>
+          </div>
+
+          <h3 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)]" title={record.title}>
+            {record.title}
+          </h3>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm font-semibold">
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--primary)]/8 px-3 py-2 text-[var(--primary)] ring-1 ring-inset ring-[var(--primary)]/15">
+              <i className="fas fa-users-rectangle opacity-70" /> {record.groupId}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-slate-600 ring-1 ring-inset ring-slate-200">
+              <i className="fas fa-user-group opacity-60" />
+              {record.membersCount} members
+            </span>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {visibleStages.map((stage) => {
+              const meta = getEvidenceReviewMeta(record[stage.reviewField]?.status);
+              return (
+                <span
+                  key={stage.checkpointKey}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-black ring-1 ring-inset ${meta.className}`}
+                >
+                  <i className={`fas ${meta.icon} text-[10px]`} aria-hidden="true" />
+                  {stage.stageLabel}: {meta.label}
+                </span>
+              );
+            })}
+          </div>
+
+          <p className="mt-3 text-xs font-bold text-slate-500">
+            {evidenceFileCount ? `${evidenceFileCount} file${evidenceFileCount === 1 ? '' : 's'}` : 'No file yet'}
+          </p>
+
+          {noteText ? (
+            <p
+              className="mt-2 max-w-2xl overflow-hidden text-sm italic leading-6 text-slate-500 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+              title={noteText}
+            >
+              <span className="not-italic font-bold text-slate-600">{noteLabel}: </span>"{noteText}"
+            </p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col justify-center gap-3 rounded-2xl border border-amber-500/15 bg-gradient-to-br from-amber-500/5 via-white to-white p-4">
+          <button
+            className="relative inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/15 px-4 text-sm font-black text-amber-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--accent)]/25"
+            type="button"
+            onClick={() => onReviewEvidence(record)}
+          >
+            <i className="fas fa-file-signature text-xs" /> Review Evidence
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-600 px-1.5 text-[11px] font-black text-white">
+              {pendingStageCount}
+            </span>
+          </button>
+        </div>
+      </div>
     </article>
   );
 }
@@ -812,7 +921,7 @@ function OtherDocumentsQueueCard({
           </div>
 
           <h3
-            className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+            className="mt-4 overflow-hidden text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--primary)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
             title={group.projectTitle}
           >
             {group.projectTitle}
@@ -1734,6 +1843,19 @@ export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: Evid
     stageLabel: string;
   } | null>(null);
 
+  // A group can have multiple evidence stages pending at once, so a single decision
+  // shouldn't close the drawer out from under the adviser if other stages still need
+  // review. This flag is set right after a successful decision, and the effect below
+  // closes the drawer once the record (re-derived from fresh parent state) shows no
+  // pending stages left.
+  const justDecidedRef = useRef(false);
+  useEffect(() => {
+    if (record && justDecidedRef.current && getGroupPendingStageCount(record) === 0) {
+      justDecidedRef.current = false;
+      onClose();
+    }
+  }, [record, onClose]);
+
   const submitEvidenceDecision = async (
     checkpointKey: DefenseApplicationStageKey,
     decision: 'approved' | 'needs_revision'
@@ -1748,6 +1870,7 @@ export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: Evid
     try {
       await onReviewEvidence(record, decision, evidenceRemarksDrafts[checkpointKey] || '', checkpointKey);
       setEvidenceRemarksDrafts((current) => ({ ...current, [checkpointKey]: '' }));
+      justDecidedRef.current = true;
     } catch (error) {
       setEvidenceError(error instanceof Error ? error.message : 'Unable to update the evidence review.');
     } finally {
@@ -1811,11 +1934,22 @@ export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: Evid
             // hasn't reached yet — checking the file/status is what actually tells us
             // whether there's real activity to show.
             const hasStageActivity = evidenceFiles.length > 0 || (evidenceReview ? evidenceReview.status !== 'PENDING' : false);
+            // Once a stage is already decided there's nothing left to act on here — it
+            // already has a read-only home on Document Submissions (see
+            // toAdviserSubmissionRecordsFromEvidence in submission-workspace-data.ts),
+            // so this drawer (which exists to collect pending decisions) doesn't need
+            // to keep showing it too. This also removes the chance of an accidental
+            // re-decision flipping an approved stage back to Needs Revision, which now
+            // deletes its stored photo (see defense-application-evidence/route.ts).
+            const isDecided = evidenceReview
+              ? ['APPROVED', 'COMPLETED', 'REJECTED'].includes(evidenceReview.status)
+              : false;
 
             // Proposal/Final cards only appear once there's something to review — no point
             // cluttering the drawer with a card for a stage the group hasn't reached yet
-            // (Concept's card always shows, unchanged).
-            if (!stage.alwaysShow && !hasStageActivity) {
+            // (Concept's card otherwise always shows). A decided stage never shows here
+            // regardless of alwaysShow.
+            if (isDecided || (!stage.alwaysShow && !hasStageActivity)) {
               return null;
             }
 
@@ -1889,7 +2023,12 @@ export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: Evid
                         )}
                       </div>
                       <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-2.5">
-                        <span className="truncate text-xs font-bold text-slate-500">{evidenceFile.name}</span>
+                        <span className="truncate text-xs font-bold text-slate-500">
+                          {evidenceFile.name}
+                          {evidenceFile.uploadedAt ? (
+                            <span className="font-medium text-slate-400"> · {formatEvidenceUploadedAt(evidenceFile.uploadedAt)}</span>
+                          ) : null}
+                        </span>
                         <div className="flex shrink-0 gap-2">
                           <a
                             className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-black text-blue-700 transition hover:bg-blue-50"
@@ -1930,7 +2069,12 @@ export function EvidenceReviewDrawer({ record, onClose, onReviewEvidence }: Evid
                     </div>
                   ) : null}
 
-                  {evidenceReview ? (
+                  {evidenceReview && isDecided ? (
+                    <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-sm font-semibold text-slate-500 ring-1 ring-inset ring-slate-100">
+                      <i className="fas fa-circle-check text-emerald-500" aria-hidden="true" />
+                      Decision recorded for this stage. Re-review happens only after the group resubmits.
+                    </div>
+                  ) : evidenceReview ? (
                     <>
                       <label className="mt-4 block">
                         <span className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-slate-500">

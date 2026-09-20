@@ -25,6 +25,7 @@ const DOCUMENT_MANAGER_ROLES = [
 const ADVISER_REVIEW_ROLES = [
   UserRole.ADVISER,
   UserRole.PANEL,
+  UserRole.PROGRAM_HEAD,
   UserRole.RESEARCH_HEAD,
   UserRole.SYSTEM_ADMIN,
   UserRole.ADMIN

@@ -1443,24 +1443,34 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     () =>
       STUDENT_NAV_SECTIONS.map((section) => ({
         ...section,
-        items: STUDENT_NAV_ITEMS.filter((item) => {
-          if (item.section !== section.key) {
-            return false;
-          }
+        items: STUDENT_NAV_ITEMS.filter((item) => item.section === section.key)
+          .map((item) => {
+            if (!isLimitedWorkspace) {
+              return item;
+            }
 
-          if (!isLimitedWorkspace) {
-            return true;
-          }
-          
-          const hasGroup = Boolean(data?.group?.id && data.group.id !== '');
+            const hasGroup = Boolean(data?.group?.id && data.group.id !== '');
 
-          return item.key === 'dashboard' || item.key === 'repository' || (hasGroup && item.key === 'title-submission');
-        })
+            if (item.key === 'dashboard' || item.key === 'repository') {
+              return item;
+            }
+
+            if (item.key === 'project-overview' && hasGroup && 'children' in item) {
+              const titleChild = item.children.find((child) => child.key === 'title-submission');
+              return titleChild ? { ...item, children: [titleChild] } : null;
+            }
+
+            return null;
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null)
       })).filter((section) => section.items.length),
-    [isLimitedWorkspace]
+    [isLimitedWorkspace, data?.group?.id]
   );
   const sidebarRoutes = useMemo(
-    () => navigationSections.flatMap((section) => section.items.map((item) => item.href)),
+    () =>
+      navigationSections.flatMap((section) =>
+        section.items.flatMap((item) => [item.href, ...('children' in item ? item.children.map((child) => child.href) : [])])
+      ),
     [navigationSections]
   );
   const prefetchRoute = useRoutePrefetch(sidebarRoutes);
@@ -1538,7 +1548,37 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
     : sidebarCollapsed
       ? 'Expand sidebar'
       : 'Collapse sidebar';
-  const activeNavItem = STUDENT_NAV_ITEMS.find((item) => matchesRoute(pathname, item.href));
+  const activeNavItem = useMemo(() => {
+    for (const item of STUDENT_NAV_ITEMS) {
+      if ('children' in item) {
+        const activeChild = item.children.find((child) => matchesRoute(pathname, child.href));
+        if (activeChild) {
+          return activeChild;
+        }
+      }
+
+      if (matchesRoute(pathname, item.href)) {
+        return item;
+      }
+    }
+
+    return undefined;
+  }, [pathname]);
+  const projectOverviewNavItem = STUDENT_NAV_ITEMS.find((item) => item.key === 'project-overview');
+  const projectOverviewChildHrefs =
+    projectOverviewNavItem && 'children' in projectOverviewNavItem
+      ? projectOverviewNavItem.children.map((child) => child.href)
+      : [];
+  const isProjectOverviewGroupPath =
+    matchesRoute(pathname, '/students/project-overview') ||
+    projectOverviewChildHrefs.some((href) => matchesRoute(pathname, href));
+  const [projectOverviewMenuOpen, setProjectOverviewMenuOpen] = useState(isProjectOverviewGroupPath);
+
+  useEffect(() => {
+    if (isProjectOverviewGroupPath) {
+      setProjectOverviewMenuOpen(true);
+    }
+  }, [isProjectOverviewGroupPath]);
   const navbarTitle = activeNavItem?.key === 'dashboard'
     ? 'Student Dashboard'
     : activeNavItem?.label ?? 'Student Workspace';
@@ -1871,6 +1911,62 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                 {section.items.map((item) => {
                   const isActive = matchesRoute(pathname, item.href);
                   const count = item.key === 'faculty-feedback' ? unreadFeedbackCount : 0;
+                  const children = 'children' in item ? item.children : undefined;
+
+                  if (children && children.length) {
+                    const isChildActive = children.some((child) => matchesRoute(pathname, child.href));
+
+                    return (
+                      <div
+                        key={item.key}
+                        className={`sidebar-nav-dropdown${projectOverviewMenuOpen ? ' is-open' : ''}${isActive || isChildActive ? ' is-active' : ''}`}
+                      >
+                        <button
+                          aria-controls={`student-${item.key}-submenu`}
+                          aria-expanded={projectOverviewMenuOpen}
+                          className={`sidebar-link${isActive || isChildActive || projectOverviewMenuOpen ? ' is-active' : ''}`}
+                          title={sidebarCollapsed ? item.label : undefined}
+                          type="button"
+                          onFocus={() => prefetchRoute(item.href)}
+                          onMouseEnter={() => prefetchRoute(item.href)}
+                          onClick={() => {
+                            setProjectOverviewMenuOpen((current) => !current);
+                            if (!isActive) {
+                              router.push(item.href);
+                            }
+                          }}
+                        >
+                          <span className="sidebar-link-icon">
+                            <i aria-hidden="true" className={`fas ${item.icon}`} />
+                          </span>
+                          <span className="sidebar-link-label">{item.label}</span>
+                          <i aria-hidden="true" className="fas fa-chevron-down sidebar-nav-chevron" />
+                        </button>
+                        <div className="sidebar-submenu" id={`student-${item.key}-submenu`} aria-label={`${item.label} sections`}>
+                          {children.map((child) => {
+                            const isChildLinkActive = matchesRoute(pathname, child.href);
+
+                            return (
+                              <Link prefetch={false}
+                                key={child.key}
+                                aria-current={isChildLinkActive ? 'page' : undefined}
+                                className={`sidebar-link ${isChildLinkActive ? 'is-active' : ''}`}
+                                href={child.href}
+                                title={child.label}
+                                onFocus={() => prefetchRoute(child.href)}
+                                onMouseEnter={() => prefetchRoute(child.href)}
+                              >
+                                <span className="sidebar-link-icon">
+                                  <i aria-hidden="true" className={`fas ${child.icon}`} />
+                                </span>
+                                <span className="sidebar-link-label sidebar-link-label-truncate">{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  }
 
                   return (
                     <Link prefetch={false}

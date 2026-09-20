@@ -65,10 +65,12 @@ export type EvidenceReview = {
     fileType?: string;
     size: number | null;
     documentCategory?: string | null;
+    uploadedAt?: string | null;
   }>;
 } | null;
 
 export const TITLE_STATUS_FILTER_OPTIONS = [
+  { value: 'active', label: 'Active (Pending Only)' },
   { value: 'all', label: 'All Status' },
   { value: 'pending', label: 'Pending' },
   { value: 'approved', label: 'Approved' },

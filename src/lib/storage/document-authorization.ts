@@ -377,7 +377,12 @@ export function canAccessDocument(user: AuthUser, file: UploadedFileAccessRecord
   }
 
   if (user.role === UserRole.PROGRAM_HEAD) {
-    return isProgramDepartmentMatch(user, file.project);
+    // A program head can be directly assigned as a project's adviser (dual role,
+    // switching into Adviser Workspace) — that direct assignment must grant access
+    // even when their own department field doesn't happen to match this project's,
+    // otherwise they're locked out of documents for a project they're literally
+    // the adviser of.
+    return isProjectParticipant(user, file.project) || isProgramDepartmentMatch(user, file.project);
   }
 
   return false;

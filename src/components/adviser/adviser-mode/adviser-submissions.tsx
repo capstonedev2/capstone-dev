@@ -5,6 +5,7 @@ import { type DocumentFileSummary } from '@/components/documents/document-file-c
 import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import {
   FiltersBar,
+  SubmissionDetailsModal,
   SubmissionFocusPanel,
   SubmissionList,
   SummaryCards,
@@ -19,6 +20,7 @@ import {
   getSubmissionTypeOptions,
   toAdviserSubmissionRecord,
   toAdviserSubmissionRecordFromTitle,
+  toAdviserSubmissionRecordsFromEvidence,
   type AdviserSubmissionRecord,
   type SubmissionMilestone,
   type SubmissionSortOption,
@@ -41,11 +43,13 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
   const [studentDocumentError, setStudentDocumentError] = useState<string | null>(null);
   const [isLoadingStudentDocuments, setIsLoadingStudentDocuments] = useState(true);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [viewingSubmission, setViewingSubmission] = useState<AdviserSubmissionRecord | null>(null);
 
   const submissions = useMemo<AdviserSubmissionRecord[]>(
     () => [
       ...studentDocuments.map((file, index) => toAdviserSubmissionRecord(file, index)),
-      ...titleSubmissions.map((title) => toAdviserSubmissionRecordFromTitle(title))
+      ...titleSubmissions.map((title) => toAdviserSubmissionRecordFromTitle(title)),
+      ...titleSubmissions.flatMap((title) => toAdviserSubmissionRecordsFromEvidence(title))
     ],
     [studentDocuments, titleSubmissions]
   );
@@ -167,32 +171,18 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
     });
   }
 
-  async function openSignedStudentDocument(submission: AdviserSubmissionRecord) {
-    try {
-      const response = await fetch(`/api/document-files/${submission.id}/signed-url`, { method: 'POST' });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload?.message || 'Unable to open the document.');
-      }
-
-      window.open(payload.signedUrl, '_blank', 'noopener,noreferrer');
-    } catch (error) {
-      setStudentDocumentError(error instanceof Error ? error.message : 'Unable to open the document.');
-    }
-  }
-
   function downloadSubmissionDocument(submission: AdviserSubmissionRecord) {
-    // Title rows aren't backed by a document-files record — they carry the file's
-    // direct URL (if the student attached one) instead of an id this endpoint knows.
-    if (submission.type === 'Title') {
-      if (submission.fileUrl) {
-        window.open(submission.fileUrl, '_blank', 'noopener,noreferrer');
-      }
+    // Title and Evidence rows use a synthetic id (not a real document-files id),
+    // so route through the real file id when one exists rather than assuming
+    // submission.id names a downloadable file.
+    if (submission.previewFileId) {
+      window.open(`/api/document-files/${submission.previewFileId}/download`, '_blank', 'noopener,noreferrer');
       return;
     }
 
-    window.open(`/api/document-files/${submission.id}/download`, '_blank', 'noopener,noreferrer');
+    if (submission.fileUrl) {
+      window.open(submission.fileUrl, '_blank', 'noopener,noreferrer');
+    }
   }
 
   async function updateSubmissionReviewStatus(
@@ -342,41 +332,47 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
         id: 'pending-review',
         label: 'Pending Reviews',
         value: pendingReviewCount,
-        helperText: 'Waiting for first adviser review.',
         icon: 'fa-clock',
-        tone: 'orange'
+        tone: 'orange',
+        filterStatus: 'pending-review'
       },
       {
         id: 'under-review',
         label: 'Under Review',
         value: underReviewCount,
-        helperText: 'Currently inside the adviser review flow.',
         icon: 'fa-pen-to-square',
-        tone: 'orange'
+        tone: 'orange',
+        filterStatus: 'under-review'
       },
       {
         id: 'needs-revision',
         label: 'Needs Revision',
         value: needsRevisionCount,
-        helperText: 'Revision requested with resubmission unlocked.',
         icon: 'fa-rotate-left',
-        tone: 'red'
+        tone: 'red',
+        filterStatus: 'needs-revision'
       },
       {
         id: 'approved-this-week',
         label: 'Approved This Week',
         value: approvedThisWeekCount,
-        helperText: 'Student notified with final adviser remarks.',
         icon: 'fa-circle-check',
-        tone: 'green'
+        tone: 'green',
+        // Not an exact match (this counts only approvals from the last 7 days,
+        // while the filter shows every approved item) but it's the closest
+        // available status filter, and clicking through to a superset the
+        // adviser can then narrow further beats not filtering at all.
+        filterStatus: 'approved'
       },
       {
         id: 'awaiting-resubmission',
         label: 'Awaiting Resubmission',
         value: awaitingResubmissionCount,
-        helperText: 'Waiting for students to upload a new version.',
         icon: 'fa-users-gear',
-        tone: 'purple'
+        tone: 'purple',
+        // Same underlying count as Needs Revision today (see awaitingResubmissionCount
+        // above) — filters to the same status.
+        filterStatus: 'needs-revision'
       }
     ],
     [approvedThisWeekCount, awaitingResubmissionCount, needsRevisionCount, pendingReviewCount, underReviewCount]
@@ -395,7 +391,12 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
             isLoading={isLoadingStudentDocuments}
           />
 
-          <SummaryCards metrics={summaryMetrics} isLoading={isLoadingStudentDocuments} />
+          <SummaryCards
+            metrics={summaryMetrics}
+            isLoading={isLoadingStudentDocuments}
+            activeStatus={statusFilter}
+            onSelect={setStatusFilter}
+          />
 
           {studentDocumentError ? (
             <div className="project-files-state is-danger">
@@ -443,12 +444,19 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
               'accepted',
               ''
             )}
-            onViewSubmission={openSignedStudentDocument}
+            onViewSubmission={setViewingSubmission}
             submissions={filteredSubmissions}
             totalSubmissions={submissions.length}
           />
         </div>
       </div>
+
+      {viewingSubmission ? (
+        <SubmissionDetailsModal
+          submission={viewingSubmission}
+          onClose={() => setViewingSubmission(null)}
+        />
+      ) : null}
     </div>
   );
 }

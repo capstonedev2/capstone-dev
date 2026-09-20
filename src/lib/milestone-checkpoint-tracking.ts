@@ -68,7 +68,7 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
     description: 'Submit the formal project proposal for adviser and panel evaluation and approval.',
     sequence: 2,
     checkpoints: [
-      { key: 'proposal-chapters', title: 'Chapters 1-3 uploaded', description: 'Proposal manuscript or Chapters 1-3 were submitted.', sequence: 1, panelRequired: false },
+      { key: 'proposal-chapters', title: 'Proposal document uploaded', description: 'Proposal manuscript or chapter documents were submitted.', sequence: 1, panelRequired: false },
       { key: 'proposal-adviser-review', title: 'Adviser initial review', description: 'Adviser completed the first proposal review.', sequence: 2, panelRequired: false },
       { key: 'proposal-defense-application', title: 'Oral defense application form uploaded', description: 'Photo evidence of the signed Application for Oral Defense of Thesis (Proposal) — cleared by the Research Head, Director, and Program Head — is uploaded from Document Submissions and independently reviewed by the adviser.', sequence: 3, panelRequired: false },
       { key: 'proposal-defense-scheduled', title: 'Proposal defense scheduled', description: 'Proposal defense schedule is recorded once the oral defense application evidence is approved.', sequence: 4, panelRequired: false, adviserRequired: false },
@@ -82,7 +82,7 @@ export const THESIS_MILESTONE_WORKFLOW: WorkflowStage[] = [
     description: 'Build the system, submit progress reports, and provide implementation evidence.',
     sequence: 3,
     checkpoints: [
-      { key: 'development-prototype', title: 'Prototype uploaded', description: 'Prototype or system build evidence was uploaded.', sequence: 1, panelRequired: false },
+      { key: 'development-prototype', title: 'System / Prototype uploaded', description: 'Prototype, system build, or implementation evidence was uploaded.', sequence: 1, panelRequired: false },
       { key: 'development-progress-report', title: 'Progress report submitted', description: 'Development progress report was submitted.', sequence: 2, panelRequired: false },
       { key: 'development-testing-evidence', title: 'Testing evidence uploaded', description: 'Testing or validation evidence was uploaded.', sequence: 3, panelRequired: false },
       { key: 'development-adviser-monitoring', title: 'Adviser monitoring approval', description: 'Adviser cleared the development monitoring checkpoint.', sequence: 4, panelRequired: false }
@@ -1298,6 +1298,58 @@ export async function resetGroupForNewTitle(
       statusClass: 'status-warning',
       milestone: 'Awaiting initial progress update',
       currentMilestone: 'Awaiting initial progress update'
+    }
+  });
+}
+
+// Only the title decision itself and the (now-invalid) defense schedule/panel
+// vote tied to it reopen — the group's already-submitted proposal chapters and
+// oral defense application evidence are unaffected by a title change and don't
+// need to be redone.
+const NEW_TITLE_RESET_CHECKPOINT_KEYS = ['proposal-adviser-review', 'proposal-defense-scheduled', 'proposal-panel-evaluation'];
+
+/**
+ * Used specifically when a Proposal (or later) defense panel decides a group needs
+ * a New Title, after that group's Concept stage already passed. Unlike
+ * resetGroupForNewTitle (which fully archives the project and unlinks the group —
+ * correct for a general-purpose "start over" demotion at any stage), this keeps the
+ * same Project row and its Group link intact, so Concept-stage checkpoints,
+ * evidence, and approvals stay exactly as they were. Only the title's own adviser
+ * review and the defense schedule/panel vote that rejected it reopen — the
+ * group's proposal documents and defense evidence are untouched, since a new
+ * title doesn't invalidate work that isn't about the title itself.
+ */
+export async function resetProjectForNewTitle(
+  db: DbClient,
+  { projectId, previousTitle, chairRemarks }: { projectId: string; previousTitle: string; chairRemarks?: string | null }
+) {
+  await db.project.update({
+    where: { id: projectId },
+    data: { status: ProjectStatus.NEEDS_REVISION }
+  });
+
+  // Surfaced right on the checkpoint the student already checks progress on
+  // (Milestones page), so it's unambiguous their old title is gone and why —
+  // not just a notification that can get missed/dismissed.
+  const rejectionNote = `Previous title "${previousTitle}" was not approved — the panel required a new title.${
+    chairRemarks ? ` Panel remarks: ${chairRemarks}` : ''
+  } Submit a replacement title to continue.`;
+
+  await db.milestoneCheckpoint.updateMany({
+    where: {
+      projectId,
+      key: { in: NEW_TITLE_RESET_CHECKPOINT_KEYS }
+    },
+    data: {
+      status: MilestoneCheckpointStatus.PENDING,
+      adviserReviewStatus: MilestoneCheckpointReviewStatus.PENDING,
+      panelReviewStatus: MilestoneCheckpointReviewStatus.PENDING,
+      submittedAt: null,
+      reviewedAt: null,
+      completedAt: null,
+      latestFeedback: rejectionNote,
+      latestFeedbackBy: 'Defense Panel Chair',
+      latestFeedbackAt: new Date()
     }
   });
 }

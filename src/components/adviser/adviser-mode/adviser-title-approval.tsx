@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AdviserPageHeader } from '@/components/adviser/shared/components/adviser-page-header';
 import { AdviserShellActions } from '@/components/adviser/shared/components/adviser-shell-actions';
-import { NAV_ITEMS, WORKSPACE_META, isNavItemActive, getShortName } from '@/components/adviser/shared/config/dashboard-utils';
+import { NAV_ITEMS, WORKSPACE_META, isNavItemActive, getShortName, getToastIcon } from '@/components/adviser/shared/config/dashboard-utils';
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
 import {
+  EvidenceQueueList,
   EvidenceReviewDrawer,
   GroupReviewList,
   OtherDocumentsQueueList,
@@ -43,7 +44,7 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const [titleRecords, setTitleRecords] = useState<AdviserTitleRecord[]>([]);
   const [titleError, setTitleError] = useState<string | null>(null);
   const [isLoadingTitles, setIsLoadingTitles] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<TitleStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<TitleStatus | 'all' | 'active'>('active');
   const [academicYearFilter, setAcademicYearFilter] = useState('all');
   const [searchValue, setSearchValue] = useState('');
   const [sortBy, setSortBy] = useState<TitleSortOption>('newest');
@@ -53,8 +54,18 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
   const [otherDocuments, setOtherDocuments] = useState<DocumentFileSummary[]>([]);
   const [isLoadingOtherDocuments, setIsLoadingOtherDocuments] = useState(true);
   const [savingOtherDocumentId, setSavingOtherDocumentId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ id: number; message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const adviserMeta = WORKSPACE_META[workspaceMode];
+
+  function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
+    const id = Date.now();
+    setToast({ id, message, type });
+
+    window.setTimeout(() => {
+      setToast((current) => (current?.id === id ? null : current));
+    }, 3200);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -111,7 +122,16 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
         const payload = await response.json();
 
         if (!cancelled) {
-          setOtherDocuments(getAdviserReviewQueueFiles(payload.files || []));
+          // getAdviserReviewQueueFiles() is shared with the Document Submissions
+          // audit page, which intentionally shows every status — it doesn't filter
+          // out already-decided files. This queue's whole purpose is "still
+          // pending," so filter that in here too, otherwise a file approved from
+          // this section would silently reappear the next time this page loads.
+          const pendingOnly = getAdviserReviewQueueFiles(payload.files || []).filter((file) => {
+            const status = String(file.submissionStatus || '').toUpperCase();
+            return status === 'SUBMITTED' || status === 'UNDER_REVIEW';
+          });
+          setOtherDocuments(pendingOnly);
         }
       } finally {
         if (!cancelled) {
@@ -203,8 +223,16 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
 
       setOtherDocuments((current) => current.filter((item) => item.id !== file.id));
       window.dispatchEvent(new Event('thesistrack:notifications-updated'));
+      showToast(
+        decision === 'approved'
+          ? `Approved "${file.fileName}".`
+          : `Revision requested for "${file.fileName}".`,
+        'success'
+      );
     } catch (error) {
-      setTitleError(error instanceof Error ? error.message : 'Unable to update the review status.');
+      const message = error instanceof Error ? error.message : 'Unable to update the review status.';
+      setTitleError(message);
+      showToast(message, 'error');
     } finally {
       setSavingOtherDocumentId(null);
     }
@@ -235,7 +263,15 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
     const normalizedSearch = searchValue.trim().toLowerCase();
 
     const filtered = titleRecords.filter((record) => {
-      const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
+      // Evidence pendingness used to also keep an otherwise-decided title
+      // showing here, back when Evidence was bundled into this same card.
+      // Now that Evidence Review Queue is its own section, this filter only
+      // needs to reflect the title decision itself.
+      const matchesStatus = statusFilter === 'all'
+        ? true
+        : statusFilter === 'active'
+          ? record.status === 'pending'
+          : record.status === statusFilter;
       const matchesAcademicYear =
         academicYearFilter === 'all' || record.academicYear === academicYearFilter;
       const matchesSearch =
@@ -436,9 +472,14 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
               }}
               onViewDetails={(record) => setSelectedTitleId(record.id)}
               titles={filteredRecords}
-              onReviewEvidence={(record) => setSelectedEvidenceTitleId(record.id)}
             />
           )}
+
+          <EvidenceQueueList
+            titles={titleRecords}
+            isLoading={isLoadingTitles}
+            onReviewEvidence={(record) => setSelectedEvidenceTitleId(record.id)}
+          />
 
           <OtherDocumentsQueueList
             groups={otherDocumentGroups}
@@ -466,6 +507,23 @@ export function AdviserTitleApproval({ data }: { data: AdviserDashboardData }) {
             onClose={() => setSelectedEvidenceTitleId(null)}
             onReviewEvidence={applyEvidenceDecision}
           />
+        ) : null}
+
+        {toast ? (
+          <div className="notification">
+            <i
+              className={`fas ${getToastIcon(toast.type)}`}
+              style={{
+                color:
+                  toast.type === 'success'
+                    ? 'var(--success)'
+                    : toast.type === 'error'
+                      ? 'var(--danger)'
+                      : 'var(--primary)'
+              }}
+            />
+            <span>{toast.message}</span>
+          </div>
         ) : null}
       </>
   );

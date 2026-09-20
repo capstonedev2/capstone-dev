@@ -3,7 +3,7 @@ import { UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { getAuthorizedDocumentFile } from '@/lib/storage/document-authorization';
 import { assertDocumentBucket, createSignedUrl } from '@/lib/storage/supabase-storage';
-import { handleApiError } from '@/lib/utils';
+import { HttpError, handleApiError } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 
@@ -29,10 +29,15 @@ export async function GET(
     const user = await requireAuthenticatedUser(request, DOCUMENT_VIEWER_ROLES);
     const { id } = await props.params;
     const file = await getAuthorizedDocumentFile(id, user);
+
+    if (!file.filePath) {
+      throw new HttpError('This file was removed from storage after a revision request and is no longer available.', 410);
+    }
+
     const bucketName = file.bucketName!;
     assertDocumentBucket(bucketName);
 
-    const signedUrl = await createSignedUrl(bucketName, file.filePath!, 60);
+    const signedUrl = await createSignedUrl(bucketName, file.filePath, 60);
     const upstream = await fetch(signedUrl);
 
     if (!upstream.ok || !upstream.body) {

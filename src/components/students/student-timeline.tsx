@@ -172,7 +172,7 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
     scheduleKeywords: ['proposal', 'defense'],
     feedbackKeywords: ['proposal', 'chapter'],
     checkpoints: [
-      { id: 'proposal-chapters', label: 'Chapters 1-3 uploaded', kind: 'chapters-uploaded' },
+      { id: 'proposal-chapters', label: 'Proposal document uploaded', kind: 'chapters-uploaded' },
       { id: 'proposal-adviser-review', label: 'Adviser initial review', kind: 'adviser-review' },
       { id: 'proposal-defense-application', label: 'Oral defense application uploaded', kind: 'proposal-defense-application' },
       { id: 'proposal-defense-scheduled', label: 'Proposal defense scheduled', kind: 'proposal-defense-scheduled' },
@@ -193,7 +193,7 @@ const STAGE_BLUEPRINTS: StageBlueprint[] = [
     scheduleKeywords: ['development', 'monitoring', 'consultation'],
     feedbackKeywords: ['development', 'prototype', 'testing', 'progress'],
     checkpoints: [
-      { id: 'development-prototype', label: 'Prototype uploaded', kind: 'prototype-uploaded' },
+      { id: 'development-prototype', label: 'System / Prototype uploaded', kind: 'prototype-uploaded' },
       { id: 'development-progress-report', label: 'Progress report submitted', kind: 'progress-report' },
       { id: 'development-testing-evidence', label: 'Testing evidence uploaded', kind: 'testing-evidence' },
       { id: 'development-adviser-monitoring', label: 'Adviser monitoring approval', kind: 'monitoring-approval' }
@@ -617,7 +617,7 @@ function getCheckpointStatus(
     case 'chapters-uploaded':
       return hasEvidence
         ? { ...checkpoint, status: 'completed', note: `${evidence.length} proposal file${evidence.length === 1 ? '' : 's'} submitted.` }
-        : { ...checkpoint, status: 'pending', note: 'Upload Chapters 1-3.' };
+        : { ...checkpoint, status: 'pending', note: 'Upload the proposal manuscript or chapter documents.' };
     case 'adviser-review':
       if (revisionFeedback) return { ...checkpoint, status: 'needs-revision', note: 'Adviser feedback requires revision.' };
       if (adviserFeedback || approvedFeedback) return { ...checkpoint, status: 'completed', note: 'Adviser review has been logged.' };
@@ -642,8 +642,8 @@ function getCheckpointStatus(
         : { ...checkpoint, status: 'pending', note: 'Requires panel evaluation.' };
     case 'prototype-uploaded':
       return hasEvidence
-        ? { ...checkpoint, status: 'completed', note: 'Prototype evidence is available.' }
-        : { ...checkpoint, status: 'pending', note: 'Upload prototype evidence.' };
+        ? { ...checkpoint, status: 'completed', note: 'System/prototype evidence is available.' }
+        : { ...checkpoint, status: 'pending', note: 'Upload your system, prototype, or implementation evidence.' };
     case 'progress-report':
       return data.progressReports.length
         ? { ...checkpoint, status: 'completed', note: `${data.progressReports.length} progress report${data.progressReports.length === 1 ? '' : 's'} submitted.` }
