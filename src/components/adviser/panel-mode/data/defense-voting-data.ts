@@ -17,7 +17,7 @@ export type DefenseVotingPanelist = {
 
 export type DefenseVotingStatus = 'awaiting-vote' | 'awaiting-others' | 'passed' | 'needs-redefense';
 
-export type DefenseChairDecision = 'APPROVED' | 'REDEFENSE' | 'NEW_TITLE';
+export type DefenseChairDecision = 'APPROVED' | 'REDEFENSE' | 'NEW_TITLE' | 'NEW_TITLE_APPROVED';
 
 export type DefenseVotingRecord = {
   id: string;

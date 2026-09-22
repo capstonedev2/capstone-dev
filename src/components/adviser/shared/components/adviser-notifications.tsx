@@ -7,6 +7,7 @@ import { NAV_ITEMS, WORKSPACE_META, isNavItemActive } from '@/components/adviser
 import { useWorkspaceMode } from '@/components/adviser/shared/hooks/use-workspace-mode';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 import type { PortalNotificationItem } from '@/components/shared/portal-shell-action-menus';
+import { isBackupTitleNotification } from '@/lib/notification-tags';
 
 export type AdviserNotificationRecord = {
   id: string;
@@ -42,7 +43,8 @@ export function AdviserNotifications({
     meta: item.meta,
     tone: item.tone,
     unread: item.status !== 'read',
-    actionLabel: 'Open'
+    actionLabel: 'Open',
+    tag: isBackupTitleNotification(item.title) ? 'Backup' : undefined
   }));
 
   const markNotificationRead = (notificationId: string) => {
@@ -135,15 +137,22 @@ export function AdviserNotifications({
                     
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-                          <h4 className={`text-[1.05rem] font-bold leading-tight transition-colors ${isUnread ? 'text-slate-900 group-hover:text-blue-700' : 'text-slate-700 group-hover:text-slate-900'}`}>
-                            {'href' in item && item.href ? (
-                               <Link href={item.href} prefetch={false} onClick={() => markNotificationRead(item.id)} className="focus:outline-none before:absolute before:inset-0 before:z-10 before:rounded-[24px]">
-                                 {item.title}
-                               </Link>
-                            ) : (
-                               item.title
+                          <div className="flex min-w-0 items-center gap-2">
+                            <h4 className={`text-[1.05rem] font-bold leading-tight transition-colors ${isUnread ? 'text-slate-900 group-hover:text-blue-700' : 'text-slate-700 group-hover:text-slate-900'}`}>
+                              {'href' in item && item.href ? (
+                                 <Link href={item.href} prefetch={false} onClick={() => markNotificationRead(item.id)} className="focus:outline-none before:absolute before:inset-0 before:z-10 before:rounded-[24px]">
+                                   {item.title}
+                                 </Link>
+                              ) : (
+                                 item.title
+                              )}
+                            </h4>
+                            {isBackupTitleNotification(item.title) && (
+                              <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-300">
+                                Backup
+                              </span>
                             )}
-                          </h4>
+                          </div>
                           <span className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 bg-white px-3 py-1.5 rounded-full ring-1 ring-slate-200 shadow-sm z-20">
                             <i className="fas fa-clock text-slate-400" /> {item.time}
                           </span>

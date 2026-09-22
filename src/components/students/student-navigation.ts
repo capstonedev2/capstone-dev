@@ -13,7 +13,7 @@ export const STUDENT_NAV_ITEMS = [
     section: 'workspace',
     children: [
       { key: 'submit', label: 'Submit Docs', href: '/students/submit', icon: 'fa-paper-plane' },
-      { key: 'title-submission', label: 'Title Submission', href: '/students/title-submission', icon: 'fa-pen-to-square' },
+      { key: 'title-submission', label: 'My Title', href: '/students/title-submission', icon: 'fa-pen-to-square' },
       { key: 'project-files', label: 'Document Tracker', href: '/students/project-files', icon: 'fa-book-open-reader' }
     ]
   },

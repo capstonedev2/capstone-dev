@@ -75,10 +75,21 @@ function createExcerpt(value: string, maxLength = 150) {
 }
 
 function getStatusTone(status: string): BadgeTone {
-  const normalized = status.toLowerCase();
+  // Raw Prisma enum values (e.g. "UNDER_REVIEW", "DEFENSE_SCHEDULED") use
+  // underscores, but several match keywords below are space-separated
+  // multi-word phrases ("under review", "in development") — without this,
+  // those specific keywords never matched an underscored enum value.
+  const normalized = status.toLowerCase().replace(/_/g, ' ');
 
   if (
-    ['approved', 'completed', 'resolved', 'confirmed', 'ready', 'success'].some(kw => normalized.includes(kw))
+    // 'defense scheduled' is treated as an approved-equivalent status
+    // throughout the backend (repository eligibility, tech-transfer,
+    // document-file access) — the project's title has already been approved,
+    // a defense is just now on the calendar for it. Without this, the
+    // dashboard's title card fell back to the "pending approval" locked
+    // state for every DEFENSE_SCHEDULED project, even ones with a long-since
+    // approved title.
+    ['approved', 'completed', 'resolved', 'confirmed', 'ready', 'success', 'defense scheduled'].some(kw => normalized.includes(kw))
   ) {
     return 'success';
   }

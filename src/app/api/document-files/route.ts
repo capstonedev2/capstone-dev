@@ -176,19 +176,42 @@ export async function GET(request: Request) {
       assertDocumentBucket(bucketName);
     }
 
-    const adviserPanelProjectWhere = user.role === UserRole.ADVISER || user.role === UserRole.PANEL
+    // An Adviser and a Panel member need different scoping here, even though
+    // both can hold an Evaluation row on the same project: being asked to sit
+    // on one defense panel for a group you don't advise shouldn't pull that
+    // group's entire document history into your own "documents from groups I
+    // advise" queue (Document Submissions, Other Pending Documents) — that
+    // panel duty belongs to the Evaluations/defense-voting flow instead. A
+    // Panel account, by contrast, has no advisee projects of its own at all —
+    // the evaluator condition is its only legitimate grant, so it stays.
+    const adviserPanelProjectWhere = user.role === UserRole.ADVISER
       ? {
           OR: [
             { adviserId: user.id },
-            { group: { groupMembers: { some: { userId: user.id, isActive: true } } } },
-            { evaluations: { some: { evaluatorId: user.id } } }
+            { group: { groupMembers: { some: { userId: user.id, isActive: true } } } }
           ]
         }
-      : null;
+      : user.role === UserRole.PANEL
+        ? {
+            OR: [
+              { adviserId: user.id },
+              { group: { groupMembers: { some: { userId: user.id, isActive: true } } } },
+              { evaluations: { some: { evaluatorId: user.id } } }
+            ]
+          }
+        : null;
 
     const where = {
       ...(bucketName ? { bucketName } : { bucketName: { not: null } }),
       ...(projectId ? { projectId } : {}),
+      // Backup title attachments (see /api/title-drafts) share this same
+      // thesis-documents bucket and (for a student) the same uploader — so
+      // without this they'd otherwise leak into the generic document listing
+      // here (a student's own Document Tracker, or an adviser/oversight
+      // role's submissions queue) even though they were never submitted
+      // anywhere. They stay reachable only through the dedicated
+      // /api/title-drafts* endpoints.
+      titleDraftId: null,
       ...(user.role === UserRole.STUDENT ? { userId: user.id } : {}),
       ...(adviserPanelProjectWhere ? { project: adviserPanelProjectWhere } : {}),
       ...(user.role === UserRole.PROGRAM_HEAD && user.department

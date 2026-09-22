@@ -1,14 +1,26 @@
-import { DefenseChairDecision, DefensePanelRole, DefenseStatus } from '@/generated/prisma/client';
+import { DefenseChairDecision, DefensePanelRole, DefenseStatus, MilestoneCheckpointReviewStatus } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { HttpError, handleApiError, parseJsonBody, successResponse } from '@/lib/utils';
-import { applyDefensePassOutcome, attachDefenseDecisionFeedback, resetProjectForNewTitle } from '@/lib/milestone-checkpoint-tracking';
+import { HttpError, handleApiError, normalizeText, parseJsonBody, successResponse } from '@/lib/utils';
+import {
+  applyDefensePassOutcome,
+  attachDefenseDecisionFeedback,
+  getNewTitleRecoveryStage,
+  resetProjectForNewTitle,
+  restartDefenseVoteForBackupTitle
+} from '@/lib/milestone-checkpoint-tracking';
 
 export const runtime = 'nodejs';
 
 type ChairDecisionBody = {
-  decision: 'approve' | 'redefense' | 'new_title';
+  decision: 'approve' | 'redefense' | 'new_title' | 'new_title_approved';
   remarks?: string;
+  // Only used for 'new_title_approved' — the replacement title the group
+  // presented and the chair is clearing in this same sitting.
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  backupDraftId?: string;
 };
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -17,7 +29,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const authUser = await requireAuthenticatedUser(request);
     const body = await parseJsonBody<ChairDecisionBody>(request);
 
-    if (body.decision !== 'approve' && body.decision !== 'redefense' && body.decision !== 'new_title') {
+    if (
+      body.decision !== 'approve' &&
+      body.decision !== 'redefense' &&
+      body.decision !== 'new_title' &&
+      body.decision !== 'new_title_approved'
+    ) {
       throw new HttpError('Invalid decision.', 400);
     }
 
@@ -68,18 +85,85 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       ? DefenseChairDecision.APPROVED
       : body.decision === 'redefense'
         ? DefenseChairDecision.REDEFENSE
-        : DefenseChairDecision.NEW_TITLE;
+        : body.decision === 'new_title_approved'
+          ? DefenseChairDecision.NEW_TITLE_APPROVED
+          : DefenseChairDecision.NEW_TITLE;
     const remarks = body.remarks?.trim() || null;
     const reviewerName = authUser.displayName || authUser.name || undefined;
 
-    await prisma.defenseSchedule.update({
-      where: { id: schedule.id },
-      data: {
-        chairDecision: decision,
-        chairDecisionAt: new Date(),
-        chairDecisionRemarks: remarks
+    let replacementTitle = '';
+    let replacementDescription = normalizeText(body.description);
+    let replacementKeywords = Array.isArray(body.keywords)
+      ? body.keywords.map((keyword) => normalizeText(keyword)).filter(Boolean)
+      : [];
+
+    if (decision === DefenseChairDecision.NEW_TITLE_APPROVED) {
+      // No freeform typing, at Concept or Proposal+ — this only clears a
+      // backup the adviser has ALREADY reviewed and approved. Real vetting
+      // already happened, it just wasn't live in the room. The submitted
+      // content must match that backup exactly, the same trust boundary
+      // POST /api/title-submissions uses for its own pre-approved-backup
+      // shortcut.
+      const requestedBackupDraftId = normalizeText(body.backupDraftId);
+      if (!requestedBackupDraftId) {
+        throw new HttpError(
+          'Approve Backup Title only works with a backup your adviser has already approved. Pick one, or use New Title instead.',
+          400
+        );
       }
-    });
+
+      const backup = await prisma.titleDraft.findFirst({
+        where: {
+          id: requestedBackupDraftId,
+          groupId: schedule.project.groupId || undefined,
+          reviewStatus: MilestoneCheckpointReviewStatus.APPROVED
+        },
+        select: { title: true, description: true, keywords: true }
+      });
+
+      if (!backup) {
+        throw new HttpError('That backup was not found or is not adviser-approved yet.', 400);
+      }
+
+      const sortedKeywordsMatch = (a: string[], b: string[]) =>
+        a.length === b.length && [...a].sort().join('\u0000') === [...b].sort().join('\u0000');
+
+      if (
+        normalizeText(body.title).toLowerCase() !== normalizeText(backup.title).toLowerCase() ||
+        normalizeText(body.description).toLowerCase() !== normalizeText(backup.description || '').toLowerCase() ||
+        !sortedKeywordsMatch(replacementKeywords, backup.keywords)
+      ) {
+        throw new HttpError('The submitted title no longer matches the approved backup exactly. Reselect it before approving.', 400);
+      }
+
+      replacementTitle = normalizeText(backup.title);
+      replacementDescription = normalizeText(backup.description || '');
+      replacementKeywords = backup.keywords;
+
+      if (replacementTitle.toLowerCase() === schedule.project.title.trim().toLowerCase()) {
+        throw new HttpError('This is the same title that was just rejected. Enter the genuinely different one that was presented.', 400);
+      }
+    }
+
+    // NEW_TITLE_APPROVED is excluded here — it never lands as a final,
+    // persisted decision. restartDefenseVoteForBackupTitle below reopens this
+    // same schedule row for a fresh vote instead, and explicitly clears
+    // chairDecision back to null so the voting UI reappears rather than a
+    // decided-recap view.
+    if (decision !== DefenseChairDecision.NEW_TITLE_APPROVED) {
+      await prisma.defenseSchedule.update({
+        where: { id: schedule.id },
+        data: {
+          chairDecision: decision,
+          chairDecisionAt: new Date(),
+          chairDecisionRemarks: remarks,
+          // Project.title gets overwritten in place once the group submits a
+          // replacement (see title-submissions/route.ts) — snapshot it here so
+          // the rejected title isn't permanently lost once that happens.
+          previousProjectTitle: decision === DefenseChairDecision.NEW_TITLE ? schedule.project.title : undefined
+        }
+      });
+    }
 
     // Notify the student and their adviser — same pattern as title-submissions' review
     // notification. Neither would otherwise learn about this decision until they happened
@@ -123,27 +207,93 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
           }))
         });
       }
-    } else {
-      // The panel rejected the title itself, not the Concept-stage idea or the
-      // group's already-submitted proposal work — Concept stays approved, and the
-      // proposal chapters/defense evidence stay as they are too, since those
-      // aren't invalidated by a title change. Only the title's adviser review and
-      // the defense schedule/panel vote that rejected it reopen. The group submits
-      // a replacement title against this same project via /api/title-submissions,
-      // which recognizes this "new title required" state and updates it in place
-      // instead of creating a fresh project.
+    } else if (decision === DefenseChairDecision.NEW_TITLE) {
+      // The panel rejected the title itself, not any earlier-stage work that's
+      // already been cleared — a Concept-stage rejection leaves nothing "earlier"
+      // to protect, while a Proposal-stage rejection leaves the already-approved
+      // Concept stage and the proposal chapters/defense evidence untouched, since
+      // those aren't invalidated by a title change. Only the checkpoints for the
+      // stage that was actually rejected reopen (see resetProjectForNewTitle). The
+      // group submits a replacement title against this same project via
+      // /api/title-submissions, which recognizes this "new title required" state
+      // and updates it in place instead of creating a fresh project.
+      const stage = getNewTitleRecoveryStage(schedule.title) ?? 'proposal';
       await resetProjectForNewTitle(prisma, {
         projectId: schedule.projectId,
         previousTitle: schedule.project.title,
-        chairRemarks: remarks
+        chairRemarks: remarks,
+        scheduleTitle: schedule.title
       });
+
+      if (notifyUserIds.length) {
+        const unaffectedNote =
+          stage === 'concept'
+            ? ''
+            : ' Your Concept-stage approval is unaffected — submit a replacement title to continue.';
+        await prisma.notification.createMany({
+          data: notifyUserIds.map((userId) => ({
+            userId,
+            title: 'Defense Decision: New Title Required',
+            message: `The panel chair determined "${schedule.project.title}" requires a new title.${remarks ? ` ${remarks}` : ''}${unaffectedNote}${stage === 'concept' ? ' Submit a replacement title to continue.' : ''}`,
+            type: 'info',
+            entityType: 'project',
+            entityId: schedule.projectId
+          }))
+        });
+      }
+    } else {
+      // NEW_TITLE_APPROVED — the group is pivoting to an adviser-approved
+      // backup title in this same sitting. Rather than skipping the vote,
+      // this reopens the SAME defense schedule for a fresh round: the group
+      // presents the backup live, and every panelist votes again on it.
+      const groupId = schedule.project.group?.id ?? null;
+
+      await restartDefenseVoteForBackupTitle(prisma, {
+        scheduleId: schedule.id,
+        projectId: schedule.projectId,
+        groupId,
+        scheduleTitle: schedule.title,
+        title: replacementTitle,
+        description: replacementDescription,
+        keywords: replacementKeywords
+      });
+
+      // Best-effort — the backup's own already-uploaded files become this
+      // project's files, so the group doesn't need to re-upload just to
+      // present the same backup live (same move as the pre-approved
+      // shortcut in POST /api/title-submissions).
+      const backupDraftId = normalizeText(body.backupDraftId);
+      if (backupDraftId) {
+        const linkedBackup = await prisma.titleDraft.findFirst({
+          where: { id: backupDraftId, groupId: groupId || undefined },
+          select: { files: { select: { id: true } } }
+        }).catch(() => null);
+
+        if (linkedBackup?.files.length) {
+          for (const file of linkedBackup.files) {
+            try {
+              await prisma.uploadedFile.update({
+                where: { id: file.id },
+                data: {
+                  projectId: schedule.projectId,
+                  documentCategory: 'Title Proposal',
+                  category: 'Title Proposal',
+                  titleDraftId: null
+                }
+              });
+            } catch (fileMoveError) {
+              console.warn(`Unable to move backup file ${file.id} to the new submission:`, fileMoveError);
+            }
+          }
+        }
+      }
 
       if (notifyUserIds.length) {
         await prisma.notification.createMany({
           data: notifyUserIds.map((userId) => ({
             userId,
-            title: 'Defense Decision: New Title Required',
-            message: `The panel chair determined "${schedule.project.title}" requires a new title.${remarks ? ` ${remarks}` : ''} Your Concept-stage approval is unaffected — submit a replacement title to continue.`,
+            title: 'Voting Again — Backup Title',
+            message: `Your previous title "${schedule.project.title}" was not approved. The panel chair is moving forward with your backup "${replacementTitle}" in this same session — present it now, the panel will vote again.${remarks ? ` ${remarks}` : ''}`,
             type: 'info',
             entityType: 'project',
             entityId: schedule.projectId
@@ -158,7 +308,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
           ? 'Recorded: the defense is approved, overriding the panel vote.'
           : decision === DefenseChairDecision.REDEFENSE
             ? 'Recorded: the student will revise and re-attempt this title.'
-            : 'Recorded: this title has been archived — the student will need to submit a new title.'
+            : decision === DefenseChairDecision.NEW_TITLE_APPROVED
+              ? 'Recorded: voting has reset — the panel can now vote on the backup title.'
+              : 'Recorded: this title has been archived — the student will need to submit a new title.'
     });
   } catch (error) {
     return handleApiError(error);

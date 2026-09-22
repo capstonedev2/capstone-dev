@@ -183,7 +183,8 @@ export type DefensePanelRole = (typeof DefensePanelRole)[keyof typeof DefensePan
 export const DefenseChairDecision = {
   REDEFENSE: 'REDEFENSE',
   NEW_TITLE: 'NEW_TITLE',
-  APPROVED: 'APPROVED'
+  APPROVED: 'APPROVED',
+  NEW_TITLE_APPROVED: 'NEW_TITLE_APPROVED'
 } as const
 
 export type DefenseChairDecision = (typeof DefenseChairDecision)[keyof typeof DefenseChairDecision]

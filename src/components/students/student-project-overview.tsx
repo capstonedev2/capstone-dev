@@ -477,12 +477,16 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
             </div>
           </div>
         </header><div className="page-body">
-          <section className="hero-card project-overview-summary-card">
+          <section className="hero-card project-overview-summary-card relative overflow-hidden">
+            <div className="pointer-events-none absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-[var(--primary)] to-sky-400" />
             <div className="hero-card-main project-overview-summary-main">
               <div className="project-overview-summary-heading">
-                <div>
-                  <span className="section-kicker">Project Summary</span>
-                  <div className="project-overview-summary-title flex items-center flex-wrap gap-3 mb-2">
+                <div className="min-w-0 w-full">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <span className="section-kicker">Project Summary</span>
+                    <Badge label={project.status} tone={projectStatusTone} />
+                  </div>
+                  <div className="project-overview-summary-title flex items-center flex-wrap gap-3 mt-2 mb-2">
                     {!hasApprovedTitle ? (
                       <>
                         <h2 className="text-xl font-medium text-[var(--muted)] italic flex items-center">
@@ -495,9 +499,8 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                         </span>
                       </>
                     ) : (
-                      <h2 className="text-2xl font-bold text-[#003A8F]">{project.title}</h2>
+                      <h2 className="text-2xl font-bold text-[#003A8F] leading-snug">{project.title}</h2>
                     )}
-                    <Badge label={project.status} tone={projectStatusTone} />
                   </div>
                   {!hasApprovedTitle ? (
                     <p className="project-overview-summary-copy text-sm text-[var(--muted)] max-w-2xl">Your project title will appear here once the concept proposal has been officially approved.</p>
@@ -513,13 +516,22 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                   <Badge key={keyword} label={keyword} tone="neutral" />
                 ))}
               </div>
-              <div className={`workspace-note project-overview-summary-note ${isLeader ? 'is-leader' : 'is-member'}`}>
-                <strong>You are viewing the shared project record for your entire capstone group.</strong>
-                <p>This project page is shared by the full group. Official project-level edits are coordinated by the group leader.</p>
+              <div className={`workspace-note project-overview-summary-note ${isLeader ? 'is-leader' : 'is-member'} flex items-start gap-3`}>
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)]/10 text-[var(--primary)]">
+                  <i className="fas fa-users text-sm" aria-hidden="true" />
+                </span>
+                <div>
+                  <strong>You are viewing the shared project record for your entire capstone group.</strong>
+                  <p>This project page is shared by the full group. Official project-level edits are coordinated by the group leader.</p>
+                </div>
               </div>
               <div className="hero-actions project-overview-summary-actions">
-                <button className="btn btn-primary" type="button" onClick={() => alert('Modal placeholder')}>
-                  <i className="fas fa-up-right-from-square" aria-hidden="true" /> View Full Information
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={() => document.getElementById('project-details-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                >
+                  <i className="fas fa-circle-info" aria-hidden="true" /> View Full Information
                 </button>
                 <Link prefetch={false} className="btn btn-secondary" href="/students/milestones">
                   <i className="fas fa-timeline" aria-hidden="true" /> Open Milestones
@@ -538,24 +550,34 @@ export function StudentProjectOverview({ data }: { data: StudentDashboardData })
                 )}
               </div>
               <div className="grid grid-cols-1 gap-3.5 pt-4 border-t border-[var(--border)] w-full">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[var(--muted)]">Current milestone</span>
-                  <strong className="text-[var(--text)] text-right">{project.currentMilestone || 'Not started'}</strong>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[var(--muted)]">Upcoming deadline</span>
-                  <strong className="text-[var(--text)] text-right">{project.upcomingDeadline || 'Not set'}</strong>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-[var(--muted)]">Repository status</span>
-                  <strong className="text-[var(--text)] text-right">{project.repositoryStatus || 'Pending'}</strong>
-                </div>
+                {(() => {
+                  const heroStats = [
+                    { icon: 'fa-flag', label: 'Current milestone', value: project.currentMilestone, fallback: 'Not started' },
+                    { icon: 'fa-calendar-day', label: 'Upcoming deadline', value: project.upcomingDeadline, fallback: 'Not set' },
+                    { icon: 'fa-book', label: 'Repository status', value: project.repositoryStatus, fallback: 'Pending', pendingValues: ['pending', 'not yet published'] }
+                  ];
+
+                  return heroStats.map((stat) => {
+                    const displayValue = stat.value || stat.fallback;
+                    // Same dim-italic treatment the Project Details grid below already
+                    // uses for empty fields — without this, "Not set"/"Pending" looked
+                    // identical in weight to real data, making blanks easy to miss.
+                    const isPending = !stat.value || (stat.pendingValues?.includes(displayValue.toLowerCase()) ?? false);
+
+                    return (
+                      <div key={stat.label} className="flex justify-between items-center gap-3 text-sm">
+                        <span className="flex items-center gap-2 text-[var(--muted)]"><i className={`fas ${stat.icon} text-xs opacity-60`} aria-hidden="true"></i>{stat.label}</span>
+                        <strong className={`text-right ${isPending ? 'text-[var(--text-meta)] font-medium italic' : 'text-[var(--text)] font-semibold'}`}>{displayValue}</strong>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           </section>
 
           <section className="content-grid project-overview-info-grid">
-            <article className="surface-card project-overview-section-card">
+            <article id="project-details-section" className="surface-card project-overview-section-card scroll-mt-24">
               <div className="card-heading">
                 <div>
                   <span className="section-kicker">Project Details</span>

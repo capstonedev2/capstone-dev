@@ -373,6 +373,25 @@
   line-height: 1.35;
 }
 
+.portal-shell-notification-menu-item-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.portal-shell-notification-menu-item-tag {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+}
+
 .portal-shell-notification-menu-item-dot {
   width: 0.55rem;
   height: 0.55rem;

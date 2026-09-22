@@ -378,7 +378,12 @@ type DefenseVoteDrawerProps = {
   onRemarksChange: (value: string) => void;
   onClose: () => void;
   onCastVote: (record: DefenseVotingRecord, vote: 'yes' | 'no') => Promise<void> | void;
-  onChairDecision: (record: DefenseVotingRecord, decision: 'approve' | 'redefense' | 'new_title', remarks: string) => Promise<void> | void;
+  onChairDecision: (
+    record: DefenseVotingRecord,
+    decision: 'approve' | 'redefense' | 'new_title' | 'new_title_approved',
+    remarks: string,
+    replacementTitle?: { title: string; description?: string; keywords?: string[]; backupDraftId?: string }
+  ) => Promise<void> | void;
   isSubmitting: boolean;
 };
 
@@ -387,7 +392,12 @@ type DrawerBodyProps = {
   remarksDraft: string;
   onRemarksChange: (value: string) => void;
   onCastVote: (record: DefenseVotingRecord, vote: 'yes' | 'no') => Promise<void> | void;
-  onChairDecision: (record: DefenseVotingRecord, decision: 'approve' | 'redefense' | 'new_title', remarks: string) => Promise<void> | void;
+  onChairDecision: (
+    record: DefenseVotingRecord,
+    decision: 'approve' | 'redefense' | 'new_title' | 'new_title_approved',
+    remarks: string,
+    replacementTitle?: { title: string; description?: string; keywords?: string[]; backupDraftId?: string }
+  ) => Promise<void> | void;
   isSubmitting: boolean;
 };
 
@@ -725,7 +735,8 @@ function PanelVoteSummarySection({ record, revealAllVotes }: { record: DefenseVo
 const CHAIR_DECISION_META: Record<DefenseChairDecision, { label: string; icon: string; badgeClassName: string }> = {
   APPROVED: { label: 'Approved — Overrode the Panel Vote', icon: 'fa-check', badgeClassName: 'bg-emerald-50 text-emerald-700' },
   REDEFENSE: { label: 'Redefense — Revise & Continue', icon: 'fa-rotate-left', badgeClassName: 'bg-blue-50 text-blue-700' },
-  NEW_TITLE: { label: 'Requires New Title', icon: 'fa-file-circle-exclamation', badgeClassName: 'bg-amber-50 text-amber-700' }
+  NEW_TITLE: { label: 'Requires New Title', icon: 'fa-file-circle-exclamation', badgeClassName: 'bg-amber-50 text-amber-700' },
+  NEW_TITLE_APPROVED: { label: 'Voted Again on Backup Title', icon: 'fa-arrows-rotate', badgeClassName: 'bg-emerald-50 text-emerald-700' }
 };
 
 function ChairDecisionRecap({ record }: { record: DefenseVotingRecord }) {
@@ -752,15 +763,75 @@ function ChairDecisionSection({
   isSubmitting
 }: {
   record: DefenseVotingRecord;
-  onChairDecision: (record: DefenseVotingRecord, decision: 'approve' | 'redefense' | 'new_title', remarks: string) => Promise<void> | void;
+  onChairDecision: (
+    record: DefenseVotingRecord,
+    decision: 'approve' | 'redefense' | 'new_title' | 'new_title_approved',
+    remarks: string,
+    replacementTitle?: { title: string; description?: string; keywords?: string[]; backupDraftId?: string }
+  ) => Promise<void> | void;
   isSubmitting: boolean;
 }) {
-  const [pendingChairDecision, setPendingChairDecision] = useState<'approve' | 'redefense' | 'new_title' | null>(null);
+  const [pendingChairDecision, setPendingChairDecision] = useState<'approve' | 'redefense' | 'new_title' | 'new_title_approved' | null>(null);
   const [chairRemarks, setChairRemarks] = useState('');
+
+  // Only fetched once the chair actually picks "New Title (Approved Now)" —
+  // most decisions never need this, so no reason to load it eagerly.
+  const [backupDrafts, setBackupDrafts] = useState<Array<{
+    id: string;
+    title: string;
+    description: string;
+    keywords: string[];
+    reviewStatus: string;
+    isPriority: boolean;
+    files: Array<{ id: string; name: string; fileType: string; size: number }>;
+  }>>([]);
+  const [isLoadingBackups, setIsLoadingBackups] = useState(false);
+  const [selectedBackupId, setSelectedBackupId] = useState<string | null>(null);
 
   if (record.chairDecision) {
     return <ChairDecisionRecap record={record} />;
   }
+
+  // This decision only ever clears a backup the adviser already reviewed and
+  // approved — no freeform typing, at Concept or Proposal+. Real vetting
+  // already happened, it just wasn't live in the room (mirrors the
+  // server-side check in chair-decision/route.ts).
+  const approvedBackups = backupDrafts.filter((draft) => draft.reviewStatus === 'APPROVED');
+  const selectedBackup = selectedBackupId ? approvedBackups.find((draft) => draft.id === selectedBackupId) ?? null : null;
+
+  const selectDecision = (decision: 'approve' | 'redefense' | 'new_title' | 'new_title_approved') => {
+    setPendingChairDecision(decision);
+
+    if (decision === 'new_title_approved' && backupDrafts.length === 0 && !isLoadingBackups) {
+      setIsLoadingBackups(true);
+      fetch(`/api/defense-schedules/${record.id}/backup-titles`, { cache: 'no-store' })
+        .then((response) => response.json())
+        .then((payload) => setBackupDrafts(payload?.drafts || []))
+        .catch(() => {})
+        .finally(() => setIsLoadingBackups(false));
+    }
+  };
+
+  const canSubmit = pendingChairDecision === 'new_title_approved'
+    ? Boolean(selectedBackup)
+    : Boolean(pendingChairDecision);
+
+  const handleSubmit = () => {
+    if (!pendingChairDecision) return;
+
+    if (pendingChairDecision === 'new_title_approved') {
+      if (!selectedBackup) return;
+      onChairDecision(record, pendingChairDecision, chairRemarks, {
+        title: selectedBackup.title,
+        description: selectedBackup.description || undefined,
+        keywords: selectedBackup.keywords,
+        backupDraftId: selectedBackup.id
+      });
+      return;
+    }
+
+    onChairDecision(record, pendingChairDecision, chairRemarks);
+  };
 
   return (
     <section className="rounded-2xl border-2 border-brand-accent/50 bg-gradient-to-br from-brand-accent/10 via-white to-white p-5 shadow-sm">
@@ -768,12 +839,15 @@ function ChairDecisionSection({
         <i className="fas fa-gavel" /> Chair Decision — What happens next?
       </p>
       <p className="mb-4 text-xs font-medium leading-relaxed text-slate-600">
-        The panel did not pass this defense. Approve it anyway to override the panel's vote, or record whether the student should revise and re-attempt this same title, or must submit an entirely new one.
+        The panel did not pass this defense. Approve it anyway to override the panel&apos;s vote, record whether the
+        student should revise and re-attempt this same title, require an entirely new one (scheduled separately
+        later), or — if the group has a backup title their adviser already approved — pivot to it right now and have
+        the panel vote again on it in this same sitting.
       </p>
-      <div className="mb-4 grid grid-cols-3 gap-2">
+      <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <button
           type="button"
-          onClick={() => setPendingChairDecision('approve')}
+          onClick={() => selectDecision('approve')}
           className={`flex flex-col items-center justify-center gap-1.5 rounded-lg py-3 text-[0.75rem] font-black transition-all ${
             pendingChairDecision === 'approve'
               ? 'bg-emerald-500 text-white shadow-md ring-2 ring-emerald-500 ring-offset-2'
@@ -785,7 +859,7 @@ function ChairDecisionSection({
         </button>
         <button
           type="button"
-          onClick={() => setPendingChairDecision('redefense')}
+          onClick={() => selectDecision('redefense')}
           className={`flex flex-col items-center justify-center gap-1.5 rounded-lg py-3 text-[0.75rem] font-black transition-all ${
             pendingChairDecision === 'redefense'
               ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-600 ring-offset-2'
@@ -797,7 +871,7 @@ function ChairDecisionSection({
         </button>
         <button
           type="button"
-          onClick={() => setPendingChairDecision('new_title')}
+          onClick={() => selectDecision('new_title')}
           className={`flex flex-col items-center justify-center gap-1.5 rounded-lg py-3 text-[0.75rem] font-black transition-all ${
             pendingChairDecision === 'new_title'
               ? 'bg-amber-600 text-white shadow-md ring-2 ring-amber-600 ring-offset-2'
@@ -807,7 +881,89 @@ function ChairDecisionSection({
           <i className="fas fa-file-circle-exclamation text-base" />
           New Title
         </button>
+        <button
+          type="button"
+          onClick={() => selectDecision('new_title_approved')}
+          className={`flex flex-col items-center justify-center gap-1.5 rounded-lg py-3 text-[0.75rem] font-black transition-all ${
+            pendingChairDecision === 'new_title_approved'
+              ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-600 ring-offset-2'
+              : 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100'
+          }`}
+        >
+          <i className="fas fa-arrows-rotate text-base" />
+          Vote Again — Backup Title
+        </button>
       </div>
+
+      {pendingChairDecision === 'new_title_approved' && (
+        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+          <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-emerald-800">
+            Which adviser-approved backup is the group presenting?
+          </p>
+          {isLoadingBackups ? (
+            <p className="text-xs font-semibold text-emerald-700">Loading saved backups…</p>
+          ) : approvedBackups.length > 0 ? (
+            <div className="mb-3 flex flex-col gap-1.5">
+              {approvedBackups.map((draft) => (
+                <button
+                  key={draft.id}
+                  type="button"
+                  onClick={() => setSelectedBackupId(draft.id)}
+                  className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-xs font-bold transition ${
+                    selectedBackupId === draft.id
+                      ? 'border-emerald-500 bg-white text-emerald-800 ring-2 ring-emerald-500/30'
+                      : 'border-emerald-200 bg-white/70 text-slate-700 hover:border-emerald-400'
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    {draft.isPriority && <i className="fas fa-star text-amber-400" aria-hidden="true" />}
+                    <span className="truncate">&quot;{draft.title}&quot;</span>
+                  </span>
+                  <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] text-emerald-700">
+                    Adviser Approved
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="mb-3 text-xs font-medium text-emerald-700">
+              {backupDrafts.length > 0
+                ? 'This group has backup titles, but none are adviser-approved yet. Use New Title instead, or have the adviser review a backup first.'
+                : 'This group has no saved backup titles. Use New Title instead.'}
+            </p>
+          )}
+
+          {selectedBackup && (
+            <div className="rounded-lg border border-emerald-300 bg-white p-3">
+              <p className="mb-1 text-[11px] font-black uppercase tracking-widest text-emerald-800">
+                Voting will reset for this backup — every panelist votes again
+              </p>
+              <p className="mb-2 text-sm font-bold text-slate-900">&quot;{selectedBackup.title}&quot;</p>
+              {selectedBackup.description ? (
+                <p className="mb-2 text-xs leading-relaxed text-slate-600">{selectedBackup.description}</p>
+              ) : (
+                <p className="mb-2 text-xs italic text-slate-400">No description saved for this backup.</p>
+              )}
+              {selectedBackup.keywords.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-1">
+                  {selectedBackup.keywords.map((keyword) => (
+                    <span key={keyword} className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
+                <i className="fas fa-paperclip" aria-hidden="true" />
+                {selectedBackup.files.length > 0
+                  ? `${selectedBackup.files.length} file${selectedBackup.files.length === 1 ? '' : 's'} attached — will carry over, no re-upload needed`
+                  : 'No files attached to this backup'}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <textarea
         value={chairRemarks}
         onChange={(event) => setChairRemarks(event.target.value)}
@@ -816,8 +972,8 @@ function ChairDecisionSection({
       />
       <button
         type="button"
-        disabled={!pendingChairDecision || isSubmitting}
-        onClick={() => pendingChairDecision && onChairDecision(record, pendingChairDecision, chairRemarks)}
+        disabled={!canSubmit || isSubmitting}
+        onClick={handleSubmit}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
       >
         <i className={`fas ${isSubmitting ? 'fa-circle-notch animate-spin' : 'fa-gavel'}`} />

@@ -6,14 +6,15 @@ export function getReviewReferenceDate() {
 }
 
 export type SubmissionStatus = 'pending-review' | 'under-review' | 'needs-revision' | 'approved';
-export type SubmissionType = 'Title' | 'Proposal' | 'Chapter' | 'Final' | 'Evidence';
+export type SubmissionType = 'Title' | 'Proposal' | 'Chapter' | 'Final' | 'Evidence' | 'Backup';
 export type SubmissionMilestone =
   | 'Title Screening'
   | 'Proposal Screening'
   | 'Chapter 1 Review'
   | 'Chapter 3 Review'
   | 'Final Manuscript Check'
-  | 'Defense Clearance';
+  | 'Defense Clearance'
+  | 'Backup Title';
 export type SubmissionSortOption = 'deadline' | 'submitted' | 'status' | 'version';
 export type CommentCategory = 'General' | 'Formatting' | 'Technical' | 'Methodology' | 'Approved Remark';
 
@@ -582,7 +583,8 @@ function mapTitleStatus(status: TitleSubmissionSummary['status']): SubmissionSta
  * and manuscripts, read-only — the actual Approve/Reject actions still only live
  * on the dedicated Title & Evidence Approval page, since that flow drives Group/Project
  * status and shouldn't be duplicated here. This just makes titles visible and
- * filterable alongside everything else an adviser has waiting on them.
+ * filterable alongside everything else an adviser has waiting on them, the same
+ * way Oral Defense Application evidence already is.
  */
 export function toAdviserSubmissionRecordFromTitle(title: TitleSubmissionSummary): AdviserSubmissionRecord {
   const submittedAt = asIsoString(title.submittedAt) || getReviewReferenceDate();
@@ -651,6 +653,131 @@ export function toAdviserSubmissionRecordFromTitle(title: TitleSubmissionSummary
   };
 }
 
+// Shape returned by GET /api/title-drafts/adviser — kept as a local type here
+// rather than importing it from the page component, to avoid a data-layer
+// file depending on a component file.
+export type AdviserBackupTitleSummary = {
+  id: string;
+  title: string;
+  description: string;
+  keywords: string[];
+  updatedAt: string;
+  reviewStatus: 'PENDING' | 'APPROVED' | 'NEEDS_REVISION' | 'IN_REVIEW' | 'NOT_REQUIRED';
+  reviewFeedback: string | null;
+  reviewedAt: string | null;
+  isPriority: boolean;
+  groupId: string;
+  groupCode: string | null;
+  groupTitle: string | null;
+  groupMembers: Array<{ name: string; isLeader: boolean }>;
+  updatedByName: string | null;
+  files: Array<{ id: string; name: string; url: string; fileType: string; size: number | null }>;
+};
+
+function mapBackupStatus(status: AdviserBackupTitleSummary['reviewStatus']): SubmissionStatus {
+  switch (status) {
+    case 'APPROVED':
+      return 'approved';
+    case 'NEEDS_REVISION':
+      return 'needs-revision';
+    case 'IN_REVIEW':
+      return 'under-review';
+    default:
+      return 'pending-review';
+  }
+}
+
+/**
+ * Surfaces backup titles (see /api/title-drafts) inside the same Document
+ * Submissions list, read-only — same reasoning as the title/evidence rows
+ * above: the actual Approve/Needs Revision decision only lives on Title &
+ * Evidence Approval's Backup Titles Awaiting Review section, this just makes
+ * a group's backups visible/filterable alongside everything else an adviser
+ * has waiting on them.
+ */
+export function toAdviserSubmissionRecordFromBackup(draft: AdviserBackupTitleSummary): AdviserSubmissionRecord {
+  const submittedAt = asIsoString(draft.updatedAt) || getReviewReferenceDate();
+  const status = mapBackupStatus(draft.reviewStatus);
+  const milestone: SubmissionMilestone = 'Backup Title';
+  const groupMembers = draft.groupMembers.map((member) => ({
+    name: member.name,
+    role: member.isLeader ? 'Leader' : 'Member',
+    isLeader: member.isLeader
+  }));
+  const submittedBy = groupMembers.find((member) => member.isLeader)?.name
+    || groupMembers[0]?.name
+    || draft.updatedByName
+    || 'Project Member';
+  const reviewedAt = asIsoString(draft.reviewedAt);
+  const attachedFile = draft.files[0] || null;
+  const latestReviewComment = draft.reviewFeedback
+    ? {
+        id: `backup-${draft.id}-feedback`,
+        body: draft.reviewFeedback,
+        decision: status === 'approved' ? 'approve' : 'request_changes',
+        createdAt: reviewedAt || submittedAt,
+        authorName: 'Adviser'
+      }
+    : null;
+  const commentCategories = inferCommentCategories(status, milestone, latestReviewComment);
+
+  return {
+    id: `backup-${draft.id}`,
+    groupId: draft.groupCode || draft.groupId,
+    projectTitle: `${draft.groupTitle || draft.groupCode || draft.groupId} — Backup Title`,
+    submissionTitle: draft.title,
+    type: 'Backup',
+    milestone,
+    status,
+    statusLabel: getSubmissionStatusMeta(status).label,
+    version: 'v1',
+    currentVersionNumber: 1,
+    submittedAt,
+    deadline: null,
+    submittedBy,
+    groupMembers,
+    latestReviewComment,
+    reviewedAt,
+    reviewFocus: `${submittedBy} prepared a backup title in advance, in case a new title is ever required.`,
+    nextAction: 'Open Title & Evidence Approval to approve or request revision on this backup title.',
+    fileUrl: attachedFile?.url || '',
+    fileType: attachedFile?.fileType || 'backup',
+    fileExtension: attachedFile ? getFileExtension(attachedFile.name) : 'backup',
+    // Backup files have no Project yet (they're pre-submission drafts), so
+    // they're only reachable through their own dedicated, group-scoped
+    // download route — the generic /api/document-files/[id]/download route
+    // would 403 here since there's no project relation to authorize against.
+    // Leaving previewFileId null keeps downloadSubmissionDocument() on the
+    // fileUrl fallback instead of assuming the generic route applies.
+    previewFileId: null,
+    previewFiles: draft.files.map((file) => ({ id: file.id, name: file.name, fileType: file.fileType })),
+    documentCategory: 'Backup Title',
+    department: 'IT',
+    approvedAt: status === 'approved' ? reviewedAt || submittedAt : undefined,
+    workspaceHref: '/adviser/adviser-mode/title-approvals',
+    deadlineProgress: getDeadlineProgress(submittedAt, null, status),
+    workflowStepIndex: getWorkflowStepIndex(status, 1),
+    commentCategories,
+    comments: latestReviewComment
+      ? buildComments(status, 'v1', milestone, [], latestReviewComment)
+      : [],
+    versionHistory: [{
+      id: `backup-${draft.id}-v1`,
+      version: 'v1',
+      label: 'Backup Title',
+      uploadedAt: submittedAt,
+      uploader: submittedBy,
+      isCurrent: true
+    }],
+    timeline: [
+      { id: 'saved', label: 'Saved by student', actor: submittedBy, occurredAt: submittedAt, isComplete: true },
+      { id: 'under-review', label: 'Adviser review pending', actor: 'Adviser', occurredAt: submittedAt, isComplete: status !== 'pending-review' },
+      { id: 'revision-requested', label: 'Revision requested', actor: 'Adviser', occurredAt: reviewedAt || submittedAt, isComplete: status === 'needs-revision' },
+      { id: 'approved', label: 'Approved by adviser', actor: 'Adviser', occurredAt: reviewedAt || submittedAt, isComplete: status === 'approved' }
+    ]
+  };
+}
+
 const EVIDENCE_STAGES: Array<{
   field: 'evidenceReview' | 'proposalEvidenceReview' | 'finalEvidenceReview';
   stageLabel: string;
@@ -679,8 +806,7 @@ function mapEvidenceStatus(status?: string | null): SubmissionStatus {
 
 /**
  * Surfaces each stage's Oral Defense Application evidence inside the same
- * Document Submissions list, read-only — same reasoning as
- * toAdviserSubmissionRecordFromTitle above: the actual Approve/Needs Revision
+ * Document Submissions list, read-only — the actual Approve/Needs Revision
  * decision only lives on Title & Evidence Approval's Review Evidence drawer,
  * this just makes it visible/filterable alongside everything else. Only
  * stages with an uploaded file produce a card; a stage nothing's been
@@ -703,8 +829,7 @@ export function toAdviserSubmissionRecordsFromEvidence(title: TitleSubmissionSum
     const status = mapEvidenceStatus(review.status);
     const milestone: SubmissionMilestone = 'Defense Clearance';
     // Evidence has no submission-level timestamp of its own in this payload —
-    // approximate with the title's own submission/review time, same fallback
-    // toAdviserSubmissionRecordFromTitle uses.
+    // approximate with the title's own submission/review time.
     const reviewedAt = status === 'approved' || status === 'needs-revision'
       ? asIsoString(title.reviewedAt) || submittedAt
       : null;

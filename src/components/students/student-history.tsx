@@ -127,7 +127,11 @@ function getMonthKey(date: Date) {
 }
 
 function getStatusTone(status: string): BadgeTone {
-  const normalized = status.toLowerCase();
+  // Raw Prisma enum values (e.g. "UNDER_REVIEW", "NEEDS_REVISION") use
+  // underscores; the match lists below are space-separated multi-word
+  // phrases — normalize so an unformatted raw status still matches instead
+  // of silently falling through to the 'info' default.
+  const normalized = status.toLowerCase().replace(/_/g, ' ');
 
   if (['approved', 'completed', 'reviewed', 'resolved', 'confirmed', 'active', 'recognized'].includes(normalized)) {
     return 'success';

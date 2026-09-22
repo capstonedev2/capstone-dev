@@ -19,8 +19,10 @@ import {
   getSubmissionMilestoneOptions,
   getSubmissionTypeOptions,
   toAdviserSubmissionRecord,
+  toAdviserSubmissionRecordFromBackup,
   toAdviserSubmissionRecordFromTitle,
   toAdviserSubmissionRecordsFromEvidence,
+  type AdviserBackupTitleSummary,
   type AdviserSubmissionRecord,
   type SubmissionMilestone,
   type SubmissionSortOption,
@@ -40,6 +42,7 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
   const [searchValue, setSearchValue] = useState('');
   const [studentDocuments, setStudentDocuments] = useState<DocumentFileSummary[]>([]);
   const [titleSubmissions, setTitleSubmissions] = useState<TitleSubmissionSummary[]>([]);
+  const [backupTitles, setBackupTitles] = useState<AdviserBackupTitleSummary[]>([]);
   const [studentDocumentError, setStudentDocumentError] = useState<string | null>(null);
   const [isLoadingStudentDocuments, setIsLoadingStudentDocuments] = useState(true);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -49,9 +52,10 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
     () => [
       ...studentDocuments.map((file, index) => toAdviserSubmissionRecord(file, index)),
       ...titleSubmissions.map((title) => toAdviserSubmissionRecordFromTitle(title)),
-      ...titleSubmissions.flatMap((title) => toAdviserSubmissionRecordsFromEvidence(title))
+      ...titleSubmissions.flatMap((title) => toAdviserSubmissionRecordsFromEvidence(title)),
+      ...backupTitles.map((draft) => toAdviserSubmissionRecordFromBackup(draft))
     ],
-    [studentDocuments, titleSubmissions]
+    [studentDocuments, titleSubmissions, backupTitles]
   );
 
   const typeOptions = useMemo(() => getSubmissionTypeOptions(submissions), [submissions]);
@@ -112,8 +116,22 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
       }
     };
 
+    const loadBackupTitles = async () => {
+      try {
+        const response = await fetch('/api/title-drafts/adviser', { cache: 'no-store' });
+        const payload = await response.json().catch(() => null);
+
+        if (response.ok && !cancelled) {
+          setBackupTitles(payload?.drafts || []);
+        }
+      } catch {
+        // Best-effort, same reasoning as loadTitleSubmissions above.
+      }
+    };
+
     loadStudentDocuments();
     loadTitleSubmissions();
+    loadBackupTitles();
 
     return () => {
       cancelled = true;

@@ -57,6 +57,7 @@ export const ModelName = {
   UploadedFile: 'UploadedFile',
   AcademicActivity: 'AcademicActivity',
   Group: 'Group',
+  TitleDraft: 'TitleDraft',
   Department: 'Department',
   AcademicYear: 'AcademicYear',
   SystemSetting: 'SystemSetting',
@@ -171,6 +172,7 @@ export const UploadedFileScalarFieldEnum = {
   submissionId: 'submissionId',
   checkpointId: 'checkpointId',
   activityId: 'activityId',
+  titleDraftId: 'titleDraftId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -232,6 +234,25 @@ export const GroupScalarFieldEnum = {
 } as const
 
 export type GroupScalarFieldEnum = (typeof GroupScalarFieldEnum)[keyof typeof GroupScalarFieldEnum]
+
+
+export const TitleDraftScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  title: 'title',
+  description: 'description',
+  keywords: 'keywords',
+  updatedById: 'updatedById',
+  reviewStatus: 'reviewStatus',
+  reviewFeedback: 'reviewFeedback',
+  reviewedAt: 'reviewedAt',
+  reviewedById: 'reviewedById',
+  isPriority: 'isPriority',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TitleDraftScalarFieldEnum = (typeof TitleDraftScalarFieldEnum)[keyof typeof TitleDraftScalarFieldEnum]
 
 
 export const DepartmentScalarFieldEnum = {
@@ -422,6 +443,7 @@ export const DefenseScheduleScalarFieldEnum = {
   chairDecision: 'chairDecision',
   chairDecisionAt: 'chairDecisionAt',
   chairDecisionRemarks: 'chairDecisionRemarks',
+  previousProjectTitle: 'previousProjectTitle',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

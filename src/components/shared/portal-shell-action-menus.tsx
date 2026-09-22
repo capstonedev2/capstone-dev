@@ -15,6 +15,10 @@ export type PortalNotificationItem = {
   tone?: NotificationTone;
   actionLabel?: string;
   unread?: boolean;
+  // Small topic badge shown next to the title (e.g. "Backup") — for
+  // notification types that could otherwise be mistaken for something else
+  // at a glance, since severity tone alone doesn't distinguish topic.
+  tag?: string;
 };
 
 export type PortalProfileBadge = {
@@ -307,7 +311,12 @@ export function PortalShellActionMenus({
                   </span>
                   <span className="portal-shell-notification-menu-item-copy">
                     <span className="portal-shell-notification-menu-item-head">
-                      <strong>{item.title}</strong>
+                      <span className="portal-shell-notification-menu-item-title-group">
+                        <strong>{item.title}</strong>
+                        {item.tag ? (
+                          <span className="portal-shell-notification-menu-item-tag">{item.tag}</span>
+                        ) : null}
+                      </span>
                       {item.unread === false || allNotificationsRead || readNotificationIds.has(item.id) ? null : <span aria-hidden="true" className="portal-shell-notification-menu-item-dot" />}
                     </span>
                     <small>{item.message}</small>

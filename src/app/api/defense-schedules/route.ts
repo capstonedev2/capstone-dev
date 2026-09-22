@@ -163,7 +163,8 @@ const scheduleGroupInclude = {
           title: true,
           scheduledAt: true,
           chairDecision: true,
-          chairDecisionRemarks: true
+          chairDecisionRemarks: true,
+          previousProjectTitle: true
         }
       },
       submissions: {
@@ -330,7 +331,8 @@ function getRedefenseReason(project: ScheduleTitleProjectRecord | null) {
       label: 'Redefense (New Title)',
       detail: `The panel required a new title after the ${lastDecidedSchedule.title} on ${decidedOn}.${
         lastDecidedSchedule.chairDecisionRemarks ? ` ${lastDecidedSchedule.chairDecisionRemarks}` : ''
-      }`
+      }`,
+      previousTitle: lastDecidedSchedule.previousProjectTitle || null
     };
   }
 

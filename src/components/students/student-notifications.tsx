@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
+import { isBackupTitleNotification } from '@/lib/notification-tags';
 
 type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 type NotificationType = StudentDashboardData['notifications'][number]['type'];
@@ -168,23 +169,30 @@ function isNeedsActionNotification(item: StudentNotification) {
 function NotificationCard({
   item,
   onMarkRead,
-  onAction,
-  onViewDetail
+  onAction
 }: {
   item: StudentNotification & { entityType?: string; entityId?: string };
   onMarkRead: (id: string) => void;
   onAction?: (id: string, action: 'accept' | 'reject') => void;
-  onViewDetail: (item: StudentNotification) => void;
 }) {
+  const router = useRouter();
   const typeMeta = getNotificationTypeMeta(item.type);
   const isPermissionRequest = item.title === 'Upload Permission Request';
   const isUnread = !item.read;
 
+  const handleOpen = () => {
+    if (isUnread) {
+      onMarkRead(item.id);
+    }
+    router.push(getNotificationAction(item).href);
+  };
+
   return (
     <article
-      className={`group relative overflow-hidden rounded-[20px] shadow-sm ring-1 transition duration-150 hover:-translate-y-px hover:shadow-md ${
+      className={`group relative cursor-pointer overflow-hidden rounded-[20px] shadow-sm ring-1 transition duration-150 hover:-translate-y-px hover:shadow-md ${
         isUnread ? 'bg-blue-50/40 ring-blue-100' : 'bg-[var(--surface)] ring-slate-200/80'
       }`}
+      onClick={handleOpen}
     >
       <span className={`absolute inset-y-0 left-0 w-1 ${typeMeta.indicatorClass}`} />
       <div className="p-5 pl-6">
@@ -199,6 +207,7 @@ function NotificationCard({
                 <Badge label={typeMeta.label} tone={typeMeta.tone} icon={typeMeta.icon} />
                 {item.priority === 'high' ? <Badge label="Urgent" tone="danger" /> : null}
                 {isPermissionRequest && isUnread ? <Badge label="Action Required" tone="danger" icon="fa-hand" /> : null}
+                {isBackupTitleNotification(item.title) ? <Badge label="Backup" tone="warning" icon="fa-bookmark" /> : null}
               </div>
               <h4 className="mt-3 text-base font-bold leading-6 text-slate-950 sm:text-lg">{item.title}</h4>
               <p className="mt-1 line-clamp-2 text-sm leading-6 text-[var(--muted)]">{item.message}</p>
@@ -214,29 +223,24 @@ function NotificationCard({
                 <button
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-emerald-600 bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition duration-150 hover:-translate-y-px hover:bg-emerald-700 hover:shadow-md"
                   type="button"
-                  onClick={() => onAction(item.id, 'accept')}
+                  onClick={(event) => { event.stopPropagation(); onAction(item.id, 'accept'); }}
                 >
                   <i className="fas fa-check" aria-hidden="true" /> Accept
                 </button>
                 <button
                   className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-[var(--surface)] px-4 text-sm font-semibold text-rose-600 shadow-sm transition duration-150 hover:-translate-y-px hover:border-rose-300 hover:bg-rose-50 hover:shadow-md"
                   type="button"
-                  onClick={() => onAction(item.id, 'reject')}
+                  onClick={(event) => { event.stopPropagation(); onAction(item.id, 'reject'); }}
                 >
                   <i className="fas fa-xmark" aria-hidden="true" /> Reject
                 </button>
               </>
             ) : (
-              <>
-                <button className={PRIMARY_ACTION_CLASS} type="button" onClick={() => onViewDetail(item)}>
-                  <i className="fas fa-eye" aria-hidden="true" /> View
+              !item.read ? (
+                <button className={SECONDARY_ACTION_CLASS} type="button" onClick={(event) => { event.stopPropagation(); onMarkRead(item.id); }}>
+                  <i className="fas fa-check" aria-hidden="true" /> Mark Read
                 </button>
-                {!item.read ? (
-                  <button className={SECONDARY_ACTION_CLASS} type="button" onClick={() => onMarkRead(item.id)}>
-                    <i className="fas fa-check" aria-hidden="true" /> Mark Read
-                  </button>
-                ) : null}
-              </>
+              ) : null
             )}
           </div>
         </div>
@@ -245,116 +249,11 @@ function NotificationCard({
   );
 }
 
-function NotificationDetailModal({
-  item,
-  onClose,
-  onMarkRead
-}: {
-  item: StudentNotification;
-  onClose: () => void;
-  onMarkRead: (id: string) => void;
-}) {
-  const typeMeta = getNotificationTypeMeta(item.type);
-  const action = getNotificationAction(item);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [onClose]);
-
-  if (typeof document === 'undefined') {
-    return null;
-  }
-
-  return createPortal(
-    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-      <button
-        className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
-        type="button"
-        aria-label="Close notification detail"
-        onClick={onClose}
-      />
-
-      <div className="relative w-full max-w-lg overflow-hidden rounded-[28px] bg-[var(--surface)] shadow-2xl ring-1 ring-slate-200/80">
-        <div className="relative bg-gradient-to-br from-blue-50 to-white p-6 pb-5">
-          <span className={`absolute inset-x-0 top-0 h-1.5 ${typeMeta.indicatorClass}`} />
-
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#003A8F]">Notification Detail</span>
-              <div className="mt-3 flex items-center gap-3">
-                <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg ring-4 ring-white ${typeMeta.iconWrapClass}`}>
-                  <i className={`fas ${typeMeta.icon}`} aria-hidden="true" />
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <Badge label={typeMeta.label} tone={typeMeta.tone} icon={typeMeta.icon} />
-                  {item.priority === 'high' ? <Badge label="Urgent" tone="danger" /> : null}
-                  <Badge label={item.read ? 'Completed' : 'Unread'} tone={item.read ? 'success' : 'warning'} />
-                </div>
-              </div>
-            </div>
-            <button
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-white hover:text-[var(--text)]"
-              type="button"
-              aria-label="Close"
-              onClick={onClose}
-            >
-              <i className="fas fa-xmark" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6 pt-5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-xl font-bold leading-7 text-slate-950">{item.title}</h3>
-            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]">
-              <i className="fas fa-clock" aria-hidden="true" /> {item.dateLabel}
-            </span>
-          </div>
-
-          <div className="mt-3 rounded-2xl bg-[var(--surface-alt)] p-4">
-            <p className="text-sm leading-7 text-[var(--text)]">{item.message}</p>
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-2 border-t border-[var(--border)] pt-5">
-            <Link prefetch={false} className={PRIMARY_ACTION_CLASS} href={action.href} onClick={onClose}>
-              <i className="fas fa-arrow-right" aria-hidden="true" /> {action.label}
-            </Link>
-            {!item.read ? (
-              <button
-                className={SECONDARY_ACTION_CLASS}
-                type="button"
-                onClick={() => {
-                  onMarkRead(item.id);
-                  onClose();
-                }}
-              >
-                <i className="fas fa-check" aria-hidden="true" /> Mark Read
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
 
 export function StudentNotifications({ data }: { data: StudentDashboardData }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<NotificationType | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'all' | 'needs-action' | 'updates' | 'completed'>('needs-action');
-  const [selectedNotification, setSelectedNotification] = useState<StudentNotification | null>(null);
   const [notificationsData, setNotificationsData] = useState(() => sortByCreatedAtDesc(data.notifications || []));
 
   const [realNotifications, setRealNotifications] = useState<any[]>(() =>
@@ -591,9 +490,6 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#003A8F]">Notification Center</span>
-                <p className="mt-2 max-w-[58ch] text-sm leading-6 text-[var(--muted)]">
-                  Handle the urgent item first, then work through what's left.
-                </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
@@ -752,7 +648,7 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
             return activeItems.length ? (
               <div className="mt-5 space-y-3">
                 {activeItems.map((item) => (
-                  <NotificationCard key={item.id} item={item as any} onMarkRead={markRead} onAction={handleAction} onViewDetail={setSelectedNotification} />
+                  <NotificationCard key={item.id} item={item as any} onMarkRead={markRead} onAction={handleAction} />
                 ))}
               </div>
             ) : (
@@ -761,14 +657,6 @@ export function StudentNotifications({ data }: { data: StudentDashboardData }) {
           })()}
         </section>
       </div>
-
-      {selectedNotification ? (
-        <NotificationDetailModal
-          item={selectedNotification}
-          onClose={() => setSelectedNotification(null)}
-          onMarkRead={markRead}
-        />
-      ) : null}
     </>
   );
 }

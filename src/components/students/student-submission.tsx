@@ -21,17 +21,15 @@ import {
   hasCompletedConceptStage
 } from '@/components/students/student-project-files.shared';
 
-const TITLE_CATEGORY_KEY = 'title-registration';
-
-const SUBMISSION_CATEGORY_OPTIONS = [
-  { key: TITLE_CATEGORY_KEY, label: 'Title Registration' },
-  ...PROJECT_FILE_CATEGORY_OPTIONS
-];
+// Title is submitted on the dedicated Title Submission workspace, which has
+// the similarity-check and multi-candidate compare/choose-favorite features
+// this quick form can't safely duplicate — so it's deliberately not one of
+// the categories offered here.
+const SUBMISSION_CATEGORY_OPTIONS = PROJECT_FILE_CATEGORY_OPTIONS;
 
 // Groups the flat category list into scannable clusters for the picker UI —
 // purely a presentation grouping, doesn't change what's actually offered.
 const CATEGORY_GROUPS: Array<{ id: string; label: string; icon: string; keys: string[] }> = [
-  { id: 'title', label: 'Title', icon: 'fa-file-signature', keys: [TITLE_CATEGORY_KEY] },
   {
     id: 'thesis',
     label: 'Thesis Documents',
@@ -67,20 +65,6 @@ type ExistingFileSummary = {
   submissionStatus: string | null;
 };
 
-type TitleSubmissionSummary = {
-  id: string;
-  title: string;
-  status: 'draft' | 'pending' | 'approved' | 'needs-revision' | 'rejected';
-};
-
-const TITLE_STATUS_META: Record<TitleSubmissionSummary['status'], { label: string; className: string }> = {
-  draft: { label: 'Draft', className: 'bg-slate-100 text-slate-600' },
-  pending: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
-  approved: { label: 'Approved', className: 'bg-emerald-100 text-emerald-700' },
-  'needs-revision': { label: 'Needs Revision', className: 'bg-orange-100 text-orange-700' },
-  rejected: { label: 'Rejected', className: 'bg-rose-100 text-rose-700' }
-};
-
 const PENDING_SUBMISSION_STATUSES = new Set(['SUBMITTED', 'UNDER_REVIEW']);
 
 function getFileIcon(fileName: string, fileType?: string) {
@@ -90,11 +74,9 @@ function getFileIcon(fileName: string, fileType?: string) {
 export function StudentSubmission({ data }: { data: StudentDashboardData }) {
   const isConceptStageComplete = useMemo(() => hasCompletedConceptStage(data), [data]);
 
-  const [category, setCategory] = useState(TITLE_CATEGORY_KEY);
+  const [category, setCategory] = useState('concept-defense-application');
   const [existingFiles, setExistingFiles] = useState<ExistingFileSummary[]>([]);
   const [isLoadingExisting, setIsLoadingExisting] = useState(true);
-  const [titleSubmissions, setTitleSubmissions] = useState<TitleSubmissionSummary[]>([]);
-  const [isLoadingTitleSubmissions, setIsLoadingTitleSubmissions] = useState(true);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notice, setNotice] = useState<NoticeState>(null);
@@ -139,55 +121,17 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
     };
   }, []);
 
-  // Read-only progress view for the "Title Registration" category — the full
-  // compare/choose-favorite/withdraw workflow stays on Title Submission; this
-  // just answers "what's the status of what I've already sent in" without
-  // leaving this page.
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const response = await fetch('/api/title-submissions?page=1&limit=20', { cache: 'no-store' });
-
-        if (!response.ok) {
-          return;
-        }
-
-        const payload = await response.json();
-        const titles: TitleSubmissionSummary[] = (payload.titles || []).map((title: any) => ({
-          id: title.id,
-          title: title.title,
-          status: title.status
-        }));
-
-        if (!cancelled) {
-          setTitleSubmissions(titles);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingTitleSubmissions(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const isTitleCategory = category === TITLE_CATEGORY_KEY;
   const isOtherCategory = category === OTHER_CATEGORY_KEY;
   const isAchievementCategory = ACHIEVEMENT_DOCUMENT_CATEGORIES.has(category);
   const isUnrestrictedCategory = UNRESTRICTED_FILE_TYPE_CATEGORIES.has(category);
-  const isCategoryLocked = !isTitleCategory && !isAchievementCategory && category !== 'concept-defense-application' && !isConceptStageComplete;
+  const isCategoryLocked = !isAchievementCategory && category !== 'concept-defense-application' && !isConceptStageComplete;
 
   // A category already has a submission awaiting adviser review — resubmitting
   // now would create a confusing duplicate round instead of adding to the open
   // one (mirrors the same guard on the Document Tracker page). "Other" is exempt:
   // it's a catch-all for unrelated, independent items (a certificate, a consent
   // form, ...), so one pending "Other" file shouldn't block every future one.
-  const hasPendingRoundForCategory = !isTitleCategory && !isAchievementCategory && !isOtherCategory &&
+  const hasPendingRoundForCategory = !isAchievementCategory && !isOtherCategory &&
     existingFiles.some(
       (file) => file.documentCategory === category && PENDING_SUBMISSION_STATUSES.has(String(file.submissionStatus || '').toUpperCase())
     );
@@ -195,10 +139,10 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
   // Same lock/pending logic as above, but evaluated for an arbitrary category —
   // used to badge each option in the picker grid, not just the one currently selected.
   const isCategoryLockedFor = (key: string) =>
-    key !== TITLE_CATEGORY_KEY && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(key) && key !== 'concept-defense-application' && !isConceptStageComplete;
+    !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(key) && key !== 'concept-defense-application' && !isConceptStageComplete;
 
   const hasPendingRoundFor = (key: string) =>
-    key !== TITLE_CATEGORY_KEY && key !== OTHER_CATEGORY_KEY && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(key) &&
+    key !== OTHER_CATEGORY_KEY && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(key) &&
     existingFiles.some(
       (file) => file.documentCategory === key && PENDING_SUBMISSION_STATUSES.has(String(file.submissionStatus || '').toUpperCase())
     );
@@ -334,7 +278,7 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
           : failures.join(' ')
       });
     } else {
-      const locksCategoryUntilReviewed = !isTitleCategory && !isAchievementCategory && !isOtherCategory;
+      const locksCategoryUntilReviewed = !isAchievementCategory && !isOtherCategory;
       const baseMessage = successCount === 1 ? `${documentFiles[0].name} uploaded securely.` : `${successCount} files uploaded securely.`;
 
       setNotice({
@@ -527,58 +471,7 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
                 </div>
               ) : null}
 
-              {isTitleCategory ? (
-                /* Titles are submitted on the dedicated Title Submission workspace,
-                   which has the similarity-check and multi-candidate compare/choose-
-                   favorite features this quick form can't safely duplicate. */
-                <article className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_16px_36px_rgba(15,23,42,0.06)] p-6 sm:p-8">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand text-sm font-black text-white">2</span>
-                    <h3 className="text-lg font-extrabold text-[var(--text-dark)]">Submit your title</h3>
-                  </div>
-
-                  <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/60 p-6 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-                      <i className="fas fa-scale-balanced text-xl" aria-hidden="true" />
-                    </div>
-                    <h4 className="mt-4 text-base font-extrabold text-[var(--text-dark)]">Managed on Title Submission</h4>
-                    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-                      Submit and compare candidate titles, review similarity checks against other groups, and choose your group&apos;s final pick on the dedicated Title Submission workspace.
-                    </p>
-                    <Link
-                      href="/students/title-submission"
-                      className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-brand/20 transition-all hover:-translate-y-0.5 hover:shadow-xl"
-                    >
-                      <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />
-                      Go to Title Submission
-                    </Link>
-                  </div>
-
-                  <div className="mt-6">
-                    <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-[var(--text-meta)]">Your Title Submissions</p>
-                    {isLoadingTitleSubmissions ? (
-                      <p className="text-xs text-[var(--muted)]">Loading...</p>
-                    ) : titleSubmissions.length ? (
-                      <ul className="space-y-2">
-                        {titleSubmissions.map((title) => {
-                          const meta = TITLE_STATUS_META[title.status] || TITLE_STATUS_META.pending;
-                          return (
-                            <li key={title.id} className="flex items-center justify-between gap-2 rounded-xl bg-[var(--surface-alt)] px-3 py-2.5">
-                              <span className="min-w-0 truncate text-sm font-bold text-[var(--text)]" title={title.title}>{title.title}</span>
-                              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${meta.className}`}>
-                                {meta.label}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : (
-                      <p className="text-xs text-[var(--muted)]">No title proposals submitted yet.</p>
-                    )}
-                  </div>
-                </article>
-              ) : (
-                <>
+              <>
                   {/* Step 2 — attach files */}
                   <article className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] shadow-[0_16px_36px_rgba(15,23,42,0.06)] p-6 sm:p-8">
                     <div className="flex items-center gap-3">
@@ -677,7 +570,6 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
                     </div>
                   </article>
                 </>
-              )}
             </div>
 
             {/* Sidebar — live summary */}
@@ -692,33 +584,29 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
                     <span className="text-[var(--muted)]">Submitting</span>
                     <strong className="truncate text-right text-[var(--text)]">{selectedOptionLabel}</strong>
                   </div>
-                  {isTitleCategory ? null : (
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[var(--muted)]">Files attached</span>
-                      <strong className={activeFiles.length ? 'text-emerald-600' : 'text-[var(--text)]'}>{activeFiles.length}</strong>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[var(--muted)]">Files attached</span>
+                    <strong className={activeFiles.length ? 'text-emerald-600' : 'text-[var(--text)]'}>{activeFiles.length}</strong>
+                  </div>
                 </div>
                 <div className={`mt-4 flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold ${
-                  isTitleCategory ? 'bg-blue-50 text-brand' : canSubmit ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-[var(--text-meta)]'
+                  canSubmit ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-[var(--text-meta)]'
                 }`}>
-                  <i className={`fas ${isTitleCategory ? 'fa-arrow-up-right-from-square' : canSubmit ? 'fa-circle-check' : 'fa-circle-info'}`} aria-hidden="true" />
-                  {isTitleCategory ? 'Submitted on Title Submission' : canSubmit ? 'Ready to submit' : 'Complete the steps to submit'}
+                  <i className={`fas ${canSubmit ? 'fa-circle-check' : 'fa-circle-info'}`} aria-hidden="true" />
+                  {canSubmit ? 'Ready to submit' : 'Complete the steps to submit'}
                 </div>
               </article>
 
-              {isTitleCategory ? null : (
-                <article className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
-                  <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-brand">
-                    <i className="fas fa-shield-halved" aria-hidden="true" /> Good to know
-                  </p>
-                  <ul className="mt-3 space-y-2 text-xs leading-relaxed text-[var(--muted)]">
-                    <li>Files stay private until your adviser reviews them.</li>
-                    <li>Once submitted, wait for a decision before resubmitting the same category.</li>
-                    <li>Up to {MAX_UPLOAD_FILES} files per submission.</li>
-                  </ul>
-                </article>
-              )}
+              <article className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
+                <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-brand">
+                  <i className="fas fa-shield-halved" aria-hidden="true" /> Good to know
+                </p>
+                <ul className="mt-3 space-y-2 text-xs leading-relaxed text-[var(--muted)]">
+                  <li>Files stay private until your adviser reviews them.</li>
+                  <li>Once submitted, wait for a decision before resubmitting the same category.</li>
+                  <li>Up to {MAX_UPLOAD_FILES} files per submission.</li>
+                </ul>
+              </article>
 
               <Link
                 href="/students/project-files"

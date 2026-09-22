@@ -139,6 +139,12 @@ enum DefenseChairDecision {
   // Chair overrides the panel vote and approves the defense anyway, despite
   // enough No votes to have failed it otherwise — their call is final.
   APPROVED  @map("approved")
+  // The original title was rejected, but the group immediately presented a
+  // backup title in this same sitting and the chair is clearing it right now —
+  // no separate reschedule, no new DefenseSchedule row. Distinct from
+  // NEW_TITLE (which still requires the group to submit a replacement and go
+  // through a freshly scheduled presentation/panel vote later).
+  NEW_TITLE_APPROVED @map("new_title_approved")
 }
 
 enum NotificationStatus {
@@ -188,6 +194,8 @@ model User {
   auditLogs            AuditLog[]            @relation("AuditActor")
   brandingAssets       BrandingAsset[]       @relation("UserBrandingAssets")
   academicActivities   AcademicActivity[]
+  updatedTitleDrafts   TitleDraft[]          @relation("TitleDraftUpdatedBy")
+  reviewedTitleDrafts  TitleDraft[]          @relation("TitleDraftReviewedBy")
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
@@ -251,6 +259,8 @@ model UploadedFile {
   checkpoint       MilestoneCheckpoint? @relation(fields: [checkpointId], references: [id], onDelete: SetNull)
   activityId       String?              @map("activity_id")
   activity         AcademicActivity?    @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  titleDraftId     String?              @map("title_draft_id")
+  titleDraft       TitleDraft?          @relation(fields: [titleDraftId], references: [id], onDelete: Cascade)
   createdAt        DateTime             @default(now()) @map("created_at")
   updatedAt        DateTime             @updatedAt @map("updated_at")
 
@@ -259,6 +269,7 @@ model UploadedFile {
   @@index([submissionId])
   @@index([checkpointId])
   @@index([activityId])
+  @@index([titleDraftId])
   @@index([category])
   @@index([documentCategory])
   @@index([bucketName])
@@ -334,12 +345,54 @@ model Group {
 
   groupMembers GroupMember[]
   projects     Project[]
+  titleDrafts  TitleDraft[]
 
   @@index([userId])
   @@index([department])
   @@index([status])
   @@index([lifecycleStatus])
   @@index([createdAt])
+}
+
+// A student-saved "backup title" — never submitted for review, never creates a
+// Project, purely a draft the group can prepare in advance and edit anytime. A
+// group can keep several (e.g. their 2nd/3rd choice titles alongside whichever
+// one is currently being defended). When the group's active project needs a
+// replacement title (see resetProjectForNewTitle / title-submissions POST's
+// "New Title Required" state), the submission form can pre-fill from any one
+// of these instead of a blank form — no rescheduling needed to write one fresh.
+model TitleDraft {
+  id          String   @id @default(cuid())
+  groupId     String
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  keywords    String[] @default([])
+  updatedById String?
+  updatedBy   User?    @relation("TitleDraftUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  // Auto-sent to the group's adviser for review the moment it's saved or
+  // edited — any edit resets this back to PENDING, since the content the
+  // adviser previously saw no longer matches what's now saved. APPROVED means
+  // the adviser has cleared this idea specifically (not the same as it being
+  // "the" project title); it's what lets a later replacement-title submission
+  // built from this exact draft skip a second review cycle instead of waiting
+  // through one again (see POST /api/title-submissions).
+  reviewStatus   MilestoneCheckpointReviewStatus @default(PENDING)
+  reviewFeedback String?
+  reviewedAt     DateTime?
+  reviewedById   String?
+  reviewedBy     User?    @relation("TitleDraftReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  // The student's own "this is my best one" pick among their saved backups —
+  // radio-style, at most one true per group (enforced in the PATCH handler,
+  // not the DB). Independent of reviewStatus: a student can flag a priority
+  // pick before the adviser has reviewed it at all.
+  isPriority     Boolean  @default(false)
+  files       UploadedFile[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([groupId])
+  @@index([reviewStatus])
 }
 
 model Department {
@@ -590,6 +643,10 @@ model DefenseSchedule {
   chairDecision        DefenseChairDecision?
   chairDecisionAt      DateTime?
   chairDecisionRemarks String?
+  // Snapshot of Project.title at the moment a NEW_TITLE decision is recorded —
+  // Project.title itself gets overwritten once the group submits a replacement,
+  // so without this the rejected title is permanently unrecoverable afterward.
+  previousProjectTitle String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 

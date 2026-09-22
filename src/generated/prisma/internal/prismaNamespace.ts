@@ -390,6 +390,7 @@ export const ModelName = {
   UploadedFile: 'UploadedFile',
   AcademicActivity: 'AcademicActivity',
   Group: 'Group',
+  TitleDraft: 'TitleDraft',
   Department: 'Department',
   AcademicYear: 'AcademicYear',
   SystemSetting: 'SystemSetting',
@@ -424,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "academicActivity" | "group" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "progressReport" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
+    modelProps: "user" | "passwordResetToken" | "passwordResetCode" | "uploadedFile" | "academicActivity" | "group" | "titleDraft" | "department" | "academicYear" | "systemSetting" | "groupMember" | "project" | "milestone" | "milestoneCheckpoint" | "submission" | "progressReport" | "reviewComment" | "defenseSchedule" | "adviserScheduleItem" | "evaluation" | "notification" | "auditLog" | "brandingAsset" | "industryPartner" | "industryProject" | "impactFeedback"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -869,6 +870,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.GroupCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.GroupCountAggregateOutputType> | number
+        }
+      }
+    }
+    TitleDraft: {
+      payload: Prisma.$TitleDraftPayload<ExtArgs>
+      fields: Prisma.TitleDraftFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TitleDraftFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TitleDraftFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>
+        }
+        findFirst: {
+          args: Prisma.TitleDraftFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TitleDraftFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>
+        }
+        findMany: {
+          args: Prisma.TitleDraftFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>[]
+        }
+        create: {
+          args: Prisma.TitleDraftCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>
+        }
+        createMany: {
+          args: Prisma.TitleDraftCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TitleDraftCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>[]
+        }
+        delete: {
+          args: Prisma.TitleDraftDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>
+        }
+        update: {
+          args: Prisma.TitleDraftUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>
+        }
+        deleteMany: {
+          args: Prisma.TitleDraftDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TitleDraftUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TitleDraftUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>[]
+        }
+        upsert: {
+          args: Prisma.TitleDraftUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TitleDraftPayload>
+        }
+        aggregate: {
+          args: Prisma.TitleDraftAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTitleDraft>
+        }
+        groupBy: {
+          args: Prisma.TitleDraftGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TitleDraftGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TitleDraftCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TitleDraftCountAggregateOutputType> | number
         }
       }
     }
@@ -2394,6 +2469,7 @@ export const UploadedFileScalarFieldEnum = {
   submissionId: 'submissionId',
   checkpointId: 'checkpointId',
   activityId: 'activityId',
+  titleDraftId: 'titleDraftId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2455,6 +2531,25 @@ export const GroupScalarFieldEnum = {
 } as const
 
 export type GroupScalarFieldEnum = (typeof GroupScalarFieldEnum)[keyof typeof GroupScalarFieldEnum]
+
+
+export const TitleDraftScalarFieldEnum = {
+  id: 'id',
+  groupId: 'groupId',
+  title: 'title',
+  description: 'description',
+  keywords: 'keywords',
+  updatedById: 'updatedById',
+  reviewStatus: 'reviewStatus',
+  reviewFeedback: 'reviewFeedback',
+  reviewedAt: 'reviewedAt',
+  reviewedById: 'reviewedById',
+  isPriority: 'isPriority',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TitleDraftScalarFieldEnum = (typeof TitleDraftScalarFieldEnum)[keyof typeof TitleDraftScalarFieldEnum]
 
 
 export const DepartmentScalarFieldEnum = {
@@ -2645,6 +2740,7 @@ export const DefenseScheduleScalarFieldEnum = {
   chairDecision: 'chairDecision',
   chairDecisionAt: 'chairDecisionAt',
   chairDecisionRemarks: 'chairDecisionRemarks',
+  previousProjectTitle: 'previousProjectTitle',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2911,6 +3007,20 @@ export type ListEnumGroupLifecycleStatusFieldRefInput<$PrismaModel> = FieldRefIn
 
 
 /**
+ * Reference to a field of type 'MilestoneCheckpointReviewStatus'
+ */
+export type EnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointReviewStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MilestoneCheckpointReviewStatus[]'
+ */
+export type ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointReviewStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -2977,20 +3087,6 @@ export type EnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel> = FieldRefI
  * Reference to a field of type 'MilestoneCheckpointStatus[]'
  */
 export type ListEnumMilestoneCheckpointStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'MilestoneCheckpointReviewStatus'
- */
-export type EnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointReviewStatus'>
-    
-
-
-/**
- * Reference to a field of type 'MilestoneCheckpointReviewStatus[]'
- */
-export type ListEnumMilestoneCheckpointReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MilestoneCheckpointReviewStatus[]'>
     
 
 
@@ -3277,6 +3373,7 @@ export type GlobalOmitConfig = {
   uploadedFile?: Prisma.UploadedFileOmit
   academicActivity?: Prisma.AcademicActivityOmit
   group?: Prisma.GroupOmit
+  titleDraft?: Prisma.TitleDraftOmit
   department?: Prisma.DepartmentOmit
   academicYear?: Prisma.AcademicYearOmit
   systemSetting?: Prisma.SystemSettingOmit

@@ -52,6 +52,7 @@ export type UploadedFileMinAggregateOutputType = {
   submissionId: string | null
   checkpointId: string | null
   activityId: string | null
+  titleDraftId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,6 +75,7 @@ export type UploadedFileMaxAggregateOutputType = {
   submissionId: string | null
   checkpointId: string | null
   activityId: string | null
+  titleDraftId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -96,6 +98,7 @@ export type UploadedFileCountAggregateOutputType = {
   submissionId: number
   checkpointId: number
   activityId: number
+  titleDraftId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -128,6 +131,7 @@ export type UploadedFileMinAggregateInputType = {
   submissionId?: true
   checkpointId?: true
   activityId?: true
+  titleDraftId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -150,6 +154,7 @@ export type UploadedFileMaxAggregateInputType = {
   submissionId?: true
   checkpointId?: true
   activityId?: true
+  titleDraftId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -172,6 +177,7 @@ export type UploadedFileCountAggregateInputType = {
   submissionId?: true
   checkpointId?: true
   activityId?: true
+  titleDraftId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -281,6 +287,7 @@ export type UploadedFileGroupByOutputType = {
   submissionId: string | null
   checkpointId: string | null
   activityId: string | null
+  titleDraftId: string | null
   createdAt: Date
   updatedAt: Date
   _count: UploadedFileCountAggregateOutputType | null
@@ -326,6 +333,7 @@ export type UploadedFileWhereInput = {
   submissionId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   checkpointId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   activityId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  titleDraftId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -333,6 +341,7 @@ export type UploadedFileWhereInput = {
   submission?: Prisma.XOR<Prisma.SubmissionNullableScalarRelationFilter, Prisma.SubmissionWhereInput> | null
   checkpoint?: Prisma.XOR<Prisma.MilestoneCheckpointNullableScalarRelationFilter, Prisma.MilestoneCheckpointWhereInput> | null
   activity?: Prisma.XOR<Prisma.AcademicActivityNullableScalarRelationFilter, Prisma.AcademicActivityWhereInput> | null
+  titleDraft?: Prisma.XOR<Prisma.TitleDraftNullableScalarRelationFilter, Prisma.TitleDraftWhereInput> | null
 }
 
 export type UploadedFileOrderByWithRelationInput = {
@@ -353,6 +362,7 @@ export type UploadedFileOrderByWithRelationInput = {
   submissionId?: Prisma.SortOrderInput | Prisma.SortOrder
   checkpointId?: Prisma.SortOrderInput | Prisma.SortOrder
   activityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  titleDraftId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -360,6 +370,7 @@ export type UploadedFileOrderByWithRelationInput = {
   submission?: Prisma.SubmissionOrderByWithRelationInput
   checkpoint?: Prisma.MilestoneCheckpointOrderByWithRelationInput
   activity?: Prisma.AcademicActivityOrderByWithRelationInput
+  titleDraft?: Prisma.TitleDraftOrderByWithRelationInput
 }
 
 export type UploadedFileWhereUniqueInput = Prisma.AtLeast<{
@@ -383,6 +394,7 @@ export type UploadedFileWhereUniqueInput = Prisma.AtLeast<{
   submissionId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   checkpointId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   activityId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  titleDraftId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -390,6 +402,7 @@ export type UploadedFileWhereUniqueInput = Prisma.AtLeast<{
   submission?: Prisma.XOR<Prisma.SubmissionNullableScalarRelationFilter, Prisma.SubmissionWhereInput> | null
   checkpoint?: Prisma.XOR<Prisma.MilestoneCheckpointNullableScalarRelationFilter, Prisma.MilestoneCheckpointWhereInput> | null
   activity?: Prisma.XOR<Prisma.AcademicActivityNullableScalarRelationFilter, Prisma.AcademicActivityWhereInput> | null
+  titleDraft?: Prisma.XOR<Prisma.TitleDraftNullableScalarRelationFilter, Prisma.TitleDraftWhereInput> | null
 }, "id" | "publicId">
 
 export type UploadedFileOrderByWithAggregationInput = {
@@ -410,6 +423,7 @@ export type UploadedFileOrderByWithAggregationInput = {
   submissionId?: Prisma.SortOrderInput | Prisma.SortOrder
   checkpointId?: Prisma.SortOrderInput | Prisma.SortOrder
   activityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  titleDraftId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UploadedFileCountOrderByAggregateInput
@@ -440,6 +454,7 @@ export type UploadedFileScalarWhereWithAggregatesInput = {
   submissionId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
   checkpointId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
   activityId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
+  titleDraftId?: Prisma.StringNullableWithAggregatesFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UploadedFile"> | Date | string
 }
@@ -464,6 +479,7 @@ export type UploadedFileCreateInput = {
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
   checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
   activity?: Prisma.AcademicActivityCreateNestedOneWithoutFilesInput
+  titleDraft?: Prisma.TitleDraftCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateInput = {
@@ -484,6 +500,7 @@ export type UploadedFileUncheckedCreateInput = {
   submissionId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -508,6 +525,7 @@ export type UploadedFileUpdateInput = {
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
   checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
   activity?: Prisma.AcademicActivityUpdateOneWithoutFilesNestedInput
+  titleDraft?: Prisma.TitleDraftUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateInput = {
@@ -528,6 +546,7 @@ export type UploadedFileUncheckedUpdateInput = {
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -550,6 +569,7 @@ export type UploadedFileCreateManyInput = {
   submissionId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -589,6 +609,7 @@ export type UploadedFileUncheckedUpdateManyInput = {
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -621,6 +642,7 @@ export type UploadedFileCountOrderByAggregateInput = {
   submissionId?: Prisma.SortOrder
   checkpointId?: Prisma.SortOrder
   activityId?: Prisma.SortOrder
+  titleDraftId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -647,6 +669,7 @@ export type UploadedFileMaxOrderByAggregateInput = {
   submissionId?: Prisma.SortOrder
   checkpointId?: Prisma.SortOrder
   activityId?: Prisma.SortOrder
+  titleDraftId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -669,6 +692,7 @@ export type UploadedFileMinOrderByAggregateInput = {
   submissionId?: Prisma.SortOrder
   checkpointId?: Prisma.SortOrder
   activityId?: Prisma.SortOrder
+  titleDraftId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -766,6 +790,48 @@ export type UploadedFileUncheckedUpdateManyWithoutActivityNestedInput = {
   connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
   update?: Prisma.UploadedFileUpdateWithWhereUniqueWithoutActivityInput | Prisma.UploadedFileUpdateWithWhereUniqueWithoutActivityInput[]
   updateMany?: Prisma.UploadedFileUpdateManyWithWhereWithoutActivityInput | Prisma.UploadedFileUpdateManyWithWhereWithoutActivityInput[]
+  deleteMany?: Prisma.UploadedFileScalarWhereInput | Prisma.UploadedFileScalarWhereInput[]
+}
+
+export type UploadedFileCreateNestedManyWithoutTitleDraftInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput> | Prisma.UploadedFileCreateWithoutTitleDraftInput[] | Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput | Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput[]
+  createMany?: Prisma.UploadedFileCreateManyTitleDraftInputEnvelope
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+}
+
+export type UploadedFileUncheckedCreateNestedManyWithoutTitleDraftInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput> | Prisma.UploadedFileCreateWithoutTitleDraftInput[] | Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput | Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput[]
+  createMany?: Prisma.UploadedFileCreateManyTitleDraftInputEnvelope
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+}
+
+export type UploadedFileUpdateManyWithoutTitleDraftNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput> | Prisma.UploadedFileCreateWithoutTitleDraftInput[] | Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput | Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput[]
+  upsert?: Prisma.UploadedFileUpsertWithWhereUniqueWithoutTitleDraftInput | Prisma.UploadedFileUpsertWithWhereUniqueWithoutTitleDraftInput[]
+  createMany?: Prisma.UploadedFileCreateManyTitleDraftInputEnvelope
+  set?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  disconnect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  delete?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  update?: Prisma.UploadedFileUpdateWithWhereUniqueWithoutTitleDraftInput | Prisma.UploadedFileUpdateWithWhereUniqueWithoutTitleDraftInput[]
+  updateMany?: Prisma.UploadedFileUpdateManyWithWhereWithoutTitleDraftInput | Prisma.UploadedFileUpdateManyWithWhereWithoutTitleDraftInput[]
+  deleteMany?: Prisma.UploadedFileScalarWhereInput | Prisma.UploadedFileScalarWhereInput[]
+}
+
+export type UploadedFileUncheckedUpdateManyWithoutTitleDraftNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadedFileCreateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput> | Prisma.UploadedFileCreateWithoutTitleDraftInput[] | Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput[]
+  connectOrCreate?: Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput | Prisma.UploadedFileCreateOrConnectWithoutTitleDraftInput[]
+  upsert?: Prisma.UploadedFileUpsertWithWhereUniqueWithoutTitleDraftInput | Prisma.UploadedFileUpsertWithWhereUniqueWithoutTitleDraftInput[]
+  createMany?: Prisma.UploadedFileCreateManyTitleDraftInputEnvelope
+  set?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  disconnect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  delete?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  connect?: Prisma.UploadedFileWhereUniqueInput | Prisma.UploadedFileWhereUniqueInput[]
+  update?: Prisma.UploadedFileUpdateWithWhereUniqueWithoutTitleDraftInput | Prisma.UploadedFileUpdateWithWhereUniqueWithoutTitleDraftInput[]
+  updateMany?: Prisma.UploadedFileUpdateManyWithWhereWithoutTitleDraftInput | Prisma.UploadedFileUpdateManyWithWhereWithoutTitleDraftInput[]
   deleteMany?: Prisma.UploadedFileScalarWhereInput | Prisma.UploadedFileScalarWhereInput[]
 }
 
@@ -914,6 +980,7 @@ export type UploadedFileCreateWithoutUserInput = {
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
   checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
   activity?: Prisma.AcademicActivityCreateNestedOneWithoutFilesInput
+  titleDraft?: Prisma.TitleDraftCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutUserInput = {
@@ -933,6 +1000,7 @@ export type UploadedFileUncheckedCreateWithoutUserInput = {
   submissionId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -984,6 +1052,7 @@ export type UploadedFileScalarWhereInput = {
   submissionId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   checkpointId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   activityId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
+  titleDraftId?: Prisma.StringNullableFilter<"UploadedFile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadedFile"> | Date | string
 }
@@ -1007,6 +1076,7 @@ export type UploadedFileCreateWithoutActivityInput = {
   project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
   checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
+  titleDraft?: Prisma.TitleDraftCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutActivityInput = {
@@ -1026,6 +1096,7 @@ export type UploadedFileUncheckedCreateWithoutActivityInput = {
   projectId?: string | null
   submissionId?: string | null
   checkpointId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1056,6 +1127,76 @@ export type UploadedFileUpdateManyWithWhereWithoutActivityInput = {
   data: Prisma.XOR<Prisma.UploadedFileUpdateManyMutationInput, Prisma.UploadedFileUncheckedUpdateManyWithoutActivityInput>
 }
 
+export type UploadedFileCreateWithoutTitleDraftInput = {
+  id?: string
+  secureUrl?: string | null
+  publicId?: string | null
+  fileName: string
+  filePath?: string | null
+  bucketName?: string | null
+  fileType: string
+  resourceType?: string | null
+  documentCategory?: string
+  category?: string
+  visibility?: string
+  size?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutUploadedFilesInput
+  project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
+  submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
+  checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
+  activity?: Prisma.AcademicActivityCreateNestedOneWithoutFilesInput
+}
+
+export type UploadedFileUncheckedCreateWithoutTitleDraftInput = {
+  id?: string
+  secureUrl?: string | null
+  publicId?: string | null
+  fileName: string
+  filePath?: string | null
+  bucketName?: string | null
+  fileType: string
+  resourceType?: string | null
+  documentCategory?: string
+  category?: string
+  visibility?: string
+  size?: number | null
+  userId: string
+  projectId?: string | null
+  submissionId?: string | null
+  checkpointId?: string | null
+  activityId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadedFileCreateOrConnectWithoutTitleDraftInput = {
+  where: Prisma.UploadedFileWhereUniqueInput
+  create: Prisma.XOR<Prisma.UploadedFileCreateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput>
+}
+
+export type UploadedFileCreateManyTitleDraftInputEnvelope = {
+  data: Prisma.UploadedFileCreateManyTitleDraftInput | Prisma.UploadedFileCreateManyTitleDraftInput[]
+  skipDuplicates?: boolean
+}
+
+export type UploadedFileUpsertWithWhereUniqueWithoutTitleDraftInput = {
+  where: Prisma.UploadedFileWhereUniqueInput
+  update: Prisma.XOR<Prisma.UploadedFileUpdateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedUpdateWithoutTitleDraftInput>
+  create: Prisma.XOR<Prisma.UploadedFileCreateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedCreateWithoutTitleDraftInput>
+}
+
+export type UploadedFileUpdateWithWhereUniqueWithoutTitleDraftInput = {
+  where: Prisma.UploadedFileWhereUniqueInput
+  data: Prisma.XOR<Prisma.UploadedFileUpdateWithoutTitleDraftInput, Prisma.UploadedFileUncheckedUpdateWithoutTitleDraftInput>
+}
+
+export type UploadedFileUpdateManyWithWhereWithoutTitleDraftInput = {
+  where: Prisma.UploadedFileScalarWhereInput
+  data: Prisma.XOR<Prisma.UploadedFileUpdateManyMutationInput, Prisma.UploadedFileUncheckedUpdateManyWithoutTitleDraftInput>
+}
+
 export type UploadedFileCreateWithoutProjectInput = {
   id?: string
   secureUrl?: string | null
@@ -1075,6 +1216,7 @@ export type UploadedFileCreateWithoutProjectInput = {
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
   checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
   activity?: Prisma.AcademicActivityCreateNestedOneWithoutFilesInput
+  titleDraft?: Prisma.TitleDraftCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutProjectInput = {
@@ -1094,6 +1236,7 @@ export type UploadedFileUncheckedCreateWithoutProjectInput = {
   submissionId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1143,6 +1286,7 @@ export type UploadedFileCreateWithoutCheckpointInput = {
   project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
   submission?: Prisma.SubmissionCreateNestedOneWithoutFilesInput
   activity?: Prisma.AcademicActivityCreateNestedOneWithoutFilesInput
+  titleDraft?: Prisma.TitleDraftCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutCheckpointInput = {
@@ -1162,6 +1306,7 @@ export type UploadedFileUncheckedCreateWithoutCheckpointInput = {
   projectId?: string | null
   submissionId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1211,6 +1356,7 @@ export type UploadedFileCreateWithoutSubmissionInput = {
   project?: Prisma.ProjectCreateNestedOneWithoutFilesInput
   checkpoint?: Prisma.MilestoneCheckpointCreateNestedOneWithoutFilesInput
   activity?: Prisma.AcademicActivityCreateNestedOneWithoutFilesInput
+  titleDraft?: Prisma.TitleDraftCreateNestedOneWithoutFilesInput
 }
 
 export type UploadedFileUncheckedCreateWithoutSubmissionInput = {
@@ -1230,6 +1376,7 @@ export type UploadedFileUncheckedCreateWithoutSubmissionInput = {
   projectId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1277,6 +1424,7 @@ export type UploadedFileCreateManyUserInput = {
   submissionId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1300,6 +1448,7 @@ export type UploadedFileUpdateWithoutUserInput = {
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
   checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
   activity?: Prisma.AcademicActivityUpdateOneWithoutFilesNestedInput
+  titleDraft?: Prisma.TitleDraftUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutUserInput = {
@@ -1319,6 +1468,7 @@ export type UploadedFileUncheckedUpdateWithoutUserInput = {
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1340,6 +1490,7 @@ export type UploadedFileUncheckedUpdateManyWithoutUserInput = {
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1361,6 +1512,7 @@ export type UploadedFileCreateManyActivityInput = {
   projectId?: string | null
   submissionId?: string | null
   checkpointId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1384,6 +1536,7 @@ export type UploadedFileUpdateWithoutActivityInput = {
   project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
   checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
+  titleDraft?: Prisma.TitleDraftUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutActivityInput = {
@@ -1403,6 +1556,7 @@ export type UploadedFileUncheckedUpdateWithoutActivityInput = {
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1424,6 +1578,95 @@ export type UploadedFileUncheckedUpdateManyWithoutActivityInput = {
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadedFileCreateManyTitleDraftInput = {
+  id?: string
+  secureUrl?: string | null
+  publicId?: string | null
+  fileName: string
+  filePath?: string | null
+  bucketName?: string | null
+  fileType: string
+  resourceType?: string | null
+  documentCategory?: string
+  category?: string
+  visibility?: string
+  size?: number | null
+  userId: string
+  projectId?: string | null
+  submissionId?: string | null
+  checkpointId?: string | null
+  activityId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadedFileUpdateWithoutTitleDraftInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutUploadedFilesNestedInput
+  project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
+  submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
+  checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
+  activity?: Prisma.AcademicActivityUpdateOneWithoutFilesNestedInput
+}
+
+export type UploadedFileUncheckedUpdateWithoutTitleDraftInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadedFileUncheckedUpdateManyWithoutTitleDraftInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  secureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  filePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bucketName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  resourceType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentCategory?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1445,6 +1688,7 @@ export type UploadedFileCreateManyProjectInput = {
   submissionId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1468,6 +1712,7 @@ export type UploadedFileUpdateWithoutProjectInput = {
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
   checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
   activity?: Prisma.AcademicActivityUpdateOneWithoutFilesNestedInput
+  titleDraft?: Prisma.TitleDraftUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutProjectInput = {
@@ -1487,6 +1732,7 @@ export type UploadedFileUncheckedUpdateWithoutProjectInput = {
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1508,6 +1754,7 @@ export type UploadedFileUncheckedUpdateManyWithoutProjectInput = {
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1529,6 +1776,7 @@ export type UploadedFileCreateManyCheckpointInput = {
   projectId?: string | null
   submissionId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1552,6 +1800,7 @@ export type UploadedFileUpdateWithoutCheckpointInput = {
   project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
   submission?: Prisma.SubmissionUpdateOneWithoutFilesNestedInput
   activity?: Prisma.AcademicActivityUpdateOneWithoutFilesNestedInput
+  titleDraft?: Prisma.TitleDraftUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutCheckpointInput = {
@@ -1571,6 +1820,7 @@ export type UploadedFileUncheckedUpdateWithoutCheckpointInput = {
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1592,6 +1842,7 @@ export type UploadedFileUncheckedUpdateManyWithoutCheckpointInput = {
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submissionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1613,6 +1864,7 @@ export type UploadedFileCreateManySubmissionInput = {
   projectId?: string | null
   checkpointId?: string | null
   activityId?: string | null
+  titleDraftId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1636,6 +1888,7 @@ export type UploadedFileUpdateWithoutSubmissionInput = {
   project?: Prisma.ProjectUpdateOneWithoutFilesNestedInput
   checkpoint?: Prisma.MilestoneCheckpointUpdateOneWithoutFilesNestedInput
   activity?: Prisma.AcademicActivityUpdateOneWithoutFilesNestedInput
+  titleDraft?: Prisma.TitleDraftUpdateOneWithoutFilesNestedInput
 }
 
 export type UploadedFileUncheckedUpdateWithoutSubmissionInput = {
@@ -1655,6 +1908,7 @@ export type UploadedFileUncheckedUpdateWithoutSubmissionInput = {
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1676,6 +1930,7 @@ export type UploadedFileUncheckedUpdateManyWithoutSubmissionInput = {
   projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checkpointId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   activityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  titleDraftId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1700,6 +1955,7 @@ export type UploadedFileSelect<ExtArgs extends runtime.Types.Extensions.Internal
   submissionId?: boolean
   checkpointId?: boolean
   activityId?: boolean
+  titleDraftId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1707,6 +1963,7 @@ export type UploadedFileSelect<ExtArgs extends runtime.Types.Extensions.Internal
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
   checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
   activity?: boolean | Prisma.UploadedFile$activityArgs<ExtArgs>
+  titleDraft?: boolean | Prisma.UploadedFile$titleDraftArgs<ExtArgs>
 }, ExtArgs["result"]["uploadedFile"]>
 
 export type UploadedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1727,6 +1984,7 @@ export type UploadedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   submissionId?: boolean
   checkpointId?: boolean
   activityId?: boolean
+  titleDraftId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1734,6 +1992,7 @@ export type UploadedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
   checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
   activity?: boolean | Prisma.UploadedFile$activityArgs<ExtArgs>
+  titleDraft?: boolean | Prisma.UploadedFile$titleDraftArgs<ExtArgs>
 }, ExtArgs["result"]["uploadedFile"]>
 
 export type UploadedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1754,6 +2013,7 @@ export type UploadedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   submissionId?: boolean
   checkpointId?: boolean
   activityId?: boolean
+  titleDraftId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1761,6 +2021,7 @@ export type UploadedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
   checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
   activity?: boolean | Prisma.UploadedFile$activityArgs<ExtArgs>
+  titleDraft?: boolean | Prisma.UploadedFile$titleDraftArgs<ExtArgs>
 }, ExtArgs["result"]["uploadedFile"]>
 
 export type UploadedFileSelectScalar = {
@@ -1781,17 +2042,19 @@ export type UploadedFileSelectScalar = {
   submissionId?: boolean
   checkpointId?: boolean
   activityId?: boolean
+  titleDraftId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UploadedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "secureUrl" | "publicId" | "fileName" | "filePath" | "bucketName" | "fileType" | "resourceType" | "documentCategory" | "category" | "visibility" | "size" | "userId" | "projectId" | "submissionId" | "checkpointId" | "activityId" | "createdAt" | "updatedAt", ExtArgs["result"]["uploadedFile"]>
+export type UploadedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "secureUrl" | "publicId" | "fileName" | "filePath" | "bucketName" | "fileType" | "resourceType" | "documentCategory" | "category" | "visibility" | "size" | "userId" | "projectId" | "submissionId" | "checkpointId" | "activityId" | "titleDraftId" | "createdAt" | "updatedAt", ExtArgs["result"]["uploadedFile"]>
 export type UploadedFileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   project?: boolean | Prisma.UploadedFile$projectArgs<ExtArgs>
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
   checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
   activity?: boolean | Prisma.UploadedFile$activityArgs<ExtArgs>
+  titleDraft?: boolean | Prisma.UploadedFile$titleDraftArgs<ExtArgs>
 }
 export type UploadedFileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1799,6 +2062,7 @@ export type UploadedFileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
   checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
   activity?: boolean | Prisma.UploadedFile$activityArgs<ExtArgs>
+  titleDraft?: boolean | Prisma.UploadedFile$titleDraftArgs<ExtArgs>
 }
 export type UploadedFileIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1806,6 +2070,7 @@ export type UploadedFileIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types
   submission?: boolean | Prisma.UploadedFile$submissionArgs<ExtArgs>
   checkpoint?: boolean | Prisma.UploadedFile$checkpointArgs<ExtArgs>
   activity?: boolean | Prisma.UploadedFile$activityArgs<ExtArgs>
+  titleDraft?: boolean | Prisma.UploadedFile$titleDraftArgs<ExtArgs>
 }
 
 export type $UploadedFilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1816,6 +2081,7 @@ export type $UploadedFilePayload<ExtArgs extends runtime.Types.Extensions.Intern
     submission: Prisma.$SubmissionPayload<ExtArgs> | null
     checkpoint: Prisma.$MilestoneCheckpointPayload<ExtArgs> | null
     activity: Prisma.$AcademicActivityPayload<ExtArgs> | null
+    titleDraft: Prisma.$TitleDraftPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1835,6 +2101,7 @@ export type $UploadedFilePayload<ExtArgs extends runtime.Types.Extensions.Intern
     submissionId: string | null
     checkpointId: string | null
     activityId: string | null
+    titleDraftId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["uploadedFile"]>
@@ -2236,6 +2503,7 @@ export interface Prisma__UploadedFileClient<T, Null = never, ExtArgs extends run
   submission<T extends Prisma.UploadedFile$submissionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UploadedFile$submissionArgs<ExtArgs>>): Prisma.Prisma__SubmissionClient<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   checkpoint<T extends Prisma.UploadedFile$checkpointArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UploadedFile$checkpointArgs<ExtArgs>>): Prisma.Prisma__MilestoneCheckpointClient<runtime.Types.Result.GetResult<Prisma.$MilestoneCheckpointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   activity<T extends Prisma.UploadedFile$activityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UploadedFile$activityArgs<ExtArgs>>): Prisma.Prisma__AcademicActivityClient<runtime.Types.Result.GetResult<Prisma.$AcademicActivityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  titleDraft<T extends Prisma.UploadedFile$titleDraftArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UploadedFile$titleDraftArgs<ExtArgs>>): Prisma.Prisma__TitleDraftClient<runtime.Types.Result.GetResult<Prisma.$TitleDraftPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2282,6 +2550,7 @@ export interface UploadedFileFieldRefs {
   readonly submissionId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly checkpointId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly activityId: Prisma.FieldRef<"UploadedFile", 'String'>
+  readonly titleDraftId: Prisma.FieldRef<"UploadedFile", 'String'>
   readonly createdAt: Prisma.FieldRef<"UploadedFile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UploadedFile", 'DateTime'>
 }
@@ -2758,6 +3027,25 @@ export type UploadedFile$activityArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.AcademicActivityInclude<ExtArgs> | null
   where?: Prisma.AcademicActivityWhereInput
+}
+
+/**
+ * UploadedFile.titleDraft
+ */
+export type UploadedFile$titleDraftArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TitleDraft
+   */
+  select?: Prisma.TitleDraftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TitleDraft
+   */
+  omit?: Prisma.TitleDraftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TitleDraftInclude<ExtArgs> | null
+  where?: Prisma.TitleDraftWhereInput
 }
 
 /**

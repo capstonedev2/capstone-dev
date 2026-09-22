@@ -80,7 +80,10 @@ function formatTimeLabel(value: string) {
 }
 
 function getStatusTone(status: string): BadgeTone {
-  const normalized = status.toLowerCase();
+  // Defensive: matches against space-separated multi-word phrases below, so
+  // normalize away underscores in case a raw enum ever reaches this function
+  // directly instead of a pre-formatted display label.
+  const normalized = status.toLowerCase().replace(/_/g, ' ');
 
   if (
     ['approved', 'completed', 'resolved', 'similarity cleared', 'cleared', 'ready'].includes(normalized)
@@ -172,6 +175,31 @@ function getWorkflowStatusTone(status: StudentTitleWorkflowStep['status']): Badg
 
 function formatProposalLabel(proposalNumber: number) {
   return `Proposal ${String(proposalNumber).padStart(2, '0')}`;
+}
+
+function getBackupReviewBadge(status: string) {
+  if (status === 'APPROVED') {
+    return { label: 'Adviser Approved', className: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200', icon: 'fa-circle-check' };
+  }
+  if (status === 'NEEDS_REVISION') {
+    return { label: 'Needs Revision', className: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200', icon: 'fa-triangle-exclamation' };
+  }
+  return { label: 'Awaiting Review', className: 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200', icon: 'fa-clock' };
+}
+
+function getFileTypeIcon(fileName: string) {
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  if (extension === 'pdf') return 'fa-file-pdf';
+  if (['doc', 'docx'].includes(extension)) return 'fa-file-word';
+  if (['xls', 'xlsx'].includes(extension)) return 'fa-file-excel';
+  if (['ppt', 'pptx'].includes(extension)) return 'fa-file-powerpoint';
+  return 'fa-file-lines';
+}
+
+function formatBackupFileSize(bytes: number | null | undefined) {
+  if (!bytes || bytes <= 0) return null;
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function deriveTitleFromFileName(fileName: string) {
@@ -590,7 +618,48 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const [isSubmittingTitle, setIsSubmittingTitle] = useState(false);
   const [isFeedbackHighlighted, setIsFeedbackHighlighted] = useState(false);
   const [insightsTab, setInsightsTab] = useState<'Overview' | 'Feedback' | 'History'>('Overview');
+  type BackupTitleDraft = {
+    id: string;
+    title: string;
+    description: string;
+    keywords: string[];
+    updatedAt: string;
+    reviewStatus: 'PENDING' | 'APPROVED' | 'NEEDS_REVISION' | 'IN_REVIEW' | 'NOT_REQUIRED';
+    reviewFeedback: string | null;
+    isPriority: boolean;
+    files: Array<{ id: string; name: string; url: string; fileType: string; size: number | null }>;
+  };
+  const MAX_BACKUP_DRAFTS = 5;
+  const [backupDrafts, setBackupDrafts] = useState<BackupTitleDraft[]>([]);
+  const [isLoadingBackupDrafts, setIsLoadingBackupDrafts] = useState(true);
+  const [isSavingBackupDraft, setIsSavingBackupDraft] = useState(false);
+  const [deletingBackupDraftId, setDeletingBackupDraftId] = useState<string | null>(null);
+  const [isUploadingBackupFile, setIsUploadingBackupFile] = useState(false);
+  const [removingBackupFileId, setRemovingBackupFileId] = useState<string | null>(null);
+  // Tracks which saved backup was last applied to the form via "Use this" /
+  // "Use backup" — sent along on submit so the server can check whether it's
+  // still an adviser-approved backup being submitted unmodified (see
+  // handleSubmitProposal and POST /api/title-submissions' isPreApprovedSubmission
+  // check). Cleared on any manual edit to the title/description/keywords below,
+  // since that means it's no longer the exact content the adviser approved.
+  const [appliedBackupDraftId, setAppliedBackupDraftId] = useState<string | null>(null);
+  // The backup card used to save whatever was currently typed into the main
+  // title form far below it on the page — confusing, since there was nothing
+  // visually connecting the two. It now has its own small, self-contained
+  // add/edit form so preparing a backup never requires touching the real
+  // submission form at all. `null` = closed, `'new'` = adding, or a draft id =
+  // editing that draft in place.
+  const [backupFormMode, setBackupFormMode] = useState<'new' | string | null>(null);
+  const [backupFormTitle, setBackupFormTitle] = useState('');
+  const [backupFormDescription, setBackupFormDescription] = useState('');
+  const [backupFormKeywords, setBackupFormKeywords] = useState('');
+  // A brand-new backup has no id yet, so files picked while creating one can't
+  // upload immediately — staged here and uploaded automatically right after
+  // the draft itself is created, in the same Save Backup click.
+  const [backupFormStagedFiles, setBackupFormStagedFiles] = useState<File[]>([]);
+  const [isDraggingBackupFile, setIsDraggingBackupFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const backupFileInputRef = useRef<HTMLInputElement | null>(null);
   const detailsPanelRef = useRef<HTMLDivElement | null>(null);
   const adviserFeedbackRef = useRef<HTMLDivElement | null>(null);
   const feedbackHighlightTimerRef = useRef<number | null>(null);
@@ -770,6 +839,246 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
     }
   }, [activeSubmission, activeSubmissionId]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch('/api/title-drafts', { cache: 'no-store' });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (!cancelled) {
+          setBackupDrafts(Array.isArray(payload.drafts) ? payload.drafts : []);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingBackupDrafts(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const openNewBackupForm = () => {
+    if (backupDrafts.length >= MAX_BACKUP_DRAFTS) {
+      setNotice({ tone: 'warning', message: `You can keep at most ${MAX_BACKUP_DRAFTS} backup titles. Delete one before adding another.` });
+      return;
+    }
+    setBackupFormTitle('');
+    setBackupFormDescription('');
+    setBackupFormKeywords('');
+    setBackupFormStagedFiles([]);
+    setBackupFormMode('new');
+  };
+
+  const openEditBackupForm = (draft: BackupTitleDraft) => {
+    setBackupFormTitle(draft.title);
+    setBackupFormDescription(draft.description);
+    setBackupFormKeywords(draft.keywords.join(', '));
+    setBackupFormStagedFiles([]);
+    setBackupFormMode(draft.id);
+  };
+
+  const closeBackupForm = () => {
+    setBackupFormMode(null);
+    setBackupFormTitle('');
+    setBackupFormDescription('');
+    setBackupFormKeywords('');
+    setBackupFormStagedFiles([]);
+  };
+
+  const handleSubmitBackupForm = async () => {
+    const title = backupFormTitle.trim();
+    if (!title) {
+      setNotice({ tone: 'warning', message: 'Enter a title before saving it as a backup.' });
+      return;
+    }
+
+    const keywords = backupFormKeywords
+      .split(',')
+      .map((keyword) => keyword.trim())
+      .filter(Boolean);
+    const isEditing = backupFormMode && backupFormMode !== 'new';
+    const stagedFiles = backupFormStagedFiles;
+
+    setIsSavingBackupDraft(true);
+    try {
+      const response = await fetch(isEditing ? `/api/title-drafts/${backupFormMode}` : '/api/title-drafts', {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description: backupFormDescription.trim(), keywords })
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to save this backup title.');
+      }
+
+      setBackupDrafts((current) =>
+        isEditing
+          ? current.map((draft) => (draft.id === payload.draft.id ? payload.draft : draft))
+          : [payload.draft, ...current]
+      );
+      setBackupFormStagedFiles([]);
+
+      // Files can already be attached before saving (staged, then uploaded
+      // automatically right here) — so a brand-new backup no longer needs to
+      // stay open afterward the way it used to. Close it, same as clicking
+      // Done. Editing an existing one still stays open, since that upload
+      // area is its normal working state, not a one-time post-create step.
+      if (!isEditing && stagedFiles.length > 0) {
+        const uploaded = await handleUploadBackupFiles(payload.draft.id, stagedFiles, { silent: true });
+        setNotice({
+          tone: uploaded ? 'success' : 'warning',
+          message: uploaded
+            ? 'Saved with attached files — sent to your adviser for review.'
+            : 'Backup saved, but the attached files failed to upload. Edit it to try again.'
+        });
+      } else {
+        setNotice({ tone: 'success', message: isEditing ? 'Backup title updated.' : 'Saved as a backup title.' });
+      }
+
+      if (isEditing) {
+        setBackupFormMode(payload.draft.id);
+      } else {
+        closeBackupForm();
+      }
+    } catch (error) {
+      setNotice({ tone: 'danger', message: error instanceof Error ? error.message : 'Unable to save this backup title.' });
+    } finally {
+      setIsSavingBackupDraft(false);
+    }
+  };
+
+  const handleApplyBackupDraft = (draft: BackupTitleDraft) => {
+    updateActiveSubmission((submission) => ({
+      ...submission,
+      proposedTitle: draft.title,
+      briefDescription: draft.description,
+      keywords: draft.keywords
+    }));
+    setAppliedBackupDraftId(draft.id);
+    setNotice({
+      tone: 'info',
+      message: draft.reviewStatus === 'APPROVED'
+        ? draft.files.length
+          ? 'Adviser-approved backup loaded, files included — submit it as-is to skip waiting for another review.'
+          : 'Adviser-approved backup loaded — submit it as-is to skip waiting for another review.'
+        : 'Backup title loaded into the form below — review it before submitting.'
+    });
+  };
+
+  const handleDeleteBackupDraft = async (draftId: string) => {
+    setDeletingBackupDraftId(draftId);
+    try {
+      const response = await fetch(`/api/title-drafts/${draftId}`, { method: 'DELETE' });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to delete this backup title.');
+      }
+      setBackupDrafts((current) => current.filter((draft) => draft.id !== draftId));
+    } catch (error) {
+      setNotice({ tone: 'danger', message: error instanceof Error ? error.message : 'Unable to delete this backup title.' });
+    } finally {
+      setDeletingBackupDraftId(null);
+    }
+  };
+
+  const handleUploadBackupFiles = async (draftId: string, files: File[], options?: { silent?: boolean }) => {
+    if (!files.length) {
+      return true;
+    }
+
+    setIsUploadingBackupFile(true);
+    try {
+      const formData = new FormData();
+      files.forEach((file) => formData.append('files', file));
+
+      const response = await fetch(`/api/title-drafts/${draftId}/files`, {
+        method: 'POST',
+        body: formData
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.message || 'Unable to upload this file.');
+      }
+
+      setBackupDrafts((current) =>
+        current.map((draft) =>
+          draft.id === draftId
+            ? { ...draft, files: [...draft.files, ...payload.files], reviewStatus: 'PENDING', reviewFeedback: null }
+            : draft
+        )
+      );
+      if (!options?.silent) {
+        setNotice({ tone: 'success', message: 'File attached — sent back to your adviser for review.' });
+      }
+      return true;
+    } catch (error) {
+      setNotice({ tone: 'danger', message: error instanceof Error ? error.message : 'Unable to upload this file.' });
+      return false;
+    } finally {
+      setIsUploadingBackupFile(false);
+    }
+  };
+
+  const handleRemoveBackupFile = async (draftId: string, fileId: string) => {
+    setRemovingBackupFileId(fileId);
+    try {
+      const response = await fetch(`/api/title-drafts/files/${fileId}`, { method: 'DELETE' });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to remove this file.');
+      }
+
+      setBackupDrafts((current) =>
+        current.map((draft) =>
+          draft.id === draftId
+            ? { ...draft, files: draft.files.filter((file) => file.id !== fileId), reviewStatus: 'PENDING', reviewFeedback: null }
+            : draft
+        )
+      );
+    } catch (error) {
+      setNotice({ tone: 'danger', message: error instanceof Error ? error.message : 'Unable to remove this file.' });
+    } finally {
+      setRemovingBackupFileId(null);
+    }
+  };
+
+  // Radio-style: starring one clears the flag on every other backup, so
+  // there's always at most one "this is my best one" pick. The server enforces
+  // the exclusivity too (see PATCH /api/title-drafts/[id]) — this local update
+  // just mirrors it immediately instead of waiting on a refetch.
+  const handleTogglePriorityBackupDraft = async (draft: BackupTitleDraft) => {
+    const nextIsPriority = !draft.isPriority;
+
+    setBackupDrafts((current) =>
+      current.map((item) => ({ ...item, isPriority: item.id === draft.id ? nextIsPriority : nextIsPriority ? false : item.isPriority }))
+    );
+
+    try {
+      const response = await fetch(`/api/title-drafts/${draft.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPriority: nextIsPriority })
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || 'Unable to update your priority pick.');
+      }
+    } catch (error) {
+      setNotice({ tone: 'danger', message: error instanceof Error ? error.message : 'Unable to update your priority pick.' });
+      // Roll back to what the server actually last confirmed.
+      setBackupDrafts((current) => current.map((item) => (item.id === draft.id ? { ...item, isPriority: draft.isPriority } : item)));
+    }
+  };
+
   const revisionHistory = useMemo(
     () => (activeSubmission ? sortByDateDesc(activeSubmission.revisionHistory) : []),
     [activeSubmission]
@@ -943,6 +1252,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
 
     updateActiveSubmission((submission) => ({ ...submission, keywords: [...submission.keywords, trimmed] }));
     setCustomKeywordDraft('');
+    setAppliedBackupDraftId(null);
   };
 
   const handleRemoveKeyword = (keyword: string) => {
@@ -950,6 +1260,7 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       ...submission,
       keywords: submission.keywords.filter((item) => item !== keyword)
     }));
+    setAppliedBackupDraftId(null);
   };
 
   const handleSelectSubmission = (submissionId: string) => {
@@ -1243,7 +1554,11 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       return;
     }
 
-    if (!activeSubmission.attachments.length) {
+    // A pre-approved backup's own attached files carry over automatically on
+    // submit (re-parented server-side, see POST /api/title-submissions) — so
+    // applying one that already has files satisfies this requirement without
+    // needing a fresh attachment here too.
+    if (!activeSubmission.attachments.length && !appliedBackupCarriesFiles) {
       setNotice({
         tone: 'warning',
         message: 'Attach at least one title proposal document before submission.'
@@ -1264,6 +1579,9 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       formData.append('title', submittedTitle);
       formData.append('description', activeSubmission.briefDescription.trim() || 'Title proposal document uploaded for adviser review.');
       formData.append('keywords', JSON.stringify(activeSubmission.keywords));
+      if (appliedBackupDraftId) {
+        formData.append('backupDraftId', appliedBackupDraftId);
+      }
 
       activeSubmission.attachments.forEach((fileObj) => {
         if (fileObj.file) {
@@ -1280,6 +1598,8 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
       if (!response.ok) {
         throw new Error(payload?.message || 'Unable to submit the title proposal.');
       }
+
+      setAppliedBackupDraftId(null);
 
       const realSubmission = mapApiTitleToSubmission(payload.title, 0, data);
       realSubmission.attachments = activeSubmission.attachments;
@@ -1384,6 +1704,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
   const hasResearchType = activeSubmission.keywords.length > 0;
   const isDetailsComplete = hasTitle && hasResearchType;
   const hasDocuments = activeSubmission.attachments.length > 0;
+  // Mirrors the same check in handleSubmitProposal — used here to show a hint
+  // instead of leaving the dropzone looking unfulfilled when it actually isn't.
+  const appliedBackupDraft = appliedBackupDraftId ? backupDrafts.find((draft) => draft.id === appliedBackupDraftId) ?? null : null;
+  const appliedBackupCarriesFiles = Boolean(appliedBackupDraft?.files.length);
   const canSubmitProposal = canUpload && !isSubmittingTitle && hasDocuments && isDetailsComplete;
   // The submit banner's "ready?" message used to always blame the concept paper,
   // even when the title or the (now-required) research type tag was what was
@@ -1512,6 +1836,73 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
         </div>
       )}
       
+      {data.project.newTitleRequired && (
+        <div className="w-full mb-6 rounded-2xl border border-rose-200 bg-rose-50/80 p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700">
+              <i className="fas fa-rotate-left text-sm" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-black uppercase tracking-wide text-rose-700">New Title Required</p>
+              <p className="mt-1 text-sm font-semibold text-rose-900">
+                Your previous title &quot;{data.project.newTitleRequired.previousTitle}&quot; was not approved after{' '}
+                {data.project.newTitleRequired.stage === 'concept' ? 'Concept Presentation' : 'Proposal Defense'}.
+                {data.project.newTitleRequired.reason ? ` Panel remarks: ${data.project.newTitleRequired.reason}` : ''}
+              </p>
+              {backupDrafts.length > 0 ? (
+                <div className="mt-4">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-rose-700/80">
+                    <i className="fas fa-bolt mr-1.5" aria-hidden="true" />
+                    Pick a saved backup to fill the form instantly
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {[...backupDrafts]
+                      .sort((a, b) => {
+                        const priorityDelta = (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0);
+                        if (priorityDelta !== 0) return priorityDelta;
+                        return (a.reviewStatus === 'APPROVED' ? -1 : 0) - (b.reviewStatus === 'APPROVED' ? -1 : 0);
+                      })
+                      .map((draft) => {
+                        const badge = getBackupReviewBadge(draft.reviewStatus);
+                        return (
+                          <button
+                            key={draft.id}
+                            type="button"
+                            onClick={() => handleApplyBackupDraft(draft)}
+                            className={`flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-rose-400 hover:bg-rose-50 ${draft.isPriority ? 'border-amber-300' : 'border-rose-200'}`}
+                          >
+                            <span className="min-w-0">
+                              <span className="flex items-center gap-2">
+                                {draft.isPriority && <i className="fas fa-star text-amber-400" aria-hidden="true" />}
+                                <span className="block truncate text-sm font-bold text-slate-800">&quot;{draft.title}&quot;</span>
+                                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.className}`}>
+                                  <i className={`fas ${badge.icon} mr-1`} aria-hidden="true" />
+                                  {badge.label}
+                                </span>
+                              </span>
+                              {draft.description && (
+                                <span className="mt-0.5 block truncate text-xs text-slate-500">{draft.description}</span>
+                              )}
+                            </span>
+                            <span className="shrink-0 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white">
+                              {draft.reviewStatus === 'APPROVED' ? 'Use & skip review' : 'Use this'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                  </div>
+                  <p className="mt-2 text-xs text-rose-800">Or type a genuinely different title below.</p>
+                </div>
+              ) : (
+                <p className="mt-1 text-sm text-rose-800">
+                  You have no saved backups — type a genuinely different title in the form below to continue.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Unified Premium Status Card */}
       <div className="w-full mb-8 rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] shadow-md overflow-hidden flex flex-col">
         
@@ -1655,7 +2046,13 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                     <h3 className="text-sm font-bold text-[var(--text)]">Upload Concept Paper</h3>
                   </div>
                   <div className="p-6 pt-0 flex-1 flex flex-col">
-                    <button 
+                    {appliedBackupCarriesFiles && !hasDocuments && (
+                      <p className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-700">
+                        <i className="fas fa-paperclip" aria-hidden="true" />
+                        {appliedBackupDraft!.files.length} file{appliedBackupDraft!.files.length === 1 ? '' : 's'} from your backup will carry over automatically — no need to attach anything here.
+                      </p>
+                    )}
+                    <button
                       type="button"
                       onClick={handleBrowseAttachments}
                       onDragOver={handleDragOver}
@@ -1858,7 +2255,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                       id="proposedTitle"
                       type="text"
                       value={activeSubmission.proposedTitle === 'No active project' ? '' : activeSubmission.proposedTitle}
-                      onChange={(e) => updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }))}
+                      onChange={(e) => {
+                        updateActiveSubmission(sub => ({ ...sub, proposedTitle: e.target.value }));
+                        setAppliedBackupDraftId(null);
+                      }}
                       placeholder="Enter the official, finalized title of your study"
                       className="block w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--muted)] focus:bg-[var(--surface)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)] hover:border-[var(--border-strong)] text-[15px] font-bold outline-none disabled:opacity-60 disabled:bg-[var(--surface-alt)]"
                       disabled={!canUpload}
@@ -1946,7 +2346,10 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
                         activeSubmission.briefDescription === 'Title proposal submitted for adviser validation.'
                         ? '' : activeSubmission.briefDescription
                       }
-                      onChange={(e) => updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }))}
+                      onChange={(e) => {
+                        updateActiveSubmission(sub => ({ ...sub, briefDescription: e.target.value }));
+                        setAppliedBackupDraftId(null);
+                      }}
                       placeholder="Add specific questions, context, or areas you want your adviser to focus on..."
                       className="block w-full rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] py-4 pl-12 pr-4 text-[var(--text)] shadow-sm transition-all placeholder:text-[var(--muted)] focus:bg-[var(--surface)] focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)] hover:border-[var(--border-strong)] text-[14px] font-medium outline-none min-h-[160px] resize-y disabled:opacity-60 disabled:bg-[var(--surface-alt)] leading-relaxed"
                       disabled={!canUpload}
@@ -2340,6 +2743,378 @@ export function StudentTitleSubmission({ data }: { data: StudentDashboardData })
           </div>
         </div>
       </div>
+
+      {/* Lets a group prepare several replacement titles ahead of time (e.g. 2nd/3rd
+          choice ideas), so if a New Title decision ever happens they don't have to
+          write one from scratch under pressure. Placed below the actual submission
+          status card on purpose — it's prep/housekeeping, not the primary thing a
+          student came to this page to check, so it shouldn't outrank their real
+          proposal status at the top of the page. Has its own small add/edit form —
+          saving one never touches the real submission form above. */}
+      {!isLoadingBackupDrafts && (
+        <div className="w-full mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-500">
+                <i className="fas fa-bookmark text-slate-400" aria-hidden="true" />
+                Backup Titles
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                  {backupDrafts.length}/{MAX_BACKUP_DRAFTS}
+                </span>
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Prepare a few alternate titles now so you&apos;re never starting from scratch if the panel ever requires a new one.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={openNewBackupForm}
+              disabled={backupDrafts.length >= MAX_BACKUP_DRAFTS}
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[var(--primary)] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:brightness-110 disabled:opacity-50"
+              title={backupDrafts.length >= MAX_BACKUP_DRAFTS ? `You can keep at most ${MAX_BACKUP_DRAFTS} backup titles.` : undefined}
+            >
+              <i className="fas fa-plus" aria-hidden="true" />
+              Add backup title
+            </button>
+          </div>
+
+          {backupFormMode && (() => {
+            const isNewDraft = backupFormMode === 'new';
+            const editingDraft = isNewDraft ? null : backupDrafts.find((draft) => draft.id === backupFormMode) ?? null;
+            const currentFileCount = isNewDraft ? backupFormStagedFiles.length : (editingDraft?.files.length ?? 0);
+            const dropzoneDisabled = isNewDraft ? currentFileCount >= 5 : (isUploadingBackupFile || currentFileCount >= 5);
+
+            const handleFilesPicked = (picked: File[]) => {
+              if (!picked.length) return;
+              if (isNewDraft) {
+                setBackupFormStagedFiles((current) => [...current, ...picked].slice(0, 5));
+              } else if (editingDraft) {
+                handleUploadBackupFiles(editingDraft.id, picked);
+              }
+            };
+
+            return (
+              <div className="mt-4 overflow-hidden rounded-2xl border border-[var(--primary)]/15 bg-gradient-to-br from-[var(--primary)]/[0.04] via-white to-white shadow-sm">
+                <div className="flex items-center gap-3 border-b border-[var(--primary)]/10 bg-white/70 px-5 py-4">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]/10 text-[var(--primary)]">
+                    <i className={`fas ${isNewDraft ? 'fa-plus' : 'fa-pen'} text-sm`} aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-[var(--text)]">{isNewDraft ? 'New Backup Title' : 'Edit Backup Title'}</p>
+                    <p className="text-xs text-slate-500">Saved privately — never submitted until you choose to use it.</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 p-5">
+                  <div>
+                    <label htmlFor="backupFormTitle" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Title
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i className="fas fa-heading text-sm" aria-hidden="true" />
+                      </div>
+                      <input
+                        id="backupFormTitle"
+                        type="text"
+                        autoFocus
+                        value={backupFormTitle}
+                        onChange={(e) => setBackupFormTitle(e.target.value)}
+                        placeholder="e.g. AI-Powered Attendance Monitoring System"
+                        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm font-semibold text-slate-800 shadow-sm transition focus:border-[var(--primary)] focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/10"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="backupFormDescription" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Description <span className="font-normal normal-case text-slate-400">(optional)</span>
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute left-3 top-3 text-slate-400">
+                        <i className="fas fa-align-left text-sm" aria-hidden="true" />
+                      </div>
+                      <textarea
+                        id="backupFormDescription"
+                        value={backupFormDescription}
+                        onChange={(e) => setBackupFormDescription(e.target.value)}
+                        rows={2}
+                        placeholder="A brief summary of the idea"
+                        className="w-full resize-none rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-700 shadow-sm transition focus:border-[var(--primary)] focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/10"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="backupFormKeywords" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Keywords <span className="font-normal normal-case text-slate-400">(optional, comma-separated)</span>
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i className="fas fa-tags text-sm" aria-hidden="true" />
+                      </div>
+                      <input
+                        id="backupFormKeywords"
+                        type="text"
+                        value={backupFormKeywords}
+                        onChange={(e) => setBackupFormKeywords(e.target.value)}
+                        placeholder="e.g. IoT, Mobile App, Machine Learning"
+                        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-700 shadow-sm transition focus:border-[var(--primary)] focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/10"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Supporting Files <span className="font-normal normal-case text-slate-400">(optional — helps your adviser review it)</span>
+                    </label>
+
+                    {currentFileCount > 0 && (
+                      <ul className="mb-2 flex flex-col gap-1.5">
+                        {isNewDraft
+                          ? backupFormStagedFiles.map((file, index) => (
+                              <li key={`${file.name}-${index}`} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                                <span className="flex min-w-0 items-center gap-2.5 text-xs font-bold text-slate-700">
+                                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <i className={`fas ${getFileTypeIcon(file.name)}`} aria-hidden="true" />
+                                  </span>
+                                  <span className="min-w-0">
+                                    <span className="block truncate">{file.name}</span>
+                                    {formatBackupFileSize(file.size) && (
+                                      <span className="block font-normal text-slate-400">{formatBackupFileSize(file.size)}</span>
+                                    )}
+                                  </span>
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setBackupFormStagedFiles((current) => current.filter((_, i) => i !== index))}
+                                  className="shrink-0 text-slate-400 transition hover:text-rose-600"
+                                  title="Remove file"
+                                >
+                                  <i className="fas fa-trash text-xs" aria-hidden="true" />
+                                </button>
+                              </li>
+                            ))
+                          : (editingDraft?.files ?? []).map((file) => (
+                              <li key={file.id} className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                                <a
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex min-w-0 items-center gap-2.5 text-xs font-bold text-slate-700 hover:text-[var(--primary)]"
+                                >
+                                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <i className={`fas ${getFileTypeIcon(file.name)}`} aria-hidden="true" />
+                                  </span>
+                                  <span className="min-w-0">
+                                    <span className="block truncate">{file.name}</span>
+                                    {formatBackupFileSize(file.size) && (
+                                      <span className="block font-normal text-slate-400">{formatBackupFileSize(file.size)}</span>
+                                    )}
+                                  </span>
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveBackupFile(editingDraft!.id, file.id)}
+                                  disabled={removingBackupFileId === file.id}
+                                  className="shrink-0 text-slate-400 transition hover:text-rose-600 disabled:opacity-60"
+                                  title="Remove file"
+                                >
+                                  <i className="fas fa-trash text-xs" aria-hidden="true" />
+                                </button>
+                              </li>
+                            ))}
+                      </ul>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => backupFileInputRef.current?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        if (!dropzoneDisabled) setIsDraggingBackupFile(true);
+                      }}
+                      onDragLeave={() => setIsDraggingBackupFile(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setIsDraggingBackupFile(false);
+                        if (dropzoneDisabled) return;
+                        handleFilesPicked(Array.from(e.dataTransfer.files || []));
+                      }}
+                      disabled={dropzoneDisabled}
+                      className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-5 text-center transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                        isDraggingBackupFile
+                          ? 'border-[var(--primary)] bg-[var(--primary)]/5'
+                          : 'border-slate-200 bg-slate-50/60 hover:border-[var(--primary)]/40 hover:bg-[var(--primary)]/[0.03]'
+                      }`}
+                    >
+                      <i className="fas fa-cloud-arrow-up text-lg text-slate-400" aria-hidden="true" />
+                      <p className="text-xs font-bold text-slate-600">
+                        {isUploadingBackupFile ? 'Uploading…' : 'Drag & drop files, or click to browse'}
+                      </p>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                        {currentFileCount >= 5 ? 'Maximum of 5 files reached' : 'PDF, DOC, PPT, XLS — up to 5 files'}
+                      </p>
+                      <input
+                        ref={backupFileInputRef}
+                        hidden
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                        onChange={(e) => {
+                          handleFilesPicked(Array.from(e.target.files || []));
+                          e.target.value = '';
+                        }}
+                      />
+                    </button>
+                    {isNewDraft && <p className="mt-1.5 text-xs text-slate-400">Attached automatically when you save.</p>}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+                    <button
+                      type="button"
+                      onClick={closeBackupForm}
+                      className="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-600 shadow-sm transition hover:bg-slate-100"
+                    >
+                      {isNewDraft ? 'Cancel' : 'Done'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSubmitBackupForm}
+                      disabled={isSavingBackupDraft}
+                      className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:brightness-110 disabled:opacity-60"
+                    >
+                      <i className={`fas ${isSavingBackupDraft ? 'fa-circle-notch fa-spin' : 'fa-floppy-disk'}`} aria-hidden="true" />
+                      {isSavingBackupDraft ? 'Saving…' : isNewDraft ? 'Save Backup' : 'Update Backup'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {backupDrafts.length > 0 ? (
+            <ul className="mt-4 flex flex-col gap-2">
+              {[...backupDrafts]
+                .sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0))
+                .map((draft) => {
+                const badge = getBackupReviewBadge(draft.reviewStatus);
+                return (
+                <li
+                  key={draft.id}
+                  className={`flex items-start justify-between gap-3 rounded-xl border p-3 transition ${
+                    draft.isPriority
+                      ? 'border-amber-300 bg-amber-50/60'
+                      : backupFormMode === draft.id
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/5'
+                        : 'border-slate-100 bg-slate-50/70'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePriorityBackupDraft(draft)}
+                    className={`mt-0.5 shrink-0 text-lg transition ${draft.isPriority ? 'text-amber-400' : 'text-slate-300 hover:text-amber-300'}`}
+                    title={draft.isPriority ? 'Your best pick — click to unstar' : 'Mark as your best pick'}
+                  >
+                    <i className={draft.isPriority ? 'fas fa-star' : 'far fa-star'} aria-hidden="true" />
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-bold text-slate-800">&quot;{draft.title}&quot;</p>
+                      {draft.isPriority && (
+                        <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 ring-1 ring-inset ring-amber-300">
+                          Best Pick
+                        </span>
+                      )}
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.className}`}>
+                        <i className={`fas ${badge.icon} mr-1`} aria-hidden="true" />
+                        {badge.label}
+                      </span>
+                    </div>
+                    {draft.description && (
+                      <p className="mt-0.5 truncate text-xs text-slate-500">{draft.description}</p>
+                    )}
+                    {draft.reviewStatus === 'NEEDS_REVISION' && draft.reviewFeedback && (
+                      <p className="mt-1 rounded-lg bg-amber-50 px-2 py-1 text-xs text-amber-800">
+                        <i className="fas fa-comment-dots mr-1" aria-hidden="true" />
+                        {draft.reviewFeedback}
+                      </p>
+                    )}
+                    {draft.keywords.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {draft.keywords.map((keyword) => (
+                          <span
+                            key={keyword}
+                            className="rounded-full bg-slate-200/70 px-2 py-0.5 text-[10px] font-bold text-slate-600"
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <p className="mt-1.5 flex items-center gap-2 text-[11px] text-slate-400">
+                      <span>
+                        Saved {new Date(draft.updatedAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                      {draft.files.length > 0 && (
+                        <span className="inline-flex items-center gap-1">
+                          <i className="fas fa-paperclip" aria-hidden="true" />
+                          {draft.files.length} file{draft.files.length === 1 ? '' : 's'}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleApplyBackupDraft(draft)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-100"
+                      title="Use this title for a submission"
+                    >
+                      <i className="fas fa-arrow-up-right-from-square" aria-hidden="true" />
+                      Use
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openEditBackupForm(draft)}
+                      className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-400 shadow-sm transition hover:bg-slate-100 hover:text-[var(--primary)]"
+                      title="Edit backup title"
+                    >
+                      <i className="fas fa-pen" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBackupDraft(draft.id)}
+                      disabled={deletingBackupDraftId === draft.id}
+                      className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-400 shadow-sm transition hover:bg-slate-100 hover:text-rose-600 disabled:opacity-60"
+                      title="Delete backup title"
+                    >
+                      <i className="fas fa-trash" aria-hidden="true" />
+                    </button>
+                  </div>
+                </li>
+                );
+              })}
+            </ul>
+          ) : (
+            !backupFormMode && (
+              <div className="mt-4 flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-200 py-8 text-center">
+                <i className="fas fa-bookmark text-2xl text-slate-300" aria-hidden="true" />
+                <p className="text-sm font-semibold text-slate-500">No backups saved yet</p>
+                <p className="max-w-xs text-xs text-slate-400">
+                  Add a few alternate titles now so you&apos;re ready if the panel ever asks for a new one.
+                </p>
+              </div>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1145,6 +1145,18 @@ button {
     color: var(--text);
 }
 
+.notification-menu-item-tag {
+    flex-shrink: 0;
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(217, 119, 6, 0.12);
+    color: #b45309;
+}
+
 .notification-menu-item-dot {
     width: 0.45rem;
     height: 0.45rem;
@@ -21763,10 +21775,15 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-welcome-insigh
     gap: 0.35rem !important;
 }
 
+/* A soft left rail visually ties the children to their parent — without it, an
+   expanded dropdown's items read as just another flat list at the same weight
+   as the parent, instead of a nested group. */
 .student-shell .student-global-sidebar .sidebar-submenu {
     display: grid !important;
     gap: 0.28rem !important;
-    padding: 0.25rem 0 0.2rem 0.55rem !important;
+    padding: 0.25rem 0 0.2rem 0.7rem !important;
+    margin-left: 0.15rem !important;
+    border-left: 2px solid rgba(0, 58, 143, 0.14) !important;
 }
 
 .student-shell .student-global-sidebar .sidebar-nav-dropdown:not(.is-open) .sidebar-submenu {
@@ -21774,12 +21791,46 @@ html[data-student-theme="dark"] .student-shell .student-dashboard-welcome-insigh
 }
 
 .student-shell .student-global-sidebar .sidebar-nav-chevron {
-    margin-left: auto !important;
     transition: transform 0.2s ease !important;
 }
 
 .student-shell .student-global-sidebar .sidebar-nav-dropdown.is-open .sidebar-nav-chevron {
     transform: rotate(180deg) !important;
+}
+
+/* The dropdown label and its expand/collapse chevron are two separate click
+   targets — clicking the label navigates to that page, clicking the chevron
+   only toggles the submenu, so neither action gets forced on you by the other. */
+.student-shell .student-global-sidebar .sidebar-nav-dropdown-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.2rem !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-nav-dropdown-row .sidebar-link {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-nav-dropdown-toggle {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+.student-shell .student-global-sidebar .sidebar-nav-dropdown-toggle:hover,
+.student-shell .student-global-sidebar .sidebar-nav-dropdown-toggle:focus-visible {
+    background: rgba(0, 58, 143, 0.08) !important;
+    color: #003a8f !important;
 }
 
 .student-shell .student-global-sidebar .sidebar-nav-heading {

@@ -1,5 +1,10 @@
 import { cache } from 'react';
-import { ensureProjectMilestoneWorkflow, TOTAL_WORKFLOW_CHECKPOINTS, TOTAL_WORKFLOW_MILESTONES } from '@/lib/milestone-checkpoint-tracking';
+import {
+  ensureProjectMilestoneWorkflow,
+  getNewTitleRecoveryStage,
+  TOTAL_WORKFLOW_CHECKPOINTS,
+  TOTAL_WORKFLOW_MILESTONES
+} from '@/lib/milestone-checkpoint-tracking';
 
 const now = '2026-04-06T00:00:00.000Z';
 
@@ -209,6 +214,11 @@ export type StudentDashboardData = {
     panelMembers?: string[];
     transferabilityNote?: string;
     abstract?: string;
+    // Set only when the group's project is in the specific "resubmit a
+    // replacement title" recovery state (see resetProjectForNewTitle /
+    // title-submissions POST) — lets the Title Submission page explain why
+    // the student is being asked to submit a title again.
+    newTitleRequired?: { previousTitle: string; reason: string | null; stage: 'concept' | 'proposal' } | null;
   };
   dashboard?: {
     snapshotAt: string;
@@ -616,11 +626,14 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             academicYear: { select: { label: true } }
           } as const;
 
+          const { DefenseChairDecision } = await import('@/generated/prisma/client');
+
           const [
             groupMembers,
             approvedTitleProject,
             adviserUser,
-            activeProjectResult
+            activeProjectResult,
+            latestNewTitleSchedule
           ] = await Promise.all([
             // 1. Group Members
             prisma.groupMember.findMany({
@@ -655,7 +668,17 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
               where: { groupId: group.id },
               orderBy: { updatedAt: 'desc' },
               select: projectSummarySelect
-            })
+            }),
+            // 5. Most recent "New Title Required" chair decision, if this group
+            // is currently in that specific resubmit-a-title recovery state
+            // (see resetProjectForNewTitle / title-submissions POST).
+            group.projectId
+              ? prisma.defenseSchedule.findFirst({
+                  where: { projectId: group.projectId, chairDecision: DefenseChairDecision.NEW_TITLE },
+                  orderBy: { chairDecisionAt: 'desc' },
+                  select: { previousProjectTitle: true, chairDecisionRemarks: true, title: true }
+                }).catch(() => null)
+              : Promise.resolve(null)
           ]);
 
           try {
@@ -735,6 +758,13 @@ export const getStudentDashboardData = cache(async function getStudentDashboardD
             repositoryStatus: approvedTitleProject?.repositoryPublishedAt || activeProjectResult?.repositoryPublishedAt
               ? 'Published'
               : (approvedTitleProject || activeProjectResult) ? 'Not yet published' : data.project.repositoryStatus,
+            newTitleRequired: activeProject?.status === 'NEEDS_REVISION' && latestNewTitleSchedule?.previousProjectTitle
+              ? {
+                  previousTitle: latestNewTitleSchedule.previousProjectTitle,
+                  reason: latestNewTitleSchedule.chairDecisionRemarks,
+                  stage: getNewTitleRecoveryStage(latestNewTitleSchedule.title) ?? 'proposal'
+                }
+              : null,
           };
 
           data.titleRegistration.proposedTitle = activeProject?.title || approvedTitleProject?.title || data.titleRegistration.proposedTitle;

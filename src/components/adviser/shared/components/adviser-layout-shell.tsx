@@ -19,6 +19,7 @@ import {
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 import type { AdviserNotificationRecord } from '@/components/adviser/shared/components/adviser-notifications';
 import type { PortalNotificationItem } from '@/components/shared/portal-shell-action-menus';
+import { isBackupTitleNotification } from '@/lib/notification-tags';
 
 const SIDEBAR_STORAGE_KEY = 'adviserShellSidebarCollapsed';
 const STUDENT_THEME_STORAGE_KEY = 'studentWorkspaceTheme';
@@ -54,7 +55,8 @@ function toNotificationPreviewItems(
     meta: item.meta,
     tone: item.tone,
     unread: item.status !== 'read',
-    actionLabel: 'Open'
+    actionLabel: 'Open',
+    tag: isBackupTitleNotification(item.title) ? 'Backup' : undefined
   }));
 }
 

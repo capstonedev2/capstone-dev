@@ -15,6 +15,8 @@ import { handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import { uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
 import {
+  NEW_TITLE_SUBMISSION_CHECKPOINT_KEY,
+  getNewTitleRecoveryStage,
   recordCheckpointSubmission,
   syncCheckpointReview,
   updateMilestoneRollup
@@ -499,11 +501,16 @@ export async function POST(request: Request) {
     let description = '';
     let keywords: string[] = [];
     let uploadedFiles: File[] = [];
+    // Set when the student applied an adviser-approved backup draft (see
+    // /api/title-drafts) and submitted it unmodified — checked below against
+    // the draft's actual saved content before it's trusted for anything.
+    let backupDraftId = '';
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       title = normalizeText(formData.get('title') as string);
       description = normalizeText(formData.get('description') as string);
+      backupDraftId = normalizeText(formData.get('backupDraftId') as string);
 
       const keywordsData = formData.get('keywords');
       if (keywordsData) {
@@ -523,6 +530,7 @@ export async function POST(request: Request) {
       const body = await request.json().catch(() => ({}));
       title = normalizeText(body?.title);
       description = normalizeText(body?.description);
+      backupDraftId = normalizeText(body?.backupDraftId);
       keywords = Array.isArray(body?.keywords)
         ? body.keywords.map((keyword: unknown) => normalizeText(keyword)).filter(Boolean)
         : [];
@@ -552,12 +560,13 @@ export async function POST(request: Request) {
 
     // Removed the requirement for an assigned adviser so students can submit a proposal to the pending queue
 
-    // A Proposal (or later) defense panel can decide a group needs an entirely new
-    // title while Concept stays approved (chair-decision/route.ts + resetProjectForNewTitle) —
-    // in that specific recovery state the group's own project is left NEEDS_REVISION
-    // with a NEW_TITLE chair decision on record. Detect it and update that same
-    // project in place instead of creating a fresh one, so Concept-stage checkpoints
-    // and evidence aren't orphaned by a title change that was never their fault.
+    // A Concept Presentation or Proposal (or later) defense panel can decide a group
+    // needs an entirely new title while any earlier, already-approved stage stays
+    // approved (chair-decision/route.ts + resetProjectForNewTitle) — in that
+    // specific recovery state the group's own project is left NEEDS_REVISION with a
+    // NEW_TITLE chair decision on record. Detect it and update that same project in
+    // place instead of creating a fresh one, so earlier-stage checkpoints and
+    // evidence aren't orphaned by a title change that was never their fault.
     const pendingNewTitleProject = group.projectId
       ? await prisma.project.findFirst({
           where: {
@@ -567,9 +576,57 @@ export async function POST(request: Request) {
               some: { chairDecision: DefenseChairDecision.NEW_TITLE }
             }
           },
-          select: { id: true, title: true }
+          select: {
+            id: true,
+            title: true,
+            defenseSchedules: {
+              where: { chairDecision: DefenseChairDecision.NEW_TITLE },
+              orderBy: { chairDecisionAt: 'desc' },
+              take: 1,
+              select: { title: true }
+            }
+          }
         })
       : null;
+
+    // Which checkpoint the replacement title (and any files attached to it)
+    // should link to depends on which stage's panel actually required the new
+    // title — see NEW_TITLE_SUBMISSION_CHECKPOINT_KEY. Falls back to Proposal
+    // when the triggering schedule's stage can't be determined, matching this
+    // code's original, pre-Concept-aware behavior.
+    const newTitleStage = pendingNewTitleProject
+      ? getNewTitleRecoveryStage(pendingNewTitleProject.defenseSchedules[0]?.title ?? '') ?? 'proposal'
+      : null;
+    const newTitleCheckpointKey = newTitleStage ? NEW_TITLE_SUBMISSION_CHECKPOINT_KEY[newTitleStage] : null;
+
+    // If a replacement title was already submitted and is still awaiting the
+    // adviser's decision (status SUBMITTED/UNDER_REVIEW, not NEEDS_REVISION
+    // anymore), block a second one instead of silently spinning up a brand-new,
+    // disconnected Project with none of this group's Concept-stage history —
+    // that's exactly what used to happen here, and worse, approving the wrong
+    // one would reassign Group.projectId away from the real project entirely.
+    if (group.projectId && !pendingNewTitleProject) {
+      const pendingReplacementProject = await prisma.project.findFirst({
+        where: {
+          id: group.projectId,
+          status: { in: [ProjectStatus.SUBMITTED, ProjectStatus.UNDER_REVIEW] },
+          defenseSchedules: {
+            some: { chairDecision: DefenseChairDecision.NEW_TITLE }
+          }
+        },
+        select: { id: true }
+      });
+
+      if (pendingReplacementProject) {
+        return Response.json(
+          {
+            success: false,
+            message: 'Your replacement title is already awaiting your adviser’s review. Wait for a decision before submitting another.'
+          },
+          { status: 409 }
+        );
+      }
+    }
 
     // The whole point of a "New Title" decision is that the title has to actually
     // change — block resubmitting the exact same one (trim/case-insensitive so
@@ -587,6 +644,38 @@ export async function POST(request: Request) {
       );
     }
 
+    // A backup draft the adviser already approved skips a second review cycle
+    // ONLY when the content actually submitted still matches exactly what was
+    // approved — the client remembers which draft was last applied, but this
+    // check is what's actually trusted, so silently editing the title/keywords
+    // after applying a backup (or applying a different, unapproved one) just
+    // falls back to the normal pending-review path with no error shown.
+    const sortedKeywordsMatch = (a: string[], b: string[]) =>
+      a.length === b.length && [...a].sort().join('\u0000') === [...b].sort().join('\u0000');
+
+    const approvedBackupDraft = pendingNewTitleProject && backupDraftId
+      ? await prisma.titleDraft.findFirst({
+          where: { id: backupDraftId, groupId: group.id, reviewStatus: MilestoneCheckpointReviewStatus.APPROVED },
+          select: {
+            title: true,
+            description: true,
+            keywords: true,
+            reviewedBy: { select: { name: true, displayName: true } },
+            files: { select: { id: true } }
+          }
+        })
+      : null;
+
+    const isPreApprovedSubmission = Boolean(
+      approvedBackupDraft &&
+      normalizeText(approvedBackupDraft.title).toLowerCase() === normalizeText(title).toLowerCase() &&
+      normalizeText(approvedBackupDraft.description || '') === normalizeText(description) &&
+      sortedKeywordsMatch(approvedBackupDraft.keywords, keywords)
+    );
+    const preApprovedByName = approvedBackupDraft?.reviewedBy
+      ? (approvedBackupDraft.reviewedBy.displayName || approvedBackupDraft.reviewedBy.name || 'Your adviser')
+      : 'Your adviser';
+
     const { project, submissionId } = await prisma.$transaction(async (tx) => {
       if (pendingNewTitleProject) {
         const updatedProject = await tx.project.update({
@@ -595,7 +684,7 @@ export async function POST(request: Request) {
             title,
             abstract: description || 'Replacement title proposal submitted for adviser validation.',
             keywords,
-            status: ProjectStatus.SUBMITTED
+            status: isPreApprovedSubmission ? ProjectStatus.APPROVED : ProjectStatus.SUBMITTED
           }
         });
 
@@ -605,24 +694,59 @@ export async function POST(request: Request) {
             submittedById: user.id,
             title: 'Replacement Title Submission',
             description: description || `Proposed replacement title: ${title}`,
-            status: SubmissionStatus.SUBMITTED,
+            status: isPreApprovedSubmission ? SubmissionStatus.APPROVED : SubmissionStatus.SUBMITTED,
+            reviewedAt: isPreApprovedSubmission ? new Date() : null,
             version: 1
           }
         });
 
         await recordCheckpointSubmission(tx, {
           projectId: updatedProject.id,
-          checkpointKey: 'proposal-adviser-review',
+          checkpointKey: newTitleCheckpointKey!,
           submissionId: submission.id
         });
+
+        if (isPreApprovedSubmission) {
+          // The checkpoint itself still needs to flip to approved/completed —
+          // recordCheckpointSubmission above only links the submission to it and
+          // leaves it pending, same as any normal submission would.
+          await syncCheckpointReview(tx, {
+            submissionId: submission.id,
+            nextStatus: SubmissionStatus.APPROVED,
+            reviewNotes: `Pre-approved backup title, applied automatically by ${getPersonName(user) || 'the student'}.`,
+            reviewerName: preApprovedByName,
+            reviewerRole: UserRole.ADVISER
+          });
+
+          // Mirrors the group-sync step PATCH /api/title-submissions runs on a
+          // normal adviser approval — Group.status/milestone are separate stored
+          // columns from Project.status, so without this the group's own status
+          // badge and milestone label would stay stuck on the pre-rejection state
+          // even though the replacement title is already fully approved.
+          await tx.group.update({
+            where: { id: group.id },
+            data: {
+              projectId: updatedProject.id,
+              projectTitle: updatedProject.title,
+              title: updatedProject.title,
+              status: 'active',
+              statusLabel: 'Active',
+              statusClass: 'status-active',
+              milestone: newTitleStage === 'concept' ? 'Concept Proposal' : 'Proposal',
+              currentMilestone: newTitleStage === 'concept' ? 'Concept Proposal' : 'Proposal'
+            }
+          });
+        }
 
         if (group.userId) {
           await tx.notification.create({
             data: {
               userId: group.userId,
-              title: 'Replacement Title Submitted',
-              message: `${getPersonName(user) || 'A student'} submitted a replacement title "${title}" for adviser review.`,
-              type: 'feedback',
+              title: isPreApprovedSubmission ? 'Replacement Title Auto-Approved' : 'Replacement Title Submitted',
+              message: isPreApprovedSubmission
+                ? `${getPersonName(user) || 'A student'} applied a replacement title "${title}" that you had already pre-approved as a backup — it's been approved automatically, no review needed.`
+                : `${getPersonName(user) || 'A student'} submitted a replacement title "${title}" for adviser review.`,
+              type: isPreApprovedSubmission ? 'success' : 'feedback',
               entityType: 'project',
               entityId: updatedProject.id
             }
@@ -706,6 +830,49 @@ export async function POST(request: Request) {
       timeout: 60000
     });
 
+    // Files attached to the title form link to the same checkpoint the title
+    // submission itself just used above — a Proposal-stage replacement title's
+    // evidence must NOT fall back to 'concept-title' (that would silently reopen
+    // an already-completed Concept checkpoint, which is exactly what happened
+    // before this fix: attaching a file to a replacement-title submission
+    // flipped Concept back to "submitted" even though nothing about Concept had
+    // changed). A Concept-stage replacement title legitimately DOES use
+    // 'concept-title' — that's the same checkpoint a first-time submission uses,
+    // since the rejected stage there was Concept itself.
+    const fileCheckpointKey = newTitleCheckpointKey ?? 'concept-title';
+
+    // A pre-approved backup that already has its own attached files doesn't
+    // need the student to re-upload anything — the exact same files just move
+    // over to become this submission's real files (re-parented from the now-
+    // fulfilled backup draft), instead of forcing a redundant re-upload of
+    // something already sitting in storage.
+    if (isPreApprovedSubmission && approvedBackupDraft && approvedBackupDraft.files.length) {
+      for (const file of approvedBackupDraft.files) {
+        try {
+          const movedFile = await prisma.uploadedFile.update({
+            where: { id: file.id },
+            data: {
+              projectId: project.id,
+              submissionId,
+              documentCategory: 'Title Proposal',
+              category: 'Title Proposal',
+              titleDraftId: null
+            }
+          });
+
+          await recordCheckpointSubmission(prisma, {
+            projectId: project.id,
+            checkpointKey: fileCheckpointKey,
+            documentCategory: 'Title Proposal',
+            fileName: movedFile.fileName,
+            fileId: movedFile.id
+          });
+        } catch (fileMoveError) {
+          console.warn(`Unable to move backup file ${file.id} to the new submission:`, fileMoveError);
+        }
+      }
+    }
+
     // Handle file uploads OUTSIDE the transaction so slow Supabase calls don't cause timeouts
     for (const file of uploadedFiles) {
       const bucketName = DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS;
@@ -739,12 +906,9 @@ export async function POST(request: Request) {
           }
         });
 
-        // 'concept-paper' was folded into 'concept-title' — the concept paper
-        // document is always uploaded together with the title, so this file
-        // ties to the same checkpoint the title submission itself uses.
         await recordCheckpointSubmission(prisma, {
           projectId: project.id,
-          checkpointKey: 'concept-title',
+          checkpointKey: fileCheckpointKey,
           documentCategory: 'Title Proposal',
           fileName: file.name,
           fileId: uploadedFile.id

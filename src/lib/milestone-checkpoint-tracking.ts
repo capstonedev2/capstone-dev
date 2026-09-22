@@ -1,6 +1,7 @@
 import {
   DefenseChairDecision,
   DefenseStatus,
+  EvaluationRecommendation,
   MilestoneCheckpointReviewStatus,
   MilestoneCheckpointStatus,
   MilestoneStatus,
@@ -17,6 +18,7 @@ type DbClient = {
   uploadedFile: any;
   group: any;
   defenseSchedule: any;
+  evaluation: any;
   notification: any;
 };
 
@@ -1193,16 +1195,27 @@ export async function getLatestDefenseOutcomeTag(db: DbClient, projectId?: strin
     }
   }
 
-  if (yesVotes > noVotes) {
+  // Must match finalizeDefenseSchedule's actual pass rule (evaluate/route.ts): unanimous
+  // Yes is required to pass — a single No sends it to the chair's decision instead. This
+  // used to check "yesVotes > noVotes" (simple majority), which could report "Passed"
+  // on a 3-yes/1-no vote even though that's not unanimous and the chair had already
+  // recorded an authoritative New Title/Redefense decision overriding it.
+  if (noVotes === 0) {
     return { label: `Passed ${schedule.title}`, tone: 'success' };
   }
 
-  if (noVotes > yesVotes) {
+  if (noVotes > 0) {
+    // The chair's follow-up call is the authoritative final word once any No vote
+    // exists — label it as the chair's decision specifically, not just a generic
+    // outcome, so it reads distinctly from an ordinary panel-vote result.
+    if (schedule.chairDecision === DefenseChairDecision.APPROVED) {
+      return { label: 'Panel Chair Decision: Approved (Override)', tone: 'success' };
+    }
     if (schedule.chairDecision === DefenseChairDecision.NEW_TITLE) {
-      return { label: 'New Title Required', tone: 'danger' };
+      return { label: 'Panel Chair Decision: New Title Required', tone: 'danger' };
     }
     if (schedule.chairDecision === DefenseChairDecision.REDEFENSE) {
-      return { label: 'Redefense Required', tone: 'danger' };
+      return { label: 'Panel Chair Decision: Redefense Required', tone: 'danger' };
     }
     // The panel already decided this — that's the majority vote, final. What's actually
     // pending is the chair's separate follow-up call (redefense vs. new title), so don't
@@ -1302,31 +1315,85 @@ export async function resetGroupForNewTitle(
   });
 }
 
-// Only the title decision itself and the (now-invalid) defense schedule/panel
-// vote tied to it reopen — the group's already-submitted proposal chapters and
-// oral defense application evidence are unaffected by a title change and don't
-// need to be redone.
-const NEW_TITLE_RESET_CHECKPOINT_KEYS = ['proposal-adviser-review', 'proposal-defense-scheduled', 'proposal-panel-evaluation'];
+export type NewTitleRecoveryStage = 'concept' | 'proposal';
+
+// A "New Title" decision can happen at Concept Presentation just as validly as
+// Proposal Defense — this derives which one from the triggering schedule's own
+// title (reuses the same normalize() + substring-match style as
+// getCheckpointKeyForSchedule above). Pre-Final/Final/Mock defenses aren't
+// mapped here: by that point the title has long since been locked in, so a
+// "New Title" decision doesn't apply there the same way.
+export function getNewTitleRecoveryStage(scheduleTitle: string): NewTitleRecoveryStage | null {
+  const normalized = normalize(scheduleTitle);
+
+  if (normalized.includes('concept')) {
+    return 'concept';
+  }
+
+  if (normalized.includes('proposal')) {
+    return 'proposal';
+  }
+
+  return null;
+}
+
+// Which checkpoint should receive the student's replacement-title submission
+// (see title-submissions/route.ts's pendingNewTitleProject branch) for each
+// recovery stage. Concept bundles the title and concept paper into a single
+// submission ('concept-title' — "Title & concept paper submitted"), so a
+// rejected concept genuinely needs that whole checkpoint redone, not just an
+// adviser-review step. Reopening 'concept-title' itself is safe (not a
+// collision risk with a brand-new group's first-ever submission) because
+// POST /api/title-submissions already resolves this exact same checkpoint key
+// for a first-time submission too — recovery and first-time naturally
+// converge on the same key at Concept. Proposal has no such first-time path
+// through this endpoint (proposal content is submitted elsewhere, via
+// /api/document-files), so its recovery safely uses a dedicated review
+// checkpoint instead.
+export const NEW_TITLE_SUBMISSION_CHECKPOINT_KEY: Record<NewTitleRecoveryStage, string> = {
+  concept: 'concept-title',
+  proposal: 'proposal-adviser-review'
+};
+
+// Which checkpoints reopen (go back to pending) for each recovery stage — the
+// title decision itself plus whatever downstream schedule/vote step is now
+// invalid because it was for the rejected title. Everything else (Concept's
+// oral defense application evidence, Proposal's chapters and defense
+// evidence) stays exactly as it was, since a title change doesn't invalidate
+// paperwork/content that isn't about the title itself.
+export const NEW_TITLE_RESET_CHECKPOINT_KEYS: Record<NewTitleRecoveryStage, string[]> = {
+  concept: ['concept-title', 'concept-adviser-approval', 'concept-presentation-scheduled', 'concept-panel-approval'],
+  proposal: ['proposal-adviser-review', 'proposal-defense-scheduled', 'proposal-panel-evaluation']
+};
 
 /**
- * Used specifically when a Proposal (or later) defense panel decides a group needs
- * a New Title, after that group's Concept stage already passed. Unlike
- * resetGroupForNewTitle (which fully archives the project and unlinks the group —
- * correct for a general-purpose "start over" demotion at any stage), this keeps the
- * same Project row and its Group link intact, so Concept-stage checkpoints,
- * evidence, and approvals stay exactly as they were. Only the title's own adviser
- * review and the defense schedule/panel vote that rejected it reopen — the
- * group's proposal documents and defense evidence are untouched, since a new
- * title doesn't invalidate work that isn't about the title itself.
+ * Used when a Concept Presentation or Proposal Defense panel decides a group
+ * needs a New Title. Unlike resetGroupForNewTitle (which fully archives the
+ * project and unlinks the group — correct for a general-purpose "start over"
+ * demotion at any stage), this keeps the same Project row and its Group link
+ * intact, and only reopens the checkpoints specific to the stage that was
+ * actually rejected (see NEW_TITLE_RESET_CHECKPOINT_KEYS) — the group's other
+ * stage-independent work stays untouched.
  */
 export async function resetProjectForNewTitle(
   db: DbClient,
-  { projectId, previousTitle, chairRemarks }: { projectId: string; previousTitle: string; chairRemarks?: string | null }
+  {
+    projectId,
+    previousTitle,
+    chairRemarks,
+    scheduleTitle
+  }: { projectId: string; previousTitle: string; chairRemarks?: string | null; scheduleTitle: string }
 ) {
   await db.project.update({
     where: { id: projectId },
     data: { status: ProjectStatus.NEEDS_REVISION }
   });
+
+  // Falls back to the Proposal checkpoint set if the schedule title doesn't
+  // match a known stage — matches this function's original, pre-Concept-aware
+  // behavior rather than silently doing nothing.
+  const stage = getNewTitleRecoveryStage(scheduleTitle) ?? 'proposal';
+  const checkpointKeys = NEW_TITLE_RESET_CHECKPOINT_KEYS[stage];
 
   // Surfaced right on the checkpoint the student already checks progress on
   // (Milestones page), so it's unambiguous their old title is gone and why —
@@ -1338,7 +1405,7 @@ export async function resetProjectForNewTitle(
   await db.milestoneCheckpoint.updateMany({
     where: {
       projectId,
-      key: { in: NEW_TITLE_RESET_CHECKPOINT_KEYS }
+      key: { in: checkpointKeys }
     },
     data: {
       status: MilestoneCheckpointStatus.PENDING,
@@ -1352,6 +1419,109 @@ export async function resetProjectForNewTitle(
       latestFeedbackAt: new Date()
     }
   });
+}
+
+/**
+ * Used when the panel chair reports that a group is pivoting to a backup
+ * title in the SAME sitting as the rejected original — no separate
+ * reschedule, no new DefenseSchedule row. Unlike resetProjectForNewTitle
+ * (which reopens checkpoints for a fresh submission + a later scheduled
+ * presentation), this swaps the project's title in place and reopens the
+ * SAME DefenseSchedule/Evaluation rows for a fresh round of voting right now
+ * — the group presents the backup live, and every panelist votes again on
+ * it, same as any other defense. The eventual pass/fail still runs through
+ * the normal finalizeDefenseSchedule path in evaluate/route.ts.
+ */
+export async function restartDefenseVoteForBackupTitle(
+  db: DbClient,
+  {
+    scheduleId,
+    projectId,
+    groupId,
+    scheduleTitle,
+    title,
+    description,
+    keywords
+  }: {
+    scheduleId: string;
+    projectId: string;
+    groupId?: string | null;
+    scheduleTitle: string;
+    title: string;
+    description?: string | null;
+    keywords?: string[];
+  }
+) {
+  await db.project.update({
+    where: { id: projectId },
+    data: {
+      title,
+      abstract: description || undefined,
+      keywords: keywords && keywords.length ? keywords : undefined,
+      status: ProjectStatus.DEFENSE_SCHEDULED
+    }
+  });
+
+  if (groupId) {
+    await db.group.update({
+      where: { id: groupId },
+      data: {
+        projectTitle: title,
+        title,
+        status: 'active',
+        statusLabel: 'Active',
+        statusClass: 'status-active'
+      }
+    });
+  }
+
+  // Reopens the same schedule row for another round — clearing chairDecision
+  // is what makes the voting UI reappear instead of the decided-recap view
+  // (see needsChairDecision/ChairDecisionRecap in defense-voting-data.ts).
+  await db.defenseSchedule.update({
+    where: { id: scheduleId },
+    data: {
+      status: DefenseStatus.SCHEDULED,
+      chairDecision: null,
+      chairDecisionAt: null,
+      chairDecisionRemarks: null
+    }
+  });
+
+  await db.evaluation.updateMany({
+    where: { defenseScheduleId: scheduleId },
+    data: {
+      recommendation: EvaluationRecommendation.PENDING,
+      remarks: null,
+      submittedAt: null
+    }
+  });
+
+  // The rejected vote left this stage's panel checkpoint at NEEDS_REVISION,
+  // which is what was driving a stale "Redefense Required" alert on the
+  // student dashboard even though voting had already restarted. The panel is
+  // actively re-voting, not asking for a revision, so this clears back to
+  // IN_REVIEW ("in progress") instead — resolved again by the normal
+  // recordDefenseVoteOutcome call once the new vote actually finishes.
+  const stage = getNewTitleRecoveryStage(scheduleTitle) ?? 'proposal';
+  const panelCheckpointKey = stage === 'concept' ? 'concept-panel-approval' : 'proposal-panel-evaluation';
+  const panelCheckpoint = await db.milestoneCheckpoint.findUnique({
+    where: { projectId_key: { projectId, key: panelCheckpointKey } }
+  });
+
+  if (panelCheckpoint) {
+    await db.milestoneCheckpoint.update({
+      where: { id: panelCheckpoint.id },
+      data: {
+        status: MilestoneCheckpointStatus.IN_REVIEW,
+        panelReviewStatus: MilestoneCheckpointReviewStatus.PENDING,
+        latestFeedback: `The group is presenting backup title "${title}" — the panel is voting again in this same session.`,
+        latestFeedbackBy: 'Defense Panel Chair',
+        latestFeedbackAt: new Date()
+      }
+    });
+    await updateMilestoneRollup(db, panelCheckpoint.milestoneId);
+  }
 }
 
 function getReviewFieldForRole(role: UserRole) {

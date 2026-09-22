@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getServerAuthenticatedUser } from '@/lib/auth';
 import { sendGroupAssignmentEmail } from '@/lib/mailer';
@@ -385,6 +386,19 @@ export async function POST(request: Request) {
     
     return NextResponse.json(newGroup, { status: 201 });
   } catch (error: any) {
+    // A collided group code is a routine, expected outcome of manual entry (not
+    // a real server error) — surface it as a clean 409 with a specific message
+    // instead of the raw Prisma constraint error the client would otherwise see.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      const target = Array.isArray(error.meta?.target) ? error.meta.target.map((value) => String(value)) : [];
+      if (target.includes('code')) {
+        return NextResponse.json(
+          { error: 'This group code is already in use. Choose a different code.' },
+          { status: 409 }
+        );
+      }
+    }
+
     console.error('Error creating group:', error);
     return NextResponse.json({ error: 'Failed to create group', details: error.message }, { status: 500 });
   }

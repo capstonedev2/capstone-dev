@@ -50,7 +50,7 @@ type ScheduleProject = {
   eligibleStage: ScheduleStageType;
   attemptCount: number;
   scheduleStatus: ScheduleStatus;
-  redefenseReason?: { label: string; detail: string } | null;
+  redefenseReason?: { label: string; detail: string; previousTitle?: string | null } | null;
 };
 type AdviserApiResponse = { advisers?: FacultyOption[]; panelists?: FacultyOption[]; data?: { advisers?: FacultyOption[]; panelists?: FacultyOption[]; }; };
 type DefenseSchedulesApiResponse = {
@@ -821,6 +821,22 @@ export function ProgramHeadSchedule() {
                         </div>
                       </div>
 
+                      {group.redefenseReason?.previousTitle && (
+                        <div className="mt-4 rounded-xl border border-rose-100 bg-rose-50/70 p-3 text-rose-900">
+                          <div className="flex items-start gap-2">
+                            <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-700">
+                              <i className="fas fa-rotate-left text-[12px]" aria-hidden="true"></i>
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-bold uppercase tracking-wider">Previous Title (Rejected)</p>
+                              <p className="mt-0.5 text-[13px] font-bold leading-snug line-through decoration-rose-400/70">
+                                {group.redefenseReason.previousTitle}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className={`mt-4 rounded-xl border p-3 ${
                         group.approvedTitle
                           ? 'border-emerald-100 bg-emerald-50/70 text-emerald-950'
@@ -834,7 +850,7 @@ export function ProgramHeadSchedule() {
                           </span>
                           <div className="min-w-0">
                             <p className="text-[11px] font-bold uppercase tracking-wider">
-                              {group.approvedTitle ? 'Approved Title' : 'Not Eligible'}
+                              {group.approvedTitle ? (group.redefenseReason?.previousTitle ? 'New Proposed Title' : 'Approved Title') : 'Not Eligible'}
                             </p>
                             <p className="mt-0.5 text-[13px] font-bold leading-snug">
                               {group.approvedTitle || group.ineligibilityReason || 'No approved title yet.'}

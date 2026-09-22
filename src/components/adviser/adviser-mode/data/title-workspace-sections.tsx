@@ -461,12 +461,23 @@ export function GroupReviewList({
   onViewApproved,
   hasPendingTitles
 }: GroupReviewListProps) {
+  // Nothing pending anywhere (not just filtered out — hasPendingTitles checks
+  // the unfiltered set) and the current view is also empty: there's truly
+  // nothing to review, so hide the whole section rather than showing an empty
+  // card, matching how the Backup/Evidence/Other-Documents queues below it
+  // already behave. If a search or status filter is just hiding real pending
+  // titles, though, keep showing the "No matching titles" empty state below —
+  // that's useful feedback the section shouldn't silently disappear on.
+  if (!titles.length && !hasPendingTitles) {
+    return null;
+  }
+
   const pendingCount = titles.filter((record) => record.status === 'pending').length;
   const completedCount = titles.filter((record) => ['approved', 'needs-revision', 'rejected'].includes(record.status)).length;
 
   return (
-    <section className="space-y-5">
-      <div className="flex flex-col gap-5 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">
+    <section className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm">
+      <div className="relative flex flex-col gap-5 overflow-hidden p-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[var(--primary)]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="relative z-10 flex items-start gap-4">
           <span className="mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--primary)]/10 to-[var(--primary)]/5 text-[var(--primary)] ring-1 ring-[var(--primary)]/20 shadow-sm">
@@ -476,7 +487,7 @@ export function GroupReviewList({
             <h2 className="text-xl font-extrabold tracking-tight text-[var(--text)]">Group Review Queue</h2>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+        <div className="relative z-10 flex flex-wrap items-center gap-2 text-xs font-semibold">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
             <i className="fas fa-list-check text-[10px] opacity-50" />
             {titles.length} group{titles.length === 1 ? '' : 's'}
@@ -493,7 +504,7 @@ export function GroupReviewList({
       </div>
 
       {titles.length ? (
-        <div className="space-y-4">
+        <div className="space-y-4 border-t border-[var(--border)] bg-[var(--surface-alt)]/40 p-6">
           {titles.map((record) => (
             <GroupReviewCard
               key={record.id}
@@ -503,7 +514,9 @@ export function GroupReviewList({
           ))}
         </div>
       ) : (
-        <EmptyState hasPendingTitles={hasPendingTitles} onViewApproved={onViewApproved} />
+        <div className="border-t border-[var(--border)] bg-[var(--surface-alt)]/40 p-6">
+          <EmptyState hasPendingTitles={hasPendingTitles} onViewApproved={onViewApproved} />
+        </div>
       )}
     </section>
   );
@@ -704,8 +717,8 @@ export function EvidenceQueueList({
   }
 
   return (
-    <section className="space-y-5">
-      <div className="flex items-center gap-4 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-sm">
+    <section className="overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] backdrop-blur-xl shadow-sm">
+      <div className="flex items-center gap-4 p-6">
         <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 text-amber-600 ring-1 ring-amber-500/20 shadow-sm">
           <i className="fas fa-file-signature text-lg" />
         </span>
@@ -714,7 +727,7 @@ export function EvidenceQueueList({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 border-t border-[var(--border)] bg-[var(--surface-alt)]/40 p-6">
         {pendingTitles.map((record) => (
           <EvidenceQueueCard key={record.id} record={record} onReviewEvidence={onReviewEvidence} />
         ))}

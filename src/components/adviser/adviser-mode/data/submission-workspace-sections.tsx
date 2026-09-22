@@ -598,7 +598,7 @@ function SubmissionItem({
   const currentWorkflowStep = REVIEW_WORKFLOW_STEPS[submission.workflowStepIndex] || REVIEW_WORKFLOW_STEPS[0];
   const latestTimelineEvent = [...submission.timeline].reverse().find((event) => event.isComplete) || submission.timeline[0];
   const latestNote = submission.latestReviewComment?.body || 'No adviser notes yet. Open the review workspace to add comments.';
-  const isTitleOrEvidence = submission.type === 'Title' || submission.type === 'Evidence';
+  const isTitleOrEvidence = submission.type === 'Title' || submission.type === 'Evidence' || submission.type === 'Backup';
   const primaryActionLabel = 'Preview & Details';
 
   return (
@@ -862,6 +862,10 @@ export function SubmissionDetailsModal({
   const previewFiles = submission.previewFiles;
   const activeFile = previewFiles[activeFileIndex] || null;
   const activeFileId = activeFile?.id || submission.previewFileId;
+  // Backup title files have no Project yet, so the generic document-files
+  // routes (which authorize off a project relation) 403 on them — they're
+  // only reachable through their own dedicated, group-scoped API.
+  const documentApiBase = submission.type === 'Backup' ? '/api/title-drafts/files' : '/api/document-files';
 
   useEffect(() => { setIsMounted(true); }, []);
   useEffect(() => {
@@ -887,7 +891,7 @@ export function SubmissionDetailsModal({
 
     const loadSignedUrl = async () => {
       try {
-        const response = await fetch(`/api/document-files/${activeFileId}/signed-url`, { method: 'POST' });
+        const response = await fetch(`${documentApiBase}/${activeFileId}/signed-url`, { method: 'POST' });
         const payload = await response.json().catch(() => null);
 
         if (!response.ok) {
@@ -996,7 +1000,7 @@ export function SubmissionDetailsModal({
                     <div className="flex items-center gap-2">
                       <a
                         className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
-                        href={previewUrl || `/api/document-files/${activeFileId}/download`}
+                        href={previewUrl || `${documentApiBase}/${activeFileId}/download`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -1005,7 +1009,7 @@ export function SubmissionDetailsModal({
                       </a>
                       <a
                         className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-blue-700 transition hover:bg-blue-50"
-                        href={`/api/document-files/${activeFileId}/download`}
+                        href={`${documentApiBase}/${activeFileId}/download`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -1149,7 +1153,7 @@ export function SubmissionDetailsModal({
                 href={submission.workspaceHref}
               >
                 <i className="fas fa-up-right-from-square text-xs" aria-hidden="true" />
-                {submission.type === 'Title' || submission.type === 'Evidence'
+                {submission.type === 'Title' || submission.type === 'Evidence' || submission.type === 'Backup'
                   ? 'Approve/Reject on Title & Evidence Approval'
                   : 'Open Full Review Workspace'}
               </Link>

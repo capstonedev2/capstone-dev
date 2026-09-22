@@ -844,10 +844,6 @@ export type EnumMilestoneCheckpointStatusFieldUpdateOperationsInput = {
   set?: $Enums.MilestoneCheckpointStatus
 }
 
-export type EnumMilestoneCheckpointReviewStatusFieldUpdateOperationsInput = {
-  set?: $Enums.MilestoneCheckpointReviewStatus
-}
-
 export type MilestoneCheckpointCreateNestedOneWithoutSubmissionsInput = {
   create?: Prisma.XOR<Prisma.MilestoneCheckpointCreateWithoutSubmissionsInput, Prisma.MilestoneCheckpointUncheckedCreateWithoutSubmissionsInput>
   connectOrCreate?: Prisma.MilestoneCheckpointCreateOrConnectWithoutSubmissionsInput
