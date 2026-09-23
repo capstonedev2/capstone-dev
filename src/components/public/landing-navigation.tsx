@@ -13,6 +13,7 @@ export function LandingNavigation() {
   const { branding } = useBranding();
   const [isOpen, setIsOpen] = useState(false);
   const [activeHref, setActiveHref] = useState('/#home');
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const navigation = branding.navigation;
   const visibleLinks = useMemo(
@@ -24,7 +25,14 @@ export function LandingNavigation() {
     setIsOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const updateScrolled = () => setIsScrolled(window.scrollY > 8);
 
+    updateScrolled();
+    window.addEventListener('scroll', updateScrolled, { passive: true });
+
+    return () => window.removeEventListener('scroll', updateScrolled);
+  }, []);
 
   useEffect(() => {
     if (pathname !== '/') {
@@ -56,12 +64,15 @@ export function LandingNavigation() {
 
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        const activationLine = window.scrollY + 140;
-        const activeSection = sectionLinks.reduce((current, item) => (
-          item.section.offsetTop <= activationLine ? item : current
-        ), sectionLinks[0]);
+        // Only highlight a link while the activation line is inside its own section, so
+        // unlinked sections (e.g. Hall of Excellence) leave every link unhighlighted.
+        const activationLine = 140;
+        const activeSection = sectionLinks.find((item) => {
+          const rect = item.section.getBoundingClientRect();
+          return rect.top <= activationLine && rect.bottom > activationLine;
+        });
 
-        setActiveHref(activeSection.href);
+        setActiveHref(activeSection ? activeSection.href : '');
       });
     };
 
@@ -97,15 +108,22 @@ export function LandingNavigation() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  const getActiveClassName = (href: string) => {
+  const isLinkActive = (href: string) => {
     const isAboutLink = href === '/about' && pathname === '/about';
     const isSectionLink = pathname === '/' && href === activeHref;
 
-    return `${styles.navLink} ${isAboutLink || isSectionLink ? styles.navLinkActive : ''}`;
+    return isAboutLink || isSectionLink;
   };
 
+  const getActiveClassName = (href: string) => (
+    `${styles.navLink} ${isLinkActive(href) ? styles.navLinkActive : ''}`
+  );
+
   return (
-    <nav className={styles.navbar} aria-label="Primary navigation">
+    <nav
+      className={`${styles.navbar} ${isScrolled ? styles.navbarScrolled : ''}`}
+      aria-label="Primary navigation"
+    >
       <div className={`${styles.container} ${styles.navbarInner}`}>
         <Link href="/#home" className={styles.brand} aria-label="Go to ThesisTrack home">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -144,6 +162,7 @@ export function LandingNavigation() {
                 key={link.href}
                 href={link.href}
                 className={getActiveClassName(link.href)}
+                aria-current={isLinkActive(link.href) ? 'page' : undefined}
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}

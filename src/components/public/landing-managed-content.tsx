@@ -63,10 +63,10 @@ export function LandingManagedHero() {
         <p style={paragraphStyle}>{landing.description}</p>
         {landing.showCtaButtons ? (
           <div className={`mt-7 flex flex-wrap gap-3 ${ctaAlignmentClass}`}>
-            <Link href={landing.primaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-black text-white transition-colors duration-200" style={primaryCtaStyle}>
+            <Link href={landing.primaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-black text-white transition-transform duration-200 ease-out hover:-translate-y-px active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current" style={primaryCtaStyle}>
               {landing.primaryCtaText}
             </Link>
-            <Link href={landing.secondaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full border bg-white px-6 text-sm font-black shadow-sm transition-colors duration-200" style={secondaryCtaStyle}>
+            <Link href={landing.secondaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full border bg-white px-6 text-sm font-black shadow-sm transition-transform duration-200 ease-out hover:-translate-y-px active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current" style={secondaryCtaStyle}>
               {landing.secondaryCtaText}
             </Link>
           </div>

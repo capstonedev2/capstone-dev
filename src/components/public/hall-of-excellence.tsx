@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useBranding } from '@/components/branding/branding-provider';
+import styles from '@/app/page.module.css';
 
 interface Author {
   name: string;
@@ -214,6 +215,8 @@ const outstandingAwards: Award[] = [
   }
 ];
 
+const LANDING_AWARD_LIMIT = 5;
+
 const deptMap: Record<string, string> = {
   "IT": "BS Information Technology",
   "ESM": "BS Energy Systems & Management",
@@ -225,9 +228,10 @@ const deptMap: Record<string, string> = {
 export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: string }) {
   const { branding } = useBranding();
 
+  // The landing page shows only the first 5 awards so each card has its own cover image (award_1–award_5).
   const filteredAwards = filterDepartmentId 
     ? outstandingAwards.filter(a => a.department === deptMap[filterDepartmentId])
-    : outstandingAwards;
+    : outstandingAwards.slice(0, LANDING_AWARD_LIMIT);
 
   if (filteredAwards.length === 0) return null;
 
@@ -283,6 +287,12 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
     }
   };
 
+  const scrollByCards = (direction: 1 | -1) => {
+    if (!scrollRef.current) return;
+    const amount = scrollRef.current.clientWidth * 0.8 * direction;
+    scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
   const handleCardClick = (e: React.MouseEvent, award: Award) => {
     // If user dragged more than 5px, it was a scroll action, not a click
     if (scrollRef.current && Math.abs(scrollRef.current.scrollLeft - scrollLeft.current) > 5) {
@@ -292,6 +302,35 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
     setSelectedAward(award);
     document.body.classList.add('modal-open');
   };
+
+  const closeModal = () => {
+    setSelectedAward(null);
+    setCurrentImageIndex(0);
+    document.body.classList.remove('modal-open');
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent, award: Award) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelectedAward(award);
+      document.body.classList.add('modal-open');
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedAward) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedAward]);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -379,29 +418,29 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
         }
       `}</style>
 
-      <section className="relative overflow-hidden bg-gradient-to-b from-white to-[#f4f8fc] pt-24 pb-16">
+      <section className={`relative overflow-hidden ${styles.bgMesh} pt-24 pb-16`}>
         {/* Background Decorative Patterns */}
         <div className="absolute top-0 right-0 w-full h-[400px] bg-[radial-gradient(ellipse_at_top_right,rgba(246,190,0,0.05),transparent_60%)] pointer-events-none" />
         
         <div className="relative z-10 w-[min(1680px,calc(100%-3rem))] mx-auto mb-16">
-          <div className="flex flex-col items-center text-center" data-reveal="fade-up">
-            <span 
-              className={`mb-4 inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] ${filterDepartmentId ? '' : 'border-[#f6be00]/30 bg-[#f6be00]/10 text-[#b17800]'}`}
+          <div className={`${styles.sectionIntro} ${styles.hallIntro}`} data-reveal="fade-up">
+            <span
+              className={styles.sectionKicker}
               style={filterDepartmentId ? { borderColor: 'color-mix(in srgb, var(--department-primary) 30%, transparent)', backgroundColor: 'color-mix(in srgb, var(--department-primary) 10%, transparent)', color: 'var(--department-primary)' } : undefined}
             >
-              <i className="fas fa-star" /> Hall of Excellence
+              Hall of Excellence
             </span>
-            <h2 className="m-0 text-3xl sm:text-5xl font-black text-[#102033] tracking-tight leading-tight">
+            <h2>
               Celebrating Outstanding <br className="hidden sm:block" />
-              <span 
-                className={`text-transparent bg-clip-text ${filterDepartmentId ? '' : 'bg-gradient-to-r from-[#b17800] to-[#f6be00]'}`}
+              <span
+                className={filterDepartmentId ? 'text-transparent bg-clip-text' : undefined}
                 style={filterDepartmentId ? { backgroundImage: 'linear-gradient(to right, var(--department-primary), var(--department-secondary))' } : undefined}
               >
                 {filterDepartmentId ? `${filterDepartmentId} Innovations` : 'Student Innovations'}
               </span>
             </h2>
-            <p className="mt-4 max-w-2xl text-[0.95rem] font-medium leading-relaxed text-slate-600">
-              {filterDepartmentId 
+            <p>
+              {filterDepartmentId
                 ? `Highlighting the highest caliber of research, technical execution, and impactful capstone projects from the ${deptMap[filterDepartmentId]} program.`
                 : 'Highlighting the highest caliber of student research, technical execution, and impactful capstone projects archived within the university repository.'}
             </p>
@@ -409,8 +448,30 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
         </div>
 
         <div className="relative w-full">
+          {/* Edge fades hinting there is more content to scroll to */}
+          <div className="hidden sm:block absolute inset-y-0 left-0 w-16 z-20 pointer-events-none bg-gradient-to-r from-[var(--background)] to-transparent" />
+          <div className="hidden sm:block absolute inset-y-0 right-0 w-16 z-20 pointer-events-none bg-gradient-to-l from-[var(--background)] to-transparent" />
+
+          {/* Prev/Next controls */}
+          <button
+            type="button"
+            onClick={() => scrollByCards(-1)}
+            aria-label="Scroll to previous awards"
+            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 items-center justify-center rounded-full bg-white text-[#003A8F] shadow-[0_8px_20px_rgba(15,43,89,0.18)] border border-white/80 transition-transform duration-200 ease-out hover:-translate-y-[calc(50%+2px)] active:scale-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#003A8F]"
+          >
+            <i className="fas fa-chevron-left" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByCards(1)}
+            aria-label="Scroll to next awards"
+            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 items-center justify-center rounded-full bg-white text-[#003A8F] shadow-[0_8px_20px_rgba(15,43,89,0.18)] border border-white/80 transition-transform duration-200 ease-out hover:-translate-y-[calc(50%+2px)] active:scale-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#003A8F]"
+          >
+            <i className="fas fa-chevron-right" aria-hidden="true" />
+          </button>
+
           {/* Scrollable Container with Hybrid Auto-scroll */}
-          <div 
+          <div
             ref={scrollRef}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={handleMouseLeave}
@@ -423,10 +484,14 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
           >
             {/* We duplicate the array to allow infinite seamless scrolling */}
             {displayAwards.map((award, index) => (
-              <div 
-                key={`${award.category}-${index}`} 
-                className="block shrink-0 group/card cursor-pointer card-3d-wrapper"
+              <div
+                key={`${award.category}-${index}`}
+                className="block shrink-0 group/card cursor-pointer card-3d-wrapper transition-transform duration-200 ease-out active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white rounded-[2rem]"
+                role="button"
+                tabIndex={0}
+                aria-label={`View details for ${award.title}`}
                 onClick={(e) => handleCardClick(e, award)}
+                onKeyDown={(e) => handleCardKeyDown(e, award)}
               >
                     <article 
                       className="card-3d-element relative rounded-[2rem] w-[320px] sm:w-[400px] h-[450px] overflow-hidden shadow-[0_8px_30px_rgba(15,23,42,0.08)] hover:shadow-[15px_20px_40px_rgba(0,58,143,0.25)]" 
@@ -444,14 +509,14 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
                       {/* Content Area */}
                       <div className="absolute inset-0 z-10 p-6 sm:p-8 flex flex-col justify-between">
                         {/* Top Floating Badges */}
-                        <div className="self-start flex flex-col gap-2">
+                        <div className="self-start flex flex-col gap-2 max-w-[85%]">
                           {[
                             { name: award.category, icon: award.icon },
                             ...(award.additionalAwards || [])
                           ].map((aw, idx) => (
-                            <div key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-lg w-max">
-                              <i 
-                                className={`${aw.icon} text-sm ${filterDepartmentId ? '' : 'text-[#f6be00]'}`} 
+                            <div key={idx} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-lg max-w-full">
+                              <i
+                                className={`${aw.icon} text-sm shrink-0 ${filterDepartmentId ? '' : 'text-[#f6be00]'}`}
                                 style={filterDepartmentId ? { color: 'var(--department-primary)' } : undefined}
                               />
                               <span className="text-[0.65rem] font-black uppercase tracking-widest">{aw.name}</span>
@@ -461,13 +526,13 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
 
                         {/* Bottom Content Area */}
                         <div className="flex flex-col mt-auto">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-2">
                             {!filterDepartmentId && (
                               <>
                                 <span className="text-[#f6be00] text-[0.65rem] font-black uppercase tracking-widest drop-shadow-md">
                                   {award.department}
                                 </span>
-                                <span className="w-1 h-1 rounded-full bg-white/40" />
+                                <span className="w-1 h-1 rounded-full bg-white/40 shrink-0" />
                               </>
                             )}
                             <span className="text-white/80 text-[0.65rem] font-bold uppercase tracking-widest drop-shadow-md">
@@ -519,17 +584,17 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
       {selectedAward && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-[#061022]/60 backdrop-blur-sm transition-opacity"
-            onClick={() => {
-              setSelectedAward(null);
-              setCurrentImageIndex(0);
-              document.body.classList.remove('modal-open');
-            }}
+            onClick={closeModal}
           />
-          
+
           {/* Modal Content - Expanded to Ultra-Premium Layout */}
-          <div className="relative bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-900/5 w-full max-w-5xl overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-300 max-h-[95vh] sm:max-h-[85vh]">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="award-modal-title"
+            className="relative bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] ring-1 ring-slate-900/5 w-full max-w-5xl overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in-95 duration-300 max-h-[95vh] sm:max-h-[85vh]">
             
             {/* Left Column: Hero Image Carousel */}
             <div className="md:w-[45%] relative min-h-[250px] md:min-h-full flex-shrink-0 group/modalimg overflow-hidden">
@@ -553,15 +618,17 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
               {/* Carousel Controls */}
               {selectedAward.galleryImages.length > 1 && (
                 <>
-                  <button 
+                  <button
                     onClick={prevImage}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition-colors opacity-0 group-hover/modalimg:opacity-100"
+                    aria-label="Previous image"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition-[background-color,opacity,transform] duration-200 ease-out opacity-0 group-hover/modalimg:opacity-100 active:scale-90 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                   >
                     <i className="fas fa-chevron-left text-sm"></i>
                   </button>
-                  <button 
+                  <button
                     onClick={nextImage}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition-colors opacity-0 group-hover/modalimg:opacity-100"
+                    aria-label="Next image"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/30 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition-[background-color,opacity,transform] duration-200 ease-out opacity-0 group-hover/modalimg:opacity-100 active:scale-90 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
                   >
                     <i className="fas fa-chevron-right text-sm"></i>
                   </button>
@@ -572,7 +639,9 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
                       <button
                         key={idx}
                         onClick={() => setCurrentImageIndex(idx)}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'}`}
+                        aria-label={`Show image ${idx + 1} of ${selectedAward.galleryImages.length}`}
+                        aria-current={idx === currentImageIndex}
+                        className={`h-1.5 rounded-full transition-all duration-300 ease-out active:scale-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white ${idx === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'}`}
                       />
                     ))}
                   </div>
@@ -606,18 +675,15 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
             <div className="md:w-[55%] flex flex-col flex-grow overflow-hidden bg-white relative">
               {/* Header */}
               <div className={`px-8 pt-10 pb-6 relative`}>
-                <button 
-                  onClick={() => {
-                    setSelectedAward(null);
-                    setCurrentImageIndex(0);
-                    document.body.classList.remove('modal-open');
-                  }}
-                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors z-10"
+                <button
+                  onClick={closeModal}
+                  aria-label="Close project details"
+                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-[background-color,color,transform] duration-200 ease-out active:scale-90 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-400"
                 >
                   <i className="fas fa-times" />
                 </button>
-                
-                <h2 className="text-3xl sm:text-4xl font-black leading-tight mt-4 bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-500 pb-1">
+
+                <h2 id="award-modal-title" className="text-3xl sm:text-4xl font-black leading-tight mt-4 bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-500 pb-1">
                   {selectedAward.title}
                 </h2>
                 <div className="flex flex-wrap items-center gap-2 mt-3">
@@ -732,9 +798,9 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
                   Full manuscript access restricted
                 </div>
                 
-                <Link 
-                  href="/login" 
-                  className="shrink-0 flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#003A8F] to-[#004bba] text-white font-bold text-sm hover:shadow-[0_8px_20px_rgba(0,58,143,0.3)] transition-all duration-300 w-full sm:w-auto hover:-translate-y-0.5"
+                <Link
+                  href="/login"
+                  className="shrink-0 flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#003A8F] to-[#004bba] text-white font-bold text-sm hover:shadow-[0_8px_20px_rgba(0,58,143,0.3)] transition-all duration-300 w-full sm:w-auto hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   Sign In to Access <i className="fas fa-arrow-right ml-1" />
                 </Link>

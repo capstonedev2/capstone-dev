@@ -32,8 +32,6 @@ import {
 } from '@/components/adviser/adviser-mode/data/submission-workspace-data';
 import type { AdviserDashboardData } from '@/lib/mock/adviser-dashboard';
 
-type ReviewPatchStatus = 'accepted' | 'approved' | 'needs_revision';
-
 export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData }) {
   const [typeFilter, setTypeFilter] = useState<SubmissionType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<SubmissionStatus | 'all'>('all');
@@ -45,7 +43,6 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
   const [backupTitles, setBackupTitles] = useState<AdviserBackupTitleSummary[]>([]);
   const [studentDocumentError, setStudentDocumentError] = useState<string | null>(null);
   const [isLoadingStudentDocuments, setIsLoadingStudentDocuments] = useState(true);
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [viewingSubmission, setViewingSubmission] = useState<AdviserSubmissionRecord | null>(null);
 
   const submissions = useMemo<AdviserSubmissionRecord[]>(
@@ -138,57 +135,6 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
     };
   }, []);
 
-  function getSubmissionRecipients(submission: AdviserSubmissionRecord, file?: DocumentFileSummary | null) {
-    const groupMembers = file?.groupMembers || submission.groupMembers || [];
-
-    return Array.from(new Set([
-      ...groupMembers
-        .map((member) => member.userId)
-        .filter((userId): userId is string => Boolean(userId)),
-      ...(file?.uploadedBy || submission.uploadedBy ? [file?.uploadedBy || submission.uploadedBy || ''] : [])
-    ].filter(Boolean)));
-  }
-
-  async function sendSubmissionNotification({
-    submission,
-    file,
-    title,
-    message,
-    type,
-    entityType = 'uploaded_file'
-  }: {
-    submission: AdviserSubmissionRecord;
-    file?: DocumentFileSummary | null;
-    title: string;
-    message: string;
-    type: 'success' | 'warning' | 'info';
-    entityType?: string;
-  }) {
-    const recipientIds = getSubmissionRecipients(submission, file);
-
-    if (!recipientIds.length) {
-      console.warn('Skipping submission notification because no student recipient IDs were found.', {
-        submissionId: submission.id
-      });
-      return;
-    }
-
-    await fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        notifications: recipientIds.map((userId) => ({
-          userId,
-          title,
-          message,
-          type,
-          entityType,
-          entityId: submission.id
-        }))
-      })
-    });
-  }
-
   function downloadSubmissionDocument(submission: AdviserSubmissionRecord) {
     // Title and Evidence rows use a synthetic id (not a real document-files id),
     // so route through the real file id when one exists rather than assuming
@@ -201,75 +147,6 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
     if (submission.fileUrl) {
       window.open(submission.fileUrl, '_blank', 'noopener,noreferrer');
     }
-  }
-
-  async function updateSubmissionReviewStatus(
-    submission: AdviserSubmissionRecord,
-    status: ReviewPatchStatus,
-    notes: string
-  ) {
-    if (isSubmittingReview) {
-      return;
-    }
-
-    setStudentDocumentError(null);
-    setIsSubmittingReview(true);
-
-    try {
-      const response = await fetch(`/api/document-files/${submission.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status,
-          notes
-        })
-      });
-      const payload = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(payload?.message || 'Unable to update the review status.');
-      }
-
-      setStudentDocuments((current) => current.map((file) => (
-        file.id === submission.id ? { ...file, ...payload.file } : file
-      )));
-
-      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
-    } catch (error) {
-      setStudentDocumentError(error instanceof Error ? error.message : 'Unable to update the review status.');
-    } finally {
-      setIsSubmittingReview(false);
-    }
-  }
-
-  async function sendReminder(submission: AdviserSubmissionRecord) {
-    try {
-      await sendSubmissionNotification({
-        submission,
-        title: 'Submission Reminder',
-        message: `Reminder from your adviser: please check "${submission.submissionTitle}" and the latest review instructions.`,
-        type: 'info'
-      });
-      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
-    } catch (error) {
-      setStudentDocumentError(error instanceof Error ? error.message : 'Unable to send reminder.');
-    }
-  }
-
-  function approveSubmission(submission: AdviserSubmissionRecord) {
-    const confirmed = window.confirm(
-      'Approve this submission and notify the student? If the document still needs changes, choose Request Revision instead.'
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    void updateSubmissionReviewStatus(
-      submission,
-      'approved',
-      'Approved by adviser. The student can now view the adviser remarks and approval status.'
-    );
   }
 
   const filteredSubmissions = useMemo(() => {
@@ -446,22 +323,8 @@ export function AdviserSubmissions({ data: _data }: { data: AdviserDashboardData
           <SubmissionList
             hasActiveFilters={hasActiveFilters}
             isLoading={isLoadingStudentDocuments}
-            onApproveNotify={approveSubmission}
             onClearFilters={clearFilters}
             onDownloadSubmission={downloadSubmissionDocument}
-            onRequestRevision={(submission) => updateSubmissionReviewStatus(
-              submission,
-              'needs_revision',
-              submission.comments.length
-                ? ''
-                : 'Revision requested. Please address adviser feedback and upload a new version.'
-            )}
-            onSendReminder={sendReminder}
-            onStartReview={(submission) => updateSubmissionReviewStatus(
-              submission,
-              'accepted',
-              ''
-            )}
             onViewSubmission={setViewingSubmission}
             submissions={filteredSubmissions}
             totalSubmissions={submissions.length}

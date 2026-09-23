@@ -12,29 +12,14 @@ import {
   getDeadlineLabel,
   getSubmissionStatusMeta,
   toAdviserSubmissionRecord,
-  type AdviserSubmissionRecord,
-  type CommentCategory
+  type AdviserSubmissionRecord
 } from '@/components/adviser/adviser-mode/data/submission-workspace-data';
 
-type ReviewPatchStatus = 'accepted' | 'approved' | 'needs_revision' | 'rejected' | 'comment';
 type ReviewInfoTab = 'notes' | 'history' | 'details';
-
-const COMMENT_CATEGORIES: CommentCategory[] = [
-  'General',
-  'Formatting',
-  'Technical',
-  'Methodology',
-  'Approved Remark'
-];
 
 type ParsedCommentBody = {
   area: string;
   text: string;
-};
-
-type ActionNotice = {
-  tone: 'success' | 'error';
-  message: string;
 };
 
 const REVIEW_INFO_TABS: Array<{ id: ReviewInfoTab; label: string }> = [
@@ -81,17 +66,6 @@ function getPreviewUrl(submission: AdviserSubmissionRecord, signedUrl: string) {
   }
 
   return `/api/document-files/${submission.id}/preview`;
-}
-
-function getRecipientIds(submission: AdviserSubmissionRecord, file?: DocumentFileSummary | null) {
-  const groupMembers = file?.groupMembers || submission.groupMembers || [];
-
-  return Array.from(new Set([
-    ...groupMembers
-      .map((member) => member.userId)
-      .filter((userId): userId is string => Boolean(userId)),
-    ...(file?.uploadedBy || submission.uploadedBy ? [file?.uploadedBy || submission.uploadedBy || ''] : [])
-  ].filter(Boolean)));
 }
 
 function getTimelineEvent(submission: AdviserSubmissionRecord, eventId: string) {
@@ -159,36 +133,12 @@ function parseCommentBody(body: string): ParsedCommentBody {
   };
 }
 
-function buildCommentBody(area: string, text: string) {
-  const cleanArea = area.trim();
-  const cleanText = text.trim();
-
-  if (!cleanText) {
-    return '';
-  }
-
-  return cleanArea ? `Area: ${cleanArea}\n\n${cleanText}` : cleanText;
-}
-
-async function getResponseMessage(response: Response, fallback: string) {
-  const payload = await response.json().catch(() => null);
-  return payload?.message || payload?.error || fallback;
-}
-
 export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string }) {
   const [files, setFiles] = useState<DocumentFileSummary[]>([]);
   const [signedUrl, setSignedUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [activeQuickAction, setActiveQuickAction] = useState<'reminder' | null>(null);
-  const [actionNotice, setActionNotice] = useState<ActionNotice | null>(null);
   const [activeInfoTab, setActiveInfoTab] = useState<ReviewInfoTab>('notes');
-  const [notes, setNotes] = useState('');
-  const [commentArea, setCommentArea] = useState('');
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [editCommentArea, setEditCommentArea] = useState('');
-  const [editCommentText, setEditCommentText] = useState('');
   const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
 
   const file = useMemo(() => files.find((item) => item.id === fileId) || null, [fileId, files]);
@@ -231,11 +181,6 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
         if (!cancelled) {
           setFiles(nextFiles);
           setSignedUrl(signedPayload.signedUrl || '');
-          const parsedComment = selectedFile.latestReviewComment?.body
-            ? parseCommentBody(selectedFile.latestReviewComment.body)
-            : null;
-          setNotes(parsedComment?.text || '');
-          setCommentArea(parsedComment?.area || '');
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -254,329 +199,6 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
       cancelled = true;
     };
   }, [fileId]);
-
-  async function sendSubmissionNotification({
-    targetSubmission,
-    targetFile,
-    title,
-    message,
-    type,
-    entityType = 'uploaded_file'
-  }: {
-    targetSubmission: AdviserSubmissionRecord;
-    targetFile?: DocumentFileSummary | null;
-    title: string;
-    message: string;
-    type: 'success' | 'warning' | 'info';
-    entityType?: string;
-  }) {
-    const recipientIds = getRecipientIds(targetSubmission, targetFile);
-
-    if (!recipientIds.length) {
-      throw new Error('No student recipients were found for this reminder.');
-    }
-
-    await Promise.all(recipientIds.map(async (userId) => {
-      const response = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          title,
-          message,
-          type,
-          entityType,
-          entityId: targetSubmission.id
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(await getResponseMessage(response, 'Unable to send one or more reminders.'));
-      }
-    }));
-
-    return recipientIds.length;
-  }
-
-  async function updateReviewStatus(
-    status: ReviewPatchStatus,
-    fallbackNotes: string,
-    useFallbackNotes = false
-  ) {
-    if (!submission || isSaving) {
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
-    setActionNotice(null);
-
-    const bodyNotes = !useFallbackNotes && notes.trim()
-      ? buildCommentBody(commentArea, notes)
-      : fallbackNotes;
-
-    try {
-      const response = await fetch(`/api/document-files/${submission.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status,
-          notes: bodyNotes
-        })
-      });
-      const payload = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(payload?.message || 'Unable to update the review status.');
-      }
-
-      setFiles((current) => current.map((item) => (
-        item.id === submission.id ? { ...item, ...payload.file } : item
-      )));
-
-      if (status === 'comment') {
-        setNotes('');
-        setCommentArea('');
-      }
-
-      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Unable to update the review status.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  function approveAndNotifyStudent() {
-    const confirmed = window.confirm(
-      'Approve this submission and notify the student? If the document still needs changes, choose Request Revision instead.'
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    void updateReviewStatus(
-      'approved',
-      'Approved by adviser. The student can now view the adviser remarks and approval status.'
-    );
-  }
-
-  function saveAdviserComment() {
-    if (!notes.trim()) {
-      setError('Write an adviser comment before saving.');
-      return;
-    }
-
-    void updateReviewStatus('comment', '');
-  }
-
-  function startEditingComment(comment: AdviserSubmissionRecord['comments'][number]) {
-    const parsedComment = parseCommentBody(comment.body);
-
-    setEditingCommentId(comment.id);
-    setEditCommentArea(parsedComment.area);
-    setEditCommentText(parsedComment.text);
-    setError(null);
-  }
-
-  function cancelEditingComment() {
-    setEditingCommentId(null);
-    setEditCommentArea('');
-    setEditCommentText('');
-  }
-
-  function replaceSavedComment(commentId: string, nextBody: string) {
-    setFiles((current) => current.map((item) => {
-      if (item.id !== submission?.id) {
-        return item;
-      }
-
-      const reviewComments = (item.reviewComments || []).map((comment) => (
-        comment.id === commentId ? { ...comment, body: nextBody } : comment
-      ));
-
-      return {
-        ...item,
-        reviewComments,
-        latestReviewComment: item.latestReviewComment?.id === commentId
-          ? { ...item.latestReviewComment, body: nextBody }
-          : item.latestReviewComment
-      };
-    }));
-  }
-
-  function removeSavedComment(commentId: string) {
-    setFiles((current) => current.map((item) => {
-      if (item.id !== submission?.id) {
-        return item;
-      }
-
-      const reviewComments = (item.reviewComments || []).filter((comment) => comment.id !== commentId);
-
-      return {
-        ...item,
-        reviewComments,
-        latestReviewComment: item.latestReviewComment?.id === commentId
-          ? reviewComments[0] || null
-          : item.latestReviewComment
-      };
-    }));
-  }
-
-  async function updateSavedComment(commentId: string) {
-    const nextBody = buildCommentBody(editCommentArea, editCommentText);
-
-    if (!nextBody) {
-      setError('Write an adviser comment before saving.');
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
-    setActionNotice(null);
-
-    try {
-      const response = await fetch('/api/review-comments', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          commentId,
-          body: nextBody
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(await getResponseMessage(response, 'Unable to update this comment.'));
-      }
-
-      replaceSavedComment(commentId, nextBody);
-      cancelEditingComment();
-    } catch (updateError) {
-      setError(updateError instanceof Error ? updateError.message : 'Unable to update this comment.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function deleteSavedComment(commentId: string) {
-    const confirmed = window.confirm('Delete this adviser comment? This cannot be undone.');
-
-    if (!confirmed) {
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
-    setActionNotice(null);
-
-    try {
-      const response = await fetch('/api/review-comments', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commentId })
-      });
-
-      if (!response.ok) {
-        throw new Error(await getResponseMessage(response, 'Unable to delete this comment.'));
-      }
-
-      removeSavedComment(commentId);
-
-      if (editingCommentId === commentId) {
-        cancelEditingComment();
-      }
-    } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete this comment.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  function requestRevision() {
-    const pendingCommentCount = adviserComments.length + (notes.trim() ? 1 : 0);
-
-    if (!pendingCommentCount) {
-      const confirmed = window.confirm(
-        'Request revision without saved adviser comments? Students learn what to fix faster when comments are attached.'
-      );
-
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    void updateReviewStatus(
-      'needs_revision',
-      pendingCommentCount ? '' : 'Revision requested. Please address adviser feedback and upload a new version.',
-      !notes.trim()
-    );
-  }
-
-  function declineSubmission() {
-    const reason = window.prompt('Provide a reason for declining this research/submission:');
-    if (reason === null) return; // cancelled
-    if (!reason.trim()) {
-      alert('A declined remark is required when declining a submission.');
-      return;
-    }
-
-    void updateReviewStatus(
-      'rejected',
-      `Declined: ${reason.trim()}`,
-      true
-    );
-  }
-
-  function reopenApprovedAsRevision() {
-    const confirmed = window.confirm(
-      'Change this approved submission back to Needs Revision? This will notify the student that a revised version is required.'
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    void updateReviewStatus(
-      'needs_revision',
-      'Approval reopened: revision is required. Please address adviser feedback and upload a revised version.',
-      true
-    );
-  }
-
-  async function sendReminder() {
-    if (!submission || isSaving) {
-      return;
-    }
-
-    setIsSaving(true);
-    setActiveQuickAction('reminder');
-    setError(null);
-    setActionNotice(null);
-
-    try {
-      const recipientCount = await sendSubmissionNotification({
-        targetSubmission: submission,
-        targetFile: file,
-        title: 'Submission Review Reminder',
-        message: `Reminder from your adviser: please check "${submission.submissionTitle}" and the latest review instructions.`,
-        type: 'info'
-      });
-      setActionNotice({
-        tone: 'success',
-        message: `Reminder sent to ${recipientCount} recipient${recipientCount === 1 ? '' : 's'}.`
-      });
-      window.dispatchEvent(new Event('thesistrack:notifications-updated'));
-    } catch (reminderError) {
-      setActionNotice({
-        tone: 'error',
-        message: reminderError instanceof Error ? reminderError.message : 'Unable to send reminder.'
-      });
-    } finally {
-      setIsSaving(false);
-      setActiveQuickAction(null);
-    }
-  }
 
   if (isLoading) {
     return (
@@ -618,70 +240,6 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
   const reviewDuration = getReviewDurationLabel(reviewStartedAt, approvedAt);
   const adviserComments = submission.comments.filter((comment) => !isSystemReviewComment(comment.body));
   const latestComment = adviserComments[0] || null;
-  const quickActionsSection = (
-    <section id="adviser-quick-actions" className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
-      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">Quick Actions</p>
-      <div className="mt-4 grid gap-2">
-        {isUnderReview ? (
-          <>
-            <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white px-4 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:opacity-60" type="button" disabled={isSaving} onClick={requestRevision}>
-              <i className="fas fa-rotate-left text-xs" aria-hidden="true" />
-              Request Revision
-            </button>
-            <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 text-sm font-black text-orange-600 transition hover:bg-orange-50 disabled:opacity-60" type="button" disabled={isSaving} onClick={sendReminder}>
-              <i className={`fas ${activeQuickAction === 'reminder' ? 'fa-spinner fa-spin' : 'fa-bell'} text-xs`} aria-hidden="true" />
-              {activeQuickAction === 'reminder' ? 'Sending Reminder...' : 'Send Reminder'}
-            </button>
-            <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-300 bg-white px-4 text-sm font-black text-red-700 transition hover:bg-red-50 disabled:opacity-60" type="button" disabled={isSaving} onClick={declineSubmission}>
-              <i className="fas fa-ban text-xs" aria-hidden="true" />
-              Decline Submission
-            </button>
-            <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-black text-white transition hover:bg-emerald-700 disabled:opacity-60" type="button" disabled={isSaving} onClick={approveAndNotifyStudent}>
-              <i className="fas fa-circle-check text-xs" aria-hidden="true" />
-              Approve & Notify Student
-            </button>
-          </>
-        ) : isApproved ? (
-          <>
-            <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 text-sm font-black text-[#003A8F] transition hover:bg-blue-100" type="button" onClick={() => document.getElementById('adviser-approval-summary')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
-              <i className="fas fa-file-circle-check text-xs" aria-hidden="true" />
-              View Review Summary
-            </button>
-            <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-black text-[#003A8F] transition hover:bg-blue-50" href={`/api/document-files/${submission.id}/download`} target="_blank" rel="noreferrer">
-              <i className="fas fa-download text-xs" aria-hidden="true" />
-              Download
-            </a>
-            <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white px-4 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:opacity-60" type="button" disabled={isSaving} onClick={reopenApprovedAsRevision}>
-              <i className="fas fa-rotate-left text-xs" aria-hidden="true" />
-              Reopen as Revision
-            </button>
-          </>
-        ) : (
-          <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#003A8F] px-4 text-sm font-black text-white transition hover:bg-[#002C6B] disabled:opacity-60" type="button" disabled={isSaving} onClick={() => updateReviewStatus('accepted', '')}>
-            <i className="fas fa-play text-xs" aria-hidden="true" />
-            Still Reviewing
-          </button>
-        )}
-      </div>
-      {actionNotice ? (
-        <div
-          className={`mt-3 rounded-2xl border px-4 py-3 text-xs font-bold leading-5 ${
-            actionNotice.tone === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : 'border-red-200 bg-red-50 text-red-700'
-          }`}
-          role={actionNotice.tone === 'error' ? 'alert' : 'status'}
-          aria-live="polite"
-        >
-          <i
-            className={`fas ${actionNotice.tone === 'success' ? 'fa-circle-check text-emerald-600' : 'fa-circle-exclamation text-red-500'} mr-2`}
-            aria-hidden="true"
-          />
-          {actionNotice.message}
-        </div>
-      ) : null}
-    </section>
-  );
 
   return (
     <div className="adviser-review-workspace px-4 py-5 sm:px-6 lg:px-8">
@@ -1016,20 +574,11 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
                       <i className="fas fa-download text-xs" aria-hidden="true" />
                       Download
                     </a>
-                    <button
-                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white px-4 text-sm font-black text-red-600 transition hover:bg-red-50 disabled:opacity-60"
-                      type="button"
-                      disabled={isSaving}
-                      onClick={reopenApprovedAsRevision}
-                    >
-                      <i className="fas fa-rotate-left text-xs" aria-hidden="true" />
-                      Reopen as Revision
-                    </button>
                   </div>
 
                   <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-xs font-bold leading-5 text-slate-500">
                     <i className="fas fa-lock mr-2 text-emerald-600" aria-hidden="true" />
-                    This workspace is read-only after approval. Annotation tools, comment editing, and revision requests are locked until it is reopened as a revision.
+                    This workspace is a read-only audit view. Decisions on this submission are made from Title & Evidence Approval.
                   </div>
                 </>
               ) : (
@@ -1037,7 +586,7 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.15em] text-[#003A8F]">Adviser Comments ({adviserComments.length})</p>
                     <p className="mt-1 text-xs font-bold leading-5 text-slate-500">
-                      Edit or delete saved comments while this review is still active.
+                      This workspace is a read-only audit view — decisions and comments are made from Title & Evidence Approval.
                     </p>
                   </div>
 
@@ -1059,80 +608,14 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
                                     <p className="text-sm font-black text-slate-950">{comment.authorName}</p>
                                     <p className="text-xs text-slate-500">Adviser | {formatSubmissionDateTime(comment.createdAt)}</p>
                                   </div>
-                                  <div className="flex shrink-0 items-center gap-1">
-                                    <button
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#003A8F] disabled:opacity-50"
-                                      type="button"
-                                      aria-label="Edit comment"
-                                      title="Edit comment"
-                                      disabled={isSaving}
-                                      onClick={() => startEditingComment(comment)}
-                                    >
-                                      <i className="fas fa-pen text-[11px]" aria-hidden="true" />
-                                    </button>
-                                    <button
-                                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-red-100 bg-white text-red-500 transition hover:border-red-200 hover:bg-red-50 disabled:opacity-50"
-                                      type="button"
-                                      aria-label="Delete comment"
-                                      title="Delete comment"
-                                      disabled={isSaving}
-                                      onClick={() => deleteSavedComment(comment.id)}
-                                    >
-                                      <i className="fas fa-trash-can text-[11px]" aria-hidden="true" />
-                                    </button>
-                                  </div>
                                 </div>
-                                {editingCommentId === comment.id ? (
-                                  <div className="mt-4 space-y-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-3">
-                                    <label className="block">
-                                      <span className="mb-1.5 block text-xs font-black text-slate-700">Where is this comment?</span>
-                                      <input
-                                        className="min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#003A8F] focus:ring-4 focus:ring-blue-900/10"
-                                        value={editCommentArea}
-                                        onChange={(event) => setEditCommentArea(event.target.value)}
-                                        placeholder="Example: Page 2, Methodology section"
-                                      />
-                                    </label>
-                                    <label className="block">
-                                      <span className="mb-1.5 block text-xs font-black text-slate-700">Adviser comment</span>
-                                      <textarea
-                                        className="min-h-24 w-full resize-y rounded-xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#003A8F] focus:ring-4 focus:ring-blue-900/10"
-                                        value={editCommentText}
-                                        onChange={(event) => setEditCommentText(event.target.value)}
-                                        placeholder="Update your feedback..."
-                                      />
-                                    </label>
-                                    <div className="flex flex-wrap gap-2">
-                                      <button
-                                        className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl bg-[#003A8F] px-3 text-xs font-black text-white transition hover:bg-[#002C6B] disabled:opacity-60"
-                                        type="button"
-                                        disabled={isSaving || !editCommentText.trim()}
-                                        onClick={() => updateSavedComment(comment.id)}
-                                      >
-                                        <i className="fas fa-floppy-disk text-[10px]" aria-hidden="true" />
-                                        Save Edit
-                                      </button>
-                                      <button
-                                        className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
-                                        type="button"
-                                        disabled={isSaving}
-                                        onClick={cancelEditingComment}
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    {parsedComment.area ? (
-                                      <p className="mt-3 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
-                                        <i className="fas fa-location-dot mr-2 text-[10px]" aria-hidden="true" />
-                                        {parsedComment.area}
-                                      </p>
-                                    ) : null}
-                                    <p className="mt-3 text-sm leading-6 text-slate-700">{parsedComment.text}</p>
-                                  </>
-                                )}
+                                {parsedComment.area ? (
+                                  <p className="mt-3 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-[#003A8F] ring-1 ring-inset ring-blue-100">
+                                    <i className="fas fa-location-dot mr-2 text-[10px]" aria-hidden="true" />
+                                    {parsedComment.area}
+                                  </p>
+                                ) : null}
+                                <p className="mt-3 text-sm leading-6 text-slate-700">{parsedComment.text}</p>
                               </div>
                             </div>
                           </article>
@@ -1144,48 +627,9 @@ export function AdviserSubmissionReviewWorkspace({ fileId }: { fileId: string })
                       No comments have been added for this version yet.
                     </div>
                   )}
-
-                  <button className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 text-sm font-black text-[#003A8F] transition hover:bg-blue-100" type="button" onClick={() => { cancelEditingComment(); document.getElementById('adviser-review-note')?.focus(); }}>
-                    <i className="fas fa-plus text-xs" aria-hidden="true" />
-                    Add New Comment
-                  </button>
-
-                  <label className="mt-4 block">
-                    <span className="mb-2 block text-sm font-black text-slate-800">Where is this comment?</span>
-                    <input
-                      className="min-h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#003A8F] focus:ring-4 focus:ring-blue-900/10"
-                      value={commentArea}
-                      onChange={(event) => setCommentArea(event.target.value)}
-                      placeholder="Example: Page 2, Methodology section, paragraph 3"
-                    />
-                  </label>
-
-                  <label className="mt-4 block">
-                    <span className="mb-2 block text-sm font-black text-slate-800">Adviser comment</span>
-                    <textarea
-                      id="adviser-review-note"
-                      className="min-h-28 w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#003A8F] focus:ring-4 focus:ring-blue-900/10"
-                      value={notes}
-                      onChange={(event) => setNotes(event.target.value)}
-                      placeholder="Write your feedback for this version..."
-                    />
-                  </label>
-
-                  <button
-                    className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-[#003A8F] px-4 text-sm font-black text-white transition hover:bg-[#002C6B] disabled:cursor-not-allowed disabled:opacity-60"
-                    type="button"
-                    disabled={isSaving || !notes.trim()}
-                    onClick={saveAdviserComment}
-                  >
-                    <i className="fas fa-floppy-disk text-xs" aria-hidden="true" />
-                    Save Comment to Review
-                  </button>
-
                 </>
               )}
             </section>
-
-            {quickActionsSection}
 
             <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
               <p className="text-[11px] font-black uppercase tracking-[0.15em] text-[#003A8F]">Review Progress</p>

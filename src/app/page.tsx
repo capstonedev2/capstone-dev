@@ -72,7 +72,7 @@ const workflowSteps = [
     title: 'Development',
     description: 'Build the system, conduct testing, and track chapter submissions.',
     artifact: 'Working system',
-    theme: 'green'
+    theme: 'blue'
   },
   {
     icon: 'fas fa-chalkboard-user',
@@ -171,7 +171,7 @@ export default function Page() {
             </div>
           </section>
 
-          <section id="university" className={styles.institutionSection}>
+          <section id="university" className={`${styles.institutionSection} ${styles.bgMesh}`}>
             <div className={styles.container}>
               <div className={styles.institutionHeader}>
                 <div className={`${styles.sectionIntro} ${styles.institutionIntro}`} data-reveal="fade-up">
@@ -189,17 +189,19 @@ export default function Page() {
 
               <div className={styles.visionMissionGrid}>
                 <article className={`${styles.institutionCard} ${styles.institutionVisionCard}`} data-reveal="fade-up">
-                  <div className={styles.institutionCardHeader}>
-                    <div className={styles.institutionIcon} aria-hidden="true">
-                      <i className="fas fa-eye" />
+                  <div className={styles.institutionVisionTop}>
+                    <div className={styles.institutionCardHeader}>
+                      <div className={styles.institutionIcon} aria-hidden="true">
+                        <i className="fas fa-eye" />
+                      </div>
+                      <span>Vision</span>
                     </div>
-                    <span>Vision</span>
+                    <h3>USTP Vision</h3>
+                    <p>
+                      A nationally-recognized S&amp;T university providing the vital link
+                      between education and the economy.
+                    </p>
                   </div>
-                  <h3>USTP Vision</h3>
-                  <p>
-                    A nationally-recognized S&amp;T university providing the vital link
-                    between education and the economy.
-                  </p>
                   <div className={styles.institutionVisionNote}>
                     <strong>Vital link</strong>
                     <span>Education, research, and economic contribution working as one academic mission.</span>
@@ -229,7 +231,7 @@ export default function Page() {
             </div>
           </section>
 
-          <section id="modules" className={styles.modulesSection}>
+          <section id="modules" className={`${styles.modulesSection} ${styles.bgPlain}`}>
             <div className={styles.container}>
               <div className={styles.moduleShowcaseHeader}>
                 <div className={`${styles.sectionIntro} ${styles.moduleIntro}`} data-reveal="fade-up">
@@ -271,7 +273,7 @@ export default function Page() {
 
           <HallOfExcellence />
 
-          <section id="workflow" className={styles.workflowSection}>
+          <section id="workflow" className={`${styles.workflowSection} ${styles.bgPlain}`}>
             <div className={styles.container}>
               <div className={styles.workflowHeader}>
                 <div className={`${styles.sectionIntro} ${styles.workflowIntro}`} data-reveal="fade-up">
@@ -286,49 +288,47 @@ export default function Page() {
                 </div>
               </div>
 
-              <div className="relative mt-16 mb-10 w-full pb-8 px-4 sm:px-6 md:overflow-x-auto hide-scrollbar">
-                <div className="relative w-full mx-auto md:min-w-[1200px] max-w-6xl md:max-w-none">
+              <div className="relative mt-16 mb-10 w-full pb-8 px-4 sm:px-6 hide-scrollbar">
+                <div className="relative w-full mx-auto max-w-6xl">
                   {/* Desktop Background Rail Line */}
-                  <div className="hidden md:block absolute top-[2.75rem] left-[5%] right-[5%] h-2 bg-gradient-to-r from-[#003A8F] via-[#418bff] to-[#f6be00] rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] opacity-90" />
-                  
-                  {/* Mobile Vertical Rail Line */}
-                  <div className="md:hidden absolute top-[2.5rem] bottom-[2.5rem] left-[3.15rem] sm:left-[3.65rem] w-1.5 bg-gradient-to-b from-[#003A8F] via-[#418bff] to-[#f6be00] rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] opacity-90" />
+                  <div className="hidden lg:block absolute top-[2.75rem] left-[5%] right-[5%] h-2 bg-gradient-to-r from-[#003A8F] via-[#418bff] to-[#f6be00] rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] opacity-90" />
 
-                  <div className="flex flex-col md:flex-row justify-between relative z-10 gap-8 md:gap-4">
+                  {/* Mobile/Tablet Vertical Rail Line */}
+                  <div className="lg:hidden absolute top-[2.5rem] bottom-[2.5rem] left-[3.15rem] sm:left-[3.65rem] w-1.5 bg-gradient-to-b from-[#003A8F] via-[#418bff] to-[#f6be00] rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] opacity-90" />
+
+                  <div className="flex flex-col lg:flex-row justify-between relative z-10 gap-8 lg:gap-4">
                     {workflowSteps.map((step, index) => {
-                      const t = step.theme === 'gold' 
+                      const t = step.theme === 'gold'
                         ? { icon: 'text-[#f6be00]', ring: 'ring-[#f6be00]/30', groupHoverRing: 'group-hover:ring-[#f6be00]', numBg: 'bg-[#f6be00]', numText: 'text-white', cardBorder: 'border-t-[#f6be00]', cardHover: 'hover:border-[#f6be00] hover:shadow-[0_20px_50px_rgba(246,190,0,0.12)]', badgeBg: 'bg-yellow-50', badgeText: 'text-[#b17800]' }
-                        : step.theme === 'green'
-                        ? { icon: 'text-emerald-600', ring: 'ring-emerald-600/30', groupHoverRing: 'group-hover:ring-emerald-600', numBg: 'bg-emerald-600', numText: 'text-white', cardBorder: 'border-t-emerald-600', cardHover: 'hover:border-emerald-400 hover:shadow-[0_20px_50px_rgba(5,150,105,0.12)]', badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-700' }
                         : { icon: 'text-[#003A8F]', ring: 'ring-[#003A8F]/30', groupHoverRing: 'group-hover:ring-[#003A8F]', numBg: 'bg-[#003A8F]', numText: 'text-white', cardBorder: 'border-t-[#003A8F]', cardHover: 'hover:border-blue-300 hover:shadow-[0_20px_50px_rgba(0,58,143,0.12)]', badgeBg: 'bg-blue-50', badgeText: 'text-[#003A8F]' };
 
                       return (
-                      <div key={step.title} className="flex flex-row md:flex-col items-center md:items-start flex-1 gap-6 md:gap-0" data-reveal="fade-up" style={{ animationDelay: `${index * 100}ms` }}>
-                        
+                      <div key={step.title} className="flex flex-row lg:flex-col items-center lg:items-start flex-1 gap-6 lg:gap-0" data-reveal="fade-up" style={{ '--reveal-delay': `${index * 60}ms` } as React.CSSProperties}>
+
                         {/* Milestone Circle Marker */}
-                        <div className="relative mb-0 md:mb-6 group cursor-default flex-shrink-0">
+                        <div className="relative mb-0 lg:mb-6 group cursor-default flex-shrink-0">
                           <div className={`w-[4.5rem] h-[4.5rem] sm:w-[5.5rem] sm:h-[5.5rem] rounded-full flex items-center justify-center border-[4px] border-white shadow-[0_8px_20px_rgba(15,43,89,0.06)] ring-1 ${t.ring} ${t.groupHoverRing} transition-all duration-300 group-hover:-translate-y-1 relative z-10 bg-white ${t.icon}`}>
                             <i className={`${step.icon} text-xl sm:text-2xl drop-shadow-sm transition-transform duration-300 group-hover:scale-110`} />
                           </div>
-                          
+
                           {/* Step Number Badge */}
                           <div className={`absolute -bottom-1 -right-1 sm:bottom-0 sm:-right-2 w-7 h-7 rounded-full border-[2px] border-white flex items-center justify-center text-[0.65rem] font-black z-20 shadow-sm ${t.numBg} ${t.numText}`}>
                             {String(index + 1).padStart(2, '0')}
                           </div>
                         </div>
-                        
+
                         {/* Content Card */}
-                        <div className={`bg-white rounded-xl p-5 shadow-[0_10px_30px_rgba(15,43,89,0.04)] border border-slate-100 transition-all duration-300 h-full flex flex-col items-start w-[180px] sm:w-[200px] border-t-4 ${t.cardBorder} ${t.cardHover}`}>
+                        <div className={`bg-white rounded-xl p-5 shadow-[0_10px_30px_rgba(15,43,89,0.04)] border border-slate-100 transition-all duration-300 ease-out h-full flex flex-col items-start w-[180px] sm:w-[200px] lg:w-full border-t-4 hover:-translate-y-0.5 ${t.cardBorder} ${t.cardHover}`}>
                           <h3 className="text-[1.05rem] font-black text-slate-900 mb-2">{step.title}</h3>
                           <p className="text-[0.8rem] text-slate-500 font-medium leading-[1.6] mb-5 flex-grow">{step.description}</p>
-                          
+
                           {/* Artifact Badge */}
-                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[0.65rem] font-black uppercase tracking-wider mt-auto ${t.badgeBg} ${t.badgeText}`}>
+                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[0.65rem] font-black uppercase tracking-wider mt-auto min-h-[2.5rem] ${t.badgeBg} ${t.badgeText}`}>
                             <i className="fas fa-file-contract opacity-70" />
                             {step.artifact}
                           </div>
                         </div>
-                        
+
                       </div>
                     )})}
                   </div>
@@ -337,7 +337,7 @@ export default function Page() {
             </div>
           </section>
 
-          <section id="about" className={`${styles.homeAboutSection} relative py-16 sm:py-20 overflow-hidden bg-[#f7fbff]`}>
+          <section id="about" className={`${styles.homeAboutSection} ${styles.bgMesh} relative py-16 sm:py-20 overflow-hidden`}>
             {/* Premium Ambient Backgrounds */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(0,58,143,0.06),transparent_70%)] pointer-events-none" />
             <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(246,190,0,0.05),transparent_60%)] pointer-events-none blur-3xl" />
@@ -345,9 +345,9 @@ export default function Page() {
 
             <div className="relative z-10 w-[min(1680px,calc(100%-3rem))] mx-auto">
               
-              <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6 mb-6">
+              <div className="grid lg:grid-cols-[1.1fr_0.9fr] lg:items-start gap-6 mb-6">
                 {/* Left Card: Premium Light Glassmorphism */}
-                <article className={`${styles.homeAboutSummaryCard} relative overflow-hidden bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)] group`} data-reveal="fade-right">
+                <article className={`${styles.homeAboutSummaryCard} relative overflow-hidden bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)] group`} data-reveal="fade-right">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-blue-50/30 pointer-events-none" />
                   
                   <div className="relative z-10">
@@ -356,10 +356,10 @@ export default function Page() {
                 </article>
 
                 {/* Right Card: Dynamic Workflow Display */}
-                <aside className={`${styles.homeAboutFlowCard} relative overflow-hidden bg-gradient-to-br from-white/90 to-[#f2f7ff]/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 flex flex-col justify-center transition-shadow duration-200 hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)]`} aria-label="System workflow preview" data-reveal="fade-left">
+                <aside className={`${styles.homeAboutFlowCard} relative overflow-hidden bg-gradient-to-br from-white/90 to-[#f2f7ff]/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 flex flex-col justify-center transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)]`} aria-label="System workflow preview" data-reveal="fade-left">
                   
                   {/* Decorative corner accent */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#f6be00]/20 to-transparent pointer-events-none rounded-bl-[100px]" />
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-[#f6be00]/10 to-transparent pointer-events-none rounded-bl-[100px]" />
                   
                   <div className="relative z-10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -396,7 +396,7 @@ export default function Page() {
                 {systemOutcomes.map((outcome, index) => (
                   <article 
                     key={outcome.title} 
-                    className={`${styles.homeAboutOutcomeCard} group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/80 rounded-[1.5rem] p-6 shadow-[0_12px_30px_rgba(15,43,89,0.03)] transition-colors duration-200 hover:bg-white`}
+                    className={`${styles.homeAboutOutcomeCard} group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/80 rounded-[1.5rem] p-6 shadow-[0_12px_30px_rgba(15,43,89,0.03)] transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-white hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)]`}
                     data-reveal="fade-up"
                     style={{ '--reveal-delay': `${index * 0.1}s` } as any}
                   >
@@ -423,12 +423,12 @@ export default function Page() {
                   </div>
                   
                   <div className="flex flex-wrap items-center justify-center gap-4">
-                    <Link href="/about" className="group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#0d61cf]/20 bg-gradient-to-br from-[#0d61cf] via-[#003a8f] to-[#082a67] px-8 py-3 text-[0.95rem] font-black text-white shadow-[0_12px_25px_rgba(0,58,143,0.25)] transition-shadow duration-200 hover:shadow-[0_14px_28px_rgba(0,58,143,0.28)]">
+                    <Link href="/about" className="group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#0d61cf]/20 bg-gradient-to-br from-[#0d61cf] via-[#003a8f] to-[#082a67] px-8 py-3 text-[0.95rem] font-black text-white shadow-[0_12px_25px_rgba(0,58,143,0.25)] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:shadow-[0_14px_28px_rgba(0,58,143,0.28)] active:translate-y-0 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">
                       <span>Explore the System</span>
                       <i className="fas fa-arrow-right" />
                     </Link>
-                    
-                    <Link href="/about#capstone-team" className={`${styles.homeAboutSecondaryLink} group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#f6be00]/40 bg-gradient-to-br from-[#ffe98b] to-[#f6be00] px-8 py-3 text-[0.95rem] font-black text-[#5b4200] shadow-[0_12px_25px_rgba(246,190,0,0.2)] transition-shadow duration-200 hover:shadow-[0_14px_28px_rgba(246,190,0,0.24)]`}>
+
+                    <Link href="/about#capstone-team" className={`${styles.homeAboutSecondaryLink} group relative isolation-isolate inline-flex min-h-[3.2rem] items-center justify-center gap-3 overflow-hidden rounded-full border border-[#f6be00]/40 bg-gradient-to-br from-[#ffe98b] to-[#f6be00] px-8 py-3 text-[0.95rem] font-black text-[#5b4200] shadow-[0_12px_25px_rgba(246,190,0,0.2)] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:shadow-[0_14px_28px_rgba(246,190,0,0.24)] active:translate-y-0 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current`}>
                       <span>Meet the Devs</span>
                       <i className="fas fa-users" />
                     </Link>

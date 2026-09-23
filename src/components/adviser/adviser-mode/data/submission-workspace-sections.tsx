@@ -516,10 +516,6 @@ export function SubmissionList({
   onClearFilters: () => void;
   onViewSubmission?: (submission: AdviserSubmissionRecord) => void;
   onDownloadSubmission?: (submission: AdviserSubmissionRecord) => void;
-  onStartReview?: (submission: AdviserSubmissionRecord) => void;
-  onRequestRevision?: (submission: AdviserSubmissionRecord) => void;
-  onApproveNotify?: (submission: AdviserSubmissionRecord) => void;
-  onSendReminder?: (submission: AdviserSubmissionRecord) => void;
 }) {
   return (
     <section className="space-y-4">
