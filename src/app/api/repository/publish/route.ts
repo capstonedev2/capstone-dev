@@ -2,6 +2,7 @@ import { UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { publishProjectToRepository } from '@/lib/repository/publish-project';
 import { handleApiError, normalizeText, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -11,7 +12,7 @@ const REPOSITORY_PUBLISH_ROLES = [
   UserRole.ADMIN
 ];
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, REPOSITORY_PUBLISH_ROLES);
     const body = await request.json().catch(() => ({}));
@@ -50,3 +51,5 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/repository/publish', handlePOST);

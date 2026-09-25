@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   let redirectUrl = '';
 
   try {
@@ -56,3 +57,5 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({ error: 'Failed to generate redirect URL' }, { status: 500 });
 }
+
+export const GET = withApiLogging('GET', '/api/auth/google', handleGET);

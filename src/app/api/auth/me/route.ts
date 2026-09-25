@@ -1,9 +1,10 @@
 import { getAuthenticatedUser, toPublicUser } from '@/lib/auth';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await getAuthenticatedUser(request);
 
@@ -18,3 +19,5 @@ export async function GET(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/auth/me', handleGET);

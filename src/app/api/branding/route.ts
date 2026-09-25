@@ -12,6 +12,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -69,7 +70,7 @@ async function saveBrandingSetting(brandingInput: unknown, actorId?: string) {
   return branding;
 }
 
-export async function GET() {
+async function handleGET() {
   try {
     const branding = await readBrandingSetting();
 
@@ -82,7 +83,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.SYSTEM_ADMIN]);
     const body = await parseJsonBody<BrandingRequestBody>(request);
@@ -102,7 +103,7 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.SYSTEM_ADMIN]);
     const branding = await saveBrandingSetting(DEFAULT_BRANDING, user.id);
@@ -115,3 +116,7 @@ export async function DELETE(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/branding', handleGET);
+export const PUT = withApiLogging('PUT', '/api/branding', handlePUT);
+export const DELETE = withApiLogging('DELETE', '/api/branding', handleDELETE);

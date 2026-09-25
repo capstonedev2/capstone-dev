@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { createSignedUrl } from '@/lib/storage/supabase-storage';
 import type { DocumentStorageBucket } from '@/lib/storage/upload-config';
 import { HttpError, handleApiError } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -26,7 +27,7 @@ type TemplateSettingValue = {
   bucketName: DocumentStorageBucket;
 };
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     await requireAuthenticatedUser(request, TEMPLATE_VIEWER_ROLES);
 
@@ -49,3 +50,5 @@ export async function GET(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/concept-defense-application-template/download', handleGET);

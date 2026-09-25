@@ -18,6 +18,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -28,7 +29,7 @@ type LoginBody = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     ensureAuthConfig();
 
@@ -163,3 +164,5 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/auth/login', handlePOST);

@@ -19,6 +19,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -120,7 +121,7 @@ function validateManagedUserInput({
   }
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const authUser = await requireAuthenticatedUser(request, USER_DIRECTORY_ROLES);
     const now = new Date();
@@ -194,7 +195,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const authUser = await requireAuthenticatedUser(request, MANAGED_USER_ROLES);
 
@@ -332,3 +333,6 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/users', handleGET);
+export const POST = withApiLogging('POST', '/api/users', handlePOST);

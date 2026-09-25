@@ -9,6 +9,7 @@ import {
   resetProjectForNewTitle,
   restartDefenseVoteForBackupTitle
 } from '@/lib/milestone-checkpoint-tracking';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -23,7 +24,7 @@ type ChairDecisionBody = {
   backupDraftId?: string;
 };
 
-export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
+async function handlePOST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id: scheduleId } = await context.params;
     const authUser = await requireAuthenticatedUser(request);
@@ -316,3 +317,5 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/defense-schedules/[id]/chair-decision', handlePOST);

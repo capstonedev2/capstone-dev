@@ -22,6 +22,7 @@ import {
   updateMilestoneRollup
 } from '@/lib/milestone-checkpoint-tracking';
 import { findSimilarTitles, type SimilarTitleMatch } from '@/lib/title-similarity';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -433,7 +434,7 @@ async function enrichWithSimilarity(
   }
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, TITLE_ROLES);
     const { searchParams } = new URL(request.url);
@@ -492,7 +493,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const contentType = request.headers.get('content-type') || '';
@@ -942,7 +943,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+async function handlePATCH(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [
       UserRole.ADVISER,
@@ -1182,3 +1183,7 @@ export async function PATCH(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/title-submissions', handleGET);
+export const POST = withApiLogging('POST', '/api/title-submissions', handlePOST);
+export const PATCH = withApiLogging('PATCH', '/api/title-submissions', handlePATCH);

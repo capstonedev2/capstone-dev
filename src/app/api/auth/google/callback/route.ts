@@ -12,6 +12,7 @@ import {
   setGoogleRegistrationCookie,
 } from '@/lib/google-oauth';
 import { prisma } from '@/lib/prisma';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -80,7 +81,7 @@ function getSyncRedirect(request: NextRequest, role: ReturnType<typeof toPublicU
   return url;
 }
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const error = requestUrl.searchParams.get('error');
@@ -175,3 +176,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(getLoginRedirect(request, 'error'));
   }
 }
+
+export const GET = withApiLogging('GET', '/api/auth/google/callback', handleGET);

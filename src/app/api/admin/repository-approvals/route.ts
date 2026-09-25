@@ -2,6 +2,7 @@ import { ProjectStatus, SubmissionStatus, UserRole } from '@/generated/prisma/cl
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { handleApiError } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -27,7 +28,7 @@ function formatFileSize(bytes: number) {
   return `${exponent === 0 ? value : value.toFixed(1)} ${units[exponent]}`;
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     await requireAuthenticatedUser(request, REPOSITORY_APPROVAL_ROLES);
 
@@ -103,3 +104,5 @@ export async function GET(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/admin/repository-approvals', handleGET);

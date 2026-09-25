@@ -2,10 +2,11 @@ import { UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   props: { params: Promise<{ id: string }> }
 ) {
@@ -35,3 +36,5 @@ export async function DELETE(
     return handleApiError(error);
   }
 }
+
+export const DELETE = withApiLogging('DELETE', '/api/academic-activities/[id]', handleDELETE);

@@ -3,6 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { assertDocumentBucket, deleteFile } from '@/lib/storage/supabase-storage';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -77,7 +78,7 @@ async function notifyAdviserOfBackupDraft(adviserId: string | null, studentName:
   });
 }
 
-export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
+async function handlePUT(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const { id } = await context.params;
@@ -133,7 +134,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 // Toggles the student's "this is my best one" pick — radio-style, so starring
 // one clears the flag on every other backup in the group rather than allowing
 // several to be marked priority at once.
-export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+async function handlePATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const { id } = await context.params;
@@ -172,7 +173,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 }
 
-export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
+async function handleDELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const { id } = await context.params;
@@ -211,3 +212,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     return handleApiError(error);
   }
 }
+
+export const PUT = withApiLogging('PUT', '/api/title-drafts/[id]', handlePUT);
+export const PATCH = withApiLogging('PATCH', '/api/title-drafts/[id]', handlePATCH);
+export const DELETE = withApiLogging('DELETE', '/api/title-drafts/[id]', handleDELETE);

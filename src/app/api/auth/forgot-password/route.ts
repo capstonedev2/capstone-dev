@@ -13,6 +13,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -22,7 +23,7 @@ type ForgotPasswordBody = {
   email?: unknown;
 };
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await parseJsonBody<ForgotPasswordBody>(request);
     const email = normalizeEmail(body.email);
@@ -89,3 +90,5 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/auth/forgot-password', handlePOST);

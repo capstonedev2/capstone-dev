@@ -3,6 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
 import { assertDocumentBucket, createSignedUrl } from '@/lib/storage/supabase-storage';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -16,7 +17,7 @@ const ELEVATED_ROLES = new Set<UserRole>([
 // Same authorization as /api/title-drafts/files/[fileId]/download — a signed
 // URL just gets embedded in a preview modal instead of redirecting straight
 // to it, so the reviewer can see the document inline without leaving the page.
-export async function POST(request: Request, context: { params: Promise<{ fileId: string }> }) {
+async function handlePOST(request: Request, context: { params: Promise<{ fileId: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request);
     const { fileId } = await context.params;
@@ -61,3 +62,5 @@ export async function POST(request: Request, context: { params: Promise<{ fileId
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/title-drafts/files/[fileId]/signed-url', handlePOST);

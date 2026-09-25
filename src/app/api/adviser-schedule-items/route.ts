@@ -14,6 +14,7 @@ import {
 } from '@/lib/utils';
 import { recordCheckpointSchedule, syncMilestoneDueDateFromDeadline } from '@/lib/milestone-checkpoint-tracking';
 import { sendScheduleNotificationEmail } from '@/lib/mailer';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -329,7 +330,7 @@ async function notifyGroupStudents({
   await Promise.allSettled(emailPromises);
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, ADVISER_SCHEDULE_ROLES);
     const accessWhere = getProjectAccessWhere(user);
@@ -400,7 +401,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, ADVISER_SCHEDULE_ROLES);
     const body = await parseJsonBody<{
@@ -618,3 +619,6 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/adviser-schedule-items', handleGET);
+export const POST = withApiLogging('POST', '/api/adviser-schedule-items', handlePOST);

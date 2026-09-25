@@ -2,6 +2,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { ReviewDecision, UserRole } from '@/generated/prisma/client';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -19,7 +20,7 @@ function canManageComment(user: { id: string; role: UserRole }, authorId?: strin
     || user.role === UserRole.ADMIN;
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, REVIEW_COMMENT_MANAGER_ROLES);
     const body = await request.json();
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+async function handlePATCH(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT, ...REVIEW_COMMENT_MANAGER_ROLES]);
     const body = await request.json();
@@ -146,7 +147,7 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, REVIEW_COMMENT_MANAGER_ROLES);
     const body = await request.json().catch(() => ({}));
@@ -181,3 +182,7 @@ export async function DELETE(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/review-comments', handlePOST);
+export const PATCH = withApiLogging('PATCH', '/api/review-comments', handlePATCH);
+export const DELETE = withApiLogging('DELETE', '/api/review-comments', handleDELETE);

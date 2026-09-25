@@ -2,6 +2,7 @@ import { UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -23,7 +24,7 @@ function parsePositiveInteger(value: string | null, fallback: number, max: numbe
  * Returns the faculty accounts that can sit on a defense panel.
  * Accessible by authenticated adviser, panel, Research Head, and System Admin users.
  */
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const url = new URL(request.url);
     const limit = parsePositiveInteger(url.searchParams.get('limit'), DEFAULT_ADVISER_LIMIT, MAX_ADVISER_LIMIT);
@@ -64,3 +65,5 @@ export async function GET(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/advisers', handleGET);

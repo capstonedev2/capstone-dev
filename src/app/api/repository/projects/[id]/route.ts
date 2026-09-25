@@ -1,10 +1,11 @@
 import { getMockRepositoryProjectById, isDatabaseConnectivityError } from '@/lib/repository/mock-data';
 import { getRepositoryPrisma } from '@/lib/repository-prisma';
 import { handleApiError, HttpError } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
-export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+async function handleGET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
 
   try {
@@ -71,3 +72,5 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/repository/projects/[id]', handleGET);

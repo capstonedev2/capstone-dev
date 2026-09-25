@@ -2,6 +2,7 @@ import { MilestoneCheckpointReviewStatus, UserRole } from '@/generated/prisma/cl
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, normalizeText, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -86,7 +87,7 @@ async function notifyAdviserOfBackupDraft(adviserId: string | null, studentName:
   });
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const group = await resolveStudentGroup(user.id);
@@ -109,7 +110,7 @@ export async function GET(request: Request) {
 
 const MAX_BACKUP_DRAFTS = 5;
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const group = await resolveStudentGroup(user.id);
@@ -154,3 +155,6 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/title-drafts', handleGET);
+export const POST = withApiLogging('POST', '/api/title-drafts', handlePOST);

@@ -13,6 +13,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -28,7 +29,7 @@ function resetSessionError() {
   return new HttpError('Reset session has expired. Request a new code.', 401);
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const body = await parseJsonBody<ResetPasswordBody>(request);
     const password = normalizeText(body.password);
@@ -150,3 +151,5 @@ export async function POST(request: NextRequest) {
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/auth/reset-password', handlePOST);

@@ -10,6 +10,7 @@ import { assertDocumentBucket, deleteFile } from '@/lib/storage/supabase-storage
 import { prisma } from '@/lib/prisma';
 import { toDocumentFilePayload } from '@/lib/storage/document-file-api';
 import { syncCheckpointReview } from '@/lib/milestone-checkpoint-tracking';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -55,7 +56,7 @@ const reviewDecisionMap: Record<SubmissionStatus, ReviewDecision> = {
   [SubmissionStatus.ARCHIVED]: ReviewDecision.COMMENT
 };
 
-export async function DELETE(
+async function handleDELETE(
   request: Request,
   props: { params: Promise<{ id: string }> }
 ) {
@@ -98,7 +99,7 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
+async function handlePATCH(
   request: Request,
   props: { params: Promise<{ id: string }> }
 ) {
@@ -425,3 +426,6 @@ export async function PATCH(
     return handleApiError(error);
   }
 }
+
+export const DELETE = withApiLogging('DELETE', '/api/document-files/[id]', handleDELETE);
+export const PATCH = withApiLogging('PATCH', '/api/document-files/[id]', handlePATCH);

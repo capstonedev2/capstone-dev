@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
 import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
 import { deleteFile, uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -57,7 +58,7 @@ async function resetDraftToPendingReview(draftId: string, adviserId: string | nu
   });
 }
 
-export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
+async function handlePOST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const { id } = await context.params;
@@ -132,3 +133,5 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/title-drafts/[id]/files', handlePOST);

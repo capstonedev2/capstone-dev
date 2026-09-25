@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
 import { DOCUMENT_STORAGE_BUCKETS, type DocumentStorageBucket } from '@/lib/storage/upload-config';
 import { assertValidDocumentFile, deleteFile, generateUniqueFilePath, uploadFile } from '@/lib/storage/supabase-storage';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -38,7 +39,7 @@ type TemplateSettingValue = {
   uploadedByName: string;
 };
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     await requireAuthenticatedUser(request, TEMPLATE_VIEWER_ROLES);
 
@@ -64,7 +65,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, TEMPLATE_MANAGER_ROLES);
     const formData = await request.formData();
@@ -152,3 +153,6 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/concept-defense-application-template', handleGET);
+export const POST = withApiLogging('POST', '/api/concept-defense-application-template', handlePOST);

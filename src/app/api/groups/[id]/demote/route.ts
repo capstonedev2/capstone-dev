@@ -3,10 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { getServerAuthenticatedUser } from '@/lib/auth';
 import { resetGroupForNewTitle } from '@/lib/milestone-checkpoint-tracking';
 import type { Prisma } from '@/generated/prisma/client';
+import { withApiLogging } from '@/lib/api-logging';
 
 const DEMOTE_ELEVATED_ROLES = new Set(['PROGRAM_HEAD', 'RESEARCH_HEAD', 'ADMIN', 'SYSTEM_ADMIN']);
 
-export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
+async function handlePOST(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const authUser = await getServerAuthenticatedUser();
     if (!authUser) {
@@ -87,3 +88,5 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Unable to demote this group.' }, { status: 500 });
   }
 }
+
+export const POST = withApiLogging('POST', '/api/groups/[id]/demote', handlePOST);

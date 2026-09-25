@@ -2,6 +2,7 @@ import { MilestoneCheckpointReviewStatus, UserRole } from '@/generated/prisma/cl
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, normalizeText, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -65,7 +66,7 @@ function toAdviserDraftPayload(draft: any) {
   };
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, TITLE_DRAFT_REVIEW_ROLES);
     const isElevated = ELEVATED_ROLES.has(user.role);
@@ -109,7 +110,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+async function handlePATCH(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, TITLE_DRAFT_REVIEW_ROLES);
     const body = await request.json().catch(() => ({}));
@@ -208,3 +209,6 @@ export async function PATCH(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/title-drafts/adviser', handleGET);
+export const PATCH = withApiLogging('PATCH', '/api/title-drafts/adviser', handlePATCH);

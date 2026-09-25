@@ -2,6 +2,7 @@ import { DefensePanelRole, UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -18,7 +19,7 @@ const ELEVATED_ROLES = new Set<UserRole>([
 // sitting. Scoped by "is the chair for this specific schedule" rather than
 // "is this group's adviser" (like /api/title-drafts/adviser is), since a
 // panel chair usually isn't the group's actual adviser.
-export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
+async function handleGET(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request);
     const { id: scheduleId } = await context.params;
@@ -87,3 +88,5 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/defense-schedules/[id]/backup-titles', handleGET);

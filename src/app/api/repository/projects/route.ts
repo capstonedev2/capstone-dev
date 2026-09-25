@@ -1,6 +1,7 @@
 import { getMockRepositoryProjects, isDatabaseConnectivityError } from '@/lib/repository/mock-data';
 import { getRepositoryPrisma } from '@/lib/repository-prisma';
 import { handleApiError, normalizeText } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -39,7 +40,7 @@ function paginateMockProjects(search: string | undefined, department: string | u
   };
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const { searchParams } = new URL(request.url);
   const search = normalizeText(searchParams.get('search'));
   const department = normalizeText(searchParams.get('department'));
@@ -132,3 +133,5 @@ export async function GET(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/repository/projects', handleGET);

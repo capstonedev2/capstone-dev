@@ -3,6 +3,7 @@ import { getCloudinaryClient, uploadBufferToCloudinary } from '@/lib/cloudinary'
 import { prisma } from '@/lib/prisma';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { UserRole } from '@/generated/prisma/client';
+import { withApiLogging } from '@/lib/api-logging';
 
 // IMPORTANT MEDIA STORAGE NOTE:
 // 1. Cloudinary is ONLY used for system branding assets (logos, login backgrounds, etc).
@@ -16,7 +17,7 @@ import { UserRole } from '@/generated/prisma/client';
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'video/mp4', 'video/webm'];
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     // 1. Role Protection
     const user = await requireAuthenticatedUser(request);
@@ -111,3 +112,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
+
+export const POST = withApiLogging('POST', '/api/admin/media/upload', handlePOST);

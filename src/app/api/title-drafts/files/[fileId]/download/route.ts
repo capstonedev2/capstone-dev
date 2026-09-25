@@ -4,6 +4,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError } from '@/lib/utils';
 import { assertDocumentBucket, createSignedUrl } from '@/lib/storage/supabase-storage';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +15,7 @@ const ELEVATED_ROLES = new Set<UserRole>([
   UserRole.ADMIN
 ]);
 
-export async function GET(request: Request, context: { params: Promise<{ fileId: string }> }) {
+async function handleGET(request: Request, context: { params: Promise<{ fileId: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request);
     const { fileId } = await context.params;
@@ -63,3 +64,5 @@ export async function GET(request: Request, context: { params: Promise<{ fileId:
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/title-drafts/files/[fileId]/download', handleGET);

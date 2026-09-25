@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { handleApiError, successResponse } from '@/lib/utils';
 import { clearAuthCookie } from '@/lib/auth';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
-export async function POST() {
+async function handlePOST() {
   try {
     const supabase = await createClient();
     await supabase.auth.signOut();
@@ -17,3 +18,5 @@ export async function POST() {
     return handleApiError(error);
   }
 }
+
+export const POST = withApiLogging('POST', '/api/auth/logout', handlePOST);

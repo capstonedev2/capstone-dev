@@ -9,6 +9,7 @@ import {
   parseJsonBody,
   successResponse
 } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -70,7 +71,7 @@ function getSuspensionExpiry(durationKey: string, suspended: boolean) {
   return new Date(Date.now() + durationMs);
 }
 
-export async function PATCH(request: Request, context: RouteContext) {
+async function handlePATCH(request: Request, context: RouteContext) {
   try {
     const actor = await requireAuthenticatedUser(request, SUSPENSION_MANAGER_ROLES);
     const { id } = await context.params;
@@ -156,3 +157,5 @@ export async function PATCH(request: Request, context: RouteContext) {
     return handleApiError(error);
   }
 }
+
+export const PATCH = withApiLogging('PATCH', '/api/users/[id]/suspension', handlePATCH);

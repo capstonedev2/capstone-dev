@@ -33,6 +33,7 @@ import {
   recordCheckpointSubmission,
   resolveMilestoneCheckpointForSubmission
 } from '@/lib/milestone-checkpoint-tracking';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -164,7 +165,7 @@ async function createUploadNotifications({
   }
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, DOCUMENT_VIEWER_ROLES);
     const url = new URL(request.url);
@@ -330,7 +331,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const user = await requireAuthenticatedUser(request, DOCUMENT_VIEWER_ROLES);
     const formData = await request.formData();
@@ -534,3 +535,6 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/document-files', handleGET);
+export const POST = withApiLogging('POST', '/api/document-files', handlePOST);

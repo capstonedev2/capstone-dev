@@ -3,6 +3,7 @@ import { UserRole } from '@/generated/prisma/client';
 import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, successResponse } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 const DEADLINE_MANAGER_ROLES: UserRole[] = [
   UserRole.ADMIN,
@@ -11,7 +12,7 @@ const DEADLINE_MANAGER_ROLES: UserRole[] = [
   UserRole.PROGRAM_HEAD
 ];
 
-export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+async function handlePATCH(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const { id: milestoneId } = await props.params;
     const user = await requireAuthenticatedUser(request);
@@ -57,3 +58,5 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     return handleApiError(error);
   }
 }
+
+export const PATCH = withApiLogging('PATCH', '/api/milestones/[id]', handlePATCH);

@@ -11,6 +11,7 @@ import {
   normalizeText,
   successResponse
 } from '@/lib/utils';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -35,7 +36,7 @@ function getPersonName(person?: { name?: string | null; firstName?: string | nul
   return person.displayName || person.name || [person.firstName, person.lastName].filter(Boolean).join(' ') || null;
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     await requireAuthenticatedUser(request, TECH_TRANSFER_ROLES);
 
@@ -88,7 +89,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     await requireAuthenticatedUser(request, TECH_TRANSFER_ROLES);
     const body = await request.json().catch(() => ({}));
@@ -172,3 +173,6 @@ export async function POST(request: Request) {
     return handleApiError(error);
   }
 }
+
+export const GET = withApiLogging('GET', '/api/tech-transfer/deployments', handleGET);
+export const POST = withApiLogging('POST', '/api/tech-transfer/deployments', handlePOST);

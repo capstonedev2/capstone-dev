@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getServerAuthenticatedUser } from '@/lib/auth';
 import { sendGroupAssignmentEmail } from '@/lib/mailer';
 import { getLatestDefenseOutcomeTag, getProjectProgressSummary } from '@/lib/milestone-checkpoint-tracking';
+import { withApiLogging } from '@/lib/api-logging';
 
 const DEFAULT_GROUP_LIMIT = 100;
 const MAX_GROUP_LIMIT = 200;
@@ -128,7 +129,7 @@ async function findAssignedStudents(students: string[], excludeGroupId?: string)
   return students.filter((student) => assignedStudentKeys.has(normalizeStudentName(student)));
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const user = await getServerAuthenticatedUser();
     if (!user) {
@@ -252,7 +253,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body = await request.json();
     const {
@@ -406,7 +407,7 @@ export async function POST(request: Request) {
 
 const GROUP_WRITE_ELEVATED_ROLES = new Set(['PROGRAM_HEAD', 'RESEARCH_HEAD', 'ADMIN', 'SYSTEM_ADMIN']);
 
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   try {
     const authUser = await getServerAuthenticatedUser();
     if (!authUser) {
@@ -723,3 +724,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Failed to update group' }, { status: 500 });
   }
 }
+
+export const GET = withApiLogging('GET', '/api/groups', handleGET);
+export const POST = withApiLogging('POST', '/api/groups', handlePOST);
+export const PUT = withApiLogging('PUT', '/api/groups', handlePUT);

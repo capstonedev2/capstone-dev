@@ -3,6 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
 import { assertDocumentBucket, deleteFile } from '@/lib/storage/supabase-storage';
+import { withApiLogging } from '@/lib/api-logging';
 
 export const runtime = 'nodejs';
 
@@ -15,7 +16,7 @@ async function resolveStudentGroupId(userId: string) {
   return membership?.groupId ?? null;
 }
 
-export async function DELETE(request: Request, context: { params: Promise<{ fileId: string }> }) {
+async function handleDELETE(request: Request, context: { params: Promise<{ fileId: string }> }) {
   try {
     const user = await requireAuthenticatedUser(request, [UserRole.STUDENT]);
     const { fileId } = await context.params;
@@ -67,3 +68,5 @@ export async function DELETE(request: Request, context: { params: Promise<{ file
     return handleApiError(error);
   }
 }
+
+export const DELETE = withApiLogging('DELETE', '/api/title-drafts/files/[fileId]', handleDELETE);
