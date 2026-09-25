@@ -25,7 +25,7 @@ const TEMPLATE_VIEWER_ROLES = [
 ];
 
 // Only the Research Head manages this template — not System Admin/IT Admin,
-// even though they can both reach the /admin route tree.
+// even though they can both reach the /research-head route tree.
 const TEMPLATE_MANAGER_ROLES = [UserRole.RESEARCH_HEAD];
 
 type TemplateSettingValue = {

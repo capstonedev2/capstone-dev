@@ -80,6 +80,14 @@ const legacyRoutes = [
 const nextConfig = {
   output: 'standalone',
   allowedDevOrigins: ['localhost', '192.168.1.37', '192.168.1.19'],
+  // The Research Head portal moved from /admin to /research-head; keep old bookmarks and any
+  // /admin links already stored (e.g. in notifications) working.
+  async redirects() {
+    return [
+      { source: '/admin', destination: '/research-head/dashboard', permanent: false },
+      { source: '/admin/:path*', destination: '/research-head/:path*', permanent: false }
+    ];
+  },
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000', '192.168.1.37:3000', '192.168.1.19:3000']

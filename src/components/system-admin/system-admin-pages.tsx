@@ -1669,7 +1669,7 @@ export function SystemAdminSettings() {
 export function SystemAdminLogs() {
   const logs = [
     { event: 'RBAC policy checked', actor: 'System Admin', detail: 'Route /system-admin/users allowed', time: 'Today 10:12 AM', status: 'approved', icon: 'fa-shield-check' },
-    { event: 'Research Head denied technical route', actor: 'Proxy', detail: 'Redirected to /admin/dashboard', time: 'Today 9:44 AM', status: 'warning', icon: 'fa-triangle-exclamation' },
+    { event: 'Research Head denied technical route', actor: 'Proxy', detail: 'Redirected to /research-head/dashboard', time: 'Today 9:44 AM', status: 'warning', icon: 'fa-triangle-exclamation' },
     { event: 'Backup completed', actor: 'Scheduler', detail: 'Database snapshot created', time: 'Today 2:10 AM', status: 'approved', icon: 'fa-database' },
     { event: 'Public registration completed', actor: 'Student', detail: 'New student account created through self-register', time: 'Yesterday 4:18 PM', status: 'info', icon: 'fa-user-plus' }
   ];

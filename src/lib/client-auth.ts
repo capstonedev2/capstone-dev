@@ -118,7 +118,7 @@ export function getRoleRedirectPath(role: ApiUserRole) {
       return '/system-admin/dashboard';
     case 'research_head':
     case 'admin':
-      return '/admin/dashboard';
+      return '/research-head/dashboard';
     case 'adviser':
       return '/adviser/adviser-mode/dashboard';
     case 'panel':
