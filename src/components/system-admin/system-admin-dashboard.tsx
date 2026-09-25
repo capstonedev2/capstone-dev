@@ -108,10 +108,6 @@ export function SystemAdminDashboard() {
     >
       <AdminPage>
         <PageHeader
-          kicker="System admin"
-          title="Admin"
-          titleAccent="Dashboard"
-          description="Accounts, access, and portal status at a glance."
           actions={
             <>
               <ActionLink href="/system-admin/branding" icon="fa-palette">

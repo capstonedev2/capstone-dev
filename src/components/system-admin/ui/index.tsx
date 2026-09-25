@@ -39,7 +39,8 @@ export function PageHeader({
 }: {
   /** Small pill badge above the title (landing-page "section kicker" style). */
   kicker?: string;
-  title: string;
+  /** Optional: a page can show only the header actions (no heading text). */
+  title?: string;
   /** Second half of a two-tone title, shown in the accent color. */
   titleAccent?: string;
   description?: string;
@@ -47,19 +48,23 @@ export function PageHeader({
 }) {
   return (
     <header className={styles.pageHeader}>
-      <div className={styles.pageHeaderText}>
-        {kicker ? <span className={styles.kicker}>{kicker}</span> : null}
-        <h1 className={styles.pageTitle}>
-          <span className={styles.pageTitleMain}>{title}</span>
-          {titleAccent ? (
-            <>
-              {' '}
-              <span className={styles.pageTitleAccent}>{titleAccent}</span>
-            </>
+      {kicker || title || description ? (
+        <div className={styles.pageHeaderText}>
+          {kicker ? <span className={styles.kicker}>{kicker}</span> : null}
+          {title ? (
+            <h1 className={styles.pageTitle}>
+              <span className={styles.pageTitleMain}>{title}</span>
+              {titleAccent ? (
+                <>
+                  {' '}
+                  <span className={styles.pageTitleAccent}>{titleAccent}</span>
+                </>
+              ) : null}
+            </h1>
           ) : null}
-        </h1>
-        {description ? <p className={styles.pageDescription}>{description}</p> : null}
-      </div>
+          {description ? <p className={styles.pageDescription}>{description}</p> : null}
+        </div>
+      ) : null}
       {actions ? <div className={styles.pageHeaderActions}>{actions}</div> : null}
     </header>
   );
