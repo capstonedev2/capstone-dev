@@ -12,7 +12,7 @@ type UploadFileInput = {
   bucketName: DocumentStorageBucket;
   filePath: string;
   file: File;
-  allowImages?: boolean | 'any';
+  allowImages?: boolean;
 };
 
 type SignedUrlResponse = {
@@ -60,7 +60,7 @@ export function assertDocumentBucket(value: string): asserts value is DocumentSt
   }
 }
 
-export function assertValidDocumentFile(file: File, bucketName: DocumentStorageBucket, allowImages: boolean | 'any' = false) {
+export function assertValidDocumentFile(file: File, bucketName: DocumentStorageBucket, allowImages = false) {
   const typeError = validateFileType(file.name, file.type, allowImages);
 
   if (typeError) {

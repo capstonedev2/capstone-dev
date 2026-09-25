@@ -32,6 +32,8 @@
     --color-error: #DC2626;
     --color-info: #2563EB;
     --color-primary-hover: #002C6B;
+    /* Shared "explore" gradient: homepage CTA banner + About the System hero (Tailwind: bg-explore). */
+    --gradient-explore: linear-gradient(90deg, #EAF1FB 0%, #FFF4D6 100%);
     --color-primary-light: #DBEAFE;
     --color-primary-dark: #1A1851;
     --color-border-suggestion: #BFDBFE;

@@ -3,7 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
 import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
-import { uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
+import { deleteFile, uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
 
 export const runtime = 'nodejs';
 
@@ -115,6 +115,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
           userId: user.id,
           titleDraftId: draft.id
         }
+      }).catch(async (error) => {
+        await deleteFile(bucketName, filePath).catch((cleanupError) => {
+          console.error(`Failed to remove orphaned upload ${filePath}:`, cleanupError);
+        });
+        throw error;
       });
 
       uploaded.push(toFilePayload(uploadedFile));

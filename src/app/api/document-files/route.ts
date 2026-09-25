@@ -12,7 +12,7 @@ import {
   CONCEPT_GATE_EXEMPT_DOCUMENT_CATEGORIES,
   DOCUMENT_STORAGE_BUCKETS,
   DOCUMENT_UPLOAD_ERROR_MESSAGES,
-  UNRESTRICTED_FILE_TYPE_CATEGORIES,
+  EVIDENCE_FILE_TYPE_CATEGORIES,
   type DocumentStorageBucket
 } from '@/lib/storage/upload-config';
 import {
@@ -24,6 +24,7 @@ import {
 import {
   assertDocumentBucket,
   assertValidDocumentFile,
+  deleteFile,
   generateUniqueFilePath,
   uploadFile
 } from '@/lib/storage/supabase-storage';
@@ -343,7 +344,7 @@ export async function POST(request: Request) {
 
     const documentCategory = normalizeText(formData.get('documentCategory')) || 'Uncategorized';
     const bucketNameValue = normalizeText(formData.get('bucketName')) || getBucketForCategory(documentCategory);
-    const fileTypeMode = UNRESTRICTED_FILE_TYPE_CATEGORIES.has(documentCategory) ? 'any' : false;
+    const fileTypeMode = EVIDENCE_FILE_TYPE_CATEGORIES.has(documentCategory);
     assertDocumentBucket(bucketNameValue);
     assertValidDocumentFile(file, bucketNameValue, fileTypeMode);
 
@@ -397,6 +398,9 @@ export async function POST(request: Request) {
       && Boolean(project?.id)
       && !ACHIEVEMENT_DOCUMENT_CATEGORIES.has(documentCategory);
 
+    // The object is already in storage by now, so if anything below rejects the
+    // upload (e.g. the duplicate-pending 409) the object has to be removed again —
+    // otherwise it sits in the bucket with no row pointing at it, using quota forever.
     const uploadedFile = await prisma.$transaction(async (tx) => {
       const checkpoint = shouldLinkCheckpoint && project?.id
         ? await resolveMilestoneCheckpointForSubmission(tx, {
@@ -504,7 +508,12 @@ export async function POST(request: Request) {
       }
 
       return savedFile;
-    }, { timeout: 15000 });
+    }, { timeout: 15000 }).catch(async (error) => {
+      await deleteFile(bucketNameValue, filePath).catch((cleanupError) => {
+        console.error(`Failed to remove orphaned upload ${filePath}:`, cleanupError);
+      });
+      throw error;
+    });
 
     await createUploadNotifications({
       bucketName: bucketNameValue,

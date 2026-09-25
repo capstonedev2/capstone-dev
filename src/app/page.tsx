@@ -345,7 +345,7 @@ export default function Page() {
 
             <div className="relative z-10 w-[min(1680px,calc(100%-3rem))] mx-auto">
               
-              <div className="grid lg:grid-cols-[1.1fr_0.9fr] lg:items-start gap-6 mb-6">
+              <div className="grid lg:grid-cols-[1.1fr_0.9fr] lg:items-start gap-6 mb-8">
                 {/* Left Card: Premium Light Glassmorphism */}
                 <article className={`${styles.homeAboutSummaryCard} relative overflow-hidden bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)] group`} data-reveal="fade-right">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-blue-50/30 pointer-events-none" />
@@ -355,6 +355,8 @@ export default function Page() {
                   </div>
                 </article>
 
+                {/* Right Column: System Flow card with the feature cards beneath it */}
+                <div className="flex flex-col gap-6">
                 {/* Right Card: Dynamic Workflow Display */}
                 <aside className={`${styles.homeAboutFlowCard} relative overflow-hidden bg-gradient-to-br from-white/90 to-[#f2f7ff]/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_rgba(15,43,89,0.05)] rounded-[2rem] p-6 sm:p-10 flex flex-col justify-center transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:shadow-[0_24px_54px_rgba(15,43,89,0.07)]`} aria-label="System workflow preview" data-reveal="fade-left">
                   
@@ -389,10 +391,9 @@ export default function Page() {
                     </div>
                   </div>
                 </aside>
-              </div>
 
-              {/* Bottom 3 Cards: Feature Showcase */}
-              <div className="grid md:grid-cols-3 gap-4 mb-8">
+                {/* Feature Cards: under System Flow */}
+                <div className="grid sm:grid-cols-3 gap-4">
                 {systemOutcomes.map((outcome, index) => (
                   <article 
                     key={outcome.title} 
@@ -411,15 +412,17 @@ export default function Page() {
                     </div>
                   </article>
                 ))}
+                </div>
+                </div>
               </div>
 
               {/* Action Banner: Highly polished call to action */}
               <div className={`${styles.homeAboutCtaShell} relative overflow-hidden rounded-[2rem] bg-white border border-[#e2eaf5] shadow-[0_20px_60px_rgba(15,43,89,0.08)] p-1.5`} data-reveal="fade-up" style={{ '--reveal-delay': '0.3s' } as any}>
-                <div className={`${styles.homeAboutCtaBand} relative flex flex-col sm:flex-row items-center justify-between gap-6 bg-gradient-to-r from-[#f8fbff] to-[#fffdf5] rounded-[1.6rem] py-8 px-8 sm:px-12`}>
+                <div className={`${styles.homeAboutCtaBand} relative flex flex-col sm:flex-row items-center justify-between gap-6 bg-explore rounded-[1.6rem] py-8 px-8 sm:px-12`}>
                   
                   <div className="text-center sm:text-left max-w-lg">
                     <h3 className={`${styles.homeAboutCtaTitle} text-xl font-black text-[#102033] mb-2`}>Ready to explore ThesisTrack?</h3>
-                    <p className={`${styles.homeAboutCtaText} text-sm text-[#66758a] font-medium`}>Discover how our unified workflow transforms academic project management.</p>
+                    <p className={`${styles.homeAboutCtaText} text-sm text-[#536982] font-medium`}>Discover how our unified workflow transforms academic project management.</p>
                   </div>
                   
                   <div className="flex flex-wrap items-center justify-center gap-4">

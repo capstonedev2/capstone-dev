@@ -121,7 +121,7 @@ export function LandingNavigation() {
 
   return (
     <nav
-      className={`${styles.navbar} ${isScrolled ? styles.navbarScrolled : ''}`}
+      className={`${styles.navbar} ${styles.navbarFloating} ${isScrolled ? styles.navbarScrolled : ''}`}
       aria-label="Primary navigation"
     >
       <div className={`${styles.container} ${styles.navbarInner}`}>

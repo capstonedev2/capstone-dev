@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { PartnerStatusTone } from '@/components/partner/partner-data';
 
@@ -23,33 +23,61 @@ export function PartnerStatCard({
   );
 }
 
-export function PartnerDepartmentBadge({ children }: { children: ReactNode }) {
-  return <span className="dept-badge">{children}</span>;
+const BADGE_BASE_STYLE: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.35rem',
+  padding: '0.25rem 0.75rem',
+  borderRadius: '999px',
+  fontSize: '0.75rem',
+  fontWeight: 700,
+  lineHeight: 1.4,
+  whiteSpace: 'nowrap'
+};
+
+export function PartnerDepartmentBadge({
+  children,
+  style
+}: {
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <span
+      className="dept-badge"
+      style={{ ...BADGE_BASE_STYLE, background: 'var(--primary-soft)', color: 'var(--primary)', ...style }}
+    >
+      {children}
+    </span>
+  );
 }
+
+const STATUS_TONE_STYLE: Record<PartnerStatusTone, { background: string; color: string }> = {
+  approved: { background: 'var(--success-soft)', color: 'var(--success)' },
+  completed: { background: 'var(--success-soft)', color: 'var(--success)' },
+  deployed: { background: 'var(--info-soft)', color: 'var(--info)' },
+  active: { background: 'var(--info-soft)', color: 'var(--info)' },
+  pending: { background: 'var(--warning-soft)', color: 'var(--warning)' },
+  warning: { background: 'var(--warning-soft)', color: 'var(--warning)' },
+  danger: { background: 'var(--danger-soft)', color: 'var(--danger)' }
+};
 
 export function PartnerStatusBadge({
   children,
-  tone
+  tone,
+  style
 }: {
   children: ReactNode;
   tone: PartnerStatusTone;
+  style?: CSSProperties;
 }) {
-  const statusClass =
-    tone === 'approved'
-      ? 'status-approved'
-      : tone === 'pending'
-        ? 'status-pending'
-        : tone === 'warning'
-          ? 'status-warning'
-          : tone === 'danger'
-            ? 'status-danger'
-            : tone === 'completed'
-              ? 'status-completed'
-              : tone === 'deployed'
-                ? 'status-deployed'
-                : 'status-active';
+  const toneStyle = STATUS_TONE_STYLE[tone] ?? STATUS_TONE_STYLE.active;
 
-  return <span className={`status-badge ${statusClass}`}>{children}</span>;
+  return (
+    <span className={`status-badge status-${tone}`} style={{ ...BADGE_BASE_STYLE, ...toneStyle, ...style }}>
+      {children}
+    </span>
+  );
 }
 
 export function PartnerButton({
@@ -132,9 +160,9 @@ export function PartnerModal({
     >
       <div 
         style={{
-          background: 'white',
+          background: 'var(--surface)',
           borderRadius: '1.2rem',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: 'var(--shadow-lg, 0 25px 50px -12px rgba(0, 0, 0, 0.25))',
           width: '100%',
           maxWidth: narrow ? '480px' : '640px',
           overflow: 'hidden',
@@ -142,15 +170,15 @@ export function PartnerModal({
           flexDirection: 'column'
         }}
       >
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC' }}>
-          <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0F172A', fontWeight: 800 }}>{title}</h3>
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-sunken)' }}>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text)', fontWeight: 800 }}>{title}</h3>
           <button 
             aria-label="Close modal" 
             type="button" 
             onClick={onClose}
-            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', border: 'none', background: 'transparent', color: '#64748B', cursor: 'pointer', transition: 'background 0.2s', fontSize: '1.2rem' }}
-            onMouseOver={(e) => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#0F172A'; }}
-            onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; }}
+            style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', border: 'none', background: 'transparent', color: 'var(--muted)', cursor: 'pointer', transition: 'background 0.2s', fontSize: '1.2rem' }}
+            onMouseOver={(e) => { e.currentTarget.style.background = 'var(--surface-accent)'; e.currentTarget.style.color = 'var(--text)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted)'; }}
           >
             <i aria-hidden="true" className="fas fa-times" />
           </button>
@@ -159,7 +187,7 @@ export function PartnerModal({
           {children}
         </div>
         {footer ? (
-          <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #F1F5F9', background: '#F8FAFC', display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid var(--border)', background: 'var(--surface-sunken)', display: 'flex', justifyContent: 'flex-end' }}>
             {footer}
           </div>
         ) : null}

@@ -19,6 +19,9 @@ module.exports = {
           accent: '#F6BE00'
         }
       },
+      backgroundImage: {
+        explore: 'var(--gradient-explore)'
+      },
       boxShadow: {
         soft: '0 1px 2px rgb(15 23 42 / 0.05)',
         card: '0 10px 24px rgb(15 23 42 / 0.06)',

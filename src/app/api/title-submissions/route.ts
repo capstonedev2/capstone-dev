@@ -13,7 +13,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { DOCUMENT_STORAGE_BUCKETS } from '@/lib/storage/upload-config';
-import { uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
+import { deleteFile, uploadFile, generateUniqueFilePath } from '@/lib/storage/supabase-storage';
 import {
   NEW_TITLE_SUBMISSION_CHECKPOINT_KEY,
   getNewTitleRecoveryStage,
@@ -886,8 +886,13 @@ export async function POST(request: Request) {
       try {
         await uploadFile({ bucketName, filePath, file });
       } catch (uploadError) {
+        // No object in storage means no row either — a row here would show the
+        // adviser a file that can never be opened.
         console.warn(`Supabase file upload skipped for ${file.name}:`, uploadError);
+        continue;
       }
+
+      let recordCreated = false;
 
       try {
         const uploadedFile = await prisma.uploadedFile.create({
@@ -905,6 +910,7 @@ export async function POST(request: Request) {
             submissionId: submissionId
           }
         });
+        recordCreated = true;
 
         await recordCheckpointSubmission(prisma, {
           projectId: project.id,
@@ -915,6 +921,12 @@ export async function POST(request: Request) {
         });
       } catch (fileDbError) {
         console.warn(`File database record skipped for ${file.name}:`, fileDbError);
+
+        if (!recordCreated) {
+          await deleteFile(bucketName, filePath).catch((cleanupError) => {
+            console.error(`Failed to remove orphaned upload ${filePath}:`, cleanupError);
+          });
+        }
       }
     }
 

@@ -42,3 +42,15 @@ export function uploadBufferToCloudinary(
     uploadStream.end(buffer);
   });
 }
+
+// Removes a profile photo this app uploaded (identified by its secure_url). URLs from
+// anywhere else — an external avatar, a branding asset — are left alone.
+export async function deleteProfileImageFromCloudinary(secureUrl: string | null | undefined) {
+  const match = secureUrl?.match(/\/(thesistrack\/profiles\/[^/?#]+?)(?:\.[a-z0-9]+)?(?:[?#].*)?$/i);
+
+  if (!match) {
+    return;
+  }
+
+  await getCloudinaryClient().uploader.destroy(match[1], { resource_type: 'image' });
+}

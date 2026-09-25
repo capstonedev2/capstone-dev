@@ -3,7 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, successResponse } from '@/lib/utils';
 import { DOCUMENT_STORAGE_BUCKETS, type DocumentStorageBucket } from '@/lib/storage/upload-config';
-import { assertValidDocumentFile, generateUniqueFilePath, uploadFile } from '@/lib/storage/supabase-storage';
+import { assertValidDocumentFile, deleteFile, generateUniqueFilePath, uploadFile } from '@/lib/storage/supabase-storage';
 
 export const runtime = 'nodejs';
 
@@ -78,6 +78,11 @@ export async function POST(request: Request) {
 
     assertValidDocumentFile(file, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
 
+    const previousSetting = await prisma.systemSetting.findUnique({
+      where: { key: TEMPLATE_SETTING_KEY }
+    });
+    const previousTemplate = previousSetting?.value as unknown as TemplateSettingValue | null | undefined;
+
     const filePath = generateUniqueFilePath({
       bucketName: DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS,
       projectId: 'system-templates',
@@ -125,6 +130,13 @@ export async function POST(request: Request) {
         metadata: { fileName: value.fileName } as Prisma.InputJsonValue
       }
     });
+
+    // Only the current template is ever served, so the replaced one is dead weight in storage.
+    if (previousTemplate?.filePath && previousTemplate.bucketName && previousTemplate.filePath !== filePath) {
+      await deleteFile(previousTemplate.bucketName, previousTemplate.filePath).catch((error) => {
+        console.error(`Failed to remove previous template ${previousTemplate.filePath}:`, error);
+      });
+    }
 
     return successResponse(
       {

@@ -119,15 +119,65 @@
   position: fixed;
   inset: 0 0 auto;
   z-index: 40;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 12px 35px rgb(15 43 89 / 0.07);
-  transition: box-shadow 0.3s ease-out;
+  /* Glass: translucent surface + blur/saturate so the page tints through, with a top highlight edge. */
+  border-bottom: 1px solid rgb(255 255 255 / 0.45);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.62), rgb(255 255 255 / 0.42));
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.7),
+    0 8px 30px rgb(15 43 89 / 0.05);
+  transition: background 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
 }
 
+/* Once scrolled over busy content (cards, photos), firm up the glass so links stay legible. */
 .navbarScrolled {
-  box-shadow: var(--shadow-card);
+  border-bottom-color: rgb(219 233 251 / 0.8);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.66), rgb(255 255 255 / 0.54));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    0 12px 35px rgb(15 43 89 / 0.1);
+}
+
+/* Landing navbar: a floating glass pill. The outer bar is transparent spacing; the glass is
+   drawn on .navbarInner::before so the mobile dropdown (a child of .navbarInner) keeps its own blur. */
+.navbarFloating {
+  border-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  padding-top: 0.75rem;
+  pointer-events: none;
+}
+
+.navbarFloating .navbarInner {
+  isolation: isolate;
+  width: min(1680px, calc(100% - 2rem));
+  min-height: 4.1rem;
+  padding: 0.45rem 0.55rem 0.45rem 1.4rem;
+  pointer-events: auto;
+}
+
+.navbarFloating .navbarInner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.62), rgb(255 255 255 / 0.42));
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    0 10px 30px rgb(15 43 89 / 0.08);
+  transition: background 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out;
+}
+
+.navbarFloating.navbarScrolled .navbarInner::before {
+  border-color: rgb(219 233 251 / 0.85);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.6));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    0 14px 38px rgb(15 43 89 / 0.14);
 }
 
 .departmentNavbar {
@@ -503,7 +553,10 @@
 .heroSection {
   position: relative;
   overflow: hidden;
-  padding: 4.7rem 0 4.3rem;
+  /* Extend the hero up behind the floating navbar (cancels .main's 4.7rem offset) so its
+     gradient fills the strip around the pill instead of showing a separate band. */
+  margin-top: -4.7rem;
+  padding: calc(4.7rem + 4.7rem) 0 4.3rem;
   background:
     radial-gradient(ellipse 60% 45% at 50% 8%, #f6be0033, #0000 70%),
     radial-gradient(circle at 92% 15%, #418bff40, #0000 45%),
@@ -1399,12 +1452,12 @@
 
 .workflowHeader {
   max-width: 46rem;
-  margin-bottom: 2.6rem;
+  margin: 0 auto 2.6rem;
 }
 
 .workflowIntro {
-  margin: 0;
-  text-align: left;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .hallIntro {
@@ -1422,8 +1475,8 @@
 }
 
 .workflowIntro p {
-  margin-right: 0;
-  margin-left: 0;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .workflowTimeline {
@@ -2483,11 +2536,13 @@
 .aboutPageHero {
   position: relative;
   overflow: hidden;
-  min-height: 36rem;
-  padding: 6.2rem 0 4.8rem;
-  background:
-    linear-gradient(90deg, rgb(255 255 255 / 0.97) 0%, rgb(255 255 255 / 0.86) 48%, rgb(255 255 255 / 0.62) 100%),
-    linear-gradient(135deg, #f8fbff 0%, #eaf3ff 52%, #fff6d9 100%);
+  /* Extend the hero up behind the floating navbar (cancels .main's 4.7rem offset) so its
+     gradient fills the strip around the pill; height, padding and mockup offset grow to match. */
+  margin-top: -4.7rem;
+  min-height: calc(36rem + 4.7rem);
+  padding: calc(6.2rem + 4.7rem) 0 4.8rem;
+  /* Soft white gradient with a faint cool-blue edge; no gold tint. */
+  background: linear-gradient(90deg, #f4f8fe 0%, #ffffff 55%, #f7faff 100%);
 }
 
 .aboutPageHero::before {
@@ -2495,10 +2550,22 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgb(0 58 143 / 0.045) 1px, transparent 1px),
-    linear-gradient(180deg, rgb(0 58 143 / 0.035) 1px, transparent 1px);
+    linear-gradient(90deg, rgb(0 58 143 / 0.07) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(0 58 143 / 0.055) 1px, transparent 1px);
   background-size: 4rem 4rem;
   mask-image: linear-gradient(90deg, #000 0%, #000 74%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Fade the hero's bottom edge into the white System Model section below. Sits above the
+   mockup (z-index 1, later in paint order) but under the content container (z-index 2). */
+.aboutPageHero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  height: 7rem;
+  background: linear-gradient(180deg, transparent, #ffffff);
   pointer-events: none;
 }
 
@@ -2509,7 +2576,7 @@
 
 .aboutHeroScene {
   position: absolute;
-  top: 3.2rem;
+  top: calc(3.2rem + 4.7rem);
   right: max(-8rem, calc((100vw - 1680px) / 2));
   z-index: 1;
   width: min(54rem, 52vw);
@@ -2717,7 +2784,7 @@
 
 .aboutHeroMetrics strong {
   display: block;
-  color: var(--accent-gold);
+  color: var(--primary-blue);
   font-size: 2.05rem;
   line-height: 1;
 }
@@ -3922,6 +3989,16 @@
     min-height: 4.6rem;
   }
 
+  .navbarFloating {
+    padding-top: 0.5rem;
+  }
+
+  .navbarFloating .navbarInner {
+    width: calc(100% - 1rem);
+    min-height: 3.9rem;
+    padding: 0.4rem 0.45rem 0.4rem 1rem;
+  }
+
   .departmentNavbarInner {
     align-items: stretch;
     flex-direction: column;
@@ -3983,7 +4060,6 @@
     border-radius: 1.75rem;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
     box-shadow: 
       0 40px 80px rgba(15, 43, 89, 0.2), 
       inset 0 0 0 1px rgba(255, 255, 255, 0.7),
@@ -4116,8 +4192,13 @@
     padding: 3.8rem 0;
   }
 
+  .heroSection {
+    padding-top: calc(3.8rem + 4.7rem);
+  }
+
   .aboutPageHero {
     min-height: auto;
+    padding-top: calc(3.8rem + 4.7rem);
   }
 
   .heroSection::before {

@@ -6,9 +6,10 @@ import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 import {
   ACHIEVEMENT_DOCUMENT_CATEGORIES,
+  DOCUMENT_AND_IMAGE_FILE_ACCEPT,
   DOCUMENT_FILE_ACCEPT,
   DOCUMENT_STORAGE_BUCKETS,
-  UNRESTRICTED_FILE_TYPE_CATEGORIES,
+  EVIDENCE_FILE_TYPE_CATEGORIES,
   validateFileSize,
   validateFileType
 } from '@/lib/storage/upload-config';
@@ -123,7 +124,7 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
 
   const isOtherCategory = category === OTHER_CATEGORY_KEY;
   const isAchievementCategory = ACHIEVEMENT_DOCUMENT_CATEGORIES.has(category);
-  const isUnrestrictedCategory = UNRESTRICTED_FILE_TYPE_CATEGORIES.has(category);
+  const isEvidenceCategory = EVIDENCE_FILE_TYPE_CATEGORIES.has(category);
   const isCategoryLocked = !isAchievementCategory && category !== 'concept-defense-application' && !isConceptStageComplete;
 
   // A category already has a submission awaiting adviser review — resubmitting
@@ -173,7 +174,7 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
 
     const invalidReasons: string[] = [];
     const validIncoming = incoming.filter((file) => {
-      const typeError = validateFileType(file.name, file.type, isUnrestrictedCategory ? 'any' : false);
+      const typeError = validateFileType(file.name, file.type, isEvidenceCategory);
       const sizeError = validateFileSize(file.size, DOCUMENT_STORAGE_BUCKETS.THESIS_DOCUMENTS);
       const reason = typeError || sizeError;
 
@@ -509,7 +510,7 @@ export function StudentSubmission({ data }: { data: StudentDashboardData }) {
                         type="file"
                         multiple
                         className="hidden"
-                        accept={isUnrestrictedCategory ? undefined : DOCUMENT_FILE_ACCEPT}
+                        accept={isEvidenceCategory ? DOCUMENT_AND_IMAGE_FILE_ACCEPT : DOCUMENT_FILE_ACCEPT}
                         onChange={handleFileInputChange}
                       />
                     </div>

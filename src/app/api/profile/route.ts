@@ -129,6 +129,13 @@ export async function PATCH(request: Request) {
       select: publicUserSelect
     });
 
+    if (data.profileImage !== undefined && user.profileImage && user.profileImage !== data.profileImage) {
+      const { deleteProfileImageFromCloudinary } = await import('@/lib/cloudinary');
+      await deleteProfileImageFromCloudinary(user.profileImage).catch((error) => {
+        console.error('Failed to remove previous profile image from Cloudinary:', error);
+      });
+    }
+
     if (newName && newName !== oldName) {
       try {
         const groupsWithOldName = await prisma.group.findMany({
