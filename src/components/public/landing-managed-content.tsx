@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { type CSSProperties } from 'react';
+import { type CSSProperties, type MouseEvent, useState } from 'react';
+import { AuthModal, type AuthView, getAuthViewForHref, shouldOpenAuthModal } from '@/components/auth/auth-modal';
 import { useBranding } from '@/components/branding/branding-provider';
 import styles from '@/app/page.module.css';
 
 export function LandingManagedHero() {
   const { branding } = useBranding();
+  const [authView, setAuthView] = useState<AuthView | null>(null);
   const landing = branding.landing;
   const hasHeroImage = landing.showHeroImage && landing.heroImage.trim();
   const heroTitle = landing.heroTitle.trim();
@@ -44,6 +46,16 @@ export function LandingManagedHero() {
     backgroundColor: branding.colors.primary,
     boxShadow: `0 14px 28px color-mix(in srgb, ${branding.colors.primary} 24%, transparent)`
   } as CSSProperties;
+  // CTA links are admin-configurable: a /login or /register link opens the auth modal on a plain click
+  // (new-tab/middle clicks still reach the full page); any other link navigates as usual.
+  const openAuthModalFor = (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    const view = getAuthViewForHref(href);
+
+    if (view && shouldOpenAuthModal(event)) {
+      event.preventDefault();
+      setAuthView(view);
+    }
+  };
   const secondaryCtaStyle = {
     borderColor: branding.colors.accent,
     color: branding.colors.primary
@@ -63,10 +75,10 @@ export function LandingManagedHero() {
         <p style={paragraphStyle}>{landing.description}</p>
         {landing.showCtaButtons ? (
           <div className={`mt-7 flex flex-wrap gap-3 ${ctaAlignmentClass}`}>
-            <Link href={landing.primaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-black text-white transition-transform duration-200 ease-out hover:-translate-y-px active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current" style={primaryCtaStyle}>
+            <Link href={landing.primaryCtaLink} onClick={openAuthModalFor(landing.primaryCtaLink)} className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-black text-white transition-transform duration-200 ease-out hover:-translate-y-px active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current" style={primaryCtaStyle}>
               {landing.primaryCtaText}
             </Link>
-            <Link href={landing.secondaryCtaLink} className="inline-flex min-h-12 items-center justify-center rounded-full border bg-white px-6 text-sm font-black shadow-sm transition-transform duration-200 ease-out hover:-translate-y-px active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current" style={secondaryCtaStyle}>
+            <Link href={landing.secondaryCtaLink} onClick={openAuthModalFor(landing.secondaryCtaLink)} className="inline-flex min-h-12 items-center justify-center rounded-full border bg-white px-6 text-sm font-black shadow-sm transition-transform duration-200 ease-out hover:-translate-y-px active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current" style={secondaryCtaStyle}>
               {landing.secondaryCtaText}
             </Link>
           </div>
@@ -77,6 +89,7 @@ export function LandingManagedHero() {
           <img alt="" className="h-full min-h-[260px] w-full object-cover" src={landing.heroImage} />
         </div>
       ) : null}
+      <AuthModal view={authView} onViewChange={setAuthView} onClose={() => setAuthView(null)} />
     </div>
   );
 }

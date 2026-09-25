@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { LoginForm } from './login-form';
 import { RegisterForm } from './register-form';
 
-export { shouldOpenAuthModal } from './auth-ui';
+export { getAuthViewForHref, shouldOpenAuthModal } from './auth-ui';
 
 export type AuthView = 'login' | 'register';
 

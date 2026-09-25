@@ -8,6 +8,24 @@ export function shouldOpenAuthModal(event: MouseEvent<HTMLAnchorElement>) {
   return !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
+/**
+ * Which auth modal view an admin-configurable link should open, if any: '/login' and
+ * '/register' (ignoring any ?query or #hash) open the modal; every other link navigates normally.
+ */
+export function getAuthViewForHref(href: string): 'login' | 'register' | null {
+  const path = href.trim().split(/[?#]/)[0].replace(/\/+$/, '');
+
+  if (path === '/login') {
+    return 'login';
+  }
+
+  if (path === '/register') {
+    return 'register';
+  }
+
+  return null;
+}
+
 export function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
 }
