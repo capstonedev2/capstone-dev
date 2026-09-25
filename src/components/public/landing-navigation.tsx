@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { BrandName } from '@/components/branding/brand-copy';
 import { LogoIcon } from '@/components/branding/logo-icon';
+import { AuthModal, type AuthView, shouldOpenAuthModal } from '@/components/auth/auth-modal';
 import { useBranding } from '@/components/branding/branding-provider';
 import styles from '@/app/page.module.css';
 
@@ -14,6 +15,7 @@ export function LandingNavigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeHref, setActiveHref] = useState('/#home');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [authView, setAuthView] = useState<AuthView | null>(null);
   const pathname = usePathname();
   const navigation = branding.navigation;
   const visibleLinks = useMemo(
@@ -172,7 +174,18 @@ export function LandingNavigation() {
 
           <div className={styles.navActions}>
             {navigation.showRegister ? (
-              <Link href="/register" className={`${styles.buttonSecondary} ${styles.navActionButton} hidden sm:flex`}>
+              <Link
+                href="/register"
+                className={`${styles.buttonSecondary} ${styles.navActionButton} hidden sm:flex`}
+                onClick={(event) => {
+                  // Plain click opens the register view; new-tab/middle clicks still reach the full /register page.
+                  if (shouldOpenAuthModal(event)) {
+                    event.preventDefault();
+                    setIsOpen(false);
+                    setAuthView('register');
+                  }
+                }}
+              >
                 <span className={styles.buttonText}>{navigation.registerLabel}</span>
                 <span className={styles.buttonIcon} aria-hidden="true">
                   <i className="fas fa-user-plus" />
@@ -181,7 +194,18 @@ export function LandingNavigation() {
             ) : null}
 
             {navigation.showLogin ? (
-              <Link href="/login" className={`${styles.buttonPrimary} ${styles.navActionButton}`}>
+              <Link
+                href="/login"
+                className={`${styles.buttonPrimary} ${styles.navActionButton}`}
+                onClick={(event) => {
+                  // Plain click opens the modal; new-tab/middle clicks still reach the full /login page.
+                  if (shouldOpenAuthModal(event)) {
+                    event.preventDefault();
+                    setIsOpen(false);
+                    setAuthView('login');
+                  }
+                }}
+              >
                 <span className={styles.buttonText}>{navigation.loginLabel}</span>
                 <span className={styles.buttonIcon} aria-hidden="true">
                   <i className="fas fa-right-to-bracket" />
@@ -191,6 +215,8 @@ export function LandingNavigation() {
           </div>
         </div>
       </div>
+
+      <AuthModal view={authView} onViewChange={setAuthView} onClose={() => setAuthView(null)} />
     </nav>
   );
 }

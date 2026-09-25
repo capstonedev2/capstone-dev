@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { AuthModal, type AuthView, shouldOpenAuthModal } from '@/components/auth/auth-modal';
 import { useBranding } from '@/components/branding/branding-provider';
 import styles from '@/app/page.module.css';
 
@@ -241,6 +242,7 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
   const displayAwards = [...repeatedBase, ...repeatedBase];
 
   const [selectedAward, setSelectedAward] = useState<Award | null>(null);
+  const [authView, setAuthView] = useState<AuthView | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const nextImage = () => {
@@ -800,6 +802,14 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
                 
                 <Link
                   href="/login"
+                  onClick={(event) => {
+                    // Swap the award modal for the login modal; new-tab/middle clicks still reach /login.
+                    if (shouldOpenAuthModal(event)) {
+                      event.preventDefault();
+                      closeModal();
+                      setAuthView('login');
+                    }
+                  }}
                   className="shrink-0 flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#003A8F] to-[#004bba] text-white font-bold text-sm hover:shadow-[0_8px_20px_rgba(0,58,143,0.3)] transition-all duration-300 w-full sm:w-auto hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   Sign In to Access <i className="fas fa-arrow-right ml-1" />
@@ -809,6 +819,8 @@ export function HallOfExcellence({ filterDepartmentId }: { filterDepartmentId?: 
           </div>
         </div>
       )}
+
+      <AuthModal view={authView} onViewChange={setAuthView} onClose={() => setAuthView(null)} />
     </>
   );
 }
