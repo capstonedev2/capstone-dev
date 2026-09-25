@@ -1,0 +1,160 @@
+/* System Admin dashboard layout. Colors come from the --sa-* theme tokens set by the shared AdminPage wrapper
+   (ui/system-admin-ui.module.css), which follow Theme & Branding and switch for the dark portal theme. */
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 1100px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- Users by role ---------- */
+.roleRow {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.6rem 0;
+}
+
+.roleRowHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--sa-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.roleCount {
+  color: var(--sa-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.barTrack {
+  height: 0.4rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sa-border) 70%, var(--sa-surface));
+}
+
+/* Width comes from the data via --share (set per row). */
+.barFill {
+  width: var(--share, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sa-primary-text);
+}
+
+.barFillAccent {
+  background: var(--color-accent);
+}
+
+/* ---------- Rows shared by activity / attention / status ---------- */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--sa-border);
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowText {
+  min-width: 0;
+  flex: 1;
+  color: var(--sa-text);
+  line-height: 1.4;
+}
+
+.rowMeta {
+  flex-shrink: 0;
+  color: var(--sa-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* ---------- Needs attention ---------- */
+.dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.dotWarning {
+  background: var(--color-accent);
+}
+
+.dotNeutral {
+  background: var(--sa-muted);
+}
+
+/* ---------- Portal status ---------- */
+.statusList {
+  margin: 0;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--sa-border);
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.statusRow:last-child {
+  border-bottom: 0;
+}
+
+.statusLabel {
+  color: var(--sa-muted);
+}
+
+.statusValue {
+  margin: 0;
+  color: var(--sa-text);
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Dark portal theme forces span text to inherit (see ui/system-admin-ui.module.css); keep the muted count. */
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .roleCount {
+  color: var(--sa-muted);
+}

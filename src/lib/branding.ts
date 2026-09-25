@@ -293,7 +293,7 @@ const DEFAULT_AUTH: BrandingAuthSettings = {
     subtitle: 'Sign in to continue managing thesis submissions, reviews, and academic records.',
     submitLabel: 'Sign in',
     alternatePrompt: 'New student account?',
-    alternateLinkLabel: 'Register here',
+    alternateLinkLabel: 'Student sign up',
     identifierLabel: 'Student ID / Email',
     identifierPlaceholder: 'e.g. 2021-00123 or user@university.edu.ph',
     passwordLabel: 'Password',
@@ -314,8 +314,8 @@ const DEFAULT_AUTH: BrandingAuthSettings = {
 
 const DEFAULT_NAVIGATION: BrandingNavigationSettings = {
   subtitle: 'Higher Education Institutions',
-  loginLabel: 'Login',
-  registerLabel: 'Sign Up',
+  loginLabel: 'Log in',
+  registerLabel: 'Student sign up',
   showLogin: true,
   showRegister: true,
   links: [

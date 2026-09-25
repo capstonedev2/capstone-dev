@@ -176,7 +176,7 @@ export function LandingNavigation() {
             {navigation.showRegister ? (
               <Link
                 href="/register"
-                className={`${styles.buttonSecondary} ${styles.navActionButton} hidden sm:flex`}
+                className={`${styles.navAuthButton} ${styles.navAuthOutline}`}
                 onClick={(event) => {
                   // Plain click opens the register view; new-tab/middle clicks still reach the full /register page.
                   if (shouldOpenAuthModal(event)) {
@@ -186,17 +186,14 @@ export function LandingNavigation() {
                   }
                 }}
               >
-                <span className={styles.buttonText}>{navigation.registerLabel}</span>
-                <span className={styles.buttonIcon} aria-hidden="true">
-                  <i className="fas fa-user-plus" />
-                </span>
+                {navigation.registerLabel}
               </Link>
             ) : null}
 
             {navigation.showLogin ? (
               <Link
                 href="/login"
-                className={`${styles.buttonPrimary} ${styles.navActionButton}`}
+                className={`${styles.navAuthButton} ${styles.navAuthPrimary}`}
                 onClick={(event) => {
                   // Plain click opens the modal; new-tab/middle clicks still reach the full /login page.
                   if (shouldOpenAuthModal(event)) {
@@ -206,10 +203,7 @@ export function LandingNavigation() {
                   }
                 }}
               >
-                <span className={styles.buttonText}>{navigation.loginLabel}</span>
-                <span className={styles.buttonIcon} aria-hidden="true">
-                  <i className="fas fa-right-to-bracket" />
-                </span>
+                {navigation.loginLabel}
               </Link>
             ) : null}
           </div>

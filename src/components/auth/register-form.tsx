@@ -17,7 +17,7 @@ import {
   getSelectClass,
   shouldOpenAuthModal
 } from './auth-ui';
-import { LogoIcon } from '@/components/branding/logo-icon';
+import { AuthModalBrand } from './auth-modal-brand';
 import { useBranding } from '@/components/branding/branding-provider';
 
 const fallbackDepartmentOptions = [
@@ -75,30 +75,24 @@ type RegisterFieldErrors = Partial<
   >
 >;
 
-const pageSectionClass =
-  'rounded-xl border border-white/45 bg-white/[0.18] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_28px_rgba(15,23,42,0.05)] backdrop-blur-md sm:p-3.5';
-// On the white modal the glass section boxes would disappear; use a light slate panel instead.
-const modalSectionClass = 'rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-3.5';
+const sectionClass = 'rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-3.5';
 
 type RegisterFormProps = {
-  variant: 'page' | 'modal';
   /** Reports account-creation progress so the modal can refuse to close mid-request. */
   onSubmittingChange?: (isSubmitting: boolean) => void;
   /** Fires once the user has typed or selected anything, so the modal can confirm before discarding it. */
   onDirtyChange?: (isDirty: boolean) => void;
-  /** Modal only: "Sign in here" switches the modal to its login view instead of navigating. */
+  /** "Sign in here" switches the modal to its login view instead of navigating. */
   onSwitchToLogin?: () => void;
 };
 
-export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwitchToLogin }: RegisterFormProps) {
+export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogin }: RegisterFormProps) {
   const router = useRouter();
   const { branding } = useBranding();
   const registerBranding = branding.auth.register;
-  const isModal = variant === 'modal';
-  const sectionClass = isModal ? modalSectionClass : pageSectionClass;
-  // Keep the page's original ids; prefix the modal's so they never collide with the login view's fields.
-  const fieldId = (name: string) => (isModal ? `register-modal-${name}` : name);
-  const messageId = (id: string) => (isModal ? id.replace(/^register-/, 'register-modal-') : id);
+  // Prefixed ids so they never collide with the login view's fields (both views live in the same dialog).
+  const fieldId = (name: string) => `register-modal-${name}`;
+  const messageId = (id: string) => id.replace(/^register-/, 'register-modal-');
   const departmentOptions = [
     { value: '', label: 'Select Department' },
     ...branding.departments
@@ -172,8 +166,8 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
       const params = new URLSearchParams(window.location.search);
       const provider = params.get('provider');
 
-      // Google sign-up always arrives as a full-page redirect to /register; the modal never enters Google mode.
-      if (variant === 'page' && provider === 'google') {
+      // Google sign-up arrives as a redirect to /register?provider=google&..., which opens this view prefilled.
+      if (provider === 'google') {
         const googleName = params.get('name') || '';
         const splitName = splitDisplayName(googleName);
         const googleFirstName = params.get('firstName') || splitName.firstName;
@@ -345,11 +339,10 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                         </label>
                         <input
                           id={fieldId('firstName')}
-                          className={cx(getInputClass(Boolean(fieldErrors.firstName)), 'text-sm', isModal && !fieldErrors.firstName && authUi.modalField)}
+                          className={cx(getInputClass(Boolean(fieldErrors.firstName)), 'text-sm', !fieldErrors.firstName && authUi.modalField)}
                           type="text"
                           placeholder="Juan"
                           autoComplete="given-name"
-                          autoFocus={!isModal}
                           value={firstName}
                           onChange={(event) => {
                             setFirstName(event.target.value);
@@ -375,7 +368,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                         </label>
                         <input
                           id={fieldId('lastName')}
-                          className={cx(getInputClass(Boolean(fieldErrors.lastName)), 'text-sm', isModal && !fieldErrors.lastName && authUi.modalField)}
+                          className={cx(getInputClass(Boolean(fieldErrors.lastName)), 'text-sm', !fieldErrors.lastName && authUi.modalField)}
                           type="text"
                           placeholder="Dela Cruz"
                           autoComplete="family-name"
@@ -416,7 +409,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                           </label>
                           <input
                             id={fieldId('studentId')}
-                            className={cx(getInputClass(Boolean(fieldErrors.studentId)), 'text-sm', isModal && !fieldErrors.studentId && authUi.modalField)}
+                            className={cx(getInputClass(Boolean(fieldErrors.studentId)), 'text-sm', !fieldErrors.studentId && authUi.modalField)}
                             type="text"
                             placeholder="2026-XXXX"
                             value={studentId}
@@ -444,7 +437,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                           </label>
                           <input
                             id={fieldId('email')}
-                            className={cx(getInputClass(Boolean(fieldErrors.email)), 'text-sm', isModal && !fieldErrors.email && authUi.modalField)}
+                            className={cx(getInputClass(Boolean(fieldErrors.email)), 'text-sm', !fieldErrors.email && authUi.modalField)}
                             type="email"
                             placeholder="student@university.edu.ph"
                             autoComplete="email"
@@ -485,7 +478,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                           <div className={authUi.selectWrap}>
                             <select
                               id={fieldId('department')}
-                              className={cx(getSelectClass(Boolean(fieldErrors.department)), 'text-sm', isModal && !fieldErrors.department && authUi.modalField)}
+                              className={cx(getSelectClass(Boolean(fieldErrors.department)), 'text-sm', !fieldErrors.department && authUi.modalField)}
                               value={department}
                               onChange={(event) => {
                                 setDepartment(event.target.value);
@@ -520,7 +513,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                           <div className={authUi.selectWrap}>
                             <select
                               id={fieldId('yearLevel')}
-                              className={cx(getSelectClass(Boolean(fieldErrors.yearLevel)), 'text-sm', isModal && !fieldErrors.yearLevel && authUi.modalField)}
+                              className={cx(getSelectClass(Boolean(fieldErrors.yearLevel)), 'text-sm', !fieldErrors.yearLevel && authUi.modalField)}
                               value={yearLevel}
                               onChange={(event) => {
                                 setYearLevel(event.target.value);
@@ -552,8 +545,8 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                   </div>
 
                   {isGoogleRegistration ? (
-                    <div className="rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold leading-5 text-slate-100">
-                      <span className="font-extrabold text-white">Google sign-in enabled.</span> Your verified Google account will be linked after you complete the required student details.
+                    <div className="rounded-xl border border-[#003A8F]/15 bg-[#EAF1FB] px-3 py-2 text-sm font-semibold leading-5 text-slate-700">
+                      <span className="font-extrabold text-[#003A8F]">Google sign-in enabled.</span> Your verified Google account will be linked after you complete the required student details.
                     </div>
                   ) : (
                     <div className={sectionClass}>
@@ -572,7 +565,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                           <div className={authUi.passwordField}>
                             <input
                               id={fieldId('password')}
-                              className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), 'text-sm', isModal && !fieldErrors.password && authUi.modalField)}
+                              className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), 'text-sm', !fieldErrors.password && authUi.modalField)}
                               type={showPassword ? 'text' : 'password'}
                               placeholder="Enter password"
                               autoComplete="new-password"
@@ -590,7 +583,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                             />
                             <button
                               type="button"
-                              className={cx(authUi.passwordToggle, 'right-2', isModal && authUi.modalToggle)}
+                              className={cx(authUi.passwordToggle, 'right-2', authUi.modalToggle)}
                               onClick={() => setShowPassword((current) => !current)}
                               aria-controls={fieldId('password')}
                               aria-pressed={showPassword}
@@ -625,7 +618,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                                           : passwordStrength < 3
                                           ? 'bg-amber-400'
                                           : 'bg-emerald-400'
-                                        : isModal ? 'bg-slate-200' : 'bg-white/20'
+                                        : 'bg-slate-200'
                                     }`}
                                   />
                                 ))}
@@ -647,7 +640,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                           <div className={authUi.passwordField}>
                             <input
                               id={fieldId('confirmPassword')}
-                              className={cx(getPasswordInputClass(Boolean(fieldErrors.confirmPassword)), 'text-sm', isModal && !fieldErrors.confirmPassword && authUi.modalField)}
+                              className={cx(getPasswordInputClass(Boolean(fieldErrors.confirmPassword)), 'text-sm', !fieldErrors.confirmPassword && authUi.modalField)}
                               type={showConfirmPassword ? 'text' : 'password'}
                               placeholder="Confirm password"
                               autoComplete="new-password"
@@ -667,7 +660,7 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                             />
                             <button
                               type="button"
-                              className={cx(authUi.passwordToggle, 'right-2', isModal && authUi.modalToggle)}
+                              className={cx(authUi.passwordToggle, 'right-2', authUi.modalToggle)}
                               onClick={() => setShowConfirmPassword((current) => !current)}
                               aria-controls={fieldId('confirmPassword')}
                               aria-pressed={showConfirmPassword}
@@ -723,86 +716,42 @@ export function RegisterForm({ variant, onSubmittingChange, onDirtyChange, onSwi
                 </form>
   );
 
-  if (isModal) {
-    return (
-      <div className="px-5 pb-6 pt-7 sm:px-8 sm:pb-7 sm:pt-8">
-        <div className="mb-5 flex flex-col items-center text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white p-2 shadow-[0_6px_16px_rgba(15,43,89,0.1)] ring-1 ring-slate-100">
-            <LogoIcon style={{ width: 'auto' }} className="h-8" />
-          </div>
-          <h2 className="m-0 font-serif text-[1.75rem] font-bold leading-tight text-[#102033]" id={messageId('register-title')}>
-            {registerBranding.title}
-          </h2>
-        </div>
-
-        {formFields}
-
-                <div className="mt-1 text-center">
-                  <p className="text-sm font-semibold leading-6 text-slate-700">
-                    {registerBranding.alternatePrompt}{' '}
-                    <Link
-                      href="/login"
-                      className={authUi.bookLink}
-                      onClick={(event) => {
-                        // Inside the modal, switch views instead of navigating; new-tab clicks still reach /login.
-                        if (onSwitchToLogin && shouldOpenAuthModal(event)) {
-                          event.preventDefault();
-                          onSwitchToLogin();
-                        }
-                      }}
-                    >
-                      <i className="fas fa-arrow-left" aria-hidden="true" />
-                      {registerBranding.alternateLinkLabel}
-                    </Link>
-                  </p>
-                </div>
-      </div>
-    );
-  }
-
   return (
-              <div className="w-full max-w-[620px] rounded-[24px] border border-white/50 bg-white/[0.30] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-5 lg:p-6">
-                <div className="mb-4 flex flex-col items-center text-center">
-                  <span className="mb-2 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
-                    <i className="fas fa-user-plus" aria-hidden="true" />
-                    {registerBranding.pill}
-                  </span>
-                  <h2 className="sr-only" id={messageId('register-title')}>
-                    {registerBranding.title}
-                  </h2>
-                </div>
+    <div className="px-5 pb-6 pt-7 sm:px-8 sm:pb-7 sm:pt-8">
+      <AuthModalBrand />
+      <div className="mb-5 flex flex-col items-center text-center">
+        <h2 className="m-0 font-serif text-[1.75rem] font-bold leading-tight text-[#102033]" id={messageId('register-title')}>
+          {registerBranding.title}
+        </h2>
+      </div>
 
-                {statusMessage ? (
-                  <div className={getMessageClass('success')} role="status" aria-live="polite">
-                    {statusMessage}
-                  </div>
-                ) : null}
+      {statusMessage ? (
+        <div className={cx(getMessageClass('success'), 'mb-3')} role="status" aria-live="polite">
+          {statusMessage}
+        </div>
+      ) : null}
 
-                {formFields}
+      {formFields}
 
-                <div className="mt-1 text-center">
-                  <p className="text-sm font-semibold leading-6 text-slate-700">
-                    {registerBranding.alternatePrompt}{' '}
-                    <Link
-                      href="/login"
-                      className={authUi.bookLink}
-                      onClick={(event) => {
-                        // Inside the modal, switch views instead of navigating; new-tab clicks still reach /login.
-                        if (onSwitchToLogin && shouldOpenAuthModal(event)) {
-                          event.preventDefault();
-                          onSwitchToLogin();
-                        }
-                      }}
-                    >
-                      <i className="fas fa-arrow-left" aria-hidden="true" />
-                      {registerBranding.alternateLinkLabel}
-                    </Link>
-                  </p>
-                </div>
-                <div className="mt-2 border-t border-slate-400/30 pt-2 text-center text-xs font-bold text-slate-700">
-                  <i className="fas fa-shield-halved mr-2 text-slate-500" aria-hidden="true" />
-                  Secure registration for ThesisTrack users only.
-                </div>
-              </div>
+      <div className="mt-1 text-center">
+        <p className="text-sm font-semibold leading-6 text-slate-700">
+          {registerBranding.alternatePrompt}{' '}
+          <Link
+            href="/login"
+            className={authUi.bookLink}
+            onClick={(event) => {
+              // Inside the modal, switch views instead of navigating; new-tab clicks still reach /login.
+              if (onSwitchToLogin && shouldOpenAuthModal(event)) {
+                event.preventDefault();
+                onSwitchToLogin();
+              }
+            }}
+          >
+            <i className="fas fa-arrow-left" aria-hidden="true" />
+            {registerBranding.alternateLinkLabel}
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type FormEvent, useEffect, useState } from 'react';
 import { useBranding } from '@/components/branding/branding-provider';
-import { LogoIcon } from '@/components/branding/logo-icon';
+import { AuthModalBrand } from './auth-modal-brand';
 import {
   getRoleRedirectPath,
   loginWithApi,
@@ -24,6 +24,7 @@ type LoginFieldErrors = Partial<Record<'identifier' | 'password', string>>;
 const resetEmailStorageKey = 'thesistrackPasswordResetEmail';
 const resetNoticeStorageKey = 'thesistrackPasswordResetNotice';
 const resetSuccessMessage = 'Password updated successfully. You can now sign in with your new password.';
+const suspendedMessage = 'Your account has been suspended. Contact your administrator for assistance.';
 const googleLoginMessages: Record<string, string> = {
   cancelled: 'Google sign in was cancelled.',
   invalid_request: 'Google sign in could not be verified. Please try again.',
@@ -32,22 +33,21 @@ const googleLoginMessages: Record<string, string> = {
   error: 'Unable to complete Google sign in. Please try again.'
 };
 
-// The page variant sits on the glass card over the campus photo; the modal variant sits on
-// plain white, where the glass input/button styles would be nearly invisible.
-const pageAltButtonClass =
-  'group relative inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-white/70 bg-white/80 px-5 text-sm font-bold text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.86),0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-[14px] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white hover:bg-white hover:shadow-[0_14px_30px_rgba(15,23,42,0.09)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-slate-200 disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0 sm:h-12';
 const modalAltButtonClass =
   'inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_10px_22px_rgba(15,23,42,0.08)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-slate-200 disabled:cursor-not-allowed disabled:opacity-75 disabled:hover:translate-y-0';
 
 type LoginFormProps = {
-  variant: 'page' | 'modal';
   /** Reports sign-in progress so the modal can refuse to close mid-request. */
   onSubmittingChange?: (isSubmitting: boolean) => void;
-  /** Modal only: "Register here" switches the modal to its register view instead of navigating. */
+  /** "Student sign up" switches the modal to its register view instead of navigating. */
   onSwitchToRegister?: () => void;
+  /** "Forgot password?" switches the modal to its password-reset view instead of navigating. */
+  onSwitchToForgotPassword?: () => void;
+  /** A success notice to show above the form (e.g. after a password reset inside the modal). */
+  notice?: { text: string; id: number };
 };
 
-export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: LoginFormProps) {
+export function LoginForm({ onSubmittingChange, onSwitchToRegister, onSwitchToForgotPassword, notice }: LoginFormProps) {
   const router = useRouter();
   const { branding } = useBranding();
   const [identifier, setIdentifier] = useState('');
@@ -60,14 +60,12 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [resetEmail, setResetEmail] = useState('');
   const isSubmitting = activeAction !== null;
-  const isModal = variant === 'modal';
   const loginBranding = branding.auth.login;
-  // Keep the page's original ids; prefix the modal's so labels never collide with another form.
-  const identifierId = isModal ? 'login-modal-identifier' : 'identifier';
-  const passwordId = isModal ? 'login-modal-password' : 'password';
-  const titleId = isModal ? 'login-modal-title' : 'login-title';
-  const identifierErrorId = isModal ? 'login-modal-identifier-error' : 'login-identifier-error';
-  const passwordErrorId = isModal ? 'login-modal-password-error' : 'login-password-error';
+  const identifierId = 'login-modal-identifier';
+  const passwordId = 'login-modal-password';
+  const titleId = 'login-modal-title';
+  const identifierErrorId = 'login-modal-identifier-error';
+  const passwordErrorId = 'login-modal-password-error';
 
   useEffect(() => {
     onSubmittingChange?.(isSubmitting);
@@ -102,6 +100,10 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
         setStatusMessage(resetNotice || resetSuccessMessage);
       }
 
+      if (params.get('suspended') === '1') {
+        setError(suspendedMessage);
+      }
+
       const googleStatus = params.get('google');
 
       if (googleStatus && googleLoginMessages[googleStatus]) {
@@ -117,9 +119,12 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
   }, []);
 
   useEffect(() => {
-    router.prefetch('/register');
-    router.prefetch('/forgot-password');
-  }, [router]);
+    if (notice) {
+      setError('');
+      setStatusMessage(notice.text);
+      setPassword('');
+    }
+  }, [notice]);
 
   const clearLoginFieldError = (field: keyof LoginFieldErrors) => {
     setFieldErrors((current) => {
@@ -160,7 +165,11 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
       }
     }
 
-    router.push('/forgot-password');
+    if (onSwitchToForgotPassword) {
+      onSwitchToForgotPassword();
+    } else {
+      router.push('/forgot-password');
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -218,7 +227,7 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
                   <i className="fas fa-user pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
                   <input
                     id={identifierId}
-                    className={cx(getInputClass(Boolean(fieldErrors.identifier)), '!pl-11 text-sm', isModal && !fieldErrors.identifier && authUi.modalField)}
+                    className={cx(getInputClass(Boolean(fieldErrors.identifier)), '!pl-11 text-sm', !fieldErrors.identifier && authUi.modalField)}
                     type="text"
                     placeholder={loginBranding.identifierPlaceholder}
                     autoComplete="username"
@@ -250,7 +259,7 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
                   <i className="fas fa-lock pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
                   <input
                     id={passwordId}
-                    className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), '!pl-11 text-sm', isModal && !fieldErrors.password && authUi.modalField)}
+                    className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), '!pl-11 text-sm', !fieldErrors.password && authUi.modalField)}
                     type={showPassword ? 'text' : 'password'}
                     placeholder={loginBranding.passwordPlaceholder}
                     autoComplete="current-password"
@@ -268,7 +277,7 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
                   />
                   <button
                     type="button"
-                    className={cx(authUi.passwordToggle, 'right-2', isModal && authUi.modalToggle)}
+                    className={cx(authUi.passwordToggle, 'right-2', authUi.modalToggle)}
                     onClick={() => setShowPassword((current) => !current)}
                     aria-controls={passwordId}
                     aria-pressed={showPassword}
@@ -335,14 +344,14 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
               </button>
 
               <div className="relative flex items-center py-1.5">
-                <div className={cx('grow border-t', isModal ? 'border-slate-200' : 'border-white/70')}></div>
-                <span className={cx('mx-4 shrink-0 text-xs font-extrabold uppercase tracking-wider', isModal ? 'text-slate-500' : 'text-slate-700')}>Or continue with</span>
-                <div className={cx('grow border-t', isModal ? 'border-slate-200' : 'border-white/70')}></div>
+                <div className="grow border-t border-slate-200"></div>
+                <span className="mx-4 shrink-0 text-xs font-extrabold uppercase tracking-wider text-slate-500">Or continue with</span>
+                <div className="grow border-t border-slate-200"></div>
               </div>
 
               <button
                 type="button"
-                className={isModal ? modalAltButtonClass : pageAltButtonClass}
+                className={modalAltButtonClass}
                 disabled={isSubmitting}
                 onClick={() => {
                   window.location.href = '/api/auth/google';
@@ -357,17 +366,6 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
                 {loginBranding.googleLabel}
               </button>
 
-              {isModal ? null : (
-              <button
-                type="button"
-                className={pageAltButtonClass}
-                disabled={isSubmitting}
-                onClick={() => router.push('/repository')}
-              >
-                <i className="fas fa-user-group text-slate-500" aria-hidden="true" />
-                Continue as Guest
-              </button>
-              )}
                 </form>
   );
 
@@ -391,57 +389,28 @@ export function LoginForm({ variant, onSubmittingChange, onSwitchToRegister }: L
                   </p>
   );
 
-  if (isModal) {
-    return (
-      <div className="px-6 pb-6 pt-7 sm:px-8 sm:pb-7 sm:pt-8">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white p-2 shadow-[0_6px_16px_rgba(15,43,89,0.1)] ring-1 ring-slate-100">
-            <LogoIcon style={{ width: 'auto' }} className="h-8" />
-          </div>
-          <h2 className="m-0 font-serif text-[1.75rem] font-bold leading-tight text-[#102033]" id={titleId}>
-            {loginBranding.title}
-          </h2>
-        </div>
-
-        {form}
-
-        <div className="mt-4 text-center">
-          {registerPrompt}
-          <button
-            type="button"
-            className="mt-1.5 border-0 bg-transparent p-0 text-xs font-semibold text-slate-500 underline-offset-2 transition hover:text-[#003A8F] hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={isSubmitting}
-            onClick={() => router.push('/repository')}
-          >
-            Continue as Guest
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-              <div className="w-full max-w-[500px] rounded-[24px] border border-white/50 bg-white/[0.30] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),0_24px_48px_-12px_rgba(0,0,0,0.22)] backdrop-blur-[18px] sm:p-7">
-                <div className="mb-5 flex flex-col items-center text-center">
-                  <span className="mb-2 inline-flex items-center gap-2 rounded-xl border border-[#003A8F]/10 bg-white px-3 py-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[#003A8F] shadow-sm">
-                    <i className="fas fa-right-to-bracket" aria-hidden="true" />
-                    {loginBranding.pill}
-                  </span>
-                  <h2 className="m-0 text-2xl font-extrabold leading-tight tracking-[-0.02em] text-slate-800" id={titleId}>
-                    {loginBranding.title}
-                  </h2>
-                </div>
+    <div className="px-6 pb-6 pt-7 sm:px-8 sm:pb-7 sm:pt-8">
+      <AuthModalBrand />
+      <div className="mb-6 flex flex-col items-center text-center">
+        <h2 className="m-0 font-serif text-[1.75rem] font-bold leading-tight text-[#102033]" id={titleId}>
+          {loginBranding.title}
+        </h2>
+      </div>
 
-                {form}
+      {form}
 
-                <div className="mt-2 text-center">
-                  {registerPrompt}
-                </div>
-
-                <div className="mt-3 border-t border-white/70 pt-3 text-center text-xs font-bold text-slate-700">
-                  <i className="fas fa-shield-halved mr-2 text-slate-700" aria-hidden="true" />
-                  Secure access for ThesisTrack users only.
-                </div>
-              </div>
+      <div className="mt-4 text-center">
+        {registerPrompt}
+        <button
+          type="button"
+          className="mt-1.5 border-0 bg-transparent p-0 text-xs font-semibold text-slate-500 underline-offset-2 transition hover:text-[#003A8F] hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={isSubmitting}
+          onClick={() => router.push('/repository')}
+        >
+          Continue as Guest
+        </button>
+      </div>
+    </div>
   );
 }

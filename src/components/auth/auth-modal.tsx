@@ -3,11 +3,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { LoginForm } from './login-form';
+import { ForgotPasswordForm, ResetPasswordForm, VerifyResetCodeForm } from './password-reset-forms';
 import { RegisterForm } from './register-form';
 
 export { getAuthViewForHref, shouldOpenAuthModal } from './auth-ui';
 
-export type AuthView = 'login' | 'register';
+export type AuthView = 'login' | 'register' | 'forgot' | 'verify' | 'reset';
+
+const TITLE_IDS: Record<AuthView, string> = {
+  login: 'login-modal-title',
+  register: 'register-modal-title',
+  forgot: 'forgot-modal-title',
+  verify: 'verify-modal-title',
+  reset: 'reset-modal-title'
+};
+
+const CLOSE_LABELS: Record<AuthView, string> = {
+  login: 'Close sign in dialog',
+  register: 'Close registration dialog',
+  forgot: 'Close password reset dialog',
+  verify: 'Close password reset dialog',
+  reset: 'Close password reset dialog'
+};
 
 const focusableSelector =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -31,6 +48,9 @@ export function AuthModal({ view, onViewChange, onClose }: AuthModalProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [loginSubmitting, setLoginSubmitting] = useState(false);
   const [registerSubmitting, setRegisterSubmitting] = useState(false);
+  const [resetSubmitting, setResetSubmitting] = useState(false);
+  // Shown above the login form after a password reset completes inside the modal.
+  const [loginNotice, setLoginNotice] = useState<{ text: string; id: number } | undefined>(undefined);
   const [isConfirmingDiscard, setIsConfirmingDiscard] = useState(false);
   // The register form mounts the first time it's shown and then stays mounted (hidden) while the
   // modal is open, so switching to login and back keeps whatever the user typed.
@@ -44,7 +64,7 @@ export function AuthModal({ view, onViewChange, onClose }: AuthModalProps) {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  const isSubmitting = loginSubmitting || registerSubmitting;
+  const isSubmitting = loginSubmitting || registerSubmitting || resetSubmitting;
   isSubmittingRef.current = isSubmitting;
   isConfirmingRef.current = isConfirmingDiscard;
 
@@ -134,6 +154,7 @@ export function AuthModal({ view, onViewChange, onClose }: AuthModalProps) {
       setIsVisible(false);
       setIsConfirmingDiscard(false);
       setRegisterMounted(false);
+      setLoginNotice(undefined);
       registerDirtyRef.current = false;
       previouslyFocused?.focus?.();
     };
@@ -186,6 +207,7 @@ export function AuthModal({ view, onViewChange, onClose }: AuthModalProps) {
   }
 
   const isRegister = view === 'register';
+  const goToLogin = () => onViewChange('login');
 
   return createPortal(
     <div
@@ -206,7 +228,7 @@ export function AuthModal({ view, onViewChange, onClose }: AuthModalProps) {
         ].join(' ')}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={isRegister ? 'register-modal-title' : 'login-modal-title'}
+        aria-labelledby={TITLE_IDS[view]}
         aria-busy={isSubmitting}
         tabIndex={-1}
       >
@@ -215,26 +237,57 @@ export function AuthModal({ view, onViewChange, onClose }: AuthModalProps) {
           className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#003A8F]/40 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={requestClose}
           disabled={isSubmitting}
-          aria-label={isRegister ? 'Close registration dialog' : 'Close sign in dialog'}
+          aria-label={CLOSE_LABELS[view]}
         >
           <i className="fas fa-xmark text-lg" aria-hidden="true" />
         </button>
 
         <div data-auth-view="login" hidden={view !== 'login'}>
           <LoginForm
-            variant="modal"
             onSubmittingChange={setLoginSubmitting}
             onSwitchToRegister={() => onViewChange('register')}
+            onSwitchToForgotPassword={() => onViewChange('forgot')}
+            notice={loginNotice}
           />
         </div>
 
         {registerMounted ? (
           <div data-auth-view="register" hidden={view !== 'register'}>
             <RegisterForm
-              variant="modal"
               onSubmittingChange={setRegisterSubmitting}
               onDirtyChange={handleRegisterDirtyChange}
-              onSwitchToLogin={() => onViewChange('login')}
+              onSwitchToLogin={goToLogin}
+            />
+          </div>
+        ) : null}
+
+        {/* Password reset steps: only the active step is mounted (each reads its state from sessionStorage). */}
+        {view === 'forgot' ? (
+          <div data-auth-view="forgot">
+            <ForgotPasswordForm onSubmittingChange={setResetSubmitting} onBackToLogin={goToLogin} onCodeSent={() => onViewChange('verify')} />
+          </div>
+        ) : null}
+
+        {view === 'verify' ? (
+          <div data-auth-view="verify">
+            <VerifyResetCodeForm
+              onSubmittingChange={setResetSubmitting}
+              onBackToLogin={goToLogin}
+              onVerified={() => onViewChange('reset')}
+              onRequestNewCode={() => onViewChange('forgot')}
+            />
+          </div>
+        ) : null}
+
+        {view === 'reset' ? (
+          <div data-auth-view="reset">
+            <ResetPasswordForm
+              onSubmittingChange={setResetSubmitting}
+              onBackToLogin={goToLogin}
+              onComplete={(message) => {
+                setLoginNotice({ text: message, id: Date.now() });
+                onViewChange('login');
+              }}
             />
           </div>
         ) : null}
