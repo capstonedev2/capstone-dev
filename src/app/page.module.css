@@ -929,11 +929,12 @@
 
 .institutionIntro {
   margin: 0;
-  text-align: left;
+  text-align: center;
 }
 
 .institutionIntro p {
   max-width: 44rem;
+  text-wrap: balance;
   margin-right: auto;
   margin-left: auto;
 }
@@ -948,15 +949,166 @@
   z-index: 1;
 }
 
+/* USTP Vision & Mission: narrower Vision card (5) beside a wider Mission card (7), equal height. */
 .visionMissionGrid {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: stretch;
   max-width: 1180px;
   margin-inline: auto;
-  gap: 1.2rem;
+  gap: 1.5rem;
 }
 
-.institutionCard,
+.visionCard,
+.missionCard {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  padding: 2.25rem;
+}
+
+.visionCard {
+  border: 1px solid #d6e2f5;
+  background: #eaf1fb;
+}
+
+.missionCard {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgb(15 43 89 / 0.06);
+}
+
+.visionIcon,
+.missionIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.9rem;
+  font-size: 1.3rem;
+}
+
+.visionIcon {
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgb(15 43 89 / 0.08);
+  color: var(--primary-blue);
+}
+
+.missionIcon {
+  background: #fff4d6;
+  color: #9a6b00;
+}
+
+.visionLabel,
+.missionLabel {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.visionLabel {
+  margin-top: 1.4rem;
+  color: var(--primary-blue);
+}
+
+.missionLabel {
+  color: #9a6b00;
+}
+
+/* Grows to fill the card so the support box sits at the bottom and the card never looks empty. */
+.visionStatement {
+  flex: 1 0 auto;
+  margin: 0.9rem 0 0;
+  color: #102033;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(1.5rem, 2.3vw, 1.875rem);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.visionSupport {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 2rem;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 1.1rem 1.25rem;
+}
+
+.visionSupport strong {
+  color: #102033;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.visionSupport span {
+  color: #536982;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.missionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.missionTimeline {
+  display: grid;
+  gap: 1.75rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.missionTimeline li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: start;
+  gap: 1.1rem;
+}
+
+/* Connector: from this circle's centre down to the next circle's centre (item height + list gap),
+   drawn behind the circles. The last item has none, so the line ends at circle 3. */
+.missionTimeline li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 1.25rem;
+  left: calc(1.25rem - 1px);
+  width: 2px;
+  height: calc(100% + 1.75rem);
+  background: #f3e3b0;
+}
+
+.missionStep {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent-gold);
+  color: #102033;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+/* padding-top centres the first text line (1.65 x 16px) on the 40px circle. */
+.missionTimeline p {
+  margin: 0;
+  padding-top: 0.45rem;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
 .moduleCard,
 .aboutSystemCard,
 .aboutLearnCard,
@@ -967,85 +1119,6 @@
   box-shadow: var(--shadow-soft);
 }
 
-.institutionCard {
-  position: relative;
-  overflow: hidden;
-  min-height: 23rem;
-  border-color: rgb(204 219 239 / 0.95);
-  border-radius: 1rem;
-  background: rgb(255 255 255 / 0.94);
-  padding: 1.7rem;
-  transform-style: flat;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.institutionCard::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 0.35rem;
-  background: linear-gradient(90deg, var(--primary-blue), var(--hover-blue), var(--accent-gold));
-}
-
-.institutionCard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(120deg, transparent 0 36%, rgb(255 255 255 / 0.76) 48%, transparent 62% 100%);
-  opacity: 0;
-  transform: translateX(-125%);
-  pointer-events: none;
-}
-
-.institutionCard:hover {
-  border-color: color-mix(in srgb, var(--primary-blue) 20%, white);
-  box-shadow: 0 34px 78px rgb(15 43 89 / 0.13);
-  transform: translateY(-1px);
-}
-
-.institutionCard:hover::after {
-  animation: none;
-}
-
-.institutionVisionCard {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background:
-    radial-gradient(circle at 94% 12%, rgb(0 58 143 / 0.09), transparent 12rem),
-    rgb(255 255 255 / 0.95);
-}
-
-.institutionMissionCard {
-  background:
-    radial-gradient(circle at 88% 15%, rgb(246 190 0 / 0.12), transparent 13rem),
-    rgb(255 255 255 / 0.95);
-}
-
-.institutionCardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.institutionCardHeader > span {
-  display: inline-flex;
-  min-height: 1.9rem;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgb(211 224 242 / 0.9);
-  border-radius: 999px;
-  background: #f8fbff;
-  color: var(--primary-blue);
-  padding: 0.35rem 0.75rem;
-  font-size: 0.68rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.institutionIcon,
 .moduleIcon,
 .detailIcon {
   display: inline-flex;
@@ -1059,12 +1132,6 @@
   font-size: 1.55rem;
 }
 
-.institutionCard:nth-child(2) .institutionIcon {
-  background: linear-gradient(135deg, #fff2c7, #fffaf0);
-  color: var(--accent-gold);
-}
-
-.institutionCard h3,
 .moduleCard h3,
 .workflowStep h3,
 .detailCard h3 {
@@ -1075,118 +1142,10 @@
   letter-spacing: 0;
 }
 
-.institutionCard p,
 .detailCard,
 .teamCard p {
   color: var(--text-muted);
   line-height: 1.72;
-}
-
-.institutionCard p {
-  margin: 0.9rem 0 0;
-}
-
-.institutionVisionCard h3,
-.institutionMissionCard h3 {
-  margin-top: 1rem;
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: clamp(1.9rem, 3vw, 2.65rem);
-  line-height: 1.08;
-}
-
-.institutionVisionCard p {
-  max-width: 32rem;
-  color: #435b76;
-  font-size: 1rem;
-}
-
-.institutionVisionTop {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.institutionVisionTop h3,
-.institutionVisionTop p {
-  margin-top: 0;
-}
-
-.institutionVisionNote {
-  display: grid;
-  gap: 0.25rem;
-  margin-top: 2rem;
-  border-left: 4px solid var(--accent-gold);
-  background: linear-gradient(90deg, rgb(246 190 0 / 0.12), transparent);
-  padding: 0.9rem 1rem;
-}
-
-.institutionVisionNote strong,
-.institutionVisionNote span {
-  display: block;
-}
-
-.institutionVisionNote strong {
-  color: #102033;
-  font-size: 0.86rem;
-  font-weight: 900;
-}
-
-.institutionVisionNote span {
-  color: #536982;
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-.institutionMissionList {
-  display: grid;
-  gap: 0.75rem;
-  margin: 1.2rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.institutionMissionList li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 3.55rem;
-  border: 1px solid rgb(211 224 242 / 0.9);
-  border-radius: 0.7rem;
-  background: rgb(255 255 255 / 0.72);
-  color: #425872;
-  padding: 0.75rem;
-  font-size: 0.9rem;
-  font-weight: 800;
-  line-height: 1.45;
-  transition: transform 0.45s var(--motion-luxe), border-color 0.45s var(--motion-luxe), box-shadow 0.45s var(--motion-luxe);
-}
-
-.institutionMissionList li:hover {
-  border-color: color-mix(in srgb, var(--primary-blue) 20%, white);
-  box-shadow: 0 14px 30px rgb(15 43 89 / 0.08);
-  transform: translateX(5px);
-}
-
-.institutionMissionList li > span {
-  display: grid;
-  width: 2.15rem;
-  height: 2.15rem;
-  place-items: center;
-  border-radius: 0.58rem;
-  background: #eaf3ff;
-  color: var(--primary-blue);
-  font-size: 0.85rem;
-}
-
-.institutionMissionList li:nth-child(2) > span {
-  background: #fff5d8;
-  color: var(--accent-gold);
-}
-
-.institutionMissionList li:nth-child(3) > span {
-  background: color-mix(in srgb, var(--primary-blue) 12%, white);
-  color: var(--primary-blue);
 }
 
 .cleanList,
@@ -4334,8 +4293,9 @@
     margin-bottom: 1.5rem;
   }
 
-  .institutionCard {
-    min-height: auto;
+  .visionCard,
+  .missionCard {
+    padding: 1.6rem;
   }
 
   .moduleShowcaseHeader {
@@ -4409,7 +4369,8 @@
     font-size: 2.15rem;
   }
 
-  .institutionCard,
+  .visionCard,
+  .missionCard,
   .moduleCard,
   .aboutSystemCard,
   .aboutLearnCard,

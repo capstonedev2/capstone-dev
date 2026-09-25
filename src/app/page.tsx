@@ -123,18 +123,9 @@ const systemFlowItems = [
 ];
 
 const missionItems = [
-  {
-    icon: 'fas fa-briefcase',
-    text: 'Bring the world of work (industry) into the actual higher education and training of students.'
-  },
-  {
-    icon: 'fas fa-lightbulb',
-    text: 'Offer entrepreneurs the opportunity to maximize their business potentials through a gamut of services from product conceptualization to commercialization;'
-  },
-  {
-    icon: 'fas fa-shield-heart',
-    text: 'Contribute significantly to the National Development Goals of food security and safety; and energy sufficiency and security through technology solutions.'
-  }
+  'Bring the world of work (industry) into the actual higher education and training of students.',
+  'Offer entrepreneurs the opportunity to maximize their business potentials through a gamut of services from product conceptualization to commercialization;',
+  'Contribute significantly to the National Development Goals of food security and safety; and energy sufficiency and security through technology solutions.'
 ];
 
 
@@ -188,44 +179,36 @@ export default function Page() {
               </div>
 
               <div className={styles.visionMissionGrid}>
-                <article className={`${styles.institutionCard} ${styles.institutionVisionCard}`} data-reveal="fade-up">
-                  <div className={styles.institutionVisionTop}>
-                    <div className={styles.institutionCardHeader}>
-                      <div className={styles.institutionIcon} aria-hidden="true">
-                        <i className="fas fa-eye" />
-                      </div>
-                      <span>Vision</span>
-                    </div>
-                    <h3>USTP Vision</h3>
-                    <p>
-                      A nationally-recognized S&amp;T university providing the vital link
-                      between education and the economy.
-                    </p>
+                <article className={styles.visionCard} data-reveal="fade-up">
+                  <div className={styles.visionIcon} aria-hidden="true">
+                    <i className="fas fa-eye" />
                   </div>
-                  <div className={styles.institutionVisionNote}>
-                    <strong>Vital link</strong>
+                  <h3 className={styles.visionLabel}>Our Vision</h3>
+                  <p className={styles.visionStatement}>
+                    A nationally-recognized S&amp;T university providing the vital link
+                    between education and the economy.
+                  </p>
+                  <div className={styles.visionSupport}>
+                    <strong>How ThesisTrack supports this</strong>
                     <span>Education, research, and economic contribution working as one academic mission.</span>
                   </div>
                 </article>
 
-                <article className={`${styles.institutionCard} ${styles.institutionMissionCard}`} data-reveal="fade-up">
-                  <div className={styles.institutionCardHeader}>
-                    <div className={styles.institutionIcon} aria-hidden="true">
+                <article className={styles.missionCard} data-reveal="fade-up">
+                  <div className={styles.missionHeader}>
+                    <div className={styles.missionIcon} aria-hidden="true">
                       <i className="fas fa-bullseye" />
                     </div>
-                    <span>Mission</span>
+                    <h3 className={styles.missionLabel}>Our Mission</h3>
                   </div>
-                  <h3>USTP Mission</h3>
-                  <ul className={styles.institutionMissionList}>
-                    {missionItems.map(item => (
-                      <li key={item.text}>
-                        <span aria-hidden="true">
-                          <i className={item.icon} />
-                        </span>
-                        {item.text}
+                  <ol className={styles.missionTimeline}>
+                    {missionItems.map((text, index) => (
+                      <li key={text}>
+                        <span className={styles.missionStep} aria-hidden="true">{index + 1}</span>
+                        <p>{text}</p>
                       </li>
                     ))}
-                  </ul>
+                  </ol>
                 </article>
               </div>
             </div>
