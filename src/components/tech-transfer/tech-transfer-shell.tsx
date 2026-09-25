@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { getStoredUser, logout } from '@/lib/mock/auth';
+import { getStoredUser } from '@/lib/mock/auth';
 import {
   TECH_TRANSFER_NAV_ITEMS,
   type TechTransferNavKey
@@ -11,6 +10,7 @@ import {
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
+import { requestLogout } from '@/components/auth/logout-flow';
 
 const TECH_TRANSFER_PREFETCH_ROUTES = TECH_TRANSFER_NAV_ITEMS.map((item) => item.href);
 
@@ -29,7 +29,6 @@ export function TechTransferShell({
   notificationCount?: number;
   children: ReactNode;
 }) {
-  const router = useRouter();
   
   const prefetchRoute = useRoutePrefetch(TECH_TRANSFER_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('Mark Rivera');
@@ -169,10 +168,7 @@ export function TechTransferShell({
                     label: 'Sign Out',
                     icon: 'fa-right-from-bracket',
                     danger: true,
-                    onClick: () => {
-                      logout();
-                      router.push('/login');
-                    }
+                    onClick: requestLogout
                   }
                 ]}
               />

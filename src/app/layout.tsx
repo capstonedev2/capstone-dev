@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display, Plus_Jakarta_Sans, Poppins } from 'next/font/google';
+import { LogoutFlow } from '@/components/auth/logout-flow';
 import { SessionSuspensionWatcher } from '@/components/auth/session-suspension-watcher';
 import { BrandingProvider } from '@/components/branding/branding-provider';
 import { SYSTEM_LOGO_SRC } from '@/lib/branding';
@@ -64,6 +65,7 @@ export default function RootLayout({
         <BrandingProvider>
           {children}
           <SessionSuspensionWatcher />
+          <LogoutFlow />
         </BrandingProvider>
       </body>
     </html>

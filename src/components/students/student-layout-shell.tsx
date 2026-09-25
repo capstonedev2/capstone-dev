@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { logoutWithApi } from '@/lib/client-auth';
 import type { StudentDashboardData } from '@/lib/services/student-workspace';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { STUDENT_NAV_ITEMS, STUDENT_NAV_SECTIONS } from '@/components/students/student-navigation';
 import { PremiumAnimatedButton } from '@/components/ui/premium-animated-button';
 import { isBackupTitleNotification } from '@/lib/notification-tags';
+import { requestLogout } from '@/components/auth/logout-flow';
 
 const SIDEBAR_STORAGE_KEY = 'studentShellSidebarCollapsed';
 const STUDENT_THEME_STORAGE_KEY = 'studentWorkspaceTheme';
@@ -1116,7 +1116,6 @@ function LimitedStudentLockedFeature({
 
 export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
   const [workspaceAccess, setWorkspaceAccess] = useState<StudentWorkspaceAccess>(() => getInitialWorkspaceAccess(data));
@@ -1886,10 +1885,7 @@ export function StudentLayoutShell({ children, data }: StudentLayoutShellProps) 
                 <button
                   className="profile-dropdown-link is-danger"
                   type="button"
-                  onClick={async () => {
-                    await logoutWithApi();
-                    router.push('/login');
-                  }}
+                  onClick={requestLogout}
                 >
                   <i aria-hidden="true" className="fas fa-right-from-bracket" /> Sign Out
                 </button>

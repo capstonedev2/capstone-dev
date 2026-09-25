@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { getStoredUser, logout } from '@/lib/mock/auth';
+import { getStoredUser } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useBranding } from '@/components/branding/branding-provider';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
+import { requestLogout } from '@/components/auth/logout-flow';
 
 const SYSTEM_ADMIN_NAV_GROUPS = [
   {
@@ -134,9 +135,7 @@ export function SystemAdminShell({
   }, [activeNav, isBrandingPath]);
 
   const handleLogout = () => {
-    logout();
-    router.push('/login');
-    router.refresh();
+    requestLogout();
   };
 
   return (

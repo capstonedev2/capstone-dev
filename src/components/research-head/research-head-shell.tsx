@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { getStoredUser, logout } from '@/lib/mock/auth';
+import { getStoredUser } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
 import { useRoutePrefetch } from '@/components/shared/use-route-prefetch';
 import { useShellSidebar } from '@/components/shared/use-shell-sidebar';
+import { requestLogout } from '@/components/auth/logout-flow';
 
 const ADMIN_NAV_ITEMS = [
   { key: 'dashboard', href: '/research-head/dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
@@ -41,7 +41,6 @@ export function ResearchHeadShell({
   notificationCount = 4,
   actions
 }: ResearchHeadShellProps) {
-  const router = useRouter();
   
   const prefetchRoute = useRoutePrefetch(ADMIN_PREFETCH_ROUTES);
   const [displayName, setDisplayName] = useState('School Research Head');
@@ -84,9 +83,7 @@ export function ResearchHeadShell({
   }, [closeSidebar]);
 
   const handleLogout = () => {
-    logout();
-    router.push('/login');
-    router.refresh();
+    requestLogout();
   };
 
   const defaultActions = (

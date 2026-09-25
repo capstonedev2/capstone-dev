@@ -28,6 +28,11 @@ const AUTH_CHECK_TTL_MS = 60_000;
 // OTHER one is now "wrong" and bounce back and forth between routes.
 let lastVerifiedRole: { role: UserRole; checkedAt: number } | null = null;
 
+/** Forget the last server-confirmed role (call on logout, or Back could reopen a dashboard within the TTL). */
+export function resetAuthVerificationCache() {
+  lastVerifiedRole = null;
+}
+
 export function ProtectedRoute({ allowedRole, children }: ProtectedRouteProps) {
   const router = useRouter();
   const allowedRoleKey = Array.isArray(allowedRole) ? allowedRole.join('|') : allowedRole;
