@@ -5,6 +5,7 @@ import { getServerAuthenticatedUser } from '@/lib/auth';
 import { sendGroupAssignmentEmail } from '@/lib/mailer';
 import { getLatestDefenseOutcomeTag, getProjectProgressSummary } from '@/lib/milestone-checkpoint-tracking';
 import { withApiLogging } from '@/lib/api-logging';
+import { groupDepartmentWhere, resolveDepartmentScope } from '@/lib/department-scope';
 
 const DEFAULT_GROUP_LIMIT = 100;
 const MAX_GROUP_LIMIT = 200;
@@ -38,32 +39,6 @@ const groupListSelect = {
   finalRecommendation: true,
   allowMemberSubmission: true
 } as const;
-
-const departmentAliases: Record<string, string[]> = {
-  ict: ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  it: ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  bsit: ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  'information technology': ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  met: ['MET', 'BSMET', 'Mechanical Engineering Technology', 'Manufacturing Eng. Tech.'],
-  bsmet: ['MET', 'BSMET', 'Mechanical Engineering Technology', 'Manufacturing Eng. Tech.'],
-  tcm: ['TCM', 'BSTCM', 'Technology Communication Management'],
-  bstcm: ['TCM', 'BSTCM', 'Technology Communication Management'],
-  esm: ['ESM', 'BSESM', 'Environmental and Safety Management', 'Energy Systems & Mgmt.'],
-  bsesm: ['ESM', 'BSESM', 'Environmental and Safety Management', 'Energy Systems & Mgmt.'],
-  name: ['NAME', 'BSNAME', 'Naval Architecture and Marine Engineering'],
-  bsname: ['NAME', 'BSNAME', 'Naval Architecture and Marine Engineering']
-};
-
-function getDepartmentSearchTerms(value: string | null) {
-  const normalized = String(value || '').trim();
-
-  if (!normalized) {
-    return [];
-  }
-
-  const key = normalized.toLowerCase();
-  return Array.from(new Set([normalized, ...(departmentAliases[key] || [])]));
-}
 
 function parsePositiveInteger(value: string | null, fallback: number, max: number) {
   const parsed = Number(value);
@@ -146,59 +121,48 @@ async function handleGET(request: Request) {
     const skip = (page - 1) * limit;
 
     const select = fields === 'students' ? { students: true } : groupListSelect;
-    const isGlobalAdmin = ['ADMIN', 'SYSTEM_ADMIN', 'RESEARCH_HEAD', 'TECH_TRANSFER', 'LIBRARY'].includes(user.role);
-    
-    let groups;
-    if (userId) {
-      groups = await prisma.group.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        select
-      });
-    } else if (studentName) {
-      groups = await prisma.group.findMany({
-        where: {
-          students: {
-            has: studentName
-          }
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        select
-      });
-    } else {
-      // Enforce department boundary unless global admin
-      const userDeptClean = user.department ? user.department.replace(/\s+(Department|Office)$/i, '').trim() : null;
-      const department = isGlobalAdmin ? requestedDepartment : (userDeptClean || requestedDepartment);
-      
-      if (department) {
-        const departmentTerms = getDepartmentSearchTerms(department);
-        groups = await prisma.group.findMany({
-          where: {
-            OR: departmentTerms.map((term) => ({
-              department: {
-                contains: term,
-                mode: 'insensitive'
-              }
-            }))
-          },
-          orderBy: { createdAt: 'desc' },
-          skip,
-          take: limit,
-          select
-        });
-      } else {
-        groups = await prisma.group.findMany({
-          orderBy: { createdAt: 'desc' },
-          skip,
-          take: limit,
-          select
-        });
-      }
+    // The department boundary comes from the signed-in user, never from ?department=.
+    const scope = resolveDepartmentScope(user, requestedDepartment);
+    if (scope.deny) {
+      return NextResponse.json([]);
     }
+    const departmentWhere: Prisma.GroupWhereInput | null = scope.department ? groupDepartmentWhere(scope.department) : null;
+
+    // ?userId= and ?studentName= used to skip the department boundary entirely. Looking up your own
+    // groups (an adviser by their id, a student by their own name) stays unrestricted; any other
+    // lookup by a department-scoped role is limited to that role's department. The name match only
+    // counts for students: a staff account sharing a student's name must not reach that group.
+    const ownNames = new Set(
+      [user.name, user.displayName, [user.firstName, user.lastName].filter(Boolean).join(' ')].map(normalizeStudentName).filter(Boolean)
+    );
+    const isOwnLookup = userId
+      ? userId === user.id
+      : studentName
+        ? user.role === 'STUDENT' && ownNames.has(normalizeStudentName(studentName))
+        : false;
+    const lookupWhere: Prisma.GroupWhereInput | null = userId ? { userId } : studentName ? { students: { has: studentName } } : null;
+
+    let where: Prisma.GroupWhereInput | undefined;
+    if (lookupWhere) {
+      if (scope.global || isOwnLookup) {
+        where = lookupWhere;
+      } else if (departmentWhere) {
+        where = { AND: [lookupWhere, departmentWhere] };
+      } else {
+        // A department-scoped account with no department can't look up other people's groups.
+        return NextResponse.json([]);
+      }
+    } else {
+      where = departmentWhere ?? undefined;
+    }
+
+    const groups = await prisma.group.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+      select
+    });
 
     if (fields === 'students') {
       return NextResponse.json(groups);
@@ -253,8 +217,21 @@ async function handleGET(request: Request) {
   }
 }
 
+// Roles that open the Adviser portal (where groups are created), plus the roles that may already
+// edit any group through PUT.
+const GROUP_CREATOR_ROLES = new Set(['ADVISER', 'PANEL', 'PROGRAM_HEAD', 'RESEARCH_HEAD', 'ADMIN', 'SYSTEM_ADMIN']);
+
 async function handlePOST(request: Request) {
   try {
+    // This handler used to run with no sign-in check at all.
+    const authUser = await getServerAuthenticatedUser();
+    if (!authUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!GROUP_CREATOR_ROLES.has(authUser.role)) {
+      return NextResponse.json({ error: 'You do not have permission to create groups.' }, { status: 403 });
+    }
+
     const body = await request.json();
     const {
       userId,

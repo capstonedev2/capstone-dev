@@ -8,7 +8,8 @@ type ApiUserRole =
   | 'program_head'
   | 'partner'
   | 'tech_transfer'
-  | 'library';
+  | 'library'
+  | 'focal_person';
 
 type ApiUser = {
   id: string;
@@ -131,6 +132,8 @@ export function getRoleRedirectPath(role: ApiUserRole) {
       return '/program-head/dashboard';
     case 'tech_transfer':
       return '/tech-transfer/dashboard';
+    case 'focal_person':
+      return '/focal-person/dashboard';
     case 'student':
     default:
       return '/students/dashboard';

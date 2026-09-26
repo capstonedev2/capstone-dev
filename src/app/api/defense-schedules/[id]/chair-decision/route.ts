@@ -10,6 +10,7 @@ import {
   restartDefenseVoteForBackupTitle
 } from '@/lib/milestone-checkpoint-tracking';
 import { withApiLogging } from '@/lib/api-logging';
+import { notifyDepartmentFocalPersons } from '@/lib/focal-person/notify';
 
 export const runtime = 'nodejs';
 
@@ -302,6 +303,23 @@ async function handlePOST(request: Request, context: { params: Promise<{ id: str
         });
       }
     }
+
+    const groupCode = schedule.project.group?.code;
+    await notifyDepartmentFocalPersons(schedule.project.departmentId || schedule.project.group?.department, {
+      title: 'Panel Chair Decision',
+      message: `${groupCode ? `${groupCode}: ` : ''}${schedule.title} for "${schedule.project.title}": ${
+        decision === DefenseChairDecision.APPROVED
+          ? 'approved (overriding the panel vote)'
+          : decision === DefenseChairDecision.REDEFENSE
+            ? 'redefense required'
+            : decision === DefenseChairDecision.NEW_TITLE_APPROVED
+              ? 'moving to the backup title in the same session'
+              : 'new title required'
+      }.`,
+      type: decision === DefenseChairDecision.APPROVED ? 'success' : 'warning',
+      entityType: 'project',
+      entityId: schedule.projectId
+    });
 
     return successResponse({
       message:

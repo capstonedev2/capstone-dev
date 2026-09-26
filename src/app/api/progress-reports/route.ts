@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, normalizeText, successResponse } from '@/lib/utils';
 import { recordCheckpointSubmission } from '@/lib/milestone-checkpoint-tracking';
 import { withApiLogging } from '@/lib/api-logging';
+import { projectDepartmentWhere } from '@/lib/department-scope';
+import { notifyDepartmentFocalPersons } from '@/lib/focal-person/notify';
 
 export const runtime = 'nodejs';
 
@@ -105,13 +107,26 @@ async function handleGET(request: Request) {
       UserRole.RESEARCH_HEAD,
       UserRole.PROGRAM_HEAD,
       UserRole.SYSTEM_ADMIN,
-      UserRole.ADMIN
+      UserRole.ADMIN,
+      UserRole.FOCAL_PERSON
     ]);
     const { searchParams } = new URL(request.url);
     const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_LIMIT, MAX_LIMIT);
     const projectIdParam = searchParams.get('projectId');
 
     let projectId = projectIdParam;
+
+    // A Research Focal Person reads progress reports only for projects in their own department.
+    if (user.role === UserRole.FOCAL_PERSON && projectId) {
+      const inDepartment = await prisma.project.findFirst({
+        where: { id: projectId, ...projectDepartmentWhere(user.department) },
+        select: { id: true }
+      });
+
+      if (!inDepartment) {
+        throw new HttpError('You can only view progress reports for projects in your department.', 403);
+      }
+    }
 
     if (!projectId) {
       if (user.role !== UserRole.STUDENT) {
@@ -234,6 +249,14 @@ async function handlePOST(request: Request) {
       }
 
       return created;
+    });
+
+    await notifyDepartmentFocalPersons(project.departmentId || group.department || group.dept, {
+      title: 'Progress Report Submitted',
+      message: `${group.code} submitted a progress report (${percentageCompleted}% complete) for "${project.title}".`,
+      type: 'info',
+      entityType: 'project',
+      entityId: project.id
     });
 
     return successResponse({ report: toReportPayload(report) }, 201);

@@ -34,6 +34,8 @@ import {
   resolveMilestoneCheckpointForSubmission
 } from '@/lib/milestone-checkpoint-tracking';
 import { withApiLogging } from '@/lib/api-logging';
+import { projectDepartmentWhere } from '@/lib/department-scope';
+import { notifyDepartmentFocalPersons } from '@/lib/focal-person/notify';
 
 export const runtime = 'nodejs';
 
@@ -46,6 +48,9 @@ const DOCUMENT_VIEWER_ROLES = [
   UserRole.SYSTEM_ADMIN,
   UserRole.ADMIN
 ];
+
+/** GET only: a Research Focal Person can list documents (their department's) but never upload. */
+const DOCUMENT_LIST_ROLES = [...DOCUMENT_VIEWER_ROLES, UserRole.FOCAL_PERSON];
 
 const DEFAULT_DOCUMENT_FILE_LIMIT = 50;
 const MAX_DOCUMENT_FILE_LIMIT = 100;
@@ -167,7 +172,7 @@ async function createUploadNotifications({
 
 async function handleGET(request: Request) {
   try {
-    const user = await requireAuthenticatedUser(request, DOCUMENT_VIEWER_ROLES);
+    const user = await requireAuthenticatedUser(request, DOCUMENT_LIST_ROLES);
     const url = new URL(request.url);
     const bucketName = normalizeText(url.searchParams.get('bucketName'));
     const projectId = normalizeText(url.searchParams.get('projectId'));
@@ -217,13 +222,10 @@ async function handleGET(request: Request) {
       ...(user.role === UserRole.STUDENT ? { userId: user.id } : {}),
       ...(adviserPanelProjectWhere ? { project: adviserPanelProjectWhere } : {}),
       ...(user.role === UserRole.PROGRAM_HEAD && user.department
-        ? {
-            OR: [
-              { project: { departmentId: user.department } },
-              { project: { group: { department: user.department } } }
-            ]
-          }
-        : {})
+        ? { project: projectDepartmentWhere(user.department) }
+        : {}),
+      // Always scoped, even with no department on the account (then it matches nothing).
+      ...(user.role === UserRole.FOCAL_PERSON ? { project: projectDepartmentWhere(user.department) } : {})
     };
 
     const files = await prisma.uploadedFile.findMany({
@@ -524,6 +526,18 @@ async function handlePOST(request: Request) {
       uploaderId: user.id,
       project
     });
+
+    // A real research submission (not an achievement/activity record): let the department's focal
+    // person know.
+    if (uploadedFile.submission && project) {
+      await notifyDepartmentFocalPersons(project.departmentId || project.group?.department, {
+        title: 'New Research Submission',
+        message: `${documentCategory}: ${file.name} was submitted for review.`,
+        type: 'info',
+        entityType: 'uploaded_file',
+        entityId: uploadedFile.id
+      });
+    }
 
     return successResponse(
       {

@@ -1,0 +1,882 @@
+/*
+ * Department Research Focal Person module. Colors use the --sa-* theme tokens (from the shared
+ * AdminPage wrapper), which follow Theme & Branding and switch for the dark portal theme. Dialogs use
+ * the shared AdminDialog (system-admin/ui), which defines the same tokens itself.
+ */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Layout ---------- */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.departmentGrid,
+.split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 1.25rem;
+}
+
+@media (max-width: 1100px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .departmentGrid,
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2.5rem 1rem;
+  color: var(--sa-muted);
+  font-size: 0.9rem;
+}
+
+.spinner,
+.spinnerSmall {
+  display: inline-block;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-top-color: var(--color-primary);
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.spinnerSmall {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-color: rgb(255 255 255 / 0.35);
+  border-top-color: #fff;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .spinnerSmall {
+    animation: none;
+  }
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, var(--sa-border));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-success) 9%, var(--sa-surface));
+  padding: 0.7rem 0.9rem;
+  color: var(--sa-text);
+  font-size: 0.9rem;
+}
+
+.notice > i {
+  color: var(--sa-success-text);
+}
+
+.notice > span {
+  flex: 1;
+}
+
+.noticeClose {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sa-muted);
+  cursor: pointer;
+}
+
+.noticeClose:hover {
+  background: color-mix(in srgb, var(--sa-muted) 14%, transparent);
+  color: var(--sa-text);
+}
+
+/* ---------- Buttons ---------- */
+.primaryButton,
+.secondaryButton,
+.dangerButton,
+.dangerSolidButton {
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  padding: 0 1rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.primaryButton:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled),
+.dangerButton:hover:not(:disabled),
+.dangerSolidButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.dangerSolidButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible,
+.dangerSolidButton:focus-visible,
+.linkButton:focus-visible,
+.historyToggle:focus-visible,
+.tableScroll:focus-visible {
+  outline: 2px solid var(--sa-primary-text);
+  outline-offset: 2px;
+}
+
+.primaryButton {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  border-color: var(--color-primary-hover, var(--color-primary));
+  background: var(--color-primary-hover, var(--color-primary));
+}
+
+.secondaryButton {
+  border-color: var(--color-accent);
+  background: var(--sa-surface);
+  color: var(--sa-primary-text);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--sa-surface));
+}
+
+.dangerButton {
+  border-color: color-mix(in srgb, var(--color-error) 45%, var(--sa-border));
+  background: var(--sa-surface);
+  color: var(--sa-error-text);
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 8%, var(--sa-surface));
+}
+
+.dangerSolidButton {
+  border-color: var(--color-error);
+  background: var(--color-error);
+  color: #fff;
+}
+
+.linkButton {
+  border: 0;
+  border-radius: 0.3rem;
+  background: transparent;
+  padding: 0.2rem 0.35rem;
+  color: var(--sa-error-text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Department cards ---------- */
+.block {
+  display: grid;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--sa-border);
+  padding: 0.7rem 0 0.85rem;
+}
+
+.blockLabel {
+  color: var(--sa-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.person {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.avatar {
+  display: inline-flex;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--sa-surface));
+  color: var(--sa-primary-text);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.personBody {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.2rem;
+}
+
+.personName {
+  color: var(--sa-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.personMeta,
+.subtle {
+  display: block;
+  color: var(--sa-muted);
+  font-size: 0.8rem;
+}
+
+.termLine {
+  color: var(--sa-text);
+  font-size: 0.85rem;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.2rem;
+}
+
+.progressTrack {
+  display: block;
+  height: 0.4rem;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sa-border) 80%, var(--sa-surface));
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sa-primary-text);
+}
+
+.progressFillSuccess {
+  background: var(--sa-success-text);
+}
+
+.daysLeft {
+  color: var(--sa-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.daysLeftSoon {
+  color: var(--sa-accent-text);
+}
+
+.note {
+  margin: 0.3rem 0 0;
+  border-left: 2px solid color-mix(in srgb, var(--color-accent) 60%, var(--sa-border));
+  padding-left: 0.6rem;
+  color: var(--sa-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.emptyLine {
+  margin: 0;
+  color: var(--sa-error-text);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.plainList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plainList:has(> .upcomingRow) {
+  gap: 0.6rem;
+}
+
+.upcomingRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+
+.upcomingRow > i {
+  color: var(--sa-primary-text);
+}
+
+.upcomingText {
+  min-width: 0;
+  flex: 1;
+  color: var(--sa-text);
+}
+
+.cardFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-top: 0.85rem;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.historyToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  padding: 0.3rem 0.2rem;
+  color: var(--sa-primary-text);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.historyToggle:disabled {
+  color: var(--sa-muted);
+  cursor: default;
+}
+
+.historyToggle i {
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.history {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.6rem 0 0;
+  border-top: 1px solid var(--sa-border);
+  padding: 0.5rem 0 0;
+  list-style: none;
+}
+
+.historyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
+}
+
+.historyDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sa-muted) 60%, transparent);
+}
+
+.historyBody {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.1rem;
+}
+
+.historyName {
+  color: var(--sa-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.historyName .subtle {
+  display: inline;
+  font-weight: 500;
+}
+
+.endedLine {
+  color: var(--sa-error-text);
+  font-size: 0.78rem;
+}
+
+.dialogText {
+  margin: 0;
+  color: var(--sa-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* ---------- Forms ---------- */
+.form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.field > span,
+.field > legend {
+  padding: 0;
+  color: var(--sa-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.field em {
+  color: var(--sa-muted);
+  font-style: normal;
+  font-weight: 500;
+}
+
+.field select,
+.field input,
+.field textarea {
+  width: 100%;
+  min-height: 2.6rem;
+  border: 1px solid var(--sa-border);
+  border-radius: 0.65rem;
+  background: var(--sa-surface);
+  padding: 0.5rem 0.75rem;
+  color: var(--sa-text);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field select:focus,
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  outline: none;
+}
+
+.field small {
+  color: var(--sa-muted);
+  font-size: 0.75rem;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.segmented {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--sa-border);
+  border-radius: 0.65rem;
+}
+
+.segmented label {
+  position: relative;
+  display: flex;
+  min-height: 2.6rem;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.4rem;
+  color: var(--sa-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.segmented label + label {
+  border-left: 1px solid var(--sa-border);
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented label:focus-within {
+  outline: 2px solid var(--sa-primary-text);
+  outline-offset: -2px;
+}
+
+.segmentActive {
+  background: var(--color-primary);
+  color: #fff !important;
+}
+
+.hint {
+  display: flex;
+  gap: 0.45rem;
+  margin: -0.3rem 0 0;
+  color: var(--sa-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.formError,
+.formWarning {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.formError {
+  background: color-mix(in srgb, var(--color-error) 9%, var(--sa-surface));
+  color: var(--sa-error-text);
+}
+
+.formWarning {
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--sa-surface));
+  color: var(--sa-text);
+}
+
+.formError i,
+.formWarning i {
+  margin-top: 0.15rem;
+}
+
+/* ---------- Dashboard ---------- */
+.scopeLine {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--sa-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.scopeLine i {
+  color: var(--sa-primary-text);
+}
+
+.stageList {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0.3rem 0 0;
+  list-style: none;
+}
+
+.stageRow {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.45rem 0;
+}
+
+.stageHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--sa-text);
+  font-size: 0.87rem;
+  font-weight: 600;
+}
+
+.stageCount {
+  color: var(--sa-text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.defenseRow,
+.delayedRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--sa-border);
+  padding: 0.75rem 0;
+}
+
+.defenseRow:last-child,
+.delayedRow:last-child {
+  border-bottom: 0;
+}
+
+.dateTile {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--color-accent) 16%, var(--sa-surface));
+  color: var(--sa-accent-text);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.dateTile strong {
+  font-size: 1.1rem;
+}
+
+.defenseBody {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.15rem;
+}
+
+@media (max-width: 600px) {
+  .delayedRow,
+  .defenseRow {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- Reports ---------- */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  padding: 0.4rem 0 0.9rem;
+}
+
+.summaryChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+  padding: 0;
+  list-style: none;
+}
+
+.summaryChips li {
+  border: 1px solid var(--sa-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--sa-surface));
+  padding: 0.3rem 0.75rem;
+  color: var(--sa-muted);
+  font-size: 0.8rem;
+}
+
+.summaryChips strong {
+  color: var(--sa-text);
+}
+
+.chipAlert {
+  border-color: color-mix(in srgb, var(--color-error) 35%, var(--sa-border)) !important;
+}
+
+.chipAlert strong {
+  color: var(--sa-error-text);
+}
+
+.tableScroll {
+  overflow-x: auto;
+  border: 1px solid var(--sa-border);
+  border-radius: 0.75rem;
+}
+
+.table {
+  width: 100%;
+  min-width: 62rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+}
+
+/* Scoped under .tableScroll to beat the portal's global table rules (uppercase th, zebra rows). */
+.tableScroll .table th,
+.tableScroll .table td {
+  border-bottom: 1px solid var(--sa-border);
+  background: var(--sa-surface);
+  padding: 0.6rem 0.75rem;
+  color: var(--sa-text);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+.tableScroll .table thead th {
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--sa-surface));
+  color: var(--sa-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tableScroll .table tbody th {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tableScroll .table tbody tr:last-child th,
+.tableScroll .table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tableScroll .table tbody tr:hover th,
+.tableScroll .table tbody tr:hover td {
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--sa-surface));
+}
+
+.cellTitle {
+  display: block;
+  min-width: 13rem;
+  color: var(--sa-text);
+  font-weight: 700;
+}
+
+/* ---------- Focal workspace ---------- */
+.noAccess {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+/* ---------- Portal banner (Adviser / Program Head) ---------- */
+
+/*
+ * Dark portal theme: the shell forces h1–h4/strong to near-white and makes p/span/small/label inherit
+ * (student-workspace.css ~19274–19297). Re-apply muted/semantic colors with a more specific selector.
+ */
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .blockLabel,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .personMeta,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .subtle,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .daysLeft,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .note,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .hint,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .scopeLine,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .field small { color: var(--sa-muted); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .daysLeftSoon,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .emptyLine,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .endedLine,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .chipAlert strong { color: var(--sa-error-text); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .personName,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .historyName,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .cellTitle,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .historyToggle,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .avatar { color: var(--sa-primary-text); }
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.departmentGridSingle {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Program Head previewing the focal person workspace. */
+.previewNotice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  border: 1px dashed color-mix(in srgb, var(--color-accent) 60%, var(--sa-border));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-accent) 9%, var(--sa-surface));
+  padding: 0.7rem 0.9rem;
+  color: var(--sa-text);
+  font-size: 0.9rem;
+}
+
+.previewNotice > i {
+  color: var(--sa-accent-text);
+}
+
+.previewNotice > span {
+  min-width: 0;
+  flex: 1;
+}
+
+.previewNotice .linkButton {
+  color: var(--sa-primary-text);
+}

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { HttpError, handleApiError, parseJsonBody, successResponse } from '@/lib/utils';
 import { applyDefensePassOutcome, recordDefenseVoteOutcome } from '@/lib/milestone-checkpoint-tracking';
 import { withApiLogging } from '@/lib/api-logging';
+import { notifyDepartmentFocalPersons } from '@/lib/focal-person/notify';
 
 export const runtime = 'nodejs';
 
@@ -21,7 +22,7 @@ async function finalizeDefenseSchedule(
   evaluations: Array<{ recommendation: string }>,
   notifyUserIds: string[],
   groupId: string | null
-) {
+): Promise<'passed' | 'not_passed'> {
   await prisma.defenseSchedule.update({
     where: { id: scheduleId },
     data: { status: DefenseStatus.COMPLETED }
@@ -48,6 +49,7 @@ async function finalizeDefenseSchedule(
       groupId,
       notifyUserIds
     });
+    return 'passed';
   } else {
     await prisma.project.update({
       where: { id: projectId },
@@ -89,6 +91,7 @@ async function finalizeDefenseSchedule(
         }))
       });
     }
+    return 'not_passed';
   }
 }
 
@@ -159,7 +162,7 @@ async function handlePOST(request: Request, context: { params: Promise<{ id: str
       const notifyUserIds = Array.from(
         new Set([schedule.project.ownerId, schedule.project.adviserId].filter((id): id is string => Boolean(id)))
       );
-      await finalizeDefenseSchedule(
+      const outcome = await finalizeDefenseSchedule(
         schedule.id,
         schedule.projectId,
         schedule.project.title,
@@ -168,6 +171,17 @@ async function handlePOST(request: Request, context: { params: Promise<{ id: str
         notifyUserIds,
         schedule.project.group?.id ?? null
       );
+
+      const groupCode = schedule.project.group?.code;
+      await notifyDepartmentFocalPersons(schedule.project.departmentId || schedule.project.group?.department, {
+        title: outcome === 'passed' ? 'Defense Passed' : 'Defense Not Passed',
+        message: `${groupCode ? `${groupCode}: ` : ''}"${schedule.project.title}" ${
+          outcome === 'passed' ? 'passed' : "did not pass, awaiting the panel chair's decision on"
+        } its ${schedule.title}.`,
+        type: outcome === 'passed' ? 'success' : 'warning',
+        entityType: 'project',
+        entityId: schedule.projectId
+      });
     }
 
     return successResponse({

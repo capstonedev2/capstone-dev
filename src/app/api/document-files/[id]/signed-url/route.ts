@@ -14,7 +14,9 @@ const DOCUMENT_VIEWER_ROLES = [
   UserRole.RESEARCH_HEAD,
   UserRole.PROGRAM_HEAD,
   UserRole.SYSTEM_ADMIN,
-  UserRole.ADMIN
+  UserRole.ADMIN,
+  // Read-only; getAuthorizedDocumentFile → canAccessDocument limits it to their own department.
+  UserRole.FOCAL_PERSON
 ];
 
 async function handlePOST(

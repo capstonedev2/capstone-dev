@@ -19,7 +19,8 @@ export const UserRole = {
   PROGRAM_HEAD: 'PROGRAM_HEAD',
   PARTNER: 'PARTNER',
   TECH_TRANSFER: 'TECH_TRANSFER',
-  LIBRARY: 'LIBRARY'
+  LIBRARY: 'LIBRARY',
+  FOCAL_PERSON: 'FOCAL_PERSON'
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]

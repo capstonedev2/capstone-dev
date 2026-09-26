@@ -1,11 +1,28 @@
 import { NextResponse } from 'next/server';
+import { GroupMemberRole, NotificationStatus, UserRole, type Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
+import { requireAuthenticatedUser } from '@/lib/auth';
+import { HttpError } from '@/lib/utils';
 import { withApiLogging } from '@/lib/api-logging';
+
+/*
+ * Notifications API. Every method requires a signed-in user, and every read or update is limited to
+ * that user's OWN notifications: the owner always comes from the session, never from a userId in
+ * the query or body. (This route used to run with no sign-in check at all, and POST created any
+ * missing user as a "Demo Account".)
+ *
+ * Creating notifications for other people is normally done server-side by the route that performs
+ * the action (uploads, reviews, schedules, …). Through this endpoint a client may only:
+ * - ask their group leader for upload permission (a student, for their own active group), or
+ * - as a System Administrator, notify existing users (single or batch).
+ */
 
 const DEFAULT_NOTIFICATION_LIMIT = 50;
 const MAX_NOTIFICATION_LIMIT = 100;
+const MAX_BATCH_SIZE = 200;
+const UPLOAD_PERMISSION_REQUEST_TITLE = 'Upload Permission Request';
 
-type BatchNotificationInput = {
+type NotificationInput = {
   userId: string;
   title: string;
   message: string;
@@ -13,6 +30,8 @@ type BatchNotificationInput = {
   entityType: string | null;
   entityId: string | null;
 };
+
+type AuthUser = Awaited<ReturnType<typeof requireAuthenticatedUser>>;
 
 function parsePositiveInteger(value: string | null, fallback: number, max: number) {
   const parsed = Number(value);
@@ -24,122 +43,141 @@ function parsePositiveInteger(value: string | null, fallback: number, max: numbe
   return Math.min(max, Math.floor(parsed));
 }
 
+function text(value: unknown) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function toNotificationInput(item: any): NotificationInput {
+  return {
+    userId: text(item?.userId),
+    title: text(item?.title),
+    message: text(item?.message),
+    type: text(item?.type) || 'info',
+    entityType: text(item?.entityType) || null,
+    entityId: text(item?.entityId) || null
+  };
+}
+
+/** Same `{ error }` shape the portals already read; 401/403 for auth problems. */
+function errorJson(error: unknown, fallback: string, logLabel: string) {
+  if (error instanceof HttpError) {
+    return NextResponse.json({ error: error.message }, { status: error.status });
+  }
+  console.error(logLabel, error);
+  return NextResponse.json({ error: fallback }, { status: 500 });
+}
+
+function personName(user: Pick<AuthUser, 'name' | 'displayName' | 'firstName' | 'lastName'>) {
+  return user.displayName || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.name || 'A group member';
+}
+
+/** System Administrator: notify existing users only (no user is ever created here). */
+async function createAdminNotifications(inputs: NotificationInput[]) {
+  const invalid = inputs.find((item) => !item.userId || !item.title || !item.message);
+  if (invalid) {
+    throw new HttpError('Missing required notification fields', 400);
+  }
+
+  const userIds = Array.from(new Set(inputs.map((item) => item.userId)));
+  const existing = await prisma.user.count({ where: { id: { in: userIds } } });
+  if (existing !== userIds.length) {
+    throw new HttpError('One or more recipients do not exist.', 400);
+  }
+
+  return inputs;
+}
+
+/**
+ * A student asks their group leader for permission to upload title files. The server checks that
+ * the sender and the leader are active members of the same group and writes the text itself.
+ */
+async function buildUploadPermissionRequest(user: AuthUser, input: NotificationInput): Promise<NotificationInput> {
+  if (user.role !== UserRole.STUDENT || input.title !== UPLOAD_PERMISSION_REQUEST_TITLE || !input.entityId || !input.userId) {
+    throw new HttpError('You do not have permission to create this notification.', 403);
+  }
+
+  if (input.userId === user.id) {
+    throw new HttpError('You cannot send this request to yourself.', 400);
+  }
+
+  const [senderMembership, leaderMembership] = await Promise.all([
+    prisma.groupMember.findFirst({ where: { groupId: input.entityId, userId: user.id, isActive: true }, select: { id: true } }),
+    prisma.groupMember.findFirst({
+      where: { groupId: input.entityId, userId: input.userId, isActive: true, role: GroupMemberRole.LEADER },
+      select: { id: true }
+    })
+  ]);
+
+  if (!senderMembership || !leaderMembership) {
+    throw new HttpError('You can only send this request to the leader of your own group.', 403);
+  }
+
+  return {
+    userId: input.userId,
+    title: UPLOAD_PERMISSION_REQUEST_TITLE,
+    message: `${personName(user)} is requesting permission to upload title proposal files.`,
+    type: 'info',
+    entityType: 'group',
+    entityId: input.entityId
+  };
+}
+
 async function handlePOST(request: Request) {
   try {
-    // We bypass strict getAuthenticatedUser() here to allow the mock/demo 
-    // student accounts to successfully trigger notification requests.
+    const user = await requireAuthenticatedUser(request);
+    const data = await request.json().catch(() => null);
+    const batch = Array.isArray(data?.notifications) ? data.notifications : null;
 
-    const data = await request.json();
-    const batchNotifications = Array.isArray(data?.notifications) ? data.notifications : null;
-
-    if (batchNotifications) {
-      const notifications: BatchNotificationInput[] = batchNotifications
-        .map((item: any): BatchNotificationInput => ({
-          userId: typeof item?.userId === 'string' ? item.userId.trim() : '',
-          title: typeof item?.title === 'string' ? item.title.trim() : '',
-          message: typeof item?.message === 'string' ? item.message.trim() : '',
-          type: typeof item?.type === 'string' ? item.type : 'info',
-          entityType: typeof item?.entityType === 'string' ? item.entityType : null,
-          entityId: typeof item?.entityId === 'string' ? item.entityId : null
-        }))
-        .filter((item: BatchNotificationInput) => item.userId && item.title && item.message);
-
-      if (!notifications.length) {
-        return NextResponse.json({ error: 'Missing required notification fields' }, { status: 400 });
+    if (batch) {
+      if (user.role !== UserRole.SYSTEM_ADMIN) {
+        throw new HttpError('Only System Administrators can send notifications in bulk.', 403);
+      }
+      if (!batch.length || batch.length > MAX_BATCH_SIZE) {
+        throw new HttpError(`Send between 1 and ${MAX_BATCH_SIZE} notifications at a time.`, 400);
       }
 
-      const userIds = Array.from(new Set<string>(notifications.map((item) => item.userId)));
-      const existingUsers = await prisma.user.findMany({
-        where: { id: { in: userIds } },
-        select: { id: true }
-      });
-      const existingUserIds = new Set(existingUsers.map((user) => user.id));
-      const missingUsers = userIds.filter((userId) => !existingUserIds.has(userId));
-
-      if (missingUsers.length) {
-        await prisma.user.createMany({
-          data: missingUsers.map((userId) => ({
-            id: userId,
-            email: `${userId}@demo.local`,
-            passwordHash: 'mock',
-            name: 'Demo Account'
-          })),
-          skipDuplicates: true
-        });
-      }
-
+      const inputs = await createAdminNotifications(batch.map(toNotificationInput));
       const created = await prisma.notification.createMany({
-        data: notifications.map((item: any) => ({
-          userId: item.userId,
-          title: item.title,
-          message: item.message,
-          type: item.type,
-          status: 'UNREAD',
-          entityType: item.entityType,
-          entityId: item.entityId
-        }))
+        data: inputs.map((item) => ({ ...item, status: NotificationStatus.UNREAD }))
       });
 
       return NextResponse.json({ success: true, count: created.count });
     }
 
-    const { userId, title, message, type, entityType, entityId } = data;
+    const input = toNotificationInput(data);
+    const [notification] =
+      user.role === UserRole.SYSTEM_ADMIN ? await createAdminNotifications([input]) : [await buildUploadPermissionRequest(user, input)];
 
-    if (!userId || !title || !message) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-
-    let targetUser = await prisma.user.findUnique({
-      where: { id: userId }
+    const created = await prisma.notification.create({
+      data: { ...notification, status: NotificationStatus.UNREAD }
     });
 
-    if (!targetUser) {
-      targetUser = await prisma.user.create({
-        data: {
-          id: userId,
-          email: `${userId}@demo.local`,
-          passwordHash: 'mock',
-          name: 'Demo Account',
-        }
-      });
-    }
-
-    const notification = await prisma.notification.create({
-      data: {
-        userId,
-        title,
-        message,
-        type: type || 'info',
-        status: 'UNREAD',
-        entityType: entityType || null,
-        entityId: entityId || null,
-      }
-    });
-
-    return NextResponse.json(notification);
-  } catch (error: any) {
-    console.error('[NOTIF POST] ❌ Failed to create notification:', error);
-    return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
+    return NextResponse.json(created);
+  } catch (error) {
+    return errorJson(error, 'Failed to create notification', '[NOTIF POST] Failed to create notification:');
   }
 }
 
 async function handleGET(request: Request) {
   try {
+    const user = await requireAuthenticatedUser(request);
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const requestedUserId = searchParams.get('userId');
+
+    // Kept for the portals that still send their own id; anyone else's id is refused.
+    if (requestedUserId && requestedUserId !== user.id) {
+      throw new HttpError('You can only view your own notifications.', 403);
+    }
+
     const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_NOTIFICATION_LIMIT, MAX_NOTIFICATION_LIMIT);
     const status = searchParams.get('status')?.trim().toUpperCase();
     const entityType = searchParams.get('entityType')?.trim();
     const entityId = searchParams.get('entityId')?.trim();
     const title = searchParams.get('title')?.trim();
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
-    }
-
-    const where: any = {
-      userId,
-      ...(status && ['UNREAD', 'READ', 'ARCHIVED'].includes(status) ? { status } : {}),
+    const where: Prisma.NotificationWhereInput = {
+      userId: user.id,
+      ...(status && status in NotificationStatus ? { status: status as NotificationStatus } : {}),
       ...(entityType ? { entityType } : {}),
       ...(entityId ? { entityId } : {}),
       ...(title ? { title } : {})
@@ -164,28 +202,27 @@ async function handleGET(request: Request) {
     });
 
     return NextResponse.json(notifications);
-  } catch (error: any) {
-    console.error('Failed to fetch notifications:', error);
-    return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
+  } catch (error) {
+    return errorJson(error, 'Failed to fetch notifications', 'Failed to fetch notifications:');
   }
 }
 
 async function handlePATCH(request: Request) {
   try {
-    const body = await request.json();
-    const { notificationId, notificationIds, userId, action } = body;
+    const user = await requireAuthenticatedUser(request);
+    const body = await request.json().catch(() => ({}));
+    const { notificationId, notificationIds, userId, action } = body ?? {};
+    const readData = { status: NotificationStatus.READ, readAt: new Date() };
 
     if (action === 'read-all') {
-      if (typeof userId !== 'string' || !userId.trim()) {
-        return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+      // The inbox is always the caller's own; a different userId in the body is refused.
+      if (typeof userId === 'string' && userId.trim() && userId.trim() !== user.id) {
+        throw new HttpError('You can only update your own notifications.', 403);
       }
 
       const updated = await prisma.notification.updateMany({
-        where: { userId, status: 'UNREAD' },
-        data: {
-          status: 'READ',
-          readAt: new Date()
-        }
+        where: { userId: user.id, status: NotificationStatus.UNREAD },
+        data: readData
       });
 
       return NextResponse.json({ success: true, count: updated.count });
@@ -200,12 +237,10 @@ async function handlePATCH(request: Request) {
         return NextResponse.json({ error: 'Batch updates only support read action' }, { status: 400 });
       }
 
+      // Ids that aren't the caller's are simply not updated.
       const updated = await prisma.notification.updateMany({
-        where: { id: { in: Array.from(new Set(ids)) } },
-        data: {
-          status: 'READ',
-          readAt: new Date()
-        }
+        where: { id: { in: Array.from(new Set(ids)) }, userId: user.id },
+        data: readData
       });
 
       return NextResponse.json({ success: true, count: updated.count });
@@ -215,67 +250,53 @@ async function handlePATCH(request: Request) {
       return NextResponse.json({ error: 'Missing notificationId' }, { status: 400 });
     }
 
-    const notification = await prisma.notification.findUnique({
-      where: { id: notificationId }
+    // Someone else's notification answers "not found", same as a missing one.
+    const notification = await prisma.notification.findFirst({
+      where: { id: notificationId, userId: user.id }
     });
 
     if (!notification) {
       return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
     }
 
-    // Split entityId into groupId and memberId if it is a composite ID
+    // Permission requests carry "groupId:memberId". Accepting one tells that member; it's only
+    // honored when the member really is active in that group (no user is ever created here).
     let groupId = notification.entityId;
-    let memberId = null;
-    
+    let memberId: string | null = null;
+
     if (notification.entityId && notification.entityId.includes(':')) {
       [groupId, memberId] = notification.entityId.split(':');
     }
 
-    // If action is "accept" and this is a permission request, grant permission to the specific member
-    if (action === 'accept' && notification.entityType === 'group' && memberId) {
-      // Auto-create member user if missing, just in case (same as POST)
-      const existingMember = await prisma.user.findUnique({ where: { id: memberId } });
-      if (!existingMember) {
-        await prisma.user.create({
+    if (action === 'accept' && notification.entityType === 'group' && groupId && memberId) {
+      const membership = await prisma.groupMember.findFirst({
+        where: { groupId, userId: memberId, isActive: true },
+        select: { id: true }
+      });
+
+      if (membership) {
+        await prisma.notification.create({
           data: {
-            id: memberId,
-            email: `${memberId}@demo.local`,
-            passwordHash: 'mock',
-            name: 'Demo Member',
+            userId: memberId,
+            title: 'Upload Permission Granted',
+            message: 'Your leader has approved your request to upload files.',
+            type: 'success',
+            status: NotificationStatus.UNREAD,
+            entityType: 'permission',
+            entityId: groupId
           }
         });
       }
-
-      await prisma.notification.create({
-        data: {
-          userId: memberId,
-          title: 'Upload Permission Granted',
-          message: 'Your leader has approved your request to upload files.',
-          type: 'success',
-          status: 'UNREAD',
-          entityType: 'permission',
-          entityId: groupId,
-        }
-      });
     }
 
-    // If action is "reject", we can optionally notify them or just silently reject
-    if (action === 'reject' && notification.entityType === 'group' && memberId) {
-    }
-
-    // Mark the notification as read
     const updated = await prisma.notification.update({
-      where: { id: notificationId },
-      data: { 
-        status: 'READ',
-        readAt: new Date()
-      }
+      where: { id: notification.id },
+      data: readData
     });
 
     return NextResponse.json(updated);
-  } catch (error: any) {
-    console.error('[NOTIF PATCH] Failed:', error);
-    return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 });
+  } catch (error) {
+    return errorJson(error, 'Failed to update notification', '[NOTIF PATCH] Failed:');
   }
 }
 

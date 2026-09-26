@@ -69,6 +69,8 @@ function getRoleRedirectPath(role: ReturnType<typeof toPublicUser>['role']) {
       return '/program-head/dashboard';
     case 'tech_transfer':
       return '/tech-transfer/dashboard';
+    case 'focal_person':
+      return '/focal-person/dashboard';
     case 'student':
     default:
       return '/students/dashboard';

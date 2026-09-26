@@ -23,6 +23,7 @@ import {
 } from '@/lib/milestone-checkpoint-tracking';
 import { findSimilarTitles, type SimilarTitleMatch } from '@/lib/title-similarity';
 import { withApiLogging } from '@/lib/api-logging';
+import { notifyDepartmentFocalPersons } from '@/lib/focal-person/notify';
 
 export const runtime = 'nodejs';
 
@@ -937,6 +938,14 @@ async function handlePOST(request: Request) {
     const titlePayload = toTitlePayload(project);
     await enrichWithSimilarity([titlePayload], [{ id: project.id, title: project.title }]);
 
+    await notifyDepartmentFocalPersons(group.department || group.dept, {
+      title: 'Title Submitted',
+      message: `${group.code} submitted the title "${project.title}" for adviser review.`,
+      type: 'info',
+      entityType: 'project',
+      entityId: project.id
+    });
+
     return successResponse({ title: titlePayload }, 201);
   } catch (error) {
     return handleApiError(error);
@@ -1176,6 +1185,14 @@ async function handlePATCH(request: Request) {
     }, {
       maxWait: 15000,
       timeout: 60000
+    });
+
+    await notifyDepartmentFocalPersons(updatedProject.departmentId || updatedProject.group?.department, {
+      title: 'Title Decision Recorded',
+      message: `${updatedProject.group?.code ? `${updatedProject.group.code}: ` : ''}"${updatedProject.title}" was ${projectStatusToTitleStatus[nextStatus]} by the adviser.`,
+      type: nextStatus === ProjectStatus.APPROVED ? 'success' : nextStatus === ProjectStatus.NEEDS_REVISION ? 'warning' : 'info',
+      entityType: 'project',
+      entityId: updatedProject.id
     });
 
     return successResponse({ title: toTitlePayload(updatedProject) });

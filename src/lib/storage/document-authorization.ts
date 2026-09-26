@@ -2,6 +2,7 @@ import { ProjectStatus, UserRole, type Project, type UploadedFile } from '@/gene
 import { prisma } from '@/lib/prisma';
 import { HttpError } from '@/lib/utils';
 import { type DocumentStorageBucket } from '@/lib/storage/upload-config';
+import { isSameDepartment } from '@/lib/department-scope';
 
 type AuthUser = {
   id: string;
@@ -29,23 +30,18 @@ type UploadedFileAccessRecord = Pick<
   project: ProjectAccessRecord | null;
 };
 
-function normalizeDepartment(value?: string | null) {
-  return String(value || '').trim().toUpperCase();
-}
-
 function isAdminRole(user: AuthUser) {
   return user.role === UserRole.SYSTEM_ADMIN || user.role === UserRole.ADMIN;
 }
 
+/** The project belongs to the user's department (alias-aware: "ICT" and "BSIT" are one department). */
 function isProgramDepartmentMatch(user: AuthUser, project: ProjectAccessRecord | null) {
-  const userDepartment = normalizeDepartment(user.department);
-
-  if (!userDepartment || !project) {
+  if (!user.department || !project) {
     return false;
   }
 
-  return normalizeDepartment(project.departmentId) === userDepartment
-    || normalizeDepartment(project.group?.department) === userDepartment;
+  return isSameDepartment(user.department, project.departmentId)
+    || isSameDepartment(user.department, project.group?.department);
 }
 
 function isProjectParticipant(user: AuthUser, project: ProjectAccessRecord | null) {
@@ -322,6 +318,10 @@ export async function assertCanUploadDocument({
     return;
   }
 
+  if (user.role === UserRole.FOCAL_PERSON) {
+    throw new HttpError('Research Focal Persons have read-only access to documents.', 403);
+  }
+
   const project = await getProjectAccessRecord(projectId);
 
   if (bucketName === 'thesis-documents') {
@@ -383,6 +383,13 @@ export function canAccessDocument(user: AuthUser, file: UploadedFileAccessRecord
     // otherwise they're locked out of documents for a project they're literally
     // the adviser of.
     return isProjectParticipant(user, file.project) || isProgramDepartmentMatch(user, file.project);
+  }
+
+  if (user.role === UserRole.FOCAL_PERSON) {
+    // Read-only monitoring: any document of a project in their own department. Files with no
+    // project can't be tied to a department, so they stay hidden. canDeleteDocument and
+    // assertCanUploadDocument give this role nothing.
+    return isProgramDepartmentMatch(user, file.project);
   }
 
   return false;

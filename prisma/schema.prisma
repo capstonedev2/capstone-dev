@@ -18,6 +18,7 @@ enum UserRole {
   PARTNER       @map("partner")
   TECH_TRANSFER @map("tech_transfer")
   LIBRARY       @map("library")
+  FOCAL_PERSON  @map("focal_person")
 }
 
 enum BrandingAssetType {

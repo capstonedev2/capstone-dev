@@ -1,3 +1,5 @@
+import { networkInterfaces } from 'node:os';
+
 const legacyRoutes = [
   ['/', '/index.html'],
   ['/login', '/login.html'],
@@ -76,10 +78,19 @@ const legacyRoutes = [
   ['/tech-transfer/reports', '/tech-transfer/reports.html']
 ];
 
+// This PC's current LAN IPv4 addresses (e.g. 192.168.1.21). Detected at startup so opening the dev
+// server from a phone/laptop on the same network keeps working when the router assigns a new address.
+const lanAddresses = Object.values(networkInterfaces())
+  .flat()
+  .filter((entry) => entry && entry.family === 'IPv4' && !entry.internal)
+  .map((entry) => entry.address);
+const devPort = process.env.PORT || '3000';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  allowedDevOrigins: ['localhost', '192.168.1.37', '192.168.1.19'],
+  // Hostnames only (no port) — a "host:port" entry here is ignored and the request stays blocked.
+  allowedDevOrigins: ['localhost', ...lanAddresses],
   // The Research Head portal moved from /admin to /research-head; keep old bookmarks and any
   // /admin links already stored (e.g. in notifications) working.
   async redirects() {
@@ -90,7 +101,8 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', '192.168.1.37:3000', '192.168.1.19:3000']
+      // Server Actions compare the full host, so these include the port.
+      allowedOrigins: [`localhost:${devPort}`, ...lanAddresses.map((address) => `${address}:${devPort}`)]
     }
   }
 };

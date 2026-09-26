@@ -227,7 +227,7 @@ export function LoginForm({ onSubmittingChange, onSwitchToRegister, onSwitchToFo
                   <i className="fas fa-user pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
                   <input
                     id={identifierId}
-                    className={cx(getInputClass(Boolean(fieldErrors.identifier)), '!pl-11 text-sm', !fieldErrors.identifier && authUi.modalField)}
+                    className={cx(getInputClass(Boolean(fieldErrors.identifier)), '!pl-11', !fieldErrors.identifier && authUi.modalField)}
                     type="text"
                     placeholder={loginBranding.identifierPlaceholder}
                     autoComplete="username"
@@ -259,7 +259,7 @@ export function LoginForm({ onSubmittingChange, onSwitchToRegister, onSwitchToFo
                   <i className="fas fa-lock pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
                   <input
                     id={passwordId}
-                    className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), '!pl-11 text-sm', !fieldErrors.password && authUi.modalField)}
+                    className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), '!pl-11', !fieldErrors.password && authUi.modalField)}
                     type={showPassword ? 'text' : 'password'}
                     placeholder={loginBranding.passwordPlaceholder}
                     autoComplete="current-password"

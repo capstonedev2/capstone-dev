@@ -339,7 +339,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                         </label>
                         <input
                           id={fieldId('firstName')}
-                          className={cx(getInputClass(Boolean(fieldErrors.firstName)), 'text-sm', !fieldErrors.firstName && authUi.modalField)}
+                          className={cx(getInputClass(Boolean(fieldErrors.firstName)), !fieldErrors.firstName && authUi.modalField)}
                           type="text"
                           placeholder="Juan"
                           autoComplete="given-name"
@@ -368,7 +368,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                         </label>
                         <input
                           id={fieldId('lastName')}
-                          className={cx(getInputClass(Boolean(fieldErrors.lastName)), 'text-sm', !fieldErrors.lastName && authUi.modalField)}
+                          className={cx(getInputClass(Boolean(fieldErrors.lastName)), !fieldErrors.lastName && authUi.modalField)}
                           type="text"
                           placeholder="Dela Cruz"
                           autoComplete="family-name"
@@ -409,7 +409,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                           </label>
                           <input
                             id={fieldId('studentId')}
-                            className={cx(getInputClass(Boolean(fieldErrors.studentId)), 'text-sm', !fieldErrors.studentId && authUi.modalField)}
+                            className={cx(getInputClass(Boolean(fieldErrors.studentId)), !fieldErrors.studentId && authUi.modalField)}
                             type="text"
                             placeholder="2026-XXXX"
                             value={studentId}
@@ -437,7 +437,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                           </label>
                           <input
                             id={fieldId('email')}
-                            className={cx(getInputClass(Boolean(fieldErrors.email)), 'text-sm', !fieldErrors.email && authUi.modalField)}
+                            className={cx(getInputClass(Boolean(fieldErrors.email)), !fieldErrors.email && authUi.modalField)}
                             type="email"
                             placeholder="student@university.edu.ph"
                             autoComplete="email"
@@ -478,7 +478,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                           <div className={authUi.selectWrap}>
                             <select
                               id={fieldId('department')}
-                              className={cx(getSelectClass(Boolean(fieldErrors.department)), 'text-sm', !fieldErrors.department && authUi.modalField)}
+                              className={cx(getSelectClass(Boolean(fieldErrors.department)), !fieldErrors.department && authUi.modalField)}
                               value={department}
                               onChange={(event) => {
                                 setDepartment(event.target.value);
@@ -513,7 +513,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                           <div className={authUi.selectWrap}>
                             <select
                               id={fieldId('yearLevel')}
-                              className={cx(getSelectClass(Boolean(fieldErrors.yearLevel)), 'text-sm', !fieldErrors.yearLevel && authUi.modalField)}
+                              className={cx(getSelectClass(Boolean(fieldErrors.yearLevel)), !fieldErrors.yearLevel && authUi.modalField)}
                               value={yearLevel}
                               onChange={(event) => {
                                 setYearLevel(event.target.value);
@@ -565,7 +565,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                           <div className={authUi.passwordField}>
                             <input
                               id={fieldId('password')}
-                              className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), 'text-sm', !fieldErrors.password && authUi.modalField)}
+                              className={cx(getPasswordInputClass(Boolean(fieldErrors.password)), !fieldErrors.password && authUi.modalField)}
                               type={showPassword ? 'text' : 'password'}
                               placeholder="Enter password"
                               autoComplete="new-password"
@@ -640,7 +640,7 @@ export function RegisterForm({ onSubmittingChange, onDirtyChange, onSwitchToLogi
                           <div className={authUi.passwordField}>
                             <input
                               id={fieldId('confirmPassword')}
-                              className={cx(getPasswordInputClass(Boolean(fieldErrors.confirmPassword)), 'text-sm', !fieldErrors.confirmPassword && authUi.modalField)}
+                              className={cx(getPasswordInputClass(Boolean(fieldErrors.confirmPassword)), !fieldErrors.confirmPassword && authUi.modalField)}
                               type={showConfirmPassword ? 'text' : 'password'}
                               placeholder="Confirm password"
                               autoComplete="new-password"

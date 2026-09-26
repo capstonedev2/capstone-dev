@@ -1,36 +1,12 @@
 import { NextResponse } from 'next/server';
+import type { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getServerAuthenticatedUser } from '@/lib/auth';
 import { withApiLogging } from '@/lib/api-logging';
+import { resolveDepartmentScope, userDepartmentWhere } from '@/lib/department-scope';
 
 const DEFAULT_STUDENT_LIMIT = 100;
 const MAX_STUDENT_LIMIT = 200;
-
-const departmentAliases: Record<string, string[]> = {
-  ict: ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  it: ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  bsit: ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  'information technology': ['ICT', 'IT', 'BSIT', 'Information Technology'],
-  met: ['MET', 'BSMET', 'Mechanical Engineering Technology', 'Manufacturing Eng. Tech.'],
-  bsmet: ['MET', 'BSMET', 'Mechanical Engineering Technology', 'Manufacturing Eng. Tech.'],
-  tcm: ['TCM', 'BSTCM', 'Technology Communication Management'],
-  bstcm: ['TCM', 'BSTCM', 'Technology Communication Management'],
-  esm: ['ESM', 'BSESM', 'Environmental and Safety Management', 'Energy Systems & Mgmt.'],
-  bsesm: ['ESM', 'BSESM', 'Environmental and Safety Management', 'Energy Systems & Mgmt.'],
-  name: ['NAME', 'BSNAME', 'Naval Architecture and Marine Engineering'],
-  bsname: ['NAME', 'BSNAME', 'Naval Architecture and Marine Engineering']
-};
-
-function getDepartmentSearchTerms(value: string | null) {
-  const normalized = String(value || '').trim();
-
-  if (!normalized) {
-    return [];
-  }
-
-  const key = normalized.toLowerCase();
-  return Array.from(new Set([normalized, ...(departmentAliases[key] || [])]));
-}
 
 function parsePositiveInteger(value: string | null, fallback: number, max: number) {
   const parsed = Number(value);
@@ -51,25 +27,19 @@ async function handleGET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const requestedDepartment = searchParams.get('department');
-    const isGlobalAdmin = ['ADMIN', 'SYSTEM_ADMIN', 'RESEARCH_HEAD', 'TECH_TRANSFER', 'LIBRARY'].includes(user.role);
-    
-    // Enforce department boundary unless global admin
-    const userDeptClean = user.department ? user.department.replace(/\s+(Department|Office)$/i, '').trim() : null;
-    const department = isGlobalAdmin ? requestedDepartment : (userDeptClean || requestedDepartment);
-    const departmentTerms = getDepartmentSearchTerms(department);
+    // The department boundary comes from the signed-in user, never from ?department=.
+    const scope = resolveDepartmentScope(user, requestedDepartment);
+    if (scope.deny) {
+      return NextResponse.json([]);
+    }
     const limit = parsePositiveInteger(searchParams.get('limit'), DEFAULT_STUDENT_LIMIT, MAX_STUDENT_LIMIT);
     const page = parsePositiveInteger(searchParams.get('page'), 1, Number.MAX_SAFE_INTEGER);
     const availableOnly = searchParams.get('availableOnly') === 'true';
 
-    const whereClause: any = { role: 'STUDENT' };
-    if (departmentTerms.length) {
-      whereClause.OR = departmentTerms.map((term) => ({
-        department: {
-          contains: term,
-          mode: 'insensitive'
-        }
-      }));
-    }
+    const whereClause: Prisma.UserWhereInput = {
+      role: 'STUDENT',
+      ...(scope.department ? userDepartmentWhere(scope.department) : {})
+    };
 
     const students = await prisma.user.findMany({
       where: whereClause,

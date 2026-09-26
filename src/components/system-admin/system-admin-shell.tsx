@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { getStoredUser } from '@/lib/mock/auth';
 import { PortalShellActionMenus } from '@/components/shared/portal-shell-action-menus';
@@ -54,6 +54,7 @@ const BRANDING_SUBMENU_ITEMS = [
   { key: 'programs', href: '/system-admin/branding?section=programs', label: 'Programs Content', icon: 'fa-layer-group' },
   { key: 'backup', href: '/system-admin/branding?section=backup', label: 'Backup & Restore Branding', icon: 'fa-file-export' }
 ] as const;
+const BRANDING_MENU_STORAGE_KEY = 'system-admin-branding-menu';
 const SYSTEM_ADMIN_PREFETCH_ROUTES = [
   ...SYSTEM_ADMIN_NAV_ITEMS.map((item) => item.href),
   ...BRANDING_SUBMENU_ITEMS.map((item) => item.href)
@@ -80,9 +81,7 @@ export function SystemAdminShell({
   children,
   notificationCount = 2
 }: SystemAdminShellProps) {
-  const router = useRouter();
   const prefetchRoute = useRoutePrefetch(SYSTEM_ADMIN_PREFETCH_ROUTES);
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { branding } = useBranding();
   const shellBranding = branding.shell;
@@ -90,8 +89,9 @@ export function SystemAdminShell({
   const [displayEmail, setDisplayEmail] = useState('system.admin@university.edu.ph');
   const currentNavItem = SYSTEM_ADMIN_NAV_ITEMS.find((item) => item.key === activeNav);
   const activeBrandingSection = getActiveBrandingSection(searchParams.get('section'));
-  const isBrandingPath = pathname.startsWith('/system-admin/branding');
-  const [brandingMenuOpen, setBrandingMenuOpen] = useState(activeNav === 'branding' || isBrandingPath);
+  // The Theme & Branding submenu opens only from its chevron button (never automatically). Its open state is
+  // remembered for the browser session so it stays open while moving between admin pages.
+  const [brandingMenuOpen, setBrandingMenuOpen] = useState(false);
   const {
     closeSidebar,
     sidebarCollapsed,
@@ -129,10 +129,26 @@ export function SystemAdminShell({
   }, [closeSidebar]);
 
   useEffect(() => {
-    if (activeNav === 'branding' || isBrandingPath) {
-      setBrandingMenuOpen(true);
+    try {
+      setBrandingMenuOpen(window.sessionStorage.getItem(BRANDING_MENU_STORAGE_KEY) === 'open');
+    } catch {
+      // Storage unavailable: the submenu simply starts closed.
     }
-  }, [activeNav, isBrandingPath]);
+  }, []);
+
+  const toggleBrandingMenu = () => {
+    setBrandingMenuOpen((current) => {
+      const next = !current;
+
+      try {
+        window.sessionStorage.setItem(BRANDING_MENU_STORAGE_KEY, next ? 'open' : 'closed');
+      } catch {
+        // Ignore storage issues.
+      }
+
+      return next;
+    });
+  };
 
   const handleLogout = () => {
     requestLogout();
@@ -238,27 +254,34 @@ export function SystemAdminShell({
                         key={item.key}
                         className={`sidebar-nav-dropdown${brandingMenuOpen ? ' is-open' : ''}${activeNav === 'branding' ? ' is-active' : ''}`}
                       >
-                        <button
-                          aria-controls="system-admin-branding-submenu"
-                          aria-expanded={brandingMenuOpen}
-                          className={`sidebar-link${activeNav === 'branding' || brandingMenuOpen ? ' is-active' : ''}`}
-                          title={sidebarCollapsed ? item.label : undefined}
-                          type="button"
-                          onFocus={() => prefetchRoute(item.href)}
-                          onMouseEnter={() => prefetchRoute(item.href)}
-                          onClick={() => {
-                            setBrandingMenuOpen((current) => !current);
-                            if (!isBrandingPath) {
-                              router.push(item.href);
-                            }
-                          }}
-                        >
-                          <span className="sidebar-link-icon">
-                            <i aria-hidden="true" className={`fas ${item.icon}`}></i>
-                          </span>
-                          <span className="sidebar-link-label">{item.label}</span>
-                          <i className="fas fa-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
-                        </button>
+                        {/* Label navigates; the chevron is a separate button that only opens/closes the submenu. */}
+                        <div className="sidebar-nav-dropdown-row">
+                          <Link
+                            aria-current={activeNav === 'branding' ? 'page' : undefined}
+                            className={`sidebar-link${activeNav === 'branding' ? ' is-active' : ''}`}
+                            href={item.href}
+                            title={sidebarCollapsed ? item.label : undefined}
+                            onFocus={() => prefetchRoute(item.href)}
+                            onMouseEnter={() => prefetchRoute(item.href)}
+                          >
+                            <span className="sidebar-link-icon">
+                              <i aria-hidden="true" className={`fas ${item.icon}`}></i>
+                            </span>
+                            <span className="sidebar-link-label">{item.label}</span>
+                          </Link>
+                          {sidebarCollapsed ? null : (
+                            <button
+                              aria-controls="system-admin-branding-submenu"
+                              aria-expanded={brandingMenuOpen}
+                              aria-label={brandingMenuOpen ? `Collapse ${item.label} sections` : `Expand ${item.label} sections`}
+                              className="sidebar-nav-dropdown-toggle"
+                              type="button"
+                              onClick={toggleBrandingMenu}
+                            >
+                              <i aria-hidden="true" className="fas fa-chevron-down sidebar-nav-chevron"></i>
+                            </button>
+                          )}
+                        </div>
                         <div
                           id="system-admin-branding-submenu"
                           className="sidebar-submenu"
@@ -267,7 +290,7 @@ export function SystemAdminShell({
                           {BRANDING_SUBMENU_ITEMS.map((subItem) => (
                             <Link
                               key={subItem.key}
-                              className={`sidebar-link ${activeBrandingSection === subItem.key ? 'is-active' : ''}`}
+                              className={`sidebar-link ${activeNav === 'branding' && activeBrandingSection === subItem.key ? 'is-active' : ''}`}
                               href={subItem.href}
                               title={sidebarCollapsed ? subItem.label : undefined}
                               onClick={closeSidebar}

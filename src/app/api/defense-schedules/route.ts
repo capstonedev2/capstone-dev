@@ -19,6 +19,8 @@ import {
 } from '@/lib/utils';
 import { ensureProjectMilestoneWorkflow, recordCheckpointSchedule } from '@/lib/milestone-checkpoint-tracking';
 import { withApiLogging } from '@/lib/api-logging';
+import { groupDepartmentWhere, isSameDepartment, projectDepartmentWhere } from '@/lib/department-scope';
+import { notifyDepartmentFocalPersons } from '@/lib/focal-person/notify';
 
 export const runtime = 'nodejs';
 
@@ -29,7 +31,9 @@ const SCHEDULE_VIEWER_ROLES: UserRole[] = [
   UserRole.PROGRAM_HEAD,
   UserRole.RESEARCH_HEAD,
   UserRole.ADMIN,
-  UserRole.SYSTEM_ADMIN
+  UserRole.SYSTEM_ADMIN,
+  // Read-only and limited to their own department (see handleGET).
+  UserRole.FOCAL_PERSON
 ];
 
 const SCHEDULE_MANAGER_ROLES: UserRole[] = [
@@ -535,6 +539,20 @@ async function handleGET(request: Request) {
       });
     }
 
+    // Department-level roles only see their own department. A Program Head also keeps the defenses
+    // they're personally part of (they can advise or sit on a panel); a Focal Person only monitors.
+    if (authUser.role === UserRole.PROGRAM_HEAD) {
+      andConditions.push({
+        OR: [
+          { project: projectDepartmentWhere(authUser.department) },
+          { evaluations: { some: { evaluatorId: authUser.id } } },
+          { project: { adviserId: authUser.id } }
+        ]
+      });
+    } else if (authUser.role === UserRole.FOCAL_PERSON) {
+      andConditions.push({ project: projectDepartmentWhere(authUser.department) });
+    }
+
     const where: Prisma.DefenseScheduleWhereInput = { AND: andConditions };
 
     const schedules = await prisma.defenseSchedule.findMany({
@@ -548,16 +566,13 @@ async function handleGET(request: Request) {
     });
 
     const assignments = schedules.map(formatAssignment);
-    const groupWhere: Prisma.GroupWhereInput = {};
-
-    /* if ((authUser.role === UserRole.PROGRAM_HEAD || authUser.role === UserRole.RESEARCH_HEAD) && authUser.department) {
-      const deptSearch = { equals: authUser.department, mode: 'insensitive' as Prisma.QueryMode };
-      groupWhere.OR = [
-        { department: deptSearch },
-        { dept: deptSearch },
-        { projects: { some: { departmentId: deptSearch } } }
-      ];
-    } */
+    // Groups offered for scheduling. This filter was commented out, so every role saw every
+    // department. It failed before because it compared the raw department text ("ICT" never equals
+    // "BSIT"); the shared matcher treats the aliases as one department. Research Head stays global.
+    const groupWhere: Prisma.GroupWhereInput =
+      authUser.role === UserRole.PROGRAM_HEAD || authUser.role === UserRole.FOCAL_PERSON
+        ? groupDepartmentWhere(authUser.department)
+        : {};
 
     const scheduleGroups = await prisma.group.findMany({
       where: groupWhere,
@@ -637,6 +652,13 @@ async function handlePOST(request: Request) {
     if (!group) {
       throw new HttpError('Group was not found.', 404, {
         group: 'Choose an existing group from the schedule list.'
+      });
+    }
+
+    // A Program Head schedules defenses for their own department only.
+    if (authUser.role === UserRole.PROGRAM_HEAD && !isSameDepartment(authUser.department, group.department || group.dept)) {
+      throw new HttpError('You can only schedule defenses for groups in your department.', 403, {
+        group: 'Choose a group from your department.'
       });
     }
 
@@ -790,6 +812,18 @@ async function handlePOST(request: Request) {
     if (!assignment) {
       throw new HttpError('Defense schedule was saved but could not be reloaded.', 500);
     }
+
+    await notifyDepartmentFocalPersons(group.department || group.dept, {
+      title: existingSchedule ? 'Defense Schedule Updated' : 'Defense Scheduled',
+      message: `${group.code} · ${scheduleType} ${existingSchedule ? 'moved to' : 'set for'} ${scheduledAt.toLocaleString('en-PH', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'Asia/Manila'
+      })}${room ? ` in ${room}` : ''}.`,
+      type: 'info',
+      entityType: 'defense_schedule',
+      entityId: schedule.id
+    });
 
     return successResponse({
       message: 'Defense schedule and panel chair assignment saved.',

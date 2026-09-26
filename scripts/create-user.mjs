@@ -20,6 +20,8 @@ const roleMap = new Map([
   ['partner', 'partner'],
   ['tech_transfer', 'tech_transfer'],
   ['library', 'library'],
+  ['focal_person', 'focal_person'],
+  ['focal-person', 'focal_person'],
 ]);
 
 function parseArgs(argv) {
@@ -52,7 +54,7 @@ function usage() {
 Create a ThesisTrack user in the configured database.
 
 Required:
-  --role        system_admin | research_head | program_head | adviser | panel | library | partner | tech_transfer | student
+  --role        system_admin | research_head | program_head | adviser | panel | focal_person | library | partner | tech_transfer | student
   --email       User email address
   --password    Temporary password, at least 6 characters
   --first-name  First name
@@ -67,6 +69,7 @@ Examples:
   npm run db:create-user -- --role system_admin --email admin@example.com --password Admin123 --first-name System --last-name Admin --department IT
   npm run db:create-user -- --role research_head --email research@example.com --password Research123 --first-name Research --last-name Head --department "Research Office"
   npm run db:create-user -- --role adviser --email adviser@example.com --password Adviser123 --first-name Ana --last-name Reyes --department BSIT
+  npm run db:create-user -- --role focal_person --email focal@example.com --password Focal123 --first-name Juan --last-name "Dela Cruz" --department BSIT
   npm run db:create-user -- --update-existing --role system_admin --email admin@example.com --password Admin123 --first-name System --last-name Admin --department IT
 `);
 }

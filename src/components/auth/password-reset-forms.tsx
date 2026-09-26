@@ -226,7 +226,7 @@ export function ForgotPasswordForm({ onSubmittingChange, onBackToLogin, onCodeSe
             <i className="fas fa-envelope pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
             <input
               id="forgot-modal-email"
-              className={cx(getInputClass(Boolean(fieldErrors.email)), '!pl-11 text-sm', !fieldErrors.email && authUi.modalField)}
+              className={cx(getInputClass(Boolean(fieldErrors.email)), '!pl-11', !fieldErrors.email && authUi.modalField)}
               type="email"
               placeholder="user@university.edu.ph"
               autoComplete="email"
@@ -573,7 +573,7 @@ export function ResetPasswordForm({ onSubmittingChange, onBackToLogin, onComplet
         <i className="fas fa-lock pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-sm text-[#003A8F]" aria-hidden="true" />
         <input
           id={id}
-          className={cx(getPasswordInputClass(Boolean(fieldErrors[errorKey])), '!pl-11 text-sm', !fieldErrors[errorKey] && authUi.modalField)}
+          className={cx(getPasswordInputClass(Boolean(fieldErrors[errorKey])), '!pl-11', !fieldErrors[errorKey] && authUi.modalField)}
           type={visible ? 'text' : 'password'}
           placeholder={placeholder}
           autoComplete="new-password"

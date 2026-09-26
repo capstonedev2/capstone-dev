@@ -1,0 +1,1081 @@
+/*
+ * System Admin → User Management. Colors use the --sa-* tokens from AdminPage (light + dark portal
+ * theme); dialogs use the shared AdminDialog, which defines the same tokens.
+ */
+
+/* ---------- Layout ---------- */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Buttons ---------- */
+.primaryButton,
+.secondaryButton,
+.dangerButton,
+.dangerSolidButton,
+.smallButton {
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  padding: 0 1rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.primaryButton:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled),
+.dangerButton:hover:not(:disabled),
+.dangerSolidButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.dangerSolidButton:disabled,
+.smallButton:disabled,
+.iconButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible,
+.dangerSolidButton:focus-visible,
+.smallButton:focus-visible,
+.iconButton:focus-visible,
+.linkButton:focus-visible,
+.roleTab:focus-visible,
+.roleTabActive:focus-visible,
+.noticeClose:focus-visible,
+.tableScroll:focus-visible {
+  outline: 2px solid var(--sa-primary-text);
+  outline-offset: 2px;
+}
+
+.primaryButton {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--color-primary-hover, var(--color-primary));
+}
+
+.secondaryButton {
+  border-color: var(--color-accent);
+  background: var(--sa-surface);
+  color: var(--sa-primary-text);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--sa-surface));
+}
+
+.dangerButton {
+  border-color: color-mix(in srgb, var(--color-error) 45%, var(--sa-border));
+  background: var(--sa-surface);
+  color: var(--sa-error-text);
+}
+
+.dangerSolidButton {
+  border-color: var(--color-error);
+  background: var(--color-error);
+  color: #fff;
+}
+
+.smallButton {
+  min-height: 2rem;
+  border-color: var(--sa-border);
+  background: var(--sa-surface);
+  padding: 0 0.75rem;
+  color: var(--sa-primary-text);
+  font-size: 0.78rem;
+}
+
+.smallButton:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--sa-surface));
+}
+
+.smallDanger {
+  color: var(--sa-error-text);
+}
+
+.smallDanger:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-error) 45%, var(--sa-border));
+  background: color-mix(in srgb, var(--color-error) 7%, var(--sa-surface));
+}
+
+.iconButton {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--sa-border);
+  border-radius: 999px;
+  background: var(--sa-surface);
+  color: var(--sa-primary-text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.iconButton:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--sa-surface));
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: end;
+  min-height: 2.6rem;
+  border: 0;
+  background: transparent;
+  padding: 0 0.25rem;
+  color: var(--sa-primary-text);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Notice ---------- */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, var(--sa-border));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-success) 9%, var(--sa-surface));
+  padding: 0.7rem 0.9rem;
+  color: var(--sa-text);
+  font-size: 0.9rem;
+}
+
+.notice > i {
+  color: var(--sa-success-text);
+}
+
+.noticeWarning {
+  border-color: color-mix(in srgb, var(--color-error) 35%, var(--sa-border));
+  background: color-mix(in srgb, var(--color-error) 7%, var(--sa-surface));
+}
+
+.noticeWarning > i {
+  color: var(--sa-error-text);
+}
+
+.notice > span {
+  flex: 1;
+}
+
+.noticeClose {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sa-muted);
+  cursor: pointer;
+}
+
+.noticeClose:hover {
+  background: color-mix(in srgb, var(--sa-muted) 14%, transparent);
+  color: var(--sa-text);
+}
+
+.countBadge {
+  border: 1px solid var(--sa-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--sa-surface));
+  padding: 0.3rem 0.7rem;
+  color: var(--sa-primary-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ---------- Role tabs + toolbar ---------- */
+.roleTabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin: 0.25rem 0 1rem;
+  padding-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.roleTab,
+.roleTabActive {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--sa-border);
+  border-radius: 999px;
+  background: var(--sa-surface);
+  padding: 0.4rem 0.8rem;
+  color: var(--sa-text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.roleTab i,
+.roleTabActive i {
+  color: var(--sa-muted);
+  font-size: 0.75rem;
+}
+
+.roleTab span,
+.roleTabActive span {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--sa-surface));
+  padding: 0.1rem 0.45rem;
+  color: var(--sa-primary-text);
+  font-size: 0.72rem;
+}
+
+.roleTab:hover {
+  border-color: var(--color-accent);
+}
+
+.roleTabActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.roleTabActive i {
+  color: var(--color-accent);
+}
+
+.roleTabActive span {
+  background: rgb(255 255 255 / 0.18);
+  color: #fff;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(14rem, 2fr) repeat(3, minmax(9rem, 1fr)) auto;
+  align-items: end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .searchField {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Form fields ---------- */
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.field > span,
+.field > legend {
+  padding: 0;
+  color: var(--sa-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.field select,
+.field input,
+.searchInput {
+  width: 100%;
+  min-height: 2.6rem;
+  border: 1px solid var(--sa-border);
+  border-radius: 0.65rem;
+  background: var(--sa-surface);
+  padding: 0.5rem 0.75rem;
+  color: var(--sa-text);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.field select:focus,
+.field input:focus,
+.searchInput:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  outline: none;
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.searchInput {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.searchInput i {
+  color: var(--sa-muted);
+  font-size: 0.85rem;
+}
+
+.field .searchInput input {
+  min-height: 2.5rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fieldError {
+  color: var(--sa-error-text);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.fieldHint {
+  color: var(--sa-muted);
+  font-size: 0.76rem;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+.hint {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--sa-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.hint i {
+  margin-top: 0.15rem;
+}
+
+.dialogText {
+  margin: 0;
+  color: var(--sa-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.formError {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--color-error) 30%, var(--sa-border));
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--color-error) 7%, var(--sa-surface));
+  padding: 0.6rem 0.75rem;
+  color: var(--sa-error-text);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.formError i {
+  margin-top: 0.15rem;
+}
+
+/* ---------- Table ---------- */
+.tableScroll {
+  overflow-x: auto;
+  border: 1px solid var(--sa-border);
+  border-radius: 0.75rem;
+}
+
+.table {
+  width: 100%;
+  min-width: 52rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.86rem;
+}
+
+.tableScroll .table th,
+.tableScroll .table td {
+  border-bottom: 1px solid var(--sa-border);
+  background: var(--sa-surface);
+  padding: 0.7rem 0.8rem;
+  color: var(--sa-text);
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+.tableScroll .table thead th {
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--sa-surface));
+  color: var(--sa-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tableScroll .table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tableScroll .table tbody tr:hover td {
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--sa-surface));
+}
+
+.tableScroll .table tbody tr.rowSuspended td {
+  background: color-mix(in srgb, var(--color-error) 4%, var(--sa-surface));
+}
+
+.tableScroll .table .actionsHead {
+  text-align: right;
+}
+
+.userCell {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.userText {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.userName,
+.detailsName {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--sa-text);
+  font-weight: 700;
+}
+
+.detailsName {
+  font-size: 1.05rem;
+}
+
+.cellMain {
+  display: block;
+  color: var(--sa-text);
+  font-weight: 600;
+}
+
+.muted {
+  display: block;
+  overflow: hidden;
+  color: var(--sa-muted);
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+}
+
+.youTag {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent) 22%, var(--sa-surface));
+  padding: 0.05rem 0.45rem;
+  color: var(--sa-accent-text);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.avatar,
+.avatarLarge,
+.roleIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.avatar {
+  width: 2.3rem;
+  height: 2.3rem;
+  font-size: 0.8rem;
+}
+
+.avatarLarge {
+  width: 3.4rem;
+  height: 3.4rem;
+  font-size: 1.1rem;
+}
+
+.roleIcon {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* Role tones: avatar / pill / icon backgrounds. */
+.tone_technical,
+.tone_oversight {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--sa-surface));
+  color: var(--sa-primary-text);
+}
+
+.tone_academic {
+  background: color-mix(in srgb, var(--color-success) 13%, var(--sa-surface));
+  color: var(--sa-success-text);
+}
+
+.tone_student,
+.tone_workflow,
+.tone_external {
+  background: color-mix(in srgb, var(--color-accent) 20%, var(--sa-surface));
+  color: var(--sa-accent-text);
+}
+
+.tone_legacy {
+  background: color-mix(in srgb, var(--sa-muted) 16%, var(--sa-surface));
+  color: var(--sa-muted);
+}
+
+.rolePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.statusActive {
+  background: color-mix(in srgb, var(--color-success) 12%, var(--sa-surface));
+  color: var(--sa-success-text);
+}
+
+.statusSuspended {
+  background: color-mix(in srgb, var(--color-error) 10%, var(--sa-surface));
+  color: var(--sa-error-text);
+}
+
+.rowActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.pageButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pageLabel {
+  color: var(--sa-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2.5rem 1rem;
+  color: var(--sa-muted);
+  font-size: 0.9rem;
+}
+
+.spinner,
+.spinnerSmall {
+  display: inline-block;
+  border: 2px solid color-mix(in srgb, var(--sa-primary-text) 25%, transparent);
+  border-top-color: var(--sa-primary-text);
+  border-radius: 999px;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.spinnerSmall {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-color: rgb(255 255 255 / 0.4);
+  border-top-color: #fff;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadError {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+}
+
+/* Phones: each row becomes a card. */
+@media (max-width: 760px) {
+  .tableScroll {
+    overflow: visible;
+    border: 0;
+  }
+
+  .table {
+    min-width: 0;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+  }
+
+  .table tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .tableScroll .table tbody tr {
+    overflow: hidden;
+    border: 1px solid var(--sa-border);
+    border-radius: 0.8rem;
+  }
+
+  .tableScroll .table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--sa-border) 60%, transparent);
+    padding: 0.6rem 0.85rem;
+    text-align: right;
+  }
+
+  .tableScroll .table td:first-child {
+    display: block;
+    text-align: left;
+  }
+
+  .tableScroll .table td[data-label]::before {
+    content: attr(data-label);
+    color: var(--sa-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .tableScroll .table td[data-label] > * {
+    margin-left: auto;
+  }
+
+  .tableScroll .table td.actionsCell {
+    border-bottom: 0;
+  }
+
+  .rowActions {
+    width: 100%;
+  }
+}
+
+/* ---------- Details dialog ---------- */
+.details {
+  display: grid;
+  gap: 1rem;
+}
+
+.detailsHero {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.detailsPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.detailsGrid > div {
+  min-width: 0;
+  border: 1px solid var(--sa-border);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.detailsGrid dt {
+  color: var(--sa-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detailsGrid dd {
+  margin: 0.15rem 0 0;
+  color: var(--sa-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.detailsWide {
+  grid-column: 1 / -1;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem !important;
+}
+
+@media (max-width: 480px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Account dialog ---------- */
+.rolePicker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (max-width: 560px) {
+  .rolePicker {
+    grid-template-columns: 1fr;
+  }
+}
+
+.roleOption {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  border: 1.5px solid var(--sa-border);
+  border-radius: 0.75rem;
+  background: var(--sa-surface);
+  padding: 0.6rem 0.7rem;
+  cursor: pointer;
+}
+
+.roleOption input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.roleOption:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 70%, var(--sa-border));
+}
+
+.roleOption:has(input:focus-visible) {
+  outline: 2px solid var(--sa-primary-text);
+  outline-offset: 2px;
+}
+
+.roleOptionActive {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--sa-surface));
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.roleOptionDisabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.roleOptionText {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.roleOptionText strong {
+  color: var(--sa-text);
+  font-size: 0.85rem;
+}
+
+.roleOptionText small {
+  color: var(--sa-muted);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.passwordPanel {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid var(--sa-border);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--sa-surface));
+  padding: 0.8rem;
+}
+
+.passwordHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.passwordHead > span {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.passwordHead strong {
+  color: var(--sa-text);
+  font-size: 0.88rem;
+}
+
+.passwordHead small,
+.meterRow small {
+  color: var(--sa-muted);
+  font-size: 0.76rem;
+}
+
+.passwordInput {
+  position: relative;
+  display: block;
+}
+
+.passwordInput input {
+  padding-right: 2.6rem;
+}
+
+.passwordInput button {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sa-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.meterRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.meter {
+  position: relative;
+  height: 0.35rem;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sa-muted) 18%, transparent);
+}
+
+.meter > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.meter1,
+.meter2 {
+  background: var(--color-error);
+}
+
+.meter3 {
+  background: var(--color-accent);
+}
+
+.meter4,
+.meter5 {
+  background: var(--color-success);
+}
+
+/* ---------- Suspend dialog ---------- */
+.durationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.duration,
+.durationActive {
+  position: relative;
+  display: flex;
+  min-height: 2.6rem;
+  align-items: center;
+  border: 1.5px solid var(--sa-border);
+  border-radius: 0.65rem;
+  background: var(--sa-surface);
+  padding: 0 0.8rem;
+  color: var(--sa-text);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.duration input,
+.durationActive input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.duration:has(input:focus-visible),
+.durationActive:has(input:focus-visible) {
+  outline: 2px solid var(--sa-primary-text);
+  outline-offset: 2px;
+}
+
+.durationActive {
+  border-color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 7%, var(--sa-surface));
+  color: var(--sa-error-text);
+}
+
+/*
+ * Dark portal theme: the shell forces h1–h4/strong to near-white and makes p/span/small/label inherit
+ * (student-workspace.css ~19274–19297). Re-apply muted/semantic colors with a more specific selector.
+ */
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .muted,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .hint,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .roleTab i { color: var(--sa-muted); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .statusSuspended,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .smallDanger { color: var(--sa-error-text); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .statusActive,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .tone_academic { color: var(--sa-success-text); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .tone_technical,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .tone_oversight,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .roleTab span,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .countBadge { color: var(--sa-primary-text); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .tone_student,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .tone_workflow,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .tone_external,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .youTag { color: var(--sa-accent-text); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .roleTabActive span { color: #fff; }
+
+.field input::placeholder {
+  color: var(--sa-muted);
+  font-weight: 400;
+  opacity: 0.85;
+}

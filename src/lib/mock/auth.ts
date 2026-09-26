@@ -10,7 +10,8 @@ export type UserRole =
   | 'library'
   | 'partner'
   | 'program_head'
-  | 'tech_transfer';
+  | 'tech_transfer'
+  | 'focal_person';
 
 export type LoginPayload = {
   email: string;
@@ -210,7 +211,8 @@ function isSupportedRole(role: string): role is UserRole {
     role === 'library' ||
     role === 'partner' ||
     role === 'program_head' ||
-    role === 'tech_transfer'
+    role === 'tech_transfer' ||
+    role === 'focal_person'
   );
 }
 
@@ -437,6 +439,8 @@ export function getRoleRedirectPath(role: UserRole) {
       return '/program-head/dashboard';
     case 'tech_transfer':
       return '/tech-transfer/dashboard';
+    case 'focal_person':
+      return '/focal-person/dashboard';
     case 'student':
     default:
       return '/students/dashboard';

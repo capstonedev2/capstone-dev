@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import styles from './system-admin-ui.module.css';
+export { AdminDialog } from './admin-dialog';
 
 /*
  * Shared building blocks for System Admin pages, themed like the public landing page.
@@ -89,10 +90,22 @@ export function ActionLink({
   );
 }
 
-export function TextLink({ href, children, label }: { href: string; children: ReactNode; label?: string }) {
+export function TextLink({
+  href,
+  children,
+  label,
+  arrow = false
+}: {
+  href: string;
+  children: ReactNode;
+  label?: string;
+  /** Trailing arrow that nudges right on hover. */
+  arrow?: boolean;
+}) {
   return (
     <Link href={href} className={styles.textLink} aria-label={label}>
       {children}
+      {arrow ? <i className={`fas fa-arrow-right ${styles.textLinkArrow}`} aria-hidden="true" /> : null}
     </Link>
   );
 }
@@ -110,20 +123,26 @@ export function KpiCard({
   label,
   value,
   helper,
+  helperIcon,
   icon,
   iconTone = 'primary',
   accent = 'primary',
   valueTone = 'default',
-  helperTone = 'default'
+  helperTone = 'default',
+  meter
 }: {
   label: string;
   value: string;
   helper?: string;
+  /** Font Awesome icon shown before the helper text (e.g. a trend arrow). */
+  helperIcon?: string;
   icon?: string;
   iconTone?: IconTone;
   accent?: CardAccent;
   valueTone?: 'default' | 'error';
   helperTone?: 'default' | 'success';
+  /** Optional 0–100 share drawn as a thin bar; decorative, so the helper text should state the number. */
+  meter?: number;
 }) {
   return (
     <article className={cx(styles.card, CARD_ACCENT_CLASS[accent], styles.kpiCard)}>
@@ -132,19 +151,36 @@ export function KpiCard({
         {icon ? <IconTile icon={icon} tone={iconTone} /> : null}
       </div>
       <strong className={cx(styles.kpiValue, valueTone === 'error' && styles.kpiValueError)}>{value}</strong>
-      {helper ? <span className={cx(styles.kpiHelper, helperTone === 'success' && styles.kpiHelperSuccess)}>{helper}</span> : null}
+      {meter !== undefined ? (
+        <span className={styles.kpiMeter} aria-hidden="true">
+          <span className={styles.kpiMeterFill} style={{ width: `${Math.min(Math.max(meter, 0), 100)}%` }} />
+        </span>
+      ) : null}
+      {helper ? (
+        <span className={cx(styles.kpiHelper, helperTone === 'success' && styles.kpiHelperSuccess)}>
+          {helperIcon ? <i className={`fas ${helperIcon}`} aria-hidden="true" /> : null}
+          {helper}
+        </span>
+      ) : null}
     </article>
   );
 }
 
 export function SectionCard({
   title,
+  description,
+  icon,
+  iconTone = 'primary',
   action,
   children,
   titleId,
   accent = 'primary'
 }: {
   title: string;
+  /** One short line under the title. */
+  description?: string;
+  icon?: string;
+  iconTone?: IconTone;
   action?: ReactNode;
   children: ReactNode;
   titleId?: string;
@@ -153,9 +189,15 @@ export function SectionCard({
   return (
     <section className={cx(styles.card, CARD_ACCENT_CLASS[accent], styles.sectionCard)} aria-labelledby={titleId}>
       <div className={styles.sectionHead}>
-        <h2 className={styles.sectionTitle} id={titleId}>
-          {title}
-        </h2>
+        <div className={styles.sectionHeadText}>
+          {icon ? <IconTile icon={icon} tone={iconTone} /> : null}
+          <div className={styles.sectionHeadCopy}>
+            <h2 className={styles.sectionTitle} id={titleId}>
+              {title}
+            </h2>
+            {description ? <p className={styles.sectionDescription}>{description}</p> : null}
+          </div>
+        </div>
         {action}
       </div>
       <div className={styles.sectionBody}>{children}</div>
@@ -178,4 +220,14 @@ export function StatusPill({ tone, children }: { tone: 'success' | 'error' | 'ne
   const toneClass = tone === 'success' ? styles.statusPillSuccess : tone === 'error' ? styles.statusPillError : styles.statusPillNeutral;
 
   return <span className={cx(styles.statusPill, toneClass)}>{children}</span>;
+}
+
+/** Marks a page or panel that shows mock data, so demo numbers aren't mistaken for real ones. */
+export function SampleDataBadge({ label = 'Sample data' }: { label?: string }) {
+  return (
+    <span className={styles.sampleBadge} title="These numbers are sample data, not live records.">
+      <i className="fas fa-flask" aria-hidden="true" />
+      {label}
+    </span>
+  );
 }

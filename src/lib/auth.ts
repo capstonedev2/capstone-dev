@@ -35,7 +35,8 @@ export type AuthRole =
   | 'program_head'
   | 'partner'
   | 'tech_transfer'
-  | 'library';
+  | 'library'
+  | 'focal_person';
 
 export type PublicUser = Pick<
   User,
@@ -103,7 +104,8 @@ const apiRoleByDbRole: Record<UserRole, AuthRole> = {
   [UserRole.PROGRAM_HEAD]: 'program_head',
   [UserRole.PARTNER]: 'partner',
   [UserRole.TECH_TRANSFER]: 'tech_transfer',
-  [UserRole.LIBRARY]: 'library'
+  [UserRole.LIBRARY]: 'library',
+  [UserRole.FOCAL_PERSON]: 'focal_person'
 };
 
 export function toApiRole(role: UserRole): AuthRole {
@@ -144,6 +146,10 @@ export function parseUserRole(value: unknown, fallback: UserRole = UserRole.STUD
       return UserRole.TECH_TRANSFER;
     case 'library':
       return UserRole.LIBRARY;
+    case 'focal_person':
+    case 'focal person':
+    case 'focal-person':
+      return UserRole.FOCAL_PERSON;
     default:
       throw new HttpError('Selected role is not supported.', 400, {
         role: 'Choose a valid user role.'

@@ -17,7 +17,10 @@
   --sa-accent-text: color-mix(in srgb, var(--color-accent) 62%, var(--color-text-primary));
   --sa-success-text: var(--color-success);
   --sa-error-text: var(--color-error);
-  --sa-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  --sa-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 5%, transparent),
+    0 10px 24px color-mix(in srgb, var(--color-primary) 6%, transparent);
+  --sa-shadow-hover: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 6%, transparent),
+    0 22px 44px color-mix(in srgb, var(--color-primary) 13%, transparent);
 
   display: grid;
   gap: 1.25rem;
@@ -39,6 +42,35 @@
   --sa-success-text: color-mix(in srgb, var(--color-success) 55%, #ffffff);
   --sa-error-text: color-mix(in srgb, var(--color-error) 55%, #ffffff);
   --sa-shadow: none;
+  --sa-shadow-hover: 0 18px 40px rgb(0 0 0 / 0.35);
+}
+
+/* Staggered entrance, same gentle settle as the landing hero. */
+@keyframes saSettle {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.adminPage > * {
+  animation: saSettle 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.adminPage > :nth-child(2) { animation-delay: 0.05s; }
+.adminPage > :nth-child(3) { animation-delay: 0.1s; }
+.adminPage > :nth-child(4) { animation-delay: 0.15s; }
+.adminPage > :nth-child(n + 5) { animation-delay: 0.2s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .adminPage > * {
+    animation: none;
+  }
 }
 
 /* Page background: a light tint of the primary color behind admin pages (the portal shell's
@@ -179,6 +211,9 @@
 }
 
 .textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   border-radius: 0.3rem;
   color: var(--sa-primary-text);
   font-size: 0.85rem;
@@ -192,21 +227,51 @@
   text-underline-offset: 3px;
 }
 
-/* ---------- Cards (landing module-card style: white, rounded, light border, 3px top stripe) ---------- */
+.textLinkArrow {
+  font-size: 0.72rem;
+  transition: transform 0.15s ease;
+}
+
+.textLink:hover .textLinkArrow {
+  transform: translateX(2px);
+}
+
+/* ---------- Cards (landing module-card style: rounded, light border, gradient top stripe, soft corner glow) ---------- */
 .card {
+  --card-accent: var(--color-primary);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   border: 1px solid var(--sa-border);
-  border-top-width: 3px;
-  border-radius: 0.75rem;
+  border-radius: 0.9rem;
   background: var(--sa-surface);
   box-shadow: var(--sa-shadow);
 }
 
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 22%, var(--sa-surface)));
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--card-accent) 9%, transparent), transparent 12rem);
+  pointer-events: none;
+}
+
 .cardPrimary {
-  border-top-color: var(--color-primary);
+  --card-accent: var(--color-primary);
 }
 
 .cardAccent {
-  border-top-color: var(--color-accent);
+  --card-accent: var(--color-accent);
 }
 
 /* ---------- Icon tile (tinted rounded square) ---------- */
@@ -245,8 +310,35 @@
 .kpiCard {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 1rem 1.15rem 1.1rem;
+  gap: 0.4rem;
+  padding: 1.1rem 1.2rem 1.15rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.kpiCard:hover {
+  border-color: color-mix(in srgb, var(--card-accent) 30%, var(--sa-border));
+  box-shadow: var(--sa-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.kpiCard .iconTile {
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.kpiCard:hover .iconTile {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kpiCard,
+  .kpiCard .iconTile {
+    transition: none;
+  }
+
+  .kpiCard:hover,
+  .kpiCard:hover .iconTile {
+    transform: none;
+  }
 }
 
 .kpiHead {
@@ -259,15 +351,19 @@
 .kpiLabel {
   padding-top: 0.2rem;
   color: var(--sa-muted);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .kpiValue {
+  margin-top: 0.1rem;
   color: var(--sa-primary-text);
-  font-size: 1.9rem;
-  font-weight: 800;
-  line-height: 1.1;
+  font-family: var(--font-serif), 'Playfair Display', Georgia, serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 
@@ -276,8 +372,45 @@
 }
 
 .kpiHelper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: auto;
   color: var(--sa-muted);
   font-size: 0.8rem;
+}
+
+.kpiHelper i {
+  font-size: 0.72rem;
+}
+
+.kpiMeter {
+  display: block;
+  height: 0.3rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sa-border) 75%, var(--sa-surface));
+}
+
+.kpiMeterFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 70%, var(--sa-surface)), var(--color-primary));
+  transform-origin: left center;
+  animation: saGrow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both;
+}
+
+@keyframes saGrow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kpiMeterFill {
+    animation: none;
+  }
 }
 
 .kpiHelperSuccess {
@@ -298,7 +431,33 @@
   justify-content: space-between;
   gap: 1rem;
   border-bottom: 1px solid var(--sa-border);
-  padding: 0.95rem 1.2rem;
+  padding: 1rem 1.25rem;
+}
+
+@media (max-width: 560px) {
+  .sectionHead {
+    flex-wrap: wrap;
+  }
+}
+
+.sectionHeadText {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionHeadCopy {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.sectionDescription {
+  margin: 0;
+  color: var(--sa-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 .sectionTitle {
@@ -311,7 +470,7 @@
 
 .sectionBody {
   flex: 1;
-  padding: 0.6rem 1.2rem 1rem;
+  padding: 0.75rem 1.25rem 1.1rem;
 }
 
 /* ---------- Empty state ---------- */
@@ -372,7 +531,8 @@
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .pageTitleAccent { color: var(--sa-accent-text); }
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .sectionTitle { color: var(--sa-primary-text); }
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .kpiLabel,
-:global(html[data-student-theme='dark'] .student-shell .student-global-content) .kpiHelper { color: var(--sa-muted); }
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .kpiHelper,
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .sectionDescription { color: var(--sa-muted); }
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .kpiValue { color: var(--sa-primary-text); }
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .kpiValueError { color: var(--sa-error-text); }
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .kpiHelperSuccess { color: var(--sa-success-text); }
@@ -384,3 +544,22 @@
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .statusPillError { color: var(--sa-error-text); }
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .statusPillNeutral { color: var(--sa-muted); }
 :global(html[data-student-theme='dark'] .student-shell .student-global-content) .emptyStateIcon { color: var(--sa-muted); }
+
+/* ---------- Sample data badge (marks pages that render mock data) ---------- */
+.sampleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px dashed color-mix(in srgb, var(--color-accent) 70%, var(--sa-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--sa-surface));
+  color: var(--sa-accent-text);
+  padding: 0.22rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+:global(html[data-student-theme='dark'] .student-shell .student-global-content) .sampleBadge { color: var(--sa-accent-text); }
